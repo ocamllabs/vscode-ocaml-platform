@@ -1,0 +1,137 @@
+{
+    "name": "ocaml-platform",
+    "displayName": "OCaml Platform",
+    "description": "Official OCaml Support from OCamlLabs",
+    "license": "ISC",
+    "version": "0.0.1",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ocamllabs/vscode-reason-ml"
+    },
+    "engines": {
+        "vscode": "^1.40.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "activationEvents": ["onLanguage:ocaml"],
+    "main": "./out/client/extension",
+    "contributes": {
+        "configuration": {
+            "title": "OCaml configuration",
+            "properties": {
+                "ocaml.lsp.path": {
+                    "type": "string",
+                    "default": "ocamlmerlin-lsp",
+                    "description": "Path to the LSP binary"
+                }
+            }
+        },
+        "languages": [
+            {
+                "id": "ocaml",
+                "aliases": [
+                    "OCaml",
+                    "ocaml"
+                ],
+                "extensions": [
+                    ".ml",
+                    ".mli",
+                    ".ocamlinit"
+                ],
+                "configuration": "./language/ocaml.json"
+            },
+            {
+                "id": "ocaml.opam",
+                "extensions": [
+                    ".opam"
+                ],
+                "configuration": "./language/opam.json"
+            },
+            {
+                "id": "ocaml.dune",
+                "aliases": [
+                    "dune"
+                ],
+                "extensions": [
+                    "dune",
+                    "jbuild"
+                ],
+                "configuration": "./language/dune.json"
+            },
+            {
+                "id": "ocaml.duneproject",
+                "aliases": [
+                    "dune project"
+                ],
+                "extensions": [
+                    "dune-project"
+                ],
+                "configuration": "./language/dune.json"
+            },
+            {
+                "id": "ocaml.menhir",
+                "aliases": [
+                    "Menhir",
+                    "menhir"
+                ],
+                "extensions": [
+                    ".mly"
+                ]
+            },
+            {
+                "id": "ocaml.ocamllex",
+                "aliases": [
+                    "OCamllex",
+                    "ocamllex"
+                ],
+                "extensions": [
+                    ".mll"
+                ]
+            }
+        ],
+        "grammars": [
+            {
+                "language": "ocaml",
+                "scopeName": "source.ocaml",
+                "path": "./syntax/ocaml.tmLanguage.json"
+            },
+            {
+                "language": "ocaml.opam",
+                "scopeName": "source.ocaml.opam",
+                "path": "./syntax/opam.tmLanguage.json"
+            },
+            {
+                "scopeName": "markdown.ocaml.codeblock",
+                "path": "./syntax/ocaml-markdown-codeblock.tmLanguage.json",
+                "injectTo": [
+                    "text.html.markdown"
+                ],
+                "embeddedLanguages": {
+                    "meta.embedded.block.ocaml": "ocaml"
+                }
+            },
+            {
+                "language": "ocaml.dune",
+                "scopeName": "source.dune",
+                "path": "./syntax/Dune.tmLanguage"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "yarn run compile",
+        "compile": "tsc -b",
+        "watch": "tsc -b -w",
+        "package": "vsce package"
+    },
+    "devDependencies": {
+        "@types/node": "^12.12.14",
+        "@types/vscode": "^1.40.0",
+        "tslint": "^5.20.1",
+        "typescript": "^3.7.3",
+        "vscode-test": "^1.2.3"
+    },
+    "dependencies": {
+        "vscode-languageclient": "^5.2.1"
+    }
+}
