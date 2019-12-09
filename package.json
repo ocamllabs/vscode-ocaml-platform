@@ -96,7 +96,7 @@
             {
                 "language": "ocaml",
                 "scopeName": "source.ocaml",
-                "path": "./syntax/ocaml.tmLanguage.json"
+                "path": "./syntax/ocaml.json"
             },
             {
                 "language": "ocaml.opam",
