@@ -14,7 +14,9 @@
     "categories": [
         "Programming Languages"
     ],
-    "activationEvents": ["onLanguage:ocaml"],
+    "activationEvents": [
+        "onLanguage:ocaml"
+    ],
     "main": "./out/client/extension",
     "contributes": {
         "configuration": {
@@ -133,5 +135,6 @@
     },
     "dependencies": {
         "vscode-languageclient": "^5.2.1"
-    }
+    },
+    "publisher": "ocamllabs"
 }
