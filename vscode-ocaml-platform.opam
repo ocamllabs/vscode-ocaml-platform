@@ -1,0 +1,21 @@
+name: "vscode-ocaml-platform"
+opam-version: "2.0"
+version: "0.1.0-dev"
+maintainer: "ocamllabs"
+authors: "ocamllabs"
+homepage: "https://github.com/ocamllabs/vscode-ocaml-platform" 
+bug-reports: "https://github.com/ocamllabs/vscode-ocaml-platform/issues"
+license: "ISC"
+dev-repo: "git://git@github.com:ocamllabs/vscode-ocaml-platform.git"
+build: [
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+depends: [
+  "ocaml" {>= "4.09.0"}
+  "dune"            {>= "2.0.0"}
+  "js_of_ocaml"     {>= "3.4.1"}
+  "js_of_ocaml-ppx"
+]
+synopsis: "VSCode plugin for ocaml platform"
+description: "VSCode plugin for ocaml platform"
