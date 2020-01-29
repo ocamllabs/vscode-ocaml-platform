@@ -6,7 +6,10 @@
     "version": "0.0.1",
     "repository": {
         "type": "git",
-        "url": "https://github.com/ocamllabs/vscode-reason-ml"
+        "url": "https://github.com/ocamllabs/vscode-ocaml-platform"
+    },
+    "bugs": {
+        "url": "https://github.com/ocamllabs/vscode-ocaml-platform/issues"
     },
     "engines": {
         "vscode": "^1.40.0"
