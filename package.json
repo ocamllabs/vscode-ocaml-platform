@@ -3,7 +3,7 @@
     "displayName": "OCaml Platform",
     "description": "Official OCaml Support from OCamlLabs",
     "license": "ISC",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "repository": {
         "type": "git",
         "url": "https://github.com/ocamllabs/vscode-ocaml-platform"
