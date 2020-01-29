@@ -27,7 +27,7 @@
             "properties": {
                 "ocaml.lsp.path": {
                     "type": "string",
-                    "default": "ocamlmerlin-lsp",
+                    "default": "ocamllsp",
                     "description": "Path to the LSP binary"
                 }
             }
