@@ -11,6 +11,7 @@
     "bugs": {
         "url": "https://github.com/ocamllabs/vscode-ocaml-platform/issues"
     },
+    "icons": "assets/logo.png",
     "engines": {
         "vscode": "^1.40.0"
     },
