@@ -15,5 +15,8 @@
     "plugin:import/warnings",
     "plugin:import/typescript"
   ],
-  "plugins": ["@typescript-eslint"]
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+    "@typescript-eslint/explicit-function-return-type": 0
+  }
 }
