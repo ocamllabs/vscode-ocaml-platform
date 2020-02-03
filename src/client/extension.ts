@@ -3,6 +3,7 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
+// eslint-disable-next-line import/no-unresolved
 import { workspace, ExtensionContext, commands } from "vscode";
 
 import {
@@ -14,10 +15,11 @@ import {
 let client: LanguageClient;
 
 export async function activate(context: ExtensionContext) {
-    let command : string = workspace.getConfiguration().get<string>('ocaml.lsp.path')!;
-    let args : Array<string> = [];
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const command = workspace.getConfiguration().get<string>('ocaml.lsp.path')!;
+    const args: Array<string> = [];
 
-    let commonOptions = {
+    const commonOptions = {
         command,
         args,
         options: {
@@ -31,13 +33,13 @@ export async function activate(context: ExtensionContext) {
 
     // If the extension is launched in debug mode then the debug server options are used
     // Otherwise the run options are used
-    let serverOptions: ServerOptions = {
+    const serverOptions: ServerOptions = {
         run: commonOptions,
         debug: commonOptions
     };
 
     // Options to control the language client
-    let clientOptions: LanguageClientOptions = {
+    const clientOptions: LanguageClientOptions = {
         // Register the server for plain text documents
         documentSelector: [
             { scheme: "file", language: "ocaml" }
@@ -48,7 +50,7 @@ export async function activate(context: ExtensionContext) {
         }
     };
 
-    let createClient = () => {
+    const createClient = () => {
         return new LanguageClient(
             "ocaml-language-server",
             "OCaml Language Server",
@@ -71,7 +73,7 @@ export async function activate(context: ExtensionContext) {
     });
 }
 
-export function deactivate(): Thenable<void> | undefined {
+export function deactivate() {
     if (!client) {
         return undefined;
     }
