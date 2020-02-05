@@ -17,7 +17,7 @@
   },
   "variant pattern": {
     "prefix": "|",
-    "body" ["| ${1:_} -> $0"]
+    "body": ["| ${1:_} -> $0"]
   },
   "let": {
     "prefix": "let",
@@ -45,7 +45,11 @@
   },
   "match": {
     "prefix": "match",
-    "body": ["match ${1:scrutinee} with", "| ${2:pattern} => ${3:${2:pattern}}", ""]
+    "body": [
+      "match ${1:scrutinee} with",
+      "| ${2:pattern} => ${3:${2:pattern}}",
+      ""
+    ]
   },
   "type (alias or abstract)": {
     "prefix": "type",
@@ -53,6 +57,10 @@
   },
   "type": {
     "prefix": "type",
-    "body": ["type ${1:name} ${2:'${3:arg} }=", "\t| ${4:Con${2: '${3:arg}}}", "\t"]
+    "body": [
+      "type ${1:name} ${2:'${3:arg} }=",
+      "\t| ${4:Con${2: '${3:arg}}}",
+      "\t"
+    ]
   }
 }

@@ -124,8 +124,10 @@
       }
     ],
     "snippets": [
-      "language": "ocaml",
-      "path": "./snippets/ocaml.json"
+      {
+        "language": "ocaml",
+        "path": "./snippets/ocaml.json"
+      }
     ]
   },
   "scripts": {
