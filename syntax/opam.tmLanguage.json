@@ -1,11 +1,7 @@
 {
   "scopeName": "source.ocaml.opam",
-  "fileTypes": [
-    "opam"
-  ],
-  "patterns": [
-    { "include": "#directive" }
-  ],
+  "fileTypes": ["opam"],
+  "patterns": [{ "include": "#directive" }],
   "repository": {
     "directive": {
       "patterns": [

@@ -2,12 +2,12 @@
 
 Visual Studio Code extension for OCaml and relevants tools
 
-*This plugin is alpha quality. Use at your own risk and please report any bugs
-you encounter.*
+_This plugin is alpha quality. Use at your own risk and please report any bugs
+you encounter._
 
 ## Features
 
-* Syntax highlighting for menhir, dune, ocamlyacc files.
+- Syntax highlighting for menhir, dune, ocamlyacc files.
 
 ## Requirements
 
@@ -28,4 +28,3 @@ recommended extension.
 ## Release Notes
 
 ### Unreleased
-
