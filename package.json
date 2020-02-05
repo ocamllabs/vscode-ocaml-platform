@@ -122,6 +122,10 @@
         "scopeName": "source.dune",
         "path": "./syntax/Dune.tmLanguage"
       }
+    ],
+    "snippets": [
+      "language": "ocaml",
+      "path": "./snippets/ocaml.json"
     ]
   },
   "scripts": {
