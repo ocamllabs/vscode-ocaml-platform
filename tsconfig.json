@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "esModuleInterop": true,
     "lib": ["ES2015"],
     "module": "commonjs",
     "noFallthroughCasesInSwitch": true,
@@ -12,5 +13,5 @@
     "strict": true,
     "target": "ES2015"
   },
-  "exclude": ["node_modules", ".vscode-test"]
+  "exclude": [".vscode-test", "node_modules"]
 }

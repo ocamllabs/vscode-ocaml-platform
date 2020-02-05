@@ -21,7 +21,7 @@
   "activationEvents": [
     "onLanguage:ocaml"
   ],
-  "main": "./out/client/extension",
+  "main": "./out/client/extension.js",
   "contributes": {
     "configuration": {
       "title": "OCaml configuration",
@@ -126,13 +126,18 @@
   },
   "scripts": {
     "fmt": "prettier --write \"**/*.{json,md,ts,yml}\"",
-    "vscode:prepublish": "yarn run compile",
+    "pretest": "yarn compile",
+    "test": "node ./out/test/runTest.js",
+    "vscode:prepublish": "yarn compile",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
     "package": "vsce package"
   },
   "devDependencies": {
-    "@types/node": "^12.12.14",
+    "@types/fs-extra": "^8.0.1",
+    "@types/glob": "^7.1.1",
+    "@types/mocha": "^7.0.1",
+    "@types/node": "^13.7.0",
     "@types/vscode": "^1.40.0",
     "@typescript-eslint/eslint-plugin": "^2.18.0",
     "@typescript-eslint/parser": "^2.18.0",
@@ -140,12 +145,15 @@
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-prettier": "^3.1.2",
+    "fs-extra": "^8.1.0",
+    "glob": "^7.1.6",
+    "mocha": "^7.0.1",
     "prettier": "1.19.1",
     "typescript": "^3.7.3",
     "vscode-test": "^1.2.3"
   },
   "dependencies": {
-    "vscode-languageclient": "^5.2.1"
+    "vscode-languageclient": "^6.1.0"
   },
   "publisher": "ocamllabs"
 }

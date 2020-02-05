@@ -1,7 +1,6 @@
-.DS_Store
-node_modules
-out/
 .log/
-*~
 .vscode-test/
 _build/
+node_modules
+out/
+.DS_Store
