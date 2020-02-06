@@ -10,3 +10,6 @@ depends: [
   "ocaml" {>= "4.04.2" & < "4.10.0"}
   "base" {>= "v0.12" }
 ]
+pin-depends: [
+  [ "ocaml-lsp-server.dev" "git+https://github.com/ocaml/ocaml-lsp.git" ]
+]
