@@ -1,11 +1,7 @@
 {
   "lambda": {
     "prefix": "fun",
-    "body": ["(${1:pattern}) => ${2:${1:pattern}}"]
-  },
-  "lambda (switch)": {
-    "prefix": "fun",
-    "body": ["fun", "\t| ${1:pattern} => ${2:${1:pattern}}", "\t;"]
+    "body": ["(${1:pattern}) -> ${2:${1:pattern}}"]
   },
   "let .. in": {
     "prefix": "let",
@@ -19,9 +15,9 @@
     "prefix": "|",
     "body": ["| ${1:_} -> $0"]
   },
-  "let": {
+  "let (toplevel)": {
     "prefix": "let",
-    "body": ["let ${1:pattern} = {", "\t$0", "};"]
+    "body": ["let ${1:pattern} = $0"]
   },
   "val": {
     "prefix": "val",
@@ -29,38 +25,29 @@
   },
   "sig": {
     "prefix": "sig",
-    "body": ["sig ${0} end"]
+    "body": ["sig\n${1}\nend$0"]
   },
   "module": {
     "prefix": "module",
-    "body": ["module ${1:M} struct = ${2:{}}\nend$0"]
+    "body": ["module ${1:M} struct = ${2}\nend$0"]
   },
-  "module (block)": {
+  "module signature": {
     "prefix": "module",
-    "body": ["module ${1:M} = {", "\t$0", "};"]
+    "body": ["module ${1:M} : sig\n${2}\nend$0"]
   },
-  "module function": {
+  "module type": {
     "prefix": "module",
-    "body": ["module ${1:M} = (${2:X}: $3{:{}}) => ${4:${2:X}};$0"]
+    "body": ["module type ${1:M} = sig", "${2}", "end\n$0"]
   },
   "match": {
     "prefix": "match",
     "body": [
       "match ${1:scrutinee} with",
-      "| ${2:pattern} => ${3:${2:pattern}}",
-      ""
+      "| ${2:pattern} -> ${3:${2:pattern}}"
     ]
   },
-  "type (alias or abstract)": {
+  "type declaration": {
     "prefix": "type",
-    "body": ["type ${1:name} ${2:${3:'${4:arg} }= ${5:'${4:arg}}}$0"]
-  },
-  "type": {
-    "prefix": "type",
-    "body": [
-      "type ${1:name} ${2:'${3:arg} }=",
-      "\t| ${4:Con${2: '${3:arg}}}",
-      "\t"
-    ]
+    "body": ["type ${1:name} = $0"]
   }
 }
