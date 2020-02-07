@@ -3,7 +3,7 @@
   "displayName": "OCaml Platform",
   "description": "Official OCaml Support from OCamlLabs",
   "license": "MIT",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/ocamllabs/vscode-ocaml-platform"
@@ -36,20 +36,20 @@
     "problemMatchers": [
       {
         "name": "ocamlc",
-
-        "fileLocation": ["relative", "${workspaceFolder}"],
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
         "pattern": [
           {
-            "regexp":
-              "^\\s*\\bFile\\b\\s*\"(.*)\",\\s*\\bline\\b\\s*(\\d+),\\s*\\bcharacters\\b\\s*(\\d+)-(\\d+)\\s*:\\s*$",
+            "regexp": "^\\s*\\bFile\\b\\s*\"(.*)\",\\s*\\bline\\b\\s*(\\d+),\\s*\\bcharacters\\b\\s*(\\d+)-(\\d+)\\s*:\\s*$",
             "file": 1,
             "line": 2,
             "column": 3,
             "endColumn": 4
           },
           {
-            "regexp":
-              "^(?:\\s*\\bParse\\b\\s*)?\\s*\\b([Ee]rror|Warning)\\b\\s*(?:\\(\\s*\\bwarning\\b\\s*(\\d+)\\))?\\s*:\\s*(.*)$",
+            "regexp": "^(?:\\s*\\bParse\\b\\s*)?\\s*\\b([Ee]rror|Warning)\\b\\s*(?:\\(\\s*\\bwarning\\b\\s*(\\d+)\\))?\\s*:\\s*(.*)$",
             "severity": 1,
             "code": 2,
             "message": 3
