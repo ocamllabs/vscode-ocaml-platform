@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "ocaml": "4.6.x",
+    "@esy-ocaml/reason": "*",
+    "@opam/ocamlformat": "0.12",
+    "@opam/ocaml-lsp-server": "prometheansacrifice/ocaml-lsp:ocaml-lsp-server.opam#924ac293be5d"
+  },
+  "resolutions": {
+    "@opam/dune": "2.0.1"
+  }
+}

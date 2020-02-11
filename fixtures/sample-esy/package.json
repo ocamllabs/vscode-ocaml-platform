@@ -1,0 +1,24 @@
+{
+  "name": "sample-esy",
+  "version": "0.1.0",
+  "description": "Starter Reason Esy Pesy Project",
+  "esy": {
+    "build": "dune build -p sample-esy"
+  },
+  "scripts": {
+    "start": "esy x SampleEsyApp.exe",
+    "test": "esy x RunSampleEsyTests.exe"
+  },
+  "dependencies": {
+    "@opam/dune": "*",
+    "@esy-ocaml/reason": "*",
+    "ocaml": "4.6.x"
+  },
+  "devDependencies": {
+    "@opam/merlin": "*",
+    "@opam/ocaml-lsp-server": "prometheansacrifice/ocaml-lsp:ocaml-lsp-server.opam#924ac293be5d"
+  },
+  "resolutions": {
+    "@opam/dune": "2.0.1"
+  }
+}

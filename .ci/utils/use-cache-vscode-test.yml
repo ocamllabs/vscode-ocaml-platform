@@ -1,0 +1,12 @@
+
+steps:
+  - bash: mkdir -p .vscode-test
+    displayName: Create .vscode-test (if it doesnot exist)
+  - task: Cache@2
+    condition: and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(), ne(variables['Build.SourceBranch'], variables['System.PullRequest.TargetBranch'])))
+    inputs:
+      key: 'v1 | $(Agent.OS)' # vPrimary, here, is just a way to bust cache during debugging. Inspired from https://docs.microsoft.com/en-us/azure/devops/pipelines/caching/?view=azure-devops#can-i-clear-a-cache" 
+      path: '.vscode-test'
+      cacheHitVar: VSCODE_TEST_CACHE_RESTORED
+    displayName:  Cache vscode-test folder
+      

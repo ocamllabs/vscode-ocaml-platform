@@ -1,0 +1,32 @@
+{
+  "name": "vscode-merlin",
+  "version": "0.1.0",
+  "reason": {
+    "react-jsx": 3
+  },
+  "sources": [
+    {
+      "subdirs": ["bindings", "formatters", "command"],
+      "dir": "src"
+    },
+    {
+      "dir": "src/command/__tests__",
+      "type": "dev"
+    },
+    {
+      "dir": "src/__tests__",
+      "type": "dev"
+    }
+  ],
+  "package-specs": {
+    "module": "commonjs",
+    "in-source": true
+  },
+  "suffix": ".bs.js",
+  "bs-dependencies": ["@glennsl/bs-json"],
+  "bs-dev-dependencies": ["@glennsl/bs-jest"],
+  "warnings": {
+    "error": "+101"
+  },
+  "refmt": 3
+}

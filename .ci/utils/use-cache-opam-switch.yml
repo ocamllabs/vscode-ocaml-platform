@@ -1,0 +1,11 @@
+steps:
+  # TODO: This can be done in parallel with installing node, and esy
+  # (which would save a bunch of time on windows)
+  - task: Cache@2
+    condition: and(eq(variables['Build.Reason'], 'PullRequest'), and(ne(variables['Agent.OS'], 'Windows_NT'), ne(variables['Build.SourceBranch'], variables['System.PullRequest.TargetBranch'])))
+    inputs:
+      key: 'vPrimary | opam | "$(Agent.OS)"' # vPrimary, here, is just a way to bust cache during debugging. Inspired from https://docs.microsoft.com/en-us/azure/devops/pipelines/caching/?view=azure-devops#can-i-clear-a-cache" 
+      path: $(HOME)/.opam
+      cacheHitVar: CACHE_RESTORED
+    displayName:  Cache opam switch
+      

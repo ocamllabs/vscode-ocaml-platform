@@ -1,0 +1,51 @@
+name: vscode-merlin
+
+trigger:
+  - master
+  - andreypopp/*
+  - prometheansacrifice/*
+  - rusty-key/*
+  - wokalski/*
+
+jobs:
+  - template: .ci/build-platform.yml
+    parameters:
+      platform: Linux
+      vmImage: ubuntu-16.04
+
+  - template: .ci/build-platform.yml
+    parameters:
+      platform: macOS
+      vmImage: macOS-10.13
+
+  # Need windows-2019 to do esy import/export-dependencies
+  # which assumes you have bsdtar (tar.exe) in your system
+  # otherwise it will end up using the esy-bash tar which doesn't
+  # understand drives like D:/ (thinks it's an scp path).
+  - template: .ci/build-platform.yml
+    parameters:
+      platform: Windows
+      vmImage: windows-2019
+
+  - job: Release
+    displayName: Release
+    dependsOn:
+      - Linux
+      - macos
+      - Windows
+    pool:
+      vmImage: ubuntu-18.04
+
+    steps:
+      - task: DownloadBuildArtifacts@0
+        condition: and(eq(variables['Build.Reason'], 'IndividualCI'), succeeded())
+        displayName: 'Downloading extension'
+        inputs:
+          artifactName: extension
+          downloadPath: '.'
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact: Release'
+        condition: and(succeeded(), eq(variables['Build.Reason'], 'IndividualCI'))
+        inputs:
+          PathtoPublish: '.'
+          ArtifactName: release
