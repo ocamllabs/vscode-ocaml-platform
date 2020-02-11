@@ -30,6 +30,14 @@
     "configuration": {
       "title": "OCaml configuration",
       "properties": {
+        "merlin.refmt.width": {
+          "type": [
+            "number",
+            null
+          ],
+          "default": null,
+          "description": "Set the width of lines when formatting code with refmt"
+        },
         "ocaml.lsp.path": {
           "type": "string",
           "default": "ocamllsp",
