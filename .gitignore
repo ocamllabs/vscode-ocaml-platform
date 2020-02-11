@@ -1,6 +1,11 @@
-.log/
-node_modules/
-out/
-*.vsix
+.bsb.lock
 .DS_Store
-.eslintcache
+.merlin
+.vscode-test
+*.vsix
+*~
+_esy/
+dist/
+lib/
+node_modules/
+.log/
