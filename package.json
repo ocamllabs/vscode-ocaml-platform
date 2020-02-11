@@ -4,6 +4,7 @@
   "description": "Official OCaml Support from OCamlLabs",
   "license": "MIT",
   "version": "0.0.2",
+  "publisher": "ocamllabs",
   "repository": {
     "type": "git",
     "url": "https://github.com/ocamllabs/vscode-ocaml-platform"
@@ -11,7 +12,8 @@
   "bugs": {
     "url": "https://github.com/ocamllabs/vscode-ocaml-platform/issues"
   },
-  "icon": "assets/logo.png",
+  "homepage": "https://github.com/ocamllabs/vscode-ocaml-platform",
+  "main": "./out/client/extension",
   "engines": {
     "vscode": "^1.40.0"
   },
@@ -21,7 +23,7 @@
   "activationEvents": [
     "onLanguage:ocaml"
   ],
-  "main": "./out/client/extension",
+  "icon": "assets/logo.png",
   "contributes": {
     "configuration": {
       "title": "OCaml configuration",
@@ -36,20 +38,20 @@
     "problemMatchers": [
       {
         "name": "ocamlc",
-
-        "fileLocation": ["relative", "${workspaceFolder}"],
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
         "pattern": [
           {
-            "regexp":
-              "^\\s*\\bFile\\b\\s*\"(.*)\",\\s*\\bline\\b\\s*(\\d+),\\s*\\bcharacters\\b\\s*(\\d+)-(\\d+)\\s*:\\s*$",
+            "regexp": "^\\s*\\bFile\\b\\s*\"(.*)\",\\s*\\bline\\b\\s*(\\d+),\\s*\\bcharacters\\b\\s*(\\d+)-(\\d+)\\s*:\\s*$",
             "file": 1,
             "line": 2,
             "column": 3,
             "endColumn": 4
           },
           {
-            "regexp":
-              "^(?:\\s*\\bParse\\b\\s*)?\\s*\\b([Ee]rror|Warning)\\b\\s*(?:\\(\\s*\\bwarning\\b\\s*(\\d+)\\))?\\s*:\\s*(.*)$",
+            "regexp": "^(?:\\s*\\bParse\\b\\s*)?\\s*\\b([Ee]rror|Warning)\\b\\s*(?:\\(\\s*\\bwarning\\b\\s*(\\d+)\\))?\\s*:\\s*(.*)$",
             "severity": 1,
             "code": 2,
             "message": 3
@@ -58,6 +60,47 @@
       }
     ],
     "languages": [
+      {
+        "id": "ocaml.dune",
+        "aliases": [
+          "dune"
+        ],
+        "extensions": [
+          "dune",
+          "jbuild"
+        ],
+        "configuration": "./languages/dune.json"
+      },
+      {
+        "id": "ocaml.menhir",
+        "aliases": [
+          "Menhir",
+          "menhir"
+        ],
+        "extensions": [
+          ".mly"
+        ]
+      },
+      {
+        "id": "ocaml.merlin",
+        "aliases": [
+          "Merlin",
+          "merlin"
+        ],
+        "extensions": [
+          ".merlin"
+        ]
+      },
+      {
+        "id": "ocaml.duneproject",
+        "aliases": [
+          "dune project"
+        ],
+        "extensions": [
+          "dune-project"
+        ],
+        "configuration": "./languages/dune.json"
+      },
       {
         "id": "ocaml",
         "aliases": [
@@ -69,44 +112,26 @@
           ".mli",
           ".ocamlinit"
         ],
-        "configuration": "./language/ocaml.json"
+        "configuration": "./languages/ocaml.json"
       },
       {
         "id": "ocaml.opam",
+        "aliases": [
+          "opam"
+        ],
         "extensions": [
           ".opam"
         ],
-        "configuration": "./language/opam.json"
+        "configuration": "./languages/opam.json"
       },
       {
-        "id": "ocaml.dune",
+        "id": "ocaml.ocamlbuild",
         "aliases": [
-          "dune"
+          "OCamlbuild",
+          "ocamlbuild"
         ],
         "extensions": [
-          "dune",
-          "jbuild"
-        ],
-        "configuration": "./language/dune.json"
-      },
-      {
-        "id": "ocaml.duneproject",
-        "aliases": [
-          "dune project"
-        ],
-        "extensions": [
-          "dune-project"
-        ],
-        "configuration": "./language/dune.json"
-      },
-      {
-        "id": "ocaml.menhir",
-        "aliases": [
-          "Menhir",
-          "menhir"
-        ],
-        "extensions": [
-          ".mly"
+          "_tags"
         ]
       },
       {
@@ -122,18 +147,18 @@
     ],
     "grammars": [
       {
-        "language": "ocaml",
-        "scopeName": "source.ocaml",
-        "path": "./syntax/ocaml.json"
+        "language": "ocaml.dune",
+        "scopeName": "source.dune",
+        "path": "./syntaxes/dune.json"
       },
       {
-        "language": "ocaml.opam",
-        "scopeName": "source.ocaml.opam",
-        "path": "./syntax/opam.tmLanguage.json"
+        "language": "ocaml.merlin",
+        "scopeName": "source.ocaml.merlin",
+        "path": "./syntaxes/merlin.json"
       },
       {
         "scopeName": "markdown.ocaml.codeblock",
-        "path": "./syntax/ocaml-markdown-codeblock.tmLanguage.json",
+        "path": "./syntaxes/ocaml-markdown-codeblock.json",
         "injectTo": [
           "text.html.markdown"
         ],
@@ -142,9 +167,19 @@
         }
       },
       {
-        "language": "ocaml.dune",
-        "scopeName": "source.dune",
-        "path": "./syntax/Dune.tmLanguage"
+        "language": "ocaml",
+        "scopeName": "source.ocaml",
+        "path": "./syntaxes/ocaml.json"
+      },
+      {
+        "language": "ocaml.ocamlbuild",
+        "scopeName": "source.ocaml.ocamlbuild",
+        "path": "./syntaxes/ocamlbuild.json"
+      },
+      {
+        "language": "ocaml.opam",
+        "scopeName": "source.ocaml.opam",
+        "path": "./syntaxes/opam.json"
       }
     ],
     "snippets": [
@@ -161,6 +196,9 @@
     "watch": "tsc -b -w",
     "package": "vsce package"
   },
+  "dependencies": {
+    "vscode-languageclient": "^5.2.1"
+  },
   "devDependencies": {
     "@types/node": "^12.12.14",
     "@types/vscode": "^1.40.0",
@@ -173,9 +211,5 @@
     "prettier": "1.19.1",
     "typescript": "^3.7.3",
     "vscode-test": "^1.2.3"
-  },
-  "dependencies": {
-    "vscode-languageclient": "^5.2.1"
-  },
-  "publisher": "ocamllabs"
+  }
 }
