@@ -30,7 +30,7 @@
     "configuration": {
       "title": "OCaml configuration",
       "properties": {
-        "merlin.refmt.width": {
+        "ocaml.refmt.width": {
           "type": [
             "number",
             null
