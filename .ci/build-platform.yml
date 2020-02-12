@@ -116,9 +116,6 @@ jobs:
           DISPLAY: ':99.0'
       - template: utils/publish-esy-cache.yml
 
-      - bash: 'mv vscode-merlin-0.1.0.vsix vscode-merlin-$(git rev-parse --short HEAD).vsix'
-        displayName: 'Adds commit hash to the release artifact name'
-
       - task: PublishPipelineArtifact@1
         displayName: 'Publishing the vsix file'
         condition: and(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Agent.OS'], 'Darwin'))
