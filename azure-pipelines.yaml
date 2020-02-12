@@ -1,4 +1,4 @@
-name: vscode-merlin
+name: vscode-ocaml-platform
 
 trigger:
   - master
