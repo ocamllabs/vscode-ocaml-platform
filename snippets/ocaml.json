@@ -41,10 +41,7 @@
   },
   "match": {
     "prefix": "match",
-    "body": [
-      "match ${1:scrutinee} with",
-      "| ${2:pattern} -> ${3:${2:pattern}}"
-    ]
+    "body": ["match ${1:scrutinee} with", "| ${2:pattern} -> ${3:${2:pattern}}"]
   },
   "type declaration": {
     "prefix": "type",

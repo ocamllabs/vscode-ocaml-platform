@@ -1,10 +1,7 @@
 {
   "name": "ocaml.dune",
   "scopeName": "source.dune",
-  "fileTypes": [
-    "jbuild",
-    "dune"
-  ],
+  "fileTypes": ["dune", "jbuild"],
   "patterns": [
     {
       "include": "#comments"
