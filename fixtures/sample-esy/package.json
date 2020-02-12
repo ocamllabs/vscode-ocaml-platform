@@ -15,7 +15,6 @@
     "ocaml": "4.6.x"
   },
   "devDependencies": {
-    "@opam/merlin": "*",
     "@opam/ocaml-lsp-server": "prometheansacrifice/ocaml-lsp:ocaml-lsp-server.opam#924ac293be5d"
   },
   "resolutions": {
