@@ -22,6 +22,14 @@ function toResult(msg, param) {
   }
 }
 
+function $$return(x) {
+  return /* Ok */Block.__(0, [x]);
+}
+
+function fail(x) {
+  return /* Error */Block.__(1, [x]);
+}
+
 var $great$great$eq = Belt_Result.flatMap;
 
 var $great$great$pipe = Belt_Result.map;
@@ -30,4 +38,6 @@ exports.$great$great$eq = $great$great$eq;
 exports.$great$great$pipe = $great$great$pipe;
 exports.$pipe$bang = $pipe$bang;
 exports.toResult = toResult;
+exports.$$return = $$return;
+exports.fail = fail;
 /* No side effect */

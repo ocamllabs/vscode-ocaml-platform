@@ -13,3 +13,6 @@ let toResult = msg =>
   fun
   | Some(x) => Ok(x)
   | None => Error(msg);
+
+let return = x => Ok(x);
+let fail = x => Error(x);

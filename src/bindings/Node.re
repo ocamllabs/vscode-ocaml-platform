@@ -6,16 +6,13 @@ open Js;
 
 [@bs.val] external __dirname: string = "__dirname";
 
-[@bs.val] [@bs.scope "process"]
-external processEnv: Js.Dict.t(string) = "env";
-
 [@bs.val] [@bs.scope "process"] external processPlatform: string = "platform";
 module Process = {
   type t;
   [@bs.val] external v: t = "process";
   [@bs.val] [@bs.scope "process"] external cwd: unit => string = "cwd";
   [@bs.val] [@bs.scope "process"] external platform: string = "platform";
-  /* TODO [@bs.val] [@bs.scope "process"] external env: Js.Dict.t(string) = "env"; */
+  [@bs.val] [@bs.scope "process"] external env: Js.Dict.t(string) = "env";
   module Stdout = {
     type t;
     [@bs.val] external v: t = "process.stdout";
@@ -86,6 +83,41 @@ module Fs = {
       | PathNotFound => "mkdir(~p=true) received home path and it was not found";
   };
 
+  module Stat = {
+    type t;
+    [@bs.send] external isDirectory: t => bool = "isDirectory";
+  };
+
+  [@bs.module "fs"]
+  external stat': (. string, (Js.Nullable.t(Error.t), Stat.t) => unit) => unit =
+    "stat";
+
+  let stat = p =>
+    Js.Promise.make((~resolve, ~reject as _) =>
+      stat'(. p, (err, stat) =>
+        resolve(.
+          switch (Js.Nullable.toOption(err)) {
+          | Some(_e) => Error("Couldn't stat")
+          | None => Ok(stat)
+          },
+        )
+      )
+    );
+
+  [@bs.module "fs"]
+  external readDir':
+    (. string, (Js.Nullable.t(Error.t), array(string)) => unit) => unit =
+    "readdir";
+  let readDir = path =>
+    Promise.make((~resolve, ~reject as _) => {
+      readDir'(. path, (error, files) => {
+        switch (Js.Nullable.toOption(error)) {
+        | Some(error) => resolve(. Error(error##message))
+        | None => resolve(. Ok(files))
+        }
+      })
+    });
+
   type fd;
   [@bs.module "fs"] external writeSync: (. fd, Buffer.t) => unit = "writeSync";
 
@@ -96,10 +128,10 @@ module Fs = {
   external readFile: string => Js.Promise.t(string) = "readFile";
 
   [@bs.module "./fs-stub.js"]
-  external mkdir': string => Js.Promise.t(result(unit, 'b)) = "mkdir";
+  external mkdir': string => Js.Promise.t(unit) = "mkdir";
 
   [@bs.module "./fs-stub.js"]
-  external exists: string => Js.Promise.t(result(bool, 'b)) = "exists";
+  external exists: string => Js.Promise.t(bool) = "exists";
 
   [@bs.module "./fs-stub.js"]
   external open_: (string, string) => Js.Promise.t(fd) = "open";
@@ -125,29 +157,25 @@ module Fs = {
     Js.Promise.(
       if (forceCreate) {
         exists(path)
-        |> then_(doesExist => {
-             switch (doesExist) {
-             | Ok(doesExist) =>
-               if (doesExist) {
-                 resolve(Ok());
+        |> then_(doesExist =>
+             if (doesExist) {
+               resolve(Ok());
+             } else {
+               let homePath = Sys.getenv(Sys.unix ? "HOME" : "USERPROFILE");
+               if (path == homePath) {
+                 resolve(Error(E.PathNotFound));
                } else {
-                 let homePath = Sys.getenv(Sys.unix ? "HOME" : "USERPROFILE");
-                 if (path == homePath) {
-                   resolve(Error(E.PathNotFound));
-                 } else {
-                   mkdir(~p=true, Filename.dirname(path))
-                   |> then_(
-                        fun
-                        | Ok () => mkdir'(path)
-                        | Error(e) => Error(e) |> resolve,
-                      );
-                 };
-               }
-             | Error(e) => resolve(Error(e))
+                 mkdir(~p=true, Filename.dirname(path))
+                 |> then_(
+                      fun
+                      | Ok () => mkdir'(path) |> then_(() => resolve(Ok()))
+                      | Error(e) => Error(e) |> resolve,
+                    );
+               };
              }
-           });
+           );
       } else {
-        mkdir'(path);
+        mkdir'(path) |> then_(() => resolve(Ok()));
       }
     );
   };
@@ -198,6 +226,8 @@ module Path = {
   external join: array(string) => string = "join";
 
   [@bs.module "path"] external basename: string => string = "basename";
+
+  [@bs.module "path"] external extname: string => string = "extname";
 
   [@bs.module "path"] external dirname: string => string = "dirname";
 };

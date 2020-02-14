@@ -6,7 +6,7 @@ var $$Node = require("../bindings/Node.bs.js");
 function run(p, file) {
   return $$Node.ChildProcess.exec("unzip " + (String(file) + ""), p !== undefined ? ({
                   cwd: p
-                }) : ({ }));
+                }) : { });
 }
 
 exports.run = run;

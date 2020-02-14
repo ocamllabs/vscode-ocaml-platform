@@ -4,31 +4,47 @@
 var LSP = require("./LSP.bs.js");
 var $$Node = require("./bindings/Node.bs.js");
 var Block = require("bs-platform/lib/js/block.js");
-var Refmt = require("./formatters/Refmt.bs.js");
+var Curry = require("bs-platform/lib/js/curry.js");
 var Vscode = require("vscode");
-var Ocamlformat = require("./formatters/Ocamlformat.bs.js");
+var Toolchain = require("./Toolchain.bs.js");
 var VscodeLanguageclient = require("vscode-languageclient");
 
-function createClient(id, name, folder) {
-  return LSP.Server.make(folder).then((function (serverOptions) {
-                if (serverOptions.tag) {
-                  return Promise.resolve(/* Error */Block.__(1, [serverOptions[0]]));
-                } else {
-                  return Promise.resolve(/* Ok */Block.__(0, [new VscodeLanguageclient.LanguageClient(id, name, serverOptions[0], LSP.Client.make(/* () */0))]));
-                }
-              }));
+function then_(f) {
+  return (function (param) {
+      return param.then((function (param) {
+                    if (param.tag) {
+                      return Promise.resolve(/* Error */Block.__(1, [param[0]]));
+                    } else {
+                      return Curry._1(f, param[0]);
+                    }
+                  }));
+    });
+}
+
+function handleError(f) {
+  return (function (param) {
+      return param.then((function (param) {
+                    if (param.tag) {
+                      return Curry._1(f, param[0]);
+                    } else {
+                      return Promise.resolve(/* () */0);
+                    }
+                  }));
+    });
 }
 
 function activate(_context) {
-  Refmt.register(/* () */0);
-  Ocamlformat.register(/* () */0);
-  return createClient("merlin-language-server", "Merlin Language Server", Vscode.workspace.rootPath).then((function (client) {
-                  if (client.tag) {
-                    return Vscode.window.showErrorMessage(client[0]);
-                  } else {
-                    return Promise.resolve(client[0].start());
-                  }
-                })).catch((function (e) {
+  process.env["OCAMLRUNPARAM"] = "b";
+  process.env["MERLIN_LOG"] = "-";
+  var folder = Vscode.workspace.rootPath;
+  return handleError((function (prim) {
+                    return Vscode.window.showErrorMessage(prim);
+                  }))(then_((function (toolchain) {
+                        var serverOptions = LSP.Server.make(toolchain);
+                        var client = new VscodeLanguageclient.LanguageClient("ocaml", "OCaml Language Server", serverOptions, LSP.Client.make(/* () */0));
+                        client.start();
+                        return Promise.resolve(/* Ok */Block.__(0, [/* () */0]));
+                      }))(then_(Toolchain.setup)(Toolchain.init(process.env, folder)))).catch((function (e) {
                 var message = $$Node.$$Error.ofPromiseError(e);
                 return Vscode.window.showErrorMessage("Error: " + (String(message) + ""));
               }));

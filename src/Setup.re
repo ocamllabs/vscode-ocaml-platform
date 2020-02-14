@@ -53,7 +53,6 @@ module Esy = {
 };
 
 module Opam = {
-  open ChildProcess;
   include Internal;
   let make = () => make();
   let run = (eventEmitter, _) => {
@@ -66,20 +65,22 @@ module Opam = {
 module Bsb = {
   module E = {
     type t =
+      | RimrafFailed(string)
       | SetupChainFailure(string)
       | CacheFailure(string)
-      | EsyBuildFailure
+      | EsyBuildFailure(string)
       | EsyImportDependenciesFailure
-      | EsyInstallFailure
+      | EsyInstallFailure(string)
       | BucklescriptCompatFailure(CheckBucklescriptCompat.E.t)
       | InvalidPath(string)
       | Failure(string);
     let toString =
       fun
+      | RimrafFailed(msg) => {j| Rimraf failed before the bsb toolchain setup: $msg |j}
       | SetupChainFailure(msg) => {j|Setup failed: $msg|j}
-      | EsyBuildFailure => "'esy install' failed"
+      | EsyBuildFailure(msg) => "'esy build' failed. Reason: " ++ msg
       | EsyImportDependenciesFailure => "'esy import-dependencies' failed"
-      | EsyInstallFailure => "'esy install' failed"
+      | EsyInstallFailure(msg) => "'esy install' failed. Reason: " ++ msg
       | BucklescriptCompatFailure(e) => {
           let msg = CheckBucklescriptCompat.E.toString(e);
           {j| BucklescriptCompatFailure: $msg |j};
@@ -112,14 +113,19 @@ module Bsb = {
     let manifestPath = Path.join([|projectPath, "package.json"|]);
     let runSetupChain = folder => {
       let hiddenEsyRoot = Path.join([|folder, ".vscode", "esy"|]);
-      /* let onlyIfOk: */
-      /*   ('a => Js.Promise.t(result('b, 'c)), result('c, 'd)) => */
-      /*   Js.Promise.t(result('b, 'c)) = */
-      /*   f => */
-      /*     fun */
-      /*     | Ok(x) => f(x) */
-      /*     | Error(e) => Js.Promise.resolve(Error(e)); */
-      Fs.mkdir(~p=true, hiddenEsyRoot)
+      Rimraf.run(hiddenEsyRoot)
+      |> then_(
+           fun
+           | Error () => Error(E.RimrafFailed(hiddenEsyRoot)) |> resolve
+           | Ok () =>
+             Fs.mkdir(~p=true, hiddenEsyRoot)
+             |> then_(
+                  fun
+                  | Ok () => Ok() |> resolve
+                  | Error(Fs.E.PathNotFound) =>
+                    Error(E.InvalidPath(hiddenEsyRoot)) |> resolve,
+                ),
+         )
       |> then_(
            fun
            | Error(e) => Error(e) |> resolve
@@ -131,22 +137,13 @@ module Bsb = {
          )
       |> then_(
            fun
-           | Error(Fs.E.PathNotFound) =>
-             Error(E.InvalidPath(hiddenEsyRoot)) |> resolve
+           | Error(e) => Error(e) |> resolve
            | Ok () => {
                Command.Esy.install(~p=hiddenEsyRoot)
                |> then_(
                     fun
                     | Error(e) =>
-                      Command.Esy.E.(
-                        switch (e) {
-                        | CmdFailed(_)
-                        | NonZeroExit(_, _, _, _)
-                        | UnexpectedJSONValue(_) /* TODO: Some of these JSON errors can be encapsulated */
-                        | JsonParseExn(_)
-                        | UnknownError => Error(E.EsyInstallFailure)
-                        }
-                      )
+                      Error(E.EsyInstallFailure(Command.Esy.E.toString(e)))
                       |> resolve
                     | Ok(_stdout) => {
                         reportProgress(eventEmitter, 0.1);
@@ -246,7 +243,8 @@ module Bsb = {
                     << (
                       fun
                       | Ok(_esyCmdOutput) => Ok()
-                      | Error(_e) => Error(E.EsyBuildFailure)
+                      | Error(e) =>
+                        Error(E.EsyBuildFailure(Command.Esy.E.toString(e)))
                     ),
                   );
              },

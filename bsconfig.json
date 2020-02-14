@@ -5,8 +5,9 @@
     "react-jsx": 3
   },
   "sources": [
+    { "dir": "src/tablecloth/bs/src", "subdirs": false },
     {
-      "subdirs": ["bindings", "formatters", "command"],
+      "subdirs": ["bindings", "command"],
       "dir": "src"
     },
     {
@@ -26,7 +27,8 @@
   "bs-dependencies": ["@glennsl/bs-json"],
   "bs-dev-dependencies": ["@glennsl/bs-jest"],
   "warnings": {
-    "error": "+101"
+    "number": "-44-45-20",
+    "error": "+101+8"
   },
   "refmt": 3
 }

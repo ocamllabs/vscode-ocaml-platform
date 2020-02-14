@@ -14,7 +14,11 @@ var Folder = {
 
 var Workspace = { };
 
-var $$Window = { };
+var QuickPickOptions = { };
+
+var $$Window = {
+  QuickPickOptions: QuickPickOptions
+};
 
 var Commands = { };
 

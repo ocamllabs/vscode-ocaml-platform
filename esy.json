@@ -3,9 +3,14 @@
     "ocaml": "4.6.x",
     "@esy-ocaml/reason": "*",
     "@opam/ocamlformat": "0.12",
-    "@opam/ocaml-lsp-server": "prometheansacrifice/ocaml-lsp:ocaml-lsp-server.opam#924ac293be5d"
+    "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam#0fc8955eb39"
   },
   "resolutions": {
-    "@opam/dune": "2.0.1"
+    "@opam/dune": "2.0.1",
+    "@opam/menhir": "20200123",
+    "@opam/menhirSdk": "20200123",
+    "@opam/menhirLib": "20200123",
+    "@opam/dune-private-libs": "2.0.1",
+    "@opam/dune-configurator": "2.0.1"
   }
 }

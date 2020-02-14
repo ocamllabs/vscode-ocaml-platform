@@ -1,8 +1,6 @@
 open Bindings;
 
 module Server = {
-  open Js.Promise;
-  open ProjectType;
   module type MTYPE = {
     type t;
     let make: unit => t;
@@ -38,100 +36,18 @@ module Server = {
     );
   };
 
-  let make:
-    string =>
-    Js.Promise.t(result(Vscode.LanguageClient.serverOptions, string)) =
-    folder => {
-      Js.Dict.set(processEnv, "OCAMLRUNPARAM", "b");
-      Js.Dict.set(processEnv, "MERLIN_LOG", "-");
-      ProjectType.detect(folder)
-      |> then_(
-           fun
-           | Error(e) => Error(ProjectType.E.toString(e)) |> resolve
-           | Ok(projectType) => {
-               let setupPromise =
-                 switch (projectType) {
-                 | Esy({readyForDev}) =>
-                   if (readyForDev) {
-                     resolve(Ok());
-                   } else {
-                     setupWithProgressIndicator((module Setup.Esy), folder);
-                   }
-                 | Opam =>
-                   setupWithProgressIndicator((module Setup.Opam), folder)
-                 | Bsb({readyForDev}) =>
-                   if (readyForDev) {
-                     resolve(Ok());
-                   } else {
-                     /* Not ready for dev. Setting up */
-                     setupWithProgressIndicator(
-                       (module Setup.Bsb),
-                       folder,
-                     );
-                   }
-                 };
-               setupPromise
-               |> then_(r => {
-                    switch (r) {
-                    | Ok () =>
-                      switch (projectType) {
-                      | Esy(_) =>
-                        Ok(
-                          {
-                            command:
-                              Process.platform == "win32" ? "esy.cmd" : "esy",
-                            args: [|
-                              "exec-command",
-                              "--include-current-env",
-                              "ocamllsp",
-                            |],
-                            options: {
-                              env: processEnv,
-                            },
-                          }: Vscode.LanguageClient.serverOptions,
-                        )
-                        |> resolve
-                      | Opam =>
-                        if (processPlatform == "win32") {
-                          Error(
-                            "Opam workflow for Windows is not supported yet",
-                          )
-                          |> resolve;
-                        } else {
-                          Ok(
-                            {
-                              command: "opam",
-                              args: [|"exec", "ocamllsp"|],
-                              options: {
-                                env: processEnv,
-                              },
-                            }: Vscode.LanguageClient.serverOptions,
-                          )
-                          |> resolve;
-                        }
-                      | Bsb(_) =>
-                        Ok(
-                          {
-                            command:
-                              Bindings.processPlatform == "win32"
-                                ? "esy.cmd" : "esy",
-                            args: [|
-                              "-P",
-                              Path.join([|folder, ".vscode", "esy"|]),
-                              "ocamllsp",
-                            |],
-                            options: {
-                              env: processEnv,
-                            },
-                          }: Vscode.LanguageClient.serverOptions,
-                        )
-                        |> resolve
-                      }
-                    | Error(e) => resolve(Error(e))
-                    }
-                  });
-             },
-         );
+  let make: Toolchain.t => Vscode.LanguageClient.serverOptions =
+    toolchain => {
+      let (command, args) = Toolchain.lsp(toolchain);
+      (
+        {
+          command,
+          args,
+          options: {
+            env: Process.env,
+          },
+        }: Vscode.LanguageClient.serverOptions
+      );
     };
 };
 

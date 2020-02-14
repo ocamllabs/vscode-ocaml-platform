@@ -177,22 +177,15 @@ function status(path) {
               }));
 }
 
-function prepareProjectPathArgs(param) {
-  if (param !== undefined) {
-    return "-P " + (String(Caml_option.valFromOption(param)) + " ");
-  } else {
-    return "";
-  }
-}
-
 function prepareCommand(a) {
   return a.join(" ");
 }
 
-function subcommand(c, p) {
-  var cmd = [
-      "esy install",
-      prepareProjectPathArgs(p)
+function subcommand(p, c) {
+  var cmd = /* array */[
+      "esy",
+      c,
+      " -P " + (String(p) + " ")
     ].join(" ");
   return $$Node.ChildProcess.exec(cmd, { }).then((function (param) {
                 if (param.tag) {
@@ -216,23 +209,23 @@ function subcommand(c, p) {
 }
 
 function install(param) {
-  return subcommand("install", param);
+  return subcommand(param, "install");
 }
 
 function i(param) {
-  return subcommand("i", param);
+  return subcommand(param, "i");
 }
 
 function importDependencies(param) {
-  return subcommand("import-dependencies", param);
+  return subcommand(param, "import-dependencies");
 }
 
 function build(param) {
-  return subcommand("build", param);
+  return subcommand(param, "build");
 }
 
 function b(param) {
-  return subcommand("b", param);
+  return subcommand(param, "b");
 }
 
 exports.UnexpectedJSONValue = UnexpectedJSONValue;
@@ -246,7 +239,6 @@ exports.bool_ = bool_;
 exports.nullableString$prime = nullableString$prime;
 exports.nullableString = nullableString;
 exports.status = status;
-exports.prepareProjectPathArgs = prepareProjectPathArgs;
 exports.prepareCommand = prepareCommand;
 exports.subcommand = subcommand;
 exports.install = install;

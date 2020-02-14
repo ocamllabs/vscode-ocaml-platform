@@ -2,6 +2,7 @@
 'use strict';
 
 var $$Node = require("./Node.bs.js");
+var Rimraf = require("./Rimraf.bs.js");
 var Vscode = require("./Vscode.bs.js");
 
 var thisProjectsEsyJson = $$Node.thisProjectsEsyJson;
@@ -54,6 +55,8 @@ var TextEdit = Vscode.TextEdit;
 
 var LanguageClient = Vscode.LanguageClient;
 
+var Rimraf$1 = Rimraf.Rimraf;
+
 exports.thisProjectsEsyJson = thisProjectsEsyJson;
 exports.CamlArray = CamlArray;
 exports.Process = Process;
@@ -79,4 +82,5 @@ exports.Languages = Languages;
 exports.$$Range = $$Range;
 exports.TextEdit = TextEdit;
 exports.LanguageClient = LanguageClient;
+exports.Rimraf = Rimraf$1;
 /* Node Not a pure module */

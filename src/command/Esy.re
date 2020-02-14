@@ -76,7 +76,8 @@ let status = path => {
            switch (childProcessError) {
            | ChildProcess.E.ExecFailure => Error(E.CmdFailed("esy status"))
            }
-         | Ok((exitCode, statusOutputString, statusErrorString)) =>
+         /* TODO: return exitCode during failure */
+         | Ok((_exitCode, statusOutputString, statusErrorString)) =>
            if (statusErrorString == "") {
              Js.Json.(
                try({
@@ -134,19 +135,14 @@ let status = path => {
      );
 };
 
-let prepareProjectPathArgs =
-  fun
-  | Some(p) => {j|-P $p |j}
-  | None => "";
-
 let prepareCommand = a => a |> Js.Array.joinWith(" ");
 
-let subcommand = (c, ~p=?) => {
-  let cmd = [|"esy install", prepareProjectPathArgs(p)|] |> prepareCommand;
+let subcommand = (~p, c) => {
+  let cmd = [|"esy", c, {j| -P $p |j}|] |> prepareCommand;
   ChildProcess.exec(cmd, ChildProcess.Options.make())
   |> then_(
        fun
-       | Error(e) => resolve(Error(E.CmdFailed(cmd)))
+       | Error(_e) => resolve(Error(E.CmdFailed(cmd)))
        | Ok((exitCode, stdout, stderr)) =>
          if (exitCode == 0) {
            resolve(Ok(stdout));
@@ -156,7 +152,7 @@ let subcommand = (c, ~p=?) => {
      );
 };
 
-type subcommand = (~p: string=?) => Js.Promise.t(result(string, E.t));
+type subcommand = (~p: string) => Js.Promise.t(result(string, E.t));
 let install: subcommand = subcommand("install");
 let i: subcommand = subcommand("i");
 

@@ -65,4 +65,4 @@ function run(manifestJson) {
 exports.E = E;
 exports.processDeps = processDeps;
 exports.run = run;
-/* semver Not a pure module */
+/* Utils Not a pure module */
