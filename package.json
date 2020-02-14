@@ -144,7 +144,8 @@
         ],
         "extensions": [
           ".mll"
-        ]
+        ],
+        "configuration": "./languages/ocamllex.json"
       },
       {
         "id": "reason",
