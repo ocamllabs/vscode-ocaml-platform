@@ -142,7 +142,8 @@
         ],
         "extensions": [
           ".mll"
-        ]
+        ],
+        "configuration": "./languages/ocamllex.json"
       }
     ],
     "grammars": [
