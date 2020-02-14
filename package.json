@@ -177,6 +177,11 @@
         "path": "./syntaxes/ocamlbuild.json"
       },
       {
+        "language": "ocaml.ocamllex",
+        "scopeName": "source.ocaml.ocamllex",
+        "path": "./syntaxes/ocamllex.json"
+      },
+      {
         "language": "ocaml.opam",
         "scopeName": "source.ocaml.opam",
         "path": "./syntaxes/opam.json"
