@@ -120,7 +120,8 @@
           "opam"
         ],
         "extensions": [
-          ".opam"
+          ".opam",
+          ".opam.locked"
         ],
         "configuration": "./languages/opam.json"
       },
