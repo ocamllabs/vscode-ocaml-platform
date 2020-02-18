@@ -21,7 +21,8 @@
     "Programming Languages"
   ],
   "activationEvents": [
-    "onLanguage:ocaml"
+    "onLanguage:ocaml",
+    "onLanguage:reason"
   ],
   "icon": "assets/logo.png",
   "contributes": {
@@ -144,6 +145,18 @@
         "extensions": [
           ".mll"
         ]
+      },
+      {
+        "id": "reason",
+        "aliases": [
+          "Reason",
+          "reason"
+        ],
+        "extensions": [
+          ".re",
+          ".rei"
+        ],
+        "configuration": "./languages/reason.json"
       }
     ],
     "grammars": [
@@ -181,6 +194,11 @@
         "language": "ocaml.opam",
         "scopeName": "source.ocaml.opam",
         "path": "./syntaxes/opam.json"
+      },
+      {
+        "language": "reason",
+        "scopeName": "source.reason",
+        "path": "./syntaxes/reason.json"
       }
     ],
     "snippets": [
