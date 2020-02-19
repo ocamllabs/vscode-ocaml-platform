@@ -196,6 +196,16 @@
         "path": "./syntaxes/opam.json"
       },
       {
+        "scopeName": "markdown.reason.codeblock",
+        "path": "./syntaxes/reason-markdown-codeblock.json",
+        "injectTo": [
+          "text.html.markdown"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.reason": "reason"
+        }
+      },
+      {
         "language": "reason",
         "scopeName": "source.reason",
         "path": "./syntaxes/reason.json"
