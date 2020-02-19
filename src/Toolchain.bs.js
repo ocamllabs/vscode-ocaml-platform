@@ -200,7 +200,7 @@ var name$1 = "opam";
 
 var lockFile$1 = Utils.Fpath.v("opam.lock");
 
-function make$2(env, root, discoveredManifestPath) {
+function make$2(env, root, param) {
   var rootStr = Utils.Fpath.toString(root);
   return Utils.okThen((function (cmd) {
                   return Result.$$return({
@@ -277,8 +277,7 @@ function ofName(env, name$2, root, discoveredManifestPath) {
 
 function alreadyUsed(folder) {
   return Promise.all(Tablecloth.$$Array.map((function (pm) {
-                      var lockFileFpath;
-                      lockFileFpath = pm.tag ? Utils.Fpath.join(pm[0], lockFile) : Utils.Fpath.join(pm[0], lockFile$1);
+                      var lockFileFpath = pm ? Utils.Fpath.join(folder, lockFile) : Utils.Fpath.join(folder, lockFile$1);
                       return $$Node.Fs.exists(Utils.Fpath.show(lockFileFpath)).then((function (param) {
                                     return Utils.$less$less((function (prim) {
                                                   return Promise.resolve(prim);
@@ -290,9 +289,9 @@ function alreadyUsed(folder) {
                                                 }), param);
                                   }));
                     }), Tablecloth.$$Array.fromList(/* :: */[
-                        /* Esy */Block.__(1, [folder]),
+                        /* Esy */1,
                         /* :: */[
-                          /* Opam */Block.__(0, [folder]),
+                          /* Opam */0,
                           /* [] */0
                         ]
                       ]))).then((function (l) {
@@ -301,6 +300,53 @@ function alreadyUsed(folder) {
                                         }), Tablecloth.$$Array.filter((function (param) {
                                               return param[1];
                                             }), l)))));
+              }));
+}
+
+function available(env) {
+  return Promise.all(Tablecloth.$$Array.fromList(Tablecloth.List.map((function (pm) {
+                          var name$2 = pm ? name : name$1;
+                          return make(env, name$2).then((function (param) {
+                                        return Utils.$less$less((function (prim) {
+                                                      return Promise.resolve(prim);
+                                                    }), (function (param) {
+                                                      if (param.tag) {
+                                                        return /* tuple */[
+                                                                pm,
+                                                                false
+                                                              ];
+                                                      } else {
+                                                        return /* tuple */[
+                                                                pm,
+                                                                true
+                                                              ];
+                                                      }
+                                                    }), param);
+                                      }));
+                        }), /* :: */[
+                        /* Esy */1,
+                        /* :: */[
+                          /* Opam */0,
+                          /* [] */0
+                        ]
+                      ]))).then((function (param) {
+                return Utils.$less$less((function (param) {
+                              return Utils.$less$less((function (param) {
+                                            return Utils.$less$less((function (param) {
+                                                          return Utils.$less$less((function (prim) {
+                                                                        return Promise.resolve(prim);
+                                                                      }), Result.$$return, param);
+                                                        }), Tablecloth.$$Array.toList, param);
+                                          }), (function (param) {
+                                            return Tablecloth.$$Array.map((function (t) {
+                                                          return t[0];
+                                                        }), param);
+                                          }), param);
+                            }), (function (param) {
+                              return Tablecloth.$$Array.filter((function (param) {
+                                            return param[1];
+                                          }), param);
+                            }), param);
               }));
 }
 
@@ -314,7 +360,10 @@ function lookup(projectRoot) {
                                       var file = param;
                                       switch (file) {
                                         case "esy.json" :
-                                            return Promise.resolve(/* Esy */Block.__(1, [projectRoot$1]));
+                                            return Promise.resolve(/* tuple */[
+                                                        /* Esy */1,
+                                                        projectRoot$1
+                                                      ]);
                                         case "opam" :
                                             return $$Node.Fs.stat(Utils.Fpath.toString(Utils.Fpath.$slash(projectRoot$1, "opam"))).then((function (param) {
                                                           return Utils.$less$less((function (prim) {
@@ -327,7 +376,10 @@ function lookup(projectRoot) {
                                                                           if (match) {
                                                                             return ;
                                                                           } else {
-                                                                            return /* Opam */Block.__(0, [projectRoot$1]);
+                                                                            return /* tuple */[
+                                                                                    /* Opam */0,
+                                                                                    projectRoot$1
+                                                                                  ];
                                                                           }
                                                                         }
                                                                       }), param);
@@ -340,9 +392,15 @@ function lookup(projectRoot) {
                                                             var json = Caml_option.valFromOption(match);
                                                             if (Utils.propertyExists(json, "dependencies") || Utils.propertyExists(json, "devDependencies")) {
                                                               if (Utils.propertyExists(json, "esy")) {
-                                                                return Promise.resolve(/* Esy */Block.__(1, [Utils.Fpath.$slash(projectRoot$1, "package.json")]));
+                                                                return Promise.resolve(/* tuple */[
+                                                                            /* Esy */1,
+                                                                            projectRoot$1
+                                                                          ]);
                                                               } else {
-                                                                return Promise.resolve(/* Esy */Block.__(1, [Utils.Fpath.$slash(Utils.Fpath.$slash(projectRoot$1, ".vscode"), "esy")]));
+                                                                return Promise.resolve(/* tuple */[
+                                                                            /* Esy */1,
+                                                                            Utils.Fpath.$slash(Utils.Fpath.$slash(projectRoot$1, ".vscode"), "esy")
+                                                                          ]);
                                                               }
                                                             } else {
                                                               return Promise.resolve(undefined);
@@ -361,7 +419,10 @@ function lookup(projectRoot) {
                                                               if (match !== undefined) {
                                                                 var json = Caml_option.valFromOption(match);
                                                                 if (Utils.propertyExists(json, "dependencies") || Utils.propertyExists(json, "devDependencies")) {
-                                                                  return Promise.resolve(/* Esy */Block.__(1, [projectRoot$1]));
+                                                                  return Promise.resolve(/* tuple */[
+                                                                              /* Esy */1,
+                                                                              projectRoot$1
+                                                                            ]);
                                                                 } else {
                                                                   return Promise.resolve(undefined);
                                                                 }
@@ -375,7 +436,10 @@ function lookup(projectRoot) {
                                                               if (param === "") {
                                                                 return Promise.resolve(undefined);
                                                               } else {
-                                                                return Promise.resolve(/* Opam */Block.__(0, [projectRoot$1]));
+                                                                return Promise.resolve(/* tuple */[
+                                                                            /* Opam */0,
+                                                                            projectRoot$1
+                                                                          ]);
                                                               }
                                                             }));
                                             default:
@@ -403,99 +467,80 @@ function init(env, folder) {
                               spec: spec,
                               projectRoot: projectRoot
                             }]);
-                }))(alreadyUsed(projectRoot).then((function (param) {
-                        if (param.tag) {
-                          return Promise.resolve(/* Error */Block.__(1, [param[0]]));
-                        } else {
-                          var packageManagersInUse = param[0];
-                          if (packageManagersInUse) {
-                            return Promise.resolve(/* Ok */Block.__(0, [packageManagersInUse]));
-                          } else {
-                            return Utils.okThen((function (x) {
-                                            if (x) {
-                                              return /* Ok */Block.__(0, [x]);
-                                            } else {
-                                              return /* Error */Block.__(1, ["TODO: global toolchain"]);
-                                            }
-                                          }))(lookup(projectRoot));
-                          }
-                        }
-                      })).then((function (param) {
-                      if (param.tag) {
-                        return Promise.resolve(/* Error */Block.__(1, [param[0]]));
-                      } else {
-                        var env$1 = env;
-                        var supportedPackageManagers = param[0];
-                        return Promise.all(Tablecloth.$$Array.fromList(Tablecloth.List.map((function (pm) {
-                                                var name$2;
-                                                name$2 = pm.tag ? name : name$1;
-                                                return make(env$1, name$2).then((function (param) {
-                                                              return Utils.$less$less((function (prim) {
-                                                                            return Promise.resolve(prim);
-                                                                          }), (function (param) {
-                                                                            if (param.tag) {
-                                                                              return /* tuple */[
-                                                                                      pm,
-                                                                                      false
-                                                                                    ];
-                                                                            } else {
-                                                                              return /* tuple */[
-                                                                                      pm,
-                                                                                      true
-                                                                                    ];
-                                                                            }
-                                                                          }), param);
-                                                            }));
-                                              }), supportedPackageManagers))).then((function (param) {
-                                      return Utils.$less$less((function (param) {
-                                                    return Utils.$less$less((function (param) {
-                                                                  return Utils.$less$less((function (param) {
-                                                                                return Utils.$less$less((function (prim) {
-                                                                                              return Promise.resolve(prim);
-                                                                                            }), Result.$$return, param);
-                                                                              }), Tablecloth.$$Array.toList, param);
-                                                                }), (function (param) {
-                                                                  return Tablecloth.$$Array.map((function (t) {
-                                                                                return t[0];
-                                                                              }), param);
-                                                                }), param);
-                                                  }), (function (param) {
-                                                    return Tablecloth.$$Array.filter((function (param) {
-                                                                  return param[1];
-                                                                }), param);
-                                                  }), param);
-                                    }));
-                      }
-                    })).then((function (param) {
-                    if (param.tag) {
-                      return Promise.resolve(/* Error */Block.__(1, [param[0]]));
+                }))(Promise.all(/* tuple */[
+                    available(env),
+                    alreadyUsed(projectRoot).then((function (param) {
+                            if (param.tag) {
+                              return Promise.resolve(/* Error */Block.__(1, [param[0]]));
+                            } else {
+                              var packageManagersInUse = param[0];
+                              if (packageManagersInUse) {
+                                return Promise.resolve(Result.$$return(Tablecloth.List.map((function (x) {
+                                                      return /* tuple */[
+                                                              x,
+                                                              projectRoot
+                                                            ];
+                                                    }), packageManagersInUse)));
+                              } else {
+                                return Utils.okThen((function (packageManagersInUse) {
+                                                if (packageManagersInUse) {
+                                                  return Result.$$return(packageManagersInUse);
+                                                } else {
+                                                  return /* Error */Block.__(1, ["TODO: global toolchain"]);
+                                                }
+                                              }))(lookup(projectRoot));
+                              }
+                            }
+                          }))
+                  ]).then((function (param) {
+                    var alreadyUsedPackageManagers = param[1];
+                    var availablePackageManagers = param[0];
+                    var availablePackageManagers$1;
+                    if (availablePackageManagers.tag) {
+                      console.log("Error during availablePackageManagers()", availablePackageManagers[0]);
+                      availablePackageManagers$1 = /* [] */0;
                     } else {
-                      var packageManagersInUse = param[0];
-                      if (packageManagersInUse) {
-                        if (packageManagersInUse[1]) {
-                          var config = Vscode.workspace.getConfiguration("ocaml");
-                          var match = config.packageManager;
-                          var match$1 = config.toolChainRoot;
-                          if (match == null) {
-                            return Promise.resolve(/* Error */Block.__(1, ["TODO: Implement prompting choice of package manager"]));
-                          } else if (match$1 == null) {
-                            return ofName(env, match, projectRoot, projectRoot);
-                          } else {
-                            return ofName(env, match, match$1, projectRoot);
-                          }
+                      availablePackageManagers$1 = availablePackageManagers[0];
+                    }
+                    var alreadyUsedPackageManagers$1;
+                    if (alreadyUsedPackageManagers.tag) {
+                      console.log("Error during alreadyUsedPackageManagers()", alreadyUsedPackageManagers[0]);
+                      alreadyUsedPackageManagers$1 = /* [] */0;
+                    } else {
+                      alreadyUsedPackageManagers$1 = alreadyUsedPackageManagers[0];
+                    }
+                    var _multipleChoices = Tablecloth.List.filter((function (param) {
+                            var x = param[0];
+                            return Tablecloth.List.findIndex((function (y) {
+                                          return Caml_obj.caml_equal(y, x);
+                                        }), availablePackageManagers$1) !== undefined;
+                          }), alreadyUsedPackageManagers$1);
+                    if (_multipleChoices) {
+                      if (_multipleChoices[1]) {
+                        var config = Vscode.workspace.getConfiguration("ocaml");
+                        var match = config.packageManager;
+                        var match$1 = config.toolChainRoot;
+                        if (match == null) {
+                          return Promise.resolve(/* Error */Block.__(1, ["TODO: Implement prompting choice of package manager"]));
+                        } else if (match$1 == null) {
+                          return ofName(env, match, projectRoot, projectRoot);
                         } else {
-                          var env$1 = env;
-                          var discoveredManifestPath = projectRoot;
-                          var t = packageManagersInUse[0];
-                          if (t.tag) {
-                            return make$1(env$1, t[0], discoveredManifestPath);
-                          } else {
-                            return make$2(env$1, t[0], discoveredManifestPath);
-                          }
+                          return ofName(env, match, match$1, projectRoot);
                         }
                       } else {
-                        return Promise.resolve(/* Error */Block.__(1, [" No package manager found. We support opam (https://opam.ocaml.org/) and esy (https://esy.sh/) "]));
+                        var match$2 = _multipleChoices[0];
+                        var env$1 = env;
+                        var root = match$2[1];
+                        var discoveredManifestPath = projectRoot;
+                        var t = match$2[0];
+                        if (t) {
+                          return make$1(env$1, root, discoveredManifestPath);
+                        } else {
+                          return make$2(env$1, root, discoveredManifestPath);
+                        }
                       }
+                    } else {
+                      return Promise.resolve(/* Error */Block.__(1, [" No package manager found. We support opam (https://opam.ocaml.org/) and esy (https://esy.sh/) "]));
                     }
                   })));
 }

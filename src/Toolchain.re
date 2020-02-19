@@ -11,20 +11,8 @@ let noPackageManagerFound = {j| No package manager found. We support opam (https
 
 type commandAndArgs = (string, array(string));
 
-module type MTYPE = {
-  type t;
-  let make: unit => t;
-  let onProgress: (t, float => unit) => unit;
-  let onEnd: (t, unit => unit) => unit;
-  let onError: (t, string => unit) => unit;
-  let reportProgress: (t, float) => unit;
-  let reportEnd: t => unit;
-  let reportError: (t, string) => unit;
-  let run: (t, string) => Js.Promise.t(unit);
-};
-
 let setupWithProgressIndicator = (m, folder) => {
-  module M = (val m: MTYPE);
+  module M = (val m: Setup.T);
   M.(
     Window.withProgress(
       {
@@ -139,22 +127,27 @@ module PackageManager: {
     ) =>
     Js.Promise.t(result(spec, string));
   let make:
-    (~env: Js.Dict.t(string), ~discoveredManifestPath: Fpath.t, ~t: t) =>
+    (
+      ~env: Js.Dict.t(string),
+      ~root: Fpath.t,
+      ~discoveredManifestPath: Fpath.t,
+      ~t: t
+    ) =>
     Js.Promise.t(result(spec, string));
   let setupToolChain: spec => Js.Promise.t(result(unit, string));
   let alreadyUsed: Fpath.t => Js.Promise.t(result(list(t), string));
   let available:
-    (~env: Js.Dict.t(string), list(t)) =>
-    Js.Promise.t(result(list(t), string));
+    (~env: Js.Dict.t(string)) => Js.Promise.t(result(list(t), string));
   let env: spec => Js.Promise.t(result(Js.Dict.t(string), string));
   let lsp: spec => commandAndArgs;
   module Manifest: {
-    let lookup: Fpath.t => Js.Promise.t(result(list(t), string));
+    let lookup:
+      Fpath.t => Js.Promise.t(result(list((t, Fpath.t)), string));
   };
 } = {
   type t =
-    | Opam(Fpath.t)
-    | Esy(Fpath.t);
+    | Opam
+    | Esy;
 
   type spec = {
     cmd: Cmd.t,
@@ -163,6 +156,7 @@ module PackageManager: {
     setup: unit => Js.Promise.t(result(unit, string)),
   };
 
+  let supportedPackageManagers = [Esy, Opam];
   module type T = {
     let name: string;
     let lockFile: Fpath.t;
@@ -258,7 +252,7 @@ module PackageManager: {
   module Opam: T = {
     let name = "opam";
     let lockFile = Fpath.v("opam.lock");
-    let make = (~env, ~root, ~discoveredManifestPath) => {
+    let make = (~env, ~root, ~discoveredManifestPath as _) => {
       let rootStr = root |> Fpath.toString;
       Cmd.make(~cmd="opam", ~env)
       |> okThen(cmd => {
@@ -317,10 +311,10 @@ module PackageManager: {
     };
   };
 
-  let make = (~env, ~discoveredManifestPath, ~t) =>
+  let make = (~env, ~root, ~discoveredManifestPath, ~t) =>
     switch (t) {
-    | Opam(root) => Opam.make(~env, ~root, ~discoveredManifestPath)
-    | Esy(root) => Esy.make(~env, ~root, ~discoveredManifestPath)
+    | Opam => Opam.make(~env, ~root, ~discoveredManifestPath)
+    | Esy => Esy.make(~env, ~root, ~discoveredManifestPath)
     };
 
   let ofName = (~env, ~name, ~root, ~discoveredManifestPath) =>
@@ -331,13 +325,13 @@ module PackageManager: {
     };
 
   let alreadyUsed = folder => {
-    [Esy(folder), Opam(folder)]
+    [Esy, Opam]
     |> Array.fromList
     |> Array.map(~f=pm => {
          let lockFileFpath =
            switch (pm) {
-           | Opam(root) => Fpath.(join(root, Opam.lockFile))
-           | Esy(root) => Fpath.(join(root, Esy.lockFile))
+           | Opam => Fpath.(join(folder, Opam.lockFile))
+           | Esy => Fpath.(join(folder, Esy.lockFile))
            };
          Fs.exists(Fpath.show(lockFileFpath))
          |> Js.Promise.then_(Js.Promise.resolve << (exists => (pm, exists)));
@@ -355,13 +349,13 @@ module PackageManager: {
          |> Js.Promise.resolve
        );
   };
-  let available = (~env, supportedPackageManagers) => {
+  let available = (~env) => {
     supportedPackageManagers
     |> List.map(~f=(pm: t) => {
          let name =
            switch (pm) {
-           | Opam(_) => Opam.name
-           | Esy(_) => Esy.name
+           | Opam => Opam.name
+           | Esy => Esy.name
            };
          Cmd.make(~env, ~cmd=name)
          |> Js.Promise.then_(
@@ -371,7 +365,7 @@ module PackageManager: {
                 | Ok(_) => {
                     (pm, true);
                   }
-                | Error(e) => {
+                | Error(_e) => {
                     (pm, false);
                   }
               ),
@@ -396,12 +390,13 @@ module PackageManager: {
   let env = spec => spec.env();
 
   module Manifest: {
-    let lookup: Fpath.t => Js.Promise.t(result(list(t), string));
+    let lookup:
+      Fpath.t => Js.Promise.t(result(list((t, Fpath.t)), string));
   } = {
     /* TODO: Constructors Esy and Opam simply take Fpath.t - no way of telling if that is a directory or actual filename */
     let parse = projectRoot =>
       fun
-      | "esy.json" => Some(Esy(Fpath.(projectRoot))) |> Js.Promise.resolve
+      | "esy.json" => Some((Esy, projectRoot)) |> Js.Promise.resolve
       | "opam" => {
           Fs.stat(Fpath.(projectRoot / "opam" |> toString))
           |> Js.Promise.then_(
@@ -410,7 +405,7 @@ module PackageManager: {
                  fun
                  | Ok(stats) =>
                    Fs.Stat.isDirectory(stats)
-                     ? None : Some(Opam(Fpath.(projectRoot)))
+                     ? None : Some((Opam, projectRoot))
                  | Error(_) => None
                ),
              );
@@ -426,10 +421,9 @@ module PackageManager: {
                  if (Utils.propertyExists(json, "dependencies")
                      || Utils.propertyExists(json, "devDependencies")) {
                    if (Utils.propertyExists(json, "esy")) {
-                     Some(Esy(Fpath.(projectRoot / "package.json")))
-                     |> Js.Promise.resolve;
+                     Some((Esy, projectRoot)) |> Js.Promise.resolve;
                    } else {
-                     Some(Esy(Fpath.(projectRoot / ".vscode" / "esy")))
+                     Some((Esy, Fpath.(projectRoot / ".vscode" / "esy")))
                      |> Js.Promise.resolve;
                    };
                  } else {
@@ -448,7 +442,7 @@ module PackageManager: {
                  | Some(json) =>
                    if (Utils.propertyExists(json, "dependencies")
                        || Utils.propertyExists(json, "devDependencies")) {
-                     Some(Esy(projectRoot)) |> Js.Promise.resolve;
+                     Some((Esy, projectRoot)) |> Js.Promise.resolve;
                    } else {
                      None |> Js.Promise.resolve;
                    }
@@ -467,7 +461,7 @@ module PackageManager: {
             |> Js.Promise.then_(
                  fun
                  | "" => None |> Js.Promise.resolve
-                 | _ => Some(Opam(projectRoot)) |> Js.Promise.resolve,
+                 | _ => Some((Opam, projectRoot)) |> Js.Promise.resolve,
                )
 
           | _ => None |> Js.Promise.resolve
@@ -521,66 +515,92 @@ type resources = {
 
 let init = (~env, ~folder) => {
   let projectRoot = Fpath.ofString(folder);
-  PackageManager.alreadyUsed(projectRoot)
+
+  Js.Promise.all2((
+    PackageManager.available(~env),
+    PackageManager.alreadyUsed(projectRoot)
+    |> Js.Promise.then_(
+         fun
+         | Ok([]) =>
+           PackageManager.Manifest.lookup(projectRoot)
+           |> okThen(
+                fun
+                | [] => Error("TODO: global toolchain")
+                | packageManagersInUse => packageManagersInUse |> R.return,
+              )
+         | Ok(packageManagersInUse) =>
+           packageManagersInUse
+           |> List.map(~f=x => (x, projectRoot))
+           |> R.return
+           |> Js.Promise.resolve
+         | Error(msg) => Error(msg) |> Js.Promise.resolve,
+       ),
+  ))
   |> Js.Promise.then_(
-       fun
-       | Ok([]) =>
-         PackageManager.Manifest.lookup(projectRoot)
-         |> okThen(
-              fun
-              | [] => Error("TODO: global toolchain")
-              | x => Ok(x),
-            )
-       | Ok(packageManagersInUse) =>
-         Ok(packageManagersInUse) |> Js.Promise.resolve
-       | Error(msg) => Error(msg) |> Js.Promise.resolve,
-     )
-  |> Js.Promise.then_(
-       fun
-       | Error(msg) => Js.Promise.resolve(Error(msg))
-       | Ok(packageManagersInUse) => {
-           PackageManager.available(~env, packageManagersInUse);
-         },
-     )
-  |> Js.Promise.then_(
-       fun
-       | Error(e) => Js.Promise.resolve(Error(e))
-       | Ok(packageManagersInUse) =>
-         switch (packageManagersInUse) {
-         | [] => Error(noPackageManagerFound) |> Js.Promise.resolve
-         | [obviousChoice] =>
-           PackageManager.make(
+       ((availablePackageManagers, alreadyUsedPackageManagers)) => {
+       let availablePackageManagers =
+         switch (availablePackageManagers) {
+         | Ok(x) => x
+         | Error(msg) =>
+           Js.log2("Error during availablePackageManagers()", msg);
+           [];
+         };
+       let alreadyUsedPackageManagers =
+         switch (alreadyUsedPackageManagers) {
+         | Ok(x) => x
+         | Error(msg) =>
+           Js.log2("Error during alreadyUsedPackageManagers()", msg);
+           [];
+         };
+
+       switch (
+         List.filter(
+           ~f=
+             ((x, _)) =>
+               switch (
+                 List.findIndex(~f=y => y == x, availablePackageManagers)
+               ) {
+               | Some(_) => true
+               | None => false
+               },
+           alreadyUsedPackageManagers,
+         )
+       ) {
+       | [] => Error(noPackageManagerFound) |> Js.Promise.resolve
+       | [(obviousChoice, toolChainRoot)] =>
+         PackageManager.make(
+           ~env,
+           ~root=toolChainRoot,
+           ~t=obviousChoice,
+           ~discoveredManifestPath=projectRoot,
+         )
+       | _multipleChoices =>
+         let config = Vscode.Workspace.getConfiguration("ocaml");
+         switch (
+           Js.Nullable.toOption(config##packageManager),
+           Js.Nullable.toOption(config##toolChainRoot),
+         ) {
+         /* TODO: unsafe type config. It's just 'a */
+         | (Some(name), Some(root)) =>
+           PackageManager.ofName(
              ~env,
-             ~t=obviousChoice,
+             ~name,
+             ~root,
              ~discoveredManifestPath=projectRoot,
            )
-         | _multipleChoices =>
-           let config = Vscode.Workspace.getConfiguration("ocaml");
-           switch (
-             Js.Nullable.toOption(config##packageManager),
-             Js.Nullable.toOption(config##toolChainRoot),
-           ) {
-           /* TODO: unsafe type config. It's just 'a */
-           | (Some(name), Some(root)) =>
-             PackageManager.ofName(
-               ~env,
-               ~name,
-               ~root,
-               ~discoveredManifestPath=projectRoot,
-             )
-           | (Some(name), None) =>
-             PackageManager.ofName(
-               ~env,
-               ~name,
-               ~root=projectRoot,
-               ~discoveredManifestPath=projectRoot,
-             )
-           | _ =>
-             Error("TODO: Implement prompting choice of package manager")
-             |> Js.Promise.resolve
-           };
-         },
-     )
+         | (Some(name), None) =>
+           PackageManager.ofName(
+             ~env,
+             ~name,
+             ~root=projectRoot,
+             ~discoveredManifestPath=projectRoot,
+           )
+         | _ =>
+           Error("TODO: Implement prompting choice of package manager")
+           |> Js.Promise.resolve
+         };
+       };
+     })
   |> okThen(spec => Ok({spec, projectRoot}));
 };
 

@@ -1,6 +1,18 @@
 open Bindings;
 open Js.Promise;
 
+module type T = {
+  type t;
+  let make: unit => t;
+  let onProgress: (t, float => unit) => unit;
+  let onEnd: (t, unit => unit) => unit;
+  let onError: (t, string => unit) => unit;
+  let reportProgress: (t, float) => unit;
+  let reportEnd: t => unit;
+  let reportError: (t, string) => unit;
+  let run: (t, string) => Js.Promise.t(unit);
+};
+
 /* False bindings to emulate EventEmitters. Node.js event emitters
    take unrestricted types on their .emit() methods */
 module Internal = {
