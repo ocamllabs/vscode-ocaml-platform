@@ -104,6 +104,7 @@ stderr: $stderr
    OCaml packages for us */
 module PackageManager: {
   type t;
+  type a = t;
   type spec;
   module type T = {
     let name: string;
@@ -118,7 +119,9 @@ module PackageManager: {
   };
   module Esy: T;
   module Opam: T;
-  let ofName:
+  let ofName: string => result(t, string);
+  let toName: t => string;
+  let specOfName:
     (
       ~env: Js.Dict.t(string),
       ~name: string,
@@ -135,6 +138,51 @@ module PackageManager: {
     ) =>
     Js.Promise.t(result(spec, string));
   let setupToolChain: spec => Js.Promise.t(result(unit, string));
+
+  module PackageManagerSpecTuple: {
+    type t = (a, Utils.Fpath.t);
+    let compare: (('a, 'b), ('a, 'b)) => int;
+  };
+  module PackageManagerSpecTupleSet: {
+    type elt = PackageManagerSpecTuple.t;
+    type t = Set.Make(PackageManagerSpecTuple).t;
+    let empty: t;
+    let is_empty: t => bool;
+    let mem: (elt, t) => bool;
+    let add: (elt, t) => t;
+    let singleton: elt => t;
+    let remove: (elt, t) => t;
+    let union: (t, t) => t;
+    let inter: (t, t) => t;
+    let diff: (t, t) => t;
+    let compare: (t, t) => int;
+    let equal: (t, t) => bool;
+    let subset: (t, t) => bool;
+    let iter: (elt => unit, t) => unit;
+    let map: (elt => elt, t) => t;
+    let fold: ((elt, 'a) => 'a, t, 'a) => 'a;
+    let for_all: (elt => bool, t) => bool;
+    let exists: (elt => bool, t) => bool;
+    let filter: (elt => bool, t) => t;
+    let partition: (elt => bool, t) => (t, t);
+    let cardinal: t => int;
+    let elements: t => list(elt);
+    let min_elt: t => elt;
+    let min_elt_opt: t => option(elt);
+    let max_elt: t => elt;
+    let max_elt_opt: t => option(elt);
+    let choose: t => elt;
+    let choose_opt: t => option(elt);
+    let split: (elt, t) => (t, bool, t);
+    let find: (elt, t) => elt;
+    let find_opt: (elt, t) => option(elt);
+    let find_first: (elt => bool, t) => elt;
+    let find_first_opt: (elt => bool, t) => option(elt);
+    let find_last: (elt => bool, t) => elt;
+    let find_last_opt: (elt => bool, t) => option(elt);
+    let of_list: list(elt) => t;
+  };
+
   let alreadyUsed: Fpath.t => Js.Promise.t(result(list(t), string));
   let available:
     (~env: Js.Dict.t(string)) => Js.Promise.t(result(list(t), string));
@@ -142,12 +190,14 @@ module PackageManager: {
   let lsp: spec => commandAndArgs;
   module Manifest: {
     let lookup:
-      Fpath.t => Js.Promise.t(result(list((t, Fpath.t)), string));
+      Fpath.t => Js.Promise.t(result(PackageManagerSpecTupleSet.t, string));
   };
 } = {
   type t =
     | Opam
     | Esy;
+
+  type a = t;
 
   type spec = {
     cmd: Cmd.t,
@@ -317,12 +367,38 @@ module PackageManager: {
     | Esy => Esy.make(~env, ~root, ~discoveredManifestPath)
     };
 
-  let ofName = (~env, ~name, ~root, ~discoveredManifestPath) =>
+  let toName =
+    fun
+    | Opam => "opam"
+    | Esy => "esy";
+
+  let ofName =
+    fun
+    | "opam" => Ok(Opam)
+    | "esy" => Ok(Esy)
+    | n => Error({j|Invalid name $n was provided|j});
+
+  let specOfName = (~env, ~name, ~root, ~discoveredManifestPath) =>
     switch (name) {
     | x when x == Opam.name => Opam.make(~env, ~root, ~discoveredManifestPath)
     | x when x == Esy.name => Esy.make(~env, ~root, ~discoveredManifestPath)
     | _ => "Invalid package manager name" |> R.fail |> Js.Promise.resolve
     };
+
+  module PackageManagerSpecTuple = {
+    type t = (a, Fpath.t);
+    let compare = (x, y) => {
+      let (xa, xb) = x;
+      let (ya, yb) = y;
+      if (xa == ya && xb == yb) {
+        0;
+      } else {
+        1;
+      };
+    };
+  };
+
+  module PackageManagerSpecTupleSet = Set.Make(PackageManagerSpecTuple);
 
   let alreadyUsed = folder => {
     [Esy, Opam]
@@ -391,7 +467,7 @@ module PackageManager: {
 
   module Manifest: {
     let lookup:
-      Fpath.t => Js.Promise.t(result(list((t, Fpath.t)), string));
+      Fpath.t => Js.Promise.t(result(PackageManagerSpecTupleSet.t, string));
   } = {
     /* TODO: Constructors Esy and Opam simply take Fpath.t - no way of telling if that is a directory or actual filename */
     let parse = projectRoot =>
@@ -491,7 +567,8 @@ module PackageManager: {
                         Array.empty,
                         l,
                       )
-                      |> Array.toList,
+                      |> Array.toList
+                      |> PackageManagerSpecTupleSet.of_list,
                     )
                     |> Js.Promise.resolve
                   );
@@ -523,10 +600,14 @@ let init = (~env, ~folder) => {
          fun
          | Ok([]) =>
            PackageManager.Manifest.lookup(projectRoot)
-           |> okThen(
-                fun
-                | [] => Error("TODO: global toolchain")
-                | packageManagersInUse => packageManagersInUse |> R.return,
+           |> okThen(x =>
+                x
+                |> PackageManager.PackageManagerSpecTupleSet.elements
+                |> (
+                  fun
+                  | [] => Error("TODO: global toolchain")
+                  | packageManagersInUse => packageManagersInUse |> R.return
+                )
               )
          | Ok(packageManagersInUse) =>
            packageManagersInUse
@@ -574,7 +655,7 @@ let init = (~env, ~folder) => {
            ~t=obviousChoice,
            ~discoveredManifestPath=projectRoot,
          )
-       | _multipleChoices =>
+       | multipleChoices =>
          let config = Vscode.Workspace.getConfiguration("ocaml");
          switch (
            Js.Nullable.toOption(config##packageManager),
@@ -582,22 +663,61 @@ let init = (~env, ~folder) => {
          ) {
          /* TODO: unsafe type config. It's just 'a */
          | (Some(name), Some(root)) =>
-           PackageManager.ofName(
+           PackageManager.specOfName(
              ~env,
              ~name,
              ~root,
              ~discoveredManifestPath=projectRoot,
            )
          | (Some(name), None) =>
-           PackageManager.ofName(
+           PackageManager.specOfName(
              ~env,
              ~name,
              ~root=projectRoot,
              ~discoveredManifestPath=projectRoot,
            )
          | _ =>
-           Error("TODO: Implement prompting choice of package manager")
-           |> Js.Promise.resolve
+           Js.log(multipleChoices);
+           Window.showQuickPick(.
+             multipleChoices
+             |> List.map(~f=((pm, _)) => PackageManager.toName(pm))
+             |> Array.fromList,
+             Window.QuickPickOptions.make(~canPickMany=false, ()),
+           )
+           |> Js.Promise.then_(packageManager => {
+                switch (Js.Nullable.toOption(packageManager)) {
+                | None =>
+                  Js.Promise.resolve(
+                    Error("showQuickPick() returned undefined"),
+                  )
+                | Some(packageManager) =>
+                  let pm = PackageManager.ofName(packageManager);
+                  switch (pm) {
+                  | Ok(pmx) =>
+                    switch (
+                      List.find(
+                        ~f=((pmy, _toolChainRoot)) => pmy == pmx,
+                        multipleChoices,
+                      )
+                    ) {
+                    | None =>
+                      Js.Promise.resolve(
+                        Error(
+                          "Weird invalid state: selected choice was not found in the list",
+                        ),
+                      )
+                    | Some((pm, toolChainRoot)) =>
+                      PackageManager.make(
+                        ~env,
+                        ~t=pm,
+                        ~root=toolChainRoot,
+                        ~discoveredManifestPath=projectRoot,
+                      )
+                    }
+                  | Error(msg) => Js.Promise.resolve(Error(msg))
+                  };
+                }
+              });
          };
        };
      })

@@ -37,11 +37,12 @@ module Workspace = {
 module Window = {
   module QuickPickOptions = {
     type t = {. "canPickMany": bool};
+    [@bs.obj] external make: (~canPickMany: bool=?, unit) => t = "";
   };
   [@bs.module "vscode"] [@bs.scope "window"]
   external showQuickPick:
-    (. list(string), QuickPickOptions.t) =>
-    Js.Promise.t(Js.Nullable.t(list(string))) =
+    (. array(string), QuickPickOptions.t) =>
+    Js.Promise.t(Js.Nullable.t(string)) =
     "showQuickPick";
   [@bs.module "vscode"] [@bs.scope "window"]
   external showInformationMessage: string => unit = "showInformationMessage";
