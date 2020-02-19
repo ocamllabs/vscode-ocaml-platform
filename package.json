@@ -220,6 +220,7 @@
   },
   "scripts": {
     "fmt": "prettier --write \"**/*.{json,md,ts,yml}\"",
+    "lint": "eslint \"**/*.ts\" --cache",
     "vscode:prepublish": "yarn run compile",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
