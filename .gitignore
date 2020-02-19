@@ -1,4 +1,5 @@
-.DS_Store
-node_modules
-out/
 .log/
+node_modules/
+out/
+*.vsix
+.DS_Store
