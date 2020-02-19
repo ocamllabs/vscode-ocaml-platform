@@ -239,6 +239,7 @@
     "eslint-plugin-prettier": "3.1.2",
     "prettier": "1.19.1",
     "typescript": "3.7.3",
+    "vsce": "1.73.0",
     "vscode-test": "1.2.3"
   }
 }
