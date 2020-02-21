@@ -50,33 +50,47 @@ function setupWithProgressIndicator(m, folder) {
 }
 
 function make(env, cmd) {
-  var cmd$1 = Sys.unix ? cmd : cmd + ".cmd";
   var match = Js_dict.get(env, "PATH");
   if (match !== undefined) {
-    return Promise.all(Tablecloth.$$Array.fromList(Tablecloth.$$String.split(Utils.env_sep, match)).map((function (p) {
-                          return $$Node.Fs.exists(Filename.concat(p, cmd$1));
+    var path = match;
+    var cmds = Sys.unix ? /* array */[cmd] : /* array */[
+        cmd + ".exe",
+        cmd + ".cmd"
+      ];
+    return Promise.all(Tablecloth.$$Array.concatenate(Tablecloth.$$Array.map((function (cmd) {
+                                return Tablecloth.$$Array.fromList(Tablecloth.$$String.split(Utils.env_sep, path)).map((function (p) {
+                                              return Filename.concat(p, cmd);
+                                            }));
+                              }), cmds)).map((function (p) {
+                          return $$Node.Fs.exists(p).then((function (exists) {
+                                        return Promise.resolve(/* tuple */[
+                                                    p,
+                                                    exists
+                                                  ]);
+                                      }));
                         }))).then((function (param) {
                     return Utils.$less$less((function (prim) {
                                   return Promise.resolve(prim);
                                 }), (function (param) {
-                                  return param.filter((function (x) {
-                                                return x;
+                                  return param.filter((function (param) {
+                                                return param[1];
                                               }));
                                 }), param);
                   })).then((function (param) {
-                  return Utils.$less$less((function (prim) {
-                                return Promise.resolve(prim);
-                              }), (function (l) {
-                                var match = l.length === 0;
-                                if (match) {
-                                  return /* Error */Block.__(1, [" Command \"" + (String(cmd$1) + "\" not found ")]);
-                                } else {
-                                  return /* Ok */Block.__(0, [{
-                                              cmd: cmd$1,
-                                              env: env
-                                            }]);
-                                }
-                              }), param);
+                  return Utils.$less$less((function (param) {
+                                return Utils.$less$less((function (prim) {
+                                              return Promise.resolve(prim);
+                                            }), (function (param) {
+                                              if (param) {
+                                                return /* Ok */Block.__(0, [{
+                                                            cmd: param[0][0],
+                                                            env: env
+                                                          }]);
+                                              } else {
+                                                return /* Error */Block.__(1, [" Command \"" + (String(cmd) + "\" not found ")]);
+                                              }
+                                            }), param);
+                              }), Tablecloth.$$Array.toList, param);
                 }));
   } else {
     return Promise.resolve(/* Error */Block.__(1, ["'PATH' variable not found in the environment"]));

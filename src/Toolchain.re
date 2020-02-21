@@ -55,22 +55,30 @@ module Cmd: {
   };
   type stdout = string;
   let make = (~env, ~cmd) => {
-    let cmd = Sys.unix ? cmd : cmd ++ ".cmd";
     switch (Js.Dict.get(env, "PATH")) {
     | None => Error(pathMissingFromEnv) |> Js.Promise.resolve
     | Some(path) =>
-      String.split(~on=env_sep, path)
-      |> Array.fromList
-      |> Js.Array.map(p => Fs.exists(Filename.concat(p, cmd)))
+      let cmds = Sys.unix ? [|cmd|]: [|cmd ++ ".exe", cmd ++ ".cmd"|];
+      cmds
+      |> Array.map(~f=cmd => {
+        String.split(~on=env_sep, path)
+        |> Array.fromList
+        |> Js.Array.map(p => Filename.concat(p, cmd))
+      })
+      |> Array.concatenate
+      |> Js.Array.map(p => { 
+          Fs.exists(p)
+          |> Js.Promise.then_(exists => Js.Promise.resolve((p, exists)))
+        })
       |> Js.Promise.all
-      |> Js.Promise.then_(Js.Promise.resolve << Js.Array.filter(x => x))
+      |> Js.Promise.then_(Js.Promise.resolve << Js.Array.filter(((p, exists)) => exists))
       |> Js.Promise.then_(
            Js.Promise.resolve
            << (
-             l =>
-               Js.Array.length(l) == 0
-                 ? Error({j| Command "$cmd" not found |j}) : Ok({cmd, env})
-           ),
+             fun 
+             | [] => Error({j| Command "$cmd" not found |j})
+             | [(cmd, exists), ..._rest] => Ok({cmd, env})
+           ) << Array.toList,
          )
     };
   };
@@ -441,7 +449,7 @@ module PackageManager: {
                 | Ok(_) => {
                     (pm, true);
                   }
-                | Error(_e) => {
+                | Error(e) => {
                     (pm, false);
                   }
               ),
