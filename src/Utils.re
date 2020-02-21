@@ -44,7 +44,7 @@ module Fpath: {
   let (/): (t, string) => t;
   let join: (t, t) => t;
 } = {
-  let sep = Sys.unix ? "/" : "\\";
+  let sep = Sys.unix ? "/" : "\\\\";
   type t = list(string);
   let ofString = String.split(~on=sep);
   let v = ofString;

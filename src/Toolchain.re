@@ -48,12 +48,14 @@ module Cmd: {
   let output:
     (~args: Js.Array.t(string), ~cwd: string, t) =>
     Js.Promise.t(result(stdout, string));
+  let binPath: t => string;
 } = {
   type t = {
     cmd: string,
     env: Js.Dict.t(string),
   };
   type stdout = string;
+  let binPath = c => c.cmd;
   let make = (~env, ~cmd) => {
     switch (Js.Dict.get(env, "PATH")) {
     | None => Error(pathMissingFromEnv) |> Js.Promise.resolve
@@ -301,7 +303,7 @@ module PackageManager: {
                       )
                     }
                   }),
-             lsp: () => (name, [|"-P", Fpath.toString(root), "ocamllsp"|]),
+             lsp: () => (Cmd.binPath(cmd), [|"-P", Fpath.toString(root), "ocamllsp"|]),
            }
            |> R.return
          });

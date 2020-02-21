@@ -133,7 +133,7 @@ function make$1(env, root, discoveredManifestPath) {
                               cmd: cmd,
                               lsp: (function (param) {
                                   return /* tuple */[
-                                          name,
+                                          cmd.cmd,
                                           /* array */[
                                             "-P",
                                             Utils.Fpath.toString(root),

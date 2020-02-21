@@ -53,7 +53,7 @@ function $less$less(f, g, x) {
   return Curry._1(f, Curry._1(g, x));
 }
 
-var sep = Sys.unix ? "/" : "\\";
+var sep = Sys.unix ? "/" : "\\\\";
 
 function ofString(param) {
   return Tablecloth.$$String.split(sep, param);
