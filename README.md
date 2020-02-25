@@ -1,6 +1,6 @@
 # vscode-ocaml-platform
 
-Visual Studio Code extension for OCaml and relevants tools
+Visual Studio Code extension for OCaml and relevants tools.
 
 _This plugin is alpha quality. Use at your own risk and please report any bugs
 you encounter._
