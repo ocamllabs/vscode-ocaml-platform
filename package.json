@@ -268,6 +268,7 @@
     "@glennsl/bs-jest": "^0.4.9",
     "@glennsl/bs-json": "^5.0.1",
     "bs-platform": "7.0.1",
+    "fs-extra": "^8.1.0",
     "jest-cli": "^24.9.0",
     "mocha": "^6.2.2",
     "npm-run-all": "^4.1.5",
