@@ -145,7 +145,7 @@ module PackageManager : sig
   val setupToolChain : spec -> (unit, string) result Js.Promise.t
 
   module PackageManagerSpecTuple : sig
-    type t = a * Utils.Fpath.t
+    type t = a * Fpath.t
   end
 
   module PackageManagerSpecTupleSet : sig

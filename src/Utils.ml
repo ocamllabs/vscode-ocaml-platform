@@ -36,41 +36,6 @@ let mergeDicts dict1 dict2 =
 
 let ( << ) f g x = f (g x)
 
-module Fpath : sig
-  type t
-
-  val ofString : string -> t
-
-  val v : string -> t
-
-  val toString : t -> string
-
-  val show : t -> string
-
-  val ( / ) : t -> string -> t
-
-  val join : t -> t -> t
-end = struct
-  let sep =
-    match Sys.unix with
-    | true -> "/"
-    | false -> "\\\\"
-
-  type t = string list
-
-  let ofString = Array.to_list << Js.String.split sep
-
-  let v = ofString
-
-  let toString = Js.Array.joinWith sep << Array.of_list
-
-  let show = toString
-
-  let ( / ) p x = p @ [ x ]
-
-  let join x y = x @ y
-end
-
 let okThen f =
   let open Js.Promise in
   then_
