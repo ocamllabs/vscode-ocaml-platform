@@ -1,9 +1,0 @@
-(executable
-  (name test)
-  (flags (-warn-error +A))
-  (libraries tablecloth-native alcotest junit junit_alcotest)
-)
-
-(alias
- (name   runtest)
- (action (run ./test.exe)))

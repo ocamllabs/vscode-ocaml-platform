@@ -1,5 +1,4 @@
 module R = Result;
-open Tablecloth;
 
 let env_sep = Sys.unix ? ":" : ";";
 let propertyExists = (json, property) => {
@@ -46,11 +45,10 @@ module Fpath: {
 } = {
   let sep = Sys.unix ? "/" : "\\\\";
   type t = list(string);
-  let ofString = String.split(~on=sep);
+  let ofString = Array.to_list << Js.String.split(sep);
   let v = ofString;
-  let toString = String.join(~sep);
+  let toString = Js.Array.joinWith(sep) << Array.of_list;
   let show = toString;
-
   let (/) = (p, x) => p @ [x];
   let join = (x, y) => x @ y;
 };

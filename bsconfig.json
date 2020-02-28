@@ -5,7 +5,6 @@
     "react-jsx": 3
   },
   "sources": [
-    { "dir": "src/tablecloth/bs/src", "subdirs": false },
     {
       "subdirs": ["bindings", "command"],
       "dir": "src"

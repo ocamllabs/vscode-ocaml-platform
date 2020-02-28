@@ -2,7 +2,6 @@ module Caml = {
   module Array = Array;
 };
 module R = Result;
-open Tablecloth;
 open Bindings;
 open Utils;
 
@@ -60,28 +59,30 @@ module Cmd: {
     switch (Js.Dict.get(env, "PATH")) {
     | None => Error(pathMissingFromEnv) |> Js.Promise.resolve
     | Some(path) =>
-      let cmds = Sys.unix ? [|cmd|]: [|cmd ++ ".exe", cmd ++ ".cmd"|];
+      let cmds = Sys.unix ? [|cmd|] : [|cmd ++ ".exe", cmd ++ ".cmd"|];
       cmds
-      |> Array.map(~f=cmd => {
-        String.split(~on=env_sep, path)
-        |> Array.fromList
-        |> Js.Array.map(p => Filename.concat(p, cmd))
-      })
-      |> Array.concatenate
-      |> Js.Array.map(p => { 
-          Fs.exists(p)
-          |> Js.Promise.then_(exists => Js.Promise.resolve((p, exists)))
-        })
+      |> Array.map(cmd => {
+           Js.String.split(env_sep, path)
+           |> Js.Array.map(p => Filename.concat(p, cmd))
+         })
+      |> Js.Array.reduce(Js.Array.concat, [||])
+      |> Js.Array.map(p => {
+           Fs.exists(p)
+           |> Js.Promise.then_(exists => Js.Promise.resolve((p, exists)))
+         })
       |> Js.Promise.all
-      |> Js.Promise.then_(Js.Promise.resolve << Js.Array.filter(((p, exists)) => exists))
+      |> Js.Promise.then_(
+           Js.Promise.resolve << Js.Array.filter(((p, exists)) => exists),
+         )
       |> Js.Promise.then_(
            Js.Promise.resolve
            << (
-             fun 
+             fun
              | [] => Error({j| Command "$cmd" not found |j})
              | [(cmd, exists), ..._rest] => Ok({cmd, env})
-           ) << Array.toList,
-         )
+           )
+           << Array.to_list,
+         );
     };
   };
   let output = (~args, ~cwd, {cmd, env}) => {
@@ -303,7 +304,10 @@ module PackageManager: {
                       )
                     }
                   }),
-             lsp: () => (Cmd.binPath(cmd), [|"-P", Fpath.toString(root), "ocamllsp"|]),
+             lsp: () => (
+               Cmd.binPath(cmd),
+               [|"-P", Fpath.toString(root), "ocamllsp"|],
+             ),
            }
            |> R.return
          });
@@ -334,10 +338,10 @@ module PackageManager: {
                )
                |> okThen(stdout => {
                     stdout
-                    |> String.split(~on="\n")
-                    |> List.map(~f=x => String.split(~on="=", x))
-                    |> List.map(
-                         ~f=
+                    |> Js.String.split("\n")
+                    |> Js.Array.map(x => Js.String.split("=", x))
+                    |> Js.Array.map(
+                         (
                            fun
                            | [] =>
                              Error("Splitting on '=' in env output failed")
@@ -347,19 +351,20 @@ module PackageManager: {
                                Error(
                                  "Splitting on '=' in env output returned more than two items",
                                );
-                             },
-                       )
-                    |> List.foldLeft(
-                         ~f=
-                           (kv, acc) => {
-                             switch (kv) {
-                             | Ok(kv) => [kv, ...acc]
-                             | Error(msg) =>
-                               Js.log(msg);
-                               acc;
                              }
-                           },
-                         ~initial=[],
+                         )
+                         << Array.to_list,
+                       )
+                    |> Js.Array.reduce(
+                         (acc, kv) => {
+                           switch (kv) {
+                           | Ok(kv) => [kv, ...acc]
+                           | Error(msg) =>
+                             Js.log(msg);
+                             acc;
+                           }
+                         },
+                         [],
                        )
                     |> Js.Dict.fromList
                     |> R.return
@@ -412,8 +417,8 @@ module PackageManager: {
 
   let alreadyUsed = folder => {
     [Esy, Opam]
-    |> Array.fromList
-    |> Array.map(~f=pm => {
+    |> Array.of_list
+    |> Array.map(pm => {
          let lockFileFpath =
            switch (pm) {
            | Opam => Fpath.(join(folder, Opam.lockFile))
@@ -425,19 +430,19 @@ module PackageManager: {
     |> Js.Promise.all
     |> Js.Promise.then_(l =>
          l
-         |> Array.filter(~f=((_pm, used)) => used)
-         |> Array.map(~f=t => {
+         |> Js.Array.filter(((_pm, used)) => used)
+         |> Array.map(t => {
               let (pm, _used) = t;
               pm;
             })
-         |> Array.toList
+         |> Array.to_list
          |> R.return
          |> Js.Promise.resolve
        );
   };
   let available = (~env) => {
     supportedPackageManagers
-    |> List.map(~f=(pm: t) => {
+    |> List.map((pm: t) => {
          let name =
            switch (pm) {
            | Opam => Opam.name
@@ -457,17 +462,17 @@ module PackageManager: {
               ),
             );
        })
-    |> Array.fromList
+    |> Array.of_list
     |> Js.Promise.all
     |> Js.Promise.then_(
          Js.Promise.resolve
          << R.return
-         << Array.toList
-         << Array.map(~f=t => {
+         << Array.to_list
+         << Array.map(t => {
               let (pm, _used) = t;
               pm;
             })
-         << Array.filter(~f=((_pm, available)) => available),
+         << Js.Array.filter(((_pm, available)) => available),
        );
   };
 
@@ -570,14 +575,14 @@ module PackageManager: {
                           Js.Array.concat(
                             acc,
                             switch (x) {
-                            | Some(x) => Array.fromList([x])
-                            | None => Array.empty
+                            | Some(x) => Array.of_list([x])
+                            | None => [||]
                             },
                           ),
-                        Array.empty,
+                        [||],
                         l,
                       )
-                      |> Array.toList
+                      |> Array.to_list
                       |> PackageManagerSpecTupleSet.of_list,
                     )
                     |> Js.Promise.resolve
@@ -621,7 +626,7 @@ let init = (~env, ~folder) => {
               )
          | Ok(packageManagersInUse) =>
            packageManagersInUse
-           |> List.map(~f=x => (x, projectRoot))
+           |> List.map(x => (x, projectRoot))
            |> R.return
            |> Js.Promise.resolve
          | Error(msg) => Error(msg) |> Js.Promise.resolve,
@@ -646,14 +651,11 @@ let init = (~env, ~folder) => {
 
        switch (
          List.filter(
-           ~f=
-             ((x, _)) =>
-               switch (
-                 List.findIndex(~f=y => y == x, availablePackageManagers)
-               ) {
-               | Some(_) => true
-               | None => false
-               },
+           ((x, _)) =>
+             switch (List.find(y => y == x, availablePackageManagers)) {
+             | Some(_) => true
+             | None => false
+             },
            alreadyUsedPackageManagers,
          )
        ) {
@@ -691,7 +693,7 @@ let init = (~env, ~folder) => {
            Window.showQuickPick(.
              multipleChoices
              |> List.map(~f=((pm, _)) => PackageManager.toName(pm))
-             |> Array.fromList,
+             |> Array.of_list,
              Window.QuickPickOptions.make(~canPickMany=false, ()),
            )
            |> Js.Promise.then_(packageManager => {
