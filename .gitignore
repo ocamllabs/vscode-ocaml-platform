@@ -9,3 +9,4 @@ dist/
 lib/
 node_modules/
 .log/
+*.bs.js
