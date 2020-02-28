@@ -74,31 +74,36 @@ end = struct
              Fs.exists p
              |> Js.Promise.then_ (fun exists -> Js.Promise.resolve (p, exists)))
       |> Js.Promise.all
-      |> Js.Promise.then_
-           (Js.Promise.resolve << Js.Array.filter (fun (_p, exists) -> exists))
-      |> Js.Promise.then_
-           ( Js.Promise.resolve
-           << (function
-                | [] -> Error {j| Command "$cmd" not found |j}
-                | (cmd, _exists) :: _rest -> Ok { cmd; env })
-           << Array.to_list )
+      |> Js.Promise.then_ (fun r ->
+             Js.Promise.resolve (Js.Array.filter (fun (_p, exists) -> exists) r))
+      |> Js.Promise.then_ (fun r ->
+             let r = Array.to_list r in
+             let r =
+               match r with
+               | [] -> Error {j| Command "$cmd" not found |j}
+               | (cmd, _exists) :: _rest -> Ok { cmd; env }
+             in
+             Js.Promise.resolve r)
 
   let output ~args ~cwd { cmd; env } =
     let shellString = Js.Array.concat args [| cmd |] |> Js.Array.joinWith " " in
     Js.log shellString;
     ChildProcess.exec shellString (ChildProcess.Options.make ~cwd ~env ())
-    |> Js.Promise.then_
-         (Js.Promise.resolve << function
-          | Error e -> e |> ChildProcess.E.toString |> R.fail
-          | Ok (exitCode, stdout, stderr) ->
-            if exitCode = 0 then
-              Ok stdout
-            else
-              Error
-                {j| Command $cmd failed:
+    |> Js.Promise.then_ (fun r ->
+           let r =
+             match r with
+             | Error e -> e |> ChildProcess.E.toString |> R.fail
+             | Ok (exitCode, stdout, stderr) ->
+               if exitCode = 0 then
+                 Ok stdout
+               else
+                 Error
+                   {j| Command $cmd failed:
 exitCode: $exitCode
 stderr: $stderr
-|j})
+|j}
+           in
+           Js.Promise.resolve r)
 end
 
 module PackageManager : sig
@@ -209,17 +214,20 @@ end = struct
                    Cmd.output cmd
                      ~args:[| "status"; "-P"; rootStr |]
                      ~cwd:rootStr
-                   |> Js.Promise.then_
-                        (Js.Promise.resolve << function
-                         | Error _ -> R.return false
-                         | Ok stdout -> (
-                           match Json.parse stdout with
-                           | None -> R.return false
-                           | Some json ->
-                             json
-                             |> (let open Json.Decode in
-                                field "isProjectReadyForDev" bool)
-                             |> R.return ))
+                   |> Js.Promise.then_ (fun r ->
+                          let r =
+                            match r with
+                            | Error _ -> R.return false
+                            | Ok stdout -> (
+                              match Json.parse stdout with
+                              | None -> R.return false
+                              | Some json ->
+                                json
+                                |> (let open Json.Decode in
+                                   field "isProjectReadyForDev" bool)
+                                |> R.return )
+                          in
+                          Js.Promise.resolve r)
                    |> Js.Promise.then_ (function
                         | Error e -> e |> R.fail |> Js.Promise.resolve
                         | Ok isProjectReadyForDev ->
@@ -276,18 +284,18 @@ end = struct
                    |> okThen (fun stdout ->
                           stdout |> Js.String.split "\n"
                           |> Js.Array.map (fun x -> Js.String.split "=" x)
-                          |> Js.Array.map
-                               ( (function
-                                   | [] ->
-                                     Error
-                                       "Splitting on '=' in env output failed"
-                                   | [ k; v ] -> Ok (k, v)
-                                   | l ->
-                                     Js.log l;
-                                     Error
-                                       "Splitting on '=' in env output \
-                                        returned more than two items")
-                               << Array.to_list )
+                          |> Js.Array.map (fun r ->
+                                 match Array.to_list r with
+                                 | [] ->
+                                   (* TODO Environment entries are not
+                                      necessarily key value pairs *)
+                                   Error "Splitting on '=' in env output failed"
+                                 | [ k; v ] -> Ok (k, v)
+                                 | l ->
+                                   Js.log l;
+                                   Error
+                                     "Splitting on '=' in env output returned \
+                                      more than two items")
                           |> Js.Array.reduce
                                (fun acc kv ->
                                  match kv with
@@ -349,7 +357,7 @@ end = struct
                join folder Esy.lockFile
            in
            Fs.exists (Fpath.show lockFileFpath)
-           |> Js.Promise.then_ (Js.Promise.resolve << fun exists -> (pm, exists)))
+           |> Js.Promise.then_ (fun exists -> Js.Promise.resolve (pm, exists)))
     |> Js.Promise.all
     |> Js.Promise.then_ (fun l ->
            l
@@ -368,17 +376,18 @@ end = struct
              | Esy -> Esy.name
            in
            Cmd.make ~env ~cmd:name
-           |> Js.Promise.then_
-                (Js.Promise.resolve << function
-                 | Ok _ -> (pm, true)
-                 | Error _e -> (pm, false)))
+           |> Js.Promise.then_ (fun r ->
+                  let r =
+                    match r with
+                    | Ok _ -> (pm, true)
+                    | Error _e -> (pm, false)
+                  in
+                  Js.Promise.resolve r))
     |> Array.of_list |> Js.Promise.all
-    |> Js.Promise.then_
-         ( Js.Promise.resolve << R.return << Array.to_list
-         << Array.map (fun t ->
-                let pm, _used = t in
-                pm)
-         << Js.Array.filter (fun (_pm, available) -> available) )
+    |> Js.Promise.then_ (fun r ->
+           Js.Array.filter (fun (_pm, available) -> available) r
+           |> Array.map (fun (pm, _used) -> pm)
+           |> Array.to_list |> R.return |> Js.Promise.resolve)
 
   let setupToolChain spec = spec.setup ()
 
@@ -396,13 +405,16 @@ end = struct
         Fs.stat
           (let open Fpath in
           projectRoot / "opam" |> toString)
-        |> Js.Promise.then_
-             (Js.Promise.resolve << function
-              | Ok stats -> (
-                match Fs.Stat.isDirectory stats with
-                | true -> None
-                | false -> Some (Opam, projectRoot) )
-              | Error _ -> None)
+        |> Js.Promise.then_ (fun r ->
+               let r =
+                 match r with
+                 | Error _ -> None
+                 | Ok stats -> (
+                   match Fs.Stat.isDirectory stats with
+                   | true -> None
+                   | false -> Some (Opam, projectRoot) )
+               in
+               Js.Promise.resolve r)
       | "package.json" ->
         let manifestFile =
           (let open Fpath in
@@ -590,9 +602,12 @@ let setup { spec; projectRoot } =
   |> Js.Promise.then_ (function
        | Ok env -> Cmd.make ~cmd:"ocamllsp" ~env
        | Error e -> e |> R.fail |> Js.Promise.resolve)
-  |> Js.Promise.then_
-       (Js.Promise.resolve << function
-        | Ok _ -> Ok ({ spec; projectRoot } : t)
-        | Error msg -> Error {j| Toolchain initialisation failed: $msg |j})
+  |> Js.Promise.then_ (fun r ->
+         let r =
+           match r with
+           | Ok _ -> Ok ({ spec; projectRoot } : t)
+           | Error msg -> Error {j| Toolchain initialisation failed: $msg |j}
+         in
+         Js.Promise.resolve r)
 
 let lsp (t : t) = PackageManager.lsp t.spec

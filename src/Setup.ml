@@ -107,7 +107,6 @@ module Bsb = struct
         {j| Setup failed with because of invalid path provided to it: $p |j}
   end
 
-  open Utils
   include Internal
 
   let download url file ~progress ~end_ ~error ~data =
@@ -124,98 +123,100 @@ module Bsb = struct
 
   let make () = make ()
 
+  let runSetupChain eventEmitter folder =
+    let hiddenEsyRoot = Path.join [| folder; ".vscode"; "esy" |] in
+    Rimraf.run hiddenEsyRoot
+    |> then_ (function
+         | Error () -> Error (E.RimrafFailed hiddenEsyRoot) |> resolve
+         | Ok () ->
+           Fs.mkdir ~p:true hiddenEsyRoot
+           |> then_ (function
+                | Ok () -> Ok () |> resolve
+                | Error Fs.E.PathNotFound ->
+                  Error (E.InvalidPath hiddenEsyRoot) |> resolve))
+    |> then_ (function
+         | Error e -> Error e |> resolve
+         | Ok () ->
+           Filename.concat hiddenEsyRoot "esy.json"
+           |> dropAnEsyJSON
+           |> then_ (fun () -> resolve (Ok ())))
+    |> then_ (function
+         | Error e -> Error e |> resolve
+         | Ok () ->
+           Command.Esy.install ~p:hiddenEsyRoot
+           |> then_ (function
+                | Error e ->
+                  Error (E.EsyInstallFailure (Command.Esy.E.toString e))
+                  |> resolve
+                | Ok _stdout ->
+                  reportProgress eventEmitter 0.1;
+                  AzurePipelines.getBuildID ()
+                  |> then_ (function
+                       | Ok id -> AzurePipelines.getDownloadURL id
+                       | Error e -> Error e |> resolve)
+                  |> then_ (function
+                       | Ok url -> Ok url |> resolve
+                       | Error e -> (
+                         let open AzurePipelines.E in
+                         match e with
+                         | DownloadFailure _
+                         | UnsupportedOS
+                         | InvalidJSONType _
+                         | MissingField _
+                         | InvalidFirstArrayElement
+                         | Failure _ ->
+                           resolve (Error (E.CacheFailure "<TODO>")) ))))
+    |> then_ (function
+         | Ok downloadUrl ->
+           Js.log2 "download" downloadUrl;
+           let lastProgress = ref 0.0 in
+           Js.Promise.make (fun ~resolve ~reject:_ ->
+               download downloadUrl
+                 (Path.join [| hiddenEsyRoot; "cache.zip" |])
+                 ~progress:(fun progressFraction ->
+                   let percent = progressFraction *. 80.0 in
+                   reportProgress eventEmitter (percent -. !lastProgress);
+                   lastProgress := percent)
+                 ~data:(fun _ -> ())
+                 ~error:(fun e ->
+                   (resolve (Error (E.CacheFailure e##message)) [@bs]))
+                 ~end_:(fun () -> (resolve (Ok ()) [@bs])))
+         | Error (_thisIsWhereCacheFailureCouldBeReported : E.t) ->
+           resolve (Error (E.CacheFailure "Couldn't compute downloadUrl")))
+    |> then_ (function
+         | Ok () ->
+           reportProgress eventEmitter 93.33;
+           Command.Unzip.run ~p:hiddenEsyRoot "cache.zip"
+           |> then_ (function
+                | Error _unzipCmdError ->
+                  Error (E.CacheFailure "Failed to unzip downloaded cache")
+                  |> resolve
+                | Ok _unzipCmdOutput -> resolve (Ok ()))
+         | Error e -> Error e |> resolve)
+    |> then_ (function
+         | Ok () ->
+           reportProgress eventEmitter 96.66;
+           Command.Esy.importDependencies ~p:hiddenEsyRoot
+           |> then_ (fun r ->
+                  resolve
+                    ( match r with
+                    | Ok _ -> Ok ()
+                    | Error _ -> Error E.EsyImportDependenciesFailure ))
+         | Error e -> resolve (Error e))
+    |> then_ (function
+         | Error e -> Error e |> resolve
+         | Ok () ->
+           reportProgress eventEmitter 99.99;
+           Command.Esy.build ~p:hiddenEsyRoot
+           |> then_ (fun r ->
+                  resolve
+                    ( match r with
+                    | Ok _esyCmdOutput -> Ok ()
+                    | Error e ->
+                      Error (E.EsyBuildFailure (Command.Esy.E.toString e)) )))
+
   let run eventEmitter projectPath =
     let manifestPath = Path.join [| projectPath; "package.json" |] in
-    let runSetupChain folder =
-      let hiddenEsyRoot = Path.join [| folder; ".vscode"; "esy" |] in
-      Rimraf.run hiddenEsyRoot
-      |> then_ (function
-           | Error () -> Error (E.RimrafFailed hiddenEsyRoot) |> resolve
-           | Ok () ->
-             Fs.mkdir ~p:true hiddenEsyRoot
-             |> then_ (function
-                  | Ok () -> Ok () |> resolve
-                  | Error Fs.E.PathNotFound ->
-                    Error (E.InvalidPath hiddenEsyRoot) |> resolve))
-      |> then_ (function
-           | Error e -> Error e |> resolve
-           | Ok () ->
-             Filename.concat hiddenEsyRoot "esy.json"
-             |> dropAnEsyJSON
-             |> then_ (fun () -> resolve (Ok ())))
-      |> then_ (function
-           | Error e -> Error e |> resolve
-           | Ok () ->
-             Command.Esy.install ~p:hiddenEsyRoot
-             |> then_ (function
-                  | Error e ->
-                    Error (E.EsyInstallFailure (Command.Esy.E.toString e))
-                    |> resolve
-                  | Ok _stdout ->
-                    reportProgress eventEmitter 0.1;
-                    AzurePipelines.getBuildID ()
-                    |> then_ (function
-                         | Ok id -> AzurePipelines.getDownloadURL id
-                         | Error e -> Error e |> resolve)
-                    |> then_ (function
-                         | Ok url -> Ok url |> resolve
-                         | Error e -> (
-                           let open AzurePipelines.E in
-                           match e with
-                           | DownloadFailure _
-                           | UnsupportedOS
-                           | InvalidJSONType _
-                           | MissingField _
-                           | InvalidFirstArrayElement
-                           | Failure _ ->
-                             resolve (Error (E.CacheFailure "<TODO>")) ))))
-      |> then_ (function
-           | Ok downloadUrl ->
-             Js.log2 "download" downloadUrl;
-             let lastProgress = ref 0.0 in
-             Js.Promise.make (fun ~resolve ~reject:_ ->
-                 download downloadUrl
-                   (Path.join [| hiddenEsyRoot; "cache.zip" |])
-                   ~progress:(fun progressFraction ->
-                     let percent = progressFraction *. 80.0 in
-                     reportProgress eventEmitter (percent -. !lastProgress);
-                     lastProgress := percent)
-                   ~data:(fun _ -> ())
-                   ~error:(fun e ->
-                     (resolve (Error (E.CacheFailure e##message)) [@bs]))
-                   ~end_:(fun () -> (resolve (Ok ()) [@bs])))
-           | Error (_thisIsWhereCacheFailureCouldBeReported : E.t) ->
-             resolve (Error (E.CacheFailure "Couldn't compute downloadUrl")))
-      |> then_ (function
-           | Ok () ->
-             reportProgress eventEmitter 93.33;
-             Command.Unzip.run ~p:hiddenEsyRoot "cache.zip"
-             |> then_ (function
-                  | Error _unzipCmdError ->
-                    Error (E.CacheFailure "Failed to unzip downloaded cache")
-                    |> resolve
-                  | Ok _unzipCmdOutput -> resolve (Ok ()))
-           | Error e -> Error e |> resolve)
-      |> then_ (function
-           | Ok () ->
-             reportProgress eventEmitter 96.66;
-             Command.Esy.importDependencies ~p:hiddenEsyRoot
-             |> then_
-                  (resolve << function
-                   | Ok _ -> Ok ()
-                   | Error _ -> Error E.EsyImportDependenciesFailure)
-           | Error e -> resolve (Error e))
-      |> then_ (function
-           | Error e -> Error e |> resolve
-           | Ok () ->
-             reportProgress eventEmitter 99.99;
-             Command.Esy.build ~p:hiddenEsyRoot
-             |> then_
-                  (resolve << function
-                   | Ok _esyCmdOutput -> Ok ()
-                   | Error e ->
-                     Error (E.EsyBuildFailure (Command.Esy.E.toString e))))
-    in
     let open Js.Promise in
     let folder = Filename.dirname manifestPath in
     Fs.readFile manifestPath
@@ -223,7 +224,7 @@ module Bsb = struct
            let open Option in
            (let open Json in
            parse manifest >>| CheckBucklescriptCompat.run >>| function
-           | Ok () -> runSetupChain folder
+           | Ok () -> runSetupChain eventEmitter folder
            | Error e -> resolve (Error (E.BucklescriptCompatFailure e)))
            |> toPromise (E.SetupChainFailure "Failed to parse manifest file"))
     |> then_ (function

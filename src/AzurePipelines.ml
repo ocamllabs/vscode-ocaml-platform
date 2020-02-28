@@ -91,18 +91,18 @@ let filter =
 
 let latest = "queryOrder=finishTimeDescending&$top=1"
 
-open Utils
 open Js.Promise
 
 let getBuildID () =
   Https.getCompleteResponse
     {j|$restBase/$proj/_apis/build/builds?$filter&$master&$latest&api-version=4.1|j}
-  |> then_
-       (resolve << function
-        | Ok response -> JSONResponse.getBuildId response
-        | Error e -> (
-          match e with
-          | Https.E.Failure url -> Error (E.DownloadFailure url) ))
+  |> then_ (fun r ->
+         resolve
+           ( match r with
+           | Ok response -> JSONResponse.getBuildId response
+           | Error e -> (
+             match e with
+             | Https.E.Failure url -> Error (E.DownloadFailure url) ) ))
 
 let getDownloadURL latestBuildID =
   let latestBuildID = Js.Float.toString latestBuildID in
@@ -110,8 +110,9 @@ let getDownloadURL latestBuildID =
   | Some artifactName ->
     Https.getCompleteResponse
       {j|$restBase/$proj/_apis/build/builds/$latestBuildID/artifacts?artifactname=$artifactName&api-version=4.1|j}
-    |> then_
-         (resolve << function
-          | Error (Https.E.Failure url) -> Error (E.Failure url)
-          | Ok url -> JSONResponse.getDownloadURL url)
+    |> then_ (fun r ->
+           resolve
+             ( match r with
+             | Error (Https.E.Failure url) -> Error (E.Failure url)
+             | Ok url -> JSONResponse.getDownloadURL url ))
   | None -> resolve (Error E.UnsupportedOS)

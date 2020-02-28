@@ -34,11 +34,10 @@ let mergeDicts dict1 dict2 =
   Js.Dict.fromArray
     (Js.Array.concat (Js.Dict.entries dict1) (Js.Dict.entries dict2))
 
-let ( << ) f g x = f (g x)
-
 let okThen f =
   let open Js.Promise in
-  then_
-    (resolve << function
-     | Ok x -> f x
-     | Error e -> Error e)
+  then_ (fun x ->
+      resolve
+        ( match x with
+        | Ok x -> f x
+        | Error e -> Error e ))

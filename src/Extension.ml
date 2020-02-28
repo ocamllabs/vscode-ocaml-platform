@@ -6,14 +6,11 @@ let then_ f =
     | Ok x -> f x
     | Error e -> Js.Promise.resolve (Error e))
 
-let handleError =
-  ( fun f ->
-      Js.Promise.then_ (function
-        | Ok () -> Js.Promise.resolve ()
-        | Error msg -> f msg)
-    :    (string -> unit Js.Promise.t)
-      -> (unit, string) result Js.Promise.t
-      -> unit Js.Promise.t )
+let handleError (f : string -> unit Js.Promise.t) :
+    (unit, string) result Js.Promise.t -> unit Js.Promise.t =
+  Js.Promise.then_ (function
+    | Ok () -> Js.Promise.resolve ()
+    | Error msg -> f msg)
 
 let activate _context =
   Js.Dict.set Process.env "OCAMLRUNPARAM" "b";
