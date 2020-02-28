@@ -1,4 +1,10 @@
-module Rimraf = {
+module Rimraf: {
+  /** Bindinds for https://www.npmjs.com/package/rimraf. rimraf
+     is a cross-platform utility library to delete a directory
+     and all its contens */
+  type t;
+  let run: string => Js.Promise.t(result(unit, unit));
+} = {
   type t;
 
   [@bs.module]
