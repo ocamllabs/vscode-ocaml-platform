@@ -652,7 +652,7 @@ let init = (~env, ~folder) => {
        switch (
          List.filter(
            ((x, _)) =>
-             switch (List.find(y => y == x, availablePackageManagers)) {
+             switch (List.find_opt(y => y == x, availablePackageManagers)) {
              | Some(_) => true
              | None => false
              },
@@ -692,7 +692,7 @@ let init = (~env, ~folder) => {
            Js.log(multipleChoices);
            Window.showQuickPick(.
              multipleChoices
-             |> List.map(~f=((pm, _)) => PackageManager.toName(pm))
+             |> List.map(((pm, _)) => PackageManager.toName(pm))
              |> Array.of_list,
              Window.QuickPickOptions.make(~canPickMany=false, ()),
            )
@@ -707,8 +707,8 @@ let init = (~env, ~folder) => {
                   switch (pm) {
                   | Ok(pmx) =>
                     switch (
-                      List.find(
-                        ~f=((pmy, _toolChainRoot)) => pmy == pmx,
+                      List.find_opt(
+                        ((pmy, _toolChainRoot)) => pmy == pmx,
                         multipleChoices,
                       )
                     ) {
