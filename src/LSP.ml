@@ -19,7 +19,7 @@ module Server =
           Window.withProgress
             ([%bs.obj { location = 15; title = "Setting up toolchain..." }])
             (fun progress ->
-               let succeeded = ref ((Ok (()))[@explicit_arity ]) in
+               let succeeded = ref ((Ok (()))) in
                let eventEmitter = make () in
                onProgress eventEmitter
                  (fun percent ->
@@ -33,14 +33,14 @@ module Server =
                     [@bs ]));
                onError eventEmitter
                  (fun errorMsg ->
-                    succeeded := ((Error (errorMsg))[@explicit_arity ]));
+                    succeeded := ((Error (errorMsg))));
                (let open Js.Promise in
                   (run eventEmitter folder) |>
                     (then_ (fun () -> resolve (!succeeded)))))
     let make =
       (fun toolchain ->
          let (command, args) = Toolchain.lsp toolchain in
-         ({ command; args; options = { env = Process.env } } : Vscode.LanguageClient.serverOptions) : 
+         ({ command; args; options = { env = Process.env } } : Vscode.LanguageClient.serverOptions) :
       Toolchain.t -> Vscode.LanguageClient.serverOptions)
   end
 module Client =

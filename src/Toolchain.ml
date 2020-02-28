@@ -19,7 +19,7 @@ let setupWithProgressIndicator m folder =
   Window.withProgress
     [%bs.obj { location = 15; title = "Setting up toolchain..." }]
     (fun progress ->
-      let succeeded = ref (Ok () [@explicit_arity]) in
+      let succeeded = ref (Ok ()) in
       let eventEmitter = make () in
       onProgress eventEmitter (fun percent ->
           Js.log2 "Percentage:" percent;
@@ -27,8 +27,7 @@ let setupWithProgressIndicator m folder =
              [%bs.obj { increment = int_of_float (percent *. 100.) }] [@bs]));
       onEnd eventEmitter (fun () ->
           (progress.report [%bs.obj { increment = 100 }] [@bs]));
-      onError eventEmitter (fun errorMsg ->
-          succeeded := (Error errorMsg [@explicit_arity]));
+      onError eventEmitter (fun errorMsg -> succeeded := Error errorMsg);
       let open Js.Promise in
       run eventEmitter folder |> then_ (fun () -> resolve !succeeded))
 
@@ -59,8 +58,8 @@ end = struct
 
   let make ~env ~cmd =
     match Js.Dict.get env "PATH" with
-    | None -> (Error pathMissingFromEnv [@explicit_arity]) |> Js.Promise.resolve
-    | ((Some path)[@explicit_arity]) ->
+    | None -> Error pathMissingFromEnv |> Js.Promise.resolve
+    | Some path ->
       let cmds =
         match Sys.unix with
         | true -> [| cmd |]
@@ -80,10 +79,8 @@ end = struct
       |> Js.Promise.then_
            ( Js.Promise.resolve
            << (function
-                | [] -> (
-                  Error {j| Command "$cmd" not found |j} [@explicit_arity] )
-                | (cmd, _exists) :: _rest -> (
-                  Ok { cmd; env } [@explicit_arity] ))
+                | [] -> Error {j| Command "$cmd" not found |j}
+                | (cmd, _exists) :: _rest -> Ok { cmd; env })
            << Array.to_list )
 
   let output ~args ~cwd { cmd; env } =
@@ -94,16 +91,14 @@ end = struct
          (Js.Promise.resolve << function
           | Error e -> e |> ChildProcess.E.toString |> R.fail
           | Ok (exitCode, stdout, stderr) ->
-            if exitCode = 0 then (
-              Ok stdout [@explicit_arity]
-            ) else (
+            if exitCode = 0 then
+              Ok stdout
+            else
               Error
                 {j| Command $cmd failed:
 exitCode: $exitCode
 stderr: $stderr
-|j}
-            [@explicit_arity]
-            ))
+|j})
 end
 
 module PackageManager : sig
@@ -217,18 +212,17 @@ end = struct
                    |> Js.Promise.then_
                         (Js.Promise.resolve << function
                          | Error _ -> R.return false
-                         | ((Ok stdout)[@explicit_arity]) -> (
+                         | Ok stdout -> (
                            match Json.parse stdout with
                            | None -> R.return false
-                           | ((Some json)[@explicit_arity]) ->
+                           | Some json ->
                              json
                              |> (let open Json.Decode in
                                 field "isProjectReadyForDev" bool)
                              |> R.return ))
                    |> Js.Promise.then_ (function
-                        | ((Error e)[@explicit_arity]) ->
-                          e |> R.fail |> Js.Promise.resolve
-                        | ((Ok isProjectReadyForDev)[@explicit_arity]) ->
+                        | Error e -> e |> R.fail |> Js.Promise.resolve
+                        | Ok isProjectReadyForDev ->
                           if isProjectReadyForDev then
                             () |> R.return |> Js.Promise.resolve
                           else if root = discoveredManifestPath then
@@ -247,14 +241,14 @@ end = struct
                      ~cwd:(Fpath.toString root)
                    |> okThen (fun stdout ->
                           match Json.parse stdout with
-                          | ((Some json)[@explicit_arity]) ->
+                          | Some json ->
                             json
                             |> Json.Decode.dict Json.Decode.string
                             |> R.return
-                          | None -> (
+                          | None ->
                             Error
                               ( "'esy command-env' returned non-json output: "
-                              ^ stdout ) [@explicit_arity] )))
+                              ^ stdout )))
              ; lsp =
                  (fun () ->
                    (Cmd.binPath cmd, [| "-P"; Fpath.toString root; "ocamllsp" |]))
@@ -290,16 +284,15 @@ end = struct
                                    | [ k; v ] -> Ok (k, v)
                                    | l ->
                                      Js.log l;
-                                     (Error
-                                        "Splitting on '=' in env output \
-                                         returned more than two items" [@explicit_arity
-                                                                         ]))
+                                     Error
+                                       "Splitting on '=' in env output \
+                                        returned more than two items")
                                << Array.to_list )
                           |> Js.Array.reduce
                                (fun acc kv ->
                                  match kv with
-                                 | ((Ok kv)[@explicit_arity]) -> kv :: acc
-                                 | ((Error msg)[@explicit_arity]) ->
+                                 | Ok kv -> kv :: acc
+                                 | Error msg ->
                                    Js.log msg;
                                    acc)
                                []
@@ -319,9 +312,9 @@ end = struct
     | Esy -> "esy"
 
   let ofName = function
-    | "opam" -> ( Ok Opam [@explicit_arity] )
-    | "esy" -> ( Ok Esy [@explicit_arity] )
-    | n -> ( Error {j|Invalid name $n was provided|j} [@explicit_arity] )
+    | "opam" -> Ok Opam
+    | "esy" -> Ok Esy
+    | n -> Error {j|Invalid name $n was provided|j}
 
   let specOfName ~env ~name ~root ~discoveredManifestPath =
     match name with
@@ -378,7 +371,7 @@ end = struct
            |> Js.Promise.then_
                 (Js.Promise.resolve << function
                  | Ok _ -> (pm, true)
-                 | ((Error _e)[@explicit_arity]) -> (pm, false)))
+                 | Error _e -> (pm, false)))
     |> Array.of_list |> Js.Promise.all
     |> Js.Promise.then_
          ( Js.Promise.resolve << R.return << Array.to_list
@@ -405,7 +398,7 @@ end = struct
           projectRoot / "opam" |> toString)
         |> Js.Promise.then_
              (Js.Promise.resolve << function
-              | ((Ok stats)[@explicit_arity]) -> (
+              | Ok stats -> (
                 match Fs.Stat.isDirectory stats with
                 | true -> None
                 | false -> Some (Opam, projectRoot) )
@@ -420,7 +413,7 @@ end = struct
         |> Js.Promise.then_ (fun manifest ->
                match Json.parse manifest with
                | None -> None |> Js.Promise.resolve
-               | ((Some json)[@explicit_arity]) ->
+               | Some json ->
                  if
                    Utils.propertyExists json "dependencies"
                    || Utils.propertyExists json "devDependencies"
@@ -446,7 +439,7 @@ end = struct
           Fs.readFile manifestFile
           |> Js.Promise.then_ (fun manifest ->
                  match Json.parse manifest with
-                 | ((Some json)[@explicit_arity]) ->
+                 | Some json ->
                    if
                      Utils.propertyExists json "dependencies"
                      || Utils.propertyExists json "devDependencies"
@@ -468,24 +461,21 @@ end = struct
     let lookup projectRoot =
       Fs.readDir (Fpath.toString projectRoot)
       |> Js.Promise.then_ (function
-           | ((Error msg)[@explicit_arity]) ->
-             Js.Promise.resolve (Error msg [@explicit_arity])
-           | ((Ok files)[@explicit_arity]) ->
+           | Error msg -> Js.Promise.resolve (Error msg)
+           | Ok files ->
              files
              |> Js.Array.map (parse projectRoot)
              |> Js.Promise.all
              |> Js.Promise.then_ (fun l ->
-                    (Ok
-                       ( Js.Array.reduce
-                           (fun acc x ->
-                             Js.Array.concat acc
-                               ( match x with
-                               | ((Some x)[@explicit_arity]) ->
-                                 Array.of_list [ x ]
-                               | None -> [||] ))
-                           [||] l
-                       |> Array.to_list |> PackageManagerSpecTupleSet.of_list ) [@explicit_arity
-                                                                                ])
+                    Ok
+                      ( Js.Array.reduce
+                          (fun acc x ->
+                            Js.Array.concat acc
+                              ( match x with
+                              | Some x -> Array.of_list [ x ]
+                              | None -> [||] ))
+                          [||] l
+                      |> Array.to_list |> PackageManagerSpecTupleSet.of_list )
                     |> Js.Promise.resolve))
   end
 end
@@ -506,32 +496,31 @@ let init ~env ~folder =
     ( PackageManager.available ~env
     , PackageManager.alreadyUsed projectRoot
       |> Js.Promise.then_ (function
-           | ((Ok [])[@explicit_arity]) ->
+           | Ok [] ->
              PackageManager.Manifest.lookup projectRoot
              |> okThen (fun x ->
                     x |> PackageManager.PackageManagerSpecTupleSet.elements
                     |> function
-                    | [] -> ( Error "TODO: global toolchain" [@explicit_arity] )
+                    | [] -> Error "TODO: global toolchain"
                     | packageManagersInUse -> packageManagersInUse |> R.return)
-           | ((Ok packageManagersInUse)[@explicit_arity]) ->
+           | Ok packageManagersInUse ->
              packageManagersInUse
              |> List.map (fun x -> (x, projectRoot))
              |> R.return |> Js.Promise.resolve
-           | ((Error msg)[@explicit_arity]) ->
-             (Error msg [@explicit_arity]) |> Js.Promise.resolve) )
+           | Error msg -> Error msg |> Js.Promise.resolve) )
   |> Js.Promise.then_
        (fun (availablePackageManagers, alreadyUsedPackageManagers) ->
          let availablePackageManagers =
            match availablePackageManagers with
-           | ((Ok x)[@explicit_arity]) -> x
-           | ((Error msg)[@explicit_arity]) ->
+           | Ok x -> x
+           | Error msg ->
              Js.log2 "Error during availablePackageManagers()" msg;
              []
          in
          let alreadyUsedPackageManagers =
            match alreadyUsedPackageManagers with
-           | ((Ok x)[@explicit_arity]) -> x
-           | ((Error msg)[@explicit_arity]) ->
+           | Ok x -> x
+           | Error msg ->
              Js.log2 "Error during alreadyUsedPackageManagers()" msg;
              []
          in
@@ -545,8 +534,7 @@ let init ~env ~folder =
                | None -> false)
              alreadyUsedPackageManagers
          with
-         | [] ->
-           (Error noPackageManagerFound [@explicit_arity]) |> Js.Promise.resolve
+         | [] -> Error noPackageManagerFound |> Js.Promise.resolve
          | [ (obviousChoice, toolChainRoot) ] ->
            PackageManager.make ~env ~root:toolChainRoot ~t:obviousChoice
              ~discoveredManifestPath:projectRoot
@@ -556,10 +544,10 @@ let init ~env ~folder =
              ( Js.Nullable.toOption config##packageManager
              , Js.Nullable.toOption config##toolChainRoot )
            with
-           | ((Some name)[@explicit_arity]), ((Some root)[@explicit_arity]) ->
+           | Some name, Some root ->
              PackageManager.specOfName ~env ~name ~root
                ~discoveredManifestPath:projectRoot
-           | ((Some name)[@explicit_arity]), None ->
+           | Some name, None ->
              PackageManager.specOfName ~env ~name ~root:projectRoot
                ~discoveredManifestPath:projectRoot
            | _ ->
@@ -573,12 +561,11 @@ let init ~env ~folder =
                     match Js.Nullable.toOption packageManager with
                     | None ->
                       Js.Promise.resolve
-                        (Error "showQuickPick() returned undefined" [@explicit_arity
-                                                                      ])
-                    | ((Some packageManager)[@explicit_arity]) -> (
+                        (Error "showQuickPick() returned undefined")
+                    | Some packageManager -> (
                       let pm = PackageManager.ofName packageManager in
                       match pm with
-                      | ((Ok pmx)[@explicit_arity]) -> (
+                      | Ok pmx -> (
                         match
                           List.find_opt
                             (fun (pmy, _toolChainRoot) -> pmy = pmx)
@@ -588,28 +575,24 @@ let init ~env ~folder =
                           Js.Promise.resolve
                             (Error
                                "Weird invalid state: selected choice was not \
-                                found in the list" [@explicit_arity])
+                                found in the list")
                         | Some (pm, toolChainRoot) ->
                           PackageManager.make ~env ~t:pm ~root:toolChainRoot
                             ~discoveredManifestPath:projectRoot )
-                      | ((Error msg)[@explicit_arity]) ->
-                        Js.Promise.resolve (Error msg [@explicit_arity]) )) ))
-  |> okThen (fun spec -> (Ok { spec; projectRoot } [@explicit_arity]))
+                      | Error msg -> Js.Promise.resolve (Error msg) )) ))
+  |> okThen (fun spec -> Ok { spec; projectRoot })
 
 let setup { spec; projectRoot } =
   PackageManager.setupToolChain spec
   |> Js.Promise.then_ (function
-       | ((Error msg)[@explicit_arity]) ->
-         (Error msg [@explicit_arity]) |> Js.Promise.resolve
-       | ((Ok ())[@explicit_arity]) -> PackageManager.env spec)
+       | Error msg -> Error msg |> Js.Promise.resolve
+       | Ok () -> PackageManager.env spec)
   |> Js.Promise.then_ (function
-       | ((Ok env)[@explicit_arity]) -> Cmd.make ~cmd:"ocamllsp" ~env
-       | ((Error e)[@explicit_arity]) -> e |> R.fail |> Js.Promise.resolve)
+       | Ok env -> Cmd.make ~cmd:"ocamllsp" ~env
+       | Error e -> e |> R.fail |> Js.Promise.resolve)
   |> Js.Promise.then_
        (Js.Promise.resolve << function
-        | Ok _ -> ( Ok ({ spec; projectRoot } : t) [@explicit_arity] )
-        | ((Error msg)[@explicit_arity]) -> (
-          Error {j| Toolchain initialisation failed: $msg |j} [@explicit_arity]
-          ))
+        | Ok _ -> Ok ({ spec; projectRoot } : t)
+        | Error msg -> Error {j| Toolchain initialisation failed: $msg |j})
 
 let lsp (t : t) = PackageManager.lsp t.spec
