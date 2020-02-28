@@ -154,44 +154,9 @@ module PackageManager: {
     type t = (a, Utils.Fpath.t);
     let compare: (('a, 'b), ('a, 'b)) => int;
   };
+
   module PackageManagerSpecTupleSet: {
-    type elt = PackageManagerSpecTuple.t;
-    type t = Set.Make(PackageManagerSpecTuple).t;
-    let empty: t;
-    let is_empty: t => bool;
-    let mem: (elt, t) => bool;
-    let add: (elt, t) => t;
-    let singleton: elt => t;
-    let remove: (elt, t) => t;
-    let union: (t, t) => t;
-    let inter: (t, t) => t;
-    let diff: (t, t) => t;
-    let compare: (t, t) => int;
-    let equal: (t, t) => bool;
-    let subset: (t, t) => bool;
-    let iter: (elt => unit, t) => unit;
-    let map: (elt => elt, t) => t;
-    let fold: ((elt, 'a) => 'a, t, 'a) => 'a;
-    let for_all: (elt => bool, t) => bool;
-    let exists: (elt => bool, t) => bool;
-    let filter: (elt => bool, t) => t;
-    let partition: (elt => bool, t) => (t, t);
-    let cardinal: t => int;
-    let elements: t => list(elt);
-    let min_elt: t => elt;
-    let min_elt_opt: t => option(elt);
-    let max_elt: t => elt;
-    let max_elt_opt: t => option(elt);
-    let choose: t => elt;
-    let choose_opt: t => option(elt);
-    let split: (elt, t) => (t, bool, t);
-    let find: (elt, t) => elt;
-    let find_opt: (elt, t) => option(elt);
-    let find_first: (elt => bool, t) => elt;
-    let find_first_opt: (elt => bool, t) => option(elt);
-    let find_last: (elt => bool, t) => elt;
-    let find_last_opt: (elt => bool, t) => option(elt);
-    let of_list: list(elt) => t;
+    include Set.S with type elt = PackageManagerSpecTuple.t;
   };
 
   let alreadyUsed: Fpath.t => Js.Promise.t(result(list(t), string));
