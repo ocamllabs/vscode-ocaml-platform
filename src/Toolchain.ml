@@ -553,11 +553,15 @@ let init ~env ~folder =
          | multipleChoices -> (
            let config = Vscode.Workspace.getConfiguration "ocaml" in
            match
-             ( Js.Nullable.toOption config##packageManager
-             , Js.Nullable.toOption config##toolChainRoot )
+             ( config
+               |. Vscode.WorkspaceConfiguration.get "packageManager"
+               |> Js.Nullable.toOption
+             , config
+               |. Vscode.WorkspaceConfiguration.get "toolChainRoot"
+               |> Js.Nullable.toOption )
            with
            | Some name, Some root ->
-             PackageManager.specOfName ~env ~name ~root
+             PackageManager.specOfName ~env ~name ~root:(Fpath.ofString root)
                ~discoveredManifestPath:projectRoot
            | Some name, None ->
              PackageManager.specOfName ~env ~name ~root:projectRoot

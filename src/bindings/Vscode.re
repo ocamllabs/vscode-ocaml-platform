@@ -11,6 +11,11 @@ module Folder = {
   let key = f => f.uri.fsPath;
 };
 
+module WorkspaceConfiguration = {
+  type t;
+  [@bs.send] external get: (t, string) => Js.Nullable.t(string) = "get";
+};
+
 module Workspace = {
   type workspaceFoldersChangeEvent = {
     added: array(Folder.t),
@@ -31,7 +36,8 @@ module Workspace = {
   [@bs.module "vscode"] [@bs.scope "workspace"]
   external textDocuments: array(TextDocument.event) = "textDocuments";
   [@bs.module "vscode"] [@bs.scope "workspace"]
-  external getConfiguration: string => 'a = "getConfiguration";
+  external getConfiguration: string => WorkspaceConfiguration.t =
+    "getConfiguration";
 };
 
 module Window = {
