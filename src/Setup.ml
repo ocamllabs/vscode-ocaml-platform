@@ -59,12 +59,26 @@ module Esy = struct
   let make () = make ()
 
   let run eventEmitter projectPath =
-    reportProgress eventEmitter 0.1;
-    exec "esy" (Options.make ~cwd:projectPath ())
-    |> then_ (fun _ ->
-           reportProgress eventEmitter 1.;
-           reportEnd eventEmitter;
-           resolve ())
+    (Window.showQuickPick [| "yes"; "no" |]
+       (Window.QuickPickOptions.make ~canPickMany:false
+          ~placeHolder:"Setup this project's toolchain with esy?" ()) [@bs])
+    |> Js.Promise.then_ (fun choice ->
+           match Js.Nullable.toOption choice with
+           | Some choice ->
+             if choice = "yes" then (
+               reportProgress eventEmitter 0.1;
+               exec "esy" (Options.make ~cwd:projectPath ())
+               |> then_ (fun _ ->
+                      reportProgress eventEmitter 1.;
+                      reportEnd eventEmitter;
+                      resolve ())
+             ) else (
+               reportError eventEmitter "Please setup the toolchain";
+               resolve ()
+             )
+           | None ->
+             reportError eventEmitter "Please setup the toolchain";
+             resolve ())
 end
 
 module Opam = struct
@@ -219,19 +233,36 @@ module Bsb = struct
     let manifestPath = Path.join [| projectPath; "package.json" |] in
     let open Js.Promise in
     let folder = Filename.dirname manifestPath in
-    Fs.readFile manifestPath
-    |> then_ (fun manifest ->
-           let open Option in
-           (let open Json in
-           parse manifest >>| CheckBucklescriptCompat.run >>| function
-           | Ok () -> runSetupChain eventEmitter folder
-           | Error e -> resolve (Error (E.BucklescriptCompatFailure e)))
-           |> toPromise (E.SetupChainFailure "Failed to parse manifest file"))
-    |> then_ (function
-         | Ok () ->
-           reportEnd eventEmitter;
-           resolve ()
-         | Error e ->
-           reportError eventEmitter (E.toString e);
-           resolve ())
+    (Window.showQuickPick [| "yes"; "no" |]
+       (Window.QuickPickOptions.make ~canPickMany:false
+          ~placeHolder:"Setup this project's toolchain with esy?" ()) [@bs])
+    |> Js.Promise.then_ (fun choice ->
+           match Js.Nullable.toOption choice with
+           | None ->
+             reportError eventEmitter "Please setup the toolchain";
+             resolve ()
+           | Some choice ->
+             if choice = "yes" then
+               Fs.readFile manifestPath
+               |> then_ (fun manifest ->
+                      let open Option in
+                      (let open Json in
+                      parse manifest >>| CheckBucklescriptCompat.run
+                      >>| function
+                      | Ok () -> runSetupChain eventEmitter folder
+                      | Error e ->
+                        resolve (Error (E.BucklescriptCompatFailure e)))
+                      |> toPromise
+                           (E.SetupChainFailure "Failed to parse manifest file"))
+               |> then_ (function
+                    | Ok () ->
+                      reportEnd eventEmitter;
+                      resolve ()
+                    | Error e ->
+                      reportError eventEmitter (E.toString e);
+                      resolve ())
+             else (
+               reportError eventEmitter "Please setup the toolchain";
+               resolve ()
+             ))
 end

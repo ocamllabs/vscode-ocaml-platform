@@ -572,7 +572,11 @@ let init ~env ~folder =
                 ( multipleChoices
                 |> List.map (fun (pm, _) -> PackageManager.toName pm)
                 |> Array.of_list )
-                (Window.QuickPickOptions.make ~canPickMany:false ()) [@bs])
+                (Window.QuickPickOptions.make ~canPickMany:false
+                   ~placeHolder:
+                     "Which package manager would you like to manage the \
+                      toolchain?"
+                   ()) [@bs])
              |> Js.Promise.then_ (fun packageManager ->
                     match Js.Nullable.toOption packageManager with
                     | None ->

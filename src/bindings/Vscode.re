@@ -45,7 +45,9 @@ module Workspace = {
 module Window = {
   module QuickPickOptions = {
     type t = {. "canPickMany": bool};
-    [@bs.obj] external make: (~canPickMany: bool=?, unit) => t = "";
+    [@bs.obj]
+    external make: (~canPickMany: bool=?, ~placeHolder: string=?, unit) => t =
+      "";
   };
   [@bs.module "vscode"] [@bs.scope "window"]
   external showQuickPick:
