@@ -221,6 +221,10 @@
       {
         "language": "ocaml",
         "path": "./snippets/ocaml.json"
+      },
+      {
+        "language": "ocaml.ocamllex",
+        "path": "./snippets/ocamllex.json"
       }
     ]
   },
