@@ -42,7 +42,8 @@ export async function activate(context: ExtensionContext) {
     // Register the server for plain text documents
     documentSelector: [
       { scheme: "file", language: "ocaml" },
-      { scheme: "file", language: "reason" }
+      { scheme: "file", language: "reason" },
+      { scheme: "file", language: "ocamllex" }
     ],
     synchronize: {
       // Notify the server about file changes to '.clientrc files contained in the workspace
