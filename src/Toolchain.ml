@@ -8,9 +8,6 @@ open Utils
 
 let pathMissingFromEnv = "'PATH' variable not found in the environment"
 
-let noPackageManagerFound =
-  {j| No package manager found. We support opam (https://opam.ocaml.org/) and esy (https://esy.sh/) |j}
-
 type commandAndArgs = string * string array
 
 let promptSetup packageManager ~f =
@@ -180,6 +177,8 @@ module PackageManager : sig
 
   val lsp : spec -> commandAndArgs
 
+  val globalSpec : string Js.Dict.t -> spec
+
   module Manifest : sig
     val lookup :
       Fpath.t -> (PackageManagerSpecTupleSet.t, string) result Js.Promise.t
@@ -192,8 +191,7 @@ end = struct
   type a = t
 
   type spec =
-    { cmd : Cmd.t
-    ; lsp : unit -> commandAndArgs
+    { lsp : unit -> commandAndArgs
     ; env : unit -> (string Js.Dict.t, string) result Js.Promise.t
     ; setup : unit -> (unit, string) result Js.Promise.t
     }
@@ -222,8 +220,7 @@ end = struct
     let make ~env ~root ~discoveredManifestPath =
       Cmd.make ~cmd:"esy" ~env
       |> okThen (fun cmd ->
-             { cmd
-             ; setup =
+             { setup =
                  (fun () ->
                    let rootStr = root |> Fpath.toString in
                    Cmd.output cmd
@@ -290,8 +287,7 @@ end = struct
       let rootStr = root |> Fpath.toString in
       Cmd.make ~cmd:"opam" ~env
       |> okThen (fun cmd ->
-             { cmd
-             ; setup =
+             { setup =
                  (fun () ->
                    setupWithProgressIndicator (module Setup.Opam) rootStr)
              ; env =
@@ -411,6 +407,12 @@ end = struct
   let lsp spec = spec.lsp ()
 
   let env spec = spec.env ()
+
+  let globalSpec env =
+    { setup = (fun () -> Js.Promise.resolve (Ok ()))
+    ; lsp = (fun () -> ("ocamllsp", [||]))
+    ; env = (fun () -> env |> R.return |> Js.Promise.resolve)
+    }
 
   module Manifest : sig
     val lookup :
@@ -563,7 +565,9 @@ let init ~env ~folder =
                | None -> false)
              alreadyUsedPackageManagers
          with
-         | [] -> Error noPackageManagerFound |> Js.Promise.resolve
+         | [] ->
+           Js.log "Will lookup toolchain from global env";
+           PackageManager.globalSpec env |> R.return |> Js.Promise.resolve
          | [ (obviousChoice, toolChainRoot) ] ->
            PackageManager.make ~env ~root:toolChainRoot ~t:obviousChoice
              ~discoveredManifestPath:projectRoot
