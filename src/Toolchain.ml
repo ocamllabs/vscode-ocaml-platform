@@ -13,6 +13,21 @@ let noPackageManagerFound =
 
 type commandAndArgs = string * string array
 
+let promptSetup packageManager ~f =
+  let open Js.Promise in
+  (Window.showQuickPick [| "yes"; "no" |]
+     (Window.QuickPickOptions.make ~canPickMany:false
+        ~placeHolder:{j|Setup this project's toolchain with $packageManager?|j}
+        ()) [@bs])
+  |> Js.Promise.then_ (fun choice ->
+         match Js.Nullable.toOption choice with
+         | None -> resolve (Error "Please setup the toolchain")
+         | Some choice ->
+           if choice = "yes" then
+             f ()
+           else
+             resolve (Error "Please setup the toolchain"))
+
 let setupWithProgressIndicator m folder =
   let module M = (val m : Setup.T) in
   let open M in
@@ -234,13 +249,15 @@ end = struct
                           if isProjectReadyForDev then
                             () |> R.return |> Js.Promise.resolve
                           else if root = discoveredManifestPath then
-                            setupWithProgressIndicator
-                              (module Setup.Esy)
-                              rootStr
+                            promptSetup "esy" ~f:(fun () ->
+                                setupWithProgressIndicator
+                                  (module Setup.Esy)
+                                  rootStr)
                           else
-                            setupWithProgressIndicator
-                              (module Setup.Bsb)
-                              (discoveredManifestPath |> Fpath.toString)))
+                            promptSetup "esy" ~f:(fun () ->
+                                setupWithProgressIndicator
+                                  (module Setup.Bsb)
+                                  (discoveredManifestPath |> Fpath.toString))))
              ; env =
                  (fun () ->
                    Cmd.output cmd
