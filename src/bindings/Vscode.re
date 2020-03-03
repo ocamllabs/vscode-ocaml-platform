@@ -14,6 +14,8 @@ module Folder = {
 module WorkspaceConfiguration = {
   type t;
   [@bs.send] external get: (t, string) => Js.Nullable.t(string) = "get";
+  [@bs.send]
+  external update: (t, string, string, int) => Js.Promise.t(unit) = "update";
 };
 
 module Workspace = {

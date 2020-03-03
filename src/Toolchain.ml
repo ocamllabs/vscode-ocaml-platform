@@ -578,24 +578,29 @@ let init ~env ~folder =
                     | None ->
                       Js.Promise.resolve
                         (Error "showQuickPick() returned undefined")
-                    | Some packageManager -> (
-                      let pm = PackageManager.ofName packageManager in
-                      match pm with
-                      | Ok pmx -> (
-                        match
-                          List.find_opt
-                            (fun (pmy, _toolChainRoot) -> pmy = pmx)
-                            multipleChoices
-                        with
-                        | None ->
-                          Js.Promise.resolve
-                            (Error
-                               "Weird invalid state: selected choice was not \
-                                found in the list")
-                        | Some (pm, toolChainRoot) ->
-                          PackageManager.make ~env ~t:pm ~root:toolChainRoot
-                            ~discoveredManifestPath:projectRoot )
-                      | Error msg -> Js.Promise.resolve (Error msg) )) ))
+                    | Some packageManager ->
+                      Vscode.WorkspaceConfiguration.update config
+                        "packageManager" packageManager 2
+                      (* Workspace *)
+                      |> Js.Promise.then_ (fun _ ->
+                             let pm = PackageManager.ofName packageManager in
+                             match pm with
+                             | Ok pmx -> (
+                               match
+                                 List.find_opt
+                                   (fun (pmy, _toolChainRoot) -> pmy = pmx)
+                                   multipleChoices
+                               with
+                               | None ->
+                                 Js.Promise.resolve
+                                   (Error
+                                      "Weird invalid state: selected choice \
+                                       was not found in the list")
+                               | Some (pm, toolChainRoot) ->
+                                 PackageManager.make ~env ~t:pm
+                                   ~root:toolChainRoot
+                                   ~discoveredManifestPath:projectRoot )
+                             | Error msg -> Js.Promise.resolve (Error msg))) ))
   |> okThen (fun spec -> Ok { spec; projectRoot })
 
 let setup { spec; projectRoot } =
