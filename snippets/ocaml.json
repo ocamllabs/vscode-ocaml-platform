@@ -29,19 +29,19 @@
   },
   "module": {
     "prefix": "module",
-    "body": ["module ${1:M} struct = ${2}\nend$0"]
+    "body": ["module ${1:M} = struct\n  ${2}\nend$0"]
   },
   "module signature": {
     "prefix": "module",
-    "body": ["module ${1:M} : sig\n${2}\nend$0"]
+    "body": ["module ${1:M} : sig\n  ${2}\nend$0"]
   },
   "module type": {
     "prefix": "module",
-    "body": ["module type ${1:M} = sig", "${2}", "end\n$0"]
+    "body": ["module type ${1:M} = sig\n  ${2}\nend$0"]
   },
   "match": {
     "prefix": "match",
-    "body": ["match ${1:scrutinee} with", "| ${2:pattern} -> ${3:${2:pattern}}"]
+    "body": ["match ${1:scrutinee} with\n| ${2:pattern} -> ${3:${2:pattern}}"]
   },
   "type declaration": {
     "prefix": "type",
