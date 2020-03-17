@@ -6,12 +6,8 @@
   },
   "sources": [
     {
-      "subdirs": ["bindings", "command"],
+      "subdirs": ["bindings"],
       "dir": "src"
-    },
-    {
-      "dir": "src/command/__tests__",
-      "type": "dev"
     },
     {
       "dir": "src/__tests__",

@@ -6,16 +6,13 @@ module R = Result
 open Bindings
 open Utils
 
-let pathMissingFromEnv = "'PATH' variable not found in the environment"
-
 type commandAndArgs = string * string array
 
-let promptSetup packageManager ~f =
+let promptSetup ~f =
   let open Js.Promise in
   (Window.showQuickPick [| "yes"; "no" |]
      (Window.QuickPickOptions.make ~canPickMany:false
-        ~placeHolder:{j|Setup this project's toolchain with $packageManager?|j}
-        ()) [@bs])
+        ~placeHolder:{j|Setup this project's toolchain with 'esy'?|j} ()) [@bs])
   |> Js.Promise.then_ (fun choice ->
          match Js.Nullable.toOption choice with
          | None -> resolve (Error "Please setup the toolchain")
@@ -25,9 +22,8 @@ let promptSetup packageManager ~f =
            else
              resolve (Error "Please setup the toolchain"))
 
-let setupWithProgressIndicator m folder =
-  let module M = (val m : Setup.T) in
-  let open M in
+let setupWithProgressIndicator esyCmd esyEnv folder =
+  let open Setup.Bsb in
   Window.withProgress
     [%bs.obj { location = 15; title = "Setting up toolchain..." }]
     (fun progress ->
@@ -41,82 +37,8 @@ let setupWithProgressIndicator m folder =
           (progress.report [%bs.obj { increment = 100 }] [@bs]));
       onError eventEmitter (fun errorMsg -> succeeded := Error errorMsg);
       let open Js.Promise in
-      run eventEmitter folder |> then_ (fun () -> resolve !succeeded))
-
-module Cmd : sig
-  type t
-
-  val make :
-    env:string Js.Dict.t -> cmd:string -> (t, string) result Js.Promise.t
-
-  type stdout = string
-
-  val output :
-       args:string Js.Array.t
-    -> cwd:string
-    -> t
-    -> (stdout, string) result Js.Promise.t
-
-  val binPath : t -> string
-end = struct
-  type t =
-    { cmd : string
-    ; env : string Js.Dict.t
-    }
-
-  type stdout = string
-
-  let binPath c = c.cmd
-
-  let make ~env ~cmd =
-    match Js.Dict.get env "PATH" with
-    | None -> Error pathMissingFromEnv |> Js.Promise.resolve
-    | Some path ->
-      let cmds =
-        match Sys.unix with
-        | true -> [| cmd |]
-        | false -> [| cmd ^ ".exe"; cmd ^ ".cmd" |]
-      in
-      cmds
-      |> Array.map (fun cmd ->
-             Js.String.split env_sep path
-             |> Js.Array.map (fun p -> Filename.concat p cmd))
-      |> Js.Array.reduce Js.Array.concat [||]
-      |> Js.Array.map (fun p ->
-             Fs.exists p
-             |> Js.Promise.then_ (fun exists -> Js.Promise.resolve (p, exists)))
-      |> Js.Promise.all
-      |> Js.Promise.then_ (fun r ->
-             Js.Promise.resolve (Js.Array.filter (fun (_p, exists) -> exists) r))
-      |> Js.Promise.then_ (fun r ->
-             let r = Array.to_list r in
-             let r =
-               match r with
-               | [] -> Error {j| Command "$cmd" not found |j}
-               | (cmd, _exists) :: _rest -> Ok { cmd; env }
-             in
-             Js.Promise.resolve r)
-
-  let output ~args ~cwd { cmd; env } =
-    let shellString = Js.Array.concat args [| cmd |] |> Js.Array.joinWith " " in
-    Js.log shellString;
-    ChildProcess.exec shellString (ChildProcess.Options.make ~cwd ~env ())
-    |> Js.Promise.then_ (fun r ->
-           let r =
-             match r with
-             | Error e -> e |> ChildProcess.E.toString |> R.fail
-             | Ok (exitCode, stdout, stderr) ->
-               if exitCode = 0 then
-                 Ok stdout
-               else
-                 Error
-                   {j| Command $cmd failed:
-exitCode: $exitCode
-stderr: $stderr
-|j}
-           in
-           Js.Promise.resolve r)
-end
+      run esyCmd esyEnv eventEmitter folder
+      |> then_ (fun () -> resolve !succeeded))
 
 module PackageManager : sig
   type t
@@ -186,14 +108,16 @@ module PackageManager : sig
 end = struct
   type t =
     | Opam
+    (* ({ lsp: commandAndArgs; env: (string Js.Dict.t, string) result
+       Js.Promise.t; setup: (unit, string) result Js.Promise.t }) *)
     | Esy
 
   type a = t
 
   type spec =
-    { lsp : unit -> commandAndArgs
-    ; env : unit -> (string Js.Dict.t, string) result Js.Promise.t
-    ; setup : unit -> (unit, string) result Js.Promise.t
+    { lsp : commandAndArgs
+    ; env : (string Js.Dict.t, string) result Js.Promise.t
+    ; setup : (unit, string) result Js.Promise.t
     }
 
   let supportedPackageManagers = [ Esy; Opam ]
@@ -221,59 +145,68 @@ end = struct
       Cmd.make ~cmd:"esy" ~env
       |> okThen (fun cmd ->
              { setup =
-                 (fun () ->
-                   let rootStr = root |> Fpath.toString in
-                   Cmd.output cmd
-                     ~args:[| "status"; "-P"; rootStr |]
-                     ~cwd:rootStr
-                   |> Js.Promise.then_ (fun r ->
-                          let r =
-                            match r with
-                            | Error _ -> R.return false
-                            | Ok stdout -> (
-                              match Json.parse stdout with
-                              | None -> R.return false
-                              | Some json ->
-                                json
-                                |> (let open Json.Decode in
-                                   field "isProjectReadyForDev" bool)
-                                |> R.return )
-                          in
-                          Js.Promise.resolve r)
-                   |> Js.Promise.then_ (function
-                        | Error e -> e |> R.fail |> Js.Promise.resolve
-                        | Ok isProjectReadyForDev ->
-                          if isProjectReadyForDev then
-                            () |> R.return |> Js.Promise.resolve
-                          else if root = discoveredManifestPath then
-                            promptSetup "esy" ~f:(fun () ->
-                                setupWithProgressIndicator
-                                  (module Setup.Esy)
-                                  rootStr)
-                          else
-                            promptSetup "esy" ~f:(fun () ->
-                                setupWithProgressIndicator
-                                  (module Setup.Bsb)
-                                  (discoveredManifestPath |> Fpath.toString))))
+                 (let rootStr = root |> Fpath.toString in
+                  Cmd.output cmd
+                    ~args:[| "status"; "-P"; rootStr |]
+                    ~cwd:rootStr
+                  |> Js.Promise.then_ (fun r ->
+                         let r =
+                           match r with
+                           | Error _ -> R.return false
+                           | Ok stdout -> (
+                             match Json.parse stdout with
+                             | None -> R.return false
+                             | Some json ->
+                               json
+                               |> (let open Json.Decode in
+                                  field "isProjectReadyForDev" bool)
+                               |> R.return )
+                         in
+                         Js.Promise.resolve r)
+                  |> Js.Promise.then_ (function
+                       | Error e -> e |> R.fail |> Js.Promise.resolve
+                       | Ok isProjectReadyForDev ->
+                         if isProjectReadyForDev then
+                           () |> R.return |> Js.Promise.resolve
+                         else if root = discoveredManifestPath then
+                           promptSetup ~f:(fun () ->
+                               Window.withProgress
+                                 [%bs.obj
+                                   { location = 15
+                                   ; title = "Setting up toolchain..."
+                                   }] (fun progress ->
+                                   (progress.report
+                                      [%bs.obj { increment = int_of_float 1. }]
+                                    [@bs]);
+                                   Cmd.output cmd ~cwd:(root |> Fpath.toString)
+                                     ~args:[||]
+                                   |> Js.Promise.then_ (fun _ ->
+                                          (progress.report
+                                             [%bs.obj
+                                               { increment = int_of_float 100. }]
+                                           [@bs]);
+                                          Js.Promise.resolve (Ok ()))))
+                         else
+                           promptSetup ~f:(fun () ->
+                               setupWithProgressIndicator cmd env
+                                 (discoveredManifestPath |> Fpath.toString))))
              ; env =
-                 (fun () ->
-                   Cmd.output cmd
-                     ~args:
-                       [| "command-env"; "--json"; "-P"; Fpath.toString root |]
-                     ~cwd:(Fpath.toString root)
-                   |> okThen (fun stdout ->
-                          match Json.parse stdout with
-                          | Some json ->
-                            json
-                            |> Json.Decode.dict Json.Decode.string
-                            |> R.return
-                          | None ->
-                            Error
-                              ( "'esy command-env' returned non-json output: "
-                              ^ stdout )))
+                 Cmd.output cmd
+                   ~args:
+                     [| "command-env"; "--json"; "-P"; Fpath.toString root |]
+                   ~cwd:(Fpath.toString root)
+                 |> okThen (fun stdout ->
+                        match Json.parse stdout with
+                        | Some json ->
+                          json
+                          |> Json.Decode.dict Json.Decode.string
+                          |> R.return
+                        | None ->
+                          Error
+                            ( "'esy command-env' returned non-json output: "
+                            ^ stdout ))
              ; lsp =
-                 (fun () ->
-                   (Cmd.binPath cmd, [| "-P"; Fpath.toString root; "ocamllsp" |]))
+                 (Cmd.binPath cmd, [| "-P"; Fpath.toString root; "ocamllsp" |])
              }
              |> R.return)
   end
@@ -284,41 +217,37 @@ end = struct
     let lockFile = Fpath.v "opam.lock"
 
     let make ~env ~root ~discoveredManifestPath:_ =
-      let rootStr = root |> Fpath.toString in
       Cmd.make ~cmd:"opam" ~env
       |> okThen (fun cmd ->
-             { setup =
-                 (fun () ->
-                   setupWithProgressIndicator (module Setup.Opam) rootStr)
+             { setup = Js.Promise.resolve (Ok ())
              ; env =
-                 (fun () ->
-                   Cmd.output cmd ~args:[| "exec"; "env" |]
-                     ~cwd:(Fpath.toString root)
-                   |> okThen (fun stdout ->
-                          stdout |> Js.String.split "\n"
-                          |> Js.Array.map (fun x -> Js.String.split "=" x)
-                          |> Js.Array.map (fun r ->
-                                 match Array.to_list r with
-                                 | [] ->
-                                   (* TODO Environment entries are not
-                                      necessarily key value pairs *)
-                                   Error "Splitting on '=' in env output failed"
-                                 | [ k; v ] -> Ok (k, v)
-                                 | l ->
-                                   Js.log l;
-                                   Error
-                                     "Splitting on '=' in env output returned \
-                                      more than two items")
-                          |> Js.Array.reduce
-                               (fun acc kv ->
-                                 match kv with
-                                 | Ok kv -> kv :: acc
-                                 | Error msg ->
-                                   Js.log msg;
-                                   acc)
-                               []
-                          |> Js.Dict.fromList |> R.return))
-             ; lsp = (fun () -> (name, [| "exec"; "ocamllsp" |]))
+                 Cmd.output cmd ~args:[| "exec"; "env" |]
+                   ~cwd:(Fpath.toString root)
+                 |> okThen (fun stdout ->
+                        stdout |> Js.String.split "\n"
+                        |> Js.Array.map (fun x -> Js.String.split "=" x)
+                        |> Js.Array.map (fun r ->
+                               match Array.to_list r with
+                               | [] ->
+                                 (* TODO Environment entries are not necessarily
+                                    key value pairs *)
+                                 Error "Splitting on '=' in env output failed"
+                               | [ k; v ] -> Ok (k, v)
+                               | l ->
+                                 Js.log l;
+                                 Error
+                                   "Splitting on '=' in env output returned \
+                                    more than two items")
+                        |> Js.Array.reduce
+                             (fun acc kv ->
+                               match kv with
+                               | Ok kv -> kv :: acc
+                               | Error msg ->
+                                 Js.log msg;
+                                 acc)
+                             []
+                        |> Js.Dict.fromList |> R.return)
+             ; lsp = (name, [| "exec"; "ocamllsp" |])
              }
              |> R.return)
   end
@@ -402,16 +331,16 @@ end = struct
            |> Array.map (fun (pm, _used) -> pm)
            |> Array.to_list |> R.return |> Js.Promise.resolve)
 
-  let setupToolChain spec = spec.setup ()
+  let setupToolChain spec = spec.setup
 
-  let lsp spec = spec.lsp ()
+  let lsp spec = spec.lsp
 
-  let env spec = spec.env ()
+  let env spec = spec.env
 
   let globalSpec env =
-    { setup = (fun () -> Js.Promise.resolve (Ok ()))
-    ; lsp = (fun () -> ("ocamllsp", [||]))
-    ; env = (fun () -> env |> R.return |> Js.Promise.resolve)
+    { setup = Js.Promise.resolve (Ok ())
+    ; lsp = ("ocamllsp", [||])
+    ; env = env |> R.return |> Js.Promise.resolve
     }
 
   module Manifest : sig
@@ -558,11 +487,7 @@ let init ~env ~folder =
          match
            List.filter
              (fun (x, _) ->
-               match
-                 List.find_opt (fun y -> y = x) availablePackageManagers
-               with
-               | Some _ -> true
-               | None -> false)
+               List.exists (fun y -> y = x) availablePackageManagers)
              alreadyUsedPackageManagers
          with
          | [] ->

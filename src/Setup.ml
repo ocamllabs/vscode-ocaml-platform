@@ -51,32 +51,6 @@ module Internal = struct
   let reportError t errorMsg = reportError' t "error" errorMsg
 end
 
-module Esy = struct
-  open Bindings.ChildProcess
-  include Internal
-
-  let make () = make ()
-
-  let run eventEmitter projectPath =
-    reportProgress eventEmitter 0.1;
-    exec "esy" (Options.make ~cwd:projectPath ())
-    |> then_ (fun _ ->
-           reportProgress eventEmitter 1.;
-           reportEnd eventEmitter;
-           resolve ())
-end
-
-module Opam = struct
-  include Internal
-
-  let make () = make ()
-
-  let run eventEmitter _ =
-    reportProgress eventEmitter 1.;
-    reportEnd eventEmitter;
-    resolve ()
-end
-
 module Bsb = struct
   module E = struct
     type t =
@@ -124,7 +98,7 @@ module Bsb = struct
 
   let make () = make ()
 
-  let runSetupChain eventEmitter folder =
+  let runSetupChain esyCmd esyEnv eventEmitter folder =
     let open Bindings in
     let hiddenEsyRoot = Path.join [| folder; ".vscode"; "esy" |] in
     Rimraf.run hiddenEsyRoot
@@ -145,11 +119,10 @@ module Bsb = struct
     |> then_ (function
          | Error e -> Error e |> resolve
          | Ok () ->
-           Command.Esy.install ~p:hiddenEsyRoot
+           Cmd.output esyCmd ~cwd:hiddenEsyRoot
+             ~args:[| "install"; "-P"; hiddenEsyRoot |]
            |> then_ (function
-                | Error e ->
-                  Error (E.EsyInstallFailure (Command.Esy.E.toString e))
-                  |> resolve
+                | Error msg -> Error (E.EsyInstallFailure msg) |> resolve
                 | Ok _stdout ->
                   reportProgress eventEmitter 0.1;
                   AzurePipelines.getBuildID ()
@@ -183,7 +156,11 @@ module Bsb = struct
     |> then_ (function
          | Ok () ->
            reportProgress eventEmitter 93.33;
-           Command.Unzip.run ~p:hiddenEsyRoot "cache.zip"
+           Cmd.make ~cmd:"unzip" ~env:esyEnv
+           |> Js.Promise.then_ (function
+                | Error msg -> Js.Promise.resolve (Error msg)
+                | Ok unzip ->
+                  Cmd.output unzip ~args:[| "cache.zip" |] ~cwd:hiddenEsyRoot)
            |> then_ (function
                 | Error _unzipCmdError ->
                   Error (E.CacheFailure "Failed to unzip downloaded cache")
@@ -193,7 +170,8 @@ module Bsb = struct
     |> then_ (function
          | Ok () ->
            reportProgress eventEmitter 96.66;
-           Command.Esy.importDependencies ~p:hiddenEsyRoot
+           Cmd.output esyCmd ~cwd:hiddenEsyRoot
+             ~args:[| "import-dependencies"; "-P"; hiddenEsyRoot |]
            |> then_ (fun r ->
                   resolve
                     ( match r with
@@ -204,15 +182,15 @@ module Bsb = struct
          | Error e -> Error e |> resolve
          | Ok () ->
            reportProgress eventEmitter 99.99;
-           Command.Esy.build ~p:hiddenEsyRoot
+           Cmd.output esyCmd ~cwd:hiddenEsyRoot
+             ~args:[| "build"; "-P"; hiddenEsyRoot |]
            |> then_ (fun r ->
                   resolve
                     ( match r with
                     | Ok _esyCmdOutput -> Ok ()
-                    | Error e ->
-                      Error (E.EsyBuildFailure (Command.Esy.E.toString e)) )))
+                    | Error msg -> Error (E.EsyBuildFailure msg) )))
 
-  let run eventEmitter projectPath =
+  let run esyCmd esyEnv eventEmitter projectPath =
     let open Bindings in
     let manifestPath = Path.join [| projectPath; "package.json" |] in
     let open Js.Promise in
@@ -222,7 +200,7 @@ module Bsb = struct
            let open Option in
            (let open Json in
            parse manifest >>| CheckBucklescriptCompat.run >>| function
-           | Ok () -> runSetupChain eventEmitter folder
+           | Ok () -> runSetupChain esyCmd esyEnv eventEmitter folder
            | Error e -> resolve (Error (E.BucklescriptCompatFailure e)))
            |> toPromise (E.SetupChainFailure "Failed to parse manifest file"))
     |> then_ (function
