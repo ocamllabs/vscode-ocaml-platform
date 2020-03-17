@@ -1,4 +1,3 @@
-open Bindings
 open Js.Promise
 
 module type T = sig
@@ -53,7 +52,7 @@ module Internal = struct
 end
 
 module Esy = struct
-  open ChildProcess
+  open Bindings.ChildProcess
   include Internal
 
   let make () = make ()
@@ -110,6 +109,7 @@ module Bsb = struct
   include Internal
 
   let download url file ~progress ~end_ ~error ~data =
+    let open Bindings in
     let stream = RequestProgress.requestProgress (Request.request url) in
     RequestProgress.onProgress stream (fun state ->
         progress
@@ -119,11 +119,13 @@ module Bsb = struct
     RequestProgress.onError stream error;
     RequestProgress.pipe stream (Fs.createWriteStream file)
 
-  let dropAnEsyJSON path = Fs.writeFile path thisProjectsEsyJson
+  let dropAnEsyJSON path =
+    Bindings.Fs.writeFile path Bindings.thisProjectsEsyJson
 
   let make () = make ()
 
   let runSetupChain eventEmitter folder =
+    let open Bindings in
     let hiddenEsyRoot = Path.join [| folder; ".vscode"; "esy" |] in
     Rimraf.run hiddenEsyRoot
     |> then_ (function
@@ -152,20 +154,16 @@ module Bsb = struct
                   reportProgress eventEmitter 0.1;
                   AzurePipelines.getBuildID ()
                   |> then_ (function
-                       | Ok id -> AzurePipelines.getDownloadURL id
-                       | Error e -> Error e |> resolve)
+                       | Ok id ->
+                         id |> AzurePipelines.getDownloadURL
+                         |> Js.Promise.then_ (function
+                              | Ok url -> resolve (Ok url)
+                              | Error msg ->
+                                Error (E.CacheFailure msg) |> resolve)
+                       | Error msg -> Error (E.CacheFailure msg) |> resolve)
                   |> then_ (function
                        | Ok url -> Ok url |> resolve
-                       | Error e -> (
-                         let open AzurePipelines.E in
-                         match e with
-                         | DownloadFailure _
-                         | UnsupportedOS
-                         | InvalidJSONType _
-                         | MissingField _
-                         | InvalidFirstArrayElement
-                         | Failure _ ->
-                           resolve (Error (E.CacheFailure "<TODO>")) ))))
+                       | Error e -> Error e |> resolve)))
     |> then_ (function
          | Ok downloadUrl ->
            Js.log2 "download" downloadUrl;
@@ -181,8 +179,7 @@ module Bsb = struct
                  ~error:(fun e ->
                    (resolve (Error (E.CacheFailure e##message)) [@bs]))
                  ~end_:(fun () -> (resolve (Ok ()) [@bs])))
-         | Error (_thisIsWhereCacheFailureCouldBeReported : E.t) ->
-           resolve (Error (E.CacheFailure "Couldn't compute downloadUrl")))
+         | Error cacheFailureReason -> resolve (Error cacheFailureReason))
     |> then_ (function
          | Ok () ->
            reportProgress eventEmitter 93.33;
@@ -216,6 +213,7 @@ module Bsb = struct
                       Error (E.EsyBuildFailure (Command.Esy.E.toString e)) )))
 
   let run eventEmitter projectPath =
+    let open Bindings in
     let manifestPath = Path.join [| projectPath; "package.json" |] in
     let open Js.Promise in
     let folder = Filename.dirname manifestPath in

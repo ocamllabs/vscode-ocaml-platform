@@ -2,71 +2,48 @@ open Bindings
 
 module E = struct
   type t =
-    | DownloadFailure of string
-    | UnsupportedOS
     | InvalidJSONType of string
     | MissingField of string
     | InvalidFirstArrayElement
-    | Failure of string
 
   let toString = function
-    | DownloadFailure url -> {j| Could not download $url |j}
-    | UnsupportedOS ->
-      "We detected a platform for which we couldn't find cached builds"
     | InvalidJSONType value ->
       {j|Field $value in Azure's response was undefined|j}
     | MissingField k -> {j| Response from Azure did not contain build $k |j}
     | InvalidFirstArrayElement -> "Unexpected array value in Azure response"
-    | Failure url -> {j| Failed to download $url |j}
 end
 
 module JSONResponse = struct
   module CamlArray = Array
-  open Js
+
+  type buildIdObject = { id : int }
 
   let getBuildId responseText =
-    try
-      let json = Json.parseExn responseText in
-      match Js.Json.classify json with
-      | JSONObject dict -> (
-        match Dict.get dict "value" with
-        | None -> Error (E.InvalidJSONType "value")
-        | Some json -> (
-          match Js.Json.classify json with
-          | JSONArray builds -> (
-            let o = CamlArray.get builds 0 in
-            match Json.classify o with
-            | JSONObject dict -> (
-              match Dict.get dict "id" with
-              | Some id -> (
-                match Json.classify id with
-                | JSONNumber n -> Ok n
-                | _ -> Error (E.InvalidJSONType "id") )
-              | None -> Error (E.InvalidJSONType "id") )
-            | _ -> Error E.InvalidFirstArrayElement )
-          | _ -> Error (E.MissingField "value") ) )
-      | _ -> Error (E.InvalidJSONType "<Entire azure response>")
-    with _ -> Error (E.InvalidJSONType "<Entire azure response>")
+    let getBuildId' json =
+      let open Json.Decode in
+      let buildIdObject json = { id = field "id" int json } in
+      let valueArray = field "value" (array buildIdObject) json in
+      valueArray.(0).id
+    in
+    match Json.parse responseText with
+    | Some json -> Ok (getBuildId' json)
+    | None -> Error "getBuildId(): responseText could not be parsed"
+
+  type downloadUrlObject = { downloadUrl : string }
 
   let getDownloadURL responseText =
+    let open Json.Decode in
     try
-      let json = Json.parseExn responseText in
-      match Js.Json.classify json with
-      | JSONObject dict -> (
-        match Dict.get dict "resource" with
-        | None -> Error (E.MissingField "resource")
-        | Some json -> (
-          match Json.classify json with
-          | JSONObject dict -> (
-            match Dict.get dict "downloadUrl" with
-            | Some id -> (
-              match Json.classify id with
-              | JSONString s -> Ok s
-              | _ -> Error (E.InvalidJSONType "downloadUrl") )
-            | None -> Error (E.MissingField "downloadUrl") )
-          | _ -> Error (E.InvalidJSONType "resource") ) )
-      | _ -> Error (E.InvalidJSONType "<entire azure response>")
-    with _ -> Error (E.InvalidJSONType "<entire azure response>")
+      match Json.parse responseText with
+      | Some json ->
+        let downloadUrlObject json =
+          { downloadUrl = field "downloadUrl" string json }
+        in
+        let resource = field "resource" downloadUrlObject json in
+        Ok resource.downloadUrl
+      | None -> Error "getDownloadURL(): could not parse responseText"
+    with _ ->
+      Error "getDownloadURL(): field() failed on 'resource' or 'downloadUrl'"
 end
 
 let restBase = "https://dev.azure.com/arrowresearch/"
@@ -99,13 +76,17 @@ let getBuildID () =
   |> then_ (fun r ->
          resolve
            ( match r with
-           | Ok response -> JSONResponse.getBuildId response
+           | Ok response -> (
+             try JSONResponse.getBuildId response
+             with _ ->
+               Error
+                 {j|Could not get field 'id' from json response $response |j} )
            | Error e -> (
              match e with
-             | Https.E.Failure url -> Error (E.DownloadFailure url) ) ))
+             | Https.E.Failure url -> Error {j| Could not download $url |j} ) ))
 
 let getDownloadURL latestBuildID =
-  let latestBuildID = Js.Float.toString latestBuildID in
+  let latestBuildID = Js.Int.toString latestBuildID in
   match artifactName with
   | Some artifactName ->
     Https.getCompleteResponse
@@ -113,6 +94,9 @@ let getDownloadURL latestBuildID =
     |> then_ (fun r ->
            resolve
              ( match r with
-             | Error (Https.E.Failure url) -> Error (E.Failure url)
+             | Error (Https.E.Failure url) ->
+               Error {j| Failed to download $url |j}
              | Ok url -> JSONResponse.getDownloadURL url ))
-  | None -> resolve (Error E.UnsupportedOS)
+  | None ->
+    resolve
+      (Error "We detected a platform for which we couldn't find cached builds")

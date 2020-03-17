@@ -28,5 +28,5 @@ let activate _context =
          Js.Promise.resolve (Ok ()))
   |> handleError Window.showErrorMessage
   |> Js.Promise.catch (fun e ->
-         let message = Bindings.Error.ofPromiseError e in
+         let message = Bindings.JsError.ofPromiseError e in
          Window.showErrorMessage {j|Error: $message|j})

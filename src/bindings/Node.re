@@ -20,7 +20,7 @@ module Process = {
   };
 };
 
-module Error = {
+module JsError = {
   type t = {. "message": string};
   [@bs.new] external make: string => t = "Error";
   let ofPromiseError = [%raw
@@ -89,7 +89,8 @@ module Fs = {
   };
 
   [@bs.module "fs"]
-  external stat': (. string, (Js.Nullable.t(Error.t), Stat.t) => unit) => unit =
+  external stat':
+    (. string, (Js.Nullable.t(JsError.t), Stat.t) => unit) => unit =
     "stat";
 
   let stat = p =>
@@ -106,7 +107,7 @@ module Fs = {
 
   [@bs.module "fs"]
   external readDir':
-    (. string, (Js.Nullable.t(Error.t), array(string)) => unit) => unit =
+    (. string, (Js.Nullable.t(JsError.t), array(string)) => unit) => unit =
     "readdir";
   let readDir = path =>
     Promise.make((~resolve, ~reject as _) => {
@@ -200,7 +201,8 @@ module ChildProcess = {
 
   [@bs.val] [@bs.module "child_process"]
   external exec:
-    (string, Options.t, (Js.Nullable.t(Error.t), string, string) => unit) => t =
+    (string, Options.t, (Js.Nullable.t(JsError.t), string, string) => unit) =>
+    t =
     "exec";
 
   let exec = (cmd, options) => {
@@ -270,7 +272,7 @@ module RequestProgress = {
   let onProgress = (t, cb) => {
     onProgress'(t, "progress", cb);
   };
-  [@bs.send] external onError': (t, string, Error.t => unit) => unit = "on";
+  [@bs.send] external onError': (t, string, JsError.t => unit) => unit = "on";
   let onError = (t, cb) => {
     onError'(t, "error", cb);
   };
