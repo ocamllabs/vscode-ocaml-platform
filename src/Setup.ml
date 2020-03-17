@@ -98,7 +98,7 @@ module Bsb = struct
 
   let make () = make ()
 
-  let runSetupChain esyCmd esyEnv eventEmitter folder =
+  let runSetupChain esyCmd envWithUnzip eventEmitter folder =
     let open Bindings in
     let hiddenEsyRoot = Path.join [| folder; ".vscode"; "esy" |] in
     Rimraf.run hiddenEsyRoot
@@ -156,7 +156,7 @@ module Bsb = struct
     |> then_ (function
          | Ok () ->
            reportProgress eventEmitter 93.33;
-           Cmd.make ~cmd:"unzip" ~env:esyEnv
+           Cmd.make ~cmd:"unzip" ~env:envWithUnzip
            |> Js.Promise.then_ (function
                 | Error msg -> Js.Promise.resolve (Error msg)
                 | Ok unzip ->
@@ -192,15 +192,15 @@ module Bsb = struct
 
   let run esyCmd esyEnv eventEmitter projectPath =
     let open Bindings in
+    let projectPath = Path.join [| projectPath; ".."; ".." |] in
     let manifestPath = Path.join [| projectPath; "package.json" |] in
     let open Js.Promise in
-    let folder = Filename.dirname manifestPath in
     Fs.readFile manifestPath
     |> then_ (fun manifest ->
            let open Option in
            (let open Json in
            parse manifest >>| CheckBucklescriptCompat.run >>| function
-           | Ok () -> runSetupChain esyCmd esyEnv eventEmitter folder
+           | Ok () -> runSetupChain esyCmd esyEnv eventEmitter projectPath
            | Error e -> resolve (Error (E.BucklescriptCompatFailure e)))
            |> toPromise (E.SetupChainFailure "Failed to parse manifest file"))
     |> then_ (function

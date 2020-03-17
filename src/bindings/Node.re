@@ -184,13 +184,6 @@ module Fs = {
 
 module ChildProcess = {
   type t = {. "exitCode": int};
-  module E = {
-    type t =
-      | ExecFailure;
-    let toString =
-      fun
-      | ExecFailure => "Error during exec";
-  };
 
   module Options = {
     type t;
@@ -214,7 +207,7 @@ module ChildProcess = {
             if (Js.Nullable.isNullable(err)) {
               resolve(. Ok(((cp^)##exitCode, stdout, stderr)));
             } else {
-              resolve(. Error(E.ExecFailure));
+              resolve(. Error({j| Exec failed during $cmd |j}));
             }
           );
         ();

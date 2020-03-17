@@ -50,7 +50,7 @@ let output ~args ~cwd { cmd; env } =
   |> Js.Promise.then_ (fun r ->
          let r =
            match r with
-           | Error e -> e |> ChildProcess.E.toString |> R.fail
+           | Error e -> e |> R.fail
            | Ok (exitCode, stdout, stderr) ->
              if exitCode = 0 then
                Ok stdout
