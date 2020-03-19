@@ -40,6 +40,12 @@ let setupWithProgressIndicator esyCmd ~envWithUnzip:esyEnv folder =
       run esyCmd esyEnv eventEmitter folder
       |> then_ (fun () -> resolve !succeeded))
 
+module Binaries = struct
+  let esy = "esy"
+
+  let opam = "opam"
+end
+
 module PackageManager : sig
   type t
 
@@ -86,30 +92,22 @@ end = struct
     ; t : t
     }
 
-  module Esy = struct
-    let name = "esy"
+  let esy root = Esy root
 
-    let make ~env ~root =
-      Cmd.make ~cmd:"esy" ~env
-      |> Js.Promise.then_ (function
-           | Error msg -> Js.Promise.resolve (Error msg)
-           | Ok cmd -> Ok { cmd; t = Esy root } |> Js.Promise.resolve)
-  end
+  let opam root = Opam root
 
-  module Opam = struct
-    let name = "opam"
-
-    let make ~env ~root =
+  let make ~env ~t =
+    match t with
+    | Opam root ->
       Cmd.make ~cmd:"opam" ~env
       |> Js.Promise.then_ (function
            | Error msg -> Js.Promise.resolve (Error msg)
            | Ok cmd -> Ok { cmd; t = Opam root } |> Js.Promise.resolve)
-  end
-
-  let make ~env ~t =
-    match t with
-    | Opam root -> Opam.make ~env ~root
-    | Esy root -> Esy.make ~env ~root
+    | Esy root ->
+      Cmd.make ~cmd:"esy" ~env
+      |> Js.Promise.then_ (function
+           | Error msg -> Js.Promise.resolve (Error msg)
+           | Ok cmd -> Ok { cmd; t = Esy root } |> Js.Promise.resolve)
     | Global ->
       Cmd.make ~env ~cmd:"bash"
       |> Js.Promise.then_ (function
@@ -117,8 +115,8 @@ end = struct
            | Error msg -> Error msg |> Js.Promise.resolve)
 
   let toName = function
-    | Opam _ -> Opam.name
-    | Esy _ -> Esy.name
+    | Opam _ -> Binaries.opam
+    | Esy _ -> Binaries.esy
     | Global -> "global"
 
   let ofName root = function
@@ -134,22 +132,17 @@ end = struct
 
   let specOfName ~env ~name ~root =
     match name with
-    | x when x = Opam.name -> Opam.make ~env ~root
-    | x when x = Esy.name -> Esy.make ~env ~root
-    | _ -> "Invalid package manager name" |> R.fail |> Js.Promise.resolve
+    | x when x = Binaries.opam -> make ~env ~t:(opam root)
+    | x when x = Binaries.esy -> make ~env ~t:(esy root)
+    | x -> "Invalid package manager name: " ^ x |> R.fail |> Js.Promise.resolve
 
   let available ~env ~root =
     let supportedPackageManagers =
       [ Esy root; Esy Fpath.(root / ".vscode" / "esy"); Opam root ]
     in
-    let getPackageManagerInfo = function
-      | Opam root -> (root, Opam.name)
-      | Esy root -> (root, Esy.name)
-      | Global -> failwith "Shouldn't be here"
-    in
     supportedPackageManagers
     |> List.map (fun (pm : t) ->
-           let _manifestDir, name = getPackageManagerInfo pm in
+           let name = toName pm in
            Cmd.make ~env ~cmd:name
            |> Js.Promise.then_ (function
                 | Ok _ -> (pm, true) |> Js.Promise.resolve
@@ -257,20 +250,15 @@ end = struct
     | Global -> ("ocamllsp", [||])
 
   let compare x y =
-    Printf.sprintf "Comparing %s and %s" (toString x) (toString y) |> Js.log;
-    let v =
-      match (x, y) with
-      | Esy root1, Esy root2 -> Fpath.compare root1 root2
-      | Opam root1, Opam root2 -> Fpath.compare root1 root2
-      | Global, Global -> 0
-      | Opam _, Esy _ -> -1
-      | Esy _, Opam _ -> 1
-      | Esy _, Global -> -1
-      | Opam _, Global -> -1
-      | Global, _ -> 1
-    in
-    Js.log {j|Comparision returned $v|j};
-    v
+    match (x, y) with
+    | Esy root1, Esy root2 -> Fpath.compare root1 root2
+    | Opam root1, Opam root2 -> Fpath.compare root1 root2
+    | Global, Global -> 0
+    | Opam _, Esy _ -> -1
+    | Esy _, Opam _ -> 1
+    | Esy _, Global -> -1
+    | Opam _, Global -> -1
+    | Global, _ -> 1
 
   let rec find name = function
     | [] -> None
@@ -293,10 +281,6 @@ end = struct
           else
             find name xs
         | Error _ -> None ) )
-
-  let esy root = Esy root
-
-  let opam root = Opam root
 end
 
 module PackageManagerSet : sig
