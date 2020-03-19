@@ -12,6 +12,21 @@ let handleError (f : string -> unit Js.Promise.t) :
     | Ok () -> Js.Promise.resolve ()
     | Error msg -> f msg)
 
+module Client = struct
+  let make () : Vscode.LanguageClient.clientOptions =
+    { documentSelector =
+        [| { scheme = "file"; language = "ocaml" }
+         ; { scheme = "file"; language = "reason" }
+        |]
+    }
+end
+
+module Server = struct
+  let make (toolchain : Toolchain.t) : Vscode.LanguageClient.serverOptions =
+    let command, args = Toolchain.lsp toolchain in
+    { command; args; options = { env = Process.env } }
+end
+
 let activate _context =
   Js.Dict.set Process.env "OCAMLRUNPARAM" "b";
   Js.Dict.set Process.env "OCAML_LSP_SERVER_LOG" "-";
