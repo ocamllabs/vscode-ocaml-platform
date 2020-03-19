@@ -23,7 +23,7 @@ end
 module Internal = struct
   type t
 
-  external make : unit -> t = "events" [@@bs.module] [@@bs.new]
+  external makeEventEmitter : unit -> t = "events" [@@bs.module] [@@bs.new]
 
   external onProgress' : t -> string -> (float -> unit) -> unit = "on"
     [@@bs.send]
@@ -57,12 +57,12 @@ module Bsb = struct
       | RimrafFailed of string
       | SetupChainFailure of string
       | CacheFailure of string
+      | BucklescriptCompatFailure of string
       | EsyBuildFailure of string
       | EsyImportDependenciesFailure
       | EsyInstallFailure of string
-      | BucklescriptCompatFailure of CheckBucklescriptCompat.E.t
       | InvalidPath of string
-      | Failure of string
+      | ManifestParseFailure of string
 
     let toString = function
       | RimrafFailed msg ->
@@ -71,11 +71,9 @@ module Bsb = struct
       | EsyBuildFailure msg -> "'esy build' failed. Reason: " ^ msg
       | EsyImportDependenciesFailure -> "'esy import-dependencies' failed"
       | EsyInstallFailure msg -> "'esy install' failed. Reason: " ^ msg
-      | BucklescriptCompatFailure e ->
-        let msg = CheckBucklescriptCompat.E.toString e in
-        {j| BucklescriptCompatFailure: $msg |j}
+      | BucklescriptCompatFailure msg -> {j| BucklescriptCompatFailure: $msg |j}
       | CacheFailure msg -> {j| Azure artifacts cache failure: $msg |j}
-      | Failure reason -> {j| Bsb setup failed. Reason: $reason |j}
+      | ManifestParseFailure reason -> reason
       | InvalidPath p ->
         {j| Setup failed with because of invalid path provided to it: $p |j}
   end
@@ -96,7 +94,7 @@ module Bsb = struct
   let dropAnEsyJSON path =
     Bindings.Fs.writeFile path Bindings.thisProjectsEsyJson
 
-  let make () = make ()
+  let make () = makeEventEmitter ()
 
   let runSetupChain esyCmd envWithUnzip eventEmitter folder =
     let open Bindings in
@@ -197,12 +195,16 @@ module Bsb = struct
     let open Js.Promise in
     Fs.readFile manifestPath
     |> then_ (fun manifest ->
-           let open Option in
-           (let open Json in
-           parse manifest >>| CheckBucklescriptCompat.run >>| function
-           | Ok () -> runSetupChain esyCmd esyEnv eventEmitter projectPath
-           | Error e -> resolve (Error (E.BucklescriptCompatFailure e)))
-           |> toPromise (E.SetupChainFailure "Failed to parse manifest file"))
+           match Json.parse manifest with
+           | Some json -> (
+             match json |> CheckBucklescriptCompat.run with
+             | Ok () -> runSetupChain esyCmd esyEnv eventEmitter projectPath
+             | Error msg -> resolve (Error (E.BucklescriptCompatFailure msg)) )
+           | None ->
+             Error
+               (E.ManifestParseFailure
+                  ("Failed to parse manifest at " ^ manifestPath))
+             |> Js.Promise.resolve)
     |> then_ (function
          | Ok () ->
            reportEnd eventEmitter;

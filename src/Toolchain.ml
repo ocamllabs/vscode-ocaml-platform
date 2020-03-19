@@ -1,10 +1,6 @@
-module Caml = struct
-  module Array = Array
-end
-
-module R = Result
 open Bindings
 open Utils
+module R = Result
 
 type commandAndArgs = string * string array
 

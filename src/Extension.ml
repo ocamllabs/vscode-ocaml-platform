@@ -1,13 +1,6 @@
-open LSP
 open Bindings
 
-let then_ f =
-  Js.Promise.then_ (function
-    | Ok x -> f x
-    | Error e -> Js.Promise.resolve (Error e))
-
-let handleError (f : string -> unit Js.Promise.t) :
-    (unit, string) result Js.Promise.t -> unit Js.Promise.t =
+let handleError f =
   Js.Promise.then_ (function
     | Ok () -> Js.Promise.resolve ()
     | Error msg -> f msg)
@@ -32,8 +25,12 @@ let activate _context =
   Js.Dict.set Process.env "OCAML_LSP_SERVER_LOG" "-";
   let folder = Workspace.rootPath in
   Toolchain.init ~env:Process.env ~folder
-  |> then_ Toolchain.setup
-  |> then_ (fun toolchain ->
+  |> Js.Promise.then_ (function
+       | Ok toolchain -> Toolchain.setup toolchain
+       | Error msg -> Error msg |> Js.Promise.resolve)
+  |> Js.Promise.then_ (function
+       | Error msg -> Error msg |> Js.Promise.resolve
+       | Ok toolchain ->
          let serverOptions = Server.make toolchain in
          let client =
            LanguageClient.make ~id:"ocaml" ~name:"OCaml Language Server"

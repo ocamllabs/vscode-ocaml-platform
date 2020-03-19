@@ -1,21 +1,5 @@
 open Utils
 
-module E = struct
-  type t =
-    | NoBsPlatform
-    | IncompatibleBucklescript
-    | NoDepsOrDevDeps
-
-  let toString = function
-    | NoBsPlatform ->
-      "'bs-platform' was expected in the 'dependencies' section of the \
-       manifest file, but was not found!"
-    | IncompatibleBucklescript -> "Bucklescript <6 not supported"
-    | NoDepsOrDevDeps ->
-      "The manifest file doesn't seem to contain `dependencies` or \
-       `devDependencies` property"
-end
-
 let processDeps dependencies =
   match Js.Dict.get dependencies "bs-platform" with
   | Some bsPlatformVersion ->
@@ -23,8 +7,11 @@ let processDeps dependencies =
     then
       Ok ()
     else
-      Error E.IncompatibleBucklescript
-  | None -> Error E.NoBsPlatform
+      Error "Bucklescript <6 not supported"
+  | None ->
+    Error
+      "'bs-platform' was expected in the 'dependencies' section of the \
+       manifest file, but was not found!"
 
 let run manifestJson =
   let open Json.Decode in
@@ -37,4 +24,7 @@ let run manifestJson =
     processDeps dependenciesJson
   | Some dependenciesJson, Some devDependenciesJson ->
     processDeps (mergeDicts dependenciesJson devDependenciesJson)
-  | None, None -> Error E.NoDepsOrDevDeps
+  | None, None ->
+    Error
+      "The manifest file doesn't seem to contain `dependencies` or \
+       `devDependencies` property"

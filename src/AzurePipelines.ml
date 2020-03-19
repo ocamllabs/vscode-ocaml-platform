@@ -1,4 +1,5 @@
 open Bindings
+open Utils
 
 module E = struct
   type t =
@@ -13,9 +14,7 @@ module E = struct
     | InvalidFirstArrayElement -> "Unexpected array value in Azure response"
 end
 
-module JSONResponse = struct
-  module CamlArray = Array
-
+module RESTResponse = struct
   type buildIdObject = { id : int }
 
   let getBuildId responseText =
@@ -58,8 +57,9 @@ let os =
   | _ -> None
 
 let artifactName =
-  let open Option in
-  os >>| fun os -> {j|cache-$os-install|j}
+  match os with
+  | Some os -> Some {j|cache-$os-install|j}
+  | None -> None
 
 let master = "branchName=refs%2Fheads%2Fmaster"
 
@@ -77,7 +77,7 @@ let getBuildID () =
          resolve
            ( match r with
            | Ok response -> (
-             try JSONResponse.getBuildId response
+             try RESTResponse.getBuildId response
              with _ ->
                Error
                  {j|Could not get field 'id' from json response $response |j} )
@@ -96,7 +96,7 @@ let getDownloadURL latestBuildID =
              ( match r with
              | Error (Https.E.Failure url) ->
                Error {j| Failed to download $url |j}
-             | Ok url -> JSONResponse.getDownloadURL url ))
+             | Ok url -> RESTResponse.getDownloadURL url ))
   | None ->
     resolve
       (Error "We detected a platform for which we couldn't find cached builds")

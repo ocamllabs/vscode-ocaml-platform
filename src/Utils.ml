@@ -1,5 +1,3 @@
-module R = Result
-
 let env_sep =
   match Sys.unix with
   | true -> ":"
@@ -17,16 +15,6 @@ let propertyExists json property =
     | None -> false )
   | _ -> false
 
-let mapResultAndResolvePromise f r =
-  let open Js.Promise in
-  let open R in
-  r >>| f |> resolve
-
-let bindResultAndResolvePromise f r =
-  let open Js.Promise in
-  let open R in
-  r >>= f |> resolve
-
 let getSubDict dict key =
   ((dict |. Js.Dict.get) key |. Belt.Option.flatMap) Js.Json.decodeObject
 
@@ -41,3 +29,15 @@ let okThen f =
         ( match x with
         | Ok x -> f x
         | Error e -> Error e ))
+
+module Result = struct
+  open Belt.Result
+
+  let ( >>= ) = flatMap
+
+  let ( >>| ) = map
+
+  let return x = Ok x
+
+  let fail x = Error x
+end
