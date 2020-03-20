@@ -1,18 +1,18 @@
 open Bindings
 open Utils
 module R = Result
+module P = Js.Promise
 
 type commandAndArgs = string * string array
 
 let promptSetup ~f =
-  let open Js.Promise in
   Window.showQuickPick [| "yes"; "no" |]
     (Window.QuickPickOptions.make ~canPickMany:false
        ~placeHolder:{j|Setup this project's toolchain with 'esy'?|j} ())
-  |> Js.Promise.then_ (function
-       | None -> resolve (Error "Please setup the toolchain")
+  |> P.then_ (function
+       | None -> P.resolve (Error "Please setup the toolchain")
        | Some choice when choice = "yes" -> f ()
-       | Some _ -> resolve (Error "Please setup the toolchain"))
+       | Some _ -> P.resolve (Error "Please setup the toolchain"))
 
 let setupWithProgressIndicator esyCmd ~envWithUnzip:esyEnv folder =
   let open Setup.Bsb in
@@ -31,9 +31,8 @@ let setupWithProgressIndicator esyCmd ~envWithUnzip:esyEnv folder =
       onEnd eventEmitter (fun () ->
           (progress.report [%bs.obj { increment = 100 }] [@bs]));
       onError eventEmitter (fun errorMsg -> succeeded := Error errorMsg);
-      let open Js.Promise in
       run esyCmd esyEnv eventEmitter folder
-      |> then_ (fun () -> resolve !succeeded))
+      |> P.then_ (fun () -> P.resolve !succeeded))
 
 module Binaries = struct
   let esy = "esy"
@@ -96,17 +95,17 @@ end = struct
     match kind with
     | Opam root ->
       Cmd.make ~cmd:"opam" ~env
-      |> Js.Promise.then_ (function
+      |> P.then_ (function
            | Error msg -> Js.Promise.resolve (Error msg)
            | Ok cmd -> Ok { cmd; kind = Opam root } |> Js.Promise.resolve)
     | Esy root ->
       Cmd.make ~cmd:"esy" ~env
-      |> Js.Promise.then_ (function
+      |> P.then_ (function
            | Error msg -> Js.Promise.resolve (Error msg)
            | Ok cmd -> Ok { cmd; kind = Esy root } |> Js.Promise.resolve)
     | Global ->
       Cmd.make ~env ~cmd:"bash"
-      |> Js.Promise.then_ (function
+      |> P.then_ (function
            | Ok cmd -> Ok { cmd; kind = Global } |> Js.Promise.resolve
            | Error msg -> Error msg |> Js.Promise.resolve)
 
@@ -140,11 +139,11 @@ end = struct
     |> List.map (fun (pm : t) ->
            let name = toName pm in
            Cmd.make ~env ~cmd:name
-           |> Js.Promise.then_ (function
+           |> P.then_ (function
                 | Ok _ -> (pm, true) |> Js.Promise.resolve
                 | Error _ -> (pm, false) |> Js.Promise.resolve))
     |> Array.of_list |> Js.Promise.all
-    |> Js.Promise.then_ (fun r ->
+    |> P.then_ (fun r ->
            Js.Array.filter (fun (_pm, available) -> available) r
            |> Array.map (fun (pm, _used) -> pm)
            |> Array.to_list |> R.return |> Js.Promise.resolve)
@@ -197,7 +196,7 @@ end = struct
     | Esy root ->
       let rootStr = root |> Fpath.toString in
       Cmd.output cmd ~args:[| "status"; "-P"; rootStr |] ~cwd:rootStr
-      |> Js.Promise.then_ (fun r ->
+      |> P.then_ (fun r ->
              let r =
                match r with
                | Error _ -> R.return false
@@ -211,7 +210,7 @@ end = struct
                    |> R.return )
              in
              Js.Promise.resolve r)
-      |> Js.Promise.then_ (function
+      |> P.then_ (function
            | Error e -> e |> R.fail |> Js.Promise.resolve
            | Ok isProjectReadyForDev ->
              if isProjectReadyForDev then
@@ -228,7 +227,7 @@ end = struct
                        (progress.report
                           [%bs.obj { increment = int_of_float 1. }] [@bs]);
                        Cmd.output cmd ~cwd:(root |> Fpath.toString) ~args:[||]
-                       |> Js.Promise.then_ (fun _ ->
+                       |> P.then_ (fun _ ->
                               (progress.report
                                  [%bs.obj { increment = int_of_float 100. }]
                                [@bs]);
@@ -295,7 +294,7 @@ end = struct
       Fs.stat
         (let open Fpath in
         projectRoot / "opam" |> toString)
-      |> Js.Promise.then_ (fun r ->
+      |> P.then_ (fun r ->
              let r =
                match r with
                | Error _ -> None
@@ -312,7 +311,7 @@ end = struct
         |> Fpath.show
       in
       Fs.readFile manifestFile
-      |> Js.Promise.then_ (fun manifest ->
+      |> P.then_ (fun manifest ->
              match Json.parse manifest with
              | None -> None |> Js.Promise.resolve
              | Some json ->
@@ -338,7 +337,7 @@ end = struct
       match Path.extname file with
       | ".json" ->
         Fs.readFile manifestFile
-        |> Js.Promise.then_ (fun manifest ->
+        |> P.then_ (fun manifest ->
                match Json.parse manifest with
                | Some json ->
                  if
@@ -354,20 +353,20 @@ end = struct
                  None |> Js.Promise.resolve)
       | ".opam" ->
         Fs.readFile manifestFile
-        |> Js.Promise.then_ (function
+        |> P.then_ (function
              | "" -> None |> Js.Promise.resolve
              | _ -> Some (PackageManager.opam projectRoot) |> Js.Promise.resolve)
       | _ -> None |> Js.Promise.resolve )
 
   let lookup projectRoot =
     Fs.readDir (Fpath.toString projectRoot)
-    |> Js.Promise.then_ (function
+    |> P.then_ (function
          | Error msg -> Js.Promise.resolve (Error msg)
          | Ok files ->
            files
            |> Js.Array.map (parse projectRoot)
            |> Js.Promise.all
-           |> Js.Promise.then_ (fun l ->
+           |> P.then_ (fun l ->
                   Ok
                     ( Js.Array.reduce
                         (fun acc x ->
@@ -400,8 +399,7 @@ let init ~env ~folder =
                Error "TODO: global toolchain"
              else
                Ok pms) )
-  |> Js.Promise.then_
-       (fun (availablePackageManagers, alreadyUsedPackageManagers) ->
+  |> P.then_ (fun (availablePackageManagers, alreadyUsedPackageManagers) ->
          let availablePackageManagers =
            match availablePackageManagers with
            | Ok x -> x |> PackageManagerSet.of_list
@@ -457,7 +455,7 @@ let init ~env ~folder =
                     "Which package manager would you like to manage the \
                      toolchain?"
                   ())
-             |> Js.Promise.then_ (function
+             |> P.then_ (function
                   | None ->
                     Js.Promise.resolve
                       (Error "showQuickPick() returned undefined")
@@ -466,7 +464,7 @@ let init ~env ~folder =
                     update config "packageManager" packageManager
                       (configurationTargetToJs Workspace)
                     (* Workspace *)
-                    |> Js.Promise.then_ (fun _ ->
+                    |> P.then_ (fun _ ->
                            match
                              PackageManager.find packageManager multipleChoices
                            with
@@ -480,13 +478,13 @@ let init ~env ~folder =
 
 let setup { spec; projectRoot } =
   PackageManager.setupToolChain projectRoot spec
-  |> Js.Promise.then_ (function
+  |> P.then_ (function
        | Error msg -> Error msg |> Js.Promise.resolve
        | Ok () -> PackageManager.env spec)
-  |> Js.Promise.then_ (function
+  |> P.then_ (function
        | Ok env -> Cmd.make ~cmd:"ocamllsp" ~env
        | Error e -> e |> R.fail |> Js.Promise.resolve)
-  |> Js.Promise.then_ (fun r ->
+  |> P.then_ (fun r ->
          let r =
            match r with
            | Ok _ -> Ok ({ spec; projectRoot } : t)
