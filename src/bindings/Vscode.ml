@@ -18,7 +18,14 @@ module WorkspaceConfiguration : sig
 
   val get : t -> string -> string option
 
-  val update : t -> string -> string -> int -> unit Js.Promise.t
+  type configurationTarget =
+    | Global
+    | Workspace
+    | WorkspaceFolder
+  [@@bs.deriving { jsConverter = newType }]
+
+  val update :
+    t -> string -> string -> abs_configurationTarget -> unit Js.Promise.t
 end = struct
   type t
 
@@ -26,7 +33,15 @@ end = struct
 
   let get workspaceConfig key = get' workspaceConfig key |> Js.Nullable.toOption
 
-  external update : t -> string -> string -> int -> unit Js.Promise.t = "update"
+  type configurationTarget =
+    | Global [@bs.as 1]
+    | Workspace [@bs.as 2]
+    | WorkspaceFolder
+  [@@bs.deriving { jsConverter = newType }]
+
+  external update :
+    t -> string -> string -> abs_configurationTarget -> unit Js.Promise.t
+    = "update"
     [@@bs.send]
 end
 
@@ -94,12 +109,18 @@ module Window : sig
 
   val activeTextEditor : activeTextEditor option
 
-  type withProgessConfig = < title : string ; location : int > Js.t
+  type location =
+    | SourceControl
+    | Window
+    | Notification
+  [@@bs.deriving { jsConverter = newType }]
+
+  type withProgressConfig = < title : string ; location : abs_location > Js.t
 
   type progress = { report : (< increment : int > Js.t -> unit[@bs]) }
 
   val withProgress :
-       withProgessConfig
+       withProgressConfig
     -> (progress -> ('a, 'b) result Js.Promise.t)
     -> ('a, 'b) result Js.Promise.t
 end = struct
@@ -147,12 +168,18 @@ end = struct
   external activeTextEditor : activeTextEditor option = "activeTextEditor"
     [@@bs.module "vscode"] [@@bs.scope "window"] [@@bs.val]
 
-  type withProgessConfig = < title : string ; location : int > Js.t
+  type location =
+    | SourceControl [@bs.as 1]
+    | Window [@bs.as 10]
+    | Notification [@bs.as 15]
+  [@@bs.deriving { jsConverter = newType }]
+
+  type withProgressConfig = < title : string ; location : abs_location > Js.t
 
   type progress = { report : (< increment : int > Js.t -> unit[@bs]) }
 
   external withProgress :
-       withProgessConfig
+       withProgressConfig
     -> (progress -> ('a, 'b) result Js.Promise.t)
     -> ('a, 'b) result Js.Promise.t = "withProgress"
     [@@bs.module "vscode"] [@@bs.scope "window"]

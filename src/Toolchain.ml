@@ -17,7 +17,10 @@ let promptSetup ~f =
 let setupWithProgressIndicator esyCmd ~envWithUnzip:esyEnv folder =
   let open Setup.Bsb in
   Window.withProgress
-    [%bs.obj { location = 15; title = "Setting up toolchain..." }]
+    [%bs.obj
+      { location = Window.locationToJs Window.Notification
+      ; title = "Setting up toolchain..."
+      }]
     (fun progress ->
       let succeeded = ref (Ok ()) in
       let eventEmitter = make () in
@@ -217,7 +220,9 @@ end = struct
                promptSetup ~f:(fun () ->
                    Window.withProgress
                      [%bs.obj
-                       { location = 15; title = "Setting up toolchain..." }]
+                       { location = Window.locationToJs Window.Notification
+                       ; title = "Setting up toolchain..."
+                       }]
                      (fun progress ->
                        (progress.report
                           [%bs.obj { increment = int_of_float 1. }] [@bs]);
@@ -456,8 +461,9 @@ let init ~env ~folder =
                     Js.Promise.resolve
                       (Error "showQuickPick() returned undefined")
                   | Some packageManager ->
-                    Vscode.WorkspaceConfiguration.update config "packageManager"
-                      packageManager 2
+                    let open Vscode.WorkspaceConfiguration in
+                    update config "packageManager" packageManager
+                      (configurationTargetToJs Workspace)
                     (* Workspace *)
                     |> Js.Promise.then_ (fun _ ->
                            match
