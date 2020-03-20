@@ -58,7 +58,8 @@ module PackageManager : sig
     -> root:Fpath.t
     -> (spec, string) result Js.Promise.t
 
-  val make : env:string Js.Dict.t -> t:t -> (spec, string) result Js.Promise.t
+  val make :
+    env:string Js.Dict.t -> kind:t -> (spec, string) result Js.Promise.t
 
   val setupToolChain : Fpath.t -> spec -> (unit, string) result Js.Promise.t
 
@@ -84,29 +85,29 @@ end = struct
 
   type spec =
     { cmd : Cmd.t
-    ; t : t
+    ; kind : t
     }
 
   let esy root = Esy root
 
   let opam root = Opam root
 
-  let make ~env ~t =
-    match t with
+  let make ~env ~kind =
+    match kind with
     | Opam root ->
       Cmd.make ~cmd:"opam" ~env
       |> Js.Promise.then_ (function
            | Error msg -> Js.Promise.resolve (Error msg)
-           | Ok cmd -> Ok { cmd; t = Opam root } |> Js.Promise.resolve)
+           | Ok cmd -> Ok { cmd; kind = Opam root } |> Js.Promise.resolve)
     | Esy root ->
       Cmd.make ~cmd:"esy" ~env
       |> Js.Promise.then_ (function
            | Error msg -> Js.Promise.resolve (Error msg)
-           | Ok cmd -> Ok { cmd; t = Esy root } |> Js.Promise.resolve)
+           | Ok cmd -> Ok { cmd; kind = Esy root } |> Js.Promise.resolve)
     | Global ->
       Cmd.make ~env ~cmd:"bash"
       |> Js.Promise.then_ (function
-           | Ok cmd -> Ok { cmd; t = Global } |> Js.Promise.resolve
+           | Ok cmd -> Ok { cmd; kind = Global } |> Js.Promise.resolve
            | Error msg -> Error msg |> Js.Promise.resolve)
 
   let toName = function
@@ -127,8 +128,8 @@ end = struct
 
   let specOfName ~env ~name ~root =
     match name with
-    | x when x = Binaries.opam -> make ~env ~t:(opam root)
-    | x when x = Binaries.esy -> make ~env ~t:(esy root)
+    | x when x = Binaries.opam -> make ~env ~kind:(opam root)
+    | x when x = Binaries.esy -> make ~env ~kind:(esy root)
     | x -> "Invalid package manager name: " ^ x |> R.fail |> Js.Promise.resolve
 
   let available ~env ~root =
@@ -149,8 +150,8 @@ end = struct
            |> Array.to_list |> R.return |> Js.Promise.resolve)
 
   let env spec =
-    let { cmd; t } = spec in
-    match t with
+    let { cmd; kind } = spec in
+    match kind with
     | Global -> Process.env |> R.return |> Js.Promise.resolve
     | Esy root ->
       Cmd.output cmd
@@ -190,8 +191,8 @@ end = struct
              |> Js.Dict.fromList |> R.return)
 
   let setupToolChain workspaceRoot spec =
-    let { cmd; t } = spec in
-    match t with
+    let { cmd; kind } = spec in
+    match kind with
     | Global -> Ok () |> Js.Promise.resolve
     | Esy root ->
       let rootStr = root |> Fpath.toString in
@@ -240,8 +241,8 @@ end = struct
     | Opam _ -> Js.Promise.resolve (Ok ())
 
   let lsp spec =
-    let { cmd; t } = spec in
-    match t with
+    let { cmd; kind } = spec in
+    match kind with
     | Opam _ -> (Cmd.binPath cmd, [| "exec"; "ocamllsp" |])
     | Esy root -> (Cmd.binPath cmd, [| "-P"; Fpath.toString root; "ocamllsp" |])
     | Global -> ("ocamllsp", [||])
@@ -431,11 +432,11 @@ let init ~env ~folder =
          | [] -> (
            Js.log "Will lookup toolchain from global env";
            match PackageManager.ofName projectRoot "<global>" with
-           | Ok t -> PackageManager.make ~env ~t
+           | Ok kind -> PackageManager.make ~env ~kind
            | Error msg -> Error msg |> Js.Promise.resolve )
          | [ obviousChoice ] ->
            Js.log2 "Toolchain detected" (PackageManager.toString obviousChoice);
-           PackageManager.make ~env ~t:obviousChoice
+           PackageManager.make ~env ~kind:obviousChoice
          | multipleChoices -> (
            let config = Vscode.Workspace.getConfiguration "ocaml" in
            match
@@ -469,7 +470,7 @@ let init ~env ~folder =
                            match
                              PackageManager.find packageManager multipleChoices
                            with
-                           | Some pm -> PackageManager.make ~env ~t:pm
+                           | Some pm -> PackageManager.make ~env ~kind:pm
                            | None ->
                              Js.Promise.resolve
                                (Error
