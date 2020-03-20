@@ -13,10 +13,18 @@ module Folder = struct
   let key f = f.uri.fsPath
 end
 
-module WorkspaceConfiguration = struct
+module WorkspaceConfiguration : sig
   type t
 
-  external get : t -> string -> string Js.Nullable.t = "get" [@@bs.send]
+  val get : t -> string -> string option
+
+  val update : t -> string -> string -> int -> unit Js.Promise.t
+end = struct
+  type t
+
+  external get' : t -> string -> string Js.Nullable.t = "get" [@@bs.send]
+
+  let get workspaceConfig key = get' workspaceConfig key |> Js.Nullable.toOption
 
   external update : t -> string -> string -> int -> unit Js.Promise.t = "update"
     [@@bs.send]
@@ -52,7 +60,49 @@ module Workspace = struct
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 end
 
-module Window = struct
+module Window : sig
+  module QuickPickOptions : sig
+    type t = < canPickMany : bool > Js.t
+
+    val make : ?canPickMany:bool -> ?placeHolder:string -> unit -> t
+  end
+
+  val showQuickPick :
+    string array -> QuickPickOptions.t -> string option Js.Promise.t
+
+  val showInformationMessage : string -> unit
+
+  val showErrorMessage : string -> 'a Js.Promise.t
+
+  type activeTextEditor = { document : document }
+
+  and document =
+    { getText : unit -> string
+    ; lineAt : int -> line
+    ; lineCount : int
+    ; fileName : string
+    }
+
+  and line = { range : range }
+
+  and range =
+    { start : rangeEdge
+    ; end_ : rangeEdge [@bs.as "end"]
+    }
+
+  and rangeEdge = { character : int }
+
+  val activeTextEditor : activeTextEditor option
+
+  type withProgessConfig = < title : string ; location : int > Js.t
+
+  type progress = { report : (< increment : int > Js.t -> unit[@bs]) }
+
+  val withProgress :
+       withProgessConfig
+    -> (progress -> ('a, 'b) result Js.Promise.t)
+    -> ('a, 'b) result Js.Promise.t
+end = struct
   module QuickPickOptions = struct
     type t = < canPickMany : bool > Js.t
 
@@ -60,10 +110,15 @@ module Window = struct
       [@@bs.obj]
   end
 
-  external showQuickPick :
-    (string array -> QuickPickOptions.t -> string Js.Nullable.t Js.Promise.t
-    [@bs]) = "showQuickPick"
+  external showQuickPick' :
+    string array -> QuickPickOptions.t -> string Js.Nullable.t Js.Promise.t
+    = "showQuickPick"
     [@@bs.module "vscode"] [@@bs.scope "window"]
+
+  let showQuickPick choices quickPickOptions =
+    showQuickPick' choices quickPickOptions
+    |> Js.Promise.then_ (fun choice ->
+           choice |> Js.Nullable.toOption |> Js.Promise.resolve)
 
   external showInformationMessage : string -> unit = "showInformationMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]

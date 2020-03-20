@@ -6,17 +6,13 @@ type commandAndArgs = string * string array
 
 let promptSetup ~f =
   let open Js.Promise in
-  (Window.showQuickPick [| "yes"; "no" |]
-     (Window.QuickPickOptions.make ~canPickMany:false
-        ~placeHolder:{j|Setup this project's toolchain with 'esy'?|j} ()) [@bs])
-  |> Js.Promise.then_ (fun choice ->
-         match Js.Nullable.toOption choice with
-         | None -> resolve (Error "Please setup the toolchain")
-         | Some choice ->
-           if choice = "yes" then
-             f ()
-           else
-             resolve (Error "Please setup the toolchain"))
+  Window.showQuickPick [| "yes"; "no" |]
+    (Window.QuickPickOptions.make ~canPickMany:false
+       ~placeHolder:{j|Setup this project's toolchain with 'esy'?|j} ())
+  |> Js.Promise.then_ (function
+       | None -> resolve (Error "Please setup the toolchain")
+       | Some choice when choice = "yes" -> f ()
+       | Some _ -> resolve (Error "Please setup the toolchain"))
 
 let setupWithProgressIndicator esyCmd ~envWithUnzip:esyEnv folder =
   let open Setup.Bsb in
@@ -438,47 +434,41 @@ let init ~env ~folder =
          | multipleChoices -> (
            let config = Vscode.Workspace.getConfiguration "ocaml" in
            match
-             ( config
-               |. Vscode.WorkspaceConfiguration.get "packageManager"
-               |> Js.Nullable.toOption
-             , config
-               |. Vscode.WorkspaceConfiguration.get "toolChainRoot"
-               |> Js.Nullable.toOption )
+             ( config |. Vscode.WorkspaceConfiguration.get "packageManager"
+             , config |. Vscode.WorkspaceConfiguration.get "toolChainRoot" )
            with
            | Some name, Some root ->
              PackageManager.specOfName ~env ~name ~root:(Fpath.ofString root)
            | Some name, None ->
              PackageManager.specOfName ~env ~name ~root:projectRoot
            | _ ->
-             (Window.showQuickPick
-                ( multipleChoices
-                |> List.map (fun pm -> PackageManager.toName pm)
-                |> Array.of_list )
-                (Window.QuickPickOptions.make ~canPickMany:false
-                   ~placeHolder:
-                     "Which package manager would you like to manage the \
-                      toolchain?"
-                   ()) [@bs])
-             |> Js.Promise.then_ (fun packageManager ->
-                    match Js.Nullable.toOption packageManager with
-                    | None ->
-                      Js.Promise.resolve
-                        (Error "showQuickPick() returned undefined")
-                    | Some packageManager ->
-                      Vscode.WorkspaceConfiguration.update config
-                        "packageManager" packageManager 2
-                      (* Workspace *)
-                      |> Js.Promise.then_ (fun _ ->
-                             match
-                               PackageManager.find packageManager
-                                 multipleChoices
-                             with
-                             | Some pm -> PackageManager.make ~env ~t:pm
-                             | None ->
-                               Js.Promise.resolve
-                                 (Error
-                                    "Weird invalid state: selected choice was \
-                                     not found in the list"))) ))
+             Window.showQuickPick
+               ( multipleChoices
+               |> List.map (fun pm -> PackageManager.toName pm)
+               |> Array.of_list )
+               (Window.QuickPickOptions.make ~canPickMany:false
+                  ~placeHolder:
+                    "Which package manager would you like to manage the \
+                     toolchain?"
+                  ())
+             |> Js.Promise.then_ (function
+                  | None ->
+                    Js.Promise.resolve
+                      (Error "showQuickPick() returned undefined")
+                  | Some packageManager ->
+                    Vscode.WorkspaceConfiguration.update config "packageManager"
+                      packageManager 2
+                    (* Workspace *)
+                    |> Js.Promise.then_ (fun _ ->
+                           match
+                             PackageManager.find packageManager multipleChoices
+                           with
+                           | Some pm -> PackageManager.make ~env ~t:pm
+                           | None ->
+                             Js.Promise.resolve
+                               (Error
+                                  "Weird invalid state: selected choice was \
+                                   not found in the list"))) ))
   |> okThen (fun spec -> Ok { spec; projectRoot })
 
 let setup { spec; projectRoot } =
