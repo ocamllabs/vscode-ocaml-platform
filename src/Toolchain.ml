@@ -58,7 +58,7 @@ module PackageManager : sig
     -> root:Fpath.t
     -> (spec, string) result Js.Promise.t
 
-  val make :
+  val makeSpec :
     env:string Js.Dict.t -> kind:t -> (spec, string) result Js.Promise.t
 
   val setupToolChain : Fpath.t -> spec -> (unit, string) result Js.Promise.t
@@ -92,7 +92,7 @@ end = struct
 
   let opam root = Opam root
 
-  let make ~env ~kind =
+  let makeSpec ~env ~kind =
     match kind with
     | Opam root ->
       Cmd.make ~cmd:"opam" ~env
@@ -128,8 +128,8 @@ end = struct
 
   let specOfName ~env ~name ~root =
     match name with
-    | x when x = Binaries.opam -> make ~env ~kind:(opam root)
-    | x when x = Binaries.esy -> make ~env ~kind:(esy root)
+    | x when x = Binaries.opam -> makeSpec ~env ~kind:(opam root)
+    | x when x = Binaries.esy -> makeSpec ~env ~kind:(esy root)
     | x -> "Invalid package manager name: " ^ x |> R.fail |> Js.Promise.resolve
 
   let available ~env ~root =
@@ -432,11 +432,11 @@ let init ~env ~folder =
          | [] -> (
            Js.log "Will lookup toolchain from global env";
            match PackageManager.ofName projectRoot "<global>" with
-           | Ok kind -> PackageManager.make ~env ~kind
+           | Ok kind -> PackageManager.makeSpec ~env ~kind
            | Error msg -> Error msg |> Js.Promise.resolve )
          | [ obviousChoice ] ->
            Js.log2 "Toolchain detected" (PackageManager.toString obviousChoice);
-           PackageManager.make ~env ~kind:obviousChoice
+           PackageManager.makeSpec ~env ~kind:obviousChoice
          | multipleChoices -> (
            let config = Vscode.Workspace.getConfiguration "ocaml" in
            match
@@ -470,7 +470,7 @@ let init ~env ~folder =
                            match
                              PackageManager.find packageManager multipleChoices
                            with
-                           | Some pm -> PackageManager.make ~env ~kind:pm
+                           | Some pm -> PackageManager.makeSpec ~env ~kind:pm
                            | None ->
                              Js.Promise.resolve
                                (Error
