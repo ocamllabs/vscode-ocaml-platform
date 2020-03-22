@@ -3,7 +3,7 @@ import { commands, ExtensionContext, workspace } from "vscode";
 import {
   LanguageClient,
   LanguageClientOptions,
-  ServerOptions
+  ServerOptions,
 } from "vscode-languageclient";
 
 let client: LanguageClient;
@@ -20,16 +20,16 @@ export async function activate(context: ExtensionContext) {
       env: {
         ...process.env,
         OCAMLRUNPARAM: "b",
-        MERLIN_LOG: "-"
-      }
-    }
+        MERLIN_LOG: "-",
+      },
+    },
   };
 
   // If the extension is launched in debug mode then the debug server options are used
   // Otherwise the run options are used
   const serverOptions: ServerOptions = {
     run: commonOptions,
-    debug: commonOptions
+    debug: commonOptions,
   };
 
   // Options to control the language client
@@ -38,12 +38,12 @@ export async function activate(context: ExtensionContext) {
     documentSelector: [
       { scheme: "file", language: "ocaml" },
       { scheme: "file", language: "reason" },
-      { scheme: "file", language: "ocamllex" }
+      { scheme: "file", language: "ocamllex" },
     ],
     synchronize: {
       // Notify the server about file changes to '.clientrc files contained in the workspace
-      fileEvents: workspace.createFileSystemWatcher("**/.clientrc")
-    }
+      fileEvents: workspace.createFileSystemWatcher("**/.clientrc"),
+    },
   };
 
   const createClient = () => {
