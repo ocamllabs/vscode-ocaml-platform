@@ -3,6 +3,11 @@ open Utils
 module R = Result
 module P = Js.Promise
 
+type packageManager =
+  | Opam of Fpath.t
+  | Esy of Fpath.t
+  | Global
+
 type commandAndArgs = string * string array
 
 let promptSetup ~f =
@@ -41,15 +46,13 @@ module Binaries = struct
 end
 
 module PackageManager : sig
-  type t
-
   type spec
 
-  val ofName : Fpath.t -> string -> (t, string) result
+  val ofName : Fpath.t -> string -> (packageManager, string) result
 
-  val toName : t -> string
+  val toName : packageManager -> string
 
-  val toString : t -> string
+  val toString : packageManager -> string
 
   val specOfName :
        env:string Js.Dict.t
@@ -57,33 +60,29 @@ module PackageManager : sig
     -> root:Fpath.t
     -> (spec, string) result P.t
 
-  val makeSpec : env:string Js.Dict.t -> kind:t -> (spec, string) result P.t
+  val makeSpec :
+    env:string Js.Dict.t -> kind:packageManager -> (spec, string) result P.t
 
   val setupToolChain : Fpath.t -> spec -> (unit, string) result P.t
 
   val available :
-    env:string Js.Dict.t -> root:Fpath.t -> (t list, string) result P.t
+       env:string Js.Dict.t
+    -> root:Fpath.t
+    -> (packageManager list, string) result P.t
 
   val env : spec -> (string Js.Dict.t, string) result P.t
 
   val lsp : spec -> commandAndArgs
 
-  val compare : t -> t -> int
+  val find : string -> packageManager list -> packageManager option
 
-  val find : string -> t list -> t option
+  val esy : Fpath.t -> packageManager
 
-  val esy : Fpath.t -> t
-
-  val opam : Fpath.t -> t
+  val opam : Fpath.t -> packageManager
 end = struct
-  type t =
-    | Opam of Fpath.t
-    | Esy of Fpath.t
-    | Global
-
   type spec =
     { cmd : Cmd.t
-    ; kind : t
+    ; kind : packageManager
     }
 
   let esy root = Esy root
@@ -128,7 +127,7 @@ end = struct
       [ Esy root; Esy Fpath.(root / ".vscode" / "esy"); Opam root ]
     in
     supportedPackageManagers
-    |> List.map (fun (pm : t) ->
+    |> List.map (fun (pm : packageManager) ->
            let name = toName pm in
            Cmd.make ~env ~cmd:name
            |> P.then_ (function
@@ -238,17 +237,6 @@ end = struct
     | Esy root -> (Cmd.binPath cmd, [| "-P"; Fpath.toString root; "ocamllsp" |])
     | Global -> ("ocamllsp", [||])
 
-  let compare x y =
-    match (x, y) with
-    | Esy root1, Esy root2 -> Fpath.compare root1 root2
-    | Opam root1, Opam root2 -> Fpath.compare root1 root2
-    | Global, Global -> 0
-    | Opam _, Esy _ -> -1
-    | Esy _, Opam _ -> 1
-    | Esy _, Global -> -1
-    | Opam _, Global -> -1
-    | Global, _ -> 1
-
   let rec find name = function
     | [] -> None
     | x :: xs -> (
@@ -273,9 +261,21 @@ end = struct
 end
 
 module PackageManagerSet : sig
-  include Set.S with type elt = PackageManager.t
-end =
-  Set.Make (PackageManager)
+  include Set.S with type elt = packageManager
+end = Set.Make (struct
+  type t = packageManager
+
+  let compare x y =
+    match (x, y) with
+    | Esy root1, Esy root2 -> Fpath.compare root1 root2
+    | Opam root1, Opam root2 -> Fpath.compare root1 root2
+    | Global, Global -> 0
+    | Opam _, Esy _ -> -1
+    | Esy _, Opam _ -> 1
+    | Esy _, Global -> -1
+    | Opam _, Global -> -1
+    | Global, _ -> 1
+end)
 
 module Manifest : sig
   val lookup : Fpath.t -> (PackageManagerSet.t, string) result P.t
