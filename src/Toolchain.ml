@@ -9,6 +9,11 @@ type packageManager =
   | Esy of Fpath.t
   | Global
 
+type spec =
+  { cmd : Cmd.t
+  ; kind : packageManager
+  }
+
 type commandAndArgs = string * string array
 
 let promptSetup ~f =
@@ -47,8 +52,6 @@ module Binaries = struct
 end
 
 module PackageManager : sig
-  type spec
-
   val ofName : Fpath.t -> string -> (packageManager, string) result
 
   val toName : packageManager -> string
@@ -66,14 +69,7 @@ module PackageManager : sig
 
   val setupToolChain : Fpath.t -> spec -> (unit, string) result P.t
 
-  val supported :
-       env:string Js.Dict.t
-    -> root:Fpath.t
-    -> (packageManager list, string) result P.t
-
   val env : spec -> (string Js.Dict.t, string) result P.t
-
-  val lsp : spec -> commandAndArgs
 
   val find : string -> packageManager list -> packageManager option
 
@@ -81,11 +77,6 @@ module PackageManager : sig
 
   val opam : Fpath.t -> packageManager
 end = struct
-  type spec =
-    { cmd : Cmd.t
-    ; kind : packageManager
-    }
-
   let esy root = Esy root
 
   let opam root = Opam root
@@ -122,23 +113,6 @@ end = struct
     | x when x = Binaries.opam -> makeSpec ~env ~kind:(opam root)
     | x when x = Binaries.esy -> makeSpec ~env ~kind:(esy root)
     | x -> "Invalid package manager name: " ^ x |> R.fail |> P.resolve
-
-  let supported ~env ~root =
-    let supportedPackageManagers =
-      [ Esy root; Esy Fpath.(root / ".vscode" / "esy"); Opam root ]
-    in
-    supportedPackageManagers
-    |> List.map (fun (pm : packageManager) ->
-           let name = toName pm in
-           Cmd.make ~env ~cmd:name
-           |> P.then_ (function
-                | Ok _ -> (pm, true) |> P.resolve
-                | Error _ -> (pm, false) |> P.resolve))
-    |> Array.of_list |> P.all
-    |> P.then_ (fun r ->
-           Js.Array.filter (fun (_pm, supported) -> supported) r
-           |> Array.map (fun (pm, _used) -> pm)
-           |> Array.to_list |> R.return |> P.resolve)
 
   let env spec =
     let { cmd; kind } = spec in
@@ -231,26 +205,13 @@ end = struct
              ))
     | Opam _ -> P.resolve (Ok ())
 
-  let lsp spec =
-    let { cmd; kind } = spec in
-    match kind with
-    | Opam _ -> (Cmd.binPath cmd, [| "exec"; "ocamllsp" |])
-    | Esy root -> (Cmd.binPath cmd, [| "-P"; Fpath.toString root; "ocamllsp" |])
-    | Global -> ("ocamllsp", [||])
-
+  (* TODO: relies on compare *)
   let rec find name = function
     | [] -> None
     | x :: xs -> (
       match x with
       | Global -> None
-      | Esy root -> (
-        match ofName root name with
-        | Ok y ->
-          if compare x y = 0 then
-            Some x
-          else
-            find name xs
-        | Error _ -> None )
+      | Esy root
       | Opam root -> (
         match ofName root name with
         | Ok y ->
@@ -278,6 +239,22 @@ end = Set.Make (struct
     | Global, _ -> 1
 end)
 
+let supportedPackageManagers ~env ~root =
+  let supportedPackageManagers =
+    [ Esy root; Esy Fpath.(root / ".vscode" / "esy"); Opam root ]
+  in
+  supportedPackageManagers
+  |> List.map (fun packageManager ->
+         Cmd.make ~env ~cmd:(PackageManager.toName packageManager)
+         |> P.then_ (function
+              | Error _ -> None |> P.resolve
+              | Ok _ -> Some packageManager |> P.resolve))
+  |> Array.of_list |> P.all
+  |> P.then_ (fun results ->
+         results
+         |. Belt.Array.keepMap (fun pm -> pm)
+         |> Array.to_list |> R.return |> P.resolve)
+
 let makeSet ~debugMsg lst =
   Js.Console.info debugMsg;
   match lst with
@@ -290,28 +267,10 @@ let makeSet ~debugMsg lst =
       msg;
     PackageManagerSet.empty
 
-type t =
-  { spec : PackageManager.spec
-  ; projectRoot : Fpath.t
-  }
-
 type resources =
-  { spec : PackageManager.spec
+  { spec : spec
   ; projectRoot : Fpath.t
   }
-
-let lookupPackageManager projectRoot =
-  Manifest.lookup projectRoot
-  |> okThen (function
-       | [] -> Error "TODO: global toolchain"
-       | pms ->
-         let pms =
-           pms
-           |> List.map (function
-                | `Opam root -> PackageManager.opam root
-                | `Esy root -> PackageManager.esy root)
-         in
-         Ok pms)
 
 let packageManagersListOfLookup = function
   | [] -> Error "TODO: global toolchain"
@@ -346,7 +305,7 @@ let init ~env ~folder =
   let usedPMs =
     Manifest.lookup projectRoot |> okThen packageManagersListOfLookup
   in
-  P.all2 (PackageManager.supported ~root:projectRoot ~env, usedPMs)
+  P.all2 (supportedPackageManagers ~root:projectRoot ~env, usedPMs)
   |> P.then_ (fun (supportedPMs, usedPMs) ->
          let supportedPMs =
            makeSet ~debugMsg:"supported package managers" supportedPMs
@@ -396,9 +355,13 @@ let setup { spec; projectRoot } =
   |> P.then_ (fun r ->
          let r =
            match r with
-           | Ok _ -> Ok ({ spec; projectRoot } : t)
+           | Ok _ -> Ok ({ spec; projectRoot } : resources)
            | Error msg -> Error {j| Toolchain initialisation failed: $msg |j}
          in
          P.resolve r)
 
-let lsp (t : t) = PackageManager.lsp t.spec
+let lsp { spec = { kind; cmd } } =
+  match kind with
+  | Opam _ -> (Cmd.binPath cmd, [| "exec"; "ocamllsp" |])
+  | Esy root -> (Cmd.binPath cmd, [| "-P"; Fpath.toString root; "ocamllsp" |])
+  | Global -> ("ocamllsp", [||])

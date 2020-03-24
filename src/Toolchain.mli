@@ -1,5 +1,3 @@
-type t
-
 type resources
 
 val init :
@@ -7,6 +5,6 @@ val init :
   -> folder:string
   -> (resources, string) result Js.Promise.t
 
-val setup : resources -> (t, string) result Js.Promise.t
+val setup : resources -> (resources, string) result Js.Promise.t
 
-val lsp : t -> string * string array
+val lsp : resources -> string * string array
