@@ -83,6 +83,7 @@ module Bsb = struct
                   Error ("'esy install' failed. Reason: " ^ msg) |> resolve
                 | Ok _stdout ->
                   reportProgress eventEmitter 0.1;
+                  (* See comment at the bottom *)
                   AzurePipelines.getBuildID ()
                   |> then_ (function
                        | Ok id ->
@@ -108,6 +109,8 @@ module Bsb = struct
                  (Path.join [| hiddenEsyRoot; "cache.zip" |])
                  ~progress:(fun progressFraction ->
                    let percent = progressFraction *. 80.0 in
+                   (* The cache restoration is assumed to take up 80%. More
+                      explanation at the bottom *)
                    reportProgress eventEmitter (percent -. !lastProgress);
                    lastProgress := percent)
                  ~data:(fun _ -> ())
@@ -118,6 +121,7 @@ module Bsb = struct
     |> then_ (function
          | Ok () ->
            reportProgress eventEmitter 93.33;
+           (* See comment at the bottom explaining 93.33 *)
            Cmd.make ~cmd:"unzip" ~env:envWithUnzip
            |> Js.Promise.then_ (function
                 | Error msg -> Js.Promise.resolve (Error msg)
@@ -132,6 +136,7 @@ module Bsb = struct
     |> then_ (function
          | Ok () ->
            reportProgress eventEmitter 96.66;
+           (* See comment at the bottom explaining 96.66 *)
            Cmd.output esyCmd ~cwd:hiddenEsyRoot
              ~args:[| "import-dependencies"; "-P"; hiddenEsyRoot |]
            |> then_ (fun r ->
@@ -146,6 +151,7 @@ module Bsb = struct
          | Error e -> Error e |> resolve
          | Ok () ->
            reportProgress eventEmitter 99.99;
+           (* See comment at the bottom explaining the 99.99 *)
            Cmd.output esyCmd ~cwd:hiddenEsyRoot
              ~args:[| "build"; "-P"; hiddenEsyRoot |]
            |> then_ (fun r ->
@@ -179,3 +185,10 @@ module Bsb = struct
            reportError eventEmitter e;
            resolve ())
 end
+
+(* Why the are progress percentages hardcoded the way they are?
+
+   Azure's REST API doesn't set the file size of the zip file in the headers.
+   This makes it hard to report download progress correctly. We work around this
+   by assuming that the download process takes up 80% of the setup time and
+   assign some approximate hardcoded time for the rest of the setups *)
