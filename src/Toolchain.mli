@@ -29,7 +29,7 @@ val init :
   -> folder:string
   -> (resources, string) result Js.Promise.t
 
-(* runSetup is a stateful function that triggers setup instructions
+(* runSetup is a effectful function that triggers setup instructions
  * automatically for the user. At present, this functionality
  * resides in the plugin itself for bucklescript users - to
  * reliably use ocamllsp for bucklescript users, a sandboxed
