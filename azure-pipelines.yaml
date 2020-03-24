@@ -16,7 +16,7 @@ jobs:
   - template: .ci/build-platform.yml
     parameters:
       platform: macOS
-      vmImage: macOS-10.13
+      vmImage: macOS-latest
 
   # Need windows-2019 to do esy import/export-dependencies
   # which assumes you have bsdtar (tar.exe) in your system
