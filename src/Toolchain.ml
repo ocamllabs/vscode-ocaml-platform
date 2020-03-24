@@ -3,78 +3,17 @@ open Utils
 module P = Js.Promise
 module WorkspaceCfg = Vscode.WorkspaceConfiguration
 
-type packageManager =
-  | Opam of Fpath.t
-  | Esy of Fpath.t
-  | Global
-
-type spec =
-  { cmd : Cmd.t
-  ; kind : packageManager
-  }
-
-let promptSetup ~f =
-  Window.showQuickPick [| "yes"; "no" |]
-    (Window.QuickPickOptions.make ~canPickMany:false
-       ~placeHolder:{j|Setup this project's toolchain with 'esy'?|j} ())
-  |> P.then_ (function
-       | None -> P.resolve (Error "Please setup the toolchain")
-       | Some choice when choice = "yes" -> f ()
-       | Some _ -> P.resolve (Error "Please setup the toolchain"))
-
-let setupWithProgressIndicator esyCmd ~envWithUnzip:esyEnv folder =
-  let open Setup.Bsb in
-  Window.withProgress
-    [%bs.obj
-      { location = Window.locationToJs Window.Notification
-      ; title = "Setting up toolchain..."
-      }]
-    (fun progress ->
-      let succeeded = ref (Ok ()) in
-      let eventEmitter = make () in
-      onProgress eventEmitter (fun percent ->
-          Js.log2 "Percentage:" percent;
-          (progress.report
-             [%bs.obj { increment = int_of_float (percent *. 100.) }] [@bs]));
-      onEnd eventEmitter (fun () ->
-          (progress.report [%bs.obj { increment = 100 }] [@bs]));
-      onError eventEmitter (fun errorMsg -> succeeded := Error errorMsg);
-      run esyCmd esyEnv eventEmitter folder
-      |> P.then_ (fun () -> P.resolve !succeeded))
-
 module Binaries = struct
   let esy = "esy"
 
   let opam = "opam"
 end
 
-module PackageManager : sig
-  val ofName : Fpath.t -> string -> (packageManager, string) result
-
-  val toName : packageManager -> string
-
-  val toString : packageManager -> string
-
-  val specOfName :
-       env:string Js.Dict.t
-    -> name:string
-    -> root:Fpath.t
-    -> (spec, string) result P.t
-
-  val makeSpec :
-    env:string Js.Dict.t -> kind:packageManager -> (spec, string) result P.t
-
-  val env : spec -> (string Js.Dict.t, string) result P.t
-
-  val find : string -> packageManager list -> packageManager option
-
-  val esy : Fpath.t -> packageManager
-
-  val opam : Fpath.t -> packageManager
-end = struct
-  let esy root = Esy root
-
-  let opam root = Opam root
+module PackageManager = struct
+  type t =
+    | Opam of Fpath.t
+    | Esy of Fpath.t
+    | Global
 
   let toName = function
     | Opam _ -> Binaries.opam
@@ -97,74 +36,6 @@ end = struct
     | Esy _ -> "esy"
     | Global -> "bash"
 
-  let makeSpec ~env ~kind =
-    Cmd.make ~env ~cmd:(toCmdString kind)
-    |> P.then_ (function
-         | Error msg -> P.resolve (Error msg)
-         | Ok cmd -> P.resolve (Ok { cmd; kind }))
-
-  let specOfName ~env ~name ~root =
-    match name with
-    | x when x = Binaries.opam -> makeSpec ~env ~kind:(opam root)
-    | x when x = Binaries.esy -> makeSpec ~env ~kind:(esy root)
-    | x -> Error ("Invalid package manager name: " ^ x) |> P.resolve
-
-  let parseOpamEnvOutput opamEnvOutput =
-    opamEnvOutput |> Js.String.split "\n"
-    |. Belt.Array.keepMap (fun r ->
-           match r |> Js.String.split "=" |> Array.to_list with
-           | [ k; v ] -> Some (k, v)
-           | [] ->
-             (* TODO Environment entries are not necessarily key value pairs *)
-             Js.Console.info "Splitting on '=' in env output failed";
-             None
-           | l ->
-             Js.Console.info2
-               "Splitting on '=' in env output returned more than two items: "
-               (l |> Array.of_list |> Js.Array.joinWith ",");
-             None)
-    |> Js.Dict.fromArray |> Result.return
-
-  let env spec =
-    let { cmd; kind } = spec in
-    match kind with
-    | Global -> Ok Process.env |> P.resolve
-    | Esy root ->
-      Cmd.output cmd
-        ~args:[| "command-env"; "--json"; "-P"; Fpath.toString root |]
-        ~cwd:(Fpath.toString root)
-      |> okThen (fun stdout ->
-             match Json.parse stdout with
-             | Some json ->
-               json |> Json.Decode.dict Json.Decode.string |> Result.return
-             | None ->
-               Error ("'esy command-env' returned non-json output: " ^ stdout))
-    | Opam root ->
-      Cmd.output cmd ~args:[| "exec"; "env" |] ~cwd:(Fpath.toString root)
-      |> okThen parseOpamEnvOutput
-
-  (* TODO: relies on compare *)
-  let rec find name = function
-    | [] -> None
-    | x :: xs -> (
-      match x with
-      | Global -> None
-      | Esy root
-      | Opam root -> (
-        match ofName root name with
-        | Ok y ->
-          if compare x y = 0 then
-            Some x
-          else
-            find name xs
-        | Error _ -> None ) )
-end
-
-module PackageManagerSet : sig
-  include Set.S with type elt = packageManager
-end = Set.Make (struct
-  type t = packageManager
-
   let compare x y =
     match (x, y) with
     | Esy root1, Esy root2 -> Fpath.compare root1 root2
@@ -175,11 +46,116 @@ end = Set.Make (struct
     | Esy _, Global -> -1
     | Opam _, Global -> -1
     | Global, _ -> 1
-end)
+
+  let makeEsy root = Esy root
+
+  let makeOpam root = Opam root
+end
+
+module PackageManagerSet : sig
+  include Set.S with type elt = PackageManager.t
+end =
+  Set.Make (PackageManager)
+
+type spec =
+  { cmd : Cmd.t
+  ; kind : PackageManager.t
+  }
+
+let promptSetup ~f =
+  Window.showQuickPick [| "yes"; "no" |]
+    (Window.QuickPickOptions.make ~canPickMany:false
+       ~placeHolder:{j|Setup this project's toolchain with 'esy'?|j} ())
+  |> P.then_ (function
+       | None -> P.resolve (Error "Please setup the toolchain")
+       | Some choice when choice = "yes" -> f ()
+       | Some _ -> P.resolve (Error "Please setup the toolchain"))
+
+let setupWithProgressIndicator esyCmd ~envWithUnzip:esyEnv folder =
+  let open Setup.Bsb in
+  Window.withProgress
+    [%bs.obj
+      { location = Window.locationToJs Window.Notification
+      ; title = "Setting up toolchain..."
+      }]
+    (fun progress ->
+      let succeeded = ref (Ok ()) in
+      let eventEmitter = make () in
+      onProgress eventEmitter (fun percent ->
+          Js.Console.info2 "Percentage:" percent;
+          (progress.report
+             [%bs.obj { increment = int_of_float (percent *. 100.) }] [@bs]));
+      onEnd eventEmitter (fun () ->
+          (progress.report [%bs.obj { increment = 100 }] [@bs]));
+      onError eventEmitter (fun errorMsg -> succeeded := Error errorMsg);
+      run esyCmd esyEnv eventEmitter folder
+      |> P.then_ (fun () -> P.resolve !succeeded))
+
+let makeSpec ~env ~kind =
+  Cmd.make ~env ~cmd:(PackageManager.toCmdString kind)
+  |> P.then_ (function
+       | Error msg -> P.resolve (Error msg)
+       | Ok cmd -> P.resolve (Ok { cmd; kind }))
+
+let specOfName ~env ~name ~root =
+  match name with
+  | x when x = Binaries.opam -> makeSpec ~env ~kind:(PackageManager.makeOpam root)
+  | x when x = Binaries.esy -> makeSpec ~env ~kind:(PackageManager.makeEsy root)
+  | x -> Error ("Invalid package manager name: " ^ x) |> P.resolve
+
+let parseOpamEnvOutput opamEnvOutput =
+  opamEnvOutput |> Js.String.split "\n"
+  |. Belt.Array.keepMap (fun r ->
+         match r |> Js.String.split "=" |> Array.to_list with
+         | [ k; v ] -> Some (k, v)
+         | [] ->
+           (* TODO Environment entries are not necessarily key value pairs *)
+           Js.Console.info "Splitting on '=' in env output failed";
+           None
+         | l ->
+           Js.Console.info2
+             "Splitting on '=' in env output returned more than two items: "
+             (l |> Array.of_list |> Js.Array.joinWith ",");
+           None)
+  |> Js.Dict.fromArray |> Result.return
+
+let env spec =
+  let { cmd; kind } = spec in
+  match kind with
+  | Global -> Ok Process.env |> P.resolve
+  | Esy root ->
+    Cmd.output cmd
+      ~args:[| "command-env"; "--json"; "-P"; Fpath.toString root |]
+      ~cwd:(Fpath.toString root)
+    |> okThen (fun stdout ->
+           match Json.parse stdout with
+           | Some json ->
+             json |> Json.Decode.dict Json.Decode.string |> Result.return
+           | None ->
+             Error ("'esy command-env' returned non-json output: " ^ stdout))
+  | Opam root ->
+    Cmd.output cmd ~args:[| "exec"; "env" |] ~cwd:(Fpath.toString root)
+    |> okThen parseOpamEnvOutput
+
+(* TODO: relies on compare *)
+let rec find name = function
+  | [] -> None
+  | x :: xs -> (
+    match x with
+    | PackageManager.Global -> None
+    | Esy root
+    | Opam root -> (
+      match PackageManager.ofName root name with
+      | Ok y ->
+        if compare x y = 0 then
+          Some x
+        else
+          find name xs
+      | Error _ -> None ) )
 
 let supportedPackageManagers ~env ~root =
   let supportedPackageManagers =
-    [ Esy root; Esy Fpath.(root / ".vscode" / "esy"); Opam root ]
+    [ PackageManager.Esy root; Esy Fpath.(root / ".vscode" / "esy"); Opam root ]
   in
   supportedPackageManagers
   |> List.map (fun packageManager ->
@@ -216,8 +192,8 @@ let packageManagersListOfLookup = function
     Ok
       (List.map
          (function
-           | `Opam root -> PackageManager.opam root
-           | `Esy root -> PackageManager.esy root)
+           | `Opam root -> PackageManager.makeOpam root
+           | `Esy root -> PackageManager.makeEsy root)
          pms)
 
 let selectPackageManager ~config choices =
@@ -233,7 +209,7 @@ let selectPackageManager ~config choices =
          WorkspaceCfg.update config "packageManager" packageManager
            (WorkspaceCfg.configurationTargetToJs Workspace)
          |> P.then_ (fun _ ->
-                match PackageManager.find packageManager choices with
+                match find packageManager choices with
                 | None ->
                   Error "Selected choice was not found in the list" |> P.resolve
                 | Some pm -> Ok pm |> P.resolve))
@@ -258,12 +234,12 @@ let init ~env ~folder =
          | [] -> (
            Js.Console.info "Will lookup toolchain from global env";
            match PackageManager.ofName projectRoot "<global>" with
-           | Ok kind -> PackageManager.makeSpec ~env ~kind
+           | Ok kind -> makeSpec ~env ~kind
            | Error msg -> Error msg |> P.resolve )
          | [ obviousChoice ] ->
            Js.Console.info2 "Toolchain detected"
              (PackageManager.toString obviousChoice);
-           PackageManager.makeSpec ~env ~kind:obviousChoice
+           makeSpec ~env ~kind:obviousChoice
          | multipleChoices -> (
            let config = Vscode.Workspace.getConfiguration "ocaml" in
            match
@@ -271,15 +247,14 @@ let init ~env ~folder =
              , config |. Vscode.WorkspaceConfiguration.get "toolChainRoot" )
            with
            | Some name, Some root ->
-             PackageManager.specOfName ~env ~name ~root:(Fpath.ofString root)
-           | Some name, None ->
-             PackageManager.specOfName ~env ~name ~root:projectRoot
+             specOfName ~env ~name ~root:(Fpath.ofString root)
+           | Some name, None -> specOfName ~env ~name ~root:projectRoot
            | None, Some _
            | None, None ->
              selectPackageManager ~config multipleChoices
              |> P.then_ (function
                   | Error e -> Error e |> P.resolve
-                  | Ok pm -> PackageManager.makeSpec ~env ~kind:pm) ))
+                  | Ok pm -> makeSpec ~env ~kind:pm) ))
   |> okThen (fun spec -> Ok { spec; projectRoot })
 
 let setupBsbWithPrompt ~cmd ~root =
@@ -341,7 +316,7 @@ let setup { spec; projectRoot } =
   setupToolChain projectRoot spec
   |> P.then_ (function
        | Error msg -> Error msg |> P.resolve
-       | Ok () -> PackageManager.env spec)
+       | Ok () -> env spec)
   |> P.then_ (function
        | Error e -> Error e |> P.resolve
        | Ok env -> Cmd.make ~cmd:"ocamllsp" ~env)
