@@ -277,100 +277,6 @@ end = Set.Make (struct
     | Global, _ -> 1
 end)
 
-module Manifest : sig
-  val lookup : Fpath.t -> (PackageManagerSet.t, string) result P.t
-end = struct
-  let parse projectRoot = function
-    | "esy.json" -> Some (PackageManager.esy projectRoot) |> P.resolve
-    | "opam" ->
-      Fs.stat
-        (let open Fpath in
-        projectRoot / "opam" |> toString)
-      |> P.then_ (fun r ->
-             let r =
-               match r with
-               | Error _ -> None
-               | Ok stats -> (
-                 match Fs.Stat.isDirectory stats with
-                 | true -> None
-                 | false -> Some (PackageManager.opam projectRoot) )
-             in
-             P.resolve r)
-    | "package.json" ->
-      let manifestFile =
-        (let open Fpath in
-        projectRoot / "package.json")
-        |> Fpath.show
-      in
-      Fs.readFile manifestFile
-      |> P.then_ (fun manifest ->
-             match Json.parse manifest with
-             | None -> None |> P.resolve
-             | Some json ->
-               if
-                 Utils.propertyExists json "dependencies"
-                 || Utils.propertyExists json "devDependencies"
-               then
-                 if Utils.propertyExists json "esy" then
-                   Some (PackageManager.esy projectRoot) |> P.resolve
-                 else
-                   Some
-                     (PackageManager.esy
-                        Fpath.(projectRoot / ".vscode" / "esy"))
-                   |> P.resolve
-               else
-                 None |> P.resolve)
-    | file -> (
-      let manifestFile =
-        (let open Fpath in
-        projectRoot / file)
-        |> Fpath.show
-      in
-      match Path.extname file with
-      | ".json" ->
-        Fs.readFile manifestFile
-        |> P.then_ (fun manifest ->
-               match Json.parse manifest with
-               | Some json ->
-                 if
-                   Utils.propertyExists json "dependencies"
-                   || Utils.propertyExists json "devDependencies"
-                 then
-                   Some (PackageManager.esy projectRoot) |> P.resolve
-                 else
-                   None |> P.resolve
-               | None ->
-                 Js.log3 "Invalid JSON file found. Ignoring..." manifest
-                   manifestFile;
-                 None |> P.resolve)
-      | ".opam" ->
-        Fs.readFile manifestFile
-        |> P.then_ (function
-             | "" -> None |> P.resolve
-             | _ -> Some (PackageManager.opam projectRoot) |> P.resolve)
-      | _ -> None |> P.resolve )
-
-  let lookup projectRoot =
-    Fs.readDir (Fpath.toString projectRoot)
-    |> P.then_ (function
-         | Error msg -> P.resolve (Error msg)
-         | Ok files ->
-           files
-           |> Js.Array.map (parse projectRoot)
-           |> P.all
-           |> P.then_ (fun l ->
-                  Ok
-                    ( Js.Array.reduce
-                        (fun acc x ->
-                          Js.Array.concat acc
-                            ( match x with
-                            | Some x -> Array.of_list [ x ]
-                            | None -> [||] ))
-                        [||] l
-                    |> Array.to_list |> PackageManagerSet.of_list )
-                  |> P.resolve))
-end
-
 type t =
   { spec : PackageManager.spec
   ; projectRoot : Fpath.t
@@ -386,11 +292,14 @@ let init ~env ~folder =
   P.all2
     ( PackageManager.available ~root:projectRoot ~env
     , Manifest.lookup projectRoot
-      |> okThen (fun pms ->
-             if pms = PackageManagerSet.empty then
-               Error "TODO: global toolchain"
-             else
-               Ok pms) )
+      |> okThen (function
+    | [] -> Error "TODO: global toolchain"
+    | pms ->
+      let pms = pms |> List.map (function
+      | `Opam root -> PackageManager.opam root
+      | `Esy root -> PackageManager.esy root
+      ) in
+      Ok pms) )
   |> P.then_ (fun (availablePackageManagers, alreadyUsedPackageManagers) ->
          let availablePackageManagers =
            match availablePackageManagers with
@@ -401,7 +310,7 @@ let init ~env ~folder =
          in
          let alreadyUsedPackageManagers =
            match alreadyUsedPackageManagers with
-           | Ok x -> x
+           | Ok x -> x |> PackageManagerSet.of_list
            | Error msg ->
              Js.log2 "Error during alreadyUsedPackageManagers()" msg;
              PackageManagerSet.empty
