@@ -1,27 +1,7 @@
 open Js.Promise
 
-module type T = sig
-  type t
-
-  val make : unit -> t
-
-  val onProgress : t -> (float -> unit) -> unit
-
-  val onEnd : t -> (unit -> unit) -> unit
-
-  val onError : t -> (string -> unit) -> unit
-
-  val reportProgress : t -> float -> unit
-
-  val reportEnd : t -> unit
-
-  val reportError : t -> string -> unit
-
-  val run : t -> string -> unit Js.Promise.t
-end
-
 module Internal = struct
-  type t
+  type t (* event emitter *)
 
   external makeEventEmitter : unit -> t = "events" [@@bs.module] [@@bs.new]
 
