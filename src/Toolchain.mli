@@ -7,4 +7,4 @@ val init :
 
 val setup : resources -> (resources, string) result Js.Promise.t
 
-val lsp : resources -> string * string array
+val getLspCommand : resources -> string * string array

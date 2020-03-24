@@ -16,7 +16,7 @@ end
 
 module Server = struct
   let make (toolchain : Toolchain.resources) : Vscode.LanguageClient.serverOptions =
-    let command, args = Toolchain.lsp toolchain in
+    let command, args = Toolchain.getLspCommand toolchain in
     { command; args; options = { env = Process.env } }
 end
 

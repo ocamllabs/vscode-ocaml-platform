@@ -360,7 +360,7 @@ let setup { spec; projectRoot } =
          in
          P.resolve r)
 
-let lsp { spec = { kind; cmd } } =
+let getLspCommand { spec = { kind; cmd } } =
   match kind with
   | Opam _ -> (Cmd.binPath cmd, [| "exec"; "ocamllsp" |])
   | Esy root -> (Cmd.binPath cmd, [| "-P"; Fpath.toString root; "ocamllsp" |])
