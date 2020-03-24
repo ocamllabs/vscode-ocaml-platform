@@ -1,6 +1,5 @@
 open Bindings
 open Utils
-module R = Result
 module P = Js.Promise
 module WorkspaceCfg = Vscode.WorkspaceConfiguration
 
@@ -13,8 +12,6 @@ type spec =
   { cmd : Cmd.t
   ; kind : packageManager
   }
-
-type commandAndArgs = string * string array
 
 let promptSetup ~f =
   Window.showQuickPick [| "yes"; "no" |]
@@ -67,8 +64,6 @@ module PackageManager : sig
   val makeSpec :
     env:string Js.Dict.t -> kind:packageManager -> (spec, string) result P.t
 
-  val setupToolChain : Fpath.t -> spec -> (unit, string) result P.t
-
   val env : spec -> (string Js.Dict.t, string) result P.t
 
   val find : string -> packageManager list -> packageManager option
@@ -112,12 +107,28 @@ end = struct
     match name with
     | x when x = Binaries.opam -> makeSpec ~env ~kind:(opam root)
     | x when x = Binaries.esy -> makeSpec ~env ~kind:(esy root)
-    | x -> "Invalid package manager name: " ^ x |> R.fail |> P.resolve
+    | x -> Error ("Invalid package manager name: " ^ x) |> P.resolve
+
+  let parseOpamEnvOutput opamEnvOutput =
+    opamEnvOutput |> Js.String.split "\n"
+    |. Belt.Array.keepMap (fun r ->
+           match r |> Js.String.split "=" |> Array.to_list with
+           | [ k; v ] -> Some (k, v)
+           | [] ->
+             (* TODO Environment entries are not necessarily key value pairs *)
+             Js.Console.info "Splitting on '=' in env output failed";
+             None
+           | l ->
+             Js.Console.info2
+               "Splitting on '=' in env output returned more than two items: "
+               (l |> Array.of_list |> Js.Array.joinWith ",");
+             None)
+    |> Js.Dict.fromArray |> Result.return
 
   let env spec =
     let { cmd; kind } = spec in
     match kind with
-    | Global -> Process.env |> R.return |> P.resolve
+    | Global -> Ok Process.env |> P.resolve
     | Esy root ->
       Cmd.output cmd
         ~args:[| "command-env"; "--json"; "-P"; Fpath.toString root |]
@@ -125,85 +136,12 @@ end = struct
       |> okThen (fun stdout ->
              match Json.parse stdout with
              | Some json ->
-               json |> Json.Decode.dict Json.Decode.string |> R.return
+               json |> Json.Decode.dict Json.Decode.string |> Result.return
              | None ->
                Error ("'esy command-env' returned non-json output: " ^ stdout))
     | Opam root ->
       Cmd.output cmd ~args:[| "exec"; "env" |] ~cwd:(Fpath.toString root)
-      |> okThen (fun stdout ->
-             stdout |> Js.String.split "\n"
-             |> Js.Array.map (fun x -> Js.String.split "=" x)
-             |> Js.Array.map (fun r ->
-                    match Array.to_list r with
-                    | [] ->
-                      (* TODO Environment entries are not necessarily key value
-                         pairs *)
-                      Error "Splitting on '=' in env output failed"
-                    | [ k; v ] -> Ok (k, v)
-                    | l ->
-                      Js.log l;
-                      Error
-                        "Splitting on '=' in env output returned more than two \
-                         items")
-             |> Js.Array.reduce
-                  (fun acc kv ->
-                    match kv with
-                    | Ok kv -> kv :: acc
-                    | Error msg ->
-                      Js.log msg;
-                      acc)
-                  []
-             |> Js.Dict.fromList |> R.return)
-
-  let setupToolChain workspaceRoot spec =
-    let { cmd; kind } = spec in
-    match kind with
-    | Global -> Ok () |> P.resolve
-    | Esy root ->
-      let rootStr = root |> Fpath.toString in
-      Cmd.output cmd ~args:[| "status"; "-P"; rootStr |] ~cwd:rootStr
-      |> P.then_ (fun r ->
-             let r =
-               match r with
-               | Error _ -> R.return false
-               | Ok stdout -> (
-                 match Json.parse stdout with
-                 | None -> R.return false
-                 | Some json ->
-                   json
-                   |> (let open Json.Decode in
-                      field "isProjectReadyForDev" bool)
-                   |> R.return )
-             in
-             P.resolve r)
-      |> P.then_ (function
-           | Error e -> e |> R.fail |> P.resolve
-           | Ok isProjectReadyForDev ->
-             if isProjectReadyForDev then
-               () |> R.return |> P.resolve
-             else if Fpath.compare root workspaceRoot = 0 then (
-               Js.log "esy project";
-               promptSetup ~f:(fun () ->
-                   Window.withProgress
-                     [%bs.obj
-                       { location = Window.locationToJs Window.Notification
-                       ; title = "Setting up toolchain..."
-                       }]
-                     (fun progress ->
-                       (progress.report
-                          [%bs.obj { increment = int_of_float 1. }] [@bs]);
-                       Cmd.output cmd ~cwd:(root |> Fpath.toString) ~args:[||]
-                       |> P.then_ (fun _ ->
-                              (progress.report
-                                 [%bs.obj { increment = int_of_float 100. }]
-                               [@bs]);
-                              P.resolve (Ok ()))))
-             ) else (
-               Js.log "bsb project";
-               setupWithProgressIndicator cmd ~envWithUnzip:Process.env
-                 (root |> Fpath.toString)
-             ))
-    | Opam _ -> P.resolve (Ok ())
+      |> okThen parseOpamEnvOutput
 
   (* TODO: relies on compare *)
   let rec find name = function
@@ -253,7 +191,7 @@ let supportedPackageManagers ~env ~root =
   |> P.then_ (fun results ->
          results
          |. Belt.Array.keepMap (fun pm -> pm)
-         |> Array.to_list |> R.return |> P.resolve)
+         |> Array.to_list |> Result.return |> P.resolve)
 
 let makeSet ~debugMsg lst =
   Js.Console.info debugMsg;
@@ -344,14 +282,69 @@ let init ~env ~folder =
                   | Ok pm -> PackageManager.makeSpec ~env ~kind:pm) ))
   |> okThen (fun spec -> Ok { spec; projectRoot })
 
+let setupBsbWithPrompt ~cmd ~root =
+  promptSetup ~f:(fun () ->
+      Window.withProgress
+        [%bs.obj
+          { location = Window.locationToJs Window.Notification
+          ; title = "Setting up toolchain..."
+          }]
+        (fun progress ->
+          (progress.report [%bs.obj { increment = int_of_float 1. }] [@bs]);
+          Cmd.output cmd ~cwd:(root |> Fpath.toString) ~args:[||]
+          |> P.then_ (fun _ ->
+                 (progress.report
+                    [%bs.obj { increment = int_of_float 100. }] [@bs]);
+                 P.resolve (Ok ()))))
+
+let esyProjectState ~cmd ~root ~projectRoot =
+  let rootStr = Fpath.toString root in
+  Cmd.output cmd ~args:[| "status"; "-P"; rootStr |] ~cwd:rootStr
+  |> P.then_ (function
+       | Error _ -> Ok false |> P.resolve
+       | Ok esyOutput -> (
+         match Json.parse esyOutput with
+         | None -> Ok false |> P.resolve
+         | Some esyResponse ->
+           esyResponse
+           |> Json.Decode.field "isProjectReadyForDev" Json.Decode.bool
+           |> Result.return |> P.resolve ))
+  |> P.then_ (function
+       | Error e -> Error e |> P.resolve
+       | Ok isProjectReadyForDev ->
+         let state =
+           if isProjectReadyForDev then
+             `Ready
+           else if Fpath.compare root projectRoot <> 0 then
+             `PendingEsy
+           else
+             `PendingBsb
+         in
+         Ok state |> P.resolve)
+
+let setupToolChain projectRoot spec =
+  let { cmd; kind } = spec in
+  match kind with
+  | Global -> Ok () |> P.resolve
+  | Opam _ -> Ok () |> P.resolve
+  | Esy root ->
+    esyProjectState ~cmd ~root ~projectRoot
+    |> P.then_ (function
+         | Error e -> Error e |> P.resolve
+         | Ok `Ready -> Ok () |> P.resolve
+         | Ok `PendingEsy ->
+           setupWithProgressIndicator cmd ~envWithUnzip:Process.env
+             (Fpath.toString root)
+         | Ok `PendingBsb -> setupBsbWithPrompt ~cmd ~root)
+
 let setup { spec; projectRoot } =
-  PackageManager.setupToolChain projectRoot spec
+  setupToolChain projectRoot spec
   |> P.then_ (function
        | Error msg -> Error msg |> P.resolve
        | Ok () -> PackageManager.env spec)
   |> P.then_ (function
-       | Ok env -> Cmd.make ~cmd:"ocamllsp" ~env
-       | Error e -> e |> R.fail |> P.resolve)
+       | Error e -> Error e |> P.resolve
+       | Ok env -> Cmd.make ~cmd:"ocamllsp" ~env)
   |> P.then_ (fun r ->
          let r =
            match r with
