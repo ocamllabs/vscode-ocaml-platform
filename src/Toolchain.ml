@@ -48,19 +48,19 @@ module PackageManager = struct
     | Global, _ -> 1
 
   let rec find name = function
-  | [] -> None
-  | x :: xs -> (
-    match x with
-    | Global -> None
-    | Esy root
-    | Opam root -> (
-      match ofName root name with
-      | Ok y ->
-        if compare x y = 0 then
-          Some x
-        else
-          find name xs
-      | Error _ -> None ) )
+    | [] -> None
+    | x :: xs -> (
+      match x with
+      | Global -> None
+      | Esy root
+      | Opam root -> (
+        match ofName root name with
+        | Ok y ->
+          if compare x y = 0 then
+            Some x
+          else
+            find name xs
+        | Error _ -> None ) )
 
   let makeEsy root = Esy root
 
@@ -77,14 +77,20 @@ type spec =
   ; kind : PackageManager.t
   }
 
+type resources =
+  { spec : spec
+  ; projectRoot : Fpath.t
+  }
+
 let promptSetup ~f =
   Window.showQuickPick [| "yes"; "no" |]
     (Window.QuickPickOptions.make ~canPickMany:false
        ~placeHolder:{j|Setup this project's toolchain with 'esy'?|j} ())
   |> P.then_ (function
-       | None -> P.resolve (Error "Please setup the toolchain")
        | Some choice when choice = "yes" -> f ()
-       | Some _ -> P.resolve (Error "Please setup the toolchain"))
+       | Some _
+       | None ->
+         Error "Please setup the toolchain" |> P.resolve)
 
 let setupWithProgressIndicator esyCmd ~envWithUnzip:esyEnv folder =
   let open Setup.Bsb in
@@ -109,12 +115,13 @@ let setupWithProgressIndicator esyCmd ~envWithUnzip:esyEnv folder =
 let makeSpec ~env ~kind =
   Cmd.make ~env ~cmd:(PackageManager.toCmdString kind)
   |> P.then_ (function
-       | Error msg -> P.resolve (Error msg)
-       | Ok cmd -> P.resolve (Ok { cmd; kind }))
+       | Error msg -> Error msg |> P.resolve
+       | Ok cmd -> Ok { cmd; kind } |> P.resolve)
 
 let specOfName ~env ~name ~root =
   match name with
-  | x when x = Binaries.opam -> makeSpec ~env ~kind:(PackageManager.makeOpam root)
+  | x when x = Binaries.opam ->
+    makeSpec ~env ~kind:(PackageManager.makeOpam root)
   | x when x = Binaries.esy -> makeSpec ~env ~kind:(PackageManager.makeEsy root)
   | x -> Error ("Invalid package manager name: " ^ x) |> P.resolve
 
@@ -180,11 +187,6 @@ let makeSet ~debugMsg lst =
       msg;
     PackageManagerSet.empty
 
-type resources =
-  { spec : spec
-  ; projectRoot : Fpath.t
-  }
-
 let packageManagersListOfLookup = function
   | [] -> Error "TODO: global toolchain"
   | pms ->
@@ -203,7 +205,7 @@ let selectPackageManager ~config choices =
   |> Window.showQuickPick
        (choices |> List.map PackageManager.toName |> Array.of_list)
   |> P.then_ (function
-       | None -> P.resolve (Error "showQuickPick() returned undefined")
+       | None -> Error "showQuickPick() returned undefined" |> P.resolve
        | Some packageManager ->
          WorkspaceCfg.update config "packageManager" packageManager
            (WorkspaceCfg.configurationTargetToJs Workspace)
@@ -269,7 +271,7 @@ let setupBsbWithPrompt ~cmd ~root =
           |> P.then_ (fun _ ->
                  (progress.report
                     [%bs.obj { increment = int_of_float 100. }] [@bs]);
-                 P.resolve (Ok ()))))
+                 Ok () |> P.resolve)))
 
 let esyProjectState ~cmd ~root ~projectRoot =
   let rootStr = Fpath.toString root in
