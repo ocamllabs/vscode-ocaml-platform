@@ -17,32 +17,47 @@ end
 module RESTResponse = struct
   type buildIdObject = { id : int }
 
-  let getBuildId responseText =
-    let getBuildId' json =
-      let open Json.Decode in
-      let buildIdObject json = { id = field "id" int json } in
-      let valueArray = field "value" (array buildIdObject) json in
-      valueArray.(0).id
-    in
-    match Json.parse responseText with
-    | Some json -> Ok (getBuildId' json)
-    | None -> Error "getBuildId(): responseText could not be parsed"
+  let guard jsonParser str =
+    try jsonParser str
+    with e ->
+      let msg = Printexc.to_string e
+      and stack = Printexc.get_backtrace () in
+      Error {|Failed to parse Azure response
+$msg
+$stack
+|}
+
+  let getBuildId' json =
+    let open Json.Decode in
+    let buildIdObject json = { id = field "id" int json } in
+    let valueArray = field "value" (array buildIdObject) json in
+    valueArray.(0).id
+
+  let getBuildId =
+    guard (fun responseText ->
+        match Json.parse responseText with
+        | Some json -> Ok (getBuildId' json)
+        | None -> Error "getBuildId(): responseText could not be parsed")
 
   type downloadUrlObject = { downloadUrl : string }
 
-  let getDownloadURL responseText =
+  let getDownloadURL' json =
     let open Json.Decode in
-    try
-      match Json.parse responseText with
-      | Some json ->
-        let downloadUrlObject json =
-          { downloadUrl = field "downloadUrl" string json }
-        in
-        let resource = field "resource" downloadUrlObject json in
-        Ok resource.downloadUrl
-      | None -> Error "getDownloadURL(): could not parse responseText"
-    with _ ->
-      Error "getDownloadURL(): field() failed on 'resource' or 'downloadUrl'"
+    let downloadUrlObject json =
+      { downloadUrl = field "downloadUrl" string json }
+    in
+    match field "resource" (optional downloadUrlObject) json with
+    | Some resource -> Ok resource.downloadUrl
+    | None ->
+      Error
+        {|getDownloadURL(): responseObject.resource as not of the form { downloadURL: "..." }. Instead got
+$responseText |}
+
+  let getDownloadURL =
+    guard (fun responseText ->
+        match Json.parse responseText with
+        | Some json -> getDownloadURL' json
+        | None -> Error "getDownloadURL(): could not parse responseText")
 end
 
 let restBase = "https://dev.azure.com/arrowresearch/"
@@ -76,11 +91,7 @@ let getBuildID () =
   |> then_ (fun r ->
          resolve
            ( match r with
-           | Ok response -> (
-             try RESTResponse.getBuildId response
-             with _ ->
-               Error
-                 {j|Could not get field 'id' from json response $response |j} )
+           | Ok response -> RESTResponse.getBuildId response
            | Error e -> (
              match e with
              | Https.E.Failure url -> Error {j| Could not download $url |j} ) ))
@@ -91,12 +102,11 @@ let getDownloadURL latestBuildID =
   | Some artifactName ->
     Https.getCompleteResponse
       {j|$restBase/$proj/_apis/build/builds/$latestBuildID/artifacts?artifactname=$artifactName&api-version=4.1|j}
-    |> then_ (fun r ->
-           resolve
-             ( match r with
-             | Error (Https.E.Failure url) ->
-               Error {j| Failed to download $url |j}
-             | Ok url -> RESTResponse.getDownloadURL url ))
+    |> then_ (function
+         | Error (Https.E.Failure url) ->
+           Error {j| Failed to download $url |j} |> resolve
+         | Ok responseText ->
+           responseText |> RESTResponse.getDownloadURL |> resolve)
   | None ->
     resolve
       (Error "We detected a platform for which we couldn't find cached builds")
