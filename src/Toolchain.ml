@@ -152,11 +152,9 @@ let makeSpec ~env ~kind =
        | Ok cmd -> Ok { cmd; kind } |> P.resolve)
 
 let specOfName ~env ~name ~root =
-  match name with
-  | x when x = Binaries.opam ->
-    makeSpec ~env ~kind:(PackageManager.makeOpam root)
-  | x when x = Binaries.esy -> makeSpec ~env ~kind:(PackageManager.makeEsy root)
-  | x -> Error ("Invalid package manager name: " ^ x) |> P.resolve
+  match PackageManager.ofName root name with
+  | Some kind -> makeSpec ~env ~kind
+  | None -> Error ("Invalid package manager name: " ^ name) |> P.resolve
 
 let parseOpamEnvOutput opamEnvOutput =
   opamEnvOutput |> Js.String.split "\n"
