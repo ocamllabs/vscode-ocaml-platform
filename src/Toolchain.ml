@@ -9,7 +9,40 @@ module Binaries = struct
   let opam = "opam"
 end
 
-module PackageManager = struct
+(* Terminology: - PackageManager - represents supported package managers with
+   Global as the fallback - Manifest - abstracts functions handling manifest
+   files of the supported package managers *)
+
+module PackageManager : sig
+  (* Represents a given package manager that would install the toolchain *)
+  type t =
+    | Opam of Fpath.t
+    | Esy of Fpath.t
+    | Global
+
+  val toName : t -> string
+
+  val ofName : Fpath.t -> string -> t option
+
+  (* Converts to a readable string representation (useful for loggers etc) *)
+  val toString : t -> string
+
+  (* Converts to a valid command name available on the system shell *)
+  val toCmdString : t -> string
+
+  (* comparision function to assist set operations *)
+  val compare : t -> t -> int
+
+  (* find returns a supported package manager from a given list keeping in my
+     Global is a fallback toolchain manager and not exactly a valid package
+     manager (hence the exclusion). TODO: rename this to something that make
+     this behaviour evident *)
+  val find : string -> t list -> t option
+
+  val makeEsy : Fpath.t -> t
+
+  val makeOpam : Fpath.t -> t
+end = struct
   type t =
     | Opam of Fpath.t
     | Esy of Fpath.t
@@ -21,10 +54,10 @@ module PackageManager = struct
     | Global -> "global"
 
   let ofName root = function
-    | "opam" -> Ok (Opam root)
-    | "esy" -> Ok (Esy root)
-    | "global" -> Ok Global
-    | n -> Error {j|Invalid name $n was provided|j}
+    | "opam" -> Some (Opam root)
+    | "esy" -> Some (Esy root)
+    | "global" -> Some Global
+    | _ -> None
 
   let toString = function
     | Esy root -> Printf.sprintf "esy(%s)" (Fpath.toString root)
@@ -55,12 +88,12 @@ module PackageManager = struct
       | Esy root
       | Opam root -> (
         match ofName root name with
-        | Ok y ->
+        | Some y ->
           if compare x y = 0 then
             Some x
           else
             find name xs
-        | Error _ -> None ) )
+        | None -> None ) )
 
   let makeEsy root = Esy root
 
@@ -234,9 +267,13 @@ let init ~env ~folder =
          with
          | [] -> (
            Js.Console.info "Will lookup toolchain from global env";
-           match PackageManager.ofName projectRoot "<global>" with
-           | Ok kind -> makeSpec ~env ~kind
-           | Error msg -> Error msg |> P.resolve )
+           let global = "global" in
+           match PackageManager.ofName projectRoot global with
+           | Some kind -> makeSpec ~env ~kind
+           | None ->
+             Error
+               {j| Unexplained exception: PackageManager.ofName returned None for a valid name $global |j}
+             |> P.resolve )
          | [ obviousChoice ] ->
            Js.Console.info2 "Toolchain detected"
              (PackageManager.toString obviousChoice);
@@ -317,8 +354,13 @@ let runSetup { spec; projectRoot } =
   setupToolChain projectRoot spec
   |> P.then_ (function
        | Error msg -> Error msg |> P.resolve
-       | Ok () -> env spec)
+       | Ok () -> let { cmd; kind } = spec in
+
+                  env spec)
   |> P.then_ (function
+       (* This function/callback here is a temporary way to check ocamllsp if
+          installed after setupToolChain completes. TODO: move it inside
+          setupToolChain itself *)
        | Error e -> Error e |> P.resolve
        | Ok env -> Cmd.make ~cmd:"ocamllsp" ~env)
   |> P.then_ (fun r ->
