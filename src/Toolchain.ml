@@ -313,7 +313,7 @@ let setupToolChain projectRoot spec =
              (Fpath.toString root)
          | Ok `PendingBsb -> setupBsbWithPrompt ~cmd ~root)
 
-let setup { spec; projectRoot } =
+let runSetup { spec; projectRoot } =
   setupToolChain projectRoot spec
   |> P.then_ (function
        | Error msg -> Error msg |> P.resolve
@@ -324,7 +324,7 @@ let setup { spec; projectRoot } =
   |> P.then_ (fun r ->
          let r =
            match r with
-           | Ok _ -> Ok ({ spec; projectRoot } : resources)
+           | Ok _ -> Ok ()
            | Error msg -> Error {j| Toolchain initialisation failed: $msg |j}
          in
          P.resolve r)
