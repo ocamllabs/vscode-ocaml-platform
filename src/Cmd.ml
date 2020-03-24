@@ -33,15 +33,14 @@ let make ~env ~cmd =
            |> Js.Promise.then_ (fun exists -> Js.Promise.resolve (p, exists)))
     |> Js.Promise.all
     |> Js.Promise.then_ (fun r ->
-           Js.Promise.resolve (Js.Array.filter (fun (_p, exists) -> exists) r))
-    |> Js.Promise.then_ (fun r ->
-           let r = Array.to_list r in
-           let r =
-             match r with
+           Js.Promise.resolve
+             ( match
+                 r
+                 |> Js.Array.filter (fun (_p, exists) -> exists)
+                 |> Array.to_list
+               with
              | [] -> Error {j| Command "$cmd" not found |j}
-             | (cmd, _exists) :: _rest -> Ok { cmd; env }
-           in
-           Js.Promise.resolve r)
+             | (cmd, _exists) :: _rest -> Ok { cmd; env } ))
 
 let output ~args ~cwd { cmd; env } =
   let shellString = Js.Array.concat args [| cmd |] |> Js.Array.joinWith " " in
