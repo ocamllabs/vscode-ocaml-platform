@@ -2,6 +2,7 @@ open Bindings
 open Utils
 module R = Result
 module P = Js.Promise
+module WorkspaceCfg = Vscode.WorkspaceConfiguration
 
 type packageManager =
   | Opam of Fpath.t
@@ -65,7 +66,7 @@ module PackageManager : sig
 
   val setupToolChain : Fpath.t -> spec -> (unit, string) result P.t
 
-  val available :
+  val supported :
        env:string Js.Dict.t
     -> root:Fpath.t
     -> (packageManager list, string) result P.t
@@ -122,7 +123,7 @@ end = struct
     | x when x = Binaries.esy -> makeSpec ~env ~kind:(esy root)
     | x -> "Invalid package manager name: " ^ x |> R.fail |> P.resolve
 
-  let available ~env ~root =
+  let supported ~env ~root =
     let supportedPackageManagers =
       [ Esy root; Esy Fpath.(root / ".vscode" / "esy"); Opam root ]
     in
@@ -135,7 +136,7 @@ end = struct
                 | Error _ -> (pm, false) |> P.resolve))
     |> Array.of_list |> P.all
     |> P.then_ (fun r ->
-           Js.Array.filter (fun (_pm, available) -> available) r
+           Js.Array.filter (fun (_pm, supported) -> supported) r
            |> Array.map (fun (pm, _used) -> pm)
            |> Array.to_list |> R.return |> P.resolve)
 
@@ -323,51 +324,48 @@ let packageManagersListOfLookup = function
          pms)
 
 let selectPackageManager ~config choices =
-  Window.showQuickPick
-    (choices |> List.map (fun pm -> PackageManager.toName pm) |> Array.of_list)
-    (Window.QuickPickOptions.make ~canPickMany:false
-       ~placeHolder:
-         "Which package manager would you like to manage the toolchain?" ())
+  let placeHolder =
+    "Which package manager would you like to manage the toolchain?"
+  in
+  Window.QuickPickOptions.make ~canPickMany:false ~placeHolder ()
+  |> Window.showQuickPick
+       (choices |> List.map PackageManager.toName |> Array.of_list)
   |> P.then_ (function
        | None -> P.resolve (Error "showQuickPick() returned undefined")
        | Some packageManager ->
-         let open Vscode.WorkspaceConfiguration in
-         update config "packageManager" packageManager
-           (configurationTargetToJs Workspace)
-         (* Workspace *)
+         WorkspaceCfg.update config "packageManager" packageManager
+           (WorkspaceCfg.configurationTargetToJs Workspace)
          |> P.then_ (fun _ ->
                 match PackageManager.find packageManager choices with
-                | Some pm -> P.resolve (Ok pm)
                 | None ->
-                  P.resolve
-                    (Error
-                       "Weird invalid state: selected choice was not found in \
-                        the list")))
+                  Error "Selected choice was not found in the list" |> P.resolve
+                | Some pm -> Ok pm |> P.resolve))
 
 let init ~env ~folder =
   let projectRoot = Fpath.ofString folder in
   let usedPMs =
     Manifest.lookup projectRoot |> okThen packageManagersListOfLookup
   in
-  P.all2 (PackageManager.available ~root:projectRoot ~env, usedPMs)
-  |> P.then_ (fun (availablePMs, usedPMs) ->
-         let availablePMs =
-           makeSet ~debugMsg:"available package managers" availablePMs
+  P.all2 (PackageManager.supported ~root:projectRoot ~env, usedPMs)
+  |> P.then_ (fun (supportedPMs, usedPMs) ->
+         let supportedPMs =
+           makeSet ~debugMsg:"supported package managers" supportedPMs
          in
          let usedPMs =
            makeSet ~debugMsg:"possibly used package managers" usedPMs
          in
          match
-           PackageManagerSet.inter availablePMs usedPMs
+           PackageManagerSet.inter supportedPMs usedPMs
            |> PackageManagerSet.elements
          with
          | [] -> (
-           Js.log "Will lookup toolchain from global env";
+           Js.Console.info "Will lookup toolchain from global env";
            match PackageManager.ofName projectRoot "<global>" with
            | Ok kind -> PackageManager.makeSpec ~env ~kind
            | Error msg -> Error msg |> P.resolve )
          | [ obviousChoice ] ->
-           Js.log2 "Toolchain detected" (PackageManager.toString obviousChoice);
+           Js.Console.info2 "Toolchain detected"
+             (PackageManager.toString obviousChoice);
            PackageManager.makeSpec ~env ~kind:obviousChoice
          | multipleChoices -> (
            let config = Vscode.Workspace.getConfiguration "ocaml" in
