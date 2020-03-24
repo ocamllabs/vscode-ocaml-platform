@@ -52,32 +52,6 @@ module Internal = struct
 end
 
 module Bsb = struct
-  module E = struct
-    type t =
-      | RimrafFailed of string
-      | SetupChainFailure of string
-      | CacheFailure of string
-      | BucklescriptCompatFailure of string
-      | EsyBuildFailure of string
-      | EsyImportDependenciesFailure
-      | EsyInstallFailure of string
-      | InvalidPath of string
-      | ManifestParseFailure of string
-
-    let toString = function
-      | RimrafFailed msg ->
-        {j| Rimraf failed before the bsb toolchain setup: $msg |j}
-      | SetupChainFailure msg -> {j|Setup failed: $msg|j}
-      | EsyBuildFailure msg -> "'esy build' failed. Reason: " ^ msg
-      | EsyImportDependenciesFailure -> "'esy import-dependencies' failed"
-      | EsyInstallFailure msg -> "'esy install' failed. Reason: " ^ msg
-      | BucklescriptCompatFailure msg -> {j| BucklescriptCompatFailure: $msg |j}
-      | CacheFailure msg -> {j| Azure artifacts cache failure: $msg |j}
-      | ManifestParseFailure reason -> reason
-      | InvalidPath p ->
-        {j| Setup failed with because of invalid path provided to it: $p |j}
-  end
-
   include Internal
 
   let download url file ~progress ~end_ ~error ~data =
@@ -101,13 +75,18 @@ module Bsb = struct
     let hiddenEsyRoot = Path.join [| folder; ".vscode"; "esy" |] in
     Rimraf.run hiddenEsyRoot
     |> then_ (function
-         | Error () -> Error (E.RimrafFailed hiddenEsyRoot) |> resolve
+         | Error () ->
+           Error
+             {j| Rimraf failed before the bsb toolchain setup: $hiddenEsyRoot |j}
+           |> resolve
          | Ok () ->
            Fs.mkdir ~p:true hiddenEsyRoot
            |> then_ (function
                 | Ok () -> Ok () |> resolve
                 | Error Fs.E.PathNotFound ->
-                  Error (E.InvalidPath hiddenEsyRoot) |> resolve))
+                  Error
+                    {j| Setup failed with because of invalid path provided to it: $hiddenEsyRoot |j}
+                  |> resolve))
     |> then_ (function
          | Error e -> Error e |> resolve
          | Ok () ->
@@ -120,7 +99,8 @@ module Bsb = struct
            Cmd.output esyCmd ~cwd:hiddenEsyRoot
              ~args:[| "install"; "-P"; hiddenEsyRoot |]
            |> then_ (function
-                | Error msg -> Error (E.EsyInstallFailure msg) |> resolve
+                | Error msg ->
+                  Error ("'esy install' failed. Reason: " ^ msg) |> resolve
                 | Ok _stdout ->
                   reportProgress eventEmitter 0.1;
                   AzurePipelines.getBuildID ()
@@ -130,8 +110,12 @@ module Bsb = struct
                          |> Js.Promise.then_ (function
                               | Ok url -> resolve (Ok url)
                               | Error msg ->
-                                Error (E.CacheFailure msg) |> resolve)
-                       | Error msg -> Error (E.CacheFailure msg) |> resolve)
+                                Error
+                                  {j| Azure artifacts cache failure: $msg |j}
+                                |> resolve)
+                       | Error msg ->
+                         Error {j| Azure artifacts cache failure: $msg |j}
+                         |> resolve)
                   |> then_ (function
                        | Ok url -> Ok url |> resolve
                        | Error e -> Error e |> resolve)))
@@ -147,8 +131,8 @@ module Bsb = struct
                    reportProgress eventEmitter (percent -. !lastProgress);
                    lastProgress := percent)
                  ~data:(fun _ -> ())
-                 ~error:(fun e ->
-                   (resolve (Error (E.CacheFailure e##message)) [@bs]))
+                 ~error:(fun _ ->
+                   (resolve (Error "Azure artifacts cache failure: ") [@bs]))
                  ~end_:(fun () -> (resolve (Ok ()) [@bs])))
          | Error cacheFailureReason -> resolve (Error cacheFailureReason))
     |> then_ (function
@@ -160,8 +144,8 @@ module Bsb = struct
                 | Ok unzip ->
                   Cmd.output unzip ~args:[| "cache.zip" |] ~cwd:hiddenEsyRoot)
            |> then_ (function
-                | Error _unzipCmdError ->
-                  Error (E.CacheFailure "Failed to unzip downloaded cache")
+                | Error unzipCmdError ->
+                  Error {j| Azure artifacts cache failure: $unzipCmdError |j}
                   |> resolve
                 | Ok _unzipCmdOutput -> resolve (Ok ()))
          | Error e -> Error e |> resolve)
@@ -174,7 +158,9 @@ module Bsb = struct
                   resolve
                     ( match r with
                     | Ok _ -> Ok ()
-                    | Error _ -> Error E.EsyImportDependenciesFailure ))
+                    | Error msg ->
+                      Error ("'esy import-dependencies' failed. Reason: " ^ msg)
+                    ))
          | Error e -> resolve (Error e))
     |> then_ (function
          | Error e -> Error e |> resolve
@@ -186,7 +172,8 @@ module Bsb = struct
                   resolve
                     ( match r with
                     | Ok _esyCmdOutput -> Ok ()
-                    | Error msg -> Error (E.EsyBuildFailure msg) )))
+                    | Error msg -> Error ("'esy build' failed. Reason: " ^ msg)
+                    )))
 
   let run esyCmd esyEnv eventEmitter projectPath =
     let open Bindings in
@@ -199,17 +186,16 @@ module Bsb = struct
            | Some json -> (
              match json |> CheckBucklescriptCompat.run with
              | Ok () -> runSetupChain esyCmd esyEnv eventEmitter projectPath
-             | Error msg -> resolve (Error (E.BucklescriptCompatFailure msg)) )
+             | Error msg ->
+               resolve (Error {j| BucklescriptCompatFailure: $msg |j}) )
            | None ->
-             Error
-               (E.ManifestParseFailure
-                  ("Failed to parse manifest at " ^ manifestPath))
+             Error ("Failed to parse manifest at " ^ manifestPath)
              |> Js.Promise.resolve)
     |> then_ (function
          | Ok () ->
            reportEnd eventEmitter;
            resolve ()
          | Error e ->
-           reportError eventEmitter (E.toString e);
+           reportError eventEmitter e;
            resolve ())
 end
