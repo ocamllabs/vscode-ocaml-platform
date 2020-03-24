@@ -90,24 +90,6 @@ end = struct
 
   let opam root = Opam root
 
-  let makeSpec ~env ~kind =
-    match kind with
-    | Opam root ->
-      Cmd.make ~cmd:"opam" ~env
-      |> P.then_ (function
-           | Error msg -> P.resolve (Error msg)
-           | Ok cmd -> Ok { cmd; kind = Opam root } |> P.resolve)
-    | Esy root ->
-      Cmd.make ~cmd:"esy" ~env
-      |> P.then_ (function
-           | Error msg -> P.resolve (Error msg)
-           | Ok cmd -> Ok { cmd; kind = Esy root } |> P.resolve)
-    | Global ->
-      Cmd.make ~env ~cmd:"bash"
-      |> P.then_ (function
-           | Ok cmd -> Ok { cmd; kind = Global } |> P.resolve
-           | Error msg -> Error msg |> P.resolve)
-
   let toName = function
     | Opam _ -> Binaries.opam
     | Esy _ -> Binaries.esy
@@ -123,6 +105,17 @@ end = struct
     | Esy root -> Printf.sprintf "esy(%s)" (Fpath.toString root)
     | Opam root -> Printf.sprintf "opam(%s)" (Fpath.toString root)
     | Global -> "global"
+
+  let toCmdString = function
+    | Opam _ -> "opam"
+    | Esy _ -> "esy"
+    | Global -> "bash"
+
+  let makeSpec ~env ~kind =
+    Cmd.make ~env ~cmd:(toCmdString kind)
+    |> P.then_ (function
+         | Error msg -> P.resolve (Error msg)
+         | Ok cmd -> P.resolve (Ok { cmd; kind }))
 
   let specOfName ~env ~name ~root =
     match name with
