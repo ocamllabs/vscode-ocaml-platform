@@ -55,17 +55,16 @@ module PackageManager : sig
        env:string Js.Dict.t
     -> name:string
     -> root:Fpath.t
-    -> (spec, string) result Js.Promise.t
+    -> (spec, string) result P.t
 
-  val makeSpec :
-    env:string Js.Dict.t -> kind:t -> (spec, string) result Js.Promise.t
+  val makeSpec : env:string Js.Dict.t -> kind:t -> (spec, string) result P.t
 
-  val setupToolChain : Fpath.t -> spec -> (unit, string) result Js.Promise.t
+  val setupToolChain : Fpath.t -> spec -> (unit, string) result P.t
 
   val available :
-    env:string Js.Dict.t -> root:Fpath.t -> (t list, string) result Js.Promise.t
+    env:string Js.Dict.t -> root:Fpath.t -> (t list, string) result P.t
 
-  val env : spec -> (string Js.Dict.t, string) result Js.Promise.t
+  val env : spec -> (string Js.Dict.t, string) result P.t
 
   val lsp : spec -> commandAndArgs
 
@@ -96,18 +95,18 @@ end = struct
     | Opam root ->
       Cmd.make ~cmd:"opam" ~env
       |> P.then_ (function
-           | Error msg -> Js.Promise.resolve (Error msg)
-           | Ok cmd -> Ok { cmd; kind = Opam root } |> Js.Promise.resolve)
+           | Error msg -> P.resolve (Error msg)
+           | Ok cmd -> Ok { cmd; kind = Opam root } |> P.resolve)
     | Esy root ->
       Cmd.make ~cmd:"esy" ~env
       |> P.then_ (function
-           | Error msg -> Js.Promise.resolve (Error msg)
-           | Ok cmd -> Ok { cmd; kind = Esy root } |> Js.Promise.resolve)
+           | Error msg -> P.resolve (Error msg)
+           | Ok cmd -> Ok { cmd; kind = Esy root } |> P.resolve)
     | Global ->
       Cmd.make ~env ~cmd:"bash"
       |> P.then_ (function
-           | Ok cmd -> Ok { cmd; kind = Global } |> Js.Promise.resolve
-           | Error msg -> Error msg |> Js.Promise.resolve)
+           | Ok cmd -> Ok { cmd; kind = Global } |> P.resolve
+           | Error msg -> Error msg |> P.resolve)
 
   let toName = function
     | Opam _ -> Binaries.opam
@@ -129,7 +128,7 @@ end = struct
     match name with
     | x when x = Binaries.opam -> makeSpec ~env ~kind:(opam root)
     | x when x = Binaries.esy -> makeSpec ~env ~kind:(esy root)
-    | x -> "Invalid package manager name: " ^ x |> R.fail |> Js.Promise.resolve
+    | x -> "Invalid package manager name: " ^ x |> R.fail |> P.resolve
 
   let available ~env ~root =
     let supportedPackageManagers =
@@ -140,18 +139,18 @@ end = struct
            let name = toName pm in
            Cmd.make ~env ~cmd:name
            |> P.then_ (function
-                | Ok _ -> (pm, true) |> Js.Promise.resolve
-                | Error _ -> (pm, false) |> Js.Promise.resolve))
-    |> Array.of_list |> Js.Promise.all
+                | Ok _ -> (pm, true) |> P.resolve
+                | Error _ -> (pm, false) |> P.resolve))
+    |> Array.of_list |> P.all
     |> P.then_ (fun r ->
            Js.Array.filter (fun (_pm, available) -> available) r
            |> Array.map (fun (pm, _used) -> pm)
-           |> Array.to_list |> R.return |> Js.Promise.resolve)
+           |> Array.to_list |> R.return |> P.resolve)
 
   let env spec =
     let { cmd; kind } = spec in
     match kind with
-    | Global -> Process.env |> R.return |> Js.Promise.resolve
+    | Global -> Process.env |> R.return |> P.resolve
     | Esy root ->
       Cmd.output cmd
         ~args:[| "command-env"; "--json"; "-P"; Fpath.toString root |]
@@ -192,7 +191,7 @@ end = struct
   let setupToolChain workspaceRoot spec =
     let { cmd; kind } = spec in
     match kind with
-    | Global -> Ok () |> Js.Promise.resolve
+    | Global -> Ok () |> P.resolve
     | Esy root ->
       let rootStr = root |> Fpath.toString in
       Cmd.output cmd ~args:[| "status"; "-P"; rootStr |] ~cwd:rootStr
@@ -209,12 +208,12 @@ end = struct
                       field "isProjectReadyForDev" bool)
                    |> R.return )
              in
-             Js.Promise.resolve r)
+             P.resolve r)
       |> P.then_ (function
-           | Error e -> e |> R.fail |> Js.Promise.resolve
+           | Error e -> e |> R.fail |> P.resolve
            | Ok isProjectReadyForDev ->
              if isProjectReadyForDev then
-               () |> R.return |> Js.Promise.resolve
+               () |> R.return |> P.resolve
              else if Fpath.compare root workspaceRoot = 0 then (
                Js.log "esy project";
                promptSetup ~f:(fun () ->
@@ -231,13 +230,13 @@ end = struct
                               (progress.report
                                  [%bs.obj { increment = int_of_float 100. }]
                                [@bs]);
-                              Js.Promise.resolve (Ok ()))))
+                              P.resolve (Ok ()))))
              ) else (
                Js.log "bsb project";
                setupWithProgressIndicator cmd ~envWithUnzip:Process.env
                  (root |> Fpath.toString)
              ))
-    | Opam _ -> Js.Promise.resolve (Ok ())
+    | Opam _ -> P.resolve (Ok ())
 
   let lsp spec =
     let { cmd; kind } = spec in
@@ -286,10 +285,10 @@ end =
   Set.Make (PackageManager)
 
 module Manifest : sig
-  val lookup : Fpath.t -> (PackageManagerSet.t, string) result Js.Promise.t
+  val lookup : Fpath.t -> (PackageManagerSet.t, string) result P.t
 end = struct
   let parse projectRoot = function
-    | "esy.json" -> Some (PackageManager.esy projectRoot) |> Js.Promise.resolve
+    | "esy.json" -> Some (PackageManager.esy projectRoot) |> P.resolve
     | "opam" ->
       Fs.stat
         (let open Fpath in
@@ -303,7 +302,7 @@ end = struct
                  | true -> None
                  | false -> Some (PackageManager.opam projectRoot) )
              in
-             Js.Promise.resolve r)
+             P.resolve r)
     | "package.json" ->
       let manifestFile =
         (let open Fpath in
@@ -313,21 +312,21 @@ end = struct
       Fs.readFile manifestFile
       |> P.then_ (fun manifest ->
              match Json.parse manifest with
-             | None -> None |> Js.Promise.resolve
+             | None -> None |> P.resolve
              | Some json ->
                if
                  Utils.propertyExists json "dependencies"
                  || Utils.propertyExists json "devDependencies"
                then
                  if Utils.propertyExists json "esy" then
-                   Some (PackageManager.esy projectRoot) |> Js.Promise.resolve
+                   Some (PackageManager.esy projectRoot) |> P.resolve
                  else
                    Some
                      (PackageManager.esy
                         Fpath.(projectRoot / ".vscode" / "esy"))
-                   |> Js.Promise.resolve
+                   |> P.resolve
                else
-                 None |> Js.Promise.resolve)
+                 None |> P.resolve)
     | file -> (
       let manifestFile =
         (let open Fpath in
@@ -344,28 +343,28 @@ end = struct
                    Utils.propertyExists json "dependencies"
                    || Utils.propertyExists json "devDependencies"
                  then
-                   Some (PackageManager.esy projectRoot) |> Js.Promise.resolve
+                   Some (PackageManager.esy projectRoot) |> P.resolve
                  else
-                   None |> Js.Promise.resolve
+                   None |> P.resolve
                | None ->
                  Js.log3 "Invalid JSON file found. Ignoring..." manifest
                    manifestFile;
-                 None |> Js.Promise.resolve)
+                 None |> P.resolve)
       | ".opam" ->
         Fs.readFile manifestFile
         |> P.then_ (function
-             | "" -> None |> Js.Promise.resolve
-             | _ -> Some (PackageManager.opam projectRoot) |> Js.Promise.resolve)
-      | _ -> None |> Js.Promise.resolve )
+             | "" -> None |> P.resolve
+             | _ -> Some (PackageManager.opam projectRoot) |> P.resolve)
+      | _ -> None |> P.resolve )
 
   let lookup projectRoot =
     Fs.readDir (Fpath.toString projectRoot)
     |> P.then_ (function
-         | Error msg -> Js.Promise.resolve (Error msg)
+         | Error msg -> P.resolve (Error msg)
          | Ok files ->
            files
            |> Js.Array.map (parse projectRoot)
-           |> Js.Promise.all
+           |> P.all
            |> P.then_ (fun l ->
                   Ok
                     ( Js.Array.reduce
@@ -376,7 +375,7 @@ end = struct
                             | None -> [||] ))
                         [||] l
                     |> Array.to_list |> PackageManagerSet.of_list )
-                  |> Js.Promise.resolve))
+                  |> P.resolve))
 end
 
 type t =
@@ -391,7 +390,7 @@ type resources =
 
 let init ~env ~folder =
   let projectRoot = Fpath.ofString folder in
-  Js.Promise.all2
+  P.all2
     ( PackageManager.available ~root:projectRoot ~env
     , Manifest.lookup projectRoot
       |> okThen (fun pms ->
@@ -431,7 +430,7 @@ let init ~env ~folder =
            Js.log "Will lookup toolchain from global env";
            match PackageManager.ofName projectRoot "<global>" with
            | Ok kind -> PackageManager.makeSpec ~env ~kind
-           | Error msg -> Error msg |> Js.Promise.resolve )
+           | Error msg -> Error msg |> P.resolve )
          | [ obviousChoice ] ->
            Js.log2 "Toolchain detected" (PackageManager.toString obviousChoice);
            PackageManager.makeSpec ~env ~kind:obviousChoice
@@ -457,8 +456,7 @@ let init ~env ~folder =
                   ())
              |> P.then_ (function
                   | None ->
-                    Js.Promise.resolve
-                      (Error "showQuickPick() returned undefined")
+                    P.resolve (Error "showQuickPick() returned undefined")
                   | Some packageManager ->
                     let open Vscode.WorkspaceConfiguration in
                     update config "packageManager" packageManager
@@ -470,7 +468,7 @@ let init ~env ~folder =
                            with
                            | Some pm -> PackageManager.makeSpec ~env ~kind:pm
                            | None ->
-                             Js.Promise.resolve
+                             P.resolve
                                (Error
                                   "Weird invalid state: selected choice was \
                                    not found in the list"))) ))
@@ -479,17 +477,17 @@ let init ~env ~folder =
 let setup { spec; projectRoot } =
   PackageManager.setupToolChain projectRoot spec
   |> P.then_ (function
-       | Error msg -> Error msg |> Js.Promise.resolve
+       | Error msg -> Error msg |> P.resolve
        | Ok () -> PackageManager.env spec)
   |> P.then_ (function
        | Ok env -> Cmd.make ~cmd:"ocamllsp" ~env
-       | Error e -> e |> R.fail |> Js.Promise.resolve)
+       | Error e -> e |> R.fail |> P.resolve)
   |> P.then_ (fun r ->
          let r =
            match r with
            | Ok _ -> Ok ({ spec; projectRoot } : t)
            | Error msg -> Error {j| Toolchain initialisation failed: $msg |j}
          in
-         Js.Promise.resolve r)
+         P.resolve r)
 
 let lsp (t : t) = PackageManager.lsp t.spec
