@@ -14,7 +14,7 @@ end
    files of the supported package managers *)
 
 module PackageManager : sig
-  (* Represents a given package manager that would install the toolchain *)
+  (** Represents a given package manager that would install the toolchain *)
   type t =
     | Opam of Fpath.t
     | Esy of Fpath.t
@@ -24,20 +24,20 @@ module PackageManager : sig
 
   val ofName : Fpath.t -> string -> t option
 
-  (* Converts to a readable string representation (useful for loggers etc) *)
+  (** Converts to a readable string representation (useful for loggers etc) *)
   val toString : t -> string
 
-  (* Converts to a valid command name available on the system shell *)
+  (** Converts to a valid command name available on the system shell *)
   val toCmdString : t -> string
 
-  (* comparision function to assist set operations *)
+  (** comparision function to assist set operations *)
   val compare : t -> t -> int
 
-  (* find returns a supported package manager from a given list keeping in my
+  (** find returns a supported package manager from a given list keeping in my
      Global is a fallback toolchain manager and not exactly a valid package
      manager (hence the exclusion). TODO: rename this to something that make
      this behaviour evident *)
-  val find : string -> t list -> t option
+  val findByName : string -> t list -> t option
 
   val makeEsy : Fpath.t -> t
 
@@ -80,7 +80,7 @@ end = struct
     | Opam _, Global -> -1
     | Global, _ -> 1
 
-  let rec find name = function
+  let rec findByName name = function
     | [] -> None
     | x :: xs -> (
       match x with
@@ -92,7 +92,7 @@ end = struct
           if compare x y = 0 then
             Some x
           else
-            find name xs
+            findByName name xs
         | None -> None ) )
 
   let makeEsy root = Esy root
@@ -237,11 +237,11 @@ let selectPackageManager ~config choices =
        (choices |> List.map PackageManager.toName |> Array.of_list)
   |> P.then_ (function
        | None -> Error "showQuickPick() returned undefined" |> P.resolve
-       | Some packageManager ->
-         WorkspaceCfg.update config "packageManager" packageManager
+       | Some packageManagerName ->
+         WorkspaceCfg.update config "packageManager" packageManagerName
            (WorkspaceCfg.configurationTargetToJs Workspace)
          |> P.then_ (fun _ ->
-                match PackageManager.find packageManager choices with
+                match PackageManager.findByName packageManagerName choices with
                 | None ->
                   Error "Selected choice was not found in the list" |> P.resolve
                 | Some pm -> Ok pm |> P.resolve))
