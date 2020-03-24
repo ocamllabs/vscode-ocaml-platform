@@ -47,6 +47,21 @@ module PackageManager = struct
     | Opam _, Global -> -1
     | Global, _ -> 1
 
+  let rec find name = function
+  | [] -> None
+  | x :: xs -> (
+    match x with
+    | Global -> None
+    | Esy root
+    | Opam root -> (
+      match ofName root name with
+      | Ok y ->
+        if compare x y = 0 then
+          Some x
+        else
+          find name xs
+      | Error _ -> None ) )
+
   let makeEsy root = Esy root
 
   let makeOpam root = Opam root
@@ -137,22 +152,6 @@ let env spec =
     Cmd.output cmd ~args:[| "exec"; "env" |] ~cwd:(Fpath.toString root)
     |> okThen parseOpamEnvOutput
 
-(* TODO: relies on compare *)
-let rec find name = function
-  | [] -> None
-  | x :: xs -> (
-    match x with
-    | PackageManager.Global -> None
-    | Esy root
-    | Opam root -> (
-      match PackageManager.ofName root name with
-      | Ok y ->
-        if compare x y = 0 then
-          Some x
-        else
-          find name xs
-      | Error _ -> None ) )
-
 let supportedPackageManagers ~env ~root =
   let supportedPackageManagers =
     [ PackageManager.Esy root; Esy Fpath.(root / ".vscode" / "esy"); Opam root ]
@@ -209,7 +208,7 @@ let selectPackageManager ~config choices =
          WorkspaceCfg.update config "packageManager" packageManager
            (WorkspaceCfg.configurationTargetToJs Workspace)
          |> P.then_ (fun _ ->
-                match find packageManager choices with
+                match PackageManager.find packageManager choices with
                 | None ->
                   Error "Selected choice was not found in the list" |> P.resolve
                 | Some pm -> Ok pm |> P.resolve))
