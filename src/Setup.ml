@@ -1,4 +1,3 @@
-open Utils
 open Bindings
 module P = Js.Promise
 
@@ -150,14 +149,15 @@ module Bsb = struct
            Error {j| Rimraf failed before the bsb toolchain setup: $esyRoot |j}
            |> P.resolve
          | Ok () -> createEsyFolder ~esyRoot)
-    |> thenMap (fun () -> writeEsyJson ~esyRoot)
-    |> thenMap (fun () -> installDepsWithEsy ~esyRoot ~esyCmd)
-    |> thenMap (fun _ -> getArtifactsUrl ~eventEmitter)
-    |> thenMap (fun downloadUrl ->
+    |> Promise.mapOk (fun () -> writeEsyJson ~esyRoot)
+    |> Promise.mapOk (fun () -> installDepsWithEsy ~esyRoot ~esyCmd)
+    |> Promise.mapOk (fun _ -> getArtifactsUrl ~eventEmitter)
+    |> Promise.mapOk (fun downloadUrl ->
            downloadArtifacts ~esyRoot ~eventEmitter downloadUrl)
-    |> thenMap (fun () -> unzipArtifacts ~esyRoot ~envWithUnzip)
-    |> thenMap (fun () -> importDownloadedDependencies ~esyRoot ~esyCmd)
-    |> thenMap (fun () -> buildDependencies ~esyRoot ~esyCmd ~eventEmitter)
+    |> Promise.mapOk (fun () -> unzipArtifacts ~esyRoot ~envWithUnzip)
+    |> Promise.mapOk (fun () -> importDownloadedDependencies ~esyRoot ~esyCmd)
+    |> Promise.mapOk (fun () ->
+           buildDependencies ~esyRoot ~esyCmd ~eventEmitter)
 
   let run esyCmd esyEnv eventEmitter projectPath =
     let projectPath = Path.join [| projectPath; ".."; ".." |] in
