@@ -1,5 +1,4 @@
 open Bindings
-open Utils
 module P = Js.Promise
 
 module E = struct
