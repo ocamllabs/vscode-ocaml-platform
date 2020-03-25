@@ -30,6 +30,13 @@ let okThen f =
         | Ok x -> f x
         | Error e -> Error e ))
 
+let thenMap fn promise =
+  let open Js.Promise in
+  promise
+  |> then_ (function
+       | Error e -> Error e |> resolve
+       | Ok payload -> fn payload)
+
 module Result = struct
   open Belt.Result
 

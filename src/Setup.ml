@@ -1,3 +1,4 @@
+open Utils
 open Bindings
 module P = Js.Promise
 
@@ -149,26 +150,14 @@ module Bsb = struct
            Error {j| Rimraf failed before the bsb toolchain setup: $esyRoot |j}
            |> P.resolve
          | Ok () -> createEsyFolder ~esyRoot)
-    |> P.then_ (function
-         | Error e -> Error e |> P.resolve
-         | Ok () -> writeEsyJson ~esyRoot)
-    |> P.then_ (function
-         | Error e -> Error e |> P.resolve
-         | Ok () -> installDepsWithEsy ~esyRoot ~esyCmd)
-    |> P.then_ (fun _ -> getArtifactsUrl ~eventEmitter)
-    |> P.then_ (function
-         | Error e -> Error e |> P.resolve
-         | Ok downloadUrl ->
+    |> thenMap (fun () -> writeEsyJson ~esyRoot)
+    |> thenMap (fun () -> installDepsWithEsy ~esyRoot ~esyCmd)
+    |> thenMap (fun _ -> getArtifactsUrl ~eventEmitter)
+    |> thenMap (fun downloadUrl ->
            downloadArtifacts ~esyRoot ~eventEmitter downloadUrl)
-    |> P.then_ (function
-         | Error e -> Error e |> P.resolve
-         | Ok () -> unzipArtifacts ~esyRoot ~envWithUnzip)
-    |> P.then_ (function
-         | Error e -> Error e |> P.resolve
-         | Ok () -> importDownloadedDependencies ~esyRoot ~esyCmd)
-    |> P.then_ (function
-         | Error e -> Error e |> P.resolve
-         | Ok () -> buildDependencies ~esyRoot ~esyCmd ~eventEmitter)
+    |> thenMap (fun () -> unzipArtifacts ~esyRoot ~envWithUnzip)
+    |> thenMap (fun () -> importDownloadedDependencies ~esyRoot ~esyCmd)
+    |> thenMap (fun () -> buildDependencies ~esyRoot ~esyCmd ~eventEmitter)
 
   let run esyCmd esyEnv eventEmitter projectPath =
     let projectPath = Path.join [| projectPath; ".."; ".." |] in
