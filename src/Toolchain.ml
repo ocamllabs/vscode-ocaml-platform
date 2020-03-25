@@ -155,7 +155,7 @@ let parseOpamEnvOutput opamEnvOutput =
              "Splitting on '=' in env output returned more than two items: "
              (l |> Array.of_list |> Js.Array.joinWith ",");
            None)
-  |> Js.Dict.fromArray |> Result.return
+  |> Js.Dict.fromArray |> Result.return |> P.resolve
 
 let env ~cmd ~kind =
   match kind with
@@ -164,15 +164,18 @@ let env ~cmd ~kind =
     Cmd.output cmd
       ~args:[| "command-env"; "--json"; "-P"; Fpath.toString root |]
       ~cwd:(Fpath.toString root)
-    |> okThen (fun stdout ->
+    |> P.mapOk (fun stdout ->
            match Json.parse stdout with
            | Some json ->
-             json |> Json.Decode.dict Json.Decode.string |> Result.return
+             json
+             |> Json.Decode.dict Json.Decode.string
+             |> Result.return |> P.resolve
            | None ->
-             Error ("'esy command-env' returned non-json output: " ^ stdout))
+             Error ("'esy command-env' returned non-json output: " ^ stdout)
+             |> P.resolve)
   | Opam root ->
     Cmd.output cmd ~args:[| "exec"; "env" |] ~cwd:(Fpath.toString root)
-    |> okThen parseOpamEnvOutput
+    |> P.mapOk parseOpamEnvOutput
 
 let supportedPackageManagers ~env ~root =
   let supportedPackageManagers =
@@ -222,7 +225,8 @@ let init ~env ~folder =
   let projectRoot = Fpath.ofString folder in
   P.all2
     ( supportedPackageManagers ~root:projectRoot ~env
-    , Manifest.lookup projectRoot |> okThen packageManagersListOfLookup )
+    , Manifest.lookup projectRoot
+      |> P.mapOk (fun r -> packageManagersListOfLookup r |> P.resolve) )
   |> P.then_ (fun (supportedPackageManagers, detectedPackageManagers) ->
          let supportedPackageManagers =
            packageManagerSetOfResultList ~debugMsg:"supported package managers"
@@ -265,8 +269,8 @@ let init ~env ~folder =
              |> P.then_ (function
                   | Error e -> Error e |> P.resolve
                   | Ok pm -> makeSpec ~env ~kind:pm) ))
-  |> okThen (fun (spec : spec) ->
-         Ok { cmd = spec.cmd; kind = spec.kind; projectRoot })
+  |> P.mapOk (fun (spec : spec) ->
+         Ok { cmd = spec.cmd; kind = spec.kind; projectRoot } |> P.resolve)
 
 let promptSetup fn =
   Window.showQuickPick [| "yes"; "no" |]
