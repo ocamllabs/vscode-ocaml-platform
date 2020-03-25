@@ -125,7 +125,8 @@ type spec =
   }
 
 type resources =
-  { spec : spec
+  { cmd : Cmd.t
+  ; kind : PackageManager.t
   ; projectRoot : Fpath.t
   }
 
@@ -156,10 +157,9 @@ let parseOpamEnvOutput opamEnvOutput =
            None)
   |> Js.Dict.fromArray |> Result.return
 
-let env spec =
-  let { cmd; kind } = spec in
+let env ~cmd ~kind =
   match kind with
-  | Global -> Ok Process.env |> P.resolve
+  | PackageManager.Global -> Ok Process.env |> P.resolve
   | Esy root ->
     Cmd.output cmd
       ~args:[| "command-env"; "--json"; "-P"; Fpath.toString root |]
@@ -253,7 +253,7 @@ let init ~env ~folder =
          | packageManagers -> (
            let config = Vscode.Workspace.getConfiguration "ocaml" in
            match
-             (Vscode.WorkspaceConfiguration.get config "packageManager"
+             ( Vscode.WorkspaceConfiguration.get config "packageManager"
              , Vscode.WorkspaceConfiguration.get config "toolChainRoot" )
            with
            | Some name, Some root ->
@@ -265,7 +265,7 @@ let init ~env ~folder =
              |> P.then_ (function
                   | Error e -> Error e |> P.resolve
                   | Ok pm -> makeSpec ~env ~kind:pm) ))
-  |> okThen (fun spec -> Ok { spec; projectRoot })
+  |> okThen (fun (spec: spec) -> Ok { cmd = spec.cmd; kind = spec.kind; projectRoot })
 
 let promptSetup fn =
   Window.showQuickPick [| "yes"; "no" |]
@@ -333,8 +333,7 @@ let esyProjectState ~cmd ~root ~projectRoot =
          in
          Ok state |> P.resolve)
 
-let setupToolChain projectRoot spec =
-  let { cmd; kind } = spec in
+let setupToolChain { cmd; kind; projectRoot } =
   match kind with
   | Global -> Ok () |> P.resolve
   | Opam _ -> Ok () |> P.resolve
@@ -347,11 +346,11 @@ let setupToolChain projectRoot spec =
          | Ok `PendingBsb ->
            setupBsb ~cmd ~envWithUnzip:Process.env (Fpath.toString root))
 
-let runSetup { spec; projectRoot } =
-  setupToolChain projectRoot spec
+let runSetup ({ cmd; kind; _ } as resources) =
+  setupToolChain resources
   |> P.then_ (function
        | Error msg -> Error msg |> P.resolve
-       | Ok () -> env spec)
+       | Ok () -> env ~cmd ~kind)
   |> P.then_ (function
        (* This function/callback here is a temporary way to check ocamllsp if
           installed after setupToolChain completes. TODO: move it inside
@@ -366,7 +365,7 @@ let runSetup { spec; projectRoot } =
          in
          P.resolve r)
 
-let getLspCommand { spec = { kind; cmd } } =
+let getLspCommand { kind; cmd; _} =
   match kind with
   | Opam _ -> (Cmd.binPath cmd, [| "exec"; "ocamllsp" |])
   | Esy root -> (Cmd.binPath cmd, [| "-P"; Fpath.toString root; "ocamllsp" |])
