@@ -129,36 +129,6 @@ type resources =
   ; projectRoot : Fpath.t
   }
 
-let promptSetup ~f =
-  Window.showQuickPick [| "yes"; "no" |]
-    (Window.QuickPickOptions.make ~canPickMany:false
-       ~placeHolder:{j|Setup this project's toolchain with 'esy'?|j} ())
-  |> P.then_ (function
-       | Some choice when choice = "yes" -> f ()
-       | Some _
-       | None ->
-         Error "Please setup the toolchain" |> P.resolve)
-
-let setupWithProgressIndicator esyCmd ~envWithUnzip:esyEnv folder =
-  let open Setup.Bsb in
-  Window.withProgress
-    [%bs.obj
-      { location = Window.locationToJs Window.Notification
-      ; title = "Setting up toolchain..."
-      }]
-    (fun progress ->
-      let succeeded = ref (Ok ()) in
-      let eventEmitter = make () in
-      onProgress eventEmitter (fun percent ->
-          Js.Console.info2 "Percentage:" percent;
-          (progress.report
-             [%bs.obj { increment = int_of_float (percent *. 100.) }] [@bs]));
-      onEnd eventEmitter (fun () ->
-          (progress.report [%bs.obj { increment = 100 }] [@bs]));
-      onError eventEmitter (fun errorMsg -> succeeded := Error errorMsg);
-      run esyCmd esyEnv eventEmitter folder
-      |> P.then_ (fun () -> P.resolve !succeeded))
-
 let makeSpec ~env ~kind =
   Cmd.make ~env ~cmd:(PackageManager.toCmdString kind)
   |> P.then_ (function
@@ -297,20 +267,46 @@ let init ~env ~folder =
                   | Ok pm -> makeSpec ~env ~kind:pm) ))
   |> okThen (fun spec -> Ok { spec; projectRoot })
 
-let setupBsbWithPrompt ~cmd ~root =
-  promptSetup ~f:(fun () ->
-      Window.withProgress
-        [%bs.obj
-          { location = Window.locationToJs Window.Notification
-          ; title = "Setting up toolchain..."
-          }]
-        (fun progress ->
-          (progress.report [%bs.obj { increment = int_of_float 1. }] [@bs]);
-          Cmd.output cmd ~cwd:(root |> Fpath.toString) ~args:[||]
-          |> P.then_ (fun _ ->
-                 (progress.report
-                    [%bs.obj { increment = int_of_float 100. }] [@bs]);
-                 Ok () |> P.resolve)))
+let promptSetup fn =
+  Window.showQuickPick [| "yes"; "no" |]
+    (Window.QuickPickOptions.make ~canPickMany:false
+       ~placeHolder:{j|Setup this project's toolchain with 'esy'?|j} ())
+  |> P.then_ (function
+       | Some choice when choice = "yes" -> fn ()
+       | Some _
+       | None ->
+         Error "Please setup the toolchain" |> P.resolve)
+
+let setupWithProgressIndicator fn =
+  Window.withProgress
+    [%bs.obj
+      { location = Window.locationToJs Window.Notification
+      ; title = "Setting up toolchain..."
+      }]
+    fn
+
+let setupEsy ~cmd ~root =
+  setupWithProgressIndicator (fun progress ->
+      (progress.report [%bs.obj { increment = int_of_float 1. }] [@bs]);
+      Cmd.output cmd ~cwd:(root |> Fpath.toString) ~args:[||]
+      |> P.then_ (fun _ ->
+             (progress.report [%bs.obj { increment = int_of_float 100. }] [@bs]);
+             Ok () |> P.resolve))
+
+let setupBsb ~cmd ~envWithUnzip:esyEnv folder =
+  setupWithProgressIndicator (fun progress ->
+      let succeeded = ref (Ok ()) in
+      let eventEmitter = Setup.Bsb.make () in
+      Setup.Bsb.onProgress eventEmitter (fun percent ->
+          Js.Console.info2 "Percentage:" percent;
+          (progress.report
+             [%bs.obj { increment = int_of_float (percent *. 100.) }] [@bs]));
+      Setup.Bsb.onEnd eventEmitter (fun () ->
+          (progress.report [%bs.obj { increment = 100 }] [@bs]));
+      Setup.Bsb.onError eventEmitter (fun errorMsg ->
+          succeeded := Error errorMsg);
+      Setup.Bsb.run cmd esyEnv eventEmitter folder
+      |> P.then_ (fun () -> P.resolve !succeeded))
 
 let esyProjectState ~cmd ~root ~projectRoot =
   let rootStr = Fpath.toString root in
@@ -330,7 +326,7 @@ let esyProjectState ~cmd ~root ~projectRoot =
          let state =
            if isProjectReadyForDev then
              `Ready
-           else if Fpath.compare root projectRoot <> 0 then
+           else if Fpath.compare root projectRoot = 0 then
              `PendingEsy
            else
              `PendingBsb
@@ -347,10 +343,9 @@ let setupToolChain projectRoot spec =
     |> P.then_ (function
          | Error e -> Error e |> P.resolve
          | Ok `Ready -> Ok () |> P.resolve
-         | Ok `PendingEsy ->
-           setupWithProgressIndicator cmd ~envWithUnzip:Process.env
-             (Fpath.toString root)
-         | Ok `PendingBsb -> setupBsbWithPrompt ~cmd ~root)
+         | Ok `PendingEsy -> promptSetup (fun () -> setupEsy ~cmd ~root)
+         | Ok `PendingBsb ->
+           setupBsb ~cmd ~envWithUnzip:Process.env (Fpath.toString root))
 
 let runSetup { spec; projectRoot } =
   setupToolChain projectRoot spec
