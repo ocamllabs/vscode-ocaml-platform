@@ -140,7 +140,7 @@ module Bsb = struct
            Error ("'esy build' failed. Reason: " ^ msg) |> P.resolve
          | Ok _esyCmdOutput -> Ok () |> P.resolve)
 
-  let runSetupChain esyCmd envWithUnzip eventEmitter folder =
+  let runSetupChain ~esyCmd ~envWithUnzip ~eventEmitter ~folder =
     let open Bindings in
     let esyRoot = Path.join [| folder; ".vscode"; "esy" |] in
     Rimraf.run esyRoot
@@ -157,7 +157,7 @@ module Bsb = struct
          | Ok () -> installDepsWithEsy ~esyRoot ~esyCmd)
     |> P.then_ (fun _ -> getArtifactsUrl ~eventEmitter)
     |> P.then_ (function
-         | Error cacheFailureReason -> P.resolve (Error cacheFailureReason)
+         | Error e -> Error e |> P.resolve
          | Ok downloadUrl ->
            downloadArtifacts ~esyRoot ~eventEmitter downloadUrl)
     |> P.then_ (function
@@ -177,17 +177,15 @@ module Bsb = struct
     |> P.then_ (fun manifest ->
            match Json.parse manifest with
            | Some json -> (
-             match json |> CheckBucklescriptCompat.run with
-             | Ok () -> runSetupChain esyCmd esyEnv eventEmitter projectPath
+             match CheckBucklescriptCompat.run json with
              | Error msg ->
-               P.resolve (Error {j| BucklescriptCompatFailure: $msg |j}) )
+               Error {j| BucklescriptCompatFailure: $msg |j} |> P.resolve
+             | Ok () ->
+               runSetupChain ~esyCmd ~envWithUnzip:esyEnv ~eventEmitter
+                 ~folder:projectPath )
            | None ->
              Error ("Failed to parse manifest at " ^ manifestPath) |> P.resolve)
     |> P.then_ (function
-         | Ok () ->
-           reportEnd eventEmitter;
-           P.resolve ()
-         | Error e ->
-           reportError eventEmitter e;
-           P.resolve ())
+         | Error e -> reportError eventEmitter e |> P.resolve
+         | Ok () -> reportEnd eventEmitter |> P.resolve)
 end
