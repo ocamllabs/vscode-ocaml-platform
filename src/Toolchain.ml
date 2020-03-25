@@ -12,6 +12,14 @@ end
 (* Terminology:
    - PackageManager: represents supported package managers
      with Global as the fallback
+   - projectRoot is different from PackageManager root (Eg. Opam
+     (Fpath.ofString "/foo/bar")). Project root
+     is the directory where manifest file (opam/esy.json/package.json)
+     was found. PackageManager root is the directory that contains the
+     manifest file responsible for setting up the toolchain - the two
+     are same for Esy and Opam project but different for
+     bucklescript. Bucklescript projects have this manifest file
+     abstracted away from the user (atleast at the moment)
    - Manifest: abstracts functions handling manifest files
      of the supported package managers *)
 
@@ -130,15 +138,15 @@ type resources =
   ; projectRoot : Fpath.t
   }
 
-let makeSpec ~env ~kind =
+let makeResources ~env ~kind ~projectRoot =
   Cmd.make ~env ~cmd:(PackageManager.toCmdString kind)
   |> P.then_ (function
        | Error msg -> Error msg |> P.resolve
-       | Ok cmd -> Ok { cmd; kind } |> P.resolve)
+       | Ok cmd -> Ok { cmd; kind; projectRoot } |> P.resolve)
 
-let specOfName ~env ~name ~root =
-  match PackageManager.ofName root name with
-  | Some kind -> makeSpec ~env ~kind
+let ofPackageManagerName ~env ~name ~projectRoot ~toolchainRoot =
+  match PackageManager.ofName toolchainRoot name with
+  | Some kind -> makeResources ~env ~kind ~projectRoot
   | None -> Error ("Invalid package manager name: " ^ name) |> P.resolve
 
 let parseOpamEnvOutput opamEnvOutput =
@@ -245,7 +253,7 @@ let init ~env ~folder =
            Js.Console.info "Will lookup toolchain from global env";
            let global = "global" in
            match PackageManager.ofName projectRoot global with
-           | Some kind -> makeSpec ~env ~kind
+           | Some kind -> makeResources ~env ~kind ~projectRoot
            | None ->
              Error
                {j| Unexplained exception: PackageManager.ofName returned None for a valid name $global |j}
@@ -253,7 +261,7 @@ let init ~env ~folder =
          | [ packageManager ] ->
            Js.Console.info2 "Toolchain detected"
              (PackageManager.toString packageManager);
-           makeSpec ~env ~kind:packageManager
+           makeResources ~env ~kind:packageManager ~projectRoot
          | packageManagers -> (
            let config = Vscode.Workspace.getConfiguration "ocaml" in
            match
@@ -261,16 +269,17 @@ let init ~env ~folder =
              , Vscode.WorkspaceConfiguration.get config "toolChainRoot" )
            with
            | Some name, Some root ->
-             specOfName ~env ~name ~root:(Fpath.ofString root)
-           | Some name, None -> specOfName ~env ~name ~root:projectRoot
+             ofPackageManagerName ~env ~name ~projectRoot
+               ~toolchainRoot:(Fpath.ofString root)
+           | Some name, None ->
+             ofPackageManagerName ~env ~name ~toolchainRoot:projectRoot
+               ~projectRoot
            | None, Some _
            | None, None ->
              selectPackageManager ~config packageManagers
              |> P.then_ (function
                   | Error e -> Error e |> P.resolve
-                  | Ok pm -> makeSpec ~env ~kind:pm) ))
-  |> P.mapOk (fun (spec : spec) ->
-         Ok { cmd = spec.cmd; kind = spec.kind; projectRoot } |> P.resolve)
+                  | Ok pm -> makeResources ~env ~kind:pm ~projectRoot) ))
 
 let promptSetup fn =
   Window.showQuickPick [| "yes"; "no" |]
