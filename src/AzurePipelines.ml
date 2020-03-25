@@ -22,10 +22,10 @@ module RESTResponse = struct
     with e ->
       let msg = Printexc.to_string e
       and stack = Printexc.get_backtrace () in
-      Error {|Failed to parse Azure response
+      Error {j|Failed to parse Azure response
 $msg
 $stack
-|}
+|j}
 
   let getBuildId' json =
     let open Json.Decode in
