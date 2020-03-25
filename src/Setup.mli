@@ -1,25 +1,31 @@
-(* A Nodejs event emitter based module that emits progress events as the
+(** A Nodejs event emitter based module that emits progress events as the
    toolchain is setup for a bucklescript project *)
 module Bsb : sig
-  type t (* event emitter *)
+  (** Represents a nodejs event emitter *)
+  type t
 
-  val make : unit -> t (* creates and event emitter *)
+  (** creates and event emitter *)
+  val make : unit -> t
 
-  (* event handlers *)
+  (** Handles progress event *)
   val onProgress : t -> (float -> unit) -> unit
 
+  (** Handles end event *)
   val onEnd : t -> (unit -> unit) -> unit
 
+  (** Handles error  *)
   val onError : t -> (string -> unit) -> unit
 
-  (* event emitters *)
+  (** Emits progress event *)
   val reportProgress : t -> float -> unit
 
+  (** Emits end event *)
   val reportEnd : t -> unit
 
+  (** Emits error *)
   val reportError : t -> string -> unit
 
-  (* runs the toolchain setup that keeps the consumer updated with progress
+  (** runs the toolchain setup that keeps the consumer updated with progress
      events *)
   val run : Cmd.t -> string Js.Dict.t -> t -> string -> unit Js.Promise.t
 end
