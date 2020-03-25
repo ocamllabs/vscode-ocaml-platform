@@ -1,3 +1,4 @@
 {
-  "FSharp.fsacRuntime": "net"
+  "FSharp.fsacRuntime": "net",
+  "editor.formatOnSave": true
 }

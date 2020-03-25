@@ -1,4 +1,5 @@
-open Js.Promise
+open Bindings
+module P = Js.Promise
 
 module Internal = struct
   type t (* event emitter *)
@@ -50,61 +51,68 @@ module Bsb = struct
 
   let make () = makeEventEmitter ()
 
+  (* Why the are progress percentages hardcoded the way they are?
+
+   Azure's REST API doesn't set the file size of the zip file in the headers.
+   This makes it hard to report download progress correctly. We work around this
+   by assuming that the download process takes up 80% of the setup time and
+   assign some approximate hardcoded time for the rest of the setups *)
+
   let runSetupChain esyCmd envWithUnzip eventEmitter folder =
     let open Bindings in
     let hiddenEsyRoot = Path.join [| folder; ".vscode"; "esy" |] in
     Rimraf.run hiddenEsyRoot
-    |> then_ (function
+    |> P.then_ (function
          | Error () ->
            Error
              {j| Rimraf failed before the bsb toolchain setup: $hiddenEsyRoot |j}
-           |> resolve
+           |> P.resolve
          | Ok () ->
            Fs.mkdir ~p:true hiddenEsyRoot
-           |> then_ (function
-                | Ok () -> Ok () |> resolve
+           |> P.then_ (function
+                | Ok () -> Ok () |> P.resolve
                 | Error Fs.E.PathNotFound ->
                   Error
                     {j| Setup failed with because of invalid path provided to it: $hiddenEsyRoot |j}
-                  |> resolve))
-    |> then_ (function
-         | Error e -> Error e |> resolve
+                  |> P.resolve))
+    |> P.then_ (function
+         | Error e -> Error e |> P.resolve
          | Ok () ->
            Filename.concat hiddenEsyRoot "esy.json"
            |> dropAnEsyJSON
-           |> then_ (fun () -> resolve (Ok ())))
-    |> then_ (function
-         | Error e -> Error e |> resolve
+           |> P.then_ (fun () -> P.resolve (Ok ())))
+    |> P.then_ (function
+         | Error e -> Error e |> P.resolve
          | Ok () ->
            Cmd.output esyCmd ~cwd:hiddenEsyRoot
              ~args:[| "install"; "-P"; hiddenEsyRoot |]
-           |> then_ (function
+           |> P.then_ (function
                 | Error msg ->
-                  Error ("'esy install' failed. Reason: " ^ msg) |> resolve
+                  Error ("'esy install' failed. Reason: " ^ msg) |> P.resolve
                 | Ok _stdout ->
                   reportProgress eventEmitter 0.1;
                   (* See comment at the bottom *)
                   AzurePipelines.getBuildID ()
-                  |> then_ (function
+                  |> P.then_ (function
                        | Ok id ->
                          id |> AzurePipelines.getDownloadURL
-                         |> Js.Promise.then_ (function
-                              | Ok url -> resolve (Ok url)
+                         |> P.then_ (function
+                              | Ok url -> P.resolve (Ok url)
                               | Error msg ->
                                 Error
                                   {j| Azure artifacts cache failure: $msg |j}
-                                |> resolve)
+                                |> P.resolve)
                        | Error msg ->
                          Error {j| Azure artifacts cache failure: $msg |j}
-                         |> resolve)
-                  |> then_ (function
-                       | Ok url -> Ok url |> resolve
-                       | Error e -> Error e |> resolve)))
-    |> then_ (function
+                         |> P.resolve)
+                  |> P.then_ (function
+                       | Ok url -> Ok url |> P.resolve
+                       | Error e -> Error e |> P.resolve)))
+    |> P.then_ (function
          | Ok downloadUrl ->
            Js.log2 "download" downloadUrl;
            let lastProgress = ref 0.0 in
-           Js.Promise.make (fun ~resolve ~reject:_ ->
+           P.make (fun ~resolve ~reject:_ ->
                download downloadUrl
                  (Path.join [| hiddenEsyRoot; "cache.zip" |])
                  ~progress:(fun progressFraction ->
@@ -117,78 +125,68 @@ module Bsb = struct
                  ~error:(fun _ ->
                    (resolve (Error "Azure artifacts cache failure: ") [@bs]))
                  ~end_:(fun () -> (resolve (Ok ()) [@bs])))
-         | Error cacheFailureReason -> resolve (Error cacheFailureReason))
-    |> then_ (function
+         | Error cacheFailureReason -> P.resolve (Error cacheFailureReason))
+    |> P.then_ (function
          | Ok () ->
            reportProgress eventEmitter 93.33;
            (* See comment at the bottom explaining 93.33 *)
            Cmd.make ~cmd:"unzip" ~env:envWithUnzip
-           |> Js.Promise.then_ (function
-                | Error msg -> Js.Promise.resolve (Error msg)
+           |> P.then_ (function
+                | Error msg -> P.resolve (Error msg)
                 | Ok unzip ->
                   Cmd.output unzip ~args:[| "cache.zip" |] ~cwd:hiddenEsyRoot)
-           |> then_ (function
+           |> P.then_ (function
                 | Error unzipCmdError ->
                   Error {j| Azure artifacts cache failure: $unzipCmdError |j}
-                  |> resolve
-                | Ok _unzipCmdOutput -> resolve (Ok ()))
-         | Error e -> Error e |> resolve)
-    |> then_ (function
+                  |> P.resolve
+                | Ok _unzipCmdOutput -> P.resolve (Ok ()))
+         | Error e -> Error e |> P.resolve)
+    |> P.then_ (function
          | Ok () ->
            reportProgress eventEmitter 96.66;
            (* See comment at the bottom explaining 96.66 *)
            Cmd.output esyCmd ~cwd:hiddenEsyRoot
              ~args:[| "import-dependencies"; "-P"; hiddenEsyRoot |]
-           |> then_ (fun r ->
-                  resolve
+           |> P.then_ (fun r ->
+                  P.resolve
                     ( match r with
                     | Ok _ -> Ok ()
                     | Error msg ->
                       Error ("'esy import-dependencies' failed. Reason: " ^ msg)
                     ))
-         | Error e -> resolve (Error e))
-    |> then_ (function
-         | Error e -> Error e |> resolve
+         | Error e -> P.resolve (Error e))
+    |> P.then_ (function
+         | Error e -> Error e |> P.resolve
          | Ok () ->
            reportProgress eventEmitter 99.99;
            (* See comment at the bottom explaining the 99.99 *)
            Cmd.output esyCmd ~cwd:hiddenEsyRoot
              ~args:[| "build"; "-P"; hiddenEsyRoot |]
-           |> then_ (fun r ->
-                  resolve
+           |> P.then_ (fun r ->
+                  P.resolve
                     ( match r with
                     | Ok _esyCmdOutput -> Ok ()
                     | Error msg -> Error ("'esy build' failed. Reason: " ^ msg)
                     )))
 
   let run esyCmd esyEnv eventEmitter projectPath =
-    let open Bindings in
     let projectPath = Path.join [| projectPath; ".."; ".." |] in
     let manifestPath = Path.join [| projectPath; "package.json" |] in
-    let open Js.Promise in
     Fs.readFile manifestPath
-    |> then_ (fun manifest ->
+    |> P.then_ (fun manifest ->
            match Json.parse manifest with
            | Some json -> (
              match json |> CheckBucklescriptCompat.run with
              | Ok () -> runSetupChain esyCmd esyEnv eventEmitter projectPath
              | Error msg ->
-               resolve (Error {j| BucklescriptCompatFailure: $msg |j}) )
+               P.resolve (Error {j| BucklescriptCompatFailure: $msg |j}) )
            | None ->
-             Error ("Failed to parse manifest at " ^ manifestPath)
-             |> Js.Promise.resolve)
-    |> then_ (function
+             Error ("Failed to parse manifest at " ^ manifestPath) |> P.resolve)
+    |> P.then_ (function
          | Ok () ->
            reportEnd eventEmitter;
-           resolve ()
+           P.resolve ()
          | Error e ->
            reportError eventEmitter e;
-           resolve ())
+           P.resolve ())
 end
-
-(* Why the are progress percentages hardcoded the way they are?
-
-   Azure's REST API doesn't set the file size of the zip file in the headers.
-   This makes it hard to report download progress correctly. We work around this
-   by assuming that the download process takes up 80% of the setup time and
-   assign some approximate hardcoded time for the rest of the setups *)

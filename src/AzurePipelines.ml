@@ -1,5 +1,6 @@
 open Bindings
 open Utils
+module P = Js.Promise
 
 module E = struct
   type t =
@@ -83,13 +84,11 @@ let filter =
 
 let latest = "queryOrder=finishTimeDescending&$top=1"
 
-open Js.Promise
-
 let getBuildID () =
   Https.getCompleteResponse
     {j|$restBase/$proj/_apis/build/builds?$filter&$master&$latest&api-version=4.1|j}
-  |> then_ (fun r ->
-         resolve
+  |> P.then_ (fun r ->
+         P.resolve
            ( match r with
            | Ok response -> RESTResponse.getBuildId response
            | Error e -> (
@@ -102,11 +101,11 @@ let getDownloadURL latestBuildID =
   | Some artifactName ->
     Https.getCompleteResponse
       {j|$restBase/$proj/_apis/build/builds/$latestBuildID/artifacts?artifactname=$artifactName&api-version=4.1|j}
-    |> then_ (function
+    |> P.then_ (function
          | Error (Https.E.Failure url) ->
-           Error {j| Failed to download $url |j} |> resolve
+           Error {j| Failed to download $url |j} |> P.resolve
          | Ok responseText ->
-           responseText |> RESTResponse.getDownloadURL |> resolve)
+           responseText |> RESTResponse.getDownloadURL |> P.resolve)
   | None ->
-    resolve
-      (Error "We detected a platform for which we couldn't find cached builds")
+    Error "We detected a platform for which we couldn't find cached builds"
+    |> P.resolve

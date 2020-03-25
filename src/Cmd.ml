@@ -26,7 +26,7 @@ let make ~env ~cmd =
     in
     cmds
     |> Array.map (fun cmd ->
-           Js.String.split env_sep path
+           Js.String.split envSep path
            |> Js.Array.map (fun p -> Filename.concat p cmd))
     |> Js.Array.reduce Js.Array.concat [||]
     |> Js.Array.map (fun p ->
