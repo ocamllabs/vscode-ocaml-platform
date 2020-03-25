@@ -1,5 +1,6 @@
 open Bindings
 open Utils
+module P = Js.Promise
 
 type t =
   { cmd : string
@@ -16,7 +17,7 @@ let binPath c = c.cmd
 
 let make ~env ~cmd =
   match Js.Dict.get env "PATH" with
-  | None -> Error pathMissingFromEnv |> Js.Promise.resolve
+  | None -> Error pathMissingFromEnv |> P.resolve
   | Some path ->
     let cmds =
       match Sys.unix with
@@ -29,35 +30,28 @@ let make ~env ~cmd =
            |> Js.Array.map (fun p -> Filename.concat p cmd))
     |> Js.Array.reduce Js.Array.concat [||]
     |> Js.Array.map (fun p ->
-           Fs.exists p
-           |> Js.Promise.then_ (fun exists -> Js.Promise.resolve (p, exists)))
-    |> Js.Promise.all
-    |> Js.Promise.then_ (fun r ->
-           Js.Promise.resolve
-             ( match
-                 r
-                 |> Js.Array.filter (fun (_p, exists) -> exists)
-                 |> Array.to_list
-               with
-             | [] -> Error {j| Command "$cmd" not found |j}
-             | (cmd, _exists) :: _rest -> Ok { cmd; env } ))
+           p |> Fs.exists |> P.then_ (fun exists -> (p, exists) |> P.resolve))
+    |> P.all
+    |> P.then_ (fun r ->
+           match
+             r |> Js.Array.filter (fun (_p, exists) -> exists) |> Array.to_list
+           with
+           | [] -> Error {j| Command "$cmd" not found |j} |> P.resolve
+           | (cmd, _exists) :: _rest -> Ok { cmd; env } |> P.resolve)
 
 let output ~args ~cwd { cmd; env } =
   let shellString = Js.Array.concat args [| cmd |] |> Js.Array.joinWith " " in
-  Js.log shellString;
+  Js.Console.info shellString;
   ChildProcess.exec shellString (ChildProcess.Options.make ~cwd ~env ())
-  |> Js.Promise.then_ (fun r ->
-         let r =
-           match r with
-           | Error e -> e |> Result.fail
-           | Ok (exitCode, stdout, stderr) ->
-             if exitCode = 0 then
-               Ok stdout
-             else
-               Error
-                 {j| Command $cmd failed:
+  |> P.then_ (function
+       | Error e -> Error e |> P.resolve
+       | Ok (exitCode, stdout, stderr) ->
+         if exitCode = 0 then
+           Ok stdout |> P.resolve
+         else
+           Error
+             {j| Command $cmd failed:
 exitCode: $exitCode
 stderr: $stderr
 |j}
-         in
-         Js.Promise.resolve r)
+           |> P.resolve)
