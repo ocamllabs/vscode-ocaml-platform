@@ -220,21 +220,21 @@ let selectPackageManager ~config choices =
 
 let init ~env ~folder =
   let projectRoot = Fpath.ofString folder in
-  let usedPMs =
-    Manifest.lookup projectRoot |> okThen packageManagersListOfLookup
-  in
-  P.all2 (supportedPackageManagers ~root:projectRoot ~env, usedPMs)
-  |> P.then_ (fun (supportedPMs, usedPMs) ->
-         let supportedPMs =
+  P.all2
+    ( supportedPackageManagers ~root:projectRoot ~env
+    , Manifest.lookup projectRoot |> okThen packageManagersListOfLookup )
+  |> P.then_ (fun (supportedPackageManagers, detectedPackageManagers) ->
+         let supportedPackageManagers =
            packageManagerSetOfResultList ~debugMsg:"supported package managers"
-             supportedPMs
+             supportedPackageManagers
          in
-         let usedPMs =
+         let detectedPackageManagers =
            packageManagerSetOfResultList
-             ~debugMsg:"possibly used package managers" usedPMs
+             ~debugMsg:"possibly used package managers" detectedPackageManagers
          in
          match
-           PackageManagerSet.inter supportedPMs usedPMs
+           PackageManagerSet.inter supportedPackageManagers
+             detectedPackageManagers
            |> PackageManagerSet.elements
          with
          | [] -> (
@@ -246,22 +246,22 @@ let init ~env ~folder =
              Error
                {j| Unexplained exception: PackageManager.ofName returned None for a valid name $global |j}
              |> P.resolve )
-         | [ obviousChoice ] ->
+         | [ packageManager ] ->
            Js.Console.info2 "Toolchain detected"
-             (PackageManager.toString obviousChoice);
-           makeSpec ~env ~kind:obviousChoice
-         | multipleChoices -> (
+             (PackageManager.toString packageManager);
+           makeSpec ~env ~kind:packageManager
+         | packageManagers -> (
            let config = Vscode.Workspace.getConfiguration "ocaml" in
            match
-             ( config |. Vscode.WorkspaceConfiguration.get "packageManager"
-             , config |. Vscode.WorkspaceConfiguration.get "toolChainRoot" )
+             (Vscode.WorkspaceConfiguration.get config "packageManager"
+             , Vscode.WorkspaceConfiguration.get config "toolChainRoot" )
            with
            | Some name, Some root ->
              specOfName ~env ~name ~root:(Fpath.ofString root)
            | Some name, None -> specOfName ~env ~name ~root:projectRoot
            | None, Some _
            | None, None ->
-             selectPackageManager ~config multipleChoices
+             selectPackageManager ~config packageManagers
              |> P.then_ (function
                   | Error e -> Error e |> P.resolve
                   | Ok pm -> makeSpec ~env ~kind:pm) ))
