@@ -104,7 +104,8 @@ end
 
 module PackageManagerSet : sig
   include Set.S with type elt = PackageManager.t
-end = Set.Make (PackageManager)
+end =
+  Set.Make (PackageManager)
 
 let packageManagerSetOfResultList ~debugMsg lst =
   Js.Console.info debugMsg;
@@ -355,9 +356,7 @@ let runSetup { spec; projectRoot } =
   setupToolChain projectRoot spec
   |> P.then_ (function
        | Error msg -> Error msg |> P.resolve
-       | Ok () -> let { cmd; kind } = spec in
-
-                  env spec)
+       | Ok () -> env spec)
   |> P.then_ (function
        (* This function/callback here is a temporary way to check ocamllsp if
           installed after setupToolChain completes. TODO: move it inside
