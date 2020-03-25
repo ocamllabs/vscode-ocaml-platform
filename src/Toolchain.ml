@@ -104,8 +104,19 @@ end
 
 module PackageManagerSet : sig
   include Set.S with type elt = PackageManager.t
-end =
-  Set.Make (PackageManager)
+end = Set.Make (PackageManager)
+
+let packageManagerSetOfResultList ~debugMsg lst =
+  Js.Console.info debugMsg;
+  match lst with
+  | Ok lst ->
+    List.iter (fun x -> x |> PackageManager.toString |> Js.Console.info) lst;
+    lst |> PackageManagerSet.of_list
+  | Error msg ->
+    Js.Console.error2
+      (Printf.sprintf "Error during extracting %s", debugMsg)
+      msg;
+    PackageManagerSet.empty
 
 type spec =
   { cmd : Cmd.t
@@ -208,18 +219,6 @@ let supportedPackageManagers ~env ~root =
          |. Belt.Array.keepMap (fun pm -> pm)
          |> Array.to_list |> Result.return |> P.resolve)
 
-let makeSet ~debugMsg lst =
-  Js.Console.info debugMsg;
-  match lst with
-  | Ok lst ->
-    List.iter (fun x -> x |> PackageManager.toString |> Js.Console.info) lst;
-    lst |> PackageManagerSet.of_list
-  | Error msg ->
-    Js.Console.error2
-      (Printf.sprintf "Error during extracting %s", debugMsg)
-      msg;
-    PackageManagerSet.empty
-
 let packageManagersListOfLookup = function
   | [] -> Error "TODO: global toolchain"
   | pms ->
@@ -256,10 +255,12 @@ let init ~env ~folder =
   P.all2 (supportedPackageManagers ~root:projectRoot ~env, usedPMs)
   |> P.then_ (fun (supportedPMs, usedPMs) ->
          let supportedPMs =
-           makeSet ~debugMsg:"supported package managers" supportedPMs
+           packageManagerSetOfResultList ~debugMsg:"supported package managers"
+             supportedPMs
          in
          let usedPMs =
-           makeSet ~debugMsg:"possibly used package managers" usedPMs
+           packageManagerSetOfResultList
+             ~debugMsg:"possibly used package managers" usedPMs
          in
          match
            PackageManagerSet.inter supportedPMs usedPMs
