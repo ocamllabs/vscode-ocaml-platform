@@ -4,7 +4,7 @@
     "@esy-ocaml/reason": "*",
     "@opam/ocamlformat": "0.13.0",
     "@opam/merlin": "*",
-    "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam#0fc8955eb39"
+    "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam#ed4f500291b"
   },
   "resolutions": {
     "@opam/dune": "2.0.1",
