@@ -9,9 +9,11 @@ module Binaries = struct
   let opam = "opam"
 end
 
-(* Terminology: - PackageManager - represents supported package managers with
-   Global as the fallback - Manifest - abstracts functions handling manifest
-   files of the supported package managers *)
+(* Terminology:
+   - PackageManager: represents supported package managers
+     with Global as the fallback
+   - Manifest: abstracts functions handling manifest files
+     of the supported package managers *)
 
 module PackageManager : sig
   (** Represents a given package manager that would install the toolchain *)
@@ -34,9 +36,9 @@ module PackageManager : sig
   val compare : t -> t -> int
 
   (** find returns a supported package manager from a given list keeping in my
-     Global is a fallback toolchain manager and not exactly a valid package
-     manager (hence the exclusion). TODO: rename this to something that make
-     this behaviour evident *)
+      Global is a fallback toolchain manager and not exactly a valid package
+      manager (hence the exclusion). TODO: rename this to something that make
+      this behaviour evident *)
   val findByName : string -> t list -> t option
 
   val makeEsy : Fpath.t -> t

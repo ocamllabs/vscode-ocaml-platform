@@ -7,7 +7,7 @@ field-space=loose
 let-and=sparse
 sequence-style=terminator
 type-decl=sparse
-wrap-comments=true
+wrap-comments=false
 if-then-else=k-r
 let-and=sparse
 space-around-records
