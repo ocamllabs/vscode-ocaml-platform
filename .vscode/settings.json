@@ -1,4 +1,4 @@
 {
-  "FSharp.fsacRuntime": "net",
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "ocaml.packageManager": "esy"
 }
