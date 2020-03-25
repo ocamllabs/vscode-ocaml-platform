@@ -1,5 +1,5 @@
 open Bindings
-module P = Js.Promise
+module P = Promise
 
 (* Why the are progress percentages hardcoded the way they are?
 
@@ -149,15 +149,14 @@ module Bsb = struct
            Error {j| Rimraf failed before the bsb toolchain setup: $esyRoot |j}
            |> P.resolve
          | Ok () -> createEsyFolder ~esyRoot)
-    |> Promise.mapOk (fun () -> writeEsyJson ~esyRoot)
-    |> Promise.mapOk (fun () -> installDepsWithEsy ~esyRoot ~esyCmd)
-    |> Promise.mapOk (fun _ -> getArtifactsUrl ~eventEmitter)
-    |> Promise.mapOk (fun downloadUrl ->
+    |> P.mapOk (fun () -> writeEsyJson ~esyRoot)
+    |> P.mapOk (fun () -> installDepsWithEsy ~esyRoot ~esyCmd)
+    |> P.mapOk (fun _ -> getArtifactsUrl ~eventEmitter)
+    |> P.mapOk (fun downloadUrl ->
            downloadArtifacts ~esyRoot ~eventEmitter downloadUrl)
-    |> Promise.mapOk (fun () -> unzipArtifacts ~esyRoot ~envWithUnzip)
-    |> Promise.mapOk (fun () -> importDownloadedDependencies ~esyRoot ~esyCmd)
-    |> Promise.mapOk (fun () ->
-           buildDependencies ~esyRoot ~esyCmd ~eventEmitter)
+    |> P.mapOk (fun () -> unzipArtifacts ~esyRoot ~envWithUnzip)
+    |> P.mapOk (fun () -> importDownloadedDependencies ~esyRoot ~esyCmd)
+    |> P.mapOk (fun () -> buildDependencies ~esyRoot ~esyCmd ~eventEmitter)
 
   let run esyCmd esyEnv eventEmitter projectPath =
     let projectPath = Path.join [| projectPath; ".."; ".." |] in

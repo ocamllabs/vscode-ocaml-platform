@@ -1,6 +1,6 @@
 open Bindings
 open Utils
-module P = Js.Promise
+module P = Promise
 module WorkspaceCfg = Vscode.WorkspaceConfiguration
 
 module Binaries = struct
@@ -265,7 +265,8 @@ let init ~env ~folder =
              |> P.then_ (function
                   | Error e -> Error e |> P.resolve
                   | Ok pm -> makeSpec ~env ~kind:pm) ))
-  |> okThen (fun (spec: spec) -> Ok { cmd = spec.cmd; kind = spec.kind; projectRoot })
+  |> okThen (fun (spec : spec) ->
+         Ok { cmd = spec.cmd; kind = spec.kind; projectRoot })
 
 let promptSetup fn =
   Window.showQuickPick [| "yes"; "no" |]
@@ -365,7 +366,7 @@ let runSetup ({ cmd; kind; _ } as resources) =
          in
          P.resolve r)
 
-let getLspCommand { kind; cmd; _} =
+let getLspCommand { kind; cmd; _ } =
   match kind with
   | Opam _ -> (Cmd.binPath cmd, [| "exec"; "ocamllsp" |])
   | Esy root -> (Cmd.binPath cmd, [| "-P"; Fpath.toString root; "ocamllsp" |])

@@ -1,7 +1,7 @@
 (* ?? Manifest *)
 
 open Bindings
-module P = Js.Promise
+module P = Promise
 
 let parseFile projectRoot = function
   | "esy.json" -> Some (`Esy projectRoot) |> P.resolve

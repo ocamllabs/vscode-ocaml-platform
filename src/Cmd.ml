@@ -1,6 +1,6 @@
 open Bindings
 open Utils
-module P = Js.Promise
+module P = Promise
 
 type t =
   { cmd : string

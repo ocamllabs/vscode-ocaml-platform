@@ -1,5 +1,5 @@
 open Bindings
-module P = Js.Promise
+module P = Promise
 
 module E = struct
   type t =

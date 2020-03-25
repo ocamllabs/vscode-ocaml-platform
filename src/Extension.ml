@@ -1,5 +1,5 @@
 open Bindings
-module P = Js.Promise
+module P = Promise
 
 let handleError f =
   P.then_ (function
