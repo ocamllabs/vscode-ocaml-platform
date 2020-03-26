@@ -86,13 +86,11 @@ let latest = "queryOrder=finishTimeDescending&$top=1"
 let getBuildID () =
   Https.getCompleteResponse
     {j|$restBase/$proj/_apis/build/builds?$filter&$master&$latest&api-version=4.1|j}
-  |> P.then_ (fun r ->
-         P.resolve
-           ( match r with
-           | Ok response -> RESTResponse.getBuildId response
-           | Error e -> (
-             match e with
-             | Https.E.Failure url -> Error {j| Could not download $url |j} ) ))
+  |> Promise.map (function
+       | Ok response -> RESTResponse.getBuildId response
+       | Error e -> (
+         match e with
+         | Https.E.Failure url -> Error {j| Could not download $url |j} ))
 
 let getDownloadURL latestBuildID =
   let latestBuildID = Js.Int.toString latestBuildID in
@@ -100,11 +98,9 @@ let getDownloadURL latestBuildID =
   | Some artifactName ->
     Https.getCompleteResponse
       {j|$restBase/$proj/_apis/build/builds/$latestBuildID/artifacts?artifactname=$artifactName&api-version=4.1|j}
-    |> P.then_ (function
-         | Error (Https.E.Failure url) ->
-           Error {j| Failed to download $url |j} |> P.resolve
-         | Ok responseText ->
-           responseText |> RESTResponse.getDownloadURL |> P.resolve)
+    |> Promise.map (function
+         | Error (Https.E.Failure url) -> Error {j| Failed to download $url |j}
+         | Ok responseText -> responseText |> RESTResponse.getDownloadURL)
   | None ->
     Error "We detected a platform for which we couldn't find cached builds"
     |> P.resolve

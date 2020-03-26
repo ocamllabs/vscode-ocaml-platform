@@ -72,10 +72,8 @@ let foldResults results =
 
 let lookup projectRoot =
   Fs.readDir (Fpath.toString projectRoot)
-  |> P.then_ (function
-       | Error msg -> Error msg |> P.resolve
-       | Ok files ->
+  |> Promise.Result.bind (fun files ->
          files
          |> Js.Array.map (parseFile projectRoot)
          |> P.all
-         |> P.then_ (fun l -> Ok (foldResults l) |> P.resolve))
+         |> Promise.map (fun l -> Ok (foldResults l)))

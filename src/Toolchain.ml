@@ -161,7 +161,7 @@ let env ~cmd ~kind =
     Cmd.output cmd
       ~args:[| "command-env"; "--json"; "-P"; Fpath.toString root |]
       ~cwd:(Fpath.toString root)
-    |> P.mapOk (fun stdout ->
+    |> Promise.Result.bind (fun stdout ->
            match Json.parse stdout with
            | Some json ->
              json
@@ -172,7 +172,7 @@ let env ~cmd ~kind =
              |> P.resolve)
   | Opam root ->
     Cmd.output cmd ~args:[| "exec"; "env" |] ~cwd:(Fpath.toString root)
-    |> P.mapOk parseOpamEnvOutput
+    |> Promise.Result.bind parseOpamEnvOutput
 
 let supportedPackageManagers ~env ~root =
   let supportedPackageManagers =
@@ -222,7 +222,8 @@ let init ~env ~folder =
   P.all2
     ( supportedPackageManagers ~root:projectRoot ~env
     , Manifest.lookup projectRoot
-      |> P.mapOk (fun r -> packageManagersListOfLookup r |> P.resolve) )
+      |> Promise.Result.bind (fun r ->
+             packageManagersListOfLookup r |> P.resolve) )
   |> P.then_ (fun (supportedPackageManagers, detectedPackageManagers) ->
          let supportedPackageManagers =
            packageManagerSetOfResultList ~debugMsg:"supported package managers"
@@ -327,18 +328,13 @@ let esyProjectState ~cmd ~root ~projectRoot =
            esyResponse
            |> Json.Decode.field "isProjectReadyForDev" Json.Decode.bool
            |> Result.return ))
-  |> Promise.map (function
-       | Error e -> Error e
-       | Ok isProjectReadyForDev ->
-         let state =
-           if isProjectReadyForDev then
-             Ready
-           else if Fpath.compare root projectRoot = 0 then
-             PendingEsy
-           else
-             PendingBsb
-         in
-         Ok state)
+  |> Promise.Result.map (fun isProjectReadyForDev ->
+         if isProjectReadyForDev then
+           Ready
+         else if Fpath.compare root projectRoot = 0 then
+           PendingEsy
+         else
+           PendingBsb)
 
 let setupToolChain { cmd; kind; projectRoot } =
   match kind with
@@ -355,15 +351,12 @@ let setupToolChain { cmd; kind; projectRoot } =
 
 let runSetup ({ cmd; kind; _ } as resources) =
   setupToolChain resources
-  |> P.then_ (function
-       | Error msg -> Error msg |> P.resolve
-       | Ok () -> env ~cmd ~kind)
-  |> P.then_ (function
-       (* This function/callback here is a temporary way to check ocamllsp if
-          installed after setupToolChain completes. TODO: move it inside
-          setupToolChain itself *)
-       | Error e -> Error e |> P.resolve
-       | Ok env -> Cmd.make ~cmd:"ocamllsp" ~env)
+  |> Promise.Result.bind (fun () -> env ~cmd ~kind)
+  |> Promise.Result.bind (fun env ->
+         (* This function/callback here is a temporary way to check ocamllsp if
+            installed after setupToolChain completes. TODO: move it inside
+            setupToolChain itself *)
+         Cmd.make ~cmd:"ocamllsp" ~env)
   |> Promise.map (function
        | Ok _ -> Ok ()
        | Error msg -> Error {j| Toolchain initialisation failed: $msg |j})

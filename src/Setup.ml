@@ -110,7 +110,7 @@ module Bsb = struct
 
   let unzipArtifacts ~esyRoot ~envWithUnzip =
     Cmd.make ~cmd:"unzip" ~env:envWithUnzip
-    |> Promise.mapOk (fun unzip ->
+    |> Promise.Result.bind (fun unzip ->
            Cmd.output unzip ~args:[| "cache.zip" |] ~cwd:esyRoot)
     |> Promise.map (function
          | Error unzipCmdError ->
@@ -142,14 +142,16 @@ module Bsb = struct
            Error {j| Rimraf failed before the bsb toolchain setup: $esyRoot |j}
            |> P.resolve
          | Ok () -> createEsyFolder ~esyRoot)
-    |> P.mapOk (fun () -> writeEsyJson ~esyRoot)
-    |> P.mapOk (fun () -> installDepsWithEsy ~esyRoot ~esyCmd)
-    |> P.mapOk (fun _ -> getArtifactsUrl ~eventEmitter)
-    |> P.mapOk (fun downloadUrl ->
+    |> Promise.Result.bind (fun () -> writeEsyJson ~esyRoot)
+    |> Promise.Result.bind (fun () -> installDepsWithEsy ~esyRoot ~esyCmd)
+    |> Promise.Result.bind (fun _ -> getArtifactsUrl ~eventEmitter)
+    |> Promise.Result.bind (fun downloadUrl ->
            downloadArtifacts ~esyRoot ~eventEmitter downloadUrl)
-    |> P.mapOk (fun () -> unzipArtifacts ~esyRoot ~envWithUnzip)
-    |> P.mapOk (fun () -> importDownloadedDependencies ~esyRoot ~esyCmd)
-    |> P.mapOk (fun () -> buildDependencies ~esyRoot ~esyCmd ~eventEmitter)
+    |> Promise.Result.bind (fun () -> unzipArtifacts ~esyRoot ~envWithUnzip)
+    |> Promise.Result.bind (fun () ->
+           importDownloadedDependencies ~esyRoot ~esyCmd)
+    |> Promise.Result.bind (fun () ->
+           buildDependencies ~esyRoot ~esyCmd ~eventEmitter)
 
   let run esyCmd esyEnv eventEmitter projectPath =
     let projectPath = Path.join [| projectPath; ".."; ".." |] in
