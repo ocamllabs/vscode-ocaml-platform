@@ -59,24 +59,22 @@ module Bsb = struct
 
   let createEsyFolder ~esyRoot =
     Fs.mkdir ~p:true esyRoot
-    |> P.then_ (function
+    |> Promise.map (function
          | Error Fs.E.PathNotFound ->
            Error
              {j| Setup failed with because of invalid path provided to it: $esyRoot |j}
-           |> P.resolve
-         | Ok () -> Ok () |> P.resolve)
+         | Ok () -> Ok ())
 
   let writeEsyJson ~esyRoot =
     Filename.concat esyRoot "esy.json"
     |> dropEsyJSON
-    |> P.then_ (fun () -> Ok () |> P.resolve)
+    |> Promise.map (fun () -> Ok ())
 
   let installDepsWithEsy ~esyRoot ~esyCmd =
     Cmd.output esyCmd ~cwd:esyRoot ~args:[| "install"; "-P"; esyRoot |]
-    |> P.then_ (function
-         | Error msg ->
-           Error ("'esy install' failed. Reason: " ^ msg) |> P.resolve
-         | Ok _stdout -> Ok () |> P.resolve)
+    |> Promise.map (function
+         | Error msg -> Error ("'esy install' failed. Reason: " ^ msg)
+         | Ok _stdout -> Ok ())
 
   let getArtifactsUrl ~eventEmitter =
     reportProgress eventEmitter 0.1;
@@ -86,10 +84,9 @@ module Bsb = struct
            Error {j| Azure artifacts cache failure: $msg |j} |> P.resolve
          | Ok id ->
            id |> AzurePipelines.getDownloadURL
-           |> P.then_ (function
-                | Error msg ->
-                  Error {j| Azure artifacts cache failure: $msg |j} |> P.resolve
-                | Ok url -> Ok url |> P.resolve))
+           |> Promise.map (function
+                | Error msg -> Error {j| Azure artifacts cache failure: $msg |j}
+                | Ok url -> Ok url))
 
   let downloadArtifacts ~esyRoot ~eventEmitter url =
     Js.Console.info2 "download" url;
