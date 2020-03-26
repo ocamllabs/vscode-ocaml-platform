@@ -212,11 +212,10 @@ let selectPackageManager ~config choices =
        | Some packageManagerName ->
          WorkspaceCfg.update config "packageManager" packageManagerName
            (WorkspaceCfg.configurationTargetToJs Workspace)
-         |> P.then_ (fun _ ->
+         |> Promise.map (fun _ ->
                 match PackageManager.findByName packageManagerName choices with
-                | None ->
-                  Error "Selected choice was not found in the list" |> P.resolve
-                | Some pm -> Ok pm |> P.resolve))
+                | None -> Error "Selected choice was not found in the list"
+                | Some pm -> Ok pm))
 
 let init ~env ~folder =
   let projectRoot = Fpath.ofString folder in
@@ -309,7 +308,7 @@ let setupBsb ~cmd ~envWithUnzip:esyEnv folder =
       Setup.Bsb.onError eventEmitter (fun errorMsg ->
           succeeded := Error errorMsg);
       Setup.Bsb.run cmd esyEnv eventEmitter folder
-      |> P.then_ (fun () -> P.resolve !succeeded))
+      |> Promise.map (fun () -> !succeeded))
 
 type esyProjectState =
   | Ready
@@ -319,17 +318,17 @@ type esyProjectState =
 let esyProjectState ~cmd ~root ~projectRoot =
   let rootStr = Fpath.toString root in
   Cmd.output cmd ~args:[| "status"; "-P"; rootStr |] ~cwd:rootStr
-  |> P.then_ (function
-       | Error _ -> Ok false |> P.resolve
+  |> Promise.map (function
+       | Error _ -> Ok false
        | Ok esyOutput -> (
          match Json.parse esyOutput with
-         | None -> Ok false |> P.resolve
+         | None -> Ok false
          | Some esyResponse ->
            esyResponse
            |> Json.Decode.field "isProjectReadyForDev" Json.Decode.bool
-           |> Result.return |> P.resolve ))
-  |> P.then_ (function
-       | Error e -> Error e |> P.resolve
+           |> Result.return ))
+  |> Promise.map (function
+       | Error e -> Error e
        | Ok isProjectReadyForDev ->
          let state =
            if isProjectReadyForDev then
@@ -339,7 +338,7 @@ let esyProjectState ~cmd ~root ~projectRoot =
            else
              PendingBsb
          in
-         Ok state |> P.resolve)
+         Ok state)
 
 let setupToolChain { cmd; kind; projectRoot } =
   match kind with
@@ -365,13 +364,9 @@ let runSetup ({ cmd; kind; _ } as resources) =
           setupToolChain itself *)
        | Error e -> Error e |> P.resolve
        | Ok env -> Cmd.make ~cmd:"ocamllsp" ~env)
-  |> P.then_ (fun r ->
-         let r =
-           match r with
-           | Ok _ -> Ok ()
-           | Error msg -> Error {j| Toolchain initialisation failed: $msg |j}
-         in
-         P.resolve r)
+  |> Promise.map (function
+       | Ok _ -> Ok ()
+       | Error msg -> Error {j| Toolchain initialisation failed: $msg |j})
 
 let getLspCommand { kind; cmd; _ } =
   match kind with
