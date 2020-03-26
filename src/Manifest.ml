@@ -3,8 +3,12 @@
 open Bindings
 module P = Promise
 
+type lookup =
+  | Esy of Fpath.t
+  | Opam of Fpath.t
+
 let parseFile projectRoot = function
-  | "esy.json" -> Some (`Esy projectRoot) |> P.resolve
+  | "esy.json" -> Some (Esy projectRoot) |> P.resolve
   | "opam" ->
     Fs.stat Fpath.(projectRoot / "opam" |> toString)
     |> P.then_ (function
@@ -12,7 +16,7 @@ let parseFile projectRoot = function
          | Ok stats -> (
            match Fs.Stat.isDirectory stats with
            | true -> None |> P.resolve
-           | false -> Some (`Opam projectRoot) |> P.resolve ))
+           | false -> Some (Opam projectRoot) |> P.resolve ))
   | "package.json" ->
     let manifestFile = Fpath.(projectRoot / "package.json") |> Fpath.show in
     Fs.readFile manifestFile
@@ -25,10 +29,9 @@ let parseFile projectRoot = function
                || Utils.propertyExists json "devDependencies"
              then
                if Utils.propertyExists json "esy" then
-                 Some (`Esy projectRoot) |> P.resolve
+                 Some (Esy projectRoot) |> P.resolve
                else
-                 Some (`Esy Fpath.(projectRoot / ".vscode" / "esy"))
-                 |> P.resolve
+                 Some (Esy Fpath.(projectRoot / ".vscode" / "esy")) |> P.resolve
              else
                None |> P.resolve)
   | file -> (
@@ -43,7 +46,7 @@ let parseFile projectRoot = function
                  Utils.propertyExists json "dependencies"
                  || Utils.propertyExists json "devDependencies"
                then
-                 Some (`Esy projectRoot) |> P.resolve
+                 Some (Esy projectRoot) |> P.resolve
                else
                  None |> P.resolve
              | None ->
@@ -54,7 +57,7 @@ let parseFile projectRoot = function
       Fs.readFile manifestFile
       |> P.then_ (function
            | "" -> None |> P.resolve
-           | _ -> Some (`Opam projectRoot) |> P.resolve)
+           | _ -> Some (Opam projectRoot) |> P.resolve)
     | _ -> None |> P.resolve )
 
 let foldResults results =

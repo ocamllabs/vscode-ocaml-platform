@@ -202,8 +202,8 @@ let packageManagersListOfLookup = function
     Ok
       (List.map
          (function
-           | `Opam root -> PackageManager.makeOpam root
-           | `Esy root -> PackageManager.makeEsy root)
+           | Manifest.Opam root -> PackageManager.makeOpam root
+           | Esy root -> PackageManager.makeEsy root)
          pms)
 
 let selectPackageManager ~config choices =
