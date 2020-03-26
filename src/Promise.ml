@@ -6,3 +6,5 @@ let mapOk fn promise =
   |> then_ (function
        | Error e -> Error e |> resolve
        | Ok payload -> fn payload)
+
+let map f promise = promise |> then_ (fun x -> resolve (f x))

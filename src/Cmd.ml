@@ -30,28 +30,27 @@ let make ~env ~cmd =
            |> Js.Array.map (fun p -> Filename.concat p cmd))
     |> Js.Array.reduce Js.Array.concat [||]
     |> Js.Array.map (fun p ->
-           p |> Fs.exists |> P.then_ (fun exists -> (p, exists) |> P.resolve))
+           p |> Fs.exists |> Promise.map (fun exists -> (p, exists)))
     |> P.all
-    |> P.then_ (fun r ->
+    |> Promise.map (fun r ->
            match
              r |> Js.Array.filter (fun (_p, exists) -> exists) |> Array.to_list
            with
-           | [] -> Error {j| Command "$cmd" not found |j} |> P.resolve
-           | (cmd, _exists) :: _rest -> Ok { cmd; env } |> P.resolve)
+           | [] -> Error {j| Command "$cmd" not found |j}
+           | (cmd, _exists) :: _rest -> Ok { cmd; env })
 
 let output ~args ~cwd { cmd; env } =
   let shellString = Js.Array.concat args [| cmd |] |> Js.Array.joinWith " " in
   Js.Console.info shellString;
   ChildProcess.exec shellString (ChildProcess.Options.make ~cwd ~env ())
-  |> P.then_ (function
-       | Error e -> Error e |> P.resolve
+  |> Promise.map (function
+       | Error e -> Error e
        | Ok (exitCode, stdout, stderr) ->
          if exitCode = 0 then
-           Ok stdout |> P.resolve
+           Ok stdout
          else
            Error
              {j| Command $cmd failed:
 exitCode: $exitCode
 stderr: $stderr
-|j}
-           |> P.resolve)
+|j})
