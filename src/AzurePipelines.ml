@@ -13,7 +13,7 @@ module E = struct
     | InvalidFirstArrayElement -> "Unexpected array value in Azure response"
 end
 
-module RESTResponse = struct
+module RestResponse = struct
   type buildIdObject = { id : int }
 
   let guard jsonParser str =
@@ -82,24 +82,24 @@ let filter =
 
 let latest = "queryOrder=finishTimeDescending&$top=1"
 
-let getBuildID () =
+let getBuildId () =
   Https.getCompleteResponse
     {j|$restBase/$proj/_apis/build/builds?$filter&$master&$latest&api-version=4.1|j}
   |> Promise.map (function
-       | Ok response -> RESTResponse.getBuildId response
+       | Ok response -> RestResponse.getBuildId response
        | Error e -> (
          match e with
          | Https.E.Failure url -> Error {j| Could not download $url |j} ))
 
-let getDownloadURL latestBuildID =
-  let latestBuildID = Js.Int.toString latestBuildID in
+let getDownloadUrl latestBuildId =
+  let latestBuildId = Js.Int.toString latestBuildId in
   match artifactName with
   | Some artifactName ->
     Https.getCompleteResponse
-      {j|$restBase/$proj/_apis/build/builds/$latestBuildID/artifacts?artifactname=$artifactName&api-version=4.1|j}
+      {j|$restBase/$proj/_apis/build/builds/$latestBuildId/artifacts?artifactname=$artifactName&api-version=4.1|j}
     |> Promise.map (function
          | Error (Https.E.Failure url) -> Error {j| Failed to download $url |j}
-         | Ok responseText -> responseText |> RESTResponse.getDownloadURL)
+         | Ok responseText -> responseText |> RestResponse.getDownloadURL)
   | None ->
     Error "We detected a platform for which we couldn't find cached builds"
     |> Promise.resolve

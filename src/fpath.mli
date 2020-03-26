@@ -1,3 +1,5 @@
+(** Representation of path *)
+
 type t
 
 val ofString : string -> t

@@ -77,12 +77,12 @@ module Bsb = struct
 
   let getArtifactsUrl ~eventEmitter =
     reportProgress eventEmitter 0.1;
-    AzurePipelines.getBuildID ()
+    AzurePipelines.getBuildId ()
     |> Promise.then_ (function
          | Error msg ->
            Error {j| Azure artifacts cache failure: $msg |j} |> Promise.resolve
          | Ok id ->
-           id |> AzurePipelines.getDownloadURL
+           id |> AzurePipelines.getDownloadUrl
            |> Promise.map (function
                 | Error msg -> Error {j| Azure artifacts cache failure: $msg |j}
                 | Ok url -> Ok url))

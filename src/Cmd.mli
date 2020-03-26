@@ -1,3 +1,5 @@
+(** Interface for running system commands *)
+
 type t
 
 val make : env:string Js.Dict.t -> cmd:string -> (t, string) result Promise.t

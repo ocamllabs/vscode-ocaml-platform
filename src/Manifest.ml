@@ -1,5 +1,3 @@
-(* ?? Manifest *)
-
 open Bindings
 
 type lookup =
