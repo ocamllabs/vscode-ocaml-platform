@@ -11,53 +11,53 @@ let parseFile projectRoot = function
   | "esy.json" -> Some (Esy projectRoot) |> P.resolve
   | "opam" ->
     Fs.stat Fpath.(projectRoot / "opam" |> toString)
-    |> P.then_ (function
-         | Error _ -> None |> P.resolve
+    |> Promise.map (function
+         | Error _ -> None
          | Ok stats -> (
            match Fs.Stat.isDirectory stats with
-           | true -> None |> P.resolve
-           | false -> Some (Opam projectRoot) |> P.resolve ))
+           | true -> None
+           | false -> Some (Opam projectRoot) ))
   | "package.json" ->
     let manifestFile = Fpath.(projectRoot / "package.json") |> Fpath.show in
     Fs.readFile manifestFile
-    |> P.then_ (fun manifest ->
+    |> Promise.map (fun manifest ->
            match Json.parse manifest with
-           | None -> None |> P.resolve
+           | None -> None
            | Some json ->
              if
                Utils.propertyExists json "dependencies"
                || Utils.propertyExists json "devDependencies"
              then
                if Utils.propertyExists json "esy" then
-                 Some (Esy projectRoot) |> P.resolve
+                 Some (Esy projectRoot)
                else
-                 Some (Esy Fpath.(projectRoot / ".vscode" / "esy")) |> P.resolve
+                 Some (Esy Fpath.(projectRoot / ".vscode" / "esy"))
              else
-               None |> P.resolve)
+               None)
   | file -> (
     let manifestFile = Fpath.(projectRoot / file) |> Fpath.show in
     match Path.extname file with
     | ".json" ->
       Fs.readFile manifestFile
-      |> P.then_ (fun manifest ->
+      |> Promise.map (fun manifest ->
              match Json.parse manifest with
              | Some json ->
                if
                  Utils.propertyExists json "dependencies"
                  || Utils.propertyExists json "devDependencies"
                then
-                 Some (Esy projectRoot) |> P.resolve
+                 Some (Esy projectRoot)
                else
-                 None |> P.resolve
+                 None
              | None ->
                Js.Console.error3 "Invalid JSON file found. Ignoring..." manifest
                  manifestFile;
-               None |> P.resolve)
+               None)
     | ".opam" ->
       Fs.readFile manifestFile
-      |> P.then_ (function
-           | "" -> None |> P.resolve
-           | _ -> Some (Opam projectRoot) |> P.resolve)
+      |> Promise.map (function
+           | "" -> None
+           | _ -> Some (Opam projectRoot))
     | _ -> None |> P.resolve )
 
 let foldResults results =
