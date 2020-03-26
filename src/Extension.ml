@@ -27,20 +27,16 @@ let activate _context =
   Js.Dict.set Process.env "OCAML_LSP_SERVER_LOG" "-";
   let folder = Workspace.rootPath in
   Toolchain.init ~env:Process.env ~folder
-  |> P.then_ (function
-       | Ok toolchain ->
+  |> P.mapOk (fun toolchain ->
          Toolchain.runSetup toolchain
-         |> P.then_ (function
-              | Error msg -> Error msg |> P.resolve
-              | Ok () ->
+         |> Promise.mapOk (fun () ->
                 let serverOptions = Server.make toolchain in
                 let client =
                   LanguageClient.make ~id:"ocaml" ~name:"OCaml Language Server"
                     ~serverOptions ~clientOptions:(Client.make ())
                 in
                 (client.start () [@bs]);
-                Ok () |> P.resolve)
-       | Error msg -> Error msg |> P.resolve)
+                Promise.resolve (Ok ())))
   |> handleError Window.showErrorMessage
   |> P.catch (fun e ->
          let message = Bindings.JsError.ofPromiseError e in
