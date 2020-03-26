@@ -317,6 +317,11 @@ let setupBsb ~cmd ~envWithUnzip:esyEnv folder =
       Setup.Bsb.run cmd esyEnv eventEmitter folder
       |> P.then_ (fun () -> P.resolve !succeeded))
 
+type esyProjectState =
+  | Ready
+  | PendingEsy
+  | PendingBsb
+
 let esyProjectState ~cmd ~root ~projectRoot =
   let rootStr = Fpath.toString root in
   Cmd.output cmd ~args:[| "status"; "-P"; rootStr |] ~cwd:rootStr
@@ -334,11 +339,11 @@ let esyProjectState ~cmd ~root ~projectRoot =
        | Ok isProjectReadyForDev ->
          let state =
            if isProjectReadyForDev then
-             `Ready
+             Ready
            else if Fpath.compare root projectRoot = 0 then
-             `PendingEsy
+             PendingEsy
            else
-             `PendingBsb
+             PendingBsb
          in
          Ok state |> P.resolve)
 
@@ -350,9 +355,9 @@ let setupToolChain { cmd; kind; projectRoot } =
     esyProjectState ~cmd ~root ~projectRoot
     |> P.then_ (function
          | Error e -> Error e |> P.resolve
-         | Ok `Ready -> Ok () |> P.resolve
-         | Ok `PendingEsy -> promptSetup (fun () -> setupEsy ~cmd ~root)
-         | Ok `PendingBsb ->
+         | Ok Ready -> Ok () |> P.resolve
+         | Ok PendingEsy -> promptSetup (fun () -> setupEsy ~cmd ~root)
+         | Ok PendingBsb ->
            setupBsb ~cmd ~envWithUnzip:Process.env (Fpath.toString root))
 
 let runSetup ({ cmd; kind; _ } as resources) =
