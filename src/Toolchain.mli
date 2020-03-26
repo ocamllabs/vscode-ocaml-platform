@@ -25,9 +25,7 @@ type resources
  * toolchain.
  *)
 val init :
-     env:string Js.Dict.t
-  -> folder:string
-  -> (resources, string) result Js.Promise.t
+  env:string Js.Dict.t -> folder:string -> (resources, string) result Promise.t
 
 (** [runSetup] is a effectful function that triggers setup instructions
  * automatically for the user. At present, this functionality
@@ -55,7 +53,7 @@ val init :
  * like yum/apt/brew or Duniverse), [runSetup] must co-operate and
  * detect such installations.
  *)
-val runSetup : resources -> (unit, string) result Js.Promise.t
+val runSetup : resources -> (unit, string) result Promise.t
 
 (* Helper utils *)
 

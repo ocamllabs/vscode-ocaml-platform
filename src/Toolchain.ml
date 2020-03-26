@@ -1,6 +1,5 @@
 open Bindings
 open Utils
-module P = Promise
 module WorkspaceCfg = Vscode.WorkspaceConfiguration
 
 module Binaries = struct
@@ -129,14 +128,14 @@ type resources =
 
 let makeResources ~env ~kind ~projectRoot =
   Cmd.make ~env ~cmd:(PackageManager.toCmdString kind)
-  |> P.then_ (function
-       | Error msg -> Error msg |> P.resolve
-       | Ok cmd -> Ok { cmd; kind; projectRoot } |> P.resolve)
+  |> Promise.map (function
+       | Error msg -> Error msg
+       | Ok cmd -> Ok { cmd; kind; projectRoot })
 
 let ofPackageManagerName ~env ~name ~projectRoot ~toolchainRoot =
   match PackageManager.ofName ~root:toolchainRoot name with
   | Some kind -> makeResources ~env ~kind ~projectRoot
-  | None -> Error ("Invalid package manager name: " ^ name) |> P.resolve
+  | None -> Error ("Invalid package manager name: " ^ name) |> Promise.resolve
 
 let parseOpamEnvOutput opamEnvOutput =
   opamEnvOutput |> Js.String.split "\n"
@@ -152,11 +151,11 @@ let parseOpamEnvOutput opamEnvOutput =
              "Splitting on '=' in env output returned more than two items: "
              (l |> Array.of_list |> Js.Array.joinWith ",");
            None)
-  |> Js.Dict.fromArray |> Result.return |> P.resolve
+  |> Js.Dict.fromArray |> Result.return |> Promise.resolve
 
 let env ~cmd ~kind =
   match kind with
-  | PackageManager.Global -> Ok Process.env |> P.resolve
+  | PackageManager.Global -> Ok Process.env |> Promise.resolve
   | Esy root ->
     Cmd.output cmd
       ~args:[| "command-env"; "--json"; "-P"; Fpath.toString root |]
@@ -166,10 +165,10 @@ let env ~cmd ~kind =
            | Some json ->
              json
              |> Json.Decode.dict Json.Decode.string
-             |> Result.return |> P.resolve
+             |> Result.return |> Promise.resolve
            | None ->
              Error ("'esy command-env' returned non-json output: " ^ stdout)
-             |> P.resolve)
+             |> Promise.resolve)
   | Opam root ->
     Cmd.output cmd ~args:[| "exec"; "env" |] ~cwd:(Fpath.toString root)
     |> Promise.Result.bind parseOpamEnvOutput
@@ -181,14 +180,14 @@ let supportedPackageManagers ~env ~root =
   supportedPackageManagers
   |> List.map (fun packageManager ->
          Cmd.make ~env ~cmd:(PackageManager.toName packageManager)
-         |> P.then_ (function
-              | Error _ -> None |> P.resolve
-              | Ok _ -> Some packageManager |> P.resolve))
-  |> Array.of_list |> P.all
-  |> P.then_ (fun results ->
+         |> Promise.then_ (function
+              | Error _ -> None |> Promise.resolve
+              | Ok _ -> Some packageManager |> Promise.resolve))
+  |> Array.of_list |> Promise.all
+  |> Promise.then_ (fun results ->
          results
          |. Belt.Array.keepMap (fun pm -> pm)
-         |> Array.to_list |> Result.return |> P.resolve)
+         |> Array.to_list |> Result.return |> Promise.resolve)
 
 let packageManagersListOfLookup = function
   | [] -> Error "TODO: global toolchain"
@@ -207,8 +206,8 @@ let selectPackageManager ~config choices =
   Window.QuickPickOptions.make ~canPickMany:false ~placeHolder ()
   |> Window.showQuickPick
        (choices |> List.map PackageManager.toName |> Array.of_list)
-  |> P.then_ (function
-       | None -> Error "showQuickPick() returned undefined" |> P.resolve
+  |> Promise.then_ (function
+       | None -> Error "showQuickPick() returned undefined" |> Promise.resolve
        | Some packageManagerName ->
          WorkspaceCfg.update config "packageManager" packageManagerName
            (WorkspaceCfg.configurationTargetToJs Workspace)
@@ -219,12 +218,12 @@ let selectPackageManager ~config choices =
 
 let init ~env ~folder =
   let projectRoot = Fpath.ofString folder in
-  P.all2
+  Promise.all2
     ( supportedPackageManagers ~root:projectRoot ~env
     , Manifest.lookup projectRoot
       |> Promise.Result.bind (fun r ->
-             packageManagersListOfLookup r |> P.resolve) )
-  |> P.then_ (fun (supportedPackageManagers, detectedPackageManagers) ->
+             packageManagersListOfLookup r |> Promise.resolve) )
+  |> Promise.then_ (fun (supportedPackageManagers, detectedPackageManagers) ->
          let supportedPackageManagers =
            packageManagerSetOfResultList ~debugMsg:"supported package managers"
              supportedPackageManagers
@@ -246,7 +245,7 @@ let init ~env ~folder =
            | None ->
              Error
                {j| Unexplained exception: PackageManager.ofName returned None for a valid name $global |j}
-             |> P.resolve )
+             |> Promise.resolve )
          | [ packageManager ] ->
            Js.Console.info2 "Toolchain detected"
              (PackageManager.toString packageManager);
@@ -266,19 +265,19 @@ let init ~env ~folder =
            | None, Some _
            | None, None ->
              selectPackageManager ~config packageManagers
-             |> P.then_ (function
-                  | Error e -> Error e |> P.resolve
+             |> Promise.then_ (function
+                  | Error e -> Error e |> Promise.resolve
                   | Ok pm -> makeResources ~env ~kind:pm ~projectRoot) ))
 
 let promptSetup fn =
   Window.showQuickPick [| "yes"; "no" |]
     (Window.QuickPickOptions.make ~canPickMany:false
        ~placeHolder:{j|Setup this project's toolchain with 'esy'?|j} ())
-  |> P.then_ (function
+  |> Promise.then_ (function
        | Some choice when choice = "yes" -> fn ()
        | Some _
        | None ->
-         Error "Please setup the toolchain" |> P.resolve)
+         Error "Please setup the toolchain" |> Promise.resolve)
 
 let setupWithProgressIndicator fn =
   Window.withProgress
@@ -292,9 +291,9 @@ let setupEsy ~cmd ~root =
   setupWithProgressIndicator (fun progress ->
       (progress.report [%bs.obj { increment = int_of_float 1. }] [@bs]);
       Cmd.output cmd ~cwd:(root |> Fpath.toString) ~args:[||]
-      |> P.then_ (fun _ ->
+      |> Promise.then_ (fun _ ->
              (progress.report [%bs.obj { increment = int_of_float 100. }] [@bs]);
-             Ok () |> P.resolve))
+             Ok () |> Promise.resolve))
 
 let setupBsb ~cmd ~envWithUnzip:esyEnv folder =
   setupWithProgressIndicator (fun progress ->
@@ -338,13 +337,13 @@ let esyProjectState ~cmd ~root ~projectRoot =
 
 let setupToolChain { cmd; kind; projectRoot } =
   match kind with
-  | Global -> Ok () |> P.resolve
-  | Opam _ -> Ok () |> P.resolve
+  | Global -> Ok () |> Promise.resolve
+  | Opam _ -> Ok () |> Promise.resolve
   | Esy root ->
     esyProjectState ~cmd ~root ~projectRoot
-    |> P.then_ (function
-         | Error e -> Error e |> P.resolve
-         | Ok Ready -> Ok () |> P.resolve
+    |> Promise.then_ (function
+         | Error e -> Error e |> Promise.resolve
+         | Ok Ready -> Ok () |> Promise.resolve
          | Ok PendingEsy -> promptSetup (fun () -> setupEsy ~cmd ~root)
          | Ok PendingBsb ->
            setupBsb ~cmd ~envWithUnzip:Process.env (Fpath.toString root))

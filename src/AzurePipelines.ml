@@ -1,5 +1,4 @@
 open Bindings
-module P = Promise
 
 module E = struct
   type t =
@@ -103,4 +102,4 @@ let getDownloadURL latestBuildID =
          | Ok responseText -> responseText |> RESTResponse.getDownloadURL)
   | None ->
     Error "We detected a platform for which we couldn't find cached builds"
-    |> P.resolve
+    |> Promise.resolve

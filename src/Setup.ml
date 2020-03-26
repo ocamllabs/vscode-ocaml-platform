@@ -1,5 +1,4 @@
 open Bindings
-module P = Promise
 
 (* Why the are progress percentages hardcoded the way they are?
 
@@ -79,9 +78,9 @@ module Bsb = struct
   let getArtifactsUrl ~eventEmitter =
     reportProgress eventEmitter 0.1;
     AzurePipelines.getBuildID ()
-    |> P.then_ (function
+    |> Promise.then_ (function
          | Error msg ->
-           Error {j| Azure artifacts cache failure: $msg |j} |> P.resolve
+           Error {j| Azure artifacts cache failure: $msg |j} |> Promise.resolve
          | Ok id ->
            id |> AzurePipelines.getDownloadURL
            |> Promise.map (function
@@ -91,7 +90,7 @@ module Bsb = struct
   let downloadArtifacts ~esyRoot ~eventEmitter url =
     Js.Console.info2 "download" url;
     let lastProgress = ref 0.0 in
-    P.make (fun ~resolve ~reject:_ ->
+    Promise.make (fun ~resolve ~reject:_ ->
         download url
           (Path.join [| esyRoot; "cache.zip" |])
           ~progress:(fun progressFraction ->
@@ -137,10 +136,10 @@ module Bsb = struct
     let open Bindings in
     let esyRoot = Path.join [| folder; ".vscode"; "esy" |] in
     Rimraf.run esyRoot
-    |> P.then_ (function
+    |> Promise.then_ (function
          | Error () ->
            Error {j| Rimraf failed before the bsb toolchain setup: $esyRoot |j}
-           |> P.resolve
+           |> Promise.resolve
          | Ok () -> createEsyFolder ~esyRoot)
     |> Promise.Result.bind (fun () -> writeEsyJson ~esyRoot)
     |> Promise.Result.bind (fun () -> installDepsWithEsy ~esyRoot ~esyCmd)
@@ -157,17 +156,18 @@ module Bsb = struct
     let projectPath = Path.join [| projectPath; ".."; ".." |] in
     let manifestPath = Path.join [| projectPath; "package.json" |] in
     Fs.readFile manifestPath
-    |> P.then_ (fun manifest ->
+    |> Promise.then_ (fun manifest ->
            match Json.parse manifest with
            | Some json -> (
              match CheckBucklescriptCompat.run json with
              | Error msg ->
-               Error {j| BucklescriptCompatFailure: $msg |j} |> P.resolve
+               Error {j| BucklescriptCompatFailure: $msg |j} |> Promise.resolve
              | Ok () ->
                runSetupChain ~esyCmd ~envWithUnzip:esyEnv ~eventEmitter
                  ~folder:projectPath )
            | None ->
-             Error ("Failed to parse manifest at " ^ manifestPath) |> P.resolve)
+             Error ("Failed to parse manifest at " ^ manifestPath)
+             |> Promise.resolve)
     |> Promise.map (function
          | Error e -> reportError eventEmitter e
          | Ok () -> reportEnd eventEmitter)

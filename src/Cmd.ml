@@ -1,6 +1,5 @@
 open Bindings
 open Utils
-module P = Promise
 
 type t =
   { cmd : string
@@ -17,7 +16,7 @@ let binPath c = c.cmd
 
 let make ~env ~cmd =
   match Js.Dict.get env "PATH" with
-  | None -> Error pathMissingFromEnv |> P.resolve
+  | None -> Error pathMissingFromEnv |> Promise.resolve
   | Some path ->
     let cmds =
       match Sys.unix with
@@ -31,7 +30,7 @@ let make ~env ~cmd =
     |> Js.Array.reduce Js.Array.concat [||]
     |> Js.Array.map (fun p ->
            p |> Fs.exists |> Promise.map (fun exists -> (p, exists)))
-    |> P.all
+    |> Promise.all
     |> Promise.map (fun r ->
            match
              r |> Js.Array.filter (fun (_p, exists) -> exists) |> Array.to_list

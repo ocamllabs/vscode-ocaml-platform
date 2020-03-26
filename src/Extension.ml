@@ -1,9 +1,8 @@
 open Bindings
-module P = Promise
 
 let handleError f =
-  P.then_ (function
-    | Ok () -> P.resolve ()
+  Promise.then_ (function
+    | Ok () -> Promise.resolve ()
     | Error msg -> f msg)
 
 module Client = struct
@@ -38,6 +37,6 @@ let activate _context =
                 (client.start () [@bs]);
                 Promise.resolve (Ok ())))
   |> handleError Window.showErrorMessage
-  |> P.catch (fun e ->
+  |> Promise.catch (fun e ->
          let message = Bindings.JsError.ofPromiseError e in
          Window.showErrorMessage {j|Error: $message|j})

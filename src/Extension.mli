@@ -1,1 +1,1 @@
-val activate : Vscode.ExtensionContext.t -> unit Js.Promise.t
+val activate : Vscode.ExtensionContext.t -> unit Promise.t

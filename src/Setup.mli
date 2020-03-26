@@ -27,5 +27,5 @@ module Bsb : sig
 
   (** runs the toolchain setup that keeps the consumer updated with progress
      events *)
-  val run : Cmd.t -> string Js.Dict.t -> t -> string -> unit Js.Promise.t
+  val run : Cmd.t -> string Js.Dict.t -> t -> string -> unit Promise.t
 end

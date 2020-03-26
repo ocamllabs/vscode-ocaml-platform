@@ -1,14 +1,13 @@
 (* ?? Manifest *)
 
 open Bindings
-module P = Promise
 
 type lookup =
   | Esy of Fpath.t
   | Opam of Fpath.t
 
 let parseFile projectRoot = function
-  | "esy.json" -> Some (Esy projectRoot) |> P.resolve
+  | "esy.json" -> Some (Esy projectRoot) |> Promise.resolve
   | "opam" ->
     Fs.stat Fpath.(projectRoot / "opam" |> toString)
     |> Promise.map (function
@@ -58,7 +57,7 @@ let parseFile projectRoot = function
       |> Promise.map (function
            | "" -> None
            | _ -> Some (Opam projectRoot))
-    | _ -> None |> P.resolve )
+    | _ -> None |> Promise.resolve )
 
 let foldResults results =
   Js.Array.reduce
@@ -75,5 +74,5 @@ let lookup projectRoot =
   |> Promise.Result.bind (fun files ->
          files
          |> Js.Array.map (parseFile projectRoot)
-         |> P.all
+         |> Promise.all
          |> Promise.map (fun l -> Ok (foldResults l)))

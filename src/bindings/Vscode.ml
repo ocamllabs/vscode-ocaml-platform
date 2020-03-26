@@ -25,7 +25,7 @@ module WorkspaceConfiguration : sig
   [@@bs.deriving { jsConverter = newType }]
 
   val update :
-    t -> string -> string -> abs_configurationTarget -> unit Js.Promise.t
+    t -> string -> string -> abs_configurationTarget -> unit Promise.t
 end = struct
   type t
 
@@ -40,7 +40,7 @@ end = struct
   [@@bs.deriving { jsConverter = newType }]
 
   external update :
-    t -> string -> string -> abs_configurationTarget -> unit Js.Promise.t
+    t -> string -> string -> abs_configurationTarget -> unit Promise.t
     = "update"
     [@@bs.send]
 end
@@ -83,11 +83,11 @@ module Window : sig
   end
 
   val showQuickPick :
-    string array -> QuickPickOptions.t -> string option Js.Promise.t
+    string array -> QuickPickOptions.t -> string option Promise.t
 
   val showInformationMessage : string -> unit
 
-  val showErrorMessage : string -> 'a Js.Promise.t
+  val showErrorMessage : string -> 'a Promise.t
 
   type activeTextEditor = { document : document }
 
@@ -121,8 +121,8 @@ module Window : sig
 
   val withProgress :
        withProgressConfig
-    -> (progress -> ('a, 'b) result Js.Promise.t)
-    -> ('a, 'b) result Js.Promise.t
+    -> (progress -> ('a, 'b) result Promise.t)
+    -> ('a, 'b) result Promise.t
 end = struct
   module QuickPickOptions = struct
     type t = < canPickMany : bool > Js.t
@@ -132,19 +132,19 @@ end = struct
   end
 
   external showQuickPick' :
-    string array -> QuickPickOptions.t -> string Js.Nullable.t Js.Promise.t
+    string array -> QuickPickOptions.t -> string Js.Nullable.t Promise.t
     = "showQuickPick"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 
   let showQuickPick choices quickPickOptions =
     showQuickPick' choices quickPickOptions
-    |> Js.Promise.then_ (fun choice ->
-           choice |> Js.Nullable.toOption |> Js.Promise.resolve)
+    |> Promise.then_ (fun choice ->
+           choice |> Js.Nullable.toOption |> Promise.resolve)
 
   external showInformationMessage : string -> unit = "showInformationMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 
-  external showErrorMessage : string -> 'a Js.Promise.t = "showErrorMessage"
+  external showErrorMessage : string -> 'a Promise.t = "showErrorMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 
   type activeTextEditor = { document : document }
@@ -180,16 +180,15 @@ end = struct
 
   external withProgress :
        withProgressConfig
-    -> (progress -> ('a, 'b) result Js.Promise.t)
-    -> ('a, 'b) result Js.Promise.t = "withProgress"
+    -> (progress -> ('a, 'b) result Promise.t)
+    -> ('a, 'b) result Promise.t = "withProgress"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 end
 
 type memento
 
 module Commands = struct
-  external get : filterInternal:bool -> string array Js.Promise.t
-    = "getCommands"
+  external get : filterInternal:bool -> string array Promise.t = "getCommands"
     [@@bs.module "vscode"] [@@bs.scope "commands"]
 
   external register : command:string -> handler:(unit -> unit) -> unit

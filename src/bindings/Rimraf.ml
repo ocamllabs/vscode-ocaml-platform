@@ -4,7 +4,7 @@ module Rimraf : sig
   (* Bindinds for https://www.npmjs.com/package/rimraf. rimraf is a
      cross-platform utility library to delete a directory and all its contens *)
 
-  val run : string -> (unit, unit) result Js.Promise.t
+  val run : string -> (unit, unit) result Promise.t
 end = struct
   type t
 
@@ -12,7 +12,7 @@ end = struct
     [@@bs.module]
 
   let run p =
-    Js.Promise.make (fun ~resolve ~reject:_ ->
+    Promise.make (fun ~resolve ~reject:_ ->
         run' p (fun err ->
             match Js.Nullable.toOption err with
             | Some _ -> ( resolve (Error ()) [@bs] )

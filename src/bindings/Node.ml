@@ -86,7 +86,7 @@ module Fs = struct
     [@@bs.module "fs"]
 
   let stat p =
-    Js.Promise.make (fun ~resolve ~reject:_ ->
+    Promise.make (fun ~resolve ~reject:_ ->
         (stat' p (fun err stat ->
              (resolve
                 ( match Js.Nullable.toOption err with
@@ -110,31 +110,31 @@ module Fs = struct
   external writeSync : (fd -> Buffer.t -> unit[@bs]) = "writeSync"
     [@@bs.module "fs"]
 
-  external writeFile : string -> string -> unit Js.Promise.t = "writeFile"
+  external writeFile : string -> string -> unit Promise.t = "writeFile"
     [@@bs.module "./fs-stub.js"]
 
-  external readFile : string -> string Js.Promise.t = "readFile"
+  external readFile : string -> string Promise.t = "readFile"
     [@@bs.module "./fs-stub.js"]
 
-  external mkdir' : string -> unit Js.Promise.t = "mkdir"
+  external mkdir' : string -> unit Promise.t = "mkdir"
     [@@bs.module "./fs-stub.js"]
 
-  external exists : string -> bool Js.Promise.t = "exists"
+  external exists : string -> bool Promise.t = "exists"
     [@@bs.module "./fs-stub.js"]
 
-  external open_ : string -> string -> fd Js.Promise.t = "open"
+  external open_ : string -> string -> fd Promise.t = "open"
     [@@bs.module "./fs-stub.js"]
 
-  external write : fd -> Buffer.t -> unit Js.Promise.t = "write"
+  external write : fd -> Buffer.t -> unit Promise.t = "write"
     [@@bs.module "./fs-stub.js"]
 
-  external close : fd -> Buffer.t -> unit Js.Promise.t = "close"
+  external close : fd -> Buffer.t -> unit Promise.t = "close"
     [@@bs.module "./fs-stub.js"]
 
   external createWriteStream : string -> Stream.t = "createWriteStream"
     [@@bs.module "fs"]
 
-  external unlink : string -> bool Js.Promise.t = "unlink"
+  external unlink : string -> bool Promise.t = "unlink"
     [@@bs.module "./fs-stub.js"]
 
   let rec mkdir ?p path =
@@ -143,7 +143,7 @@ module Fs = struct
       | Some x -> x
       | None -> false
     in
-    let open Js.Promise in
+    let open Promise in
     if forceCreate then
       exists path
       |> then_ (fun doesExist ->
@@ -186,7 +186,7 @@ module ChildProcess = struct
     [@@bs.val] [@@bs.module "child_process"]
 
   let exec cmd options =
-    let open Js.Promise in
+    let open Promise in
     make (fun ~resolve ~reject:_ ->
         let cp = ref [%bs.obj { exitCode = 0 }] in
         cp :=
