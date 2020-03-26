@@ -1,3 +1,4 @@
+open Utils
 open Bindings
 
 type lookup =
@@ -28,7 +29,7 @@ let parseFile projectRoot = function
                if Utils.propertyExists json "esy" then
                  Some (Esy projectRoot)
                else
-                 Some (Esy Fpath.(projectRoot / ".vscode" / "esy"))
+                 Some (Esy (hiddenEsyDir projectRoot))
              else
                None)
   | file -> (

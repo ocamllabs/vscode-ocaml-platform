@@ -175,7 +175,7 @@ let env ~cmd ~kind =
 
 let supportedPackageManagers ~env ~root =
   let supportedPackageManagers =
-    [ PackageManager.Esy root; Esy Fpath.(root / ".vscode" / "esy"); Opam root ]
+    [ PackageManager.Esy root; Esy (hiddenEsyDir root); Opam root ]
   in
   supportedPackageManagers
   |> List.map (fun packageManager ->
