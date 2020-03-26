@@ -42,6 +42,8 @@ end
 module Bsb = struct
   include Internal
 
+  let cacheFileName = "cache.zip"
+
   let download url file ~progress ~end_ ~error ~data =
     let open Bindings in
     let stream = RequestProgress.requestProgress (Request.request url) in
@@ -93,7 +95,7 @@ module Bsb = struct
     let lastProgress = ref 0.0 in
     Promise.make (fun ~resolve ~reject:_ ->
         download url
-          (Path.join [| esyRoot; "cache.zip" |])
+          (Path.join [| esyRoot; cacheFileName |])
           ~progress:(fun progressFraction ->
             (* The cache restoration is assumed to take up 80%. More
                explanation at the top *)
@@ -111,7 +113,7 @@ module Bsb = struct
   let unzipArtifacts ~esyRoot ~envWithUnzip =
     Cmd.make ~cmd:"unzip" ~env:envWithUnzip
     |> Promise.Result.bind (fun unzip ->
-           Cmd.output unzip ~args:[| "cache.zip" |] ~cwd:esyRoot)
+           Cmd.output unzip ~args:[| cacheFileName |] ~cwd:esyRoot)
     |> Promise.map (function
          | Error unzipCmdError ->
            Error {j| Azure artifacts cache failure: $unzipCmdError |j}
