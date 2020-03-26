@@ -113,32 +113,28 @@ module Bsb = struct
 
   let unzipArtifacts ~esyRoot ~envWithUnzip =
     Cmd.make ~cmd:"unzip" ~env:envWithUnzip
-    |> P.then_ (function
-         | Error msg -> P.resolve (Error msg)
-         | Ok unzip -> Cmd.output unzip ~args:[| "cache.zip" |] ~cwd:esyRoot)
-    |> P.then_ (function
+    |> Promise.mapOk (fun unzip ->
+           Cmd.output unzip ~args:[| "cache.zip" |] ~cwd:esyRoot)
+    |> Promise.map (function
          | Error unzipCmdError ->
            Error {j| Azure artifacts cache failure: $unzipCmdError |j}
-           |> P.resolve
-         | Ok _unzipCmdOutput -> P.resolve (Ok ()))
+         | Ok _unzipCmdOutput -> Ok ())
 
   let importDownloadedDependencies ~esyRoot ~esyCmd =
     Cmd.output esyCmd ~cwd:esyRoot
       ~args:[| "import-dependencies"; "-P"; esyRoot |]
-    |> P.then_ (function
+    |> Promise.map (function
          | Error msg ->
            Error ("'esy import-dependencies' failed. Reason: " ^ msg)
-           |> P.resolve
-         | Ok _ -> Ok () |> P.resolve)
+         | Ok _ -> Ok ())
 
   let buildDependencies ~esyRoot ~esyCmd ~eventEmitter =
     reportProgress eventEmitter 99.99;
     (* See comment at the top explaining the 99.99 *)
     Cmd.output esyCmd ~cwd:esyRoot ~args:[| "build"; "-P"; esyRoot |]
-    |> P.then_ (function
-         | Error msg ->
-           Error ("'esy build' failed. Reason: " ^ msg) |> P.resolve
-         | Ok _esyCmdOutput -> Ok () |> P.resolve)
+    |> Promise.map (function
+         | Error msg -> Error ("'esy build' failed. Reason: " ^ msg)
+         | Ok _esyCmdOutput -> Ok ())
 
   let runSetupChain ~esyCmd ~envWithUnzip ~eventEmitter ~folder =
     let open Bindings in
@@ -173,7 +169,7 @@ module Bsb = struct
                  ~folder:projectPath )
            | None ->
              Error ("Failed to parse manifest at " ^ manifestPath) |> P.resolve)
-    |> P.then_ (function
-         | Error e -> reportError eventEmitter e |> P.resolve
-         | Ok () -> reportEnd eventEmitter |> P.resolve)
+    |> Promise.map (function
+         | Error e -> reportError eventEmitter e
+         | Ok () -> reportEnd eventEmitter)
 end
