@@ -33,3 +33,15 @@ module Result = struct
 
   let fail x = Error x
 end
+
+module List = struct
+  include List
+
+  let rec find_map xs ~f =
+    match xs with
+    | [] -> None
+    | x :: xs -> (
+      match f x with
+      | None -> find_map xs ~f
+      | Some _ as e -> e )
+end

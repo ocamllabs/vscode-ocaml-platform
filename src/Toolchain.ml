@@ -90,20 +90,14 @@ end = struct
     | Opam _, Global -> -1
     | Global, _ -> 1
 
-  let rec findByName name = function
-    | [] -> None
-    | x :: xs -> (
-      match x with
+  let findByName name xs =
+    Utils.List.find_map xs ~f:(function
       | Global -> None
-      | Esy root
-      | Opam root -> (
-        match ofName ~root name with
-        | Some y ->
-          if compare x y = 0 then
-            Some x
-          else
-            findByName name xs
-        | None -> None ) )
+      | s ->
+        if toName s = name then
+          Some s
+        else
+          None)
 
   let makeEsy root = Esy root
 
