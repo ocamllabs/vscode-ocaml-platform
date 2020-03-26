@@ -180,14 +180,14 @@ let supportedPackageManagers ~env ~root =
   supportedPackageManagers
   |> List.map (fun packageManager ->
          Cmd.make ~env ~cmd:(PackageManager.toName packageManager)
-         |> Promise.then_ (function
-              | Error _ -> None |> Promise.resolve
-              | Ok _ -> Some packageManager |> Promise.resolve))
+         |> Promise.map (function
+              | Error _ -> None
+              | Ok _ -> Some packageManager))
   |> Array.of_list |> Promise.all
-  |> Promise.then_ (fun results ->
+  |> Promise.map (fun results ->
          results
          |. Belt.Array.keepMap (fun pm -> pm)
-         |> Array.to_list |> Result.return |> Promise.resolve)
+         |> Array.to_list |> Result.return)
 
 let packageManagersListOfLookup = function
   | [] -> Error "TODO: global toolchain"
@@ -291,9 +291,9 @@ let setupEsy ~cmd ~root =
   setupWithProgressIndicator (fun progress ->
       (progress.report [%bs.obj { increment = int_of_float 1. }] [@bs]);
       Cmd.output cmd ~cwd:(root |> Fpath.toString) ~args:[||]
-      |> Promise.then_ (fun _ ->
+      |> Promise.map (fun _ ->
              (progress.report [%bs.obj { increment = int_of_float 100. }] [@bs]);
-             Ok () |> Promise.resolve))
+             Ok ()))
 
 let setupBsb ~cmd ~envWithUnzip:esyEnv folder =
   setupWithProgressIndicator (fun progress ->

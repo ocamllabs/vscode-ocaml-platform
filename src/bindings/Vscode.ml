@@ -138,8 +138,7 @@ end = struct
 
   let showQuickPick choices quickPickOptions =
     showQuickPick' choices quickPickOptions
-    |> Promise.then_ (fun choice ->
-           choice |> Js.Nullable.toOption |> Promise.resolve)
+    |> Promise.map (fun choice -> choice |> Js.Nullable.toOption)
 
   external showInformationMessage : string -> unit = "showInformationMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]
