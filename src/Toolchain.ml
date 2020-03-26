@@ -127,11 +127,6 @@ let packageManagerSetOfResultList ~debugMsg lst =
       msg;
     PackageManagerSet.empty
 
-type spec =
-  { cmd : Cmd.t
-  ; kind : PackageManager.t
-  }
-
 type resources =
   { cmd : Cmd.t
   ; kind : PackageManager.t
