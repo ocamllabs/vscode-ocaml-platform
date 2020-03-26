@@ -1,3 +1,4 @@
+open Utils
 open Bindings
 
 (* Why the are progress percentages hardcoded the way they are?
@@ -134,7 +135,7 @@ module Bsb = struct
 
   let runSetupChain ~esyCmd ~envWithUnzip ~eventEmitter ~folder =
     let open Bindings in
-    let esyRoot = Path.join [| folder; ".vscode"; "esy" |] in
+    let esyRoot = Fpath.toString (hiddenEsyDir (Fpath.ofString folder)) in
     Rimraf.run esyRoot
     |> Promise.then_ (function
          | Error () ->
