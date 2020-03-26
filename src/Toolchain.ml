@@ -32,7 +32,7 @@ module PackageManager : sig
 
   val toName : t -> string
 
-  val ofName : Fpath.t -> string -> t option
+  val ofName : root:Fpath.t -> string -> t option
 
   (** Converts to a readable string representation (useful for loggers etc) *)
   val toString : t -> string
@@ -63,7 +63,7 @@ end = struct
     | Esy _ -> Binaries.esy
     | Global -> "global"
 
-  let ofName root = function
+  let ofName ~root = function
     | "opam" -> Some (Opam root)
     | "esy" -> Some (Esy root)
     | "global" -> Some Global
@@ -97,7 +97,7 @@ end = struct
       | Global -> None
       | Esy root
       | Opam root -> (
-        match ofName root name with
+        match ofName ~root name with
         | Some y ->
           if compare x y = 0 then
             Some x
@@ -140,7 +140,7 @@ let makeResources ~env ~kind ~projectRoot =
        | Ok cmd -> Ok { cmd; kind; projectRoot } |> P.resolve)
 
 let ofPackageManagerName ~env ~name ~projectRoot ~toolchainRoot =
-  match PackageManager.ofName toolchainRoot name with
+  match PackageManager.ofName ~root:toolchainRoot name with
   | Some kind -> makeResources ~env ~kind ~projectRoot
   | None -> Error ("Invalid package manager name: " ^ name) |> P.resolve
 
@@ -247,7 +247,7 @@ let init ~env ~folder =
          | [] -> (
            Js.Console.info "Will lookup toolchain from global env";
            let global = "global" in
-           match PackageManager.ofName projectRoot global with
+           match PackageManager.ofName ~root:projectRoot global with
            | Some kind -> makeResources ~env ~kind ~projectRoot
            | None ->
              Error
