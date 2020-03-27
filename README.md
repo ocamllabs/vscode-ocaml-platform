@@ -16,14 +16,30 @@ This vscode extension works in conjunction with
 
 ## Extension Settings
 
-For now, it's required to either have `ocamllsp` (from ocaml-lsp) in `PATH` or
-configure it with the `ocaml.lsp.path` variable
+The LSP server (ocamllsp) is not bundled with the extension
+itself (but the extension can help you with it). The language server
+itself can be installed via opam, esy or by any means (Nix, Duniverse
+etc) that'll make it available globally on $PATH.
 
-## Known Issues
+1. Via OPAM
+If you have opam installed and as long as `opam exec ocamllsp` runs
+okay in your project's directory, this plugin will not require any
+special configuration
 
-For [ReasonML](https://reasonml.github.io) support,
-[vscode-reasonml](https://github.com/reasonml-editor/vscode-reasonml) is the
-recommended extension.
+2. Via Esy
+
+Esy users have to make sure `ocamllsp` is present in the sandbox -
+ie. it must be present in your `devDependencies`
+
+If you have both Esy and Opam installed, the extension will prompt for
+the choice of package manager that would setup (or has already setup)
+`ocamllsp`. This can be manually entered in settings if you wish by
+updating `ocaml.packageManager`.
+
+If you use neither OPAM nor Esy, please make sure `ocamllsp` is
+globally available on `$PATH`. Alternatively, it can be specified with
+the `ocaml.lsp.path` variable.
+
 
 ## Release Notes
 
