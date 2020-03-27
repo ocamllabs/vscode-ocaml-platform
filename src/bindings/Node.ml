@@ -80,33 +80,35 @@ module Fs = struct
     external isDirectory : t -> bool = "isDirectory" [@@bs.send]
   end
 
-  external stat' : string -> (JsError.t Js.Nullable.t -> Stat.t -> unit) -> unit
+  external stat' :
+    (string -> (JsError.t Js.Nullable.t -> Stat.t -> unit) -> unit[@bs])
     = "stat"
     [@@bs.module "fs"]
 
   let stat p =
     Promise.make (fun ~resolve ~reject:_ ->
-        stat' p (fun err stat ->
-            (resolve
-               ( match Js.Nullable.toOption err with
-               | Some _e -> Error "Couldn't stat"
-               | None -> Ok stat ) [@bs])))
+        (stat' p (fun err stat ->
+             (resolve
+                ( match Js.Nullable.toOption err with
+                | Some _e -> Error "Couldn't stat"
+                | None -> Ok stat ) [@bs])) [@bs]))
 
   external readDir' :
-    string -> (JsError.t Js.Nullable.t -> string array -> unit) -> unit
+    (string -> (JsError.t Js.Nullable.t -> string array -> unit) -> unit[@bs])
     = "readdir"
     [@@bs.module "fs"]
 
   let readDir path =
     Promise.make (fun ~resolve ~reject:_ ->
-        readDir' path (fun error files ->
-            match Js.Nullable.toOption error with
-            | Some error -> ( resolve (Error error##message) [@bs] )
-            | None -> ( resolve (Ok files) [@bs] )))
+        (readDir' path (fun error files ->
+             match Js.Nullable.toOption error with
+             | Some error -> ( resolve (Error error##message) [@bs] )
+             | None -> ( resolve (Ok files) [@bs] )) [@bs]))
 
   type fd
 
-  external writeSync : fd -> Buffer.t -> unit = "writeSync" [@@bs.module "fs"]
+  external writeSync : (fd -> Buffer.t -> unit[@bs]) = "writeSync"
+    [@@bs.module "fs"]
 
   external writeFile : string -> string -> unit Promise.t = "writeFile"
     [@@bs.module "./fs-stub.js"]
