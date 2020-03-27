@@ -289,10 +289,10 @@ let setupWithProgressIndicator fn =
 
 let setupEsy ~cmd ~root =
   setupWithProgressIndicator (fun progress ->
-      progress.report [%bs.obj { increment = int_of_float 1. }];
+      (progress.report [%bs.obj { increment = int_of_float 1. }] [@bs]);
       Cmd.output cmd ~cwd:(root |> Fpath.toString) ~args:[||]
       |> Promise.map (fun _ ->
-             progress.report [%bs.obj { increment = int_of_float 100. }];
+             (progress.report [%bs.obj { increment = int_of_float 100. }] [@bs]);
              Ok ()))
 
 let setupBsb ~cmd ~envWithUnzip:esyEnv folder =
@@ -301,10 +301,10 @@ let setupBsb ~cmd ~envWithUnzip:esyEnv folder =
       let eventEmitter = Setup.Bsb.make () in
       Setup.Bsb.onProgress eventEmitter (fun percent ->
           Js.Console.info2 "Percentage:" percent;
-          progress.report
-            [%bs.obj { increment = int_of_float (percent *. 100.) }]);
+          (progress.report
+             [%bs.obj { increment = int_of_float (percent *. 100.) }] [@bs]));
       Setup.Bsb.onEnd eventEmitter (fun () ->
-          progress.report [%bs.obj { increment = 100 }]);
+          (progress.report [%bs.obj { increment = 100 }] [@bs]));
       Setup.Bsb.onError eventEmitter (fun errorMsg ->
           succeeded := Error errorMsg);
       Setup.Bsb.run cmd esyEnv eventEmitter folder

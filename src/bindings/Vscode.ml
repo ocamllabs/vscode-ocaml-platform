@@ -117,7 +117,7 @@ module Window : sig
 
   type withProgressConfig = < title : string ; location : abs_location > Js.t
 
-  type progress = { report : < increment : int > Js.t -> unit }
+  type progress = { report : (< increment : int > Js.t -> unit[@bs]) }
 
   val withProgress :
        withProgressConfig
@@ -175,7 +175,7 @@ end = struct
 
   type withProgressConfig = < title : string ; location : abs_location > Js.t
 
-  type progress = { report : < increment : int > Js.t -> unit }
+  type progress = { report : (< increment : int > Js.t -> unit[@bs]) }
 
   external withProgress :
        withProgressConfig
@@ -196,7 +196,7 @@ module Commands = struct
 end
 
 module ExtensionContext = struct
-  type disposable = { dispose : unit -> unit }
+  type disposable = { dispose : (unit -> unit[@bs]) }
 
   type t =
     { extensionPath : string
@@ -252,8 +252,8 @@ module LanguageClient = struct
     }
 
   type t =
-    { start : unit -> unit
-    ; stop : unit -> unit
+    { start : (unit -> unit[@bs])
+    ; stop : (unit -> unit[@bs])
     }
 
   external make :

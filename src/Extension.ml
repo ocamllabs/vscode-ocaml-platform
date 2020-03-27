@@ -34,7 +34,7 @@ let activate _context =
                   LanguageClient.make ~id:"ocaml" ~name:"OCaml Language Server"
                     ~serverOptions ~clientOptions:(Client.make ())
                 in
-                client.start ();
+                (client.start () [@bs]);
                 Promise.resolve (Ok ())))
   |> handleError Window.showErrorMessage
   |> Promise.catch (fun e ->
