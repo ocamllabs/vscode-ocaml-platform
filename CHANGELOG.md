@@ -10,7 +10,7 @@
 
 ## 0.2.0
 
--  Add ocamllex syntax highlighting
+- Add ocamllex syntax highlighting
 
 ## 0.1.0
 
