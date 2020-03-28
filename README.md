@@ -1,6 +1,6 @@
 # VSCode OCaml Platform
 
-Visual Studio Code extension for OCaml and relevant tools
+Visual Studio Code extension for OCaml and relevant tools.
 
 _This plugin is alpha quality. Use at your own risk and please report any bugs
 you encounter._
@@ -10,12 +10,12 @@ you encounter._
 - Syntax highlighting for OCaml, ReasonML, dune, merlin, ocamlbuild, ocamllex,
   opam files.
 
-- Indentation rules and snippets for OCaml
+- Indentation rules and snippets for OCaml.
 
 ## Extension Settings
 
 For now, it's required to either have `ocamllsp` (from ocaml-lsp) in `PATH` or
-configure it with the `ocaml.lsp.path` variable
+configure it with the `ocaml.lsp.path` variable.
 
 ## Installation
 
@@ -30,11 +30,11 @@ This VSCode extension works in conjunction with
 
 ### Download a pre-built extension installer from GitHub Actions artifacts
 
-- Select a build you want to try from the Actions tab.
+- Select a build you want to try from the Actions tab
 
   - <https://github.com/ocamllabs/vscode-ocaml-platform/actions>
 
-- Download the artifact for your platform in your preferred way.
+- Download the artifact for your platform in your preferred way
 
 - Unzip the downloaded file
 
@@ -43,7 +43,3 @@ This VSCode extension works in conjunction with
 ```
 code --install-extension <Path to unzipped vsix file>
 ```
-
-## Release Notes
-
-### Unreleased
