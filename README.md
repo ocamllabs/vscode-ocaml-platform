@@ -10,6 +10,8 @@ you encounter._
 - Syntax highlighting for OCaml, ReasonML, dune, merlin, ocamlbuild, ocamllex,
   opam files.
 
+- Indentation rules and snippets for OCaml
+
 ## Extension Settings
 
 For now, it's required to either have `ocamllsp` (from ocaml-lsp) in `PATH` or
