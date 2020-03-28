@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 0.3.0
 
 - Add OCaml indent rules
 
