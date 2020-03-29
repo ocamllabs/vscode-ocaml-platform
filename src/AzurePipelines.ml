@@ -1,18 +1,5 @@
 open Bindings
 
-module E = struct
-  type t =
-    | InvalidJSONType of string
-    | MissingField of string
-    | InvalidFirstArrayElement
-
-  let toString = function
-    | InvalidJSONType value ->
-      {j|Field $value in Azure's response was undefined|j}
-    | MissingField k -> {j| Response from Azure did not contain build $k |j}
-    | InvalidFirstArrayElement -> "Unexpected array value in Azure response"
-end
-
 module RestResponse = struct
   type buildIdObject = { id : int }
 
