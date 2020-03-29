@@ -128,9 +128,7 @@ type resources =
 
 let makeResources ~env ~kind ~projectRoot =
   Cmd.make ~env ~cmd:(PackageManager.toCmdString kind)
-  |> Promise.map (function
-       | Error msg -> Error msg
-       | Ok cmd -> Ok { cmd; kind; projectRoot })
+  |> Promise.Result.map (fun cmd -> { cmd; kind; projectRoot })
 
 let ofPackageManagerName ~env ~name ~projectRoot ~toolchainRoot =
   match PackageManager.ofName ~root:toolchainRoot name with
@@ -162,15 +160,12 @@ let env ~cmd ~kind =
     Cmd.output cmd
       ~args:[| "command-env"; "--json"; "-P"; Fpath.toString root |]
       ~cwd:(Fpath.toString root)
-    |> Promise.Result.bind (fun stdout ->
+    |> Promise.map (fun stdout ->
            match Json.parse stdout with
            | Some json ->
-             json
-             |> Json.Decode.dict Json.Decode.string
-             |> Result.return |> Promise.resolve
+             json |> Json.Decode.dict Json.Decode.string |> Result.return
            | None ->
-             Error ("'esy command-env' returned non-json output: " ^ stdout)
-             |> Promise.resolve)
+             Error ("'esy command-env' returned non-json output: " ^ stdout))
   | Opam root ->
     Cmd.output cmd ~args:[| "env"; "--sexp" |] ~cwd:(Fpath.toString root)
     |> Promise.map (Result.bind ~f:parseOpamEnvOutput)
