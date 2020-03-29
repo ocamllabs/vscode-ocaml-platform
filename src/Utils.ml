@@ -34,6 +34,8 @@ module Result = struct
   let return x = Ok x
 
   let fail x = Error x
+
+  let bind x ~f = x >>= f
 end
 
 module List = struct

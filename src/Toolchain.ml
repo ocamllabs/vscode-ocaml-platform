@@ -137,21 +137,23 @@ let ofPackageManagerName ~env ~name ~projectRoot ~toolchainRoot =
   | Some kind -> makeResources ~env ~kind ~projectRoot
   | None -> Error ("Invalid package manager name: " ^ name) |> Promise.resolve
 
-let parseOpamEnvOutput opamEnvOutput =
-  opamEnvOutput |> Js.String.split "\n"
-  |. Belt.Array.keepMap (fun r ->
-         match r |> Js.String.split "=" |> Array.to_list with
-         | [ k; v ] -> Some (k, v)
-         | [] ->
-           (* TODO Environment entries are not necessarily key value pairs *)
-           Js.Console.info "Splitting on '=' in env output failed";
-           None
-         | l ->
-           Js.Console.info2
-             "Splitting on '=' in env output returned more than two items: "
-             (l |> Array.of_list |> Js.Array.joinWith ",");
-           None)
-  |> Js.Dict.fromArray |> Result.return |> Promise.resolve
+let parseOpamEnvOutput (opamEnvOutput : string) =
+  let error message =
+    Error ("invalid opam output: " ^ message ^ "\n" ^ opamEnvOutput)
+  in
+  match Sexp.parse_string opamEnvOutput with
+  | Error s -> error s
+  | Ok (Sexp.Atom a) -> error ("unexpected atom " ^ a)
+  | Ok (Sexp.List s) -> (
+    match
+      List.map
+        (function
+          | Sexp.List [ Sexp.Atom key; Atom value ] -> (key, value)
+          | _ -> raise Exit)
+        s
+    with
+    | exception Exit -> error "unable to parse key value list"
+    | kvs -> Ok (Js.Dict.fromList kvs) )
 
 let env ~cmd ~kind =
   match kind with
@@ -170,8 +172,8 @@ let env ~cmd ~kind =
              Error ("'esy command-env' returned non-json output: " ^ stdout)
              |> Promise.resolve)
   | Opam root ->
-    Cmd.output cmd ~args:[| "exec"; "env" |] ~cwd:(Fpath.toString root)
-    |> Promise.Result.bind parseOpamEnvOutput
+    Cmd.output cmd ~args:[| "env"; "--sexp" |] ~cwd:(Fpath.toString root)
+    |> Promise.map (Result.bind ~f:parseOpamEnvOutput)
 
 let supportedPackageManagers ~env ~root =
   let supportedPackageManagers =

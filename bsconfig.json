@@ -7,7 +7,13 @@
   "sources": [
     {
       "subdirs": ["bindings"],
-      "dir": "src"
+      "dir": "src",
+      "generators": [
+        {
+          "name": "lex",
+          "edge": ["sexp.ml", ":", "sexp.mll"]
+        }
+      ]
     },
     {
       "dir": "src/__tests__",
@@ -25,5 +31,11 @@
     "number": "-44-45-20",
     "error": "+101+8"
   },
-  "refmt": 3
+  "refmt": 3,
+  "generators": [
+    {
+      "name": "lex",
+      "command": "ocamllex.opt $in"
+    }
+  ]
 }
