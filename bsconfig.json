@@ -35,7 +35,7 @@
   "generators": [
     {
       "name": "lex",
-      "command": "esy ocamllex.opt $in"
+      "command": "ocamllex.opt $in"
     }
   ]
 }

@@ -103,14 +103,17 @@ jobs:
       - script: "esy build"
         displayName: "esy build"
         continueOnError: true
-      - script: "npm i"
-        displayName: "npm install"
-      - script: "npm run build"
-        displayName: "Compiling re files"
-      - script: "npm run package"
+      - script: "yarn"
+        displayName: "yarn"
+      # Not using yarn build because we need ocamllex to be picked up from esy sandbox for Windows portability on the CI
+      - script: "esy bsb -make-world"
+        displayName: "Compiling ml files using bucklescript"
+      - script: "webpack --mode production"
+        displayName: "Bundling using webpack"
+      - script: "yarn package"
         displayName: "Packaging the extension"
       - template: utils/use-cache-vscode-test.yml
-      - script: "npm test"
+      - script: "yarn test"
         displayName: "Running vscode integration tests"
         env:
           DISPLAY: ':99.0'
