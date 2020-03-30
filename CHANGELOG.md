@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.1
+
+- Remove auto closing for single quotes and angled brackets.
+
 ## 0.3.0
 
 - Add OCaml indent rules
