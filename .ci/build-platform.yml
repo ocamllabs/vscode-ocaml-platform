@@ -110,7 +110,7 @@ jobs:
       # Not using yarn build because we need ocamllex to be picked up from esy sandbox for Windows portability on the CI
       - script: "esy bsb -make-world"
         displayName: "Compiling ml files using bucklescript"
-      - script: "webpack --mode production"
+      - script: "yarn build:webpack"
         displayName: "Bundling using webpack"
       - script: "yarn package"
         displayName: "Packaging the extension"
