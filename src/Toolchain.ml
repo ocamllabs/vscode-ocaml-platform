@@ -160,12 +160,12 @@ let env ~cmd ~kind =
     Cmd.output cmd
       ~args:[| "command-env"; "--json"; "-P"; Fpath.toString root |]
       ~cwd:(Fpath.toString root)
-    |> Promise.map (fun stdout ->
+    |> Promise.map (Result.bind ~f:(fun stdout ->
            match Json.parse stdout with
            | Some json ->
              json |> Json.Decode.dict Json.Decode.string |> Result.return
            | None ->
-             Error ("'esy command-env' returned non-json output: " ^ stdout))
+             Error ("'esy command-env' returned non-json output: " ^ stdout)))
   | Opam root ->
     Cmd.output cmd ~args:[| "env"; "--sexp" |] ~cwd:(Fpath.toString root)
     |> Promise.map (Result.bind ~f:parseOpamEnvOutput)
