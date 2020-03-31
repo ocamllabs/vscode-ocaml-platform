@@ -97,6 +97,8 @@ jobs:
         displayName: "Print environment"
       - template: utils/use-node.yml
       - template: utils/use-esy.yml
+      - script: "npm i -g bs-platform@7.0.1"
+        displayName: "Installing bs-platform globally" # so that we can 'esy bsb -make-world'. Bsb needs to run inside esy and yarn installed bsb isn't seen by esy
       - script: "esy install"
         displayName: "esy install"
       - template: utils/restore-esy-cache.yml
