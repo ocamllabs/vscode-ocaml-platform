@@ -11,4 +11,4 @@ node_modules/
 .log/
 *.bs.js
 .vscode/settings.json
-src/sexp.ml
+# src/sexp.ml - since we couldn't get ocamllex.opt in the esy sandbox to produce it. TODO
