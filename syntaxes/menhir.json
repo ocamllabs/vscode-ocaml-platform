@@ -1,0 +1,199 @@
+{
+  "name": "Menhir",
+  "scopeName": "source.ocaml.menhir",
+  "fileTypes": ["mly"],
+  "patterns": [
+    { "include": "#comment" },
+    {
+      "comment": "sequence of declarations",
+      "begin": "(?=%[^%])",
+      "end": "(?=%%)",
+      "patterns": [{ "include": "#comment" }, { "include": "#declaration" }]
+    },
+    {
+      "comment": "sequence of rules",
+      "begin": "%%",
+      "beginCaptures": [{ "name": "keyword.other.menhir" }],
+      "end": "%%",
+      "endCaptures": [{ "name": "keyword.other.menhir" }],
+      "patterns": [{ "include": "#comment" }, { "include": "#rule" }]
+    },
+    { "include": "source.ocaml" }
+  ],
+  "repository": {
+    "declaration": {
+      "patterns": [
+        {
+          "comment": "ocaml header",
+          "begin": "%{",
+          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "end": "%}",
+          "endCaptures": [{ "name": "keyword.other.menhir" }],
+          "patterns": [{ "include": "source.ocaml" }]
+        },
+        {
+          "comment": "builtin declaration",
+          "name": "keyword.other.menhir",
+          "match": "(%parameter|%token|%nonassoc|%left|%right|%type|%start|%attribute|%on_error_reduce)\\b"
+        },
+        {
+          "comment": "ocaml type annotation for token",
+          "begin": "<",
+          "end": ">",
+          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "endCaptures": [{ "name": "keyword.other.menhir" }],
+          "patterns": [{ "include": "source.ocaml" }]
+        },
+        { "include": "#strings" }
+      ]
+    },
+    "rule": {
+      "patterns": [
+        {
+          "comment": "rule name with optional parameter list",
+          "match": "([a-z][a-zA-Z0-9_]*)\\s*(?:\\(([^)]+)\\))?(?=\\s*:)",
+          "captures": {
+            "1": {
+              "comment": "rule name",
+              "name": "entity.name.function.rule.menhir"
+            },
+            "2": {
+              "patterns": [
+                {
+                  "comment": "rule parameter",
+                  "name": "variable.parameter.rule.menhir",
+                  "match": "[a-zA-Z][a-zA-Z0-9_]*"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "comment": "declaration for public or inline rule; precedence annotation",
+          "name": "keyword.other.directive.menhir",
+          "match": "%public|%inline|%prec"
+        },
+        {
+          "comment": "production",
+          "begin": ":|\\|",
+          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "end": "(?={)",
+          "patterns": [
+            { "include": "#comment" },
+            { "include": "#variable" },
+            { "include": "#reference" },
+            { "include": "#operator" },
+            { "include": "#strings" }
+          ]
+        },
+        {
+          "comment": "ocaml semantic action",
+          "begin": "{",
+          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "end": "}",
+          "endCaptures": [{ "name": "keyword.other.menhir" }],
+          "patterns": [{ "include": "source.ocaml" }]
+        }
+      ]
+    },
+    "comment": {
+      "patterns": [
+        {
+          "comment": "c-style block comment",
+          "name": "comment.block.menhir",
+          "begin": "/\\*",
+          "end": "\\*/"
+        },
+        {
+          "comment": "ocaml-style block comment",
+          "name": "comment.block.other.menhir",
+          "begin": "\\(\\*",
+          "end": "\\*\\)"
+        },
+        {
+          "comment": "c-style line comment",
+          "name": "comment.line.menhir",
+          "begin": "//",
+          "end": "$"
+        }
+      ]
+    },
+    "variable": {
+      "comment": "labeled semantic value identifier",
+      "match": "([a-z][a-zA-Z0-9_]*)\\s*=",
+      "captures": { "1": { "name": "variable.parameter.value.menhir" } },
+      "patterns": [{ "include": "#reference" }]
+    },
+    "reference": {
+      "patterns": [
+        {
+          "comment": "builtin standard library functions",
+          "name": "support.function.rule.menhir",
+          "match": "\\b(endrule|midrule|option|ioption|boption|loption|pair|separated_pair|preceded|terminated|delimited|list|nonempty_list|separated_list|separated_nonempty_list|rev|flatten|append)\\b"
+        },
+        {
+          "comment": "reference to a token",
+          "name": "entity.name.token.menhir",
+          "match": "[A-Z][a-zA-Z0-9_]*"
+        },
+        {
+          "comment": "reference to a production",
+          "name": "entity.name.function.rule.menhir",
+          "match": "[a-z][a-zA-Z0-9_]*"
+        }
+      ]
+    },
+    "operator": {
+      "comment": "rule modifier (?, +, *, or |)",
+      "match": "[?+*|]",
+      "name": "keyword.operator.menhir"
+    },
+    "strings": {
+      "patterns": [
+        {
+          "comment": "strings used as aliases for tokens",
+          "name": "string.quoted.double.ocaml",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "comment": "escaped backslash",
+              "name": "constant.character.escape.ocaml",
+              "match": "\\\\\\\\"
+            },
+            {
+              "comment": "escaped quote or whitespace",
+              "name": "constant.character.escape.ocaml",
+              "match": "\\\\[\"'ntbr ]"
+            },
+            {
+              "comment": "character from decimal ASCII code",
+              "name": "constant.character.escape.ocaml",
+              "match": "\\\\[0-9]{3}"
+            },
+            {
+              "comment": "character from hexadecimal ASCII code",
+              "name": "constant.character.escape.ocaml",
+              "match": "\\\\x[0-9A-Fa-f]{2}"
+            },
+            {
+              "comment": "character from octal ASCII code",
+              "name": "constant.character.escape.ocaml",
+              "match": "\\\\o[0-3][0-7]{2}"
+            },
+            {
+              "comment": "unicode character escape sequence",
+              "name": "constant.character.escape.ocaml",
+              "match": "\\\\u\\{[0-9A-Fa-f]+\\}"
+            },
+            {
+              "comment": "unknown escape sequence",
+              "name": "invalid.illegal.unknown-escape.ocaml",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
