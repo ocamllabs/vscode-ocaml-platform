@@ -110,6 +110,10 @@ jobs:
       # Not using yarn build because we need ocamllex to be picked up from esy sandbox for Windows portability on the CI
       - script: "esy bsb -make-world"
         displayName: "Compiling ml files using bucklescript"
+        condition: ne(variables['AGENT.OS'], 'Windows_NT')
+      - script: "esy bsb.cmd -make-world"
+        displayName: "Compiling ml files using bucklescript"
+        condition: eq(variables['AGENT.OS'], 'Windows_NT')
       - script: "yarn build:webpack"
         displayName: "Bundling using webpack"
       - script: "yarn package"
