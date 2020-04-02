@@ -9,24 +9,9 @@ end
 
 module Folder = struct
   type t = { uri : TextDocument.uri }
-
-  let key f = f.uri.fsPath
 end
 
-module WorkspaceConfiguration : sig
-  type t
-
-  val get : t -> string -> string option
-
-  type configurationTarget =
-    | Global
-    | Workspace
-    | WorkspaceFolder
-  [@@bs.deriving { jsConverter = newType }]
-
-  val update :
-    t -> string -> string -> abs_configurationTarget -> unit Promise.t
-end = struct
+module WorkspaceConfiguration = struct
   type t
 
   external get' : t -> string -> string Js.Nullable.t = "get" [@@bs.send]
@@ -75,55 +60,7 @@ module Workspace = struct
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 end
 
-module Window : sig
-  module QuickPickOptions : sig
-    type t = < canPickMany : bool > Js.t
-
-    val make : ?canPickMany:bool -> ?placeHolder:string -> unit -> t
-  end
-
-  val showQuickPick :
-    string array -> QuickPickOptions.t -> string option Promise.t
-
-  val showInformationMessage : string -> unit
-
-  val showErrorMessage : string -> 'a Promise.t
-
-  type activeTextEditor = { document : document }
-
-  and document =
-    { getText : unit -> string
-    ; lineAt : int -> line
-    ; lineCount : int
-    ; fileName : string
-    }
-
-  and line = { range : range }
-
-  and range =
-    { start : rangeEdge
-    ; end_ : rangeEdge [@bs.as "end"]
-    }
-
-  and rangeEdge = { character : int }
-
-  val activeTextEditor : activeTextEditor option
-
-  type location =
-    | SourceControl
-    | Window
-    | Notification
-  [@@bs.deriving { jsConverter = newType }]
-
-  type withProgressConfig = < title : string ; location : abs_location > Js.t
-
-  type progress = { report : (< increment : int > Js.t -> unit[@bs]) }
-
-  val withProgress :
-       withProgressConfig
-    -> (progress -> ('a, 'b) result Promise.t)
-    -> ('a, 'b) result Promise.t
-end = struct
+module Window = struct
   module QuickPickOptions = struct
     type t = < canPickMany : bool > Js.t
 
