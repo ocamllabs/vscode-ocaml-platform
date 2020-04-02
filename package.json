@@ -148,6 +148,19 @@
         "configuration": "./languages/ocamllex.json"
       },
       {
+        "id": "ocaml.menhir",
+        "aliases": [
+          "Menhir",
+          "menhir",
+          "OCamlyacc",
+          "ocamlyacc"
+        ],
+        "extensions": [
+          ".mly"
+        ],
+        "configuration": "./languages/menhir.json"
+      },
+      {
         "id": "reason",
         "aliases": [
           "Reason",
@@ -195,6 +208,11 @@
         "language": "ocaml.ocamllex",
         "scopeName": "source.ocaml.ocamllex",
         "path": "./syntaxes/ocamllex.json"
+      },
+      {
+        "language": "ocaml.menhir",
+        "scopeName": "source.ocaml.menhir",
+        "path": "./syntaxes/menhir.json"
       },
       {
         "language": "ocaml.opam",
