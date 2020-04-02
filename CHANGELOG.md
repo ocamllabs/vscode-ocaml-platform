@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 0.4.0
 
 - Add syntax highlighting and basic language support for ocamlyacc/menhir
   sources.
