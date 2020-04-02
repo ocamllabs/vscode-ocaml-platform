@@ -415,7 +415,7 @@
       "patterns": [
         {
           "comment": "unit literal",
-          "name": "constant.language.ocaml",
+          "name": "constant.language.ocaml strong",
           "match": "\\(\\)"
         },
 
