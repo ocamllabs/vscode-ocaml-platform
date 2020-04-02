@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased
+
+- Add syntax highlighting and basic language support for ocamlyacc/menhir
+  sources.
+
 ## 0.3.1
 
 - Remove auto closing for single quotes and angled brackets.
