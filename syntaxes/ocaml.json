@@ -16,10 +16,10 @@
       "include": "#bindings"
     },
     {
-      "include": "#operators"
+      "include": "#keywords"
     },
     {
-      "include": "#keywords"
+      "include": "#operators"
     },
     {
       "include": "#literals"
@@ -336,6 +336,36 @@
       ]
     },
 
+    "keywords": {
+      "patterns": [
+        {
+          "comment": "ocaml toplevel directive",
+          "name": "keyword.other.ocaml",
+          "match": "(#use|#load)\\b"
+        },
+        {
+          "comment": "reserved ocaml keyword",
+          "name": "keyword.ocaml",
+          "match": "\\b(and|as|assert|begin|class|constraint|do|done|downto|else|end|exception|external|for|fun|function|functor|if|in|include|inherit|initializer|lazy|let|match|method|module|mutable|new|nonrec|object|of|open|private|rec|sig|struct|then|to|try|type|val|virtual|when|while|with)\\b"
+        },
+        {
+          "comment": "wildcard underscore",
+          "name": "keyword.other.ocaml",
+          "match": "\\b_\\b"
+        },
+        {
+          "comment": "brackets for array literals",
+          "name": "source.ocaml",
+          "match": "\\[\\||\\|\\]"
+        },
+        {
+          "comment": "object duplication",
+          "name": "source.ocaml",
+          "match": "\\{<|>\\}"
+        }
+      ]
+    },
+
     "operators": {
       "patterns": [
         {
@@ -377,36 +407,6 @@
           "comment": "type annotation",
           "name": "keyword.other.ocaml",
           "match": ":"
-        }
-      ]
-    },
-
-    "keywords": {
-      "patterns": [
-        {
-          "comment": "reserved ocaml keyword",
-          "name": "keyword.ocaml",
-          "match": "\\b(and|as|assert|begin|class|constraint|do|done|downto|else|end|exception|external|for|fun|function|functor|if|in|include|inherit|initializer|lazy|let|match|method|module|mutable|new|nonrec|object|of|open|private|rec|sig|struct|then|to|try|type|val|virtual|when|while|with)\\b"
-        },
-        {
-          "comment": "ocaml toplevel directive",
-          "name": "keyword.other.ocaml",
-          "match": "(#use|#load)\\b"
-        },
-        {
-          "comment": "wildcard underscore",
-          "name": "keyword.other.ocaml",
-          "match": "\\b_\\b"
-        },
-        {
-          "comment": "brackets for array literals",
-          "name": "source.ocaml",
-          "match": "\\[\\||\\|\\]"
-        },
-        {
-          "comment": "object duplication",
-          "name": "source.ocaml",
-          "match": "\\{<|>\\}"
         }
       ]
     },
