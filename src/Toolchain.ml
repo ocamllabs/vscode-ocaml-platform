@@ -126,13 +126,13 @@ type resources =
   ; projectRoot : Fpath.t
   }
 
-let makeResources ~env ~kind ~projectRoot =
-  Cmd.make ~env ~cmd:(PackageManager.toCmdString kind)
+let makeResources ~kind ~projectRoot =
+  Cmd.make ~cmd:(PackageManager.toCmdString kind) ()
   |> Promise.Result.map (fun cmd -> { cmd; kind; projectRoot })
 
-let ofPackageManagerName ~env ~name ~projectRoot ~toolchainRoot =
+let ofPackageManagerName ~name ~projectRoot ~toolchainRoot =
   match PackageManager.ofName ~root:toolchainRoot name with
-  | Some kind -> makeResources ~env ~kind ~projectRoot
+  | Some kind -> makeResources ~kind ~projectRoot
   | None -> Error ("Invalid package manager name: " ^ name) |> Promise.resolve
 
 let parseOpamEnvOutput (opamEnvOutput : string) =
@@ -160,23 +160,24 @@ let env ~cmd ~kind =
     Cmd.output cmd
       ~args:[| "command-env"; "--json"; "-P"; Fpath.toString root |]
       ~cwd:(Fpath.toString root)
-    |> Promise.map (Result.bind ~f:(fun stdout ->
-           match Json.parse stdout with
-           | Some json ->
-             json |> Json.Decode.dict Json.Decode.string |> Result.return
-           | None ->
-             Error ("'esy command-env' returned non-json output: " ^ stdout)))
+    |> Promise.map
+         (Result.bind ~f:(fun stdout ->
+              match Json.parse stdout with
+              | Some json ->
+                json |> Json.Decode.dict Json.Decode.string |> Result.return
+              | None ->
+                Error ("'esy command-env' returned non-json output: " ^ stdout)))
   | Opam root ->
     Cmd.output cmd ~args:[| "env"; "--sexp" |] ~cwd:(Fpath.toString root)
     |> Promise.map (Result.bind ~f:parseOpamEnvOutput)
 
-let supportedPackageManagers ~env ~root =
+let supportedPackageManagers ~root =
   let supportedPackageManagers =
     [ PackageManager.Esy root; Esy (hiddenEsyDir root); Opam root ]
   in
   supportedPackageManagers
   |> List.map (fun packageManager ->
-         Cmd.make ~env ~cmd:(PackageManager.toName packageManager)
+         Cmd.make ~cmd:(PackageManager.toName packageManager) ()
          |> Promise.map (function
               | Error _ -> None
               | Ok _ -> Some packageManager))
@@ -213,10 +214,10 @@ let selectPackageManager ~config choices =
                 | None -> Error "Selected choice was not found in the list"
                 | Some pm -> Ok pm))
 
-let init ~env ~folder =
+let init ~folder =
   let projectRoot = Fpath.ofString folder in
   Promise.all2
-    ( supportedPackageManagers ~root:projectRoot ~env
+    ( supportedPackageManagers ~root:projectRoot
     , Manifest.lookup projectRoot
       |> Promise.Result.bind (fun r ->
              packageManagersListOfLookup r |> Promise.resolve) )
@@ -238,7 +239,7 @@ let init ~env ~folder =
            Js.Console.info "Will lookup toolchain from global env";
            let global = "global" in
            match PackageManager.ofName ~root:projectRoot global with
-           | Some kind -> makeResources ~env ~kind ~projectRoot
+           | Some kind -> makeResources ~kind ~projectRoot
            | None ->
              Error
                {j| Unexplained exception: PackageManager.ofName returned None for a valid name $global |j}
@@ -246,7 +247,7 @@ let init ~env ~folder =
          | [ packageManager ] ->
            Js.Console.info2 "Toolchain detected"
              (PackageManager.toString packageManager);
-           makeResources ~env ~kind:packageManager ~projectRoot
+           makeResources ~kind:packageManager ~projectRoot
          | packageManagers -> (
            let config = Vscode.Workspace.getConfiguration "ocaml" in
            match
@@ -254,17 +255,16 @@ let init ~env ~folder =
              , Vscode.WorkspaceConfiguration.get config "toolChainRoot" )
            with
            | Some name, Some root ->
-             ofPackageManagerName ~env ~name ~projectRoot
+             ofPackageManagerName ~name ~projectRoot
                ~toolchainRoot:(Fpath.ofString root)
            | Some name, None ->
-             ofPackageManagerName ~env ~name ~toolchainRoot:projectRoot
-               ~projectRoot
+             ofPackageManagerName ~name ~toolchainRoot:projectRoot ~projectRoot
            | None, Some _
            | None, None ->
              selectPackageManager ~config packageManagers
              |> Promise.then_ (function
                   | Error e -> Error e |> Promise.resolve
-                  | Ok pm -> makeResources ~env ~kind:pm ~projectRoot) ))
+                  | Ok pm -> makeResources ~kind:pm ~projectRoot) ))
 
 let promptSetup fn =
   Window.showQuickPick [| "yes"; "no" |]
@@ -352,7 +352,7 @@ let runSetup ({ cmd; kind; _ } as resources) =
          (* This function/callback here is a temporary way to check ocamllsp if
             installed after setupToolChain completes. TODO: move it inside
             setupToolChain itself *)
-         Cmd.make ~cmd:"ocamllsp" ~env)
+         Cmd.make ~cmd:"ocamllsp" ~env ())
   |> Promise.map (function
        | Ok _ -> Ok ()
        | Error msg -> Error {j| Toolchain initialisation failed: $msg |j})

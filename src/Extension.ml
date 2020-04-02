@@ -25,7 +25,7 @@ let activate _context =
   Js.Dict.set Process.env "OCAMLRUNPARAM" "b";
   Js.Dict.set Process.env "OCAML_LSP_SERVER_LOG" "-";
   let folder = Workspace.rootPath in
-  Toolchain.init ~env:Process.env ~folder
+  Toolchain.init ~folder
   |> Promise.Result.bind (fun toolchain ->
          Toolchain.runSetup toolchain
          |> Promise.Result.bind (fun () ->

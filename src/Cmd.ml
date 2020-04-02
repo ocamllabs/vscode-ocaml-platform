@@ -14,7 +14,7 @@ let pathMissingFromEnv = "'PATH' variable not found in the environment"
 
 let binPath c = c.cmd
 
-let make ~env ~cmd =
+let make ?(env = Process.env) ~cmd () =
   match Js.Dict.get env "PATH" with
   | None -> Error pathMissingFromEnv |> Promise.resolve
   | Some path ->
