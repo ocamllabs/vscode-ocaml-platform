@@ -5,6 +5,8 @@
 - Add syntax highlighting and basic language support for ocamlyacc/menhir
   sources.
 
+- Improve syntax highlighting of OCaml sources
+
 ## 0.3.1
 
 - Remove auto closing for single quotes and angled brackets.
