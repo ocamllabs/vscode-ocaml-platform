@@ -1,7 +1,7 @@
 {
   "lambda": {
     "prefix": "fun",
-    "body": ["(${1:pattern}) -> ${2:${1:pattern}}"]
+    "body": ["fun (${1:pattern}) -> ${2:${1:pattern}}"]
   },
   "let .. in": {
     "prefix": "let",
