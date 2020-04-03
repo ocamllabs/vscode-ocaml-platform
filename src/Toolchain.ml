@@ -200,9 +200,9 @@ let selectPackageManager ~config choices =
   let placeHolder =
     "Which package manager would you like to manage the toolchain?"
   in
-  let choices = choices |> List.map PackageManager.toName |> Array.of_list in
   Window.QuickPickOptions.make ~canPickMany:false ~placeHolder ()
-  |> Window.showQuickPick choices
+  |> Window.showQuickPick
+       (choices |> List.map PackageManager.toName |> Array.of_list)
   |> Promise.then_ (function
        | None ->
          Window.showInformationMessage "Defaulting to the global toolchain";
