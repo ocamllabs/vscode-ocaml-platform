@@ -201,14 +201,16 @@ let selectPackageManager ~config choices =
   let placeHolder =
     "Which package manager would you like to manage the toolchain?"
   in
+  let choices = choices |> List.map PackageManager.toName |> Array.of_list in
   Window.QuickPickOptions.make ~canPickMany:false ~placeHolder ()
-  |> Window.showQuickPick
-       (choices |> List.map PackageManager.toName |> Array.of_list)
+  |> Window.showQuickPick choices
   |> Promise.then_ (function
-       | None -> Error "showQuickPick() returned undefined" |> Promise.resolve
+       | None ->
+         Window.showInformationMessage "Defaulting to the global toolchain";
+         Promise.Result.return PackageManager.Global
        | Some packageManagerName ->
-         WorkspaceCfg.update config "packageManager" packageManagerName
-           (WorkspaceCfg.configurationTargetToJs Workspace)
+         WorkspaceCfg.configurationTargetToJs Workspace
+         |> WorkspaceCfg.update config "packageManager" packageManagerName
          |> Promise.map (fun _ ->
                 match PackageManager.findByName packageManagerName choices with
                 | None -> Error "Selected choice was not found in the list"
