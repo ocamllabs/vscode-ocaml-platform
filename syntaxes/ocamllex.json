@@ -90,7 +90,7 @@
         {
           "comment": "regex operators",
           "name": "keyword.operator.ocamllex",
-          "match": "\\^|#|\\*|\\+|\\?|\\|"
+          "match": "\\^|#|\\*|\\+|\\?|\\||-"
         },
         {
           "comment": "end-of-file token",
