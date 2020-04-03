@@ -5,41 +5,38 @@ Visual Studio Code extension for OCaml and relevant tools.
 _This plugin is alpha quality. Use at your own risk and please report any bugs
 you encounter._
 
+## Quick start
+
+1. Install [opam](https://opam.ocaml.org) (OCaml Package Manager)
+2. Install this extension from
+   [the VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=ocamllabs.ocaml-platform)
+   (or by entering `ext install ocamllabs.ocaml-platform` at the command palette
+   <kbd>Ctrl</kbd>+<kbd>P</kbd>)
+3. Install [ocaml-lsp](https://github.com/ocaml/ocaml-lsp)
+4. Open a OCaml/ReasonML project (`File > Add Folder to Workspace...`)
+
 ## Features
 
-- Syntax highlighting for OCaml, ReasonML, dune, merlin, ocamlbuild, ocamllex,
-  opam files.
+- Syntax highlighting
+  - OCaml
+  - ReasonML
+  - dune
+  - menhir
+  - merlin
+  - ocamlbuild
+  - ocamllex
+  - opam
+- Indentation rules
+- Snippets
 
-- Indentation rules and snippets for OCaml.
+## Configuration
 
-## Extension Settings
+This extension provides options in VSCode's configuration settings. You can find
+the settings under `File > Preferences > Settings`.
 
-For now, it's required to either have `ocamllsp` (from ocaml-lsp) in `PATH` or
-configure it with the `ocaml.lsp.path` variable.
+- `ocaml.lsp.path` (optional) - specifies the PATH to `ocamllsp` (from
+  ocaml-lsp).
 
-## Installation
+## Requirements
 
-### Requirements
-
-This VSCode extension works in conjunction with
-[ocaml-lsp-server](https://github.com/ocaml/ocaml-lsp).
-
-### Install from the Marketplace (Recommended)
-
-<https://marketplace.visualstudio.com/items?itemName=ocamllabs.ocaml-platform>
-
-### Download a pre-built extension installer from GitHub Actions artifacts
-
-- Select a build you want to try from the Actions tab
-
-  - <https://github.com/ocamllabs/vscode-ocaml-platform/actions>
-
-- Download the artifact for your platform in your preferred way
-
-- Unzip the downloaded file
-
-- Install to VSCode using the code command
-
-```
-code --install-extension <Path to unzipped vsix file>
-```
+- [ocaml-lsp-server](https://github.com/ocaml/ocaml-lsp)
