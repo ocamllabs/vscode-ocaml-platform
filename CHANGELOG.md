@@ -1,5 +1,9 @@
 # Change Log
 
+## Unrealeased
+
+- Improve ocamllex syntax highlighting
+
 ## 0.4.0
 
 - Add syntax highlighting and basic language support for ocamlyacc/menhir
