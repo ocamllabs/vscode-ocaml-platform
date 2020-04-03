@@ -214,8 +214,7 @@ let selectPackageManager ~config choices =
                 | None -> Error "Selected choice was not found in the list"
                 | Some pm -> Ok pm))
 
-let init ~folder =
-  let projectRoot = Fpath.ofString folder in
+let init ~projectRoot =
   Promise.all2
     ( supportedPackageManagers ~root:projectRoot
     , Manifest.lookup projectRoot

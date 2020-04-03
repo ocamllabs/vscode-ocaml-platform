@@ -24,7 +24,7 @@ type resources
    be passed on to runSetup that can be called to install the
    toolchain.
  *)
-val init : folder:string -> (resources, string) result Promise.t
+val init : projectRoot:Fpath.t -> (resources, string) result Promise.t
 
 (** [runSetup] is a effectful function that triggers setup instructions
    automatically for the user. At present, this functionality
