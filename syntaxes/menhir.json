@@ -3,12 +3,12 @@
   "scopeName": "source.ocaml.menhir",
   "fileTypes": ["mly"],
   "patterns": [
-    { "include": "#comment" },
+    { "include": "#comments" },
     {
       "comment": "sequence of declarations",
       "begin": "(?=%[^%])",
       "end": "(?=%%)",
-      "patterns": [{ "include": "#comment" }, { "include": "#declaration" }]
+      "patterns": [{ "include": "#comments" }, { "include": "#declarations" }]
     },
     {
       "comment": "sequence of rules",
@@ -16,12 +16,12 @@
       "beginCaptures": [{ "name": "keyword.other.menhir" }],
       "end": "%%",
       "endCaptures": [{ "name": "keyword.other.menhir" }],
-      "patterns": [{ "include": "#comment" }, { "include": "#rule" }]
+      "patterns": [{ "include": "#comments" }, { "include": "#rules" }]
     },
     { "include": "source.ocaml" }
   ],
   "repository": {
-    "declaration": {
+    "declarations": {
       "patterns": [
         {
           "comment": "ocaml header",
@@ -44,10 +44,11 @@
           "endCaptures": [{ "name": "keyword.other.menhir" }],
           "patterns": [{ "include": "source.ocaml" }]
         },
-        { "include": "#strings" }
+        { "include": "source.ocaml#strings" }
       ]
     },
-    "rule": {
+
+    "rules": {
       "patterns": [
         {
           "comment": "rule name with optional parameter list",
@@ -79,11 +80,11 @@
           "beginCaptures": [{ "name": "keyword.other.menhir" }],
           "end": "(?={)",
           "patterns": [
-            { "include": "#comment" },
-            { "include": "#variable" },
-            { "include": "#reference" },
-            { "include": "#operator" },
-            { "include": "#strings" }
+            { "include": "#comments" },
+            { "include": "#variables" },
+            { "include": "#references" },
+            { "include": "#operators" },
+            { "include": "source.ocaml#strings" }
           ]
         },
         {
@@ -96,7 +97,8 @@
         }
       ]
     },
-    "comment": {
+
+    "comments": {
       "patterns": [
         {
           "comment": "c-style block comment",
@@ -118,13 +120,15 @@
         }
       ]
     },
-    "variable": {
+
+    "variables": {
       "comment": "labeled semantic value identifier",
       "match": "([a-z][a-zA-Z0-9_]*)\\s*=",
       "captures": { "1": { "name": "variable.parameter.value.menhir" } },
-      "patterns": [{ "include": "#reference" }]
+      "patterns": [{ "include": "#references" }]
     },
-    "reference": {
+
+    "references": {
       "patterns": [
         {
           "comment": "builtin standard library functions",
@@ -143,57 +147,11 @@
         }
       ]
     },
-    "operator": {
+
+    "operators": {
       "comment": "rule modifier (?, +, *, or |)",
       "match": "[?+*|]",
       "name": "keyword.operator.menhir"
-    },
-    "strings": {
-      "patterns": [
-        {
-          "comment": "strings used as aliases for tokens",
-          "name": "string.quoted.double.ocaml",
-          "begin": "\"",
-          "end": "\"",
-          "patterns": [
-            {
-              "comment": "escaped backslash",
-              "name": "constant.character.escape.ocaml",
-              "match": "\\\\\\\\"
-            },
-            {
-              "comment": "escaped quote or whitespace",
-              "name": "constant.character.escape.ocaml",
-              "match": "\\\\[\"'ntbr ]"
-            },
-            {
-              "comment": "character from decimal ASCII code",
-              "name": "constant.character.escape.ocaml",
-              "match": "\\\\[0-9]{3}"
-            },
-            {
-              "comment": "character from hexadecimal ASCII code",
-              "name": "constant.character.escape.ocaml",
-              "match": "\\\\x[0-9A-Fa-f]{2}"
-            },
-            {
-              "comment": "character from octal ASCII code",
-              "name": "constant.character.escape.ocaml",
-              "match": "\\\\o[0-3][0-7]{2}"
-            },
-            {
-              "comment": "unicode character escape sequence",
-              "name": "constant.character.escape.ocaml",
-              "match": "\\\\u\\{[0-9A-Fa-f]+\\}"
-            },
-            {
-              "comment": "unknown escape sequence",
-              "name": "invalid.illegal.unknown-escape.ocaml",
-              "match": "\\\\."
-            }
-          ]
-        }
-      ]
     }
   }
 }
