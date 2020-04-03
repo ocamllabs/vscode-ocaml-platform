@@ -1,5 +1,4 @@
-open Bindings
-open Utils
+open Import
 module WorkspaceCfg = Vscode.WorkspaceConfiguration
 
 module Binaries = struct
@@ -90,7 +89,7 @@ end = struct
     | Global, _ -> 1
 
   let findByName name xs =
-    Utils.List.find_map xs ~f:(function
+    List.find_map xs ~f:(function
       | Global -> None
       | s ->
         if toName s = name then

@@ -1,3 +1,6 @@
+include Vscode
+module Process = Node.Process
+
 let envSep =
   match Sys.unix with
   | true -> ":"
