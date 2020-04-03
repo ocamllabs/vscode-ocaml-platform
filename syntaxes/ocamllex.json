@@ -7,294 +7,100 @@
   "keyEquivalent": "^~O",
   "patterns": [
     {
-      "begin": "(rule|and)\\s+([a-z][a-zA-Z0-9_]*)\\s+(=)\\s+(parse)(?=\\s*$)|((?<!\\|)(\\|)(?!\\|))",
-      "beginCaptures": {
-        "1": {
-          "name": "keyword.other.ocamllex"
-        },
-        "2": {
-          "name": "entity.name.function.entrypoint.ocamllex"
-        },
-        "3": {
-          "name": "keyword.operator.ocamllex"
-        },
-        "4": {
-          "name": "keyword.other.ocamllex"
-        },
-        "5": {
-          "name": "punctuation.separator.match-pattern.ocamllex"
-        }
-      },
-      "end": "(?:^\\s*((and)\\b|(?=\\|)|$))",
-      "endCaptures": {
-        "3": {
-          "name": "keyword.other.entry-definition.ocamllex"
-        }
-      },
-      "name": "meta.pattern-match.ocaml",
-      "patterns": [
-        {
-          "include": "#actions"
-        },
-        {
-          "include": "#match-patterns"
-        }
-      ]
+      "include": "source.ocaml#comments"
     },
     {
-      "begin": "\\(",
-      "end": "\\)",
-      "name": "meta.paren-group.ocamllex",
-      "patterns": [
-        {
-          "include": "$self"
-        }
-      ]
+      "include": "source.ocaml#strings"
     },
     {
-      "begin": "\\b(let)\\s+([a-z][a-zA-Z0-9'_]*)\\s+=",
-      "beginCaptures": {
-        "1": {
-          "name": "keyword.other.pattern-definition.ocamllex"
-        },
-        "2": {
-          "name": "entity.name.type.pattern.stupid-goddamn-hack.ocamllex"
-        }
-      },
-      "end": "^(?:\\s*let)|(?:\\s*(rule|$))",
-      "name": "meta.pattern-definition.ocaml",
-      "patterns": [
-        {
-          "include": "#match-patterns"
-        }
-      ]
+      "include": "source.ocaml#characters"
+    },
+
+    {
+      "include": "#rules"
     },
     {
-      "begin": "^\\s*({)",
-      "beginCaptures": {
-        "1": {
-          "name": "punctuation.section.embedded.ocaml.begin.ocamllex"
-        }
-      },
-      "end": "^\\s*(})",
-      "endCaptures": {
-        "1": {
-          "name": "punctuation.section.embedded.ocaml.end.ocamllex"
-        }
-      },
-      "name": "meta.embedded.ocaml",
-      "patterns": [
-        {
-          "include": "source.ocaml"
-        }
-      ]
+      "include": "#keywords"
     },
     {
-      "include": "#comments"
+      "include": "#actions"
     },
     {
-      "include": "#strings"
+      "include": "#regex"
     },
+
     {
       "match": "(’|‘|“|”)",
       "name": "invalid.illegal.unrecognized-character.ocamllex"
-    },
-    {
-      "match": "=",
-      "name": "keyword.operator.symbol.ocamllex"
     }
   ],
   "repository": {
+    "rules": {
+      "match": "\\b(rule|and)\\s+([a-z][a-zA-Z0-9_]*)\\b",
+      "captures": {
+        "1": {
+          "name": "keyword.other.ocamllex"
+        },
+        "2": {
+          "name": "entity.name.function.rule.ocamllex"
+        }
+      }
+    },
+
+    "keywords": {
+      "patterns": [
+        {
+          "comment": "ocamllex reserved keywords",
+          "name": "keyword.other.ocamllex",
+          "match": "\\b(let|as|rule|and|parse|shortest|refill)\\b"
+        },
+        {
+          "comment": "assignment operator",
+          "match": "=",
+          "name": "keyword.operator.symbol.ocamllex"
+        }
+      ]
+    },
+
     "actions": {
       "patterns": [
         {
-          "begin": "[^\\']({)",
-          "beginCaptures": {
-            "1": {
-              "name": "punctuation.definition.action.begin.ocamllex"
-            }
-          },
-          "end": "(})",
-          "endCaptures": {
-            "1": {
-              "name": "punctuation.definition.action.end.ocamllex"
-            }
-          },
-          "name": "meta.action.ocamllex",
-          "patterns": [
-            {
-              "include": "source.ocaml"
-            }
-          ]
+          "comment": "embedded ocaml source",
+          "begin": "{",
+          "beginCaptures": [{ "name": "keyword.other.ocamllex" }],
+          "end": "}",
+          "endCaptures": [{ "name": "keyword.other.ocamllex" }],
+          "patterns": [{ "include": "source.ocaml" }]
         }
       ]
     },
-    "chars": {
+
+    "regex": {
       "patterns": [
         {
-          "captures": {
-            "1": {
-              "name": "punctuation.definition.char.begin.ocamllex"
-            },
-            "4": {
-              "name": "punctuation.definition.char.end.ocamllex"
-            }
-          },
-          "match": "(')([^\\\\]|\\\\(x[a-fA-F0-9][a-fA-F0-9]|[0-2]\\d\\d|[bnrt'\"\\\\]))(')",
-          "name": "constant.character.ocamllex"
-        }
-      ]
-    },
-    "comments": {
-      "patterns": [
-        {
-          "begin": "(?=[^\\\\])(\")",
-          "end": "\"",
-          "name": "comment.block.string.quoted.double.ocaml",
-          "patterns": [
-            {
-              "match": "\\\\(x[a-fA-F0-9][a-fA-F0-9]|[0-2]\\d\\d|[bnrt'\"\\\\])",
-              "name": "comment.block.string.constant.character.escape.ocaml"
-            }
-          ]
+          "comment": "regex character set",
+          "name": "punctuation.character-set.ocamllex",
+          "match": "\\[|\\]"
         },
         {
-          "begin": "\\(\\*",
-          "beginCaptures": {
-            "0": {
-              "name": "punctuation.definition.comment.begin.ocaml"
-            }
-          },
-          "end": "\\*\\)",
-          "endCaptures": {
-            "0": {
-              "name": "punctuation.definition.comment.end.ocaml"
-            }
-          },
-          "name": "comment.block.ocaml",
-          "patterns": [
-            {
-              "include": "#comments"
-            }
-          ]
-        }
-      ]
-    },
-    "match-patterns": {
-      "patterns": [
-        {
-          "begin": "(\\()",
-          "beginCaptures": {
-            "1": {
-              "name": "punctuation.definition.sub-pattern.begin.ocamllex"
-            }
-          },
-          "end": "(\\))",
-          "endCaptures": {
-            "1": {
-              "name": "punctuation.definition.sub-pattern.end.ocamllex"
-            }
-          },
-          "name": "meta.pattern.sub-pattern.ocamllex",
-          "patterns": [
-            {
-              "include": "#match-patterns"
-            }
-          ]
+          "comment": "regex group",
+          "name": "punctuation.group.ocamllex",
+          "match": "\\(|\\)"
         },
         {
-          "begin": "(\\[)(\\^?)",
-          "beginCaptures": {
-            "1": {
-              "name": "punctuation.definition.character-class.begin.ocamllex"
-            },
-            "2": {
-              "name": "punctuation.definition.character-class.negation.ocamllex"
-            }
-          },
-          "end": "(])(?!\\')",
-          "endCaptures": {
-            "1": {
-              "name": "punctuation.definition.character-class.end.ocamllex"
-            }
-          },
-          "name": "meta.pattern.character-class.ocamllex",
-          "patterns": [
-            {
-              "include": "#chars"
-            },
-            {
-              "match": "-",
-              "name": "punctuation.separator.character-class.range.ocamllex"
-            }
-          ]
+          "comment": "regex operators",
+          "name": "keyword.operator.ocamllex",
+          "match": "\\^|#|\\*|\\+|\\?|\\|"
         },
         {
-          "include": "#chars"
+          "comment": "end-of-file token",
+          "name": "constant.language.eof.ocamllex",
+          "match": "\\beof\\b"
         },
         {
-          "include": "#strings"
-        },
-        {
-          "match": "[a-z][a-zA-Z0-9'_]",
-          "name": "entity.name.type.pattern.reference.stupid-goddamn-hack.ocamllex"
-        },
-        {
-          "match": "\\*|\\+|\\?",
-          "name": "keyword.operator.pattern.modifier.ocamllex"
-        },
-        {
-          "match": "\\bas\\b",
-          "name": "keyword.other.pattern.ocamllex"
-        },
-        {
-          "match": "\\|",
-          "name": "keyword.operator.pattern.alternation.ocamllex"
-        },
-        {
-          "match": "_",
-          "name": "constant.language.universal-match.ocamllex"
-        },
-        {
-          "match": "eof",
-          "name": "constant.language.eof.ocamllex"
-        }
-      ]
-    },
-    "strings": {
-      "patterns": [
-        {
-          "begin": "(?=[^\\\\])(\")",
-          "beginCaptures": {
-            "1": {
-              "name": "punctuation.definition.string.begin.ocaml"
-            }
-          },
-          "end": "(\")",
-          "endCaptures": {
-            "1": {
-              "name": "punctuation.definition.string.end.ocaml"
-            }
-          },
-          "name": "string.quoted.double.ocamllex",
-          "patterns": [
-            {
-              "match": "\\\\$[ \\t]*",
-              "name": "punctuation.separator.string.ignore-eol.ocaml"
-            },
-            {
-              "match": "\\\\(?!(x[a-fA-F0-9][a-fA-F0-9]|[0-2]\\d\\d|[bnrt'\"\\\\]|[\\|\\(\\)1-9$^.*+?\\[\\]]|$[ \\t]*))(?:.)",
-              "name": "invalid.illegal.character.string.escape"
-            },
-            {
-              "match": "\\\\(x[a-fA-F0-9][a-fA-F0-9]|[0-2]\\d\\d|[bnrt'\"\\\\])",
-              "name": "constant.character.string.escape.ocaml"
-            },
-            {
-              "match": "\\\\[\\|\\(\\)1-9$^.*+?\\[\\]]",
-              "name": "constant.character.regexp.escape.ocaml"
-            }
-          ]
+          "comment": "reference to regex pattern",
+          "name": "entity.name.type.reference.ocamllex",
+          "match": "[a-z][a-zA-Z0-9'_]*"
         }
       ]
     }
