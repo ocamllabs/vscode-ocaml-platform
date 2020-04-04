@@ -1,6 +1,5 @@
 {
   "name": "vscode-ocaml-platform",
-  "version": "0.1.0",
   "reason": {
     "react-jsx": 3
   },
