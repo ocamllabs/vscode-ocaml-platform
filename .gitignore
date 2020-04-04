@@ -11,6 +11,5 @@ node_modules/
 .log/
 *.bs.js
 .vscode/settings.json
-src/sexp.ml
 out/
 yarn-error.log
