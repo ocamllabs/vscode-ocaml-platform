@@ -1,99 +1,109 @@
 {
   "scopeName": "source.ocaml.opam",
   "fileTypes": ["opam"],
-  "patterns": [{ "include": "#directive" }],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#fields" },
+    { "include": "#values" }
+  ],
   "repository": {
-    "directive": {
+    "comments": {
       "patterns": [
         {
-          "begin": "\\b(depends)\\b",
-          "end": "(?<=\\])",
-          "beginCaptures": {
-            "1": { "name": "storage.type" }
-          },
-          "patterns": [
-            {
-              "match": "\\G(:)",
-              "name": "keyword.other"
-            },
-            {
-              "begin": "\\[",
-              "end": "\\]",
-              "patterns": [
-                {
-                  "begin": "(\")",
-                  "end": "(\")",
-                  "beginCaptures": {
-                    "1": { "name": "comment.line" }
-                  },
-                  "endCaptures": {
-                    "1": { "name": "comment.line" }
-                  },
-                  "patterns": [
-                    {
-                      "match": "\\b([[:alpha:]][[:word:]]*)\\b[[:space:]]*(\\.)?",
-                      "captures": {
-                        "1": { "name": "entity.name.class" },
-                        "2": { "name": "keyword.other" }
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
+          "comment": "block comment",
+          "name": "comment.block.opam",
+          "begin": "\\(\\*",
+          "end": "\\*\\)"
         },
         {
-          "end": "(?=[:])",
-          "patterns": [
-            {
-              "begin": "(\")",
-              "end": "(\")",
-              "beginCaptures": {
-                "1": { "name": "keyword.other" }
-              },
-              "endCaptures": {
-                "1": { "name": "keyword.other" }
-              },
-              "patterns": [
-                {
-                  "match": "(?<![\\-\\+])(?:(\\b[[:word:]]+\\b)|([*]+))[[:space:]]*([\\./])?",
-                  "captures": {
-                    "1": { "name": "string.double" },
-                    "2": { "name": "constant.language" },
-                    "3": { "name": "keyword.other" }
-                  }
-                }
-              ]
-            },
-            {
-              "match": "\\b([[:alpha:]][[:word:]]*)\\b([\\-])?",
-              "captures": {
-                "1": { "name": "constant.language" },
-                "2": { "name": "keyword.other" }
-              }
-            }
-          ]
+          "comment": "line comment",
+          "name": "comment.line.opam",
+          "begin": "#",
+          "end": "$"
+        }
+      ]
+    },
+
+    "fields": {
+      "comment": "labeled field",
+      "match": "^([a-zA-Z0-9_\\-]*[a-zA-Z][a-zA-Z0-9_\\-]*)(:)",
+      "captures": {
+        "1": { "name": "entity.name.tag.opam" },
+        "2": { "name": "keyword.operator.opam" }
+      }
+    },
+
+    "values": {
+      "patterns": [
+        {
+          "comment": "boolean literal",
+          "name": "constant.language.opam",
+          "match": "\\b(true|false)\\b"
         },
         {
-          "begin": "(:)",
-          "end": "$",
-          "beginCaptures": {
-            "1": { "name": "keyword.other" }
-          },
-          "patterns": [
-            {
-              "begin": "(\")",
-              "end": "(\")",
-              "contentName": "variable.parameter",
-              "beginCaptures": {
-                "1": { "name": "comment.line" }
-              },
-              "endCaptures": {
-                "1": { "name": "comment.line" }
-              }
-            }
-          ]
+          "comment": "integer literal",
+          "name": "constant.numeric.decimal.opam",
+          "match": "(\\b|\\-?)[0-9]+\\b"
+        },
+        {
+          "comment": "double-quote string literal",
+          "name": "string.quoted.double.opam",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [{ "include": "#string-elements" }]
+        },
+        {
+          "comment": "triple-double-quote string literal",
+          "name": "string.quoted.triple-double.opam",
+          "begin": "\"\"\"",
+          "end": "\"\"\"",
+          "patterns": [{ "include": "#string-elements" }]
+        },
+        {
+          "comment": "operator",
+          "name": "keyword.operator.opam",
+          "match": "[!=<>\\|&?:]+"
+        },
+        {
+          "comment": "identifier",
+          "match": "\\b([a-zA-Z0-9_\\-+]+)\\b",
+          "name": "variable.parameter.opam"
+        }
+      ]
+    },
+
+    "string-elements": {
+      "patterns": [
+        {
+          "comment": "escaped backslash",
+          "name": "constant.character.escape.opam",
+          "match": "\\\\\\\\"
+        },
+        {
+          "comment": "escaped quote or whitespace",
+          "name": "constant.character.escape.opam",
+          "match": "\\\\[\"ntbr\\n]"
+        },
+        {
+          "comment": "character from decimal ASCII code",
+          "name": "constant.character.escape.opam",
+          "match": "\\\\[0-9]{3}"
+        },
+        {
+          "comment": "character from hexadecimal ASCII code",
+          "name": "constant.character.escape.opam",
+          "match": "\\\\x[0-9A-Fa-f]{2}"
+        },
+        {
+          "comment": "variable interpolation",
+          "name": "constant.variable.opam",
+          "begin": "%\\{",
+          "end": "}\\%"
+        },
+        {
+          "comment": "unknown escape sequence",
+          "name": "invalid.illegal.unknown-escape.opam",
+          "match": "\\\\."
         }
       ]
     }
