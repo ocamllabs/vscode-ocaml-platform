@@ -26,7 +26,9 @@ jobs:
           echo "Initialising opam..."
           opam init --yes -c 4.08.1 --disable-sandboxing
         displayName: "Azure cache miss: setting up opam switch"
-        condition: and(ne(variables.CACHE_RESTORED, 'true'), ne(variables['Agent.OS'], 'Windows_NT'))
+        condition:
+          and(ne(variables.CACHE_RESTORED, 'true'), ne(variables['Agent.OS'],
+          'Windows_NT'))
 
       - bash: |
           eval $(opam env)
@@ -44,26 +46,44 @@ jobs:
 
       - powershell: $Env:Path
         continueOnError: true
-        condition: and(eq(variables['AGENT.OS'], 'Windows_NT'), and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(), ne(variables['Build.SourceBranch'], variables['System.PullRequest.TargetBranch']))))
+        condition:
+          and(eq(variables['AGENT.OS'], 'Windows_NT'),
+          and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(),
+          ne(variables['Build.SourceBranch'],
+          variables['System.PullRequest.TargetBranch']))))
         displayName: "Print env in powershell"
       # Needed so that the mingw tar doesn't shadow the system tar. See
       # pipelines.yaml. We need windows bsdtar from system32, not the mingw
       # one. Note powershell doesn't need escaping of backslashes.
-      - powershell: Write-Host "##vso[task.setvariable variable=PATH;]C:\Windows\system32;${env:PATH}"
+      - powershell:
+          Write-Host "##vso[task.setvariable
+          variable=PATH;]C:\Windows\system32;${env:PATH}"
         continueOnError: true
         condition: eq(variables['AGENT.OS'], 'Windows_NT')
         displayName: "Make sure windows/system32 is at front of path if windows"
       - powershell: $Env:Path
         continueOnError: true
-        condition: and(eq(variables['AGENT.OS'], 'Windows_NT'), and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(), ne(variables['Build.SourceBranch'], variables['System.PullRequest.TargetBranch']))))
+        condition:
+          and(eq(variables['AGENT.OS'], 'Windows_NT'),
+          and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(),
+          ne(variables['Build.SourceBranch'],
+          variables['System.PullRequest.TargetBranch']))))
         displayName: "Print env in powershell"
       - powershell: get-command tar
         continueOnError: true
-        condition: and(eq(variables['AGENT.OS'], 'Windows_NT'), and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(), ne(variables['Build.SourceBranch'], variables['System.PullRequest.TargetBranch']))))
+        condition:
+          and(eq(variables['AGENT.OS'], 'Windows_NT'),
+          and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(),
+          ne(variables['Build.SourceBranch'],
+          variables['System.PullRequest.TargetBranch']))))
         displayName: "Print where tar is located"
       - powershell: tar --help
         continueOnError: true
-        condition: and(eq(variables['AGENT.OS'], 'Windows_NT'), and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(), ne(variables['Build.SourceBranch'], variables['System.PullRequest.TargetBranch']))))
+        condition:
+          and(eq(variables['AGENT.OS'], 'Windows_NT'),
+          and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(),
+          ne(variables['Build.SourceBranch'],
+          variables['System.PullRequest.TargetBranch']))))
         displayName: "Print tar help"
       - bash: |
           # COMPUTE THE ESY INSTALL CACHE LOCATION AHEAD OF TIME
@@ -122,12 +142,14 @@ jobs:
       - script: "yarn test"
         displayName: "Running vscode integration tests"
         env:
-          DISPLAY: ':99.0'
+          DISPLAY: ":99.0"
       - template: utils/publish-esy-cache.yml
 
       - task: PublishPipelineArtifact@1
-        displayName: 'Publishing the vsix file'
-        condition: and(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Agent.OS'], 'Darwin'))
+        displayName: "Publishing the vsix file"
+        condition:
+          and(eq(variables['Build.Reason'], 'IndividualCI'),
+          eq(variables['Agent.OS'], 'Darwin'))
         inputs:
-          path: '.'
-          artifact: 'extension'
+          path: "."
+          artifact: "extension"

@@ -38,14 +38,16 @@ jobs:
 
     steps:
       - task: DownloadBuildArtifacts@0
-        condition: and(eq(variables['Build.Reason'], 'IndividualCI'), succeeded())
-        displayName: 'Downloading extension'
+        condition:
+          and(eq(variables['Build.Reason'], 'IndividualCI'), succeeded())
+        displayName: "Downloading extension"
         inputs:
           artifactName: extension
-          downloadPath: '.'
+          downloadPath: "."
       - task: PublishBuildArtifacts@1
-        displayName: 'Publish Artifact: Release'
-        condition: and(succeeded(), eq(variables['Build.Reason'], 'IndividualCI'))
+        displayName: "Publish Artifact: Release"
+        condition:
+          and(succeeded(), eq(variables['Build.Reason'], 'IndividualCI'))
         inputs:
-          PathtoPublish: '.'
+          PathtoPublish: "."
           ArtifactName: release

@@ -1,9 +1,9 @@
 # Steps for publishing project cache
 
 steps:
-  - bash: 'mkdir -p $(Build.StagingDirectory)'
+  - bash: "mkdir -p $(Build.StagingDirectory)"
     condition: and(succeeded(), eq(variables['Build.Reason'], 'IndividualCI'))
-    displayName: '[Cache][Publish] Create cache directory'
+    displayName: "[Cache][Publish] Create cache directory"
 
   # continueOnError because on windows it has a permission denied error but the
   # export succeeds.
@@ -12,9 +12,11 @@ steps:
     condition: and(succeeded(), eq(variables['Build.Reason'], 'IndividualCI'))
     displayName: "esy export-dependencies"
 
-  - bash: pwd && ls _export/* && mv _export '$(Build.StagingDirectory)' && ls '$(Build.StagingDirectory)/_export/'
+  - bash:
+      pwd && ls _export/* && mv _export '$(Build.StagingDirectory)' && ls
+      '$(Build.StagingDirectory)/_export/'
     condition: and(succeeded(), eq(variables['Build.Reason'], 'IndividualCI'))
-    displayName: '[Cache][Publish] move export to staging dir'
+    displayName: "[Cache][Publish] move export to staging dir"
 
   # - bash: cd $ESY__CACHE_INSTALL_PATH && tar -czf $(Build.StagingDirectory)/esy-cache.tar .
   #   workingDirectory: ''
@@ -26,12 +28,12 @@ steps:
   #   displayName: '[Cache][Publish] Tar npm cache directory'
 
   - task: PublishBuildArtifacts@1
-    displayName: '[Cache][Publish] Upload tarball'
+    displayName: "[Cache][Publish] Upload tarball"
     condition: and(succeeded(), eq(variables['Build.Reason'], 'IndividualCI'))
     # TODO: The CI Build caches are pulled down by the last successful buildID
     # for the target branch.
     inputs:
-        pathToPublish: '$(Build.StagingDirectory)'
-        artifactName: 'cache-$(Agent.OS)-install'
-        parallel: true
-        parallelCount: 8
+      pathToPublish: "$(Build.StagingDirectory)"
+      artifactName: "cache-$(Agent.OS)-install"
+      parallel: true
+      parallelCount: 8

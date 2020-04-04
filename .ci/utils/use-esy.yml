@@ -2,5 +2,5 @@
 
 steps:
   # Ensure esy is able to pull in submodules (introduced in 0.6.0)
-- script: 'npm install -g esy --unsafe-perm'
-  displayName: 'npm install -g esy'
+  - script: "npm install -g esy --unsafe-perm"
+    displayName: "npm install -g esy"

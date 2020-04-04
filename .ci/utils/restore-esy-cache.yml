@@ -1,18 +1,24 @@
 # Steps for restoring project cache
 
 steps:
-  - bash: 'mkdir -p $(Build.StagingDirectory)'
-    condition: and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(), ne(variables['Build.SourceBranch'], variables['System.PullRequest.TargetBranch'])))
-    displayName: '[Cache][Publish] Create cache directory'
+  - bash: "mkdir -p $(Build.StagingDirectory)"
+    condition:
+      and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(),
+      ne(variables['Build.SourceBranch'],
+      variables['System.PullRequest.TargetBranch'])))
+    displayName: "[Cache][Publish] Create cache directory"
 
   # TODO: This can be done in parallel with installing node, and esy
   # (which would save a bunch of time on windows)
   - task: Bash@3
-    condition: and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(), ne(variables['Build.SourceBranch'], variables['System.PullRequest.TargetBranch'])))
-    displayName: '[Cache][Restore] Restoring build cache using REST API'
+    condition:
+      and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(),
+      ne(variables['Build.SourceBranch'],
+      variables['System.PullRequest.TargetBranch'])))
+    displayName: "[Cache][Restore] Restoring build cache using REST API"
     continueOnError: true
     inputs:
-      targetType: 'inline' # Optional. Options: filePath, inline
+      targetType: "inline" # Optional. Options: filePath, inline
       script: |
         # If org name is reasonml then REST_BASE will be: https://dev.azure.com/reasonml/
         REST_BASE="${SYSTEM_TEAMFOUNDATIONCOLLECTIONURI}"
@@ -86,14 +92,20 @@ steps:
         }
         fetchArtifactURL
         downloadArtifactAndContinue
-      
-  - bash: 'rm -rf _import'
-    continueOnError: true
-    condition: and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(), ne(variables['Build.SourceBranch'], variables['System.PullRequest.TargetBranch'])))
-    displayName: 'Remove import directory'
 
-  - bash: 'rm -rf *'
+  - bash: "rm -rf _import"
     continueOnError: true
-    workingDirectory: '$(Build.StagingDirectory)'
-    condition: and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(), ne(variables['Build.SourceBranch'], variables['System.PullRequest.TargetBranch'])))
-    displayName: '[Cache][Restore] Clean up staging dir'
+    condition:
+      and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(),
+      ne(variables['Build.SourceBranch'],
+      variables['System.PullRequest.TargetBranch'])))
+    displayName: "Remove import directory"
+
+  - bash: "rm -rf *"
+    continueOnError: true
+    workingDirectory: "$(Build.StagingDirectory)"
+    condition:
+      and(eq(variables['Build.Reason'], 'PullRequest'), and(succeeded(),
+      ne(variables['Build.SourceBranch'],
+      variables['System.PullRequest.TargetBranch'])))
+    displayName: "[Cache][Restore] Clean up staging dir"
