@@ -1,8 +1,5 @@
 {
   "name": "vscode-ocaml-platform",
-  "reason": {
-    "react-jsx": 3
-  },
   "sources": [
     {
       "subdirs": ["bindings"],
@@ -24,5 +21,4 @@
     "number": "-44-45-20",
     "error": "+101+8"
   },
-  "refmt": 3
 }
