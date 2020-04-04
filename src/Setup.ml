@@ -1,4 +1,5 @@
 open Import
+
 (* Why the are progress percentages hardcoded the way they are?
 
    Azure's REST API doesn't set the file size of the zip file in the headers.
@@ -45,7 +46,7 @@ module Bsb = struct
 
   let cacheFileName = "cache.zip"
 
-  let download url file ~progress ~end_ ~error ~data =
+  let download url (file : Path.t) ~progress ~end_ ~error ~data =
     let stream = RequestProgress.requestProgress (Request.request url) in
     RequestProgress.onProgress stream (fun state ->
         progress
@@ -53,14 +54,14 @@ module Bsb = struct
     RequestProgress.onData stream data;
     RequestProgress.onEnd stream end_;
     RequestProgress.onError stream error;
-    RequestProgress.pipe stream (Fs.createWriteStream file)
+    RequestProgress.pipe stream (Fs.createWriteStream (Path.toString file))
 
   let dropEsyJSON path = Fs.writeFile path Node.thisProjectsEsyJson
 
   let make () = makeEventEmitter ()
 
   let createEsyFolder ~esyRoot =
-    Fs.mkdir ~p:true esyRoot
+    Path.toString esyRoot |> Fs.mkdir ~p:true
     |> Promise.map (function
          | Error Fs.E.PathNotFound ->
            Error
@@ -68,12 +69,13 @@ module Bsb = struct
          | Ok () -> Ok ())
 
   let writeEsyJson ~esyRoot =
-    Filename.concat esyRoot "esy.json"
-    |> dropEsyJSON
+    Path.relative esyRoot "esy.json"
+    |> Path.toString |> dropEsyJSON
     |> Promise.map (fun () -> Ok ())
 
   let installDepsWithEsy ~esyRoot ~esyCmd =
-    Cmd.output esyCmd ~cwd:esyRoot ~args:[| "install"; "-P"; esyRoot |]
+    Cmd.output esyCmd ~cwd:esyRoot
+      ~args:[| "install"; "-P"; Path.toString esyRoot |]
     |> Promise.map (function
          | Error msg -> Error ("'esy install' failed. Reason: " ^ msg)
          | Ok _stdout -> Ok ())
@@ -95,7 +97,7 @@ module Bsb = struct
     let lastProgress = ref 0.0 in
     Promise.make (fun ~resolve ~reject:_ ->
         download url
-          (Path.join [| esyRoot; cacheFileName |])
+          (Path.relative esyRoot cacheFileName)
           ~progress:(fun progressFraction ->
             (* The cache restoration is assumed to take up 80%. More
                explanation at the top *)
@@ -121,7 +123,7 @@ module Bsb = struct
 
   let importDownloadedDependencies ~esyRoot ~esyCmd =
     Cmd.output esyCmd ~cwd:esyRoot
-      ~args:[| "import-dependencies"; "-P"; esyRoot |]
+      ~args:[| "import-dependencies"; "-P"; Path.toString esyRoot |]
     |> Promise.map (function
          | Error msg ->
            Error ("'esy import-dependencies' failed. Reason: " ^ msg)
@@ -130,14 +132,15 @@ module Bsb = struct
   let buildDependencies ~esyRoot ~esyCmd ~eventEmitter =
     reportProgress eventEmitter 99.99;
     (* See comment at the top explaining the 99.99 *)
-    Cmd.output esyCmd ~cwd:esyRoot ~args:[| "build"; "-P"; esyRoot |]
+    Cmd.output esyCmd ~cwd:esyRoot
+      ~args:[| "build"; "-P"; Path.toString esyRoot |]
     |> Promise.map (function
          | Error msg -> Error ("'esy build' failed. Reason: " ^ msg)
          | Ok _esyCmdOutput -> Ok ())
 
   let runSetupChain ~esyCmd ~envWithUnzip ~eventEmitter ~folder =
-    let esyRoot = Fpath.toString (hiddenEsyDir (Fpath.ofString folder)) in
-    Rimraf.run esyRoot
+    let esyRoot = hiddenEsyDir folder in
+    Rimraf.run (Path.toString esyRoot)
     |> Promise.then_ (function
          | Error () ->
            Error {j| Rimraf failed before the bsb toolchain setup: $esyRoot |j}
@@ -155,9 +158,9 @@ module Bsb = struct
            buildDependencies ~esyRoot ~esyCmd ~eventEmitter)
 
   let run esyCmd esyEnv eventEmitter projectPath =
-    let projectPath = Path.join [| projectPath; ".."; ".." |] in
-    let manifestPath = Path.join [| projectPath; "package.json" |] in
-    Fs.readFile manifestPath
+    let projectPath = Path.relative_all projectPath [ ".."; ".." ] in
+    let manifestPath = Path.relative projectPath "package.json" in
+    Path.toString manifestPath |> Fs.readFile
     |> Promise.then_ (fun manifest ->
            match Json.parse manifest with
            | Some json -> (
@@ -168,7 +171,7 @@ module Bsb = struct
                runSetupChain ~esyCmd ~envWithUnzip:esyEnv ~eventEmitter
                  ~folder:projectPath )
            | None ->
-             Error ("Failed to parse manifest at " ^ manifestPath)
+             Error ("Failed to parse manifest at " ^ Path.toString manifestPath)
              |> Promise.resolve)
     |> Promise.map (function
          | Error e -> reportError eventEmitter e

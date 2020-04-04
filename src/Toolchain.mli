@@ -18,17 +18,15 @@
 
 module PackageManager : sig
   type t =
-    | Opam of Fpath.t
-    | Esy of Fpath.t
+    | Opam of Path.t
+    | Esy of Path.t
     | Global
 end
 
 type resources
 
 val makeResources :
-     projectRoot:Fpath.t
-  -> PackageManager.t
-  -> (resources, string) result Promise.t
+  projectRoot:Path.t -> PackageManager.t -> (resources, string) result Promise.t
 
 (** [init] requires the process environment the plugin is
    being run in (ie VSCode's process environment) and the project
@@ -36,7 +34,7 @@ val makeResources :
    be passed on to runSetup that can be called to install the
    toolchain.
  *)
-val init : projectRoot:Fpath.t -> (resources, string) result Promise.t
+val init : projectRoot:Path.t -> (resources, string) result Promise.t
 
 (** [runSetup] is a effectful function that triggers setup instructions
    automatically for the user. At present, this functionality

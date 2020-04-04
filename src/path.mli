@@ -10,8 +10,12 @@ val compare : t -> t -> int
 
 val toString : t -> string
 
-val show : t -> string
+val extname : t -> string
 
 val ( / ) : t -> string -> t
+
+val relative : t -> string -> t
+
+val relative_all : t -> string list -> t
 
 val join : t -> t -> t

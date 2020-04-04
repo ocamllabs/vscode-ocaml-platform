@@ -1,13 +1,13 @@
 open Import
 
 type lookup =
-  | Esy of Fpath.t
-  | Opam of Fpath.t
+  | Esy of Path.t
+  | Opam of Path.t
 
 let parseFile projectRoot = function
   | "esy.json" -> Some (Esy projectRoot) |> Promise.resolve
   | "opam" ->
-    Fs.stat Fpath.(projectRoot / "opam" |> toString)
+    Fs.stat Path.(projectRoot / "opam" |> toString)
     |> Promise.map (function
          | Error _ -> None
          | Ok stats -> (
@@ -15,7 +15,7 @@ let parseFile projectRoot = function
            | true -> None
            | false -> Some (Opam projectRoot) ))
   | "package.json" ->
-    let manifestFile = Fpath.(projectRoot / "package.json") |> Fpath.show in
+    let manifestFile = Path.(projectRoot / "package.json") |> Path.toString in
     Fs.readFile manifestFile
     |> Promise.map (fun manifest ->
            match Json.parse manifest with
@@ -32,10 +32,10 @@ let parseFile projectRoot = function
              else
                None)
   | file -> (
-    let manifestFile = Fpath.(projectRoot / file) |> Fpath.show in
-    match Path.extname file with
+    let manifestFile = Path.(projectRoot / file) in
+    match Node.Path.extname file with
     | ".json" ->
-      Fs.readFile manifestFile
+      Fs.readFile (Path.toString manifestFile)
       |> Promise.map (fun manifest ->
              match Json.parse manifest with
              | Some json ->
@@ -51,8 +51,10 @@ let parseFile projectRoot = function
                  manifestFile;
                None)
     | ".opam" ->
-      Fs.readFile manifestFile
+      Fs.readFile (Path.toString manifestFile)
       |> Promise.map (function
+           (* TODO this is wrong. we shouldn't be assuming anything based on the
+              contents of the opam file *)
            | "" -> None
            | _ -> Some (Opam projectRoot))
     | _ -> None |> Promise.resolve )
@@ -68,7 +70,7 @@ let foldResults results =
   |> Array.to_list
 
 let lookup projectRoot =
-  Fs.readDir (Fpath.toString projectRoot)
+  Fs.readDir (Path.toString projectRoot)
   |> Promise.Result.bind (fun files ->
          files
          |> Js.Array.map (parseFile projectRoot)
