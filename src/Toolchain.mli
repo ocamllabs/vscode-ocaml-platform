@@ -16,7 +16,19 @@
    user to install missing tools etc). Having a single [Toolchain.make()], for
    instance, would not make it this flexible. *)
 
+module PackageManager : sig
+  type t =
+    | Opam of Fpath.t
+    | Esy of Fpath.t
+    | Global
+end
+
 type resources
+
+val makeResources :
+     projectRoot:Fpath.t
+  -> PackageManager.t
+  -> (resources, string) result Promise.t
 
 (** [init] requires the process environment the plugin is
    being run in (ie VSCode's process environment) and the project

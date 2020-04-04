@@ -125,13 +125,13 @@ type resources =
   ; projectRoot : Fpath.t
   }
 
-let makeResources ~kind ~projectRoot =
+let makeResources ~projectRoot kind =
   Cmd.make ~cmd:(PackageManager.toCmdString kind) ()
   |> Promise.Result.map (fun cmd -> { cmd; kind; projectRoot })
 
 let ofPackageManagerName ~name ~projectRoot ~toolchainRoot =
   match PackageManager.ofName ~root:toolchainRoot name with
-  | Some kind -> makeResources ~kind ~projectRoot
+  | Some kind -> makeResources kind ~projectRoot
   | None -> Error ("Invalid package manager name: " ^ name) |> Promise.resolve
 
 let parseOpamEnvOutput (opamEnvOutput : string) =
@@ -219,8 +219,7 @@ let init ~projectRoot =
   Promise.all2
     ( supportedPackageManagers ~root:projectRoot
     , Manifest.lookup projectRoot
-      |> Promise.Result.bind (fun r ->
-             packageManagersListOfLookup r |> Promise.resolve) )
+      |> Promise.map (Result.bind ~f:packageManagersListOfLookup) )
   |> Promise.then_ (fun (supportedPackageManagers, detectedPackageManagers) ->
          let supportedPackageManagers =
            packageManagerSetOfResultList ~debugMsg:"supported package managers"
@@ -239,7 +238,7 @@ let init ~projectRoot =
            Js.Console.info "Will lookup toolchain from global env";
            let global = "global" in
            match PackageManager.ofName ~root:projectRoot global with
-           | Some kind -> makeResources ~kind ~projectRoot
+           | Some kind -> makeResources kind ~projectRoot
            | None ->
              Error
                {j| Unexplained exception: PackageManager.ofName returned None for a valid name $global |j}
@@ -247,7 +246,7 @@ let init ~projectRoot =
          | [ packageManager ] ->
            Js.Console.info2 "Toolchain detected"
              (PackageManager.toString packageManager);
-           makeResources ~kind:packageManager ~projectRoot
+           makeResources packageManager ~projectRoot
          | packageManagers -> (
            let config = Vscode.Workspace.getConfiguration "ocaml" in
            match
@@ -264,7 +263,7 @@ let init ~projectRoot =
              selectPackageManager ~config packageManagers
              |> Promise.then_ (function
                   | Error e -> Error e |> Promise.resolve
-                  | Ok pm -> makeResources ~kind:pm ~projectRoot) ))
+                  | Ok pm -> makeResources pm ~projectRoot) ))
 
 let promptSetup fn =
   Window.showQuickPick [| "yes"; "no" |]
