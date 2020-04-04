@@ -1,4 +1,6 @@
-open Bindings
+open Import
+
+module Https = Node.Https
 
 module RestResponse = struct
   type buildIdObject = { id : int }

@@ -1,6 +1,4 @@
-open Utils
-open Bindings
-
+open Import
 (* Why the are progress percentages hardcoded the way they are?
 
    Azure's REST API doesn't set the file size of the zip file in the headers.
@@ -39,13 +37,15 @@ module Internal = struct
   let reportError t errorMsg = reportError' t "error" errorMsg
 end
 
+module RequestProgress = Node.RequestProgress
+module Request = Node.Request
+
 module Bsb = struct
   include Internal
 
   let cacheFileName = "cache.zip"
 
   let download url file ~progress ~end_ ~error ~data =
-    let open Bindings in
     let stream = RequestProgress.requestProgress (Request.request url) in
     RequestProgress.onProgress stream (fun state ->
         progress
@@ -55,7 +55,7 @@ module Bsb = struct
     RequestProgress.onError stream error;
     RequestProgress.pipe stream (Fs.createWriteStream file)
 
-  let dropEsyJSON path = Bindings.Fs.writeFile path Bindings.thisProjectsEsyJson
+  let dropEsyJSON path = Fs.writeFile path Node.thisProjectsEsyJson
 
   let make () = makeEventEmitter ()
 
@@ -136,7 +136,6 @@ module Bsb = struct
          | Ok _esyCmdOutput -> Ok ())
 
   let runSetupChain ~esyCmd ~envWithUnzip ~eventEmitter ~folder =
-    let open Bindings in
     let esyRoot = Fpath.toString (hiddenEsyDir (Fpath.ofString folder)) in
     Rimraf.run esyRoot
     |> Promise.then_ (function

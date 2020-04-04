@@ -1,20 +1,11 @@
-module Rimraf : sig
-  type t
+type t
 
-  (* Bindinds for https://www.npmjs.com/package/rimraf. rimraf is a
-     cross-platform utility library to delete a directory and all its contens *)
+external run' : string -> ('a Js.Nullable.t -> unit) -> unit = "rimraf"
+[@@bs.module]
 
-  val run : string -> (unit, unit) result Promise.t
-end = struct
-  type t
-
-  external run' : string -> ('a Js.Nullable.t -> unit) -> unit = "rimraf"
-    [@@bs.module]
-
-  let run p =
-    Promise.make (fun ~resolve ~reject:_ ->
-        run' p (fun err ->
-            match Js.Nullable.toOption err with
-            | Some _ -> ( resolve (Error ()) [@bs] )
-            | None -> ( resolve (Ok ()) [@bs] )))
-end
+let run p =
+  Promise.make (fun ~resolve ~reject:_ ->
+      run' p (fun err ->
+          match Js.Nullable.toOption err with
+          | Some _ -> ( resolve (Error ()) [@bs] )
+          | None -> ( resolve (Ok ()) [@bs] )))

@@ -1,5 +1,8 @@
 include Vscode
 module Process = Node.Process
+module ChildProcess = Node.ChildProcess
+module Fs = Node.Fs
+module Path = Node.Path (* why do we have 2 path modules *)
 
 let envSep =
   match Sys.unix with

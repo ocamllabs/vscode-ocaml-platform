@@ -60,10 +60,19 @@ module Window : sig
     val make : ?canPickMany:bool -> ?placeHolder:string -> unit -> t
   end
 
+  module MessageItem : sig
+    type t
+
+    val create : title:string -> t
+  end
+
   val showQuickPick :
     string array -> QuickPickOptions.t -> string option Promise.t
 
   val showInformationMessage : string -> unit
+
+  val showInformationMessage' :
+    string -> (MessageItem.t * 'a) list -> 'a option Promise.t
 
   val showErrorMessage : string -> 'a Promise.t
 

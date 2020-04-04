@@ -68,6 +68,14 @@ module Window = struct
       [@@bs.obj]
   end
 
+  module MessageItem = struct
+    type t = < title : string > Js.t
+
+    let create ~title : t =
+      ignore title;
+      assert false
+  end
+
   external showQuickPick' :
     string array -> QuickPickOptions.t -> string Js.Nullable.t Promise.t
     = "showQuickPick"
@@ -80,26 +88,28 @@ module Window = struct
   external showInformationMessage : string -> unit = "showInformationMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 
+  let showInformationMessage' _msg _choices = Promise.resolve None
+
   external showErrorMessage : string -> 'a Promise.t = "showErrorMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 
-  type activeTextEditor = { document : document }
+  type rangeEdge = { character : int }
 
-  and document =
+  type range =
+    { start : rangeEdge
+    ; end_ : rangeEdge [@bs.as "end"]
+    }
+
+  type line = { range : range }
+
+  type document =
     { getText : unit -> string
     ; lineAt : int -> line
     ; lineCount : int
     ; fileName : string
     }
 
-  and line = { range : range }
-
-  and range =
-    { start : rangeEdge
-    ; end_ : rangeEdge [@bs.as "end"]
-    }
-
-  and rangeEdge = { character : int }
+  type activeTextEditor = { document : document }
 
   external activeTextEditor : activeTextEditor option = "activeTextEditor"
     [@@bs.module "vscode"] [@@bs.scope "window"] [@@bs.val]

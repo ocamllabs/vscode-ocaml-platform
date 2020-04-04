@@ -1,5 +1,4 @@
-open Utils
-open Bindings
+open Import
 
 type lookup =
   | Esy of Fpath.t
@@ -23,10 +22,10 @@ let parseFile projectRoot = function
            | None -> None
            | Some json ->
              if
-               Utils.propertyExists json "dependencies"
-               || Utils.propertyExists json "devDependencies"
+               propertyExists json "dependencies"
+               || propertyExists json "devDependencies"
              then
-               if Utils.propertyExists json "esy" then
+               if propertyExists json "esy" then
                  Some (Esy projectRoot)
                else
                  Some (Esy (hiddenEsyDir projectRoot))
@@ -41,8 +40,8 @@ let parseFile projectRoot = function
              match Json.parse manifest with
              | Some json ->
                if
-                 Utils.propertyExists json "dependencies"
-                 || Utils.propertyExists json "devDependencies"
+                 propertyExists json "dependencies"
+                 || propertyExists json "devDependencies"
                then
                  Some (Esy projectRoot)
                else

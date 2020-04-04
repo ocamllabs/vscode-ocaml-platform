@@ -1,4 +1,4 @@
-open Bindings
+open Import
 
 let handleError f =
   Promise.then_ (function
@@ -38,5 +38,5 @@ let activate _context =
                 Promise.resolve (Ok ())))
   |> handleError Window.showErrorMessage
   |> Promise.catch (fun e ->
-         let message = Bindings.JsError.ofPromiseError e in
+         let message = Node.JsError.ofPromiseError e in
          Window.showErrorMessage {j|Error: $message|j})

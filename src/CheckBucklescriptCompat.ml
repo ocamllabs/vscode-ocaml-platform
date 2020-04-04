@@ -1,4 +1,4 @@
-open Utils
+open Import
 
 let processDeps dependencies =
   match Js.Dict.get dependencies "bs-platform" with
