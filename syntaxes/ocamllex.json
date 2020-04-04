@@ -36,7 +36,7 @@
   ],
   "repository": {
     "rules": {
-      "match": "\\b(rule|and)\\s+([a-z][a-zA-Z0-9_]*)\\b",
+      "match": "\\b(rule|and)\\s+([a-z][a-zA-Z0-9_']*('|\\b))",
       "captures": {
         "1": {
           "name": "keyword.other.ocamllex"
@@ -100,7 +100,7 @@
         {
           "comment": "reference to regex pattern",
           "name": "entity.name.type.reference.ocamllex",
-          "match": "[a-z][a-zA-Z0-9'_]*"
+          "match": "\\b[a-zA-Z][a-zA-Z0-9'_]*('|\\b)"
         }
       ]
     }
