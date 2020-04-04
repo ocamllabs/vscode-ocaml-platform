@@ -4,12 +4,13 @@
     { "open": "[", "close": "]" },
     { "open": "(", "close": ")" },
     { "open": "\"", "close": "\"", "notIn": ["string"] },
-    { "open": "(**", "close": " *)", "notIn": ["string"] }
+    { "open": "(*", "close": "*", "notIn": ["string"] }
   ],
   "brackets": [
     ["{", "}"],
     ["[", "]"],
-    ["(", ")"]
+    ["(", ")"],
+    ["[|", "|]"]
   ],
   "comments": {
     "blockComment": ["(*", "*)"]
@@ -20,5 +21,10 @@
     ["(", ")"],
     ["'", "'"],
     ["\"", "\""]
-  ]
+  ],
+  "indentationRules": {
+    "decreaseIndentPattern": "^\\s*(end|done|with|in|else)\\b|^\\s*;;|^[^\\(\"]*\\)",
+    "increaseIndentPattern": "^.*(\\([^)\"\\n]*|begin)$|\\bobject\\s*$|\\blet [a-zA-Z0-9_-]+( [^ ]+)+ =\\s*$|method!?[ \\t]+.*=[ \\t]*$|->[ \\t]*$|\\b(for|while)(_lwt)?[ \\t]+.*[ \\t]+do[ \\t]*$|(\\btry(_lwt)?$|\\bif\\s+.*\\sthen$|\\belse|[:=]\\s*sig|=\\s*struct)\\s*$",
+    "indentNextLinePattern": "(?!\\bif.*then.*(else.*|(;|[ \\t]in)[ \\t]*$))\\bif|\\bthen[ \\t]*$|\\belse[ \\t]*$$"
+  }
 }

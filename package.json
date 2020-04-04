@@ -3,7 +3,7 @@
   "displayName": "OCaml Platform",
   "description": "Official OCaml Support from OCamlLabs",
   "license": "MIT",
-  "version": "0.3.0-dev",
+  "version": "0.4.0",
   "publisher": "ocamllabs",
   "repository": {
     "type": "git",
@@ -15,7 +15,7 @@
   "homepage": "https://github.com/ocamllabs/vscode-ocaml-platform",
   "main": "./dist/extension.js",
   "engines": {
-    "vscode": "^1.40.0"
+    "vscode": "^1.43.0"
   },
   "categories": [
     "Programming Languages"
@@ -155,7 +155,21 @@
         ],
         "extensions": [
           ".mll"
-        ]
+        ],
+        "configuration": "./languages/ocamllex.json"
+      },
+      {
+        "id": "ocaml.menhir",
+        "aliases": [
+          "Menhir",
+          "menhir",
+          "OCamlyacc",
+          "ocamlyacc"
+        ],
+        "extensions": [
+          ".mly"
+        ],
+        "configuration": "./languages/menhir.json"
       },
       {
         "id": "reason",
@@ -202,6 +216,16 @@
         "path": "./syntaxes/ocamlbuild.json"
       },
       {
+        "language": "ocaml.ocamllex",
+        "scopeName": "source.ocaml.ocamllex",
+        "path": "./syntaxes/ocamllex.json"
+      },
+      {
+        "language": "ocaml.menhir",
+        "scopeName": "source.ocaml.menhir",
+        "path": "./syntaxes/menhir.json"
+      },
+      {
         "language": "ocaml.opam",
         "scopeName": "source.ocaml.opam",
         "path": "./syntaxes/opam.json"
@@ -226,6 +250,10 @@
       {
         "language": "ocaml",
         "path": "./snippets/ocaml.json"
+      },
+      {
+        "language": "ocaml.ocamllex",
+        "path": "./snippets/ocamllex.json"
       }
     ]
   },
@@ -242,11 +270,11 @@
     "test:unit": "yarn run build:bsb && jest src/",
     "test:opam": "node ./test/runOpamTests.js",
     "test": "yarn run test:unit && yarn run test:opam ",
-    "fmt:refmt": "find ./src ./fixtures ./__tests__ -type f -name \"*.re\" | xargs bsrefmt --in-place",
-    "fmt:prettier": "prettier --write \"**/*.{json,md,ts,yml}\"",
-    "fmt": "yarn run fmt:refmt; yarn run fmt:prettier",
     "vscode:prepublish": "yarn run build",
-    "package": "vsce package"
+    "package": "vsce package --yarn",
+    "lint": "eslint \"**/*.ts\" --cache",
+    "fmt:check": "prettier --check .",
+    "fmt": "prettier --write ."
   },
   "dependencies": {
     "request": "^2.88.0",
@@ -254,7 +282,7 @@
     "rimraf": "^3.0.0",
     "semver": "^6.3.0",
     "uuid": "^3.3.3",
-    "vscode-languageclient": "^5.2.1"
+    "vscode-languageclient": "6.1.3"
   },
   "devDependencies": {
     "@glennsl/bs-jest": "^0.4.9",

@@ -1,0 +1,46 @@
+name: Main workflow
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+        node-version:
+          - 12.x
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2.1.0
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1.4.1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install packages
+        run: yarn --frozen-lockfile
+
+      - name: Check formatting
+        run: yarn fmt:check
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Build
+        run: yarn package
+
+      - name: Upload extension installer to artifact
+        uses: actions/upload-artifact@v2-preview
+        with:
+          name: ocaml-platform-${{ matrix.os }}-${{ github.sha }}
+          path: ocaml-platform-*.vsix
