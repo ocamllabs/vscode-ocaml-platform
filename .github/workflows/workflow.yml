@@ -28,7 +28,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install packages
-        run: yarn --frozen-lockfile
+        # We need --production=false to install the bsb toolkit
+        run: yarn --frozen-lockfile --production=false
 
       - name: Check formatting
         run: yarn fmt:check
