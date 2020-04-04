@@ -1,0 +1,37 @@
+{
+  "name": "vscode-ocaml-platform",
+  "sources": [
+    {
+      "subdirs": ["bindings"],
+      "dir": "src",
+      "generators": [
+        {
+          "name": "lex",
+          "edge": ["sexp.ml", ":", "sexp.mll"]
+        }
+      ]
+    },
+    {
+      "dir": "src/__tests__",
+      "type": "dev"
+    }
+  ],
+  "package-specs": {
+    "module": "commonjs",
+    "in-source": true
+  },
+  "suffix": ".bs.js",
+  "bs-dependencies": ["@glennsl/bs-json"],
+  "bs-dev-dependencies": ["@glennsl/bs-jest"],
+  "warnings": {
+    "number": "-44-45-20",
+    "error": "+101+8"
+  },
+  "generators": [
+    {
+      "name": "lex",
+      "command": "ocamllex $in"
+    }
+  ],
+  "cut-generators": true
+}
