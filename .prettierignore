@@ -1,2 +1,6 @@
 node_modules/
 out/
+_esy/
+lib/
+dist/
+esy.lock/
