@@ -28,13 +28,14 @@ type resources
 val makeResources :
   projectRoot:Path.t -> PackageManager.t -> (resources, string) result Promise.t
 
-(** [init] requires the process environment the plugin is
+(** [select] requires the process environment the plugin is
    being run in (ie VSCode's process environment) and the project
    root and produces a promise of resources available that can later
    be passed on to runSetup that can be called to install the
    toolchain.
  *)
-val init : projectRoot:Path.t -> (resources, string) result Promise.t
+
+val select : projectRoot:Path.t -> (resources option, string) result Promise.t
 
 (** [runSetup] is a effectful function that triggers setup instructions
    automatically for the user. At present, this functionality

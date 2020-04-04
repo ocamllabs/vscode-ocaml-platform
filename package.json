@@ -26,6 +26,13 @@
   ],
   "icon": "assets/logo.png",
   "contributes": {
+    "commands": [
+      {
+        "command": "ocaml.select-sandbox",
+        "category": "OCaml",
+        "title": "Select sandbox for this workspace"
+      }
+    ],
     "configuration": {
       "title": "OCaml configuration",
       "properties": {

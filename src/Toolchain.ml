@@ -1,5 +1,4 @@
 open Import
-module WorkspaceCfg = Vscode.WorkspaceConfiguration
 
 module Binaries = struct
   let esy = "esy"
@@ -204,18 +203,17 @@ let selectPackageManager ~config choices =
   |> Window.showQuickPick
        (choices |> List.map PackageManager.toName |> Array.of_list)
   |> Promise.then_ (function
-       | None ->
-         Window.showInformationMessage "Defaulting to the global toolchain";
-         Promise.Result.return PackageManager.Global
+       | None -> Promise.Result.return None
        | Some packageManagerName ->
-         WorkspaceCfg.configurationTargetToJs Workspace
-         |> WorkspaceCfg.update config "packageManager" packageManagerName
+         WorkspaceConfiguration.configurationTargetToJs Workspace
+         |> WorkspaceConfiguration.update config "packageManager"
+              packageManagerName
          |> Promise.map (fun _ ->
                 match PackageManager.findByName packageManagerName choices with
                 | None -> Error "Selected choice was not found in the list"
-                | Some pm -> Ok pm))
+                | Some pm -> Ok (Some pm)))
 
-let init ~projectRoot =
+let select ~projectRoot =
   Promise.all2
     ( supportedPackageManagers ~root:projectRoot
     , Manifest.lookup projectRoot
@@ -238,7 +236,9 @@ let init ~projectRoot =
            Js.Console.info "Will lookup toolchain from global env";
            let global = "global" in
            match PackageManager.ofName ~root:projectRoot global with
-           | Some kind -> makeResources kind ~projectRoot
+           | Some kind ->
+             makeResources kind ~projectRoot
+             |> Promise.Result.map (fun x -> Some x)
            | None ->
              Error
                {j| Unexplained exception: PackageManager.ofName returned None for a valid name $global |j}
@@ -247,6 +247,7 @@ let init ~projectRoot =
            Js.Console.info2 "Toolchain detected"
              (PackageManager.toString packageManager);
            makeResources packageManager ~projectRoot
+           |> Promise.Result.map (fun x -> Some x)
          | packageManagers -> (
            let config = Vscode.Workspace.getConfiguration "ocaml" in
            match
@@ -256,14 +257,18 @@ let init ~projectRoot =
            | Some name, Some root ->
              ofPackageManagerName ~name ~projectRoot
                ~toolchainRoot:(Path.ofString root)
+             |> Promise.Result.map (fun x -> Some x)
            | Some name, None ->
              ofPackageManagerName ~name ~toolchainRoot:projectRoot ~projectRoot
+             |> Promise.Result.map (fun x -> Some x)
            | None, Some _
            | None, None ->
              selectPackageManager ~config packageManagers
-             |> Promise.then_ (function
-                  | Error e -> Error e |> Promise.resolve
-                  | Ok pm -> makeResources pm ~projectRoot) ))
+             |> Promise.Result.bind (function
+                  | None -> Promise.Result.return None
+                  | Some pm ->
+                    makeResources pm ~projectRoot
+                    |> Promise.Result.map (fun s -> Some s)) ))
 
 let promptSetup fn =
   Window.showQuickPick [| "yes"; "no" |]

@@ -21,21 +21,53 @@ module Server = struct
     { command; args; options = { env = Process.env } }
 end
 
+module Instance = struct
+  type t = LanguageClient.t option ref
+
+  let create () = ref None
+
+  let stop t =
+    match !t with
+    | None -> ()
+    | Some (client : LanguageClient.t) ->
+      (client.stop () [@bs]);
+      t := None
+
+  let start t toolchain =
+    let open Promise.Result.O in
+    Toolchain.runSetup toolchain >>| fun () ->
+    let serverOptions = Server.make toolchain in
+    let client =
+      LanguageClient.make ~id:"ocaml" ~name:"OCaml Language Server"
+        ~serverOptions ~clientOptions:(Client.make ())
+    in
+    t := Some client;
+    (client.start () [@bs])
+end
+
+let workspaceRoot () = Path.ofString Workspace.rootPath
+
+let selectSandbox (instance : Instance.t) () =
+  let setToolchain =
+    let open Promise.Result.O in
+    Toolchain.select ~projectRoot:(workspaceRoot ()) >>= function
+    | None -> Promise.Result.return ()
+    | Some t ->
+      Instance.stop instance;
+      Instance.start instance t
+  in
+  let (_ : unit Promise.t) = handleError Window.showErrorMessage setToolchain in
+  ()
+
 let activate _context =
   Js.Dict.set Process.env "OCAMLRUNPARAM" "b";
   Js.Dict.set Process.env "OCAML_LSP_SERVER_LOG" "-";
-  let projectRoot = Path.ofString Workspace.rootPath in
+  let instance = Instance.create () in
+  Vscode.Commands.register ~command:"ocaml.select-sandbox"
+    ~handler:(selectSandbox instance);
+  let projectRoot = workspaceRoot () in
   Toolchain.makeResources ~projectRoot Global
-  |> Promise.Result.bind (fun toolchain ->
-         Toolchain.runSetup toolchain
-         |> Promise.Result.bind (fun () ->
-                let serverOptions = Server.make toolchain in
-                let client =
-                  LanguageClient.make ~id:"ocaml" ~name:"OCaml Language Server"
-                    ~serverOptions ~clientOptions:(Client.make ())
-                in
-                (client.start () [@bs]);
-                Promise.resolve (Ok ())))
+  |> Promise.Result.bind (Instance.start instance)
   |> handleError Window.showErrorMessage
   |> Promise.catch (fun e ->
          let message = Node.JsError.ofPromiseError e in
