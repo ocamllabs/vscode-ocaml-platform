@@ -19,5 +19,5 @@ module.exports = {
   write,
   close,
   thisProjectsEsyJson,
-  unlink
+  unlink,
 };

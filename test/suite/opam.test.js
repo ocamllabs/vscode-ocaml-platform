@@ -21,7 +21,7 @@ suite("Basic tests", () => {
     fs.copySync(sampleOpamSrc, projectPath);
     cp.execSync(`mkdir -p ${opamRoot}`);
     cp.execSync(`sh -c 'opam install . --deps-only --yes > /dev/null'`, {
-      cwd: projectPath
+      cwd: projectPath,
     }).toString();
     projectUri = Uri.file(projectPath);
     await vscode.commands.executeCommand("vscode.openFolder", projectUri);

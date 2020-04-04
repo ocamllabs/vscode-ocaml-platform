@@ -11,14 +11,14 @@ module.exports = (_env, argv) => {
     output: {
       libraryTarget: "commonjs",
       path: path.resolve(__dirname, "dist"),
-      filename: "extension.js"
+      filename: "extension.js",
     },
     devtool: isProduction ? false : "source-map",
     externals: {
-      vscode: "commonjs vscode"
+      vscode: "commonjs vscode",
     },
     resolve: {
-      extensions: [".js"]
-    }
+      extensions: [".js"],
+    },
   };
 };

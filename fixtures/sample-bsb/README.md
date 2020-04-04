@@ -1,2 +1,1 @@
-
-  # bs-foo-latest
+# bs-foo-latest

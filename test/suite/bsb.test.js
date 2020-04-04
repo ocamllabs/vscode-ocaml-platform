@@ -40,7 +40,7 @@ suite("Basic tests", () => {
     );
 
     function delay(timeout) {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         setTimeout(resolve, timeout);
       });
     }
