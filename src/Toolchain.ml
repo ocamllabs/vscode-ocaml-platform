@@ -133,24 +133,6 @@ let ofPackageManagerName ~name ~projectRoot ~toolchainRoot =
   | Some kind -> makeResources kind ~projectRoot
   | None -> Error ("Invalid package manager name: " ^ name) |> Promise.resolve
 
-let parseOpamEnvOutput (opamEnvOutput : string) =
-  let error message =
-    Error ("invalid opam output: " ^ message ^ "\n" ^ opamEnvOutput)
-  in
-  match Sexp.parse_string opamEnvOutput with
-  | Error s -> error s
-  | Ok (Sexp.Atom a) -> error ("unexpected atom " ^ a)
-  | Ok (Sexp.List s) -> (
-    match
-      List.map
-        (function
-          | Sexp.List [ Sexp.Atom key; Atom value ] -> (key, value)
-          | _ -> raise Exit)
-        s
-    with
-    | exception Exit -> error "unable to parse key value list"
-    | kvs -> Ok (Js.Dict.fromList kvs) )
-
 let env ~cmd ~kind =
   match kind with
   | PackageManager.Global -> Ok Process.env |> Promise.resolve
@@ -165,9 +147,7 @@ let env ~cmd ~kind =
                 json |> Json.Decode.dict Json.Decode.string |> Result.return
               | None ->
                 Error ("'esy command-env' returned non-json output: " ^ stdout)))
-  | Opam root ->
-    Cmd.output cmd ~args:[| "env"; "--sexp" |] ~cwd:root
-    |> Promise.map (Result.bind ~f:parseOpamEnvOutput)
+  | Opam root -> Opam.env ~cwd:root ~cmd ()
 
 let supportedPackageManagers ~root =
   let supportedPackageManagers =

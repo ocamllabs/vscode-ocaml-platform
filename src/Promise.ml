@@ -11,6 +11,7 @@ module O = struct
 end
 
 module Result = struct
+
   let bind fn promise =
     let open Js.Promise in
     promise

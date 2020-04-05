@@ -54,3 +54,7 @@ module List = struct
       | None -> find_map xs ~f
       | Some _ as e -> e )
 end
+
+module Or_error = struct
+  type 'a t = ('a, string) result
+end
