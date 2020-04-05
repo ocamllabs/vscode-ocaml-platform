@@ -2,7 +2,6 @@ include Vscode
 module Process = Node.Process
 module ChildProcess = Node.ChildProcess
 module Fs = Node.Fs
-module Path = Node.Path (* why do we have 2 path modules *)
 
 let envSep =
   match Sys.unix with
@@ -28,7 +27,7 @@ let mergeDicts dict1 dict2 =
   Js.Dict.fromArray
     (Js.Array.concat (Js.Dict.entries dict1) (Js.Dict.entries dict2))
 
-let hiddenEsyDir root = Fpath.(root / ".vscode" / "esy")
+let hiddenEsyDir root = Path.(root / ".vscode" / "esy")
 
 module Result = struct
   open Belt.Result

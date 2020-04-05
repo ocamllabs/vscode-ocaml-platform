@@ -40,6 +40,7 @@ let make ?(env = Process.env) ~cmd () =
 let output ~args ~cwd { cmd; env } =
   let shellString = Js.Array.concat args [| cmd |] |> Js.Array.joinWith " " in
   Js.Console.info shellString;
+  let cwd = Path.toString cwd in
   ChildProcess.exec shellString (ChildProcess.Options.make ~cwd ~env ())
   |> Promise.map (function
        | Error e -> Error e

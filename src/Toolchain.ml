@@ -11,7 +11,7 @@ end
    - PackageManager: represents supported package managers
      with Global as the fallback
    - projectRoot is different from PackageManager root (Eg. Opam
-     (Fpath.ofString "/foo/bar")). Project root
+     (Path.ofString "/foo/bar")). Project root
      is the directory where manifest file (opam/esy.json/package.json)
      was found. PackageManager root is the directory that contains the
      manifest file responsible for setting up the toolchain - the two
@@ -24,13 +24,13 @@ end
 module PackageManager : sig
   (** Represents a given package manager that would install the toolchain *)
   type t =
-    | Opam of Fpath.t
-    | Esy of Fpath.t
+    | Opam of Path.t
+    | Esy of Path.t
     | Global
 
   val toName : t -> string
 
-  val ofName : root:Fpath.t -> string -> t option
+  val ofName : root:Path.t -> string -> t option
 
   (** Converts to a readable string representation (useful for loggers etc) *)
   val toString : t -> string
@@ -47,13 +47,13 @@ module PackageManager : sig
       this behaviour evident *)
   val findByName : string -> t list -> t option
 
-  val makeEsy : Fpath.t -> t
+  val makeEsy : Path.t -> t
 
-  val makeOpam : Fpath.t -> t
+  val makeOpam : Path.t -> t
 end = struct
   type t =
-    | Opam of Fpath.t
-    | Esy of Fpath.t
+    | Opam of Path.t
+    | Esy of Path.t
     | Global
 
   let toName = function
@@ -68,8 +68,8 @@ end = struct
     | _ -> None
 
   let toString = function
-    | Esy root -> Printf.sprintf "esy(%s)" (Fpath.toString root)
-    | Opam root -> Printf.sprintf "opam(%s)" (Fpath.toString root)
+    | Esy root -> Printf.sprintf "esy(%s)" (Path.toString root)
+    | Opam root -> Printf.sprintf "opam(%s)" (Path.toString root)
     | Global -> "global"
 
   let toCmdString = function
@@ -79,8 +79,8 @@ end = struct
 
   let compare x y =
     match (x, y) with
-    | Esy root1, Esy root2 -> Fpath.compare root1 root2
-    | Opam root1, Opam root2 -> Fpath.compare root1 root2
+    | Esy root1, Esy root2 -> Path.compare root1 root2
+    | Opam root1, Opam root2 -> Path.compare root1 root2
     | Global, Global -> 0
     | Opam _, Esy _ -> -1
     | Esy _, Opam _ -> 1
@@ -122,7 +122,7 @@ let packageManagerSetOfResultList ~debugMsg lst =
 type resources =
   { cmd : Cmd.t
   ; kind : PackageManager.t
-  ; projectRoot : Fpath.t
+  ; projectRoot : Path.t
   }
 
 let makeResources ~projectRoot kind =
@@ -157,8 +157,8 @@ let env ~cmd ~kind =
   | PackageManager.Global -> Ok Process.env |> Promise.resolve
   | Esy root ->
     Cmd.output cmd
-      ~args:[| "command-env"; "--json"; "-P"; Fpath.toString root |]
-      ~cwd:(Fpath.toString root)
+      ~args:[| "command-env"; "--json"; "-P"; Path.toString root |]
+      ~cwd:root
     |> Promise.map
          (Result.bind ~f:(fun stdout ->
               match Json.parse stdout with
@@ -167,7 +167,7 @@ let env ~cmd ~kind =
               | None ->
                 Error ("'esy command-env' returned non-json output: " ^ stdout)))
   | Opam root ->
-    Cmd.output cmd ~args:[| "env"; "--sexp" |] ~cwd:(Fpath.toString root)
+    Cmd.output cmd ~args:[| "env"; "--sexp" |] ~cwd:root
     |> Promise.map (Result.bind ~f:parseOpamEnvOutput)
 
 let supportedPackageManagers ~root =
@@ -255,7 +255,7 @@ let init ~projectRoot =
            with
            | Some name, Some root ->
              ofPackageManagerName ~name ~projectRoot
-               ~toolchainRoot:(Fpath.ofString root)
+               ~toolchainRoot:(Path.ofString root)
            | Some name, None ->
              ofPackageManagerName ~name ~toolchainRoot:projectRoot ~projectRoot
            | None, Some _
@@ -286,7 +286,7 @@ let setupWithProgressIndicator fn =
 let setupEsy ~cmd ~root =
   setupWithProgressIndicator (fun progress ->
       (progress.report [%bs.obj { increment = int_of_float 1. }] [@bs]);
-      Cmd.output cmd ~cwd:(root |> Fpath.toString) ~args:[||]
+      Cmd.output cmd ~cwd:root ~args:[||]
       |> Promise.map (fun _ ->
              (progress.report [%bs.obj { increment = int_of_float 100. }] [@bs]);
              Ok ()))
@@ -312,8 +312,8 @@ type esyProjectState =
   | PendingBsb
 
 let esyProjectState ~cmd ~root ~projectRoot =
-  let rootStr = Fpath.toString root in
-  Cmd.output cmd ~args:[| "status"; "-P"; rootStr |] ~cwd:rootStr
+  let rootStr = Path.toString root in
+  Cmd.output cmd ~args:[| "status"; "-P"; rootStr |] ~cwd:root
   |> Promise.map (function
        | Error _ -> Ok false
        | Ok esyOutput -> (
@@ -326,7 +326,7 @@ let esyProjectState ~cmd ~root ~projectRoot =
   |> Promise.Result.map (fun isProjectReadyForDev ->
          if isProjectReadyForDev then
            Ready
-         else if Fpath.compare root projectRoot = 0 then
+         else if Path.compare root projectRoot = 0 then
            PendingEsy
          else
            PendingBsb)
@@ -341,8 +341,7 @@ let setupToolChain { cmd; kind; projectRoot } =
          | Error e -> Error e |> Promise.resolve
          | Ok Ready -> Ok () |> Promise.resolve
          | Ok PendingEsy -> promptSetup (fun () -> setupEsy ~cmd ~root)
-         | Ok PendingBsb ->
-           setupBsb ~cmd ~envWithUnzip:Process.env (Fpath.toString root))
+         | Ok PendingBsb -> setupBsb ~cmd ~envWithUnzip:Process.env root)
 
 let runSetup ({ cmd; kind; _ } as resources) =
   setupToolChain resources
@@ -359,5 +358,5 @@ let runSetup ({ cmd; kind; _ } as resources) =
 let getLspCommand { kind; cmd; _ } =
   match kind with
   | Opam _ -> (Cmd.binPath cmd, [| "exec"; "ocamllsp" |])
-  | Esy root -> (Cmd.binPath cmd, [| "-P"; Fpath.toString root; "ocamllsp" |])
+  | Esy root -> (Cmd.binPath cmd, [| "-P"; Path.toString root; "ocamllsp" |])
   | Global -> ("ocamllsp", [||])
