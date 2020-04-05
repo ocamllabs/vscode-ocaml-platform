@@ -74,12 +74,6 @@ type resources =
 
 let toolChainRoot = Settings.string ~scope:Workspace ~key:"toolChainRoot"
 
-let env (pm : PackageManager.t) =
-  match pm with
-  | PackageManager.Global -> Ok Process.env |> Promise.resolve
-  | Esy (esy, manifest) -> Esy.env esy ~manifest
-  | Opam (opam, switch) -> Opam.env opam ~switch
-
 let availablePackageManagers () =
   { PackageManager.Kind.Hmap.opam = Opam.make ()
   ; esy = Esy.make ()
@@ -194,18 +188,6 @@ let setupToolChain { kind; projectRoot } =
   | Opam _ -> Ok () |> Promise.resolve
   | Esy (esy, manifest) -> Esy.setupToolchain esy ~manifest ~projectRoot
 
-let runSetup resources =
-  setupToolChain resources
-  |> Promise.Result.bind (fun () -> env resources.kind)
-  |> Promise.Result.bind (fun env ->
-         (* This function/callback here is a temporary way to check ocamllsp if
-            installed after setupToolChain completes. TODO: move it inside
-            setupToolChain itself *)
-         Cmd.make ~cmd:"ocamllsp" ~env ())
-  |> Promise.map (function
-       | Ok _ -> Ok ()
-       | Error msg -> Error {j| Toolchain initialisation failed: $msg |j})
-
 let makeResources ~projectRoot kind = { projectRoot; kind }
 
 let select ~projectRoot =
@@ -223,3 +205,13 @@ let getLspCommand t =
   | Opam (opam, switch) -> Opam.exec opam ~switch ~args:[| name |]
   | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:[| name |]
   | Global -> (name, [||])
+
+let runSetup resources =
+  let open Promise.Result.O in
+  setupToolChain resources
+  >>= (fun () ->
+        let cmd, args = getLspCommand resources in
+        Cmd.make ~cmd () >>= fun cmd -> Cmd.output cmd ~args)
+  |> Promise.map (function
+       | Ok _ -> Ok ()
+       | Error msg -> Error {j| Toolchain initialisation failed: $msg |j})
