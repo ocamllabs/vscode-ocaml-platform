@@ -64,8 +64,15 @@ module Window = struct
   module QuickPickItem = struct
     type t = unit
 
-    let create ?alwaysShow ?description ?detail ?label ?picked () =
-      ignore (alwaysShow, description, detail, label, picked)
+    external create :
+         ?alwaysShow:bool
+      -> ?description:string
+      -> ?detail:string
+      -> ?label:string
+      -> ?picked:bool
+      -> unit
+      -> t = ""
+      [@@bs.obj]
   end
 
   module QuickPickOptions = struct
@@ -92,7 +99,17 @@ module Window = struct
     showQuickPick' choices quickPickOptions
     |> Promise.map (fun choice -> choice |> Js.Nullable.toOption)
 
-  let showQuickPickItems _choices _options = assert false
+  external _showQuickPickItems :
+       QuickPickItem.t list
+    -> QuickPickOptions.t
+    -> QuickPickItem.t Js.Nullable.t Promise.t = "showQuickPick"
+    [@@bs.module "vscode"] [@@bs.scope "window"]
+
+  let showQuickPickItems choices options =
+    _showQuickPickItems (List.map fst choices) options
+    |> Promise.map (fun choice ->
+           choice |> Js.Nullable.toOption
+           |. Belt.Option.map (fun q -> List.assq q choices))
 
   external showInformationMessage : string -> unit = "showInformationMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]
