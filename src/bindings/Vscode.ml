@@ -61,6 +61,13 @@ module Workspace = struct
 end
 
 module Window = struct
+  module QuickPickItem = struct
+    type t = unit
+
+    let create ?alwaysShow ?description ?detail ?label ?picked () =
+      ignore (alwaysShow, description, detail, label, picked)
+  end
+
   module QuickPickOptions = struct
     type t = < canPickMany : bool > Js.t
 
@@ -84,6 +91,8 @@ module Window = struct
   let showQuickPick choices quickPickOptions =
     showQuickPick' choices quickPickOptions
     |> Promise.map (fun choice -> choice |> Js.Nullable.toOption)
+
+  let showQuickPickItems _choices _options = assert false
 
   external showInformationMessage : string -> unit = "showInformationMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]

@@ -49,11 +49,13 @@ let workspaceRoot () = Path.ofString Workspace.rootPath
 
 let selectSandbox (instance : Instance.t) () =
   let setToolchain =
-    let open Promise.Result.O in
-    Toolchain.select ~projectRoot:(workspaceRoot ()) >>= function
+    let open Promise.O in
+    let projectRoot = workspaceRoot () in
+    Toolchain.select ~projectRoot >>= function
     | None -> Promise.Result.return ()
     | Some t ->
       Instance.stop instance;
+      let t = Toolchain.makeResources ~projectRoot t in
       Instance.start instance t
   in
   let (_ : unit Promise.t) = handleError Window.showErrorMessage setToolchain in
@@ -66,8 +68,8 @@ let activate _context =
   Vscode.Commands.register ~command:"ocaml.select-sandbox"
     ~handler:(selectSandbox instance);
   let projectRoot = workspaceRoot () in
-  Toolchain.makeResources ~projectRoot Global
-  |> Promise.Result.bind (Instance.start instance)
+  let toolchain = Toolchain.makeResources ~projectRoot Global in
+  Instance.start instance toolchain
   |> handleError Window.showErrorMessage
   |> Promise.catch (fun e ->
          let message = Node.JsError.ofPromiseError e in

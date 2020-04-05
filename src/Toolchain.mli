@@ -18,15 +18,18 @@
 
 module PackageManager : sig
   type t =
-    | Opam of Path.t
-    | Esy of Path.t
+    | Opam of Opam.t * Opam.Switch.t
+    | Esy of Cmd.t * Path.t
     | Global
+
+  val toString : t -> string
 end
 
 type resources
 
-val makeResources :
-  projectRoot:Path.t -> PackageManager.t -> (resources, string) result Promise.t
+val ofSettings : projectRoot:Path.t -> PackageManager.t option Promise.t
+
+val makeResources : projectRoot:Path.t -> PackageManager.t -> resources
 
 (** [select] requires the process environment the plugin is
    being run in (ie VSCode's process environment) and the project
@@ -35,7 +38,7 @@ val makeResources :
    toolchain.
  *)
 
-val select : projectRoot:Path.t -> (resources option, string) result Promise.t
+val select : projectRoot:Path.t -> PackageManager.t option Promise.t
 
 (** [runSetup] is a effectful function that triggers setup instructions
    automatically for the user. At present, this functionality
@@ -64,7 +67,6 @@ val select : projectRoot:Path.t -> (resources option, string) result Promise.t
    detect such installations.
  *)
 val runSetup : resources -> (unit, string) result Promise.t
-
 (* Helper utils *)
 
 (** Extract lsp command and arguments (Eg. "opam" and [| "exec";

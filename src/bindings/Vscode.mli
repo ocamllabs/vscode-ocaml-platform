@@ -54,6 +54,14 @@ module WorkspaceConfiguration : sig
 end
 
 module Window : sig
+  module QuickPickItem : sig
+    type t
+
+    val create
+      : ?alwaysShow:bool -> ?description:string -> ?detail:string
+      -> ?label:string -> ?picked:bool -> unit -> t
+  end
+
   module QuickPickOptions : sig
     type t = < canPickMany : bool > Js.t
 
@@ -68,6 +76,8 @@ module Window : sig
 
   val showQuickPick :
     string array -> QuickPickOptions.t -> string option Promise.t
+
+  val showQuickPickItems : (QuickPickItem.t * 'a) list -> QuickPickOptions.t -> 'a option Promise.t
 
   val showInformationMessage : string -> unit
 
