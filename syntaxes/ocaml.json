@@ -36,7 +36,7 @@
       "patterns": [
         {
           "comment": "ocamldoc comment",
-          "name": "comment.doc.ocaml emphasis",
+          "name": "comment.doc.ocaml",
           "begin": "\\(\\*\\*",
           "end": "\\*\\)",
           "patterns": [
@@ -44,6 +44,12 @@
               "comment": "ocamldoc documentation tag",
               "name": "keyword.doc-tag.ocaml",
               "match": "\\@[a-z]+"
+            },
+            {
+              "comment": "embedded ocaml source",
+              "begin": "\\[",
+              "end": "\\]",
+              "patterns": [{ "include": "source.ocaml" }]
             },
             { "include": "#comments" }
           ]
