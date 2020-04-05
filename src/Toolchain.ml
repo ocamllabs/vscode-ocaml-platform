@@ -149,11 +149,11 @@ let env ~cmd ~kind =
                 Error ("'esy command-env' returned non-json output: " ^ stdout)))
   | Opam root -> Opam.env ~cwd:root ~cmd ()
 
-let supportedPackageManagers ~root =
-  let supportedPackageManagers =
+let avialablePackageManagers ~root =
+  let availablePackageManagers =
     [ PackageManager.Esy root; Esy (hiddenEsyDir root); Opam root ]
   in
-  supportedPackageManagers
+  availablePackageManagers
   |> List.map (fun packageManager ->
          Cmd.make ~cmd:(PackageManager.toName packageManager) ()
          |> Promise.map (function
@@ -197,7 +197,7 @@ let selectPackageManager choices =
 
 let select ~projectRoot =
   Promise.all2
-    ( supportedPackageManagers ~root:projectRoot
+    ( avialablePackageManagers ~root:projectRoot
     , Manifest.lookup projectRoot
       |> Promise.map (Result.bind ~f:packageManagersListOfLookup) )
   |> Promise.then_ (fun (supportedPackageManagers, detectedPackageManagers) ->
