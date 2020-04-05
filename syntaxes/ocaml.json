@@ -36,7 +36,7 @@
       "patterns": [
         {
           "comment": "ocamldoc comment",
-          "name": "comment.doc.ocaml emphasis",
+          "name": "comment.doc.ocaml",
           "begin": "\\(\\*\\*",
           "end": "\\*\\)",
           "patterns": [
@@ -44,6 +44,13 @@
               "comment": "ocamldoc documentation tag",
               "name": "keyword.doc-tag.ocaml",
               "match": "\\@[a-z]+"
+            },
+            {
+              "comment": "embedded ocaml source",
+              "begin": "\\[",
+              "end": "\\]",
+              "contentName": "source.embedded.ocaml",
+              "patterns": [{ "include": "source.ocaml" }]
             },
             { "include": "#comments" }
           ]
@@ -112,11 +119,6 @@
               "comment": "printf format string",
               "name": "constant.character.printf.ocaml",
               "match": "%[-0+ #]*([0-9]+|\\*)?(.([0-9]+|\\*))?[lLn]?[diunlLNxXosScCfFeEgGhHBbat!%@,]"
-            },
-            {
-              "comment": "unknown printf format string",
-              "name": "invalid.illegal.unknown-escape.ocaml",
-              "match": "%[^\"]"
             },
             {
               "comment": "unknown escape sequence",
@@ -189,8 +191,19 @@
           "match": "~[a-z_][A-Za-z0-9_']*"
         },
         {
+          "comment": "for loop",
+          "match": "\\b(for)\\s([a-z_][A-Za-z0-9_']*)",
+          "captures": {
+            "1": { "name": "keyword.ocaml" },
+            "2": {
+              "name": "entity.name.function.binding.ocaml",
+              "patterns": [{ "include": "source.ocaml" }]
+            }
+          }
+        },
+        {
           "comment": "let expression",
-          "match": "\\b(let|external|for)\\s+(rec\\s+)?([a-z_][A-Za-z0-9_']*)",
+          "match": "\\b(let)\\s+(rec\\s+)?([a-z_][A-Za-z0-9_']*)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
@@ -233,6 +246,33 @@
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
             "3": {
+              "name": "entity.name.function.binding.ocaml",
+              "patterns": [{ "include": "source.ocaml" }]
+            }
+          }
+        },
+        {
+          "comment": "external declaration assigned to string",
+          "contentName": "string.quoted.double.ocaml",
+          "begin": "\\b(external)\\s+([a-z_][A-Za-z0-9_']*)?(.*=)\\s*(\")",
+          "beginCaptures": {
+            "1": { "name": "keyword.ocaml" },
+            "2": {
+              "name": "entity.name.function.binding.ocaml",
+              "patterns": [{ "include": "source.ocaml" }]
+            },
+            "3": { "patterns": [{ "include": "source.ocaml" }] },
+            "4": { "name": "string.quoted.double.ocaml" }
+          },
+          "end": "\"",
+          "endCaptures": [{ "name": "string.quoted.double.ocaml" }]
+        },
+        {
+          "comment": "external declaration",
+          "match": "\\b(external)\\s+([a-z_][A-Za-z0-9_']*)",
+          "captures": {
+            "1": { "name": "keyword.ocaml" },
+            "2": {
               "name": "entity.name.function.binding.ocaml",
               "patterns": [{ "include": "source.ocaml" }]
             }
