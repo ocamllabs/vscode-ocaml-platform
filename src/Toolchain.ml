@@ -195,7 +195,11 @@ let packageManagersListOfLookup = function
            | Esy root -> PackageManager.makeEsy root)
          pms)
 
-let selectPackageManager ~config choices =
+let packageManager = Settings.string ~scope:Workspace ~key:"packageManager"
+
+let toolChainRoot = Settings.string ~scope:Workspace ~key:"toolChainRoot"
+
+let selectPackageManager choices =
   let placeHolder =
     "Which package manager would you like to manage the toolchain?"
   in
@@ -205,10 +209,8 @@ let selectPackageManager ~config choices =
   |> Promise.then_ (function
        | None -> Promise.Result.return None
        | Some packageManagerName ->
-         WorkspaceConfiguration.configurationTargetToJs Workspace
-         |> WorkspaceConfiguration.update config "packageManager"
-              packageManagerName
-         |> Promise.map (fun _ ->
+         Settings.set packageManager packageManagerName
+         |> Promise.map (fun () ->
                 match PackageManager.findByName packageManagerName choices with
                 | None -> Error "Selected choice was not found in the list"
                 | Some pm -> Ok (Some pm)))
@@ -249,11 +251,7 @@ let select ~projectRoot =
            makeResources packageManager ~projectRoot
            |> Promise.Result.map (fun x -> Some x)
          | packageManagers -> (
-           let config = Vscode.Workspace.getConfiguration "ocaml" in
-           match
-             ( Vscode.WorkspaceConfiguration.get config "packageManager"
-             , Vscode.WorkspaceConfiguration.get config "toolChainRoot" )
-           with
+           match (Settings.get packageManager, Settings.get toolChainRoot) with
            | Some name, Some root ->
              ofPackageManagerName ~name ~projectRoot
                ~toolchainRoot:(Path.ofString root)
@@ -263,7 +261,7 @@ let select ~projectRoot =
              |> Promise.Result.map (fun x -> Some x)
            | None, Some _
            | None, None ->
-             selectPackageManager ~config packageManagers
+             selectPackageManager packageManagers
              |> Promise.Result.bind (function
                   | None -> Promise.Result.return None
                   | Some pm ->
