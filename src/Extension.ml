@@ -68,7 +68,13 @@ let activate _context =
   Vscode.Commands.register ~command:"ocaml.select-sandbox"
     ~handler:(selectSandbox instance);
   let projectRoot = workspaceRoot () in
-  let toolchain = Toolchain.makeResources ~projectRoot Global in
+  let open Promise.O in
+  let toolchain =
+    Toolchain.ofSettings ~projectRoot >>| fun setting ->
+    let toolchain = Belt.Option.getWithDefault setting Global in
+    Toolchain.makeResources ~projectRoot toolchain
+  in
+  toolchain >>= fun toolchain ->
   Instance.start instance toolchain
   |> handleError Window.showErrorMessage
   |> Promise.catch (fun e ->
