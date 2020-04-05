@@ -47,24 +47,11 @@ module Buffer = struct
   let ofString = from
 end
 
-module type STREAM = sig
+module Stream = struct
   type t
-
-  val on : t -> string -> (Buffer.t -> unit) -> unit
-end
-
-module StreamFunctor (S : sig
-  type t
-end) =
-struct
-  type t = S.t
 
   external on : t -> string -> (Buffer.t -> unit) -> unit = "on" [@@bs.send]
 end
-
-module Stream = StreamFunctor (struct
-  type t
-end)
 
 module Fs = struct
   module E = struct
@@ -167,7 +154,6 @@ module Fs = struct
     else
       mkdir' path |> then_ (fun () -> resolve (Ok ()))
 end
-
 module ChildProcess = struct
   type t = < exitCode : int > Js.t
 
