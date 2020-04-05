@@ -61,8 +61,8 @@ module Window : sig
          ?alwaysShow:bool
       -> ?description:string
       -> ?detail:string
-      -> ?label:string
       -> ?picked:bool
+      -> label:string
       -> unit
       -> t
   end
