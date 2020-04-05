@@ -70,3 +70,6 @@ let env t ~switch =
 
 let exec t ~switch ~args =
   (Cmd.binPath t, Array.append [| "exec"; switchArg switch; "--" |] args)
+
+let exists t ~switch =
+  switchList t |> Promise.map (List.exists (fun sw -> sw = switch))
