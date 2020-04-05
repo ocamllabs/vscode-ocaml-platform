@@ -49,6 +49,7 @@
               "comment": "embedded ocaml source",
               "begin": "\\[",
               "end": "\\]",
+              "contentName": "source.embedded.ocaml",
               "patterns": [{ "include": "source.ocaml" }]
             },
             { "include": "#comments" }
