@@ -65,8 +65,8 @@ let switchList t =
 let switchArg switch = "--switch=" ^ Switch.toString switch
 
 let env t ~switch =
-  let args = [| switchArg switch; "env"; "--sexp" |] in
+  let args = [| "env"; "--sexp"; switchArg switch |] in
   Cmd.output t ~args |> Promise.map (Result.bind ~f:parseEnvOutput)
 
 let exec t ~switch ~args =
-  (Cmd.binPath t, Array.append [| switchArg switch; "exec"; "--" |] args)
+  (Cmd.binPath t, Array.append [| "exec"; switchArg switch; "--" |] args)
