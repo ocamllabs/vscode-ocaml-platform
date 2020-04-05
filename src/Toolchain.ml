@@ -52,7 +52,7 @@ module PackageManager = struct
 
   type t =
     | Opam of Opam.t * Opam.Switch.t
-    | Esy of Cmd.t * Path.t
+    | Esy of Esy.t * Path.t
     | Global
 
   let kind = function
@@ -77,28 +77,14 @@ let toolChainRoot = Settings.string ~scope:Workspace ~key:"toolChainRoot"
 let env (pm : PackageManager.t) =
   match pm with
   | PackageManager.Global -> Ok Process.env |> Promise.resolve
-  | Esy (cmd, root) ->
-    Cmd.output cmd
-      ~args:[| "command-env"; "--json"; "-P"; Path.toString root |]
-      ~cwd:root
-    |> Promise.map
-         (Result.bind ~f:(fun stdout ->
-              match Json.parse stdout with
-              | Some json ->
-                json |> Json.Decode.dict Json.Decode.string |> Result.return
-              | None ->
-                Error ("'esy command-env' returned non-json output: " ^ stdout)))
+  | Esy (esy, manifest) -> Esy.env esy ~manifest
   | Opam (opam, switch) -> Opam.env opam ~switch
 
 let availablePackageManagers () =
-  let open Promise.O in
-  let esy =
-    Cmd.make ~cmd:"esy" () >>| fun esy ->
-    match esy with
-    | Ok cmd -> Some cmd
-    | Error _ -> None
-  in
-  { PackageManager.Kind.Hmap.opam = Opam.make (); esy; global = () }
+  { PackageManager.Kind.Hmap.opam = Opam.make ()
+  ; esy = Esy.make ()
+  ; global = ()
+  }
 
 let ofSettings ~(projectRoot : Path.t) : PackageManager.t option Promise.t =
   let root =
@@ -202,83 +188,11 @@ let sandboxCandidates ~projectRoot =
   Promise.all2 (esy, opam) >>| fun (esy, opam) ->
   (PackageManager.Global :: esy) @ opam
 
-let promptSetup fn =
-  Window.showQuickPick [| "yes"; "no" |]
-    (Window.QuickPickOptions.make ~canPickMany:false
-       ~placeHolder:{j|Setup this project's toolchain with 'esy'?|j} ())
-  |> Promise.then_ (function
-       | Some choice when choice = "yes" -> fn ()
-       | Some _
-       | None ->
-         Error "Please setup the toolchain" |> Promise.resolve)
-
-let setupWithProgressIndicator fn =
-  Window.withProgress
-    [%bs.obj
-      { location = Window.locationToJs Window.Notification
-      ; title = "Setting up toolchain..."
-      }]
-    fn
-
-let setupEsy ~cmd ~root =
-  setupWithProgressIndicator (fun progress ->
-      (progress.report [%bs.obj { increment = int_of_float 1. }] [@bs]);
-      Cmd.output cmd ~cwd:root ~args:[||]
-      |> Promise.map (fun _ ->
-             (progress.report [%bs.obj { increment = int_of_float 100. }] [@bs]);
-             Ok ()))
-
-let setupBsb ~cmd ~envWithUnzip:esyEnv folder =
-  setupWithProgressIndicator (fun progress ->
-      let succeeded = ref (Ok ()) in
-      let eventEmitter = Setup.Bsb.make () in
-      Setup.Bsb.onProgress eventEmitter (fun percent ->
-          Js.Console.info2 "Percentage:" percent;
-          (progress.report
-             [%bs.obj { increment = int_of_float (percent *. 100.) }] [@bs]));
-      Setup.Bsb.onEnd eventEmitter (fun () ->
-          (progress.report [%bs.obj { increment = 100 }] [@bs]));
-      Setup.Bsb.onError eventEmitter (fun errorMsg ->
-          succeeded := Error errorMsg);
-      Setup.Bsb.run cmd esyEnv eventEmitter folder
-      |> Promise.map (fun () -> !succeeded))
-
-type esyProjectState =
-  | Ready
-  | PendingEsy
-  | PendingBsb
-
-let esyProjectState ~cmd ~root ~projectRoot =
-  let rootStr = Path.toString root in
-  Cmd.output cmd ~args:[| "status"; "-P"; rootStr |] ~cwd:root
-  |> Promise.map (function
-       | Error _ -> Ok false
-       | Ok esyOutput -> (
-         match Json.parse esyOutput with
-         | None -> Ok false
-         | Some esyResponse ->
-           esyResponse
-           |> Json.Decode.field "isProjectReadyForDev" Json.Decode.bool
-           |> Result.return ))
-  |> Promise.Result.map (fun isProjectReadyForDev ->
-         if isProjectReadyForDev then
-           Ready
-         else if Path.compare root projectRoot = 0 then
-           PendingEsy
-         else
-           PendingBsb)
-
 let setupToolChain { kind; projectRoot } =
   match kind with
   | Global -> Ok () |> Promise.resolve
   | Opam _ -> Ok () |> Promise.resolve
-  | Esy (cmd, root) ->
-    esyProjectState ~cmd ~root ~projectRoot
-    |> Promise.then_ (function
-         | Error e -> Error e |> Promise.resolve
-         | Ok Ready -> Ok () |> Promise.resolve
-         | Ok PendingEsy -> promptSetup (fun () -> setupEsy ~cmd ~root)
-         | Ok PendingBsb -> setupBsb ~cmd ~envWithUnzip:Process.env root)
+  | Esy (esy, manifest) -> Esy.setupToolchain esy ~manifest ~projectRoot
 
 let runSetup resources =
   setupToolChain resources
@@ -307,5 +221,5 @@ let getLspCommand t =
   let name = "ocamllsp" in
   match t.kind with
   | Opam (opam, switch) -> Opam.exec opam ~switch ~args:[| name |]
-  | Esy (cmd, root) -> (Cmd.binPath cmd, [| "-P"; Path.toString root; name |])
+  | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:[| name |]
   | Global -> (name, [||])

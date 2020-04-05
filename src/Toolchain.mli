@@ -19,7 +19,7 @@
 module PackageManager : sig
   type t =
     | Opam of Opam.t * Opam.Switch.t
-    | Esy of Cmd.t * Path.t
+    | Esy of Esy.t * Path.t
     | Global
 
   val toString : t -> string
@@ -67,6 +67,7 @@ val select : projectRoot:Path.t -> PackageManager.t option Promise.t
    detect such installations.
  *)
 val runSetup : resources -> (unit, string) result Promise.t
+
 (* Helper utils *)
 
 (** Extract lsp command and arguments (Eg. "opam" and [| "exec";
