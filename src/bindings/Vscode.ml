@@ -119,6 +119,12 @@ module Window = struct
   external showErrorMessage : string -> 'a Promise.t = "showErrorMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 
+  external showWarningMessage' : string -> 'a Promise.t = "showErrorMessage"
+    [@@bs.module "vscode"] [@@bs.scope "window"]
+
+  let showWarningMessage m =
+    showWarningMessage' m |> Js.Promise.then_ (fun _ -> Js.Promise.resolve ())
+
   type rangeEdge = { character : int }
 
   type range =

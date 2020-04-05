@@ -92,6 +92,8 @@ module Window : sig
 
   val showErrorMessage : string -> 'a Promise.t
 
+  val showWarningMessage : string -> unit Promise.t
+
   type activeTextEditor = { document : document }
 
   and document =
