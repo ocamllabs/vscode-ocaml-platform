@@ -43,8 +43,8 @@ module PackageManager = struct
     let setting =
       let of_string s =
         match of_string s with
-        | None -> failwith ("Invalid kind: " ^ s)
-        | Some s -> s
+        | None -> Error (sprintf "%s is not a package manager" s)
+        | Some s -> Ok s
       in
       Settings.create ~scope:Workspace ~key:"packageManager" ~of_string
         ~to_string
