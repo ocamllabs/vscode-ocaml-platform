@@ -28,7 +28,13 @@ let make () =
 
 let parseSwitchList out =
   let lines = String.split_on_char '\n' out in
-  List.map Switch.ofString lines
+  let result =
+    Belt.List.keepMap lines (function
+      | "" -> None
+      | s -> Some (Switch.ofString s))
+  in
+  Js.Console.log (sprintf "%d switches" (List.length result));
+  result
 
 let parseEnvOutput (opamEnvOutput : string) =
   let error message =
@@ -63,4 +69,4 @@ let env t ~switch =
   Cmd.output t ~args |> Promise.map (Result.bind ~f:parseEnvOutput)
 
 let exec t ~switch ~args =
-  Cmd.binPath t, (Array.append [| switchArg switch ; "exec" ; "--" ; |] args)
+  (Cmd.binPath t, Array.append [| switchArg switch; "exec"; "--" |] args)

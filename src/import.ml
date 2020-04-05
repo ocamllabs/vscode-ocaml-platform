@@ -58,3 +58,5 @@ end
 module Or_error = struct
   type 'a t = ('a, string) result
 end
+
+let sprintf = Printf.sprintf
