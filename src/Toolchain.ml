@@ -206,14 +206,14 @@ let selectPackageManager choices =
   Window.QuickPickOptions.make ~canPickMany:false ~placeHolder ()
   |> Window.showQuickPick
        (choices |> List.map PackageManager.toName |> Array.of_list)
-  |> Promise.then_ (function
-       | None -> Promise.Result.return None
-       | Some packageManagerName ->
-         Settings.set packageManager packageManagerName
-         |> Promise.map (fun () ->
-                match PackageManager.findByName packageManagerName choices with
-                | None -> Error "Selected choice was not found in the list"
-                | Some pm -> Ok (Some pm)))
+  |> Promise.map (function
+       | None -> None
+       | Some packageManagerName -> (
+         match PackageManager.findByName packageManagerName choices with
+         | None ->
+           (* always present because the choice was presented to the user *)
+           assert false
+         | Some _ as s -> s ))
 
 let select ~projectRoot =
   Promise.all2
@@ -260,13 +260,13 @@ let select ~projectRoot =
              ofPackageManagerName ~name ~toolchainRoot:projectRoot ~projectRoot
              |> Promise.Result.map (fun x -> Some x)
            | None, Some _
-           | None, None ->
-             selectPackageManager packageManagers
-             |> Promise.Result.bind (function
-                  | None -> Promise.Result.return None
-                  | Some pm ->
-                    makeResources pm ~projectRoot
-                    |> Promise.Result.map (fun s -> Some s)) ))
+           | None, None -> (
+             let open Promise.O in
+             selectPackageManager packageManagers >>= function
+             | None -> Promise.Result.return None
+             | Some pm ->
+               makeResources pm ~projectRoot
+               |> Promise.Result.map (fun s -> Some s) ) ))
 
 let promptSetup fn =
   Window.showQuickPick [| "yes"; "no" |]
