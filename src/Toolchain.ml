@@ -163,14 +163,9 @@ let sandboxCandidates ~projectRoot =
   let esy =
     available.esy >>= function
     | None -> Promise.return []
-    | Some cmd -> (
-      Manifest.lookup projectRoot >>| function
-      | Error _ -> [] (* TODO warn *)
-      | Ok lookups ->
-        Belt.List.keepMap lookups (function
-          | Esy s -> Some (PackageManager.Esy (cmd, s))
-          (* TODO this will not be necessary once we merge esy with manifest *)
-          | Opam _ -> None) )
+    | Some esy ->
+      Esy.discover ~dir:projectRoot
+      >>| List.map (fun manifest -> PackageManager.Esy (esy, manifest))
   in
   let opam =
     available.opam >>= function
