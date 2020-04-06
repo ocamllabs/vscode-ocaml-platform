@@ -31,14 +31,12 @@ val ofSettings : unit -> PackageManager.t option Promise.t
 
 val makeResources : projectRoot:Path.t -> PackageManager.t -> resources
 
-(** [select] requires the process environment the plugin is
-   being run in (ie VSCode's process environment) and the project
-   root and produces a promise of resources available that can later
-   be passed on to runSetup that can be called to install the
-   toolchain.
- *)
+(** [selectAndSave] requires the process environment the plugin is being run in
+   (ie VSCode's process environment) and the project root and produces a promise
+   of resources available that can later be passed on to runSetup that can be
+   called to install the toolchain. *)
 
-val select : projectRoot:Path.t -> PackageManager.t option Promise.t
+val selectAndSave : projectRoot:Path.t -> PackageManager.t option Promise.t
 
 (** [runSetup] is a effectful function that triggers setup instructions
    automatically for the user. At present, this functionality

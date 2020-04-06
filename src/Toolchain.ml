@@ -92,8 +92,7 @@ module PackageManager = struct
       | Opam sw ->
         object_ @@ (("switch", string @@ Opam.Switch.toString sw) :: kind)
 
-    let t =
-      Settings.create ~scope:Workspace ~key:"sandbox" ~ofJson ~toJson
+    let t = Settings.create ~scope:Workspace ~key:"sandbox" ~ofJson ~toJson
   end
 
   let toSetting = function
@@ -206,7 +205,7 @@ let setupToolChain { kind; projectRoot } =
 
 let makeResources ~projectRoot kind = { projectRoot; kind }
 
-let select ~projectRoot =
+let selectAndSave ~projectRoot =
   let open Promise.O in
   sandboxCandidates ~projectRoot >>= fun candidates ->
   selectPackageManager candidates >>| function

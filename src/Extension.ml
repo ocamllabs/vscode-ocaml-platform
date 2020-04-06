@@ -51,7 +51,7 @@ let selectSandbox (instance : Instance.t) () =
   let setToolchain =
     let open Promise.O in
     let projectRoot = workspaceRoot () in
-    Toolchain.select ~projectRoot >>= function
+    Toolchain.selectAndSave ~projectRoot >>= function
     | None -> Promise.Result.return ()
     | Some t ->
       Instance.stop instance;
