@@ -35,19 +35,19 @@ module PackageManager = struct
       | "global" -> Some Global
       | _ -> None
 
+    let ofJson json =
+      let open Json.Decode in
+      match of_string (string json) with
+      | Some s -> s
+      | None ->
+        raise (DecodeError "opma | esy | global are the only valid values")
+
     let to_string = function
       | Opam -> "opam"
       | Esy -> "esy"
       | Global -> "global"
 
-    let setting =
-      let of_string s =
-        match of_string s with
-        | None -> Error (sprintf "%s is not a package manager" s)
-        | Some s -> Ok s
-      in
-      Settings.create ~scope:Workspace ~key:"packageManager" ~of_string
-        ~to_string
+    let toJson s = Json.Encode.string (to_string s)
   end
 
   type t =
@@ -55,10 +55,51 @@ module PackageManager = struct
     | Esy of Esy.t * Path.t
     | Global
 
-  let kind = function
-    | Opam _ -> Kind.Opam
-    | Esy _ -> Esy
-    | Global -> Global
+  module Setting = struct
+    type t =
+      | Opam of Opam.Switch.t
+      | Esy of Path.t
+      | Global
+
+    let kind : t -> Kind.t = function
+      | Opam _ -> Opam
+      | Esy _ -> Esy
+      | Global -> Global
+
+    let ofJson json =
+      let open Json.Decode in
+      let kind = field "kind" Kind.ofJson json in
+      match (kind : Kind.t) with
+      | Global -> Global
+      | Esy ->
+        let manifest =
+          field "root" (fun js -> Path.ofString (string js)) json
+        in
+        Esy manifest
+      | Opam ->
+        let switch =
+          field "switch" (fun js -> Opam.Switch.ofString (string js)) json
+        in
+        Opam switch
+
+    let toJson (t : t) =
+      let open Json.Encode in
+      let kind = [ ("kind", Kind.toJson (kind t)) ] in
+      match t with
+      | Global -> Json.Encode.object_ kind
+      | Esy manifest ->
+        object_ @@ (("root", string @@ Path.toString manifest) :: kind)
+      | Opam sw ->
+        object_ @@ (("switch", string @@ Opam.Switch.toString sw) :: kind)
+
+    let t =
+      Settings.create ~scope:Workspace ~key:"sandbox" ~ofJson ~toJson
+  end
+
+  let toSetting = function
+    | Esy (_, root) -> Setting.Esy root
+    | Opam (_, switch) -> Setting.Opam switch
+    | Global -> Setting.Global
 
   let toString = function
     | Esy (_, root) -> Printf.sprintf "esy(%s)" (Path.toString root)
@@ -72,36 +113,26 @@ type resources =
   ; projectRoot : Path.t
   }
 
-let toolChainRoot = Settings.string ~scope:Workspace ~key:"toolChainRoot"
-
 let availablePackageManagers () =
   { PackageManager.Kind.Hmap.opam = Opam.make ()
   ; esy = Esy.make ()
   ; global = ()
   }
 
-let ofSettings ~(projectRoot : Path.t) : PackageManager.t option Promise.t =
-  let root =
-    match Settings.get toolChainRoot with
-    | None ->
-      Path.toString projectRoot (* TODO stupid back and forth conversion *)
-    | Some s -> s
-  in
+let ofSettings () : PackageManager.t option Promise.t =
   let open Promise.O in
   let available = availablePackageManagers () in
   match
-    (Settings.get PackageManager.Kind.setting : PackageManager.Kind.t option)
+    (Settings.get PackageManager.Setting.t : PackageManager.Setting.t option)
   with
   | None -> Promise.return None
-  | Some Esy -> (
+  | Some (Esy manifest) -> (
     available.esy >>| function
     | None ->
       (* TODO warn here that the user's choice can't be respected *)
       None
-    | Some esy ->
-      let root = Path.ofString root in
-      Some (PackageManager.Esy (esy, root)) )
-  | Some Opam -> (
+    | Some esy -> Some (PackageManager.Esy (esy, manifest)) )
+  | Some (Opam switch) -> (
     let open Promise.O in
     available.opam >>| function
     | None ->
@@ -109,22 +140,12 @@ let ofSettings ~(projectRoot : Path.t) : PackageManager.t option Promise.t =
       None
     | Some opam ->
       (* TODO we need to validate this switch first *)
-      Some (PackageManager.Opam (opam, Opam.Switch.ofString root)) )
-  | Some PackageManager.Kind.Global ->
+      Some (PackageManager.Opam (opam, switch)) )
+  | Some PackageManager.Setting.Global ->
     Promise.return (Some PackageManager.Global)
 
 let toSettings (pm : PackageManager.t) =
-  let kindSet =
-    Settings.set PackageManager.Kind.setting (PackageManager.kind pm)
-  in
-  let rootSet =
-    match pm with
-    | Global -> Promise.return () (* TODO wrong *)
-    | Esy (_, p) -> Settings.set toolChainRoot (Path.toString p)
-    | Opam (_, sw) -> Settings.set toolChainRoot (Opam.Switch.toString sw)
-  in
-  let open Promise.O in
-  Js.Promise.all2 (kindSet, rootSet) >>| fun ((), ()) -> ()
+  Settings.set PackageManager.Setting.t (PackageManager.toSetting pm)
 
 let selectPackageManager choices =
   let placeHolder =

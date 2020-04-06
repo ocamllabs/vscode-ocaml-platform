@@ -14,7 +14,7 @@ end
 module WorkspaceConfiguration = struct
   type t
 
-  external get' : t -> string -> string Js.Nullable.t = "get" [@@bs.send]
+  external get' : t -> string -> Js.Json.t Js.Nullable.t = "get" [@@bs.send]
 
   let get workspaceConfig key = get' workspaceConfig key |> Js.Nullable.toOption
 
@@ -25,7 +25,7 @@ module WorkspaceConfiguration = struct
   [@@bs.deriving { jsConverter = newType }]
 
   external update :
-    t -> string -> string -> abs_configurationTarget -> unit Promise.t
+    t -> string -> Js.Json.t -> abs_configurationTarget -> unit Promise.t
     = "update"
     [@@bs.send]
 end

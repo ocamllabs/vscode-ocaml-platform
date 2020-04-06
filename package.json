@@ -36,15 +36,10 @@
     "configuration": {
       "title": "OCaml configuration",
       "properties": {
-        "ocaml.toolChainRoot": {
-          "type": "string",
+        "ocaml.sandbox": {
+          "type": "object",
           "default": null,
-          "description": "Determines where to find the toolchain for a given project"
-        },
-        "ocaml.packageManager": {
-          "type": "string",
-          "default": null,
-          "description": "Determines what package manager to use for a given project"
+          "description": "Determines where to find the sandbox for a given project"
         },
         "ocaml.lsp.path": {
           "type": "string",

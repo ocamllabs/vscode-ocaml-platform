@@ -70,7 +70,7 @@ let activate _context =
   let projectRoot = workspaceRoot () in
   let open Promise.O in
   let toolchain =
-    Toolchain.ofSettings ~projectRoot >>| fun setting ->
+    Toolchain.ofSettings () >>| fun setting ->
     let toolchain = Belt.Option.getWithDefault setting Global in
     Toolchain.makeResources ~projectRoot toolchain
   in

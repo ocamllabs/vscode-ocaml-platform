@@ -27,7 +27,7 @@ end
 
 type resources
 
-val ofSettings : projectRoot:Path.t -> PackageManager.t option Promise.t
+val ofSettings : unit -> PackageManager.t option Promise.t
 
 val makeResources : projectRoot:Path.t -> PackageManager.t -> resources
 

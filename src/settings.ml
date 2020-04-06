@@ -2,23 +2,22 @@ open Import
 
 type 'a t =
   { key : string
-  ; to_string : 'a -> string
-  ; of_string : string -> 'a Or_error.t
+  ; toJson : 'a -> Js.Json.t
+  ; ofJson : Js.Json.t -> 'a
   ; scope : WorkspaceConfiguration.configurationTarget
   }
 
 let section = Workspace.getConfiguration "ocaml"
 
-let create ~scope ~key ~of_string ~to_string =
-  { scope; key; to_string; of_string }
+let create ~scope ~key ~ofJson ~toJson = { scope; key; toJson; ofJson }
 
 let get t =
   match WorkspaceConfiguration.get section t.key with
   | None -> None
   | Some v -> (
-    match t.of_string v with
-    | Ok s -> Some s
-    | Error msg ->
+    match t.ofJson v with
+    | s -> Some s
+    | exception Json.Decode.DecodeError msg ->
       let (_ : unit Promise.t) =
         Window.showErrorMessage (sprintf "Setting %s is invalid: %s" t.key msg)
       in
@@ -26,6 +25,9 @@ let get t =
 
 let set t v =
   let scope = WorkspaceConfiguration.configurationTargetToJs t.scope in
-  WorkspaceConfiguration.update section t.key (t.to_string v) scope
+  WorkspaceConfiguration.update section t.key (t.toJson v) scope
 
-let string = create ~of_string:(fun x -> Ok x) ~to_string:(fun x -> x)
+let string =
+  let toJson = Js.Json.string in
+  let ofJson (y : Js.Json.t) = Json.Decode.string y in
+  create ~ofJson ~toJson

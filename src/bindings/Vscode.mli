@@ -41,7 +41,7 @@ end
 module WorkspaceConfiguration : sig
   type t
 
-  val get : t -> string -> string option
+  val get : t -> string -> Js.Json.t option
 
   type configurationTarget =
     | Global
@@ -50,7 +50,7 @@ module WorkspaceConfiguration : sig
   [@@bs.deriving { jsConverter = newType }]
 
   val update :
-    t -> string -> string -> abs_configurationTarget -> unit Promise.t
+    t -> string -> Js.Json.t -> abs_configurationTarget -> unit Promise.t
 end
 
 module Window : sig
