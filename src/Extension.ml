@@ -62,7 +62,6 @@ let selectSandbox (instance : Instance.t) () =
   ()
 
 let activate _context =
-  Js.Dict.set Process.env "OCAMLRUNPARAM" "b";
   Js.Dict.set Process.env "OCAML_LSP_SERVER_LOG" "-";
   let instance = Instance.create () in
   Vscode.Commands.register ~command:"ocaml.select-sandbox"
