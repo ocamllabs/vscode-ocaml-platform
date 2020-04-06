@@ -29,7 +29,9 @@ module Discover = struct
            | Error _ -> None
            | Ok stats -> (
              match Fs.Stat.isDirectory stats with
-             | true -> None
+             | true ->
+               (* Is this wrong? The opam file can exist in a directroy as well *)
+               None
              | false -> Some projectRoot ))
     | "package.json" ->
       let manifestFile = Path.(projectRoot / "package.json") |> Path.toString in
