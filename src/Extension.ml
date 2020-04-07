@@ -65,7 +65,7 @@ let suggestToSetupToolchain instance =
   let open Promise.O in
   Vscode.Window.showInformationMessage'
     "There is no toolchain attached to this project."
-    [ ("select toolchain", ())) ]
+    [ ("select toolchain", ()) ]
   >>| function
   | None -> ()
   | Some () -> selectSandbox instance ()

@@ -274,7 +274,9 @@
     "vscode:prepublish": "yarn run build",
     "package": "vsce package --yarn",
     "fmt:check": "prettier --check .",
-    "fmt": "prettier --write ."
+    "fmt:ocaml": "git ls-files '*.ml' '*.mli' | xargs ocamlformat -i",
+    "fmt:metadata": "prettier --write .",
+    "fmt": "yarn run fmt:ocaml && yarn fmt:metadata"
   },
   "dependencies": {
     "request": "2.88.2",

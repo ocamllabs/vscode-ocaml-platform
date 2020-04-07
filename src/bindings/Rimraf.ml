@@ -1,7 +1,7 @@
 type t
 
 external run' : string -> ('a Js.Nullable.t -> unit) -> unit = "rimraf"
-[@@bs.module]
+  [@@bs.module]
 
 let run p =
   Promise.make (fun ~resolve ~reject:_ ->
