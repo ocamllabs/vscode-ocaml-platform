@@ -121,6 +121,17 @@ let availablePackageManagers () =
 let ofSettings () : PackageManager.t option Promise.t =
   let open Promise.O in
   let available = availablePackageManagers () in
+  let notAvailable kind =
+    let this_ =
+      match kind with
+      | `Esy -> "esy"
+      | `Opam -> "opam"
+    in
+    message `Warn
+      "This workspace is configured to use an %s sandbox, but %s isn't \
+       available"
+      this_ this_
+  in
   match
     (Settings.get PackageManager.Setting.t : PackageManager.Setting.t option)
   with
@@ -128,18 +139,24 @@ let ofSettings () : PackageManager.t option Promise.t =
   | Some (Esy manifest) -> (
     available.esy >>| function
     | None ->
-      (* TODO warn here that the user's choice can't be respected *)
+      notAvailable `Esy;
       None
     | Some esy -> Some (PackageManager.Esy (esy, manifest)) )
   | Some (Opam switch) -> (
     let open Promise.O in
-    available.opam >>| function
+    available.opam >>= function
     | None ->
-      (* TODO Warn here *)
-      None
-    | Some opam ->
-      (* TODO we need to validate this switch first *)
-      Some (PackageManager.Opam (opam, switch)) )
+      notAvailable `Opam;
+      Promise.return None
+    | Some opam -> (
+      Opam.exists opam ~switch >>| function
+      | false ->
+        message `Warn
+          "Workspace is configured to use the switch %s. This switch does not \
+           exist."
+          (Opam.Switch.toString switch);
+        None
+      | true -> Some (PackageManager.Opam (opam, switch)) ) )
   | Some PackageManager.Setting.Global ->
     Promise.return (Some PackageManager.Global)
 

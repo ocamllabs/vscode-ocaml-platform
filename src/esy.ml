@@ -85,7 +85,11 @@ module Discover = struct
   let run ~dir : Path.t list Promise.t =
     let open Promise.O in
     (Path.toString dir |> Fs.readDir >>| function
-     | Error _ -> [||] (* TODO warn here *)
+     | Error _ ->
+       message `Warn
+         "Unable to read %s. No esy projects will be inferred from here"
+         (Path.toString dir);
+       [||]
      | Ok res -> res)
     >>= fun files ->
     files

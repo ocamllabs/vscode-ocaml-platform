@@ -60,3 +60,16 @@ module Or_error = struct
 end
 
 let sprintf = Printf.sprintf
+
+let message kind fmt =
+  let k =
+    match kind with
+    | `Warn -> Window.showWarningMessage
+    | `Info -> Window.showInformationMessage
+    | `Error -> Window.showErrorMessage
+  in
+  Printf.ksprintf
+    (fun x ->
+      let (_ : unit Promise.t) = k x in
+      ())
+    fmt

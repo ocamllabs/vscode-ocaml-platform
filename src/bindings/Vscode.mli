@@ -81,7 +81,7 @@ module Window : sig
   val showQuickPickItems :
     (QuickPickItem.t * 'a) list -> QuickPickOptions.t -> 'a option Promise.t
 
-  val showInformationMessage : string -> unit
+  val showInformationMessage : string -> unit Promise.t
 
   val showInformationMessage' :
     string -> (string * 'a) list -> 'a option Promise.t

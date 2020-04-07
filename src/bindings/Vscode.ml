@@ -109,7 +109,8 @@ module Window = struct
            choice |> Js.Nullable.toOption
            |. Belt.Option.map (fun q -> List.assq q choices))
 
-  external showInformationMessage : string -> unit = "showInformationMessage"
+  external showInformationMessage : string -> unit Promise.t
+    = "showInformationMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 
   external _showInformationMessage' :

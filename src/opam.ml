@@ -58,7 +58,7 @@ let switchList t =
   Cmd.output t ~args:[| "switch"; "list"; "-s" |]
   |> Promise.map (function
        | Error _ ->
-         (* TODO Warn *)
+         message `Warn "Unable to read the list of switches.";
          []
        | Ok out -> parseSwitchList out)
 
