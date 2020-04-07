@@ -83,11 +83,9 @@ module Window = struct
   end
 
   module MessageItem = struct
-    type t = < title : string > Js.t
+    type t
 
-    let create ~title : t =
-      ignore title;
-      assert false
+    external create : ?title:string -> unit -> t = "" [@@bs.obj]
   end
 
   external showQuickPick' :
@@ -114,7 +112,21 @@ module Window = struct
   external showInformationMessage : string -> unit = "showInformationMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 
-  let showInformationMessage' _msg _choices = Promise.resolve None
+  external _showInformationMessage' :
+    string -> MessageItem.t array -> MessageItem.t Js.Nullable.t Promise.t
+    = "showInformationMessage"
+    [@@bs.module "vscode"] [@@bs.scope "window"]
+
+  let showInformationMessage' msg choices =
+    let choices =
+      List.map
+        (fun (title, choice) -> (MessageItem.create ~title (), choice))
+        choices
+    in
+    _showInformationMessage' msg (choices |> List.map fst |> Array.of_list)
+    |> Promise.map (fun choice ->
+           choice |> Js.Nullable.toOption
+           |. Belt.Option.map (fun q -> List.assq q choices))
 
   external showErrorMessage : string -> 'a Promise.t = "showErrorMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]
@@ -172,6 +184,15 @@ module Commands = struct
   external register : command:string -> handler:(unit -> unit) -> unit
     = "registerCommand"
     [@@bs.module "vscode"] [@@bs.scope "commands"]
+
+  external _executeCommand :
+    command:string -> args:'a list -> unit Js.Nullable.t Promise.t
+    = "executeCommand"
+    [@@bs.module "vscode"] [@@bs.scope "commands"]
+
+  let executeCommand ~command ~args =
+    _executeCommand ~command ~args
+    |> Promise.then_ (fun _ -> Promise.resolve ())
 end
 
 module ExtensionContext = struct

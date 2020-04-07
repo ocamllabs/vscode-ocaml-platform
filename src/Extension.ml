@@ -61,6 +61,15 @@ let selectSandbox (instance : Instance.t) () =
   let (_ : unit Promise.t) = handleError Window.showErrorMessage setToolchain in
   ()
 
+let suggestToSetupToolchain instance =
+  let open Promise.O in
+  Vscode.Window.showInformationMessage'
+    "There is no toolchain attached to this project."
+    [ ("select toolchain", ())) ]
+  >>| function
+  | None -> ()
+  | Some () -> selectSandbox instance ()
+
 let activate _context =
   Js.Dict.set Process.env "OCAML_LSP_SERVER_LOG" "-";
   let instance = Instance.create () in
@@ -69,9 +78,15 @@ let activate _context =
   let projectRoot = workspaceRoot () in
   let open Promise.O in
   let toolchain =
-    Toolchain.ofSettings () >>| fun setting ->
-    let toolchain = Belt.Option.getWithDefault setting Global in
-    Toolchain.makeResources ~projectRoot toolchain
+    Toolchain.ofSettings () >>| fun pm ->
+    let resources =
+      match pm with
+      | None ->
+        let (_ : unit Promise.t) = suggestToSetupToolchain instance in
+        Toolchain.PackageManager.Global
+      | Some toolchain -> toolchain
+    in
+    Toolchain.makeResources ~projectRoot resources
   in
   toolchain >>= fun toolchain ->
   Instance.start instance toolchain

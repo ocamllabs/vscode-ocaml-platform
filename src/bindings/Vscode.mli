@@ -11,6 +11,8 @@ module Commands : sig
   val get : filterInternal:bool -> string array Promise.t
 
   val register : command:string -> handler:(unit -> unit) -> unit
+
+  val executeCommand : command:string -> args:'a list -> unit Promise.t
 end
 
 module ExtensionContext : sig
@@ -73,12 +75,6 @@ module Window : sig
     val make : ?canPickMany:bool -> ?placeHolder:string -> unit -> t
   end
 
-  module MessageItem : sig
-    type t
-
-    val create : title:string -> t
-  end
-
   val showQuickPick :
     string array -> QuickPickOptions.t -> string option Promise.t
 
@@ -88,7 +84,7 @@ module Window : sig
   val showInformationMessage : string -> unit
 
   val showInformationMessage' :
-    string -> (MessageItem.t * 'a) list -> 'a option Promise.t
+    string -> (string * 'a) list -> 'a option Promise.t
 
   val showErrorMessage : string -> 'a Promise.t
 
