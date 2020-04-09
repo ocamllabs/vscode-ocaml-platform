@@ -147,6 +147,17 @@
         ]
       },
       {
+        "id": "ocaml.ocamlformat",
+        "aliases": [
+          "OCamlFormat",
+          "ocamlformat"
+        ],
+        "extensions": [
+          ".ocamlformat"
+        ],
+        "configuration": "./languages/ocamlformat.json"
+      },
+      {
         "id": "ocaml.ocamllex",
         "aliases": [
           "OCamllex",
@@ -213,6 +224,11 @@
         "language": "ocaml.ocamlbuild",
         "scopeName": "source.ocaml.ocamlbuild",
         "path": "./syntaxes/ocamlbuild.json"
+      },
+      {
+        "language": "ocaml.ocamlformat",
+        "scopeName": "source.ocaml.ocamlformat",
+        "path": "./syntaxes/ocamlformat.json"
       },
       {
         "language": "ocaml.ocamllex",
