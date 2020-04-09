@@ -5,6 +5,7 @@
 - Improve ocamllex syntax highlighting
 - Improve opam syntax highlighting
 - Fix bugs in ocaml and ocamllex syntax highlighting
+- Add OCamlFormat syntax highlighting
 
 ## 0.4.0
 
