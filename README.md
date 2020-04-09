@@ -24,6 +24,7 @@ you encounter._
   - menhir
   - merlin
   - ocamlbuild
+  - OCamlFormat
   - ocamllex
   - opam
 - Indentation rules
