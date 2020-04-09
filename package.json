@@ -83,16 +83,6 @@
         "configuration": "./languages/dune.json"
       },
       {
-        "id": "ocaml.menhir",
-        "aliases": [
-          "Menhir",
-          "menhir"
-        ],
-        "extensions": [
-          ".mly"
-        ]
-      },
-      {
         "id": "ocaml.merlin",
         "aliases": [
           "Merlin",
