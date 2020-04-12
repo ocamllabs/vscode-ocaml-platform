@@ -40,4 +40,4 @@ the settings under `File > Preferences > Settings`.
 
 ## Requirements
 
-- [ocaml-lsp-server](https://github.com/ocaml/ocaml-lsp)
+- [ocaml-lsp](https://github.com/ocaml/ocaml-lsp)
