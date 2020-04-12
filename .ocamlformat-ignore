@@ -1,3 +1,4 @@
+src/sexp.ml
 node_modules/
 out/
 _esy/

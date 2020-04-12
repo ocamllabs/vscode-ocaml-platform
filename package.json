@@ -26,18 +26,20 @@
   ],
   "icon": "assets/logo.png",
   "contributes": {
+    "commands": [
+      {
+        "command": "ocaml.select-sandbox",
+        "category": "OCaml",
+        "title": "Select sandbox for this workspace"
+      }
+    ],
     "configuration": {
       "title": "OCaml configuration",
       "properties": {
-        "ocaml.toolChainRoot": {
-          "type": "string",
+        "ocaml.sandbox": {
+          "type": "object",
           "default": null,
-          "description": "Determines where to find the toolchain for a given project"
-        },
-        "ocaml.packageManager": {
-          "type": "string",
-          "default": null,
-          "description": "Determines what package manager to use for a given project"
+          "description": "Determines where to find the sandbox for a given project"
         },
         "ocaml.lsp.path": {
           "type": "string",
@@ -278,7 +280,9 @@
     "vscode:prepublish": "yarn run build",
     "package": "vsce package --yarn",
     "fmt:check": "prettier --check .",
-    "fmt": "prettier --write ."
+    "fmt:ocaml": "git ls-files '*.ml' '*.mli' | xargs ocamlformat -i",
+    "fmt:metadata": "prettier --write .",
+    "fmt": "yarn run fmt:ocaml && yarn fmt:metadata"
   },
   "dependencies": {
     "request": "2.88.2",

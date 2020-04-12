@@ -1,11 +1,4 @@
 open Import
-module WorkspaceCfg = Vscode.WorkspaceConfiguration
-
-module Binaries = struct
-  let esy = "esy"
-
-  let opam = "opam"
-end
 
 (* Terminology:
    - PackageManager: represents supported package managers
@@ -21,342 +14,236 @@ end
    - Manifest: abstracts functions handling manifest files
      of the supported package managers *)
 
-module PackageManager : sig
-  (** Represents a given package manager that would install the toolchain *)
+module PackageManager = struct
+  module Kind = struct
+    type t =
+      | Opam
+      | Esy
+      | Global
+
+    module Hmap = struct
+      type ('opam, 'esy, 'global) t =
+        { opam : 'opam
+        ; esy : 'esy
+        ; global : 'global
+        }
+    end
+
+    let of_string = function
+      | "opam" -> Some Opam
+      | "esy" -> Some Esy
+      | "global" -> Some Global
+      | _ -> None
+
+    let ofJson json =
+      let open Json.Decode in
+      match of_string (string json) with
+      | Some s -> s
+      | None ->
+        raise (DecodeError "opma | esy | global are the only valid values")
+
+    let to_string = function
+      | Opam -> "opam"
+      | Esy -> "esy"
+      | Global -> "global"
+
+    let toJson s = Json.Encode.string (to_string s)
+  end
+
   type t =
-    | Opam of Path.t
-    | Esy of Path.t
+    | Opam of Opam.t * Opam.Switch.t
+    | Esy of Esy.t * Path.t
     | Global
 
-  val toName : t -> string
+  module Setting = struct
+    type t =
+      | Opam of Opam.Switch.t
+      | Esy of Path.t
+      | Global
 
-  val ofName : root:Path.t -> string -> t option
+    let kind : t -> Kind.t = function
+      | Opam _ -> Opam
+      | Esy _ -> Esy
+      | Global -> Global
 
-  (** Converts to a readable string representation (useful for loggers etc) *)
-  val toString : t -> string
+    let ofJson json =
+      let open Json.Decode in
+      let kind = field "kind" Kind.ofJson json in
+      match (kind : Kind.t) with
+      | Global -> Global
+      | Esy ->
+        let manifest =
+          field "root" (fun js -> Path.ofString (string js)) json
+        in
+        Esy manifest
+      | Opam ->
+        let switch =
+          field "switch" (fun js -> Opam.Switch.ofString (string js)) json
+        in
+        Opam switch
 
-  (** Converts to a valid command name available on the system shell *)
-  val toCmdString : t -> string
+    let toJson (t : t) =
+      let open Json.Encode in
+      let kind = [ ("kind", Kind.toJson (kind t)) ] in
+      match t with
+      | Global -> Json.Encode.object_ kind
+      | Esy manifest ->
+        object_ @@ (("root", string @@ Path.toString manifest) :: kind)
+      | Opam sw ->
+        object_ @@ (("switch", string @@ Opam.Switch.toString sw) :: kind)
 
-  (** comparision function to assist set operations *)
-  val compare : t -> t -> int
+    let t = Settings.create ~scope:Workspace ~key:"sandbox" ~ofJson ~toJson
+  end
 
-  (** find returns a supported package manager from a given list keeping in my
-      Global is a fallback toolchain manager and not exactly a valid package
-      manager (hence the exclusion). TODO: rename this to something that make
-      this behaviour evident *)
-  val findByName : string -> t list -> t option
-
-  val makeEsy : Path.t -> t
-
-  val makeOpam : Path.t -> t
-end = struct
-  type t =
-    | Opam of Path.t
-    | Esy of Path.t
-    | Global
-
-  let toName = function
-    | Opam _ -> Binaries.opam
-    | Esy _ -> Binaries.esy
-    | Global -> "global"
-
-  let ofName ~root = function
-    | "opam" -> Some (Opam root)
-    | "esy" -> Some (Esy root)
-    | "global" -> Some Global
-    | _ -> None
+  let toSetting = function
+    | Esy (_, root) -> Setting.Esy root
+    | Opam (_, switch) -> Setting.Opam switch
+    | Global -> Setting.Global
 
   let toString = function
-    | Esy root -> Printf.sprintf "esy(%s)" (Path.toString root)
-    | Opam root -> Printf.sprintf "opam(%s)" (Path.toString root)
+    | Esy (_, root) -> Printf.sprintf "esy(%s)" (Path.toString root)
+    | Opam (_, switch) ->
+      Printf.sprintf "opam(%s)" (Opam.Switch.toString switch)
     | Global -> "global"
-
-  let toCmdString = function
-    | Opam _ -> "opam"
-    | Esy _ -> "esy"
-    | Global -> "bash"
-
-  let compare x y =
-    match (x, y) with
-    | Esy root1, Esy root2 -> Path.compare root1 root2
-    | Opam root1, Opam root2 -> Path.compare root1 root2
-    | Global, Global -> 0
-    | Opam _, Esy _ -> -1
-    | Esy _, Opam _ -> 1
-    | Esy _, Global -> -1
-    | Opam _, Global -> -1
-    | Global, _ -> 1
-
-  let findByName name xs =
-    List.find_map xs ~f:(function
-      | Global -> None
-      | s ->
-        if toName s = name then
-          Some s
-        else
-          None)
-
-  let makeEsy root = Esy root
-
-  let makeOpam root = Opam root
 end
 
-module PackageManagerSet : sig
-  include Set.S with type elt = PackageManager.t
-end =
-  Set.Make (PackageManager)
-
-let packageManagerSetOfResultList ~debugMsg lst =
-  Js.Console.info debugMsg;
-  match lst with
-  | Ok lst ->
-    List.iter (fun x -> x |> PackageManager.toString |> Js.Console.info) lst;
-    lst |> PackageManagerSet.of_list
-  | Error msg ->
-    Js.Console.error2
-      (Printf.sprintf "Error during extracting %s", debugMsg)
-      msg;
-    PackageManagerSet.empty
-
 type resources =
-  { cmd : Cmd.t
-  ; kind : PackageManager.t
+  { kind : PackageManager.t
   ; projectRoot : Path.t
   }
 
-let makeResources ~projectRoot kind =
-  Cmd.make ~cmd:(PackageManager.toCmdString kind) ()
-  |> Promise.Result.map (fun cmd -> { cmd; kind; projectRoot })
+let availablePackageManagers () =
+  { PackageManager.Kind.Hmap.opam = Opam.make ()
+  ; esy = Esy.make ()
+  ; global = ()
+  }
 
-let ofPackageManagerName ~name ~projectRoot ~toolchainRoot =
-  match PackageManager.ofName ~root:toolchainRoot name with
-  | Some kind -> makeResources kind ~projectRoot
-  | None -> Error ("Invalid package manager name: " ^ name) |> Promise.resolve
-
-let parseOpamEnvOutput (opamEnvOutput : string) =
-  let error message =
-    Error ("invalid opam output: " ^ message ^ "\n" ^ opamEnvOutput)
+let ofSettings () : PackageManager.t option Promise.t =
+  let open Promise.O in
+  let available = availablePackageManagers () in
+  let notAvailable kind =
+    let this_ =
+      match kind with
+      | `Esy -> "esy"
+      | `Opam -> "opam"
+    in
+    message `Warn
+      "This workspace is configured to use an %s sandbox, but %s isn't \
+       available"
+      this_ this_
   in
-  match Sexp.parse_string opamEnvOutput with
-  | Error s -> error s
-  | Ok (Sexp.Atom a) -> error ("unexpected atom " ^ a)
-  | Ok (Sexp.List s) -> (
-    match
-      List.map
-        (function
-          | Sexp.List [ Sexp.Atom key; Atom value ] -> (key, value)
-          | _ -> raise Exit)
-        s
-    with
-    | exception Exit -> error "unable to parse key value list"
-    | kvs -> Ok (Js.Dict.fromList kvs) )
+  match
+    (Settings.get PackageManager.Setting.t : PackageManager.Setting.t option)
+  with
+  | None -> Promise.return None
+  | Some (Esy manifest) -> (
+    available.esy >>| function
+    | None ->
+      notAvailable `Esy;
+      None
+    | Some esy -> Some (PackageManager.Esy (esy, manifest)) )
+  | Some (Opam switch) -> (
+    let open Promise.O in
+    available.opam >>= function
+    | None ->
+      notAvailable `Opam;
+      Promise.return None
+    | Some opam -> (
+      Opam.exists opam ~switch >>| function
+      | false ->
+        message `Warn
+          "Workspace is configured to use the switch %s. This switch does not \
+           exist."
+          (Opam.Switch.toString switch);
+        None
+      | true -> Some (PackageManager.Opam (opam, switch)) ) )
+  | Some PackageManager.Setting.Global ->
+    Promise.return (Some PackageManager.Global)
 
-let env ~cmd ~kind =
-  match kind with
-  | PackageManager.Global -> Ok Process.env |> Promise.resolve
-  | Esy root ->
-    Cmd.output cmd
-      ~args:[| "command-env"; "--json"; "-P"; Path.toString root |]
-      ~cwd:root
-    |> Promise.map
-         (Result.bind ~f:(fun stdout ->
-              match Json.parse stdout with
-              | Some json ->
-                json |> Json.Decode.dict Json.Decode.string |> Result.return
-              | None ->
-                Error ("'esy command-env' returned non-json output: " ^ stdout)))
-  | Opam root ->
-    Cmd.output cmd ~args:[| "env"; "--sexp" |] ~cwd:root
-    |> Promise.map (Result.bind ~f:parseOpamEnvOutput)
+let toSettings (pm : PackageManager.t) =
+  Settings.set PackageManager.Setting.t (PackageManager.toSetting pm)
 
-let supportedPackageManagers ~root =
-  let supportedPackageManagers =
-    [ PackageManager.Esy root; Esy (hiddenEsyDir root); Opam root ]
-  in
-  supportedPackageManagers
-  |> List.map (fun packageManager ->
-         Cmd.make ~cmd:(PackageManager.toName packageManager) ()
-         |> Promise.map (function
-              | Error _ -> None
-              | Ok _ -> Some packageManager))
-  |> Array.of_list |> Promise.all
-  |> Promise.map (fun results ->
-         results
-         |. Belt.Array.keepMap (fun pm -> pm)
-         |> Array.to_list |> Result.return)
-
-let packageManagersListOfLookup = function
-  | [] -> Error "TODO: global toolchain"
-  | pms ->
-    Ok
-      (List.map
-         (function
-           | Manifest.Opam root -> PackageManager.makeOpam root
-           | Esy root -> PackageManager.makeEsy root)
-         pms)
-
-let selectPackageManager ~config choices =
+let selectPackageManager choices =
   let placeHolder =
     "Which package manager would you like to manage the toolchain?"
   in
-  Window.QuickPickOptions.make ~canPickMany:false ~placeHolder ()
-  |> Window.showQuickPick
-       (choices |> List.map PackageManager.toName |> Array.of_list)
-  |> Promise.then_ (function
-       | None ->
-         Window.showInformationMessage "Defaulting to the global toolchain";
-         Promise.Result.return PackageManager.Global
-       | Some packageManagerName ->
-         WorkspaceCfg.configurationTargetToJs Workspace
-         |> WorkspaceCfg.update config "packageManager" packageManagerName
-         |> Promise.map (fun _ ->
-                match PackageManager.findByName packageManagerName choices with
-                | None -> Error "Selected choice was not found in the list"
-                | Some pm -> Ok pm))
+  let choices =
+    let create = Window.QuickPickItem.create in
+    List.map
+      (fun pm ->
+        let quickPick =
+          match pm with
+          | PackageManager.Opam (_, s) ->
+            let label = Opam.Switch.toString s in
+            let detail =
+              match s with
+              | Local _ -> "Local switch"
+              | Named _ -> "Global switch"
+            in
+            create ~label ~detail ()
+          | Esy (_, p) -> create ~label:(Path.toString p) ~description:"Esy" ()
+          | Global ->
+            create ~label:"Global"
+              ~description:"Global toolchain inherited from the environment" ()
+        in
+        (quickPick, pm))
+      choices
+  in
+  let options =
+    Window.QuickPickOptions.make ~canPickMany:false ~placeHolder ()
+  in
+  Window.showQuickPickItems choices options
 
-let init ~projectRoot =
-  Promise.all2
-    ( supportedPackageManagers ~root:projectRoot
-    , Manifest.lookup projectRoot
-      |> Promise.map (Result.bind ~f:packageManagersListOfLookup) )
-  |> Promise.then_ (fun (supportedPackageManagers, detectedPackageManagers) ->
-         let supportedPackageManagers =
-           packageManagerSetOfResultList ~debugMsg:"supported package managers"
-             supportedPackageManagers
-         in
-         let detectedPackageManagers =
-           packageManagerSetOfResultList
-             ~debugMsg:"possibly used package managers" detectedPackageManagers
-         in
-         match
-           PackageManagerSet.inter supportedPackageManagers
-             detectedPackageManagers
-           |> PackageManagerSet.elements
-         with
-         | [] -> (
-           Js.Console.info "Will lookup toolchain from global env";
-           let global = "global" in
-           match PackageManager.ofName ~root:projectRoot global with
-           | Some kind -> makeResources kind ~projectRoot
-           | None ->
-             Error
-               {j| Unexplained exception: PackageManager.ofName returned None for a valid name $global |j}
-             |> Promise.resolve )
-         | [ packageManager ] ->
-           Js.Console.info2 "Toolchain detected"
-             (PackageManager.toString packageManager);
-           makeResources packageManager ~projectRoot
-         | packageManagers -> (
-           let config = Vscode.Workspace.getConfiguration "ocaml" in
-           match
-             ( Vscode.WorkspaceConfiguration.get config "packageManager"
-             , Vscode.WorkspaceConfiguration.get config "toolChainRoot" )
-           with
-           | Some name, Some root ->
-             ofPackageManagerName ~name ~projectRoot
-               ~toolchainRoot:(Path.ofString root)
-           | Some name, None ->
-             ofPackageManagerName ~name ~toolchainRoot:projectRoot ~projectRoot
-           | None, Some _
-           | None, None ->
-             selectPackageManager ~config packageManagers
-             |> Promise.then_ (function
-                  | Error e -> Error e |> Promise.resolve
-                  | Ok pm -> makeResources pm ~projectRoot) ))
+let sandboxCandidates ~projectRoot =
+  let open Promise.O in
+  let available = availablePackageManagers () in
+  let esy =
+    available.esy >>= function
+    | None -> Promise.return []
+    | Some esy ->
+      Esy.discover ~dir:projectRoot
+      >>| List.map (fun manifest -> PackageManager.Esy (esy, manifest))
+  in
+  let opam =
+    available.opam >>= function
+    | None -> Promise.return []
+    | Some opam ->
+      Opam.switchList opam
+      >>| List.map (fun sw -> PackageManager.Opam (opam, sw))
+  in
+  Promise.all2 (esy, opam) >>| fun (esy, opam) ->
+  (PackageManager.Global :: esy) @ opam
 
-let promptSetup fn =
-  Window.showQuickPick [| "yes"; "no" |]
-    (Window.QuickPickOptions.make ~canPickMany:false
-       ~placeHolder:{j|Setup this project's toolchain with 'esy'?|j} ())
-  |> Promise.then_ (function
-       | Some choice when choice = "yes" -> fn ()
-       | Some _
-       | None ->
-         Error "Please setup the toolchain" |> Promise.resolve)
-
-let setupWithProgressIndicator fn =
-  Window.withProgress
-    [%bs.obj
-      { location = Window.locationToJs Window.Notification
-      ; title = "Setting up toolchain..."
-      }]
-    fn
-
-let setupEsy ~cmd ~root =
-  setupWithProgressIndicator (fun progress ->
-      (progress.report [%bs.obj { increment = int_of_float 1. }] [@bs]);
-      Cmd.output cmd ~cwd:root ~args:[||]
-      |> Promise.map (fun _ ->
-             (progress.report [%bs.obj { increment = int_of_float 100. }] [@bs]);
-             Ok ()))
-
-let setupBsb ~cmd ~envWithUnzip:esyEnv folder =
-  setupWithProgressIndicator (fun progress ->
-      let succeeded = ref (Ok ()) in
-      let eventEmitter = Setup.Bsb.make () in
-      Setup.Bsb.onProgress eventEmitter (fun percent ->
-          Js.Console.info2 "Percentage:" percent;
-          (progress.report
-             [%bs.obj { increment = int_of_float (percent *. 100.) }] [@bs]));
-      Setup.Bsb.onEnd eventEmitter (fun () ->
-          (progress.report [%bs.obj { increment = 100 }] [@bs]));
-      Setup.Bsb.onError eventEmitter (fun errorMsg ->
-          succeeded := Error errorMsg);
-      Setup.Bsb.run cmd esyEnv eventEmitter folder
-      |> Promise.map (fun () -> !succeeded))
-
-type esyProjectState =
-  | Ready
-  | PendingEsy
-  | PendingBsb
-
-let esyProjectState ~cmd ~root ~projectRoot =
-  let rootStr = Path.toString root in
-  Cmd.output cmd ~args:[| "status"; "-P"; rootStr |] ~cwd:root
-  |> Promise.map (function
-       | Error _ -> Ok false
-       | Ok esyOutput -> (
-         match Json.parse esyOutput with
-         | None -> Ok false
-         | Some esyResponse ->
-           esyResponse
-           |> Json.Decode.field "isProjectReadyForDev" Json.Decode.bool
-           |> Result.return ))
-  |> Promise.Result.map (fun isProjectReadyForDev ->
-         if isProjectReadyForDev then
-           Ready
-         else if Path.compare root projectRoot = 0 then
-           PendingEsy
-         else
-           PendingBsb)
-
-let setupToolChain { cmd; kind; projectRoot } =
+let setupToolChain { kind; projectRoot } =
   match kind with
   | Global -> Ok () |> Promise.resolve
   | Opam _ -> Ok () |> Promise.resolve
-  | Esy root ->
-    esyProjectState ~cmd ~root ~projectRoot
-    |> Promise.then_ (function
-         | Error e -> Error e |> Promise.resolve
-         | Ok Ready -> Ok () |> Promise.resolve
-         | Ok PendingEsy -> promptSetup (fun () -> setupEsy ~cmd ~root)
-         | Ok PendingBsb -> setupBsb ~cmd ~envWithUnzip:Process.env root)
+  | Esy (esy, manifest) -> Esy.setupToolchain esy ~manifest ~projectRoot
 
-let runSetup ({ cmd; kind; _ } as resources) =
+let makeResources ~projectRoot kind = { projectRoot; kind }
+
+let selectAndSave ~projectRoot =
+  let open Promise.O in
+  sandboxCandidates ~projectRoot >>= fun candidates ->
+  selectPackageManager candidates >>| function
+  | None -> None
+  | Some choice ->
+    let (_ : unit Promise.t) = toSettings choice in
+    Some choice
+
+let getLspCommand t =
+  let name = "ocamllsp" in
+  match t.kind with
+  | Opam (opam, switch) -> Opam.exec opam ~switch ~args:[| name |]
+  | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:[| name |]
+  | Global -> (name, [||])
+
+let runSetup resources =
+  let open Promise.Result.O in
   setupToolChain resources
-  |> Promise.Result.bind (fun () -> env ~cmd ~kind)
-  |> Promise.Result.bind (fun env ->
-         (* This function/callback here is a temporary way to check ocamllsp if
-            installed after setupToolChain completes. TODO: move it inside
-            setupToolChain itself *)
-         Cmd.make ~cmd:"ocamllsp" ~env ())
+  >>= (fun () ->
+        let cmd, args = getLspCommand resources in
+        Cmd.make ~cmd () >>= fun cmd -> Cmd.output cmd ~args)
   |> Promise.map (function
        | Ok _ -> Ok ()
        | Error msg -> Error {j| Toolchain initialisation failed: $msg |j})
-
-let getLspCommand { kind; cmd; _ } =
-  match kind with
-  | Opam _ -> (Cmd.binPath cmd, [| "exec"; "ocamllsp" |])
-  | Esy root -> (Cmd.binPath cmd, [| "-P"; Path.toString root; "ocamllsp" |])
-  | Global -> ("ocamllsp", [||])

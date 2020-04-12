@@ -37,11 +37,15 @@ let make ?(env = Process.env) ~cmd () =
            | [] -> Error {j| Command "$cmd" not found |j}
            | (cmd, _exists) :: _rest -> Ok { cmd; env })
 
-let output ~args ~cwd { cmd; env } =
+let output ~args ?cwd { cmd; env } =
   let shellString = Js.Array.concat args [| cmd |] |> Js.Array.joinWith " " in
   Js.Console.info shellString;
-  let cwd = Path.toString cwd in
-  ChildProcess.exec shellString (ChildProcess.Options.make ~cwd ~env ())
+  let cwd =
+    match cwd with
+    | None -> None
+    | Some cwd -> Some (Path.toString cwd)
+  in
+  ChildProcess.exec shellString (ChildProcess.Options.make ?cwd ~env ())
   |> Promise.map (function
        | Error e -> Error e
        | Ok (exitCode, stdout, stderr) ->

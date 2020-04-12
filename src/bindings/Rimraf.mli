@@ -1,4 +1,3 @@
-
 type t
 
 (* Bindinds for https://www.npmjs.com/package/rimraf. rimraf is a

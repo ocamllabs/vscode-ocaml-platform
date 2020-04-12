@@ -18,23 +18,25 @@
 
 module PackageManager : sig
   type t =
-    | Opam of Path.t
-    | Esy of Path.t
+    | Opam of Opam.t * Opam.Switch.t
+    | Esy of Esy.t * Path.t
     | Global
+
+  val toString : t -> string
 end
 
 type resources
 
-val makeResources :
-  projectRoot:Path.t -> PackageManager.t -> (resources, string) result Promise.t
+val ofSettings : unit -> PackageManager.t option Promise.t
 
-(** [init] requires the process environment the plugin is
-   being run in (ie VSCode's process environment) and the project
-   root and produces a promise of resources available that can later
-   be passed on to runSetup that can be called to install the
-   toolchain.
- *)
-val init : projectRoot:Path.t -> (resources, string) result Promise.t
+val makeResources : projectRoot:Path.t -> PackageManager.t -> resources
+
+(** [selectAndSave] requires the process environment the plugin is being run in
+   (ie VSCode's process environment) and the project root and produces a promise
+   of resources available that can later be passed on to runSetup that can be
+   called to install the toolchain. *)
+
+val selectAndSave : projectRoot:Path.t -> PackageManager.t option Promise.t
 
 (** [runSetup] is a effectful function that triggers setup instructions
    automatically for the user. At present, this functionality

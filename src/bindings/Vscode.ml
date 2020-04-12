@@ -14,7 +14,7 @@ end
 module WorkspaceConfiguration = struct
   type t
 
-  external get' : t -> string -> string Js.Nullable.t = "get" [@@bs.send]
+  external get' : t -> string -> Js.Json.t Js.Nullable.t = "get" [@@bs.send]
 
   let get workspaceConfig key = get' workspaceConfig key |> Js.Nullable.toOption
 
@@ -25,7 +25,7 @@ module WorkspaceConfiguration = struct
   [@@bs.deriving { jsConverter = newType }]
 
   external update :
-    t -> string -> string -> abs_configurationTarget -> unit Promise.t
+    t -> string -> Js.Json.t -> abs_configurationTarget -> unit Promise.t
     = "update"
     [@@bs.send]
 end
@@ -61,6 +61,20 @@ module Workspace = struct
 end
 
 module Window = struct
+  module QuickPickItem = struct
+    type t
+
+    external create :
+         ?alwaysShow:bool
+      -> ?description:string
+      -> ?detail:string
+      -> ?picked:bool
+      -> label:string
+      -> unit
+      -> t = ""
+      [@@bs.obj]
+  end
+
   module QuickPickOptions = struct
     type t = < canPickMany : bool > Js.t
 
@@ -69,11 +83,9 @@ module Window = struct
   end
 
   module MessageItem = struct
-    type t = < title : string > Js.t
+    type t
 
-    let create ~title : t =
-      ignore title;
-      assert false
+    external create : ?title:string -> unit -> t = "" [@@bs.obj]
   end
 
   external showQuickPick' :
@@ -85,13 +97,46 @@ module Window = struct
     showQuickPick' choices quickPickOptions
     |> Promise.map (fun choice -> choice |> Js.Nullable.toOption)
 
-  external showInformationMessage : string -> unit = "showInformationMessage"
+  external _showQuickPickItems :
+       QuickPickItem.t array
+    -> QuickPickOptions.t
+    -> QuickPickItem.t Js.Nullable.t Promise.t = "showQuickPick"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 
-  let showInformationMessage' _msg _choices = Promise.resolve None
+  let showQuickPickItems choices options =
+    _showQuickPickItems (Array.of_list (List.map fst choices)) options
+    |> Promise.map (fun choice ->
+           choice |> Js.Nullable.toOption
+           |. Belt.Option.map (fun q -> List.assq q choices))
+
+  external showInformationMessage : string -> unit Promise.t
+    = "showInformationMessage"
+    [@@bs.module "vscode"] [@@bs.scope "window"]
+
+  external _showInformationMessage' :
+    string -> MessageItem.t array -> MessageItem.t Js.Nullable.t Promise.t
+    = "showInformationMessage"
+    [@@bs.module "vscode"] [@@bs.scope "window"]
+
+  let showInformationMessage' msg choices =
+    let choices =
+      List.map
+        (fun (title, choice) -> (MessageItem.create ~title (), choice))
+        choices
+    in
+    _showInformationMessage' msg (choices |> List.map fst |> Array.of_list)
+    |> Promise.map (fun choice ->
+           choice |> Js.Nullable.toOption
+           |. Belt.Option.map (fun q -> List.assq q choices))
 
   external showErrorMessage : string -> 'a Promise.t = "showErrorMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]
+
+  external showWarningMessage' : string -> 'a Promise.t = "showErrorMessage"
+    [@@bs.module "vscode"] [@@bs.scope "window"]
+
+  let showWarningMessage m =
+    showWarningMessage' m |> Js.Promise.then_ (fun _ -> Js.Promise.resolve ())
 
   type rangeEdge = { character : int }
 
@@ -140,6 +185,15 @@ module Commands = struct
   external register : command:string -> handler:(unit -> unit) -> unit
     = "registerCommand"
     [@@bs.module "vscode"] [@@bs.scope "commands"]
+
+  external _executeCommand :
+    command:string -> args:'a list -> unit Js.Nullable.t Promise.t
+    = "executeCommand"
+    [@@bs.module "vscode"] [@@bs.scope "commands"]
+
+  let executeCommand ~command ~args =
+    _executeCommand ~command ~args
+    |> Promise.then_ (fun _ -> Promise.resolve ())
 end
 
 module ExtensionContext = struct

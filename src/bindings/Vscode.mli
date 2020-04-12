@@ -11,6 +11,8 @@ module Commands : sig
   val get : filterInternal:bool -> string array Promise.t
 
   val register : command:string -> handler:(unit -> unit) -> unit
+
+  val executeCommand : command:string -> args:'a list -> unit Promise.t
 end
 
 module ExtensionContext : sig
@@ -41,7 +43,7 @@ end
 module WorkspaceConfiguration : sig
   type t
 
-  val get : t -> string -> string option
+  val get : t -> string -> Js.Json.t option
 
   type configurationTarget =
     | Global
@@ -50,31 +52,43 @@ module WorkspaceConfiguration : sig
   [@@bs.deriving { jsConverter = newType }]
 
   val update :
-    t -> string -> string -> abs_configurationTarget -> unit Promise.t
+    t -> string -> Js.Json.t -> abs_configurationTarget -> unit Promise.t
 end
 
 module Window : sig
+  module QuickPickItem : sig
+    type t
+
+    val create :
+         ?alwaysShow:bool
+      -> ?description:string
+      -> ?detail:string
+      -> ?picked:bool
+      -> label:string
+      -> unit
+      -> t
+  end
+
   module QuickPickOptions : sig
     type t = < canPickMany : bool > Js.t
 
     val make : ?canPickMany:bool -> ?placeHolder:string -> unit -> t
   end
 
-  module MessageItem : sig
-    type t
-
-    val create : title:string -> t
-  end
-
   val showQuickPick :
     string array -> QuickPickOptions.t -> string option Promise.t
 
-  val showInformationMessage : string -> unit
+  val showQuickPickItems :
+    (QuickPickItem.t * 'a) list -> QuickPickOptions.t -> 'a option Promise.t
+
+  val showInformationMessage : string -> unit Promise.t
 
   val showInformationMessage' :
-    string -> (MessageItem.t * 'a) list -> 'a option Promise.t
+    string -> (string * 'a) list -> 'a option Promise.t
 
   val showErrorMessage : string -> 'a Promise.t
+
+  val showWarningMessage : string -> unit Promise.t
 
   type activeTextEditor = { document : document }
 
