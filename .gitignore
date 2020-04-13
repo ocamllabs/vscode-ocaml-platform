@@ -13,3 +13,4 @@ node_modules/
 .vscode/settings.json
 out/
 yarn-error.log
+_opam
