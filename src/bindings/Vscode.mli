@@ -127,7 +127,11 @@ module Window : sig
 end
 
 module Folder : sig
-  type t = { uri : TextDocument.uri }
+  type t =
+    { uri : TextDocument.uri
+    ; index : int
+    ; name : string
+    }
 end
 
 module Workspace : sig
@@ -136,7 +140,9 @@ module Workspace : sig
     ; removed : Folder.t array
     }
 
-  val rootPath : string
+  val rootPath : unit -> string option
+
+  val workspaceFolders : unit -> Folder.t array
 
   val onDidOpenTextDocument : (TextDocument.event -> unit) -> unit
 

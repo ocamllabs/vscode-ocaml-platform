@@ -45,17 +45,16 @@ module Instance = struct
     client.start () [@bs]
 end
 
-let workspaceRoot () = Path.ofString Workspace.rootPath
+let workspaceRoot () = Belt.Option.map (Workspace.rootPath ()) Path.ofString
 
 let selectSandbox (instance : Instance.t) () =
   let setToolchain =
     let open Promise.O in
-    let projectRoot = workspaceRoot () in
-    Toolchain.selectAndSave ~projectRoot >>= function
+    Toolchain.selectAndSave () >>= function
     | None -> Promise.Result.return ()
     | Some t ->
       Instance.stop instance;
-      let t = Toolchain.makeResources ~projectRoot t in
+      let t = Toolchain.makeResources t in
       Instance.start instance t
   in
   let (_ : unit Promise.t) = handleError Window.showErrorMessage setToolchain in
@@ -75,7 +74,6 @@ let activate _context =
   let instance = Instance.create () in
   Vscode.Commands.register ~command:"ocaml.select-sandbox"
     ~handler:(selectSandbox instance);
-  let projectRoot = workspaceRoot () in
   let open Promise.O in
   let toolchain =
     Toolchain.ofSettings () >>| fun pm ->
@@ -86,7 +84,7 @@ let activate _context =
         Toolchain.PackageManager.Global
       | Some toolchain -> toolchain
     in
-    Toolchain.makeResources ~projectRoot resources
+    Toolchain.makeResources resources
   in
   toolchain >>= fun toolchain ->
   Instance.start instance toolchain
