@@ -1,10 +1,10 @@
 {
   "checksum": "a82ba3fc3f6ad86d71ba9c651c69bdbe",
-  "root": "vscode-ocaml@link-dev:./esy.json",
+  "root": "vscode-ocaml-platform@link-dev:./esy.json",
   "node": {
-    "vscode-ocaml@link-dev:./esy.json": {
-      "id": "vscode-ocaml@link-dev:./esy.json",
-      "name": "vscode-ocaml",
+    "vscode-ocaml-platform@link-dev:./esy.json": {
+      "id": "vscode-ocaml-platform@link-dev:./esy.json",
+      "name": "vscode-ocaml-platform",
       "version": "link-dev:./esy.json",
       "source": { "type": "link-dev", "path": ".", "manifest": "esy.json" },
       "overrides": [],
