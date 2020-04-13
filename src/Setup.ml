@@ -110,7 +110,7 @@ module Bsb = struct
           ~end_:(fun () ->
             (* See comment at the top explaining 96.66 *)
             reportProgress eventEmitter 93.33;
-            (resolve (Ok ()) [@bs])))
+            resolve (Ok ()) [@bs]))
 
   let unzipArtifacts ~esyRoot ~envWithUnzip =
     Cmd.make ~cmd:"unzip" ~env:envWithUnzip ()
