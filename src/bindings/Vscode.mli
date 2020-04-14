@@ -140,7 +140,7 @@ module Workspace : sig
     ; removed : Folder.t array
     }
 
-  val rootPath : unit -> string option
+  val name : unit -> string option
 
   val workspaceFolders : unit -> Folder.t array
 

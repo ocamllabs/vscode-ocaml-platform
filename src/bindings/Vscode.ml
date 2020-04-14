@@ -40,10 +40,10 @@ module Workspace = struct
     ; removed : Folder.t array
     }
 
-  external _rootPath : string Js.Nullable.t = "rootPath"
+  external _name : string Js.Nullable.t = "name"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 
-  let rootPath () = Js.Nullable.toOption _rootPath
+  let name () = Js.Nullable.toOption _name
 
   external _workspaceFolders : Folder.t array Js.Nullable.t = "workspaceFolders"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
