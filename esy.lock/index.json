@@ -1,5 +1,5 @@
 {
-  "checksum": "025921c1eacc27030094c6717f52bc98",
+  "checksum": "6f02687e572afcf5b01556aa6f36ee5f",
   "root": "vscode-ocaml-platform@link-dev:./esy.json",
   "node": {
     "vscode-ocaml-platform@link-dev:./esy.json": {
@@ -11,7 +11,7 @@
       "dependencies": [
         "ocaml@4.6.1000@d41d8cd9", "@opam/reason@opam:3.6.0@2da53ff9",
         "@opam/ocamlformat@opam:0.13.0@216ba5f8",
-        "@opam/ocaml-lsp-server@github:ocaml/ocaml-lsp:ocaml-lsp-server.opam#7592d32fe0cb7c4f7cf74939160802d22e9202e0@d41d8cd9",
+        "@opam/ocaml-lsp-server@github:ocaml/ocaml-lsp:ocaml-lsp-server.opam#7592d32@d41d8cd9",
         "@opam/merlin@opam:3.3.3@d653b06a"
       ],
       "devDependencies": []
@@ -641,17 +641,14 @@
         "@opam/dune@opam:2.0.1@5dc56bd0"
       ]
     },
-    "@opam/ocaml-lsp-server@github:ocaml/ocaml-lsp:ocaml-lsp-server.opam#7592d32fe0cb7c4f7cf74939160802d22e9202e0@d41d8cd9": {
+    "@opam/ocaml-lsp-server@github:ocaml/ocaml-lsp:ocaml-lsp-server.opam#7592d32@d41d8cd9": {
       "id":
-        "@opam/ocaml-lsp-server@github:ocaml/ocaml-lsp:ocaml-lsp-server.opam#7592d32fe0cb7c4f7cf74939160802d22e9202e0@d41d8cd9",
+        "@opam/ocaml-lsp-server@github:ocaml/ocaml-lsp:ocaml-lsp-server.opam#7592d32@d41d8cd9",
       "name": "@opam/ocaml-lsp-server",
-      "version":
-        "github:ocaml/ocaml-lsp:ocaml-lsp-server.opam#7592d32fe0cb7c4f7cf74939160802d22e9202e0",
+      "version": "github:ocaml/ocaml-lsp:ocaml-lsp-server.opam#7592d32",
       "source": {
         "type": "install",
-        "source": [
-          "github:ocaml/ocaml-lsp:ocaml-lsp-server.opam#7592d32fe0cb7c4f7cf74939160802d22e9202e0"
-        ]
+        "source": [ "github:ocaml/ocaml-lsp:ocaml-lsp-server.opam#7592d32" ]
       },
       "overrides": [],
       "dependencies": [
