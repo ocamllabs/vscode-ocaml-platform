@@ -68,6 +68,6 @@ val runSetup : resources -> (unit, string) result Promise.t
 
 (* Helper utils *)
 
-val getLspCommand : resources -> string * string array
+val getLspCommand : resources -> Path.t * string array
 (** Extract lsp command and arguments (Eg. "opam" and [| "exec";
    "ocamllsp" |] *)

@@ -25,6 +25,7 @@ let get t =
 
 let set t v =
   let scope = WorkspaceConfiguration.configurationTargetToJs t.scope in
+  (* TODO this will raise if a workspace isn't open *)
   WorkspaceConfiguration.update section t.key (t.toJson v) scope
 
 let string =

@@ -2,7 +2,7 @@ open Import
 
 type t = Cmd.t
 
-let binary = "esy"
+let binary = Path.ofString "esy"
 
 let make () =
   Cmd.make ~cmd:binary ()

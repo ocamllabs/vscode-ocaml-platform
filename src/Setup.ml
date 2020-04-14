@@ -113,7 +113,7 @@ module Bsb = struct
             resolve (Ok ()) [@bs]))
 
   let unzipArtifacts ~esyRoot ~envWithUnzip =
-    Cmd.make ~cmd:"unzip" ~env:envWithUnzip ()
+    Cmd.make ~cmd:(Path.ofString "unzip") ~env:envWithUnzip ()
     |> Promise.Result.bind (fun unzip ->
            Cmd.output unzip ~args:[| cacheFileName |] ~cwd:esyRoot)
     |> Promise.map (function

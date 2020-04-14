@@ -208,6 +208,8 @@ module Path = struct
   external extname : string -> string = "extname" [@@bs.module "path"]
 
   external dirname : string -> string = "dirname" [@@bs.module "path"]
+
+  external isAbsolute : string -> bool = "isAbsolute" [@@bs.module "path"]
 end
 
 module Response = struct

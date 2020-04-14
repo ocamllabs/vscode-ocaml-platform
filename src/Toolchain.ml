@@ -235,12 +235,12 @@ let selectAndSave () =
     let (_ : unit Promise.t) = toSettings choice in
     Some choice
 
-let getLspCommand (t : PackageManager.t) =
+let getLspCommand (t : PackageManager.t) : Path.t * string array =
   let name = "ocamllsp" in
   match t with
   | Opam (opam, switch) -> Opam.exec opam ~switch ~args:[| name |]
   | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:[| name |]
-  | Global -> (name, [||])
+  | Global -> (Path.ofString name, [||])
 
 let runSetup resources =
   let open Promise.Result.O in

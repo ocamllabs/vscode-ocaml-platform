@@ -16,7 +16,7 @@ module Switch = struct
     | Local p -> Path.toString p
 end
 
-let binary = "opam"
+let binary = Path.ofString "opam"
 
 type t = Cmd.t
 
@@ -57,7 +57,8 @@ let parseEnvOutput (opamEnvOutput : string) =
 let switchList t =
   Cmd.output t ~args:[| "switch"; "list"; "-s" |]
   |> Promise.map (function
-       | Error _ ->
+       | Error e ->
+         Js.Console.log {j|"Unable to read switches: $e"|j};
          message `Warn "Unable to read the list of switches.";
          []
        | Ok out -> parseSwitchList out)

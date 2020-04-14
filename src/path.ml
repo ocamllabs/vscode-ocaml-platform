@@ -3,22 +3,26 @@ let sep =
   | true -> "/"
   | false -> "\\\\"
 
-type t = string list
+type t = string
 
-let ofString s = Array.to_list (Js.String.split sep s)
+let ofString s = s
+
+let isAbsolute t = Node.Path.isAbsolute t
 
 let v = ofString
 
-let toString s = Js.Array.joinWith sep (Array.of_list s)
+let toString s = s
 
-let compare x y = String.compare (toString x) (toString y)
+let compare = String.compare
 
-let extname t = Node.Path.extname (toString t)
+let extname t = Node.Path.extname t
 
-let ( / ) p x = p @ [ x ]
+let ( / ) = Filename.concat
 
 let relative = ( / )
 
-let relative_all p xs = p @ xs
+let relative_all p xs = List.fold_left Filename.concat p xs
 
-let join x y = x @ y
+let join x y = Filename.concat x y
+
+let withExt x ~ext = x ^ ext
