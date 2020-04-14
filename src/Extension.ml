@@ -45,8 +45,6 @@ module Instance = struct
     client.start () [@bs]
 end
 
-let workspaceRoot () = Belt.Option.map (Workspace.rootPath ()) Path.ofString
-
 let selectSandbox (instance : Instance.t) () =
   let setToolchain =
     let open Promise.O in
