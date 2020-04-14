@@ -2,7 +2,7 @@ open Import
 
 type t = Cmd.t
 
-let binary = "esy"
+let binary = Path.ofString "esy"
 
 let make () =
   Cmd.make ~cmd:binary ()
@@ -109,9 +109,9 @@ module State = struct
     | PendingBsb
 end
 
-let state t ~manifest ~projectRoot =
+let state t ~manifest =
   let rootStr = Path.toString manifest in
-  Cmd.output t ~args:[| "status"; "-P"; rootStr |] ~cwd:projectRoot
+  Cmd.output t ~args:[| "status"; "-P"; rootStr |]
   |> Promise.map (function
        | Error _ -> Ok false
        | Ok esyOutput -> (
@@ -124,7 +124,8 @@ let state t ~manifest ~projectRoot =
   |> Promise.Result.map (fun isProjectReadyForDev ->
          if isProjectReadyForDev then
            State.Ready
-         else if Path.compare manifest projectRoot = 0 then
+         else if true then
+           (* TODO this was a check based on projectRoot. This is wrong. *)
            PendingEsy
          else
            PendingBsb)
@@ -171,9 +172,9 @@ let setupEsy t ~manifest =
              progress.report [%bs.obj { increment = int_of_float 100. }] [@bs];
              Ok ()))
 
-let setupToolchain t ~manifest ~projectRoot =
+let setupToolchain t ~manifest =
   let open Promise.Result.O in
-  state t ~manifest ~projectRoot >>= function
+  state t ~manifest >>= function
   | State.Ready -> Promise.Result.return ()
   | PendingEsy -> promptSetup (fun () -> setupEsy t ~manifest)
   | PendingBsb -> setupBsb t ~envWithUnzip:Process.env ~manifest

@@ -29,14 +29,14 @@ type resources
 
 val ofSettings : unit -> PackageManager.t option Promise.t
 
-val makeResources : projectRoot:Path.t -> PackageManager.t -> resources
+val makeResources : PackageManager.t -> resources
 
 (** [selectAndSave] requires the process environment the plugin is being run in
    (ie VSCode's process environment) and the project root and produces a promise
    of resources available that can later be passed on to runSetup that can be
    called to install the toolchain. *)
 
-val selectAndSave : projectRoot:Path.t -> PackageManager.t option Promise.t
+val selectAndSave : unit -> PackageManager.t option Promise.t
 
 val runSetup : resources -> (unit, string) result Promise.t
 (** [runSetup] is a effectful function that triggers setup instructions
@@ -68,6 +68,6 @@ val runSetup : resources -> (unit, string) result Promise.t
 
 (* Helper utils *)
 
-val getLspCommand : resources -> string * string array
+val getLspCommand : resources -> Path.t * string array
 (** Extract lsp command and arguments (Eg. "opam" and [| "exec";
    "ocamllsp" |] *)

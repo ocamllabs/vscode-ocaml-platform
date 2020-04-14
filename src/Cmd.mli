@@ -3,7 +3,7 @@
 type t
 
 val make :
-  ?env:string Js.Dict.t -> cmd:string -> unit -> (t, string) result Promise.t
+  ?env:string Js.Dict.t -> cmd:Path.t -> unit -> (t, string) result Promise.t
 
 type stdout = string
 
@@ -15,4 +15,4 @@ val output :
   -> t
   -> (stdout, stderr) result Promise.t
 
-val binPath : t -> string
+val binPath : t -> Path.t

@@ -8,7 +8,11 @@ module TextDocument = struct
 end
 
 module Folder = struct
-  type t = { uri : TextDocument.uri }
+  type t =
+    { uri : TextDocument.uri
+    ; index : int
+    ; name : string
+    }
 end
 
 module WorkspaceConfiguration = struct
@@ -36,8 +40,16 @@ module Workspace = struct
     ; removed : Folder.t array
     }
 
-  external rootPath : string = "rootPath"
+  external _name : string Js.Nullable.t = "name"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
+
+  let name () = Js.Nullable.toOption _name
+
+  external _workspaceFolders : Folder.t array Js.Nullable.t = "workspaceFolders"
+    [@@bs.module "vscode"] [@@bs.scope "workspace"]
+
+  let workspaceFolders () =
+    Js.Nullable.toOption _workspaceFolders |. Belt.Option.getWithDefault [||]
 
   external onDidOpenTextDocument : (TextDocument.event -> unit) -> unit
     = "onDidOpenTextDocument"
@@ -116,7 +128,7 @@ module Window = struct
   external _showInformationMessage' :
     string -> MessageItem.t array -> MessageItem.t Js.Nullable.t Promise.t
     = "showInformationMessage"
-    [@@bs.module "vscode"] [@@bs.scope "window"]
+    [@@bs.module "vscode"] [@@bs.scope "window"] [@@bs.variadic]
 
   let showInformationMessage' msg choices =
     let choices =

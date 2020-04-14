@@ -107,10 +107,7 @@ module PackageManager = struct
     | Global -> "global"
 end
 
-type resources =
-  { kind : PackageManager.t
-  ; projectRoot : Path.t
-  }
+type resources = PackageManager.t
 
 let availablePackageManagers () =
   { PackageManager.Kind.Hmap.opam = Opam.make ()
@@ -194,15 +191,21 @@ let selectPackageManager choices =
   in
   Window.showQuickPickItems choices options
 
-let sandboxCandidates ~projectRoot =
+let sandboxCandidates ~workspaceFolders =
   let open Promise.O in
   let available = availablePackageManagers () in
   let esy =
     available.esy >>= function
     | None -> Promise.return []
     | Some esy ->
-      Esy.discover ~dir:projectRoot
-      >>| List.map (fun manifest -> PackageManager.Esy (esy, manifest))
+      workspaceFolders
+      |> Array.map (fun (folder : Vscode.Folder.t) ->
+             let dir = Path.ofString folder.uri.fsPath in
+             Esy.discover ~dir)
+      |> Promise.all
+      >>| fun esys ->
+      Array.to_list esys |> List.concat
+      |> List.map (fun manifest -> PackageManager.Esy (esy, manifest))
   in
   let opam =
     available.opam >>= function
@@ -214,29 +217,30 @@ let sandboxCandidates ~projectRoot =
   Promise.all2 (esy, opam) >>| fun (esy, opam) ->
   (PackageManager.Global :: esy) @ opam
 
-let setupToolChain { kind; projectRoot } =
+let setupToolChain (kind : PackageManager.t) =
   match kind with
   | Global -> Ok () |> Promise.resolve
   | Opam _ -> Ok () |> Promise.resolve
-  | Esy (esy, manifest) -> Esy.setupToolchain esy ~manifest ~projectRoot
+  | Esy (esy, manifest) -> Esy.setupToolchain esy ~manifest
 
-let makeResources ~projectRoot kind = { projectRoot; kind }
+let makeResources kind = kind
 
-let selectAndSave ~projectRoot =
+let selectAndSave () =
   let open Promise.O in
-  sandboxCandidates ~projectRoot >>= fun candidates ->
+  let workspaceFolders = Vscode.Workspace.workspaceFolders () in
+  sandboxCandidates ~workspaceFolders >>= fun candidates ->
   selectPackageManager candidates >>| function
   | None -> None
   | Some choice ->
     let (_ : unit Promise.t) = toSettings choice in
     Some choice
 
-let getLspCommand t =
+let getLspCommand (t : PackageManager.t) : Path.t * string array =
   let name = "ocamllsp" in
-  match t.kind with
+  match t with
   | Opam (opam, switch) -> Opam.exec opam ~switch ~args:[| name |]
   | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:[| name |]
-  | Global -> (name, [||])
+  | Global -> (Path.ofString name, [||])
 
 let runSetup resources =
   let open Promise.Result.O in

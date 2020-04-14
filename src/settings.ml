@@ -24,8 +24,11 @@ let get t =
       None )
 
 let set t v =
-  let scope = WorkspaceConfiguration.configurationTargetToJs t.scope in
-  WorkspaceConfiguration.update section t.key (t.toJson v) scope
+  match Vscode.Workspace.name () with
+  | None -> Promise.return ()
+  | Some _ ->
+    let scope = WorkspaceConfiguration.configurationTargetToJs t.scope in
+    WorkspaceConfiguration.update section t.key (t.toJson v) scope
 
 let string =
   let toJson = Js.Json.string in

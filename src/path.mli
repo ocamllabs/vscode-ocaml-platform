@@ -4,6 +4,8 @@ type t
 
 val ofString : string -> t
 
+val isAbsolute : t -> bool
+
 val v : string -> t
 
 val compare : t -> t -> int
@@ -19,3 +21,5 @@ val relative : t -> string -> t
 val relative_all : t -> string list -> t
 
 val join : t -> t -> t
+
+val withExt : t -> ext:string -> t
