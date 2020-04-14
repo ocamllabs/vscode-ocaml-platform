@@ -10,6 +10,23 @@ module O = struct
   let ( >>= ) x f = then_ f x
 end
 
+module Array = struct
+  let findMap (type a b) (f : a -> b option t) (arr : a array) : b option t =
+    let open O in
+    Array.map f arr |> Js.Promise.all
+    |> map (fun arr ->
+           match
+             Js.Array.find
+               (function
+                 | Some _ -> true
+                 | None -> false)
+               arr
+           with
+           | None -> None
+           | Some (Some _ as x) -> x
+           | Some None -> assert false)
+end
+
 module Result = struct
   let bind fn promise =
     let open Js.Promise in
