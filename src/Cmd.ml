@@ -58,7 +58,7 @@ let output ~args ?cwd { cmd; env } =
   ChildProcess.exec shellString (ChildProcess.Options.make ?cwd ~env ())
   |> Promise.map (function
        | Error e -> Error e
-       | Ok (exitCode, stdout, stderr) ->
+       | Ok { ChildProcess.exitCode; stdout; stderr } ->
          if exitCode = 0 then
            Ok stdout
          else

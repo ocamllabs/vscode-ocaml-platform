@@ -185,6 +185,12 @@ module ChildProcess = struct
     -> t = "exec"
     [@@bs.val] [@@bs.module "child_process"]
 
+  type return =
+    { exitCode : int
+    ; stdout : string
+    ; stderr : string
+    }
+
   let exec cmd options =
     let open Promise in
     make (fun ~resolve ~reject:_ ->
@@ -192,7 +198,7 @@ module ChildProcess = struct
         cp :=
           exec cmd options (fun err stdout stderr ->
               if Js.Nullable.isNullable err then (
-                resolve (Ok (!cp##exitCode, stdout, stderr)) [@bs]
+                resolve (Ok { exitCode = !cp##exitCode; stdout; stderr }) [@bs]
               ) else (
                 resolve (Error {j| Exec failed during $cmd |j}) [@bs]
               ));

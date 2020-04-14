@@ -7,6 +7,6 @@ let () =
       testPromise "toBe" (fun () ->
           ChildProcess.exec "echo hey" (ChildProcess.Options.make ())
           |> Promise.map (function
-               | Ok (_exitCode, stdout, _) ->
+               | Ok { ChildProcess.exitCode = _; stdout; stderr = _ } ->
                  expect stdout |> toContainString "hey"
                | Error _ -> fail "exec should have succeeded")))
