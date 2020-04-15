@@ -33,15 +33,15 @@
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(break-before-in|break-cases|break-collection|break-fun-decl|break-fun-sig|break-infix|break-infix-before-func|break-separators|break-sequences|break-string-literals|break-struct)\\b"
+          "match": "\\b(break-before-in|break-cases|break-collection-expressions|break-collection|break-fun-decl|break-fun-sig|break-infix-before-func|break-infix|break-separators|break-sequences|break-string-literals|break-struct)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(cases-exp-indent|cases-matching-exp-indent)\\b"
+          "match": "\\b(cases-exp-indent|cases-matching-exp-indent|comment-check)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(disable|disambiguate-non-breaking-match|doc-comments-padding|doc-comments|doc-comments-tag-only|doc-comments-val|dock-collection-brackets)\\b"
+          "match": "\\b(disable|disambiguate-non-breaking-match|doc-comments-padding|doc-comments-tag-only|doc-comments-val|doc-comments|dock-collection-brackets)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
@@ -61,11 +61,11 @@
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(m|margin|match-indent-nested|match-indent|max-indent|module-item-spacing)\\b"
+          "match": "\\b(m|margin|match-indent-nested|match-indent|max-indent|module-item-spacing|max-iters)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(no-align-cases|no-align-constructors-decl|no-align-variants-decl|no-break-infix-before-func|no-break-sequences|no-disable|no-disambiguate-non-breaking-match|no-dock-collection-brackets|no-leading-nested-match-parens|no-ocp-indent-compat|no-parens-ite|no-parse-docstrings|no-space-around-arrays|no-space-around-lists|no-space-around-records|no-space-around-variants|no-wrap-comments|no-wrap-fun-args)\\b"
+          "match": "\\b(n|nested-match|no-align-cases|no-align-constructors-decl|no-align-variants-decl|no-break-infix-before-func|no-break-sequences|no-disable|no-disambiguate-non-breaking-match|no-dock-collection-brackets|no-leading-nested-match-parens|no-ocp-indent-compat|no-parens-ite|no-parse-docstrings|no-space-around-arrays|no-space-around-lists|no-space-around-records|no-space-around-variants|no-wrap-comments|no-wrap-fun-args)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
@@ -73,7 +73,11 @@
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(parens-ite|parens-tuple|parens-tuple-patterns|parse-docstrings)\\b"
+          "match": "\\b(p|profile|parens-ite|parens-tuple-patterns|parens-tuple|parse-docstrings)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(q|quiet)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
@@ -115,7 +119,7 @@
         },
         {
           "name": "constant.language.ocamlformat",
-          "match": "\\b(closing-on-separate-line|compact)\\b"
+          "match": "\\b(closing-on-separate-line|compact|conventional)\\b"
         },
         {
           "name": "constant.language.ocamlformat",
@@ -139,6 +143,10 @@
         },
         {
           "name": "constant.language.ocamlformat",
+          "match": "\\b(janestreet)\\b"
+        },
+        {
+          "name": "constant.language.ocamlformat",
           "match": "\\b(k-r|keyword-first)\\b"
         },
         {
@@ -152,6 +160,10 @@
         {
           "name": "constant.language.ocamlformat",
           "match": "\\b(natural|nested|never|no|normal)\\b"
+        },
+        {
+          "name": "constant.language.ocamlformat",
+          "match": "\\b(ocamlformat)\\b"
         },
         {
           "name": "constant.language.ocamlformat",
