@@ -6,7 +6,7 @@ build:
 .PHONY: build
 
 fmt:
-	esy ocamlformat --inplace --enable-outside-detected-project $(OCAML_SRCFILES)
-	esy refmt --in-place $(REASON_SRCFILES)
+	ocamlformat --inplace --enable-outside-detected-project $(OCAML_SRCFILES)
+	refmt --in-place $(REASON_SRCFILES)
 	yarn fmt
 .PHONY: fmt
