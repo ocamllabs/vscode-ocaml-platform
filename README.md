@@ -35,8 +35,19 @@ you encounter._
 This extension provides options in VSCode's configuration settings. You can find
 the settings under `File > Preferences > Settings`.
 
-- `ocaml.lsp.path` (optional) - specifies the PATH to `ocamllsp` (from
-  ocaml-lsp).
+| Name             | Description                                              | Default    |
+| ---------------- | -------------------------------------------------------- | ---------- |
+| `ocaml.sandbox`  | Determines where to find the sandbox for a given project | `null`     |
+| `ocaml.lsp.path` | Path to the LSP binary                                   | `ocamllsp` |
+
+## Commands
+
+You can execute it by entering the following command at the command palette
+<kbd>Ctrl</kbd>+<kbd>P</kbd>.
+
+| Name                   | Description                       | Keyboard Shortcuts | Menu Contents |
+| ---------------------- | --------------------------------- | ------------------ | ------------- |
+| `ocaml.select-sandbox` | Select sandbox for this workspace |                    |               |
 
 ## Requirements
 
