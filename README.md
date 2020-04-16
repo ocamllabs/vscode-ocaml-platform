@@ -30,7 +30,7 @@ you encounter._
 - Indentation rules
 - Snippets
 
-## Configurations
+## Configuration
 
 This extension provides options in VSCode's configuration settings. You can find
 the settings under `File > Preferences > Settings`.
