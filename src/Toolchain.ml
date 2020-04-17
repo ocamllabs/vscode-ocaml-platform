@@ -243,7 +243,7 @@ let getLspCommand (t : PackageManager.t) : Path.t * string array =
   | Global -> (Path.ofString name, [||])
 
 let addLspCheckArg args =
-  Array.append args [| "--help" |]
+  Array.append args [| "--help=plain" |]
 
 let runSetup resources =
   let open Promise.Result.O in
