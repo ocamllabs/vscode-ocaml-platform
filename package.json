@@ -280,7 +280,7 @@
     "vscode:prepublish": "yarn run build",
     "package": "vsce package --yarn",
     "fmt:check": "prettier --check .",
-    "fmt:ocaml": "git ls-files '*.ml' '*.mli' | xargs ocamlformat -i",
+    "fmt:ocaml": "git ls-files '*.ml' '*.mli' | xargs esy exec-command -- ocamlformat -i",
     "fmt:metadata": "prettier --write .",
     "fmt": "yarn run fmt:ocaml && yarn fmt:metadata"
   },
