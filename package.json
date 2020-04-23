@@ -279,10 +279,9 @@
     "test": "yarn run test:unit && yarn run test:opam ",
     "vscode:prepublish": "yarn run build",
     "package": "vsce package --yarn",
-    "fmt:check": "prettier --check .",
-    "fmt:ocaml": "git ls-files '*.ml' '*.mli' | xargs esy exec-command -- ocamlformat -i",
-    "fmt:metadata": "prettier --write .",
-    "fmt": "yarn run fmt:ocaml && yarn fmt:metadata"
+    "ocamlformat": "git ls-files '*.ml' '*.mli' | xargs esy exec-command -- ocamlformat",
+    "fmt:check": "yarn ocamlformat --check && prettier --check .",
+    "fmt": "yarn ocamlformat -i && prettier --write ."
   },
   "dependencies": {
     "request": "2.88.2",
