@@ -61,8 +61,8 @@ let selectSandbox (instance : Instance.t) () =
 let suggestToSetupToolchain instance =
   let open Promise.O in
   Vscode.Window.showInformationMessage'
-    "There is no toolchain attached to this project."
-    [ ("select toolchain", ()) ]
+    "Extension is unable to find ocamllsp automatically. Please select package manager you used to install ocamllsp for this project."
+    [ ("Select package manager", ()) ]
   >>| function
   | None -> ()
   | Some () -> selectSandbox instance ()
