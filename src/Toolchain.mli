@@ -38,7 +38,6 @@ val makeResources : PackageManager.t -> resources
 
 val selectAndSave : unit -> PackageManager.t option Promise.t
 
-val runSetup : resources -> (unit, string) result Promise.t
 (** [runSetup] is a effectful function that triggers setup instructions
    automatically for the user. At present, this functionality
    resides in the plugin itself for bucklescript users - to
@@ -65,9 +64,10 @@ val runSetup : resources -> (unit, string) result Promise.t
    like yum/apt/brew or Duniverse), [runSetup] must co-operate and
    detect such installations.
  *)
+val runSetup : resources -> (unit, string) result Promise.t
 
 (* Helper utils *)
 
-val getLspCommand : resources -> Path.t * string array
 (** Extract lsp command and arguments (Eg. "opam" and [| "exec";
    "ocamllsp" |] *)
+val getLspCommand : resources -> Path.t * string array

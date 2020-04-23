@@ -30,7 +30,7 @@ module Instance = struct
     match !t with
     | None -> ()
     | Some (client : LanguageClient.t) ->
-      client.stop () [@bs];
+      (client.stop () [@bs]);
       t := None
 
   let start t toolchain =
@@ -42,7 +42,7 @@ module Instance = struct
         ~serverOptions ~clientOptions:(Client.make ())
     in
     t := Some client;
-    client.start () [@bs]
+    (client.start () [@bs])
 end
 
 let selectSandbox (instance : Instance.t) () =
