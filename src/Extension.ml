@@ -61,7 +61,8 @@ let selectSandbox (instance : Instance.t) () =
 let suggestToSetupToolchain instance =
   let open Promise.O in
   Vscode.Window.showInformationMessage'
-    "Extension is unable to find ocamllsp automatically. Please select package manager you used to install ocamllsp for this project."
+    "Extension is unable to find ocamllsp automatically. Please select package \
+     manager you used to install ocamllsp for this project."
     [ ("Select package manager", ()) ]
   >>| function
   | None -> ()
