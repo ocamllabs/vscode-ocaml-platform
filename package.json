@@ -284,7 +284,7 @@
     "test": "yarn run test:unit && yarn run test:opam ",
     "vscode:prepublish": "yarn run build",
     "package": "vsce package --yarn",
-    "ocamlformat": "git ls-files '*.ml' '*.mli' | xargs esy exec-command -- ocamlformat",
+    "ocamlformat": "git ls-files '*.ml' '*.mli' | xargs yarn esy exec-command -- ocamlformat",
     "fmt:check": "yarn ocamlformat --check && prettier --check .",
     "fmt": "yarn ocamlformat -i && prettier --write .",
     "deps": "esy install"
