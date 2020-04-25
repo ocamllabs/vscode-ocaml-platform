@@ -76,7 +76,7 @@ let activate _context =
   let open Promise.O in
   let toolchain =
     Toolchain.ofSettings () >>| fun pm ->
-    let (resources, isFallback) =
+    let resources, isFallback =
       match pm with
       | None ->
         let (_ : unit Promise.t) = suggestToSetupToolchain instance in
@@ -88,8 +88,10 @@ let activate _context =
   toolchain >>= fun (toolchain, isFallback) ->
   Instance.start instance toolchain
   |> handleError (fun e ->
-      if isFallback then Promise.resolve () else Window.showErrorMessage e
-  )
+         if isFallback then
+           Promise.resolve ()
+         else
+           Window.showErrorMessage e)
   |> Promise.catch (fun e ->
          let message = Node.JsError.ofPromiseError e in
          Window.showErrorMessage {j|Error: $message|j})
