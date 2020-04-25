@@ -286,7 +286,8 @@
     "package": "vsce package --yarn",
     "ocamlformat": "git ls-files '*.ml' '*.mli' | xargs esy exec-command -- ocamlformat",
     "fmt:check": "yarn ocamlformat --check && prettier --check .",
-    "fmt": "yarn ocamlformat -i && prettier --write ."
+    "fmt": "yarn ocamlformat -i && prettier --write .",
+    "deps": "esy install"
   },
   "dependencies": {
     "request": "2.88.2",
