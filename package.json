@@ -300,6 +300,7 @@
     "@glennsl/bs-jest": "0.5.1",
     "@glennsl/bs-json": "5.0.2",
     "bs-platform": "7.3.1",
+    "esy": "^0.6.4",
     "fs-extra": "9.0.0",
     "jest-cli": "25.4.0",
     "mocha": "7.1.1",
