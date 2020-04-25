@@ -6,6 +6,7 @@
 - Improve opam syntax highlighting
 - Fix bugs in ocaml and ocamllex syntax highlighting
 - Add OCamlFormat syntax highlighting
+- Add dune-project syntax highlighting
 
 ## 0.4.0
 

@@ -85,6 +85,16 @@
         "configuration": "./languages/dune.json"
       },
       {
+        "id": "ocaml.dune-project",
+        "aliases": [
+          "dune project"
+        ],
+        "extensions": [
+          "dune-project"
+        ],
+        "configuration": "./languages/dune.json"
+      },
+      {
         "id": "ocaml.merlin",
         "aliases": [
           "Merlin",
@@ -93,16 +103,6 @@
         "extensions": [
           ".merlin"
         ]
-      },
-      {
-        "id": "ocaml.duneproject",
-        "aliases": [
-          "dune project"
-        ],
-        "extensions": [
-          "dune-project"
-        ],
-        "configuration": "./languages/dune.json"
       },
       {
         "id": "ocaml",
@@ -191,6 +191,11 @@
         "language": "ocaml.dune",
         "scopeName": "source.dune",
         "path": "./syntaxes/dune.json"
+      },
+      {
+        "language": "ocaml.dune-project",
+        "scopeName": "source.dune-project",
+        "path": "./syntaxes/dune-project.json"
       },
       {
         "language": "ocaml.merlin",
@@ -299,11 +304,11 @@
     "jest-cli": "25.4.0",
     "mocha": "7.1.1",
     "npm-run-all": "4.1.5",
-    "prettier": "2.0.4",
+    "prettier": "2.0.5",
     "vsce": "1.75.0",
     "vscode": "1.1.36",
     "vscode-test": "1.3.0",
-    "webpack": "4.42.1",
+    "webpack": "4.43.0",
     "webpack-cli": "3.3.11"
   }
 }

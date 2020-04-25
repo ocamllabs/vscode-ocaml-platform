@@ -61,8 +61,9 @@ let selectSandbox (instance : Instance.t) () =
 let suggestToSetupToolchain instance =
   let open Promise.O in
   Vscode.Window.showInformationMessage'
-    "There is no toolchain attached to this project."
-    [ ("select toolchain", ()) ]
+    "Extension is unable to find ocamllsp automatically. Please select package \
+     manager you used to install ocamllsp for this project."
+    [ ("Select package manager", ()) ]
   >>| function
   | None -> ()
   | Some () -> selectSandbox instance ()
@@ -75,18 +76,20 @@ let activate _context =
   let open Promise.O in
   let toolchain =
     Toolchain.ofSettings () >>| fun pm ->
-    let resources =
+    let (resources, isFallback) =
       match pm with
       | None ->
         let (_ : unit Promise.t) = suggestToSetupToolchain instance in
-        Toolchain.PackageManager.Global
-      | Some toolchain -> toolchain
+        (Toolchain.PackageManager.Global, true)
+      | Some toolchain -> (toolchain, false)
     in
-    Toolchain.makeResources resources
+    (Toolchain.makeResources resources, isFallback)
   in
-  toolchain >>= fun toolchain ->
+  toolchain >>= fun (toolchain, isFallback) ->
   Instance.start instance toolchain
-  |> handleError Window.showErrorMessage
+  |> handleError (fun e ->
+      if isFallback then Promise.resolve () else Window.showErrorMessage e
+  )
   |> Promise.catch (fun e ->
          let message = Node.JsError.ofPromiseError e in
          Window.showErrorMessage {j|Error: $message|j})
