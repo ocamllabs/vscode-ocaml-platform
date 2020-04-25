@@ -85,6 +85,16 @@
         "configuration": "./languages/dune.json"
       },
       {
+        "id": "ocaml.dune-project",
+        "aliases": [
+          "dune project"
+        ],
+        "extensions": [
+          "dune-project"
+        ],
+        "configuration": "./languages/dune.json"
+      },
+      {
         "id": "ocaml.merlin",
         "aliases": [
           "Merlin",
@@ -93,16 +103,6 @@
         "extensions": [
           ".merlin"
         ]
-      },
-      {
-        "id": "ocaml.duneproject",
-        "aliases": [
-          "dune project"
-        ],
-        "extensions": [
-          "dune-project"
-        ],
-        "configuration": "./languages/dune.json"
       },
       {
         "id": "ocaml",
@@ -191,6 +191,11 @@
         "language": "ocaml.dune",
         "scopeName": "source.dune",
         "path": "./syntaxes/dune.json"
+      },
+      {
+        "language": "ocaml.dune-project",
+        "scopeName": "source.dune-project",
+        "path": "./syntaxes/dune-project.json"
       },
       {
         "language": "ocaml.merlin",
