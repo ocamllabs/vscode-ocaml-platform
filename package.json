@@ -287,7 +287,7 @@
     "ocamlformat": "git ls-files '*.ml' '*.mli' ':!fixtures/*' | xargs yarn esy exec-command ocamlformat",
     "fmt:check": "yarn ocamlformat --check && prettier --check .",
     "fmt": "yarn ocamlformat -i && prettier --write .",
-    "deps": "esy install && esy ls-builds"
+    "deps": "esy && esy ls-builds"
   },
   "dependencies": {
     "request": "2.88.2",
