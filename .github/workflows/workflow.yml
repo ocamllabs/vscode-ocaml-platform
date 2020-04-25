@@ -28,7 +28,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install packages
-        run: yarn --frozen-lockfile && yarn deps
+        run: yarn --frozen-lockfile
+
+      - name: Install esy deps
+        run: yarn deps
 
       - name: Check formatting
         run: yarn fmt:check
