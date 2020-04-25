@@ -1,6 +1,6 @@
 {
   "name": "ocaml.dune-project",
-  "scopeName": "source.dune-project",
+  "scopeName": "source.ocaml.dune-project",
   "fileTypes": ["dune-project"],
   "patterns": [{ "include": "#stanzas" }, { "include": "#general" }],
   "repository": {
@@ -24,7 +24,8 @@
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
           },
-          "contentName": "variable.other.declaration.dune-project"
+          "contentName": "variable.other.declaration.dune-project",
+          "patterns": [{ "include": "#general" }]
         },
 
         {
@@ -34,7 +35,8 @@
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
           },
-          "contentName": "constant.language.dune-project"
+          "contentName": "constant.language.dune-project",
+          "patterns": [{ "include": "#general" }]
         },
 
         {
@@ -80,7 +82,8 @@
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
               },
-              "contentName": "variable.other.declaration.dune-project"
+              "contentName": "variable.other.declaration.dune-project",
+              "patterns": [{ "include": "#general" }]
             },
 
             {
@@ -156,7 +159,8 @@
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
               },
-              "contentName": "variable.other.declaration.dune-project"
+              "contentName": "variable.other.declaration.dune-project",
+              "patterns": [{ "include": "#general" }]
             },
 
             {
@@ -202,7 +206,8 @@
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
               },
-              "contentName": "variable.other.declaration.dune-project"
+              "contentName": "variable.other.declaration.dune-project",
+              "patterns": [{ "include": "#general" }]
             },
 
             {
@@ -222,7 +227,7 @@
 
         {
           "comment": "using",
-          "begin": "\\(\\s*(using) (menhir)?\\b",
+          "begin": "\\(\\s*(using)(\\s+menhir)?\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" },
@@ -244,7 +249,8 @@
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
           },
-          "contentName": "constant.language.dune-project"
+          "contentName": "constant.language.dune-project",
+          "patterns": [{ "include": "#general" }]
         },
 
         {
@@ -346,6 +352,14 @@
           "match": "\\b(true|false)\\b"
         },
         {
+          "comment": "variable",
+          "begin": "%\\{",
+          "end": "\\}",
+          "beginCaptures": [{ "name": "keyword.operator.dune" }],
+          "endCaptures": [{ "name": "keyword.operator.dune" }],
+          "patterns": [{ "include": "#variables" }]
+        },
+        {
           "comment": "boolean/predicate language",
           "begin": "\\(\\s*(=|<>|>=|<=|<|>)",
           "end": "\\)",
@@ -360,12 +374,13 @@
           "patterns": [{ "include": "#general" }]
         },
         {
-          "comment": "variable",
-          "begin": "%\\{",
-          "end": "\\}",
-          "beginCaptures": [{ "name": "keyword.operator.dune" }],
-          "endCaptures": [{ "name": "keyword.operator.dune" }],
-          "patterns": [{ "include": "#variables" }]
+          "comment": "ordered set language",
+          "begin": "\\(",
+          "end": "\\)",
+          "patterns": [
+            { "name": "keyword.operator.dune", "match": "/" },
+            { "include": "#general" }
+          ]
         }
       ]
     },
