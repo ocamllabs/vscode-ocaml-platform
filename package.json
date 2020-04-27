@@ -95,6 +95,19 @@
         "configuration": "./languages/dune.json"
       },
       {
+        "id": "ocaml.dune-workspace",
+        "aliases": [
+          "dune workspace"
+        ],
+        "filenames": [
+          "dune-workspace"
+        ],
+        "filenamePatterns": [
+          "dune-workspace.*"
+        ],
+        "configuration": "./languages/dune.json"
+      },
+      {
         "id": "ocaml.merlin",
         "aliases": [
           "Merlin",
@@ -189,13 +202,18 @@
     "grammars": [
       {
         "language": "ocaml.dune",
-        "scopeName": "source.dune",
+        "scopeName": "source.ocaml.dune",
         "path": "./syntaxes/dune.json"
       },
       {
         "language": "ocaml.dune-project",
-        "scopeName": "source.dune-project",
+        "scopeName": "source.ocaml.dune-project",
         "path": "./syntaxes/dune-project.json"
+      },
+      {
+        "language": "ocaml.dune-workspace",
+        "scopeName": "source.ocaml.dune-workspace",
+        "path": "./syntaxes/dune-workspace.json"
       },
       {
         "language": "ocaml.merlin",
