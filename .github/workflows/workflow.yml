@@ -31,7 +31,7 @@ jobs:
         run: yarn --frozen-lockfile
 
       - name: Install esy deps
-        run: yarn deps
+        run: yarn esy:deps
 
       - name: Check formatting
         run: yarn esy:fmt:check
