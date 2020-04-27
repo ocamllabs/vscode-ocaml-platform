@@ -284,10 +284,13 @@
     "test": "yarn run test:unit && yarn run test:opam ",
     "vscode:prepublish": "yarn run build",
     "package": "vsce package --yarn",
-    "ocamlformat": "git ls-files '*.ml' '*.mli' ':!fixtures/*' | xargs yarn esy exec-command ocamlformat",
+    "ocamlformat": "git ls-files '*.ml' '*.mli' | xargs ocamlformat",
+    "fmt:ocaml": "yarn ocamlformat -i",
+    "fmt:metadata": "prettier --write .",
     "fmt:check": "yarn ocamlformat --check && prettier --check .",
-    "fmt": "yarn ocamlformat -i && prettier --write .",
-    "deps": "esy && esy ls-builds"
+    "fmt": "yarn fmt:ocaml && yarn fmt:metadata",
+    "esy:deps": "esy && esy ls-builds",
+    "esy:fmt:check": "esy yarn fmt:check"
   },
   "dependencies": {
     "request": "2.88.2",

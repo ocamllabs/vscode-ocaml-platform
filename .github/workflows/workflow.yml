@@ -34,7 +34,7 @@ jobs:
         run: yarn deps
 
       - name: Check formatting
-        run: yarn fmt:check
+        run: yarn esy:fmt:check
 
       - name: Build
         run: yarn package
