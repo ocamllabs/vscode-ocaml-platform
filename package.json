@@ -295,7 +295,6 @@
     "watch:bsb": "bsb -make-world -w",
     "watch:webpack": "webpack --mode development --watch",
     "watch": "run-p watch:bsb watch:webpack",
-    "test:bsb": "node ./test/runBsbTests.js",
     "test:esy": "node ./test/runEsyTests.js",
     "test:unit": "yarn run build:bsb && jest src/",
     "test:opam": "node ./test/runOpamTests.js",
