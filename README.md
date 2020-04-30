@@ -12,16 +12,22 @@ you encounter._
    (or by entering `ext install ocamllabs.ocaml-platform` at the command palette
    <kbd>Ctrl</kbd>+<kbd>P</kbd>)
 2. Open a OCaml/ReasonML project (`File > Add Folder to Workspace...`)
-3. Install `ocamllsp` with [`opam`](https://github.com/ocaml/ocaml-lsp#opam) or [`esy`](https://github.com/ocaml/ocaml-lsp#esy).
+3. Install `ocamllsp` with [`opam`](https://github.com/ocaml/ocaml-lsp#opam) or
+   [`esy`](https://github.com/ocaml/ocaml-lsp#esy).
 
 ### Bucklescript
 
-There is currently no way of installing `ocamlsp` "natively" for Bucklescript projects. As a fast workaround, you can use `esy`:
+There is currently no way of installing `ocamlsp` "natively" for Bucklescript
+projects. As a fast workaround, you can use `esy`:
+
 1. Install esy
+
 ```
 npm i -g esy
 ```
+
 2. Add `esy.json` to the project root with following content:
+
 ```json
 {
   "dependencies": {
@@ -41,11 +47,12 @@ npm i -g esy
   }
 }
 ```
+
 3. Install and build packages
+
 ```
 esy
 ```
-
 
 ## Features
 
