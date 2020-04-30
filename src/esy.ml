@@ -44,10 +44,7 @@ module Discover = struct
                  propertyExists json "dependencies"
                  || propertyExists json "devDependencies"
                then
-                 if propertyExists json "esy" then
-                   Some projectRoot
-                 else
-                   Some (hiddenEsyDir projectRoot)
+                Some projectRoot
                else
                  None)
     | file -> (
@@ -105,8 +102,7 @@ let exec t ~manifest ~args =
 module State = struct
   type t =
     | Ready
-    | PendingEsy
-    | PendingBsb
+    | Pending
 end
 
 let state t ~manifest =
@@ -124,11 +120,8 @@ let state t ~manifest =
   |> Promise.Result.map (fun isProjectReadyForDev ->
          if isProjectReadyForDev then
            State.Ready
-         else if true then
-           (* TODO this was a check based on projectRoot. This is wrong. *)
-           PendingEsy
          else
-           PendingBsb)
+         Pending)
 
 let setupWithProgressIndicator fn =
   Window.withProgress
@@ -137,21 +130,6 @@ let setupWithProgressIndicator fn =
       ; title = "Setting up toolchain..."
       }]
     fn
-
-let setupBsb t ~manifest ~envWithUnzip:esyEnv =
-  setupWithProgressIndicator (fun progress ->
-      let succeeded = ref (Ok ()) in
-      let eventEmitter = Setup.Bsb.make () in
-      Setup.Bsb.onProgress eventEmitter (fun percent ->
-          Js.Console.info2 "Percentage:" percent;
-          progress.report
-            [%bs.obj { increment = int_of_float (percent *. 100.) }] [@bs]);
-      Setup.Bsb.onEnd eventEmitter (fun () ->
-          (progress.report [%bs.obj { increment = 100 }] [@bs]));
-      Setup.Bsb.onError eventEmitter (fun errorMsg ->
-          succeeded := Error errorMsg);
-      Setup.Bsb.run t esyEnv eventEmitter manifest
-      |> Promise.map (fun () -> !succeeded))
 
 (* This doesn't really belong this module, it should be the caller's job to summon UI elements *)
 let promptSetup fn =
@@ -176,5 +154,4 @@ let setupToolchain t ~manifest =
   let open Promise.Result.O in
   state t ~manifest >>= function
   | State.Ready -> Promise.Result.return ()
-  | PendingEsy -> promptSetup (fun () -> setupEsy t ~manifest)
-  | PendingBsb -> setupBsb t ~envWithUnzip:Process.env ~manifest
+  | Pending -> promptSetup (fun () -> setupEsy t ~manifest)
