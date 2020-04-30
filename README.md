@@ -7,13 +7,45 @@ you encounter._
 
 ## Quick start
 
-1. Install [opam](https://opam.ocaml.org) (OCaml Package Manager)
-2. Install this extension from
+1. Install this extension from
    [the VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=ocamllabs.ocaml-platform)
    (or by entering `ext install ocamllabs.ocaml-platform` at the command palette
    <kbd>Ctrl</kbd>+<kbd>P</kbd>)
-3. Install [ocaml-lsp](https://github.com/ocaml/ocaml-lsp)
-4. Open a OCaml/ReasonML project (`File > Add Folder to Workspace...`)
+2. Open a OCaml/ReasonML project (`File > Add Folder to Workspace...`)
+3. Install `ocamllsp` with [`opam`](https://github.com/ocaml/ocaml-lsp#opam) or [`esy`](https://github.com/ocaml/ocaml-lsp#esy).
+
+### Bucklescript
+
+There is currently no way of installing `ocamlsp` "natively" for Bucklescript projects. As a fast workaround, you can use `esy`:
+1. Install esy
+```
+npm i -g esy
+```
+2. Add `esy.json` to the project root with following content:
+```json
+{
+  "dependencies": {
+    "@opam/merlin": "*",
+    "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam#7592d32",
+    "@opam/ocamlformat": "0.13.0",
+    "@opam/reason": "*",
+    "ocaml": "4.6.x"
+  },
+  "resolutions": {
+    "@opam/dune": "2.0.1",
+    "@opam/dune-configurator": "2.0.1",
+    "@opam/dune-private-libs": "2.0.1",
+    "@opam/menhir": "20200123",
+    "@opam/menhirLib": "20200123",
+    "@opam/menhirSdk": "20200123"
+  }
+}
+```
+3. Install and build packages
+```
+esy
+```
+
 
 ## Features
 
