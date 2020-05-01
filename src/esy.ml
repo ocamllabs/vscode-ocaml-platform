@@ -105,8 +105,7 @@ let exec t ~manifest ~args =
 module State = struct
   type t =
     | Ready
-    | PendingEsy
-    | PendingBsb
+    | Pending
 end
 
 let state t ~manifest =
@@ -124,11 +123,8 @@ let state t ~manifest =
   |> Promise.Result.map (fun isProjectReadyForDev ->
          if isProjectReadyForDev then
            State.Ready
-         else if true then
-           (* TODO this was a check based on projectRoot. This is wrong. *)
-           PendingEsy
          else
-           PendingBsb)
+           Pending)
 
 let setupWithProgressIndicator fn =
   Window.withProgress
@@ -174,7 +170,12 @@ let setupEsy t ~manifest =
 
 let setupToolchain t ~manifest =
   let open Promise.Result.O in
-  state t ~manifest >>= function
-  | State.Ready -> Promise.Result.return ()
-  | PendingEsy -> promptSetup (fun () -> setupEsy t ~manifest)
-  | PendingBsb -> setupBsb t ~envWithUnzip:Process.env ~manifest
+  state t ~manifest >>| function
+   | State.Ready -> ()
+   | Pending ->
+     let rootDir = Path.toString manifest in
+     Window.showInformationMessage
+       (Printf.sprintf "Esy dependencies are not installed. Run esy under %s"
+          rootDir)
+     |> ignore;
+     ()
