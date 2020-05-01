@@ -29,6 +29,9 @@
     },
     {
       "include": "#types"
+    },
+    {
+      "include": "#identifiers"
     }
   ],
   "repository": {
@@ -85,6 +88,11 @@
           "begin": "\"",
           "end": "\"",
           "patterns": [
+            {
+              "comment": "escaped newline",
+              "name": "constant.character.escape.dune",
+              "match": "\\\\$"
+            },
             {
               "comment": "escaped backslash",
               "name": "constant.character.escape.ocaml",
@@ -195,10 +203,7 @@
           "match": "\\b(for)\\s([a-z_][A-Za-z0-9_']*)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
-            "2": {
-              "name": "entity.name.function.binding.ocaml",
-              "patterns": [{ "include": "source.ocaml" }]
-            }
+            "2": { "name": "entity.name.function.binding.ocaml" }
           }
         },
         {
@@ -207,10 +212,7 @@
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
-            "3": {
-              "name": "entity.name.function.binding.ocaml",
-              "patterns": [{ "include": "source.ocaml" }]
-            }
+            "3": { "name": "entity.name.function.binding.ocaml" }
           }
         },
         {
@@ -220,10 +222,7 @@
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
             "3": { "patterns": [{ "include": "source.ocaml" }] },
-            "4": {
-              "name": "entity.name.function.binding.ocaml",
-              "patterns": [{ "include": "source.ocaml" }]
-            }
+            "4": { "name": "entity.name.function.binding.ocaml" }
           }
         },
         {
@@ -233,10 +232,7 @@
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
             "3": { "patterns": [{ "include": "source.ocaml" }] },
-            "4": {
-              "name": "entity.name.function.binding.ocaml",
-              "patterns": [{ "include": "source.ocaml" }]
-            }
+            "4": { "name": "entity.name.function.binding.ocaml" }
           }
         },
         {
@@ -245,37 +241,33 @@
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
-            "3": {
-              "name": "entity.name.function.binding.ocaml",
-              "patterns": [{ "include": "source.ocaml" }]
-            }
+            "3": { "name": "entity.name.function.binding.ocaml" }
           }
         },
         {
           "comment": "external declaration assigned to string",
-          "contentName": "string.quoted.double.ocaml",
-          "begin": "\\b(external)\\s+([a-z_][A-Za-z0-9_']*)?(.*=)\\s*(\")",
+          "begin": "\\b(external)\\s+([a-z_][A-Za-z0-9_']*)?(.*=)",
           "beginCaptures": {
             "1": { "name": "keyword.ocaml" },
-            "2": {
-              "name": "entity.name.function.binding.ocaml",
-              "patterns": [{ "include": "source.ocaml" }]
-            },
-            "3": { "patterns": [{ "include": "source.ocaml" }] },
-            "4": { "name": "string.quoted.double.ocaml" }
+            "2": { "name": "entity.name.function.binding.ocaml" },
+            "3": { "patterns": [{ "include": "source.ocaml" }] }
           },
-          "end": "\"",
-          "endCaptures": [{ "name": "string.quoted.double.ocaml" }]
+          "end": "$",
+          "patterns": [
+            {
+              "comment": "string literal",
+              "name": "string.quoted.double.ocaml",
+              "begin": "\"",
+              "end": "\""
+            }
+          ]
         },
         {
           "comment": "external declaration",
           "match": "\\b(external)\\s+([a-z_][A-Za-z0-9_']*)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
-            "2": {
-              "name": "entity.name.function.binding.ocaml",
-              "patterns": [{ "include": "source.ocaml" }]
-            }
+            "2": { "name": "entity.name.function.binding.ocaml" }
           }
         },
         {
@@ -293,10 +285,7 @@
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
             "3": { "name": "keyword.ocaml" },
-            "4": {
-              "name": "entity.name.function.binding.ocaml",
-              "patterns": [{ "include": "source.ocaml" }]
-            }
+            "4": { "name": "entity.name.function.binding.ocaml" }
           }
         },
         {
@@ -306,10 +295,7 @@
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
             "3": { "name": "keyword.ocaml" },
-            "4": {
-              "name": "entity.name.function.binding.ocaml",
-              "patterns": [{ "include": "source.ocaml" }]
-            }
+            "4": { "name": "entity.name.function.binding.ocaml" }
           }
         },
         {
@@ -319,10 +305,7 @@
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
             "3": { "name": "keyword.ocaml" },
-            "4": {
-              "name": "entity.name.function.binding.ocaml",
-              "patterns": [{ "include": "source.ocaml" }]
-            }
+            "4": { "name": "entity.name.function.binding.ocaml" }
           }
         },
         {
@@ -332,10 +315,7 @@
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
             "3": { "name": "keyword.ocaml" },
-            "4": {
-              "name": "entity.name.function.binding.ocaml",
-              "patterns": [{ "include": "source.ocaml" }]
-            }
+            "4": { "name": "entity.name.function.binding.ocaml" }
           }
         },
         {
@@ -346,10 +326,7 @@
             "2": { "name": "keyword.ocaml" },
             "3": { "name": "keyword.ocaml" },
             "4": { "patterns": [{ "include": "source.ocaml" }] },
-            "5": {
-              "name": "entity.name.function.binding.ocaml",
-              "patterns": [{ "include": "source.ocaml" }]
-            }
+            "5": { "name": "entity.name.function.binding.ocaml" }
           }
         },
         {
@@ -359,10 +336,7 @@
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
             "3": { "name": "keyword.ocaml" },
-            "4": {
-              "name": "entity.name.function.binding.ocaml",
-              "patterns": [{ "include": "source.ocaml" }]
-            }
+            "4": { "name": "entity.name.function.binding.ocaml" }
           }
         },
         {
@@ -370,10 +344,7 @@
           "match": "\\b(object)\\s*\\(\\s*([a-z_][A-Za-z0-9_']*)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
-            "2": {
-              "name": "entity.name.function.binding.ocaml",
-              "patterns": [{ "include": "source.ocaml" }]
-            }
+            "2": { "name": "entity.name.function.binding.ocaml" }
           }
         }
       ]
@@ -565,12 +536,6 @@
           "comment": "polymorphic variant tag",
           "name": "constant.language.polymorphic-variant.ocaml",
           "match": "\\`[A-Za-z][A-Za-z0-9_']*\\b"
-        },
-
-        {
-          "comment": "capital identifier for constructor, exception, or module",
-          "name": "constant.language.capital-identifier.ocaml",
-          "match": "\\b[A-Z][A-Za-z0-9_']*('|\\b)"
         }
       ]
     },
@@ -586,6 +551,21 @@
           "comment": "builtin type",
           "name": "support.type.ocaml",
           "match": "\\b(unit|bool|int|int32|int64|nativeint|float|char|bytes|string)\\b"
+        }
+      ]
+    },
+
+    "identifiers": {
+      "patterns": [
+        {
+          "comment": "capital identifier for constructor, exception, or module",
+          "name": "constant.language.capital-identifier.ocaml",
+          "match": "\\b[A-Z][A-Za-z0-9_']*('|\\b)"
+        },
+        {
+          "comment": "lowercase identifier",
+          "name": "source.ocaml",
+          "match": "\\b[a-z_][A-Za-z0-9_']*('|\\b)"
         }
       ]
     }
