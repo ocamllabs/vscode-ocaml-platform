@@ -105,8 +105,7 @@ let exec t ~manifest ~args =
 module State = struct
   type t =
     | Ready
-    | PendingEsy
-    | PendingBsb
+    | Pending
 end
 
 let state t ~manifest =
@@ -124,11 +123,8 @@ let state t ~manifest =
   |> Promise.Result.map (fun isProjectReadyForDev ->
          if isProjectReadyForDev then
            State.Ready
-         else if true then
-           (* TODO this was a check based on projectRoot. This is wrong. *)
-           PendingEsy
          else
-           PendingBsb)
+           Pending)
 
 let setupWithProgressIndicator fn =
   Window.withProgress
@@ -138,14 +134,14 @@ let setupWithProgressIndicator fn =
       }]
     fn
 
-let setupBsb t ~manifest ~envWithUnzip:esyEnv =
+let _setupBsb t ~manifest ~envWithUnzip:esyEnv =
   setupWithProgressIndicator (fun progress ->
       let succeeded = ref (Ok ()) in
       let eventEmitter = Setup.Bsb.make () in
       Setup.Bsb.onProgress eventEmitter (fun percent ->
           Js.Console.info2 "Percentage:" percent;
-          progress.report
-            [%bs.obj { increment = int_of_float (percent *. 100.) }] [@bs]);
+          (progress.report
+             [%bs.obj { increment = int_of_float (percent *. 100.) }] [@bs]));
       Setup.Bsb.onEnd eventEmitter (fun () ->
           (progress.report [%bs.obj { increment = 100 }] [@bs]));
       Setup.Bsb.onError eventEmitter (fun errorMsg ->
@@ -154,7 +150,7 @@ let setupBsb t ~manifest ~envWithUnzip:esyEnv =
       |> Promise.map (fun () -> !succeeded))
 
 (* This doesn't really belong this module, it should be the caller's job to summon UI elements *)
-let promptSetup fn =
+let _promptSetup fn =
   Window.showQuickPick [| "yes"; "no" |]
     (Window.QuickPickOptions.make ~canPickMany:false
        ~placeHolder:{j|Setup this project's toolchain with 'esy'?|j} ())
@@ -164,17 +160,22 @@ let promptSetup fn =
        | None ->
          Error "Please setup the toolchain" |> Promise.resolve)
 
-let setupEsy t ~manifest =
+let _setupEsy t ~manifest =
   setupWithProgressIndicator (fun progress ->
-      progress.report [%bs.obj { increment = int_of_float 1. }] [@bs];
+      (progress.report [%bs.obj { increment = int_of_float 1. }] [@bs]);
       Cmd.output t ~cwd:manifest ~args:[||]
       |> Promise.map (fun _ ->
-             progress.report [%bs.obj { increment = int_of_float 100. }] [@bs];
+             (progress.report [%bs.obj { increment = int_of_float 100. }] [@bs]);
              Ok ()))
 
 let setupToolchain t ~manifest =
   let open Promise.Result.O in
-  state t ~manifest >>= function
-  | State.Ready -> Promise.Result.return ()
-  | PendingEsy -> promptSetup (fun () -> setupEsy t ~manifest)
-  | PendingBsb -> setupBsb t ~envWithUnzip:Process.env ~manifest
+  state t ~manifest >>| function
+  | State.Ready -> ()
+  | Pending ->
+    let rootDir = Path.toString manifest in
+    Window.showInformationMessage
+      (Printf.sprintf "Esy dependencies are not installed. Run esy under %s"
+         rootDir)
+    |> ignore;
+    ()
