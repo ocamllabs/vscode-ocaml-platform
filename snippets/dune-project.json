@@ -14,7 +14,7 @@
   "info": {
     "prefix": "info",
     "body": [
-      "(license $1)\n(authors \"$2\")\n(maintainers \"$3\")\n(source (github $4))\n(bug_reports \"$5\")\n(homepage \"$6\")\n(documentation \"$7\")"
+      "(license $1)\n(authors \"$2\")\n(maintainers \"$3\")\n(source (${4|url,github|} $5))\n(bug_reports \"$6\")\n(homepage \"$7\")\n(documentation \"$8\")"
     ]
   },
   "package": {
