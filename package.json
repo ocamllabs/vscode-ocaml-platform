@@ -22,10 +22,10 @@
   ],
   "activationEvents": [
     "onLanguage:ocaml",
+    "onLanguage:reason",
     "onLanguage:dune",
     "onLanguage:dune-project",
-    "onLanguage:dune-workspace",
-    "onLanguage:reason"
+    "onLanguage:dune-workspace"
   ],
   "icon": "assets/logo.png",
   "contributes": {
@@ -49,6 +49,24 @@
           "default": "ocamllsp",
           "description": "Path to the LSP binary"
         }
+      }
+    },
+    "configurationDefaults": {
+      "[ocaml]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+      },
+      "[dune]": {
+        "editor.tabSize": 1,
+        "editor.insertSpaces": true
+      },
+      "[dune-project]": {
+        "editor.tabSize": 1,
+        "editor.insertSpaces": true
+      },
+      "[dune-workspace]": {
+        "editor.tabSize": 1,
+        "editor.insertSpaces": true
       }
     },
     "problemMatchers": [
