@@ -15,10 +15,9 @@ let format (document : TextDocument.t) (options : Workspace.formattingOptions)
   let documentText = TextDocument.getText document fullDocumentRange in
 
   let newline =
-    if document.eol = EndOfLine.crlf then
-      "\r\n"
-    else
-      "\n"
+    match TextDocument.endOfLineFromJs document.eol with
+    | TextDocument.CRLF -> "\r\n"
+    | TextDocument.LF -> "\n"
   in
 
   (* return the indentation string for a given depth *)

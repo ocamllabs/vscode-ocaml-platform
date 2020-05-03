@@ -1,11 +1,3 @@
-module EndOfLine = struct
-  type t = int
-
-  let crlf = 2
-
-  let lf = 1
-end
-
 module Range = struct
   type t
 
@@ -41,8 +33,13 @@ module TextDocument = struct
 
   type event = { uri : uri }
 
+  type endOfLine =
+    | CRLF [@bs.as 2]
+    | LF [@bs.as 1]
+  [@@bs.deriving { jsConverter = newType }]
+
   type t =
-    { eol : EndOfLine.t
+    { eol : abs_endOfLine
     ; fileName : string
     ; isClosed : bool
     ; isDirty : bool

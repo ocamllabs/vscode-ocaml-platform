@@ -1,11 +1,3 @@
-module EndOfLine : sig
-  type t
-
-  val crlf : t
-
-  val lf : t
-end
-
 module Range : sig
   type t
 
@@ -38,8 +30,13 @@ module TextDocument : sig
 
   type event = { uri : uri }
 
+  type endOfLine =
+    | CRLF
+    | LF
+  [@@bs.deriving { jsConverter = newType }]
+
   type t =
-    { eol : EndOfLine.t
+    { eol : abs_endOfLine
     ; fileName : string
     ; isClosed : bool
     ; isDirty : bool
