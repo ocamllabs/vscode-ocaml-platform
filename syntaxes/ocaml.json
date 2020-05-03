@@ -142,42 +142,42 @@
       "patterns": [
         {
           "comment": "character literal",
-          "name": "constant.character.ocaml",
+          "name": "string.quoted.other.ocaml constant.character.ocaml",
           "match": "'.'"
         },
         {
           "comment": "character literal from escaped backslash",
-          "name": "constant.character.ocaml",
+          "name": "string.quoted.other.ocaml constant.character.ocaml",
           "match": "'(\\\\\\\\)'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
           "comment": "character literal from escaped quote or whitespace",
-          "name": "constant.character.ocaml",
+          "name": "string.quoted.other.ocaml constant.character.ocaml",
           "match": "'(\\\\[\"'ntbr ])'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
           "comment": "character literal from decimal ASCII code",
-          "name": "constant.character.ocaml",
+          "name": "string.quoted.other.ocaml constant.character.ocaml",
           "match": "'(\\\\[0-9]{3})'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
           "comment": "character literal from hexadecimal ASCII code",
-          "name": "constant.character.ocaml",
+          "name": "string.quoted.other.ocaml constant.character.ocaml",
           "match": "'(\\\\x[0-9A-Fa-f]{2})'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
           "comment": "character literal from octal ASCII code",
-          "name": "constant.character.ocaml",
+          "name": "string.quoted.other.ocaml constant.character.ocaml",
           "match": "'(\\\\o[0-3][0-7]{2})'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
           "comment": "character literal from unknown escape sequence",
-          "name": "constant.character.ocaml",
+          "name": "string.quoted.other.ocaml constant.character.ocaml",
           "match": "'(\\\\.)'",
           "captures": {
             "1": { "name": "invalid.illegal.unknown-escape.ocaml" }
