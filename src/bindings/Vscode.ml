@@ -1,3 +1,38 @@
+module EndOfLine = struct
+  type t = int
+
+  let crlf = 2
+
+  let lf = 1
+end
+
+module Range = struct
+  type t
+
+  external make :
+    startLine:int -> startCharacter:int -> endLine:int -> endCharacter:int -> t
+    = "Range"
+    [@@bs.module "vscode"] [@@bs.new]
+end
+
+module TextLine = struct
+  type t =
+    { firstNonWhitespaceCharacterIndex : int
+    ; isEmptyOrWhitespace : bool
+    ; lineNumber : int
+    ; range : Range.t
+    ; rangeIncludingLineBreak : Range.t
+    ; text : string
+    }
+end
+
+module TextEdit = struct
+  type t
+
+  external replace : Range.t -> string -> t = "replace"
+    [@@bs.module "vscode"] [@@bs.scope "TextEdit"]
+end
+
 module TextDocument = struct
   type uri =
     { scheme : string
@@ -5,6 +40,22 @@ module TextDocument = struct
     }
 
   type event = { uri : uri }
+
+  type t =
+    { eol : EndOfLine.t
+    ; fileName : string
+    ; isClosed : bool
+    ; isDirty : bool
+    ; isUntitled : bool
+    ; languageId : string
+    ; lineCount : int
+    ; uri : uri
+    ; version : int
+    }
+
+  external getText : t -> Range.t -> string = "getText" [@@bs.send]
+
+  external lineAt : t -> int -> TextLine.t = "lineAt" [@@bs.send]
 end
 
 module Folder = struct
@@ -39,6 +90,13 @@ module Workspace = struct
     { added : Folder.t array
     ; removed : Folder.t array
     }
+
+  type formattingOptions =
+    { insertSpaces : bool
+    ; tabSize : int
+    }
+
+  type cancellationToken = { isCancellationRequested : bool }
 
   external _name : string Js.Nullable.t = "name"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
@@ -229,23 +287,18 @@ module Languages = struct
     ; language : string
     }
 
+  type documentFormattingEditProvider =
+    { provideDocumentFormattingEdits :
+           TextDocument.t
+        -> Workspace.formattingOptions
+        -> Workspace.cancellationToken
+        -> TextEdit.t array Promise.t
+    }
+
   external registerDocumentFormattingEditProvider :
-    documentSelector -> 'a -> unit = "registerDocumentFormattingEditProvider"
+    documentSelector -> documentFormattingEditProvider -> unit
+    = "registerDocumentFormattingEditProvider"
     [@@bs.module "vscode"] [@@bs.scope "languages"]
-end
-
-module Range = struct
-  type t
-
-  external create : int -> int -> int -> int -> t = "Range"
-    [@@bs.module "vscode"] [@@bs.new]
-end
-
-module TextEdit = struct
-  type t
-
-  external replace : Range.t -> string -> t = "replace"
-    [@@bs.module "vscode"] [@@bs.scope "TextEdit"]
 end
 
 module LanguageClient = struct

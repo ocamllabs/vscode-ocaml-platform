@@ -1,3 +1,35 @@
+module EndOfLine : sig
+  type t
+
+  val crlf : t
+
+  val lf : t
+end
+
+module Range : sig
+  type t
+
+  val make :
+    startLine:int -> startCharacter:int -> endLine:int -> endCharacter:int -> t
+end
+
+module TextLine : sig
+  type t =
+    { firstNonWhitespaceCharacterIndex : int
+    ; isEmptyOrWhitespace : bool
+    ; lineNumber : int
+    ; range : Range.t
+    ; rangeIncludingLineBreak : Range.t
+    ; text : string
+    }
+end
+
+module TextEdit : sig
+  type t
+
+  val replace : Range.t -> string -> t
+end
+
 module TextDocument : sig
   type uri =
     { scheme : string
@@ -5,6 +37,22 @@ module TextDocument : sig
     }
 
   type event = { uri : uri }
+
+  type t =
+    { eol : EndOfLine.t
+    ; fileName : string
+    ; isClosed : bool
+    ; isDirty : bool
+    ; isUntitled : bool
+    ; languageId : string
+    ; lineCount : int
+    ; uri : uri
+    ; version : int
+    }
+
+  val getText : t -> Range.t -> string
+
+  val lineAt : t -> int -> TextLine.t
 end
 
 module Commands : sig
@@ -17,27 +65,6 @@ end
 
 module ExtensionContext : sig
   type t
-end
-
-module Languages : sig
-  type documentSelector =
-    { scheme : string
-    ; language : string
-    }
-
-  val registerDocumentFormattingEditProvider : documentSelector -> 'a -> unit
-end
-
-module Range : sig
-  type t
-
-  val create : int -> int -> int -> int -> t
-end
-
-module TextEdit : sig
-  type t
-
-  val replace : Range.t -> string -> t
 end
 
 module WorkspaceConfiguration : sig
@@ -140,6 +167,13 @@ module Workspace : sig
     ; removed : Folder.t array
     }
 
+  type formattingOptions =
+    { insertSpaces : bool
+    ; tabSize : int
+    }
+
+  type cancellationToken = { isCancellationRequested : bool }
+
   val name : unit -> string option
 
   val workspaceFolders : unit -> Folder.t array
@@ -154,6 +188,24 @@ module Workspace : sig
   val textDocuments : TextDocument.event array
 
   val getConfiguration : string -> WorkspaceConfiguration.t
+end
+
+module Languages : sig
+  type documentSelector =
+    { scheme : string
+    ; language : string
+    }
+
+  type documentFormattingEditProvider =
+    { provideDocumentFormattingEdits :
+           TextDocument.t
+        -> Workspace.formattingOptions
+        -> Workspace.cancellationToken
+        -> TextEdit.t array Promise.t
+    }
+
+  val registerDocumentFormattingEditProvider :
+    documentSelector -> documentFormattingEditProvider -> unit
 end
 
 module LanguageClient : sig

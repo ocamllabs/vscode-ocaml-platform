@@ -22,6 +22,9 @@
   ],
   "activationEvents": [
     "onLanguage:ocaml",
+    "onLanguage:ocaml.dune",
+    "onLanguage:ocaml.dune-project",
+    "onLanguage:ocaml.dune-workspace",
     "onLanguage:reason"
   ],
   "icon": "assets/logo.png",
