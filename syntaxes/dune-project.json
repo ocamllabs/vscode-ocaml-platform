@@ -1,6 +1,6 @@
 {
-  "name": "ocaml.dune-project",
-  "scopeName": "source.ocaml.dune-project",
+  "name": "dune-project",
+  "scopeName": "source.dune-project",
   "fileTypes": ["dune-project"],
   "patterns": [{ "include": "#stanzas" }, { "include": "#general" }],
   "repository": {
