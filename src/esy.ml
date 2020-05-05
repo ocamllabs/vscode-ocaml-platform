@@ -100,7 +100,8 @@ module Discover = struct
 
   let run ~dir : Path.t list Promise.t =
     dir |> getUpstreamDirs |> Array.of_list |> Array.map parseDir |> Promise.all
-    |> Promise.map (fun res -> res |> Array.to_list |> Array.concat |> foldResults)
+    |> Promise.map (fun res ->
+           res |> Array.to_list |> Array.concat |> foldResults)
 end
 
 let discover = Discover.run
