@@ -41,13 +41,11 @@ module Discover = struct
              | None -> None
              | Some json ->
                if
-                 propertyExists json "dependencies"
-                 || propertyExists json "devDependencies"
+                 ( propertyExists json "dependencies"
+                 || propertyExists json "devDependencies" )
+                 && propertyExists json "esy"
                then
-                 if propertyExists json "esy" then
-                   Some projectRoot
-                 else
-                   Some (hiddenEsyDir projectRoot)
+                 Some projectRoot
                else
                  None)
     | file -> (
