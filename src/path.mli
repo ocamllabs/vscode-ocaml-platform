@@ -23,3 +23,7 @@ val relative_all : t -> string list -> t
 val join : t -> t -> t
 
 val withExt : t -> ext:string -> t
+
+val split : t -> string list
+
+val concat : string list -> t
