@@ -80,7 +80,7 @@ module Discover = struct
       [||] results
     |> Array.to_list
 
-  let run ~dir : Path.t list Promise.t =
+  let parseDir dir =
     let open Promise.O in
     (Path.toString dir |> Fs.readDir >>| function
      | Error _ ->
@@ -89,10 +89,18 @@ module Discover = struct
          (Path.toString dir);
        [||]
      | Ok res -> res)
-    >>= fun files ->
-    files
-    |> Js.Array.map (parseFile dir)
-    |> Promise.all |> Promise.map foldResults
+    >>= fun files -> files |> Js.Array.map (parseFile dir) |> Promise.all
+
+  let getUpstreamDirs dir =
+    let dirList = dir |> Path.split in
+    dirList |> List.length
+    |. Belt.List.makeBy (fun i ->
+           dirList |. Belt.List.take (i + 1) |. Belt.Option.map Path.concat)
+    |. Belt.List.keepMap (fun x -> x)
+
+  let run ~dir : Path.t list Promise.t =
+    dir |> getUpstreamDirs |> Array.of_list |> Array.map parseDir |> Promise.all
+    |> Promise.map (fun res -> res |> Array.to_list |> Array.concat |> foldResults)
 end
 
 let discover = Discover.run
