@@ -78,8 +78,11 @@
         {
           "comment": "quoted string literal",
           "name": "string.quoted.braced.ocaml",
-          "begin": "\\{[a-z_]*\\|",
+          "begin": "\\{(%%?[A-Za-z_][A-Za-z0-9_']*(\\.[A-Za-z_][A-Za-z0-9_']*)*\\s*)?[a-z_]*\\|",
           "end": "\\|[a-z_]*\\}",
+          "beginCaptures": {
+            "1": { "patterns": [{ "include": "source.ocaml" }] }
+          },
           "patterns": [{ "include": "#strings" }]
         },
         {
@@ -207,8 +210,16 @@
           }
         },
         {
+          "comment": "local open/exception/module",
+          "match": "\\b(let)\\s+(open|exception|module)\\b",
+          "captures": {
+            "1": { "name": "keyword.ocaml" },
+            "2": { "name": "keyword.ocaml" }
+          }
+        },
+        {
           "comment": "let expression",
-          "match": "\\b(let)\\s+(rec\\s+)?(lazy\\s+)?([a-z_][A-Za-z0-9_']*)\\s*(?==|:)",
+          "match": "\\b(let)\\s+(rec\\s+)?(lazy\\s+)?([a-z_][A-Za-z0-9_']*)\\b(?!\\s*,)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
@@ -228,7 +239,7 @@
         },
         {
           "comment": "and declaration for let bindings, type declarations, class bindings, or class type definitions",
-          "match": "\\b(and)\\s+((?:virtual|lazy)\\s+)?(_\\s+|'[A-Za-z][A-Za-z0-9_']*\\s+|\\(.*\\)\\s+)?([a-z_][A-Za-z0-9_']*)\\s*(?==|:|$)",
+          "match": "\\b(and)\\s+((?:virtual|lazy)\\s+)?(_\\s+|'[A-Za-z][A-Za-z0-9_']*\\s+|\\(.*\\)\\s+)?([a-z_][A-Za-z0-9_']*)\\b(?!\\s*,)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
@@ -238,7 +249,7 @@
         },
         {
           "comment": "using binding operators",
-          "match": "\\b(let|and)([$&*+\\-/=>@^|<][!?$&*+\\-/=>@^|%:]*)\\s*(lazy\\s+)?([a-z_][A-Za-z0-9_']*)\\s*(?==|:)",
+          "match": "\\b(let|and)([$&*+\\-/=>@^|<][!?$&*+\\-/=>@^|%:]*)\\s*(lazy\\s+)?([a-z_][A-Za-z0-9_']*)\\b(?!\\s*,)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
