@@ -60,6 +60,10 @@ struct
   type t = S.t
 
   external on : t -> string -> (Buffer.t -> unit) -> unit = "on" [@@bs.send]
+
+  external write : t -> string -> unit = "write" [@@bs.send]
+
+  external end_ : t -> unit = "end" [@@bs.send]
 end
 
 module Stream = StreamFunctor (struct
@@ -171,6 +175,8 @@ end
 module ChildProcess = struct
   type t = < exitCode : int > Js.t
 
+  external get_stdin : t -> Stream.t = "stdin" [@@bs.get]
+
   module Options = struct
     type t
 
@@ -191,18 +197,22 @@ module ChildProcess = struct
     ; stderr : string
     }
 
-  let exec cmd options =
-    let open Promise in
-    make (fun ~resolve ~reject:_ ->
-        let cp = ref [%bs.obj { exitCode = 0 }] in
-        cp :=
-          exec cmd options (fun err stdout stderr ->
-              if Js.Nullable.isNullable err then (
-                resolve (Ok { exitCode = !cp##exitCode; stdout; stderr }) [@bs]
-              ) else (
-                resolve (Error {j| Exec failed during $cmd |j}) [@bs]
-              ));
-        ())
+  let exec cmd ?stdin options =
+    Promise.make @@ fun ~resolve ~reject:_ ->
+    let cp = ref [%bs.obj { exitCode = 0 }] in
+    cp :=
+      exec cmd options (fun err stdout stderr ->
+          if Js.Nullable.isNullable err then (
+            resolve (Ok { exitCode = !cp##exitCode; stdout; stderr }) [@bs]
+          ) else (
+            resolve (Error {j| Exec failed during $cmd |j}) [@bs]
+          ));
+    match stdin with
+    | Some text ->
+      let stdinStream = get_stdin !cp in
+      Stream.write stdinStream text;
+      Stream.end_ stdinStream
+    | None -> ()
 end
 
 module Path = struct

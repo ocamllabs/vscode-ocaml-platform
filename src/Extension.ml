@@ -73,15 +73,11 @@ let activate _context =
   let instance = Instance.create () in
   Vscode.Commands.register ~command:"ocaml.select-sandbox"
     ~handler:(selectSandbox instance);
-  Vscode.Languages.registerDocumentFormattingEditProvider
-    Vscode.Languages.{ scheme = "file"; language = "dune" }
-    SexpFormatter.formattingProvider;
-  Vscode.Languages.registerDocumentFormattingEditProvider
-    Vscode.Languages.{ scheme = "file"; language = "dune-project" }
-    SexpFormatter.formattingProvider;
-  Vscode.Languages.registerDocumentFormattingEditProvider
-    Vscode.Languages.{ scheme = "file"; language = "dune-workspace" }
-    SexpFormatter.formattingProvider;
+  [ "dune"; "dune-project"; "dune-workspace" ]
+  |> List.iter (fun language ->
+         Vscode.Languages.registerDocumentFormattingEditProvider
+           Vscode.Languages.{ language; scheme = "file" }
+           DuneFormatter.formattingProvider);
   let open Promise.O in
   let toolchain =
     Toolchain.ofSettings () >>| fun pm ->
