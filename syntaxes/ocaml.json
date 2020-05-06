@@ -210,6 +210,14 @@
           }
         },
         {
+          "comment": "local open/exception/module",
+          "match": "\\b(let)\\s+(open|exception|module)\\b",
+          "captures": {
+            "1": { "name": "keyword.ocaml" },
+            "2": { "name": "keyword.ocaml" }
+          }
+        },
+        {
           "comment": "let expression",
           "match": "\\b(let)\\s+(rec\\s+)?(lazy\\s+)?([a-z_][A-Za-z0-9_']*)\\b(?!\\s*,)",
           "captures": {
