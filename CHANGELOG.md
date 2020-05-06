@@ -8,7 +8,7 @@
 - Add OCamlFormat syntax highlighting
 - Add dune-project syntax highlighting
 - Add dune-workspace syntax highlighting
-- Add indentation formatting for dune/dune-project/dune-workspace files
+- Add formatting for dune/dune-project/dune-workspace files with format-dune-file
 
 ## 0.4.0
 
