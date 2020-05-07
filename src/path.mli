@@ -24,6 +24,4 @@ val join : t -> t -> t
 
 val withExt : t -> ext:string -> t
 
-val split : t -> string list
-
-val concat : string list -> t
+val parent : t -> t option

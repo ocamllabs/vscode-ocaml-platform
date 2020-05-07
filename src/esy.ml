@@ -71,13 +71,14 @@ module Discover = struct
       | _ -> None |> Promise.resolve )
 
   let foldResults results =
-    Js.Array.reduce
-      (fun acc x ->
-        Js.Array.concat acc
-          ( match x with
-          | Some x -> Array.of_list [ x ]
-          | None -> [||] ))
-      [||] results
+    results |> Array.to_list |> Array.concat
+    |> Js.Array.reduce
+         (fun acc x ->
+           Js.Array.concat acc
+             ( match x with
+             | Some x -> Array.of_list [ x ]
+             | None -> [||] ))
+         [||]
     |> Array.to_list
 
   let parseDir dir =
@@ -91,17 +92,17 @@ module Discover = struct
      | Ok res -> res)
     >>= fun files -> files |> Js.Array.map (parseFile dir) |> Promise.all
 
-  let getUpstreamDirs dir =
-    let dirList = dir |> Path.split in
-    dirList |> List.length
-    |. Belt.List.makeBy (fun i ->
-           dirList |. Belt.List.take (i + 1) |. Belt.Option.map Path.concat)
-    |. Belt.List.keepMap (fun x -> x)
+  let rec parseDirsUp' parsedDirs dir =
+    let parsedDirs = parseDir dir :: parsedDirs in
+    match Path.parent dir with
+    | None -> parsedDirs
+    | Some dir -> parseDirsUp' parsedDirs dir
+
+  let parseDirsUp dir = parseDirsUp' [] dir
 
   let run ~dir : Path.t list Promise.t =
-    dir |> getUpstreamDirs |> Array.of_list |> Array.map parseDir |> Promise.all
-    |> Promise.map (fun res ->
-           res |> Array.to_list |> Array.concat |> foldResults)
+    dir |> parseDirsUp |> Array.of_list |> Promise.all
+    |> Promise.map foldResults
 end
 
 let discover = Discover.run

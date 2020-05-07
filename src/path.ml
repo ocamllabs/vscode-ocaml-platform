@@ -27,7 +27,9 @@ let join x y = Filename.concat x y
 
 let withExt x ~ext = x ^ ext
 
-let split x =
-  x |> Js.String.split sep |> Array.to_list |> List.filter (fun p -> p != "")
-
-let concat x = sep ^ (x |> Array.of_list |> Js.Array.joinWith sep)
+let parent x =
+  match x |> Js.String.split sep with
+  | [||]
+  | [| "" |] ->
+    None
+  | x -> Some (x |> Js.Array.slice ~start:0 ~end_:~-1 |> Js.Array.joinWith sep)
