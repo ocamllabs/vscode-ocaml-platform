@@ -45,6 +45,11 @@
           "type": "string",
           "default": "ocamllsp",
           "description": "Path to the LSP binary"
+        },
+        "ocaml.refmt.width": {
+          "type": "number",
+          "defult": "null",
+          "desscription": "Width of lines when formatting code with refmt"
         }
       }
     },
