@@ -36,6 +36,14 @@ jobs:
       - name: Build
         run: yarn package
 
+      - name: Publish
+        if: |
+          success() &&
+          runner.os == 'Linux' &&
+          github.event_name == 'push' &&
+          startsWith(github.ref, 'refs/tags/')
+        run: yarn publish --pat ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
+
       - name: Upload extension installer to artifact
         uses: actions/upload-artifact@v2-preview
         with:
