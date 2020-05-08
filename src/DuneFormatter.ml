@@ -13,12 +13,14 @@ let format (document : TextDocument.t) options token =
   (* text of entire document *)
   let documentText = TextDocument.getText document fullDocumentRange in
 
-  ChildProcess.exec "dune format-dune-file" ~stdin:documentText
-    (ChildProcess.Options.make ())
+  Cmd.make ~cmd:(Path.ofString "dune") ()
+  |> Promise.Result.bind (fun duneCmd ->
+         Cmd.output duneCmd
+           ~args:[| "format-dune-file"; document.fileName |]
+           ~stdin:documentText)
   |> Promise.map (function
-       | Ok { ChildProcess.exitCode = 0; stdout; stderr } ->
-         [| TextEdit.replace fullDocumentRange stdout |]
-       | _ -> [||])
+       | Ok stdout -> [| TextEdit.replace fullDocumentRange stdout |]
+       | Error _ -> [||])
 
 let formattingProvider : Languages.documentFormattingEditProvider =
   Languages.{ provideDocumentFormattingEdits = format }
