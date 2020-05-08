@@ -15,9 +15,19 @@ module Client = struct
 end
 
 module Server = struct
+  let refmtSettings =
+    Settings.create ~scope:Workspace ~key:"refmt.width" ~ofJson:Json.Decode.int
+      ~toJson:Json.Encode.int
+
   let make (toolchain : Toolchain.resources) :
       Vscode.LanguageClient.serverOptions =
     let command, args = Toolchain.getLspCommand toolchain in
+    let args =
+      match Settings.get refmtSettings with
+      | None -> args
+      | Some refmtWidth ->
+        Array.concat [ args; [| "--refmt-width"; string_of_int refmtWidth |] ]
+    in
     { command = Path.toString command; args; options = { env = Process.env } }
 end
 
