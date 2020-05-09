@@ -70,17 +70,6 @@ module Discover = struct
       | ".opam" -> Promise.return (Some manifestFile)
       | _ -> None |> Promise.resolve )
 
-  let foldResults results =
-    results |> Array.to_list |> Array.concat
-    |> Js.Array.reduce
-         (fun acc x ->
-           Js.Array.concat acc
-             ( match x with
-             | Some x -> Array.of_list [ x ]
-             | None -> [||] ))
-         [||]
-    |> Array.to_list
-
   let parseDir dir =
     let open Promise.O in
     (Path.toString dir |> Fs.readDir >>| function
@@ -90,19 +79,20 @@ module Discover = struct
          (Path.toString dir);
        [||]
      | Ok res -> res)
-    >>= fun files -> files |> Js.Array.map (parseFile dir) |> Promise.all
+    >>= fun files -> files |> Promise.Array.filterMap (parseFile dir)
 
-  let rec parseDirsUp' parsedDirs dir =
-    let parsedDirs = parseDir dir :: parsedDirs in
-    match Path.parent dir with
-    | None -> parsedDirs
-    | Some dir -> parseDirsUp' parsedDirs dir
-
-  let parseDirsUp dir = parseDirsUp' [] dir
+  let parseDirsUp dir =
+    let rec loop parsedDirs dir =
+      let parsedDirs = parseDir dir :: parsedDirs in
+      match Path.parent dir with
+      | None -> parsedDirs
+      | Some dir -> loop parsedDirs dir
+    in
+    loop [] dir
 
   let run ~dir : Path.t list Promise.t =
     dir |> parseDirsUp |> Array.of_list |> Promise.all
-    |> Promise.map foldResults
+    |> Promise.map (fun x -> Array.to_list (Js.Array.concatMany x [||]))
 end
 
 let discover = Discover.run
