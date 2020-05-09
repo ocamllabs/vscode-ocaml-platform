@@ -14,16 +14,16 @@ jobs:
           - ubuntu-latest
           - windows-latest
         node-version:
-          - 13.x
+          - 14.x
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2.1.0
+        uses: actions/checkout@v2
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1.4.1
+        uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -45,7 +45,7 @@ jobs:
         run: yarn publish --pat ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
 
       - name: Upload extension installer to artifact
-        uses: actions/upload-artifact@v2-preview
+        uses: actions/upload-artifact@v2
         with:
           name: ocaml-platform-${{ matrix.os }}-${{ github.sha }}
           path: ocaml-platform-*.vsix
