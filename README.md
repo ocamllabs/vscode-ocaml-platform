@@ -68,6 +68,7 @@ esy
   - OCamlFormat
   - ocamllex
   - opam
+  - META
 - Indentation rules
 - Snippets
 

@@ -10,6 +10,7 @@
 - Add dune-workspace syntax highlighting
 - Add dune snippets
 - Add dune-project snippets
+- Add META syntax highlighting
 
 ## 0.4.0
 
