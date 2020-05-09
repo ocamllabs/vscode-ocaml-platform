@@ -17,6 +17,7 @@ suite("Basic tests", () => {
     fs.copySync(sampleEsySrc, projectPath);
     console.log("Running in", projectPath);
     cp.execSync("esy", { cwd: projectPath });
+    cp.execSync("esy status", { cwd: projectPath });
 
     fs.writeFileSync(
       path.join(projectPath, ".vscode", "settings.json"),
