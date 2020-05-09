@@ -25,6 +25,11 @@ module Array = struct
            | None -> None
            | Some (Some _ as x) -> x
            | Some None -> assert false)
+
+  let filterMap (type a b) (f : a -> b option t) (a : a array) : b array t =
+    let open O in
+    Array.map f a |> Js.Promise.all >>| fun a ->
+    Belt.Array.keepMap a (fun x -> x)
 end
 
 module Result = struct
