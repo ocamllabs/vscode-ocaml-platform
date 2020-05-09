@@ -24,18 +24,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Use OCaml ${{ matrix.ocaml-version }}
-        uses: avsm/setup-ocaml@v1
-        with:
-          ocaml-version: ${{ matrix.ocaml-version }}
-
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Install latest esy
-        run: npm install --global esy
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -57,6 +49,14 @@ jobs:
           path: ~/.opam
           # opam cache is coupled to esy lock files, so both caches will be wiped whenever esy deps change
           key: ${{ runner.os }}-opam-${{ matrix.ocaml-version }}-${{ hashFiles('**/index.json') }}
+
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: avsm/setup-ocaml@v1
+        with:
+          ocaml-version: ${{ matrix.ocaml-version }}
+
+      - name: Install latest esy
+        run: npm install --global esy
 
       - name: Try to restore esy install cache
         uses: actions/cache@v1
