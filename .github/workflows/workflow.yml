@@ -47,7 +47,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.opam
-          # opam cache is coupled to esy lock files, so both caches will be wiped whenever esy deps change
+          # opam cache is coupled to esy lock files, both caches will be wiped whenever esy deps change
           key:
             ${{ runner.os }}-opam-${{ matrix.ocaml-version }}-${{
             hashFiles('**/index.json') }}
