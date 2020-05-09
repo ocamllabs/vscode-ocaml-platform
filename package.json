@@ -326,7 +326,7 @@
     "test:esy": "node ./test/runEsyTests.js",
     "test:unit": "yarn run build:bsb && jest src/",
     "test:opam": "node ./test/runOpamTests.js",
-    "test": "yarn run test:unit && yarn run test:opam ",
+    "test": "yarn run test:unit && yarn run test:opam && yarn run test:esy",
     "vscode:prepublish": "yarn run build",
     "package": "vsce package --yarn",
     "publish": "vsce publish --yarn",
