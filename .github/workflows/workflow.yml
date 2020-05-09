@@ -37,13 +37,59 @@ jobs:
       - name: Install latest esy
         run: npm install --global esy
 
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: Try to restore yarn cache
+        uses: actions/cache@v1
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Try to restore .opam folder
+        id: cache-opam
+        uses: actions/cache@v1
+        with:
+          path: ~/.opam
+          # opam cache is coupled to esy lock files, so both caches will be wiped whenever esy deps change
+          key: ${{ runner.os }}-opam-${{ matrix.ocaml-version }}-${{ hashFiles('**/index.json') }}
+
+      - name: Try to restore esy install cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.esy/source
+          key: source-${{ hashFiles('**/index.json') }}
+
       - name: Install opam packages
+        if: steps.cache-opam.outputs.cache-hit != 'true'
         run: |
           opam pin ocaml-lsp-server https://github.com/ocaml/ocaml-lsp.git --no-action
           opam install ocaml-lsp-server ocamlformat reason --yes
 
       - name: Install esy packages
-        run: esy
+        run: esy install
+
+      - name: Print esy cache
+        id: print_esy_cache
+        run: node .github/workflows/print_esy_cache.js
+
+      - name: Try to restore build cache
+        id: deps-cache-macos
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.print_esy_cache.outputs.esy_cache }}
+          key: build-${{ matrix.os }}-${{ hashFiles('**/index.json') }}
+          restore-keys: build-${{ matrix.os }}-
+
+      - name: Build
+        run: |
+          esy build
+          # Cleanup build cache in case dependencies have changed
+          esy cleanup .
 
       - name: Install npm packages
         run: yarn --frozen-lockfile
