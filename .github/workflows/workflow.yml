@@ -48,7 +48,9 @@ jobs:
         with:
           path: ~/.opam
           # opam cache is coupled to esy lock files, so both caches will be wiped whenever esy deps change
-          key: ${{ runner.os }}-opam-${{ matrix.ocaml-version }}-${{ hashFiles('**/index.json') }}
+          key:
+            ${{ runner.os }}-opam-${{ matrix.ocaml-version }}-${{
+            hashFiles('**/index.json') }}
 
       - name: Use OCaml ${{ matrix.ocaml-version }}
         uses: avsm/setup-ocaml@v1
