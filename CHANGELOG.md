@@ -8,6 +8,7 @@
 - Add OCamlFormat syntax highlighting
 - Add dune-project syntax highlighting
 - Add dune-workspace syntax highlighting
+- Add META syntax highlighting
 
 ## 0.4.0
 

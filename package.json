@@ -142,6 +142,20 @@
         "configuration": "./languages/opam.json"
       },
       {
+        "id": "ocaml.META",
+        "aliases": [
+          "META",
+          "meta"
+        ],
+        "filenames": [
+          "META"
+        ],
+        "filenamePatterns": [
+          "META.*"
+        ],
+        "configuration": "./languages/META.json"
+      },
+      {
         "id": "ocaml.ocamlbuild",
         "aliases": [
           "OCamlbuild",
@@ -259,6 +273,11 @@
         "language": "ocaml.opam",
         "scopeName": "source.ocaml.opam",
         "path": "./syntaxes/opam.json"
+      },
+      {
+        "language": "ocaml.META",
+        "scopeName": "source.ocaml.META",
+        "path": "./syntaxes/META.json"
       },
       {
         "scopeName": "markdown.reason.codeblock",
