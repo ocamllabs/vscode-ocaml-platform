@@ -58,8 +58,10 @@ jobs:
           path: ${{ steps.opam-root-dir-path.outputs.dir }}
           # opam cache is coupled to esy lock files, both caches will be wiped whenever esy deps change
           key:
-            ${{ runner.os }}-opam-${{ matrix.ocaml-version }}-${{
+            opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-${{
             hashFiles('**/index.json') }}
+          restore-keys: |
+            opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-
 
       - name: Install latest esy
         run: npm install --global esy
@@ -83,7 +85,7 @@ jobs:
         id: print_esy_cache
         run: node .github/workflows/print_esy_cache.js
 
-      - name: Try to restore build cache
+      - name: Try to restore esy build cache
         id: deps-cache-macos
         uses: actions/cache@v1
         with:
