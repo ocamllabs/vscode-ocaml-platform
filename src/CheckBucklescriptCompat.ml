@@ -1,4 +1,6 @@
-open Import
+let mergeDicts dict1 dict2 =
+  Js.Dict.fromArray
+    (Js.Array.concat (Js.Dict.entries dict1) (Js.Dict.entries dict2))
 
 let processDeps dependencies =
   match Js.Dict.get dependencies "bs-platform" with
