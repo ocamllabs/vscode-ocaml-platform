@@ -1,5 +1,7 @@
 # VSCode OCaml Platform
 
+[![Main workflow](https://github.com/ocamllabs/vscode-ocaml-platform/workflows/Main%20workflow/badge.svg?branch=master)](https://github.com/ocamllabs/vscode-ocaml-platform/actions)
+
 Visual Studio Code extension for OCaml and relevant tools.
 
 _This plugin is alpha quality. Use at your own risk and please report any bugs

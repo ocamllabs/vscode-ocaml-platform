@@ -242,15 +242,15 @@ let getLspCommand (t : PackageManager.t) : Path.t * string array =
   | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:[| name |]
   | Global -> (Path.ofString name, [||])
 
-let addLspCheckArg args =
-  Array.append args [| "--help=plain" |]
+let addLspCheckArg args = Array.append args [| "--help=plain" |]
 
 let runSetup resources =
   let open Promise.Result.O in
   setupToolChain resources
   >>= (fun () ->
         let cmd, args = getLspCommand resources in
-        Cmd.make ~cmd () >>= fun cmd -> Cmd.output cmd ~args:(addLspCheckArg args))
+        Cmd.make ~cmd () >>= fun cmd ->
+        Cmd.output cmd ~args:(addLspCheckArg args))
   |> Promise.map (function
        | Ok _ -> Ok ()
        | Error msg -> Error {j| Toolchain initialisation failed: $msg |j})

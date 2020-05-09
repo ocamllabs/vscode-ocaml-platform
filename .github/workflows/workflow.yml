@@ -13,31 +13,62 @@ jobs:
           - macos-latest
           - ubuntu-latest
           - windows-latest
+        ocaml-version:
+          - 4.06.1
         node-version:
-          - 13.x
+          - 14.x
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2.1.0
+        uses: actions/checkout@v2
+
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: avsm/setup-ocaml@v1
+        with:
+          ocaml-version: ${{ matrix.ocaml-version }}
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1.4.1
+        uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install packages
+      - name: Install latest esy
+        run: npm install --global esy
+
+      - name: Install opam packages
+        run: |
+          opam pin ocaml-lsp-server https://github.com/ocaml/ocaml-lsp.git --no-action
+          opam install ocaml-lsp-server ocamlformat reason --yes
+
+      - name: Install esy packages
+        run: esy
+
+      - name: Install npm packages
         run: yarn --frozen-lockfile
 
       - name: Check formatting
         run: yarn fmt:check
 
-      - name: Build
+      - name: Test extension
+        uses: GabrielBB/xvfb-action@v1.0
+        with:
+          run: yarn test
+
+      - name: Package extension
         run: yarn package
 
+      - name: Publish
+        if: |
+          success() &&
+          runner.os == 'Linux' &&
+          github.event_name == 'push' &&
+          startsWith(github.ref, 'refs/tags/')
+        run: yarn publish --pat ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
+
       - name: Upload extension installer to artifact
-        uses: actions/upload-artifact@v2-preview
+        uses: actions/upload-artifact@v2
         with:
           name: ocaml-platform-${{ matrix.os }}-${{ github.sha }}
           path: ocaml-platform-*.vsix

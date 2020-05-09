@@ -78,8 +78,11 @@
         {
           "comment": "quoted string literal",
           "name": "string.quoted.braced.ocaml",
-          "begin": "\\{[a-z_]*\\|",
+          "begin": "\\{(%%?[A-Za-z_][A-Za-z0-9_']*(\\.[A-Za-z_][A-Za-z0-9_']*)*\\s*)?[a-z_]*\\|",
           "end": "\\|[a-z_]*\\}",
+          "beginCaptures": {
+            "1": { "patterns": [{ "include": "source.ocaml" }] }
+          },
           "patterns": [{ "include": "#strings" }]
         },
         {
@@ -142,42 +145,42 @@
       "patterns": [
         {
           "comment": "character literal",
-          "name": "constant.character.ocaml",
+          "name": "string.quoted.other.ocaml constant.character.ocaml",
           "match": "'.'"
         },
         {
           "comment": "character literal from escaped backslash",
-          "name": "constant.character.ocaml",
+          "name": "string.quoted.other.ocaml constant.character.ocaml",
           "match": "'(\\\\\\\\)'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
           "comment": "character literal from escaped quote or whitespace",
-          "name": "constant.character.ocaml",
+          "name": "string.quoted.other.ocaml constant.character.ocaml",
           "match": "'(\\\\[\"'ntbr ])'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
           "comment": "character literal from decimal ASCII code",
-          "name": "constant.character.ocaml",
+          "name": "string.quoted.other.ocaml constant.character.ocaml",
           "match": "'(\\\\[0-9]{3})'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
           "comment": "character literal from hexadecimal ASCII code",
-          "name": "constant.character.ocaml",
+          "name": "string.quoted.other.ocaml constant.character.ocaml",
           "match": "'(\\\\x[0-9A-Fa-f]{2})'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
           "comment": "character literal from octal ASCII code",
-          "name": "constant.character.ocaml",
+          "name": "string.quoted.other.ocaml constant.character.ocaml",
           "match": "'(\\\\o[0-3][0-7]{2})'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
           "comment": "character literal from unknown escape sequence",
-          "name": "constant.character.ocaml",
+          "name": "string.quoted.other.ocaml constant.character.ocaml",
           "match": "'(\\\\.)'",
           "captures": {
             "1": { "name": "invalid.illegal.unknown-escape.ocaml" }
@@ -207,12 +210,21 @@
           }
         },
         {
+          "comment": "local open/exception/module",
+          "match": "\\b(let)\\s+(open|exception|module)\\b",
+          "captures": {
+            "1": { "name": "keyword.ocaml" },
+            "2": { "name": "keyword.ocaml" }
+          }
+        },
+        {
           "comment": "let expression",
-          "match": "\\b(let)\\s+(rec\\s+)?([a-z_][A-Za-z0-9_']*)",
+          "match": "\\b(let)\\s+(rec\\s+)?(lazy\\s+)?([a-z_][A-Za-z0-9_']*)\\b(?!\\s*,)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
-            "3": { "name": "entity.name.function.binding.ocaml" }
+            "3": { "name": "keyword.ocaml" },
+            "4": { "name": "entity.name.function.binding.ocaml" }
           }
         },
         {
@@ -227,7 +239,7 @@
         },
         {
           "comment": "and declaration for let bindings, type declarations, class bindings, or class type definitions",
-          "match": "\\b(and)\\s+(virtual\\s+)?(_\\s+|'[A-Za-z][A-Za-z0-9_']*\\s+|\\(.*\\)\\s+)?([a-z_][A-Za-z0-9_']*)",
+          "match": "\\b(and)\\s+((?:virtual|lazy)\\s+)?(_\\s+|'[A-Za-z][A-Za-z0-9_']*\\s+|\\(.*\\)\\s+)?([a-z_][A-Za-z0-9_']*)\\b(?!\\s*,)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
@@ -237,7 +249,7 @@
         },
         {
           "comment": "using binding operators",
-          "match": "\\b(let|and)([$&*+\\-/=>@^|<][!?$&*+\\-/=>@^|%:]*)\\s*([a-z_][A-Za-z0-9_']*)",
+          "match": "\\b(let|and)([$&*+\\-/=>@^|<][!?$&*+\\-/=>@^|%:]*)\\s*(lazy\\s+)?([a-z_][A-Za-z0-9_']*)\\b(?!\\s*,)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
@@ -245,12 +257,11 @@
           }
         },
         {
-          "comment": "external declaration assigned to string",
-          "begin": "\\b(external)\\s+([a-z_][A-Za-z0-9_']*)?(.*=)",
+          "comment": "external declaration",
+          "begin": "\\b(external)\\s+([a-z_][A-Za-z0-9_']*)?",
           "beginCaptures": {
             "1": { "name": "keyword.ocaml" },
-            "2": { "name": "entity.name.function.binding.ocaml" },
-            "3": { "patterns": [{ "include": "source.ocaml" }] }
+            "2": { "name": "entity.name.function.binding.ocaml" }
           },
           "end": "$",
           "patterns": [
@@ -259,16 +270,9 @@
               "name": "string.quoted.double.ocaml",
               "begin": "\"",
               "end": "\""
-            }
+            },
+            { "include": "source.ocaml" }
           ]
-        },
-        {
-          "comment": "external declaration",
-          "match": "\\b(external)\\s+([a-z_][A-Za-z0-9_']*)",
-          "captures": {
-            "1": { "name": "keyword.ocaml" },
-            "2": { "name": "entity.name.function.binding.ocaml" }
-          }
         },
         {
           "comment": "first class module packing",
