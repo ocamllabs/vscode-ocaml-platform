@@ -24,53 +24,47 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
-
       - name: Use OCaml ${{ matrix.ocaml-version }}
         uses: avsm/setup-ocaml@v1
         with:
           ocaml-version: ${{ matrix.ocaml-version }}
 
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - name: Try to restore yarn cache
-        uses: actions/cache@v1
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
         with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          node-version: ${{ matrix.node-version }}
+
+      - name: Use latest esy
+        run: npm install --global esy
 
       - name: Get opam root directory path
         id: opam-root-dir-path
         run: echo "::set-output name=dir::$(opam config var root)"
 
-      - name: Try to restore .opam folder
+      # This step is required because esy's home directory doesn't exist at this point
+      - name: Install esy packages
+        run: esy install
+
+      - name: Get esy cache directory path
+        id: esy-cache-dir-path
+        run: node .github/workflows/print_esy_cache.js
+
+      - name: Restore opam cache
         id: cache-opam
         uses: actions/cache@v1
         with:
           path: ${{ steps.opam-root-dir-path.outputs.dir }}
           # opam cache is coupled to esy lock files, so both caches will be wiped whenever esy deps change
-          key:
-            opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-${{
-            hashFiles('**/index.json') }}
+          key: opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-${{ hashFiles('esy.lock/index.json') }}
           restore-keys: |
             opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-
 
-      - name: Install latest esy
-        run: npm install --global esy
-
-      - name: Try to restore esy install cache
+      - name: Restore esy cache
         uses: actions/cache@v1
         with:
-          path: ~/.esy/source
-          key: source-${{ hashFiles('**/index.json') }}
+          path: ${{ steps.esy-cache-dir-path.outputs.dir }}
+          key: esy-${{ matrix.os }}-${{ hashFiles('esy.lock/index.json') }}
+          restore-keys: esy-${{ matrix.os }}-
 
       - name: Install opam packages
         if: steps.cache-opam.outputs.cache-hit != 'true'
@@ -78,25 +72,10 @@ jobs:
           opam pin ocaml-lsp-server https://github.com/ocaml/ocaml-lsp.git --no-action
           opam install ocaml-lsp-server ocamlformat reason --yes
 
-      - name: Install esy packages
-        run: esy install
-
-      - name: Print esy cache
-        id: print_esy_cache
-        run: node .github/workflows/print_esy_cache.js
-
-      - name: Try to restore esy build cache
-        id: deps-cache-macos
-        uses: actions/cache@v1
-        with:
-          path: ${{ steps.print_esy_cache.outputs.esy_cache }}
-          key: build-${{ matrix.os }}-${{ hashFiles('**/index.json') }}
-          restore-keys: build-${{ matrix.os }}-
-
-      - name: Build
+      - name: Build esy packages
+        # Cleanup build cache in case dependencies have changed
         run: |
           esy build
-          # Cleanup build cache in case dependencies have changed
           esy cleanup .
 
       - name: Install npm packages
