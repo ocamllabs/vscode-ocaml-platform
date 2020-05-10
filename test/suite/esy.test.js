@@ -2,33 +2,13 @@ const assert = require("assert");
 const path = require("path");
 const vscode = require("vscode");
 const os = require("os");
-const cp = require("child_process");
-const fs = require("fs-extra");
 const { Uri } = vscode;
 
-let root = path.dirname(path.dirname(__dirname));
-let fixtureSrcDir = path.join(root, "fixtures");
-let sampleEsySrc = path.join(fixtureSrcDir, "sample-esy");
 let projectPath = path.join(os.tmpdir(), "sample-esy");
 let projectUri = Uri.file(projectPath);
 
 suite("Basic tests", () => {
   test("Esy", async () => {
-    fs.copySync(sampleEsySrc, projectPath);
-    console.log("Running in", projectPath);
-    cp.execSync("esy", { cwd: projectPath });
-    cp.execSync("esy status", { cwd: projectPath });
-
-    fs.writeFileSync(
-      path.join(projectPath, ".vscode", "settings.json"),
-      JSON.stringify({
-        "ocaml.sandbox": {
-          root: projectPath,
-          kind: "esy",
-        },
-      })
-    );
-
     await vscode.commands.executeCommand("vscode.openFolder", projectUri);
     let reasonDocument = await vscode.workspace.openTextDocument(
       Uri.file(path.join(projectPath, "bin", "SampleEsyApp.re"))
