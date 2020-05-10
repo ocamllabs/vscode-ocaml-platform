@@ -51,13 +51,13 @@ jobs:
       - name: Check formatting
         run: yarn fmt:check
 
+      - name: Package extension
+        run: yarn package
+
       - name: Test extension
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: yarn test
-
-      - name: Package extension
-        run: yarn package
 
       - name: Publish
         if: |
