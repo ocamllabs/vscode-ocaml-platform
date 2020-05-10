@@ -36,7 +36,7 @@ suite("Basic tests", () => {
       });
     }
 
-    await delay(500);
+    await delay(1000);
     let reasonDiagnostics = await vscode.languages.getDiagnostics(
       Uri.file(path.join(projectPath, "bin", "SampleEsyApp.re"))
     );
