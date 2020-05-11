@@ -12,7 +12,6 @@ end
 
 module Array = struct
   let findMap (type a b) (f : a -> b option t) (arr : a array) : b option t =
-    let open O in
     Array.map f arr |> Js.Promise.all
     |> map (fun arr ->
            match
