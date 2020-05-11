@@ -48,6 +48,12 @@
         }
       }
     },
+    "configurationDefaults": {
+      "[cram]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+      }
+    },
     "problemMatchers": [
       {
         "name": "ocamlc",
