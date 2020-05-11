@@ -77,9 +77,9 @@ esy
 This extension provides options in VSCode's configuration settings. You can find
 the settings under `File > Preferences > Settings`.
 
-| Name             | Description                                              | Default    |
-| ---------------- | -------------------------------------------------------- | ---------- |
-| `ocaml.sandbox`  | Determines where to find the sandbox for a given project | `null`     |
+| Name            | Description                                              | Default |
+| --------------- | -------------------------------------------------------- | ------- |
+| `ocaml.sandbox` | Determines where to find the sandbox for a given project | `null`  |
 
 ## Commands
 
