@@ -41,13 +41,11 @@ module Discover = struct
              | None -> None
              | Some json ->
                if
-                 propertyExists json "dependencies"
-                 || propertyExists json "devDependencies"
+                 ( propertyExists json "dependencies"
+                 || propertyExists json "devDependencies" )
+                 && propertyExists json "esy"
                then
-                 if propertyExists json "esy" then
-                   Some projectRoot
-                 else
-                   Some (hiddenEsyDir projectRoot)
+                 Some projectRoot
                else
                  None)
     | file -> (
@@ -72,17 +70,7 @@ module Discover = struct
       | ".opam" -> Promise.return (Some manifestFile)
       | _ -> None |> Promise.resolve )
 
-  let foldResults results =
-    Js.Array.reduce
-      (fun acc x ->
-        Js.Array.concat acc
-          ( match x with
-          | Some x -> Array.of_list [ x ]
-          | None -> [||] ))
-      [||] results
-    |> Array.to_list
-
-  let run ~dir : Path.t list Promise.t =
+  let parseDir dir =
     let open Promise.O in
     (Path.toString dir |> Fs.readDir >>| function
      | Error _ ->
@@ -91,10 +79,20 @@ module Discover = struct
          (Path.toString dir);
        [||]
      | Ok res -> res)
-    >>= fun files ->
-    files
-    |> Js.Array.map (parseFile dir)
-    |> Promise.all |> Promise.map foldResults
+    >>= fun files -> files |> Promise.Array.filterMap (parseFile dir)
+
+  let parseDirsUp dir =
+    let rec loop parsedDirs dir =
+      let parsedDirs = parseDir dir :: parsedDirs in
+      match Path.parent dir with
+      | None -> parsedDirs
+      | Some dir -> loop parsedDirs dir
+    in
+    loop [] dir
+
+  let run ~dir : Path.t list Promise.t =
+    dir |> parseDirsUp |> Array.of_list |> Promise.all
+    |> Promise.map (fun x -> Array.to_list (Js.Array.concatMany x [||]))
 end
 
 let discover = Discover.run
