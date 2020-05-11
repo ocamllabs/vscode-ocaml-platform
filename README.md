@@ -80,7 +80,6 @@ the settings under `File > Preferences > Settings`.
 | Name             | Description                                              | Default    |
 | ---------------- | -------------------------------------------------------- | ---------- |
 | `ocaml.sandbox`  | Determines where to find the sandbox for a given project | `null`     |
-| `ocaml.lsp.path` | Path to the LSP binary                                   | `ocamllsp` |
 
 ## Commands
 

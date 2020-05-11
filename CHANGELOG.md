@@ -11,6 +11,9 @@
 - Add dune snippets
 - Add dune-project snippets
 - Add META syntax highlighting
+- Remove `ocaml.lsp.path` configuration option
+- Introduce `ocaml.sandbox` configuration option to set the toolchain
+- Introduce a `ocaml.select-sandbox` command for selecting the sandbox
 
 ## 0.4.0
 
