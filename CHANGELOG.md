@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 0.5.0
 
 - Improve ocamllex syntax highlighting
 - Improve opam syntax highlighting
