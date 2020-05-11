@@ -8,6 +8,7 @@
 - Add OCamlFormat syntax highlighting
 - Add dune-project syntax highlighting
 - Add dune-workspace syntax highlighting
+- Add Cram test syntax highlighting
 
 ## 0.4.0
 

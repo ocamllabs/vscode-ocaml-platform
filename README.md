@@ -66,6 +66,7 @@ esy
   - OCamlFormat
   - ocamllex
   - opam
+  - Cram tests
 - Indentation rules
 - Snippets
 
