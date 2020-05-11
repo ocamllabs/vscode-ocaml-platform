@@ -105,7 +105,8 @@ jobs:
         run: yarn publish --pat ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
 
       - name: Upload extension installer to artifact
+        if: runner.os == 'Linux'
         uses: actions/upload-artifact@v2
         with:
-          name: ocaml-platform-${{ matrix.os }}-${{ github.sha }}
+          name: ocaml-platform-${{ github.sha }}
           path: ocaml-platform-*.vsix
