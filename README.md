@@ -1,5 +1,7 @@
 # VSCode OCaml Platform
 
+[![Main workflow](https://img.shields.io/github/workflow/status/ocamllabs/vscode-ocaml-platform/Main%20workflow?branch=master)](https://github.com/ocamllabs/vscode-ocaml-platform/actions?query=workflow%3A%22Main+workflow%22+branch%3Amaster)
+
 Visual Studio Code extension for OCaml and relevant tools.
 
 _This plugin is alpha quality. Use at your own risk and please report any bugs
@@ -66,6 +68,8 @@ esy
   - OCamlFormat
   - ocamllex
   - opam
+  - META
+  - Cram tests
   - ATD
 - Indentation rules
 - Snippets
@@ -75,10 +79,9 @@ esy
 This extension provides options in VSCode's configuration settings. You can find
 the settings under `File > Preferences > Settings`.
 
-| Name             | Description                                              | Default    |
-| ---------------- | -------------------------------------------------------- | ---------- |
-| `ocaml.sandbox`  | Determines where to find the sandbox for a given project | `null`     |
-| `ocaml.lsp.path` | Path to the LSP binary                                   | `ocamllsp` |
+| Name            | Description                                              | Default |
+| --------------- | -------------------------------------------------------- | ------- |
+| `ocaml.sandbox` | Determines where to find the sandbox for a given project | `null`  |
 
 ## Commands
 
