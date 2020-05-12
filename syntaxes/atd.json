@@ -5,8 +5,8 @@
   "patterns": [
     { "include": "source.ocaml#comments" },
     { "include": "source.ocaml#strings" },
-    { "include": "source.ocaml#bindings" },
     { "include": "#annotations" },
+    { "include": "#definitions" },
     { "include": "#keywords" },
     { "include": "#types" },
     { "include": "source.ocaml#operators" },
@@ -27,6 +27,14 @@
         }
       ]
     },
+    "definitions": {
+      "match": "\\b(type)\\s+('[A-Za-z][A-Za-z0-9_']*\\s+|\\(.*\\)\\s*)?([a-z_][A-Za-z0-9_']*)",
+      "captures": {
+        "1": { "name": "keyword.other.atd" },
+        "2": { "patterns": [{ "include": "$self" }] },
+        "3": { "name": "entity.name.function.binding.atd" }
+      }
+    },
     "keywords": {
       "name": "keyword.other.atd",
       "match": "\\b(type|of|inherit)\\b"
@@ -35,12 +43,12 @@
       "patterns": [
         {
           "comment": "type parameter",
-          "name": "storage.type.atd",
+          "name": "storage.type.ocaml.atd",
           "match": "'[A-Za-z][A-Za-z0-9_']*\\b"
         },
         {
           "comment": "builtin type",
-          "name": "support.type.atd",
+          "name": "support.type.ocaml.atd",
           "match": "\\b(unit|bool|int|float|string|abstract)\\b"
         }
       ]
