@@ -23,10 +23,6 @@ let propertyExists json property =
 let getSubDict dict key =
   ((dict |. Js.Dict.get) key |. Belt.Option.flatMap) Js.Json.decodeObject
 
-let mergeDicts dict1 dict2 =
-  Js.Dict.fromArray
-    (Js.Array.concat (Js.Dict.entries dict1) (Js.Dict.entries dict2))
-
 let hiddenEsyDir root = Path.(root / ".vscode" / "esy")
 
 module Result = struct
