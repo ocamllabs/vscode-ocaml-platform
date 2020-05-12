@@ -32,11 +32,18 @@ npm i -g esy
 
 ```json
 {
-  "devDependencies": {
-    "ocaml": "4.6.x",
-    "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam#360dd5",
+  "dependencies": {
+    "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam",
+    "@opam/reason": "*",
+    "ocaml": "4.6.x"
+  },
+  "resolutions": {
+    "@opam/dune-configurator": "2.0.1",
+    "@opam/dune-private-libs": "2.0.1",
     "@opam/dune": "2.0.1",
-    "@esy-ocaml/reason": "*"
+    "@opam/menhir": "20200123",
+    "@opam/menhirLib": "20200123",
+    "@opam/menhirSdk": "20200123"
   }
 }
 ```
