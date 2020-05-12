@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Add Cram test syntax highlighting
+
 ## 0.5.0
 
 - Improve ocamllex syntax highlighting

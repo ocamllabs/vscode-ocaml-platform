@@ -69,6 +69,7 @@ esy
   - ocamllex
   - opam
   - META
+  - Cram tests
 - Indentation rules
 - Snippets
 

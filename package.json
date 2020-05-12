@@ -48,6 +48,12 @@
         }
       }
     },
+    "configurationDefaults": {
+      "[cram]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+      }
+    },
     "problemMatchers": [
       {
         "name": "ocamlc",
@@ -211,6 +217,17 @@
           ".rei"
         ],
         "configuration": "./languages/reason.json"
+      },
+      {
+        "id": "cram",
+        "aliases": [
+          "Cram Test",
+          "Cram",
+          "cram"
+        ],
+        "extensions": [
+          ".t"
+        ]
       }
     ],
     "grammars": [
@@ -293,6 +310,11 @@
         "language": "reason",
         "scopeName": "source.reason",
         "path": "./syntaxes/reason.json"
+      },
+      {
+        "language": "cram",
+        "scopeName": "source.cram",
+        "path": "./syntaxes/cram.json"
       }
     ],
     "snippets": [
