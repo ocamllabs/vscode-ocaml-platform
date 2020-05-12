@@ -104,8 +104,16 @@
       ]
     },
     "glob": {
-      "name": "keyword.other.cram",
-      "match": "\\*|\\?"
+      "patterns": [
+        {
+          "name": "keyword.other.cram",
+          "match": "[*?]"
+        },
+        {
+          "name": "keyword.other.cram",
+          "match": "\\\\[*?\\\\]"
+        }
+      ]
     },
     "regex": {
       "patterns": [
@@ -115,7 +123,7 @@
         },
         {
           "name": "keyword.other.regex",
-          "match": "\\^|\\$|\\|"
+          "match": "[|^$]"
         },
         {
           "begin": "\\[\\^?",
