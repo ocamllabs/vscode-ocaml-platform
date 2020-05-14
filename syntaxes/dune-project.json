@@ -280,7 +280,7 @@
               },
               "patterns": [
                 {
-                  "name": "keyword.operator.dune-project",
+                  "name": "keyword.language.dune-project",
                   "match": "/"
                 },
                 { "include": "#general" }
