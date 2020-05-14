@@ -354,11 +354,11 @@
     ],
     "snippets": [
       {
-        "language": "ocaml.dune",
+        "language": "dune",
         "path": "./snippets/dune.json"
       },
       {
-        "language": "ocaml.dune-project",
+        "language": "dune-project",
         "path": "./snippets/dune-project.json"
       },
       {
