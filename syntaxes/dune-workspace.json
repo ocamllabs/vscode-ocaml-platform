@@ -1,6 +1,6 @@
 {
-  "name": "ocaml.dune-workspace",
-  "scopeName": "source.ocaml.dune-workspace",
+  "name": "dune-workspace",
+  "scopeName": "source.dune-workspace",
   "fileTypes": ["dune-workspace"],
   "patterns": [{ "include": "#stanzas" }, { "include": "#general" }],
   "repository": {

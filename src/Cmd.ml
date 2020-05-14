@@ -45,7 +45,7 @@ let make ?(env = Process.env) ~cmd () =
       | None -> Error {j| Command "$cmd" not found |j}
       | Some cmd -> Ok { cmd; env } )
 
-let output ~args ?cwd { cmd; env } =
+let output ~args ?cwd ?stdin { cmd; env } =
   (* TODO use ChildProcess.spawn to get rid of this pointless concatenation *)
   let shellString =
     Js.Array.joinWith " " (Js.Array.concat args [| Path.toString cmd |])
@@ -56,7 +56,7 @@ let output ~args ?cwd { cmd; env } =
     | None -> None
     | Some cwd -> Some (Path.toString cwd)
   in
-  ChildProcess.exec shellString (ChildProcess.Options.make ?cwd ~env ())
+  ChildProcess.exec shellString ?stdin (ChildProcess.Options.make ?cwd ~env ())
   |> Promise.map (function
        | Error e -> Error e
        | Ok { ChildProcess.exitCode; stdout; stderr } ->

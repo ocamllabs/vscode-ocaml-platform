@@ -22,7 +22,10 @@
   ],
   "activationEvents": [
     "onLanguage:ocaml",
-    "onLanguage:reason"
+    "onLanguage:reason",
+    "onLanguage:dune",
+    "onLanguage:dune-project",
+    "onLanguage:dune-workspace"
   ],
   "icon": "assets/logo.png",
   "contributes": {
@@ -49,6 +52,22 @@
       }
     },
     "configurationDefaults": {
+      "[ocaml]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+      },
+      "[dune]": {
+        "editor.tabSize": 1,
+        "editor.insertSpaces": true
+      },
+      "[dune-project]": {
+        "editor.tabSize": 1,
+        "editor.insertSpaces": true
+      },
+      "[dune-workspace]": {
+        "editor.tabSize": 1,
+        "editor.insertSpaces": true
+      },
       "[cram]": {
         "editor.tabSize": 2,
         "editor.insertSpaces": true
@@ -80,7 +99,7 @@
     ],
     "languages": [
       {
-        "id": "ocaml.dune",
+        "id": "dune",
         "aliases": [
           "dune"
         ],
@@ -91,7 +110,7 @@
         "configuration": "./languages/dune.json"
       },
       {
-        "id": "ocaml.dune-project",
+        "id": "dune-project",
         "aliases": [
           "dune project"
         ],
@@ -101,7 +120,7 @@
         "configuration": "./languages/dune.json"
       },
       {
-        "id": "ocaml.dune-workspace",
+        "id": "dune-workspace",
         "aliases": [
           "dune workspace"
         ],
@@ -243,18 +262,18 @@
     ],
     "grammars": [
       {
-        "language": "ocaml.dune",
-        "scopeName": "source.ocaml.dune",
+        "language": "dune",
+        "scopeName": "source.dune",
         "path": "./syntaxes/dune.json"
       },
       {
-        "language": "ocaml.dune-project",
-        "scopeName": "source.ocaml.dune-project",
+        "language": "dune-project",
+        "scopeName": "source.dune-project",
         "path": "./syntaxes/dune-project.json"
       },
       {
-        "language": "ocaml.dune-workspace",
-        "scopeName": "source.ocaml.dune-workspace",
+        "language": "dune-workspace",
+        "scopeName": "source.dune-workspace",
         "path": "./syntaxes/dune-workspace.json"
       },
       {
@@ -335,11 +354,11 @@
     ],
     "snippets": [
       {
-        "language": "ocaml.dune",
+        "language": "dune",
         "path": "./snippets/dune.json"
       },
       {
-        "language": "ocaml.dune-project",
+        "language": "dune-project",
         "path": "./snippets/dune-project.json"
       },
       {

@@ -4,6 +4,7 @@
 
 - Add Cram test syntax highlighting
 - Add ATD syntax highlighting
+- Add formatting for Dune files with format-dune-file
 
 ## 0.5.0
 

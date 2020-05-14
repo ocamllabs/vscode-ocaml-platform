@@ -12,6 +12,7 @@ type stderr = string
 val output :
      args:string Js.Array.t
   -> ?cwd:Path.t
+  -> ?stdin:string
   -> t
   -> (stdout, stderr) result Promise.t
 
