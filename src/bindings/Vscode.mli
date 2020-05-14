@@ -206,12 +206,25 @@ module Languages : sig
 end
 
 module LanguageClient : sig
+  module RevealOutputChannelOn : sig
+    type t =
+      | Info
+      | Warn
+      | Error
+      | Never
+    [@@bs.deriving { jsConverter = newType }]
+  end
+
   type documentSelectorItem =
     { scheme : string
     ; language : string
     }
 
-  type clientOptions = { documentSelector : documentSelectorItem array }
+  type clientOptions =
+    { documentSelector : documentSelectorItem array
+    ; revealOutputChannelOn : RevealOutputChannelOn.abs_t [@bs.optional]
+    }
+  [@@bs.deriving abstract]
 
   type processOptions = { env : string Js.Dict.t }
 

@@ -299,12 +299,25 @@ module Languages = struct
 end
 
 module LanguageClient = struct
+  module RevealOutputChannelOn = struct
+    type t =
+      | Info [@bs.as 1]
+      | Warn [@bs.as 2]
+      | Error [@bs.as 3]
+      | Never [@bs.as 4]
+    [@@bs.deriving { jsConverter = newType }]
+  end
+
   type documentSelectorItem =
     { scheme : string
     ; language : string
     }
 
-  type clientOptions = { documentSelector : documentSelectorItem array }
+  type clientOptions =
+    { documentSelector : documentSelectorItem array
+    ; revealOutputChannelOn : RevealOutputChannelOn.abs_t [@bs.optional]
+    }
+  [@@bs.deriving abstract]
 
   type processOptions = { env : string Js.Dict.t }
 
