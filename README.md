@@ -14,18 +14,19 @@ you encounter._
    (or by entering `ext install ocamllabs.ocaml-platform` at the command palette
    <kbd>Ctrl</kbd>+<kbd>P</kbd>)
 2. Open a OCaml/ReasonML project (`File > Add Folder to Workspace...`)
-3. Install `ocamllsp` with [`opam`](https://github.com/ocaml/ocaml-lsp#opam) or
-   [`esy`](https://github.com/ocaml/ocaml-lsp#esy).
+3. Install [OCaml-LSP](https://github.com/ocaml/ocaml-lsp) with
+   [opam](https://github.com/ocaml/opam) or [esy](https://github.com/esy/esy).
 
-### Bucklescript
+### BuckleScript
 
-There is currently no way of installing `ocamlsp` "natively" for Bucklescript
-projects. As a fast workaround, you can use `esy`:
+There is currently no way of installing
+[OCaml-LSP](https://github.com/ocaml/ocaml-lsp) _natively_ for BuckleScript
+projects. As a fast workaround, you can use [esy](https://github.com/esy/esy):
 
 1. Install esy
 
-```
-npm i -g esy
+```bash
+npm install esy --global
 ```
 
 2. Add `esy.json` to the project root with following content:
@@ -33,16 +34,14 @@ npm i -g esy
 ```json
 {
   "dependencies": {
-    "@opam/merlin": "*",
-    "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam#7592d32",
-    "@opam/ocamlformat": "0.13.0",
+    "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam",
     "@opam/reason": "*",
     "ocaml": "4.6.x"
   },
   "resolutions": {
-    "@opam/dune": "2.0.1",
     "@opam/dune-configurator": "2.0.1",
     "@opam/dune-private-libs": "2.0.1",
+    "@opam/dune": "2.0.1",
     "@opam/menhir": "20200123",
     "@opam/menhirLib": "20200123",
     "@opam/menhirSdk": "20200123"
@@ -52,27 +51,30 @@ npm i -g esy
 
 3. Install and build packages
 
-```
+```bash
 esy
 ```
 
 ## Features
 
 - Syntax highlighting
-  - OCaml
-  - ReasonML
-  - dune
-  - menhir
-  - merlin
-  - ocamlbuild
-  - OCamlFormat
-  - ocamllex
-  - opam
-  - META
-  - Cram tests
   - ATD
+  - Cram tests
+  - Dune
+  - Menhir
+  - Merlin
+  - META
+  - OCaml
+  - OCamlbuild
+  - OCamlFormat
+  - OCamllex
+  - opam
+  - ReasonML
 - Indentation rules
 - Snippets
+  - Dune
+  - OCaml
+  - OCamllex
 
 ## Configuration
 
@@ -94,4 +96,4 @@ You can execute it by entering the following command at the command palette
 
 ## Requirements
 
-- [ocaml-lsp](https://github.com/ocaml/ocaml-lsp)
+- [ocaml/ocaml-lsp](https://github.com/ocaml/ocaml-lsp)

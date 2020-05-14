@@ -1,24 +1,30 @@
-"use strict";
-
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const path = require("path");
+const TerserPlugin = require("terser-webpack-plugin");
+const WebpackBar = require("webpackbar");
 
 module.exports = (_env, argv) => {
   const isProduction = argv.mode == "production";
-
   return {
-    target: "node",
     entry: "./src/Extension.bs.js",
     output: {
-      libraryTarget: "commonjs",
-      path: path.resolve(__dirname, "dist"),
       filename: "extension.js",
+      path: path.resolve(__dirname, "dist"),
+      libraryTarget: "commonjs",
     },
+    optimization: {
+      minimizer: [
+        new TerserPlugin({
+          cache: true,
+          parallel: true,
+          extractComments: false,
+        }),
+      ],
+    },
+    plugins: [new CleanWebpackPlugin(), new WebpackBar()],
     devtool: isProduction ? false : "source-map",
-    externals: {
-      vscode: "commonjs vscode",
-    },
-    resolve: {
-      extensions: [".js"],
-    },
+    target: "node",
+    externals: { vscode: "commonjs vscode" },
+    stats: "errors-only",
   };
 };
