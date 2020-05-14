@@ -207,6 +207,17 @@
         "configuration": "./languages/menhir.json"
       },
       {
+        "id": "atd",
+        "aliases": [
+          "ATD",
+          "atd"
+        ],
+        "extensions": [
+          ".atd"
+        ],
+        "configuration": "./languages/ocaml.json"
+      },
+      {
         "id": "reason",
         "aliases": [
           "Reason",
@@ -295,6 +306,11 @@
         "language": "ocaml.META",
         "scopeName": "source.ocaml.META",
         "path": "./syntaxes/META.json"
+      },
+      {
+        "language": "atd",
+        "scopeName": "source.atd",
+        "path": "./syntaxes/atd.json"
       },
       {
         "scopeName": "markdown.reason.codeblock",

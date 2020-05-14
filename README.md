@@ -58,6 +58,7 @@ esy
 ## Features
 
 - Syntax highlighting
+  - ATD
   - Cram tests
   - Dune
   - Menhir

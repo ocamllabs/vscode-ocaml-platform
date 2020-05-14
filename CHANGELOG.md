@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Add Cram test syntax highlighting
+- Add ATD syntax highlighting
 
 ## 0.5.0
 
