@@ -7,11 +7,16 @@ let handleError f =
 
 module Client = struct
   let make () : Vscode.LanguageClient.clientOptions =
-    { documentSelector =
-        [| { scheme = "file"; language = "ocaml" }
-         ; { scheme = "file"; language = "reason" }
-        |]
-    }
+    let documentSelector : Vscode.LanguageClient.documentSelectorItem array =
+      [| { scheme = "file"; language = "ocaml" }
+       ; { scheme = "file"; language = "reason" }
+      |]
+    in
+    let revealOutputChannelOn =
+      Vscode.LanguageClient.RevealOutputChannelOn.tToJs Never
+    in
+    Vscode.LanguageClient.clientOptions ~documentSelector ~revealOutputChannelOn
+      ()
 end
 
 module Server = struct

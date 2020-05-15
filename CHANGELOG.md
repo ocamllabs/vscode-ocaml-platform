@@ -5,6 +5,8 @@
 - Add Cram test syntax highlighting
 - Add ATD syntax highlighting
 - Add formatting for Dune files with format-dune-file
+- Fix errors by the lsp server stealing focus from the editor to the output
+  window.
 
 ## 0.5.0
 
