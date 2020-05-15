@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 0.6.0
 
 - Add Cram test syntax highlighting
 - Add ATD syntax highlighting
