@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.6.1
+
+- Fix Dune formatting for unsaved files
+
 ## 0.6.0
 
 - Add Cram test syntax highlighting
