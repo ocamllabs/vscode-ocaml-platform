@@ -1,6 +1,6 @@
 open Import
 
-let format (document : TextDocument.t) options token =
+let format (document : TextDocument.t) _options _token =
   let lastLine = document.lineCount - 1 in
   let lastCharacter =
     String.length (TextDocument.lineAt document lastLine).text
