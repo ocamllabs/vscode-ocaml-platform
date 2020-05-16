@@ -95,6 +95,13 @@ jobs:
       - name: Package extension
         run: yarn package
 
+      - name: Upload artifact
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ocaml-platform-${{ github.sha }}
+          path: ocaml-platform-*.vsix
+
       - name: Test extension
         uses: GabrielBB/xvfb-action@v1.0
         with:
@@ -103,13 +110,6 @@ jobs:
       - name: Publish extension
         if: success() && runner.os == 'Linux' && contains(github.ref, 'refs/tags')
         run: yarn publish --pat ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
-
-      - name: Upload extension installer to artifact
-        if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v2
-        with:
-          name: ocaml-platform-${{ github.sha }}
-          path: ocaml-platform-*.vsix
 
       - name: Create Release
         if: runner.os == 'Linux' && contains(github.ref, 'refs/tags')
