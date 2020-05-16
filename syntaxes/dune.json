@@ -1,6 +1,6 @@
 {
-  "name": "ocaml.dune",
-  "scopeName": "source.ocaml.dune",
+  "name": "dune",
+  "scopeName": "source.dune",
   "fileTypes": ["dune", "jbuild"],
   "patterns": [
     {

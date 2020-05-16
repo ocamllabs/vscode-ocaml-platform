@@ -1,8 +1,8 @@
 name: Main workflow
 
 on:
-  - push
   - pull_request
+  - push
 
 jobs:
   build:
@@ -13,31 +13,102 @@ jobs:
           - macos-latest
           - ubuntu-latest
           - windows-latest
+        ocaml-version:
+          - 4.06.1
         node-version:
-          - 13.x
+          - 14.x
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2.1.0
+        uses: actions/checkout@v2
+
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: avsm/setup-ocaml@v1
+        with:
+          ocaml-version: ${{ matrix.ocaml-version }}
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1.4.1
+        uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install packages
+      - name: Use latest esy
+        run: npm install --global esy
+
+      - name: Get opam root directory path
+        id: opam-root-dir-path
+        run: echo "::set-output name=dir::$(opam config var root)"
+
+      # This step is required because esy's home directory doesn't exist at this point
+      - name: Install esy packages
+        run: esy install
+
+      - name: Get esy cache directory path
+        id: esy-cache-dir-path
+        run: node .github/workflows/print_esy_cache.js
+
+      - name: Restore opam cache
+        id: cache-opam
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.opam-root-dir-path.outputs.dir }}
+          # opam cache is coupled to esy lock files, so both caches will be wiped whenever esy deps change
+          key: opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-${{ hashFiles('esy.lock/index.json') }}
+          restore-keys: |
+            opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-
+
+      - name: Restore esy cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.esy-cache-dir-path.outputs.dir }}
+          key: esy-${{ matrix.os }}-${{ hashFiles('esy.lock/index.json') }}
+          restore-keys: esy-${{ matrix.os }}-
+
+      - name: Install opam packages
+        if: steps.cache-opam.outputs.cache-hit != 'true'
+        run: |
+          opam pin ocaml-lsp-server https://github.com/ocaml/ocaml-lsp.git --no-action
+          opam install ocaml-lsp-server ocamlformat reason --yes
+
+      - name: Build esy packages
+        # Cleanup build cache in case dependencies have changed
+        run: |
+          esy build
+          esy cleanup .
+
+      - name: Install npm packages
         run: yarn --frozen-lockfile
 
       - name: Check formatting
         run: yarn fmt:check
 
-      - name: Build
+      - name: Package extension
         run: yarn package
 
-      - name: Upload extension installer to artifact
-        uses: actions/upload-artifact@v2-preview
+      - name: Upload artifact
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v2
         with:
-          name: ocaml-platform-${{ matrix.os }}-${{ github.sha }}
+          name: ocaml-platform-${{ github.sha }}
           path: ocaml-platform-*.vsix
+
+      - name: Test extension
+        uses: GabrielBB/xvfb-action@v1.0
+        with:
+          run: yarn test
+
+      - name: Publish extension
+        if: success() && runner.os == 'Linux' && contains(github.ref, 'refs/tags')
+        run: yarn publish --pat ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
+
+      - name: Create Release
+        if: runner.os == 'Linux' && contains(github.ref, 'refs/tags')
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

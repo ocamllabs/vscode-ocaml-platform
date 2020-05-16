@@ -7,11 +7,16 @@ let handleError f =
 
 module Client = struct
   let make () : Vscode.LanguageClient.clientOptions =
-    { documentSelector =
-        [| { scheme = "file"; language = "ocaml" }
-         ; { scheme = "file"; language = "reason" }
-        |]
-    }
+    let documentSelector : Vscode.LanguageClient.documentSelectorItem array =
+      [| { scheme = "file"; language = "ocaml" }
+       ; { scheme = "file"; language = "reason" }
+      |]
+    in
+    let revealOutputChannelOn =
+      Vscode.LanguageClient.RevealOutputChannelOn.tToJs Never
+    in
+    Vscode.LanguageClient.clientOptions ~documentSelector ~revealOutputChannelOn
+      ()
 end
 
 module Server = struct
@@ -83,6 +88,11 @@ let activate _context =
   let instance = Instance.create () in
   Vscode.Commands.register ~command:"ocaml.select-sandbox"
     ~handler:(selectSandbox instance);
+  [ "dune"; "dune-project"; "dune-workspace" ]
+  |> List.iter (fun language ->
+         Vscode.Languages.registerDocumentFormattingEditProvider
+           Vscode.Languages.{ language; scheme = "file" }
+           DuneFormatter.formattingProvider);
   let open Promise.O in
   let toolchain =
     Toolchain.ofSettings () >>| fun pm ->

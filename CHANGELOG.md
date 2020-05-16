@@ -1,6 +1,18 @@
 # Change Log
 
-## Unreleased
+## 0.6.1
+
+- Fix Dune formatting for unsaved files
+
+## 0.6.0
+
+- Add Cram test syntax highlighting
+- Add ATD syntax highlighting
+- Add formatting for Dune files with format-dune-file
+- Fix errors by the lsp server stealing focus from the editor to the output
+  window.
+
+## 0.5.0
 
 - Improve ocamllex syntax highlighting
 - Improve opam syntax highlighting
@@ -10,6 +22,10 @@
 - Add dune-workspace syntax highlighting
 - Add dune snippets
 - Add dune-project snippets
+- Add META syntax highlighting
+- Remove `ocaml.lsp.path` configuration option
+- Introduce `ocaml.sandbox` configuration option to set the toolchain
+- Introduce a `ocaml.select-sandbox` command for selecting the sandbox
 
 ## 0.4.0
 
