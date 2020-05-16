@@ -1,16 +1,8 @@
 name: Main workflow
 
 on:
-  pull_request:
-    branches:
-      - master
-    paths-ignore:
-      - "**.md"
-  push:
-    branches:
-      - master
-    paths-ignore:
-      - "**.md"
+  - pull_request
+  - push
 
 jobs:
   build:
