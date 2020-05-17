@@ -50,20 +50,22 @@ module Instance = struct
     (client.start () [@bs])
 end
 
-let selectSandbox (instance : Instance.t) () =
+let selectSandbox (instance : Instance.t) (duneFormatter : DuneFormatter.t) () =
   let setToolchain =
     let open Promise.O in
     Toolchain.selectAndSave () >>= function
     | None -> Promise.Result.return ()
     | Some t ->
       Instance.stop instance;
+      DuneFormatter.dispose duneFormatter;
       let t = Toolchain.makeResources t in
+      DuneFormatter.register duneFormatter t;
       Instance.start instance t
   in
   let (_ : unit Promise.t) = handleError Window.showErrorMessage setToolchain in
   ()
 
-let suggestToSetupToolchain instance =
+let suggestToSetupToolchain instance duneFormatter =
   let open Promise.O in
   Vscode.Window.showInformationMessage'
     "Extension is unable to find ocamllsp automatically. Please select package \
@@ -71,31 +73,30 @@ let suggestToSetupToolchain instance =
     [ ("Select package manager", ()) ]
   >>| function
   | None -> ()
-  | Some () -> selectSandbox instance ()
+  | Some () -> selectSandbox instance duneFormatter ()
 
 let activate _context =
   Js.Dict.set Process.env "OCAML_LSP_SERVER_LOG" "-";
   let instance = Instance.create () in
+  let duneFormatter = DuneFormatter.create () in
   Vscode.Commands.register ~command:"ocaml.select-sandbox"
-    ~handler:(selectSandbox instance);
-  [ "dune"; "dune-project"; "dune-workspace" ]
-  |> List.iter (fun language ->
-         Vscode.Languages.registerDocumentFormattingEditProvider
-           Vscode.Languages.{ language; scheme = "file" }
-           DuneFormatter.formattingProvider);
+    ~handler:(selectSandbox instance duneFormatter);
   let open Promise.O in
   let toolchain =
     Toolchain.ofSettings () >>| fun pm ->
     let resources, isFallback =
       match pm with
       | None ->
-        let (_ : unit Promise.t) = suggestToSetupToolchain instance in
+        let (_ : unit Promise.t) =
+          suggestToSetupToolchain instance duneFormatter
+        in
         (Toolchain.PackageManager.Global, true)
       | Some toolchain -> (toolchain, false)
     in
     (Toolchain.makeResources resources, isFallback)
   in
   toolchain >>= fun (toolchain, isFallback) ->
+  DuneFormatter.register duneFormatter toolchain;
   Instance.start instance toolchain
   |> handleError (fun e ->
          if isFallback then
