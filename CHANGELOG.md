@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Add support for Dune formatting in sandboxes
+
 ## 0.6.1
 
 - Fix Dune formatting for unsaved files
