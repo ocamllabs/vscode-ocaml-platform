@@ -15,15 +15,15 @@ let getFormatter toolchain =
   let documentText = TextDocument.getText document fullDocumentRange in
 
   let cmd, args = Toolchain.getDuneFormatter toolchain in
-  Cmd.make ~cmd ()
-  |> Promise.then_ (function
-       | Ok command -> Cmd.output command ~args ~stdin:documentText
-       | Error _ -> Promise.resolve (Error "could not find dune executable"))
-  |> Promise.map (function
-       | Ok stdout -> [| TextEdit.replace fullDocumentRange stdout |]
-       | Error msg ->
-         ignore @@ Window.showErrorMessage {j| Dune formatting failed: $msg |j};
-         [||])
+  let open Promise.O in
+  (Cmd.make ~cmd () >>= function
+   | Ok command -> Cmd.output command ~args ~stdin:documentText
+   | Error _ -> Promise.resolve (Error "could not find dune executable"))
+  >>| function
+  | Ok stdout -> [| TextEdit.replace fullDocumentRange stdout |]
+  | Error msg ->
+    ignore @@ Window.showErrorMessage {j| Dune formatting failed: $msg |j};
+    [||]
 
 type t = Disposable.t list ref
 
