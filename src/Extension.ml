@@ -28,19 +28,19 @@ end
 
 module Instance = struct
   type t =
-    { client : LanguageClient.t option ref
+    { mutable client : LanguageClient.t option
     ; duneFormatter : DuneFormatter.t
     }
 
-  let create () = { client = ref None; duneFormatter = DuneFormatter.create () }
+  let create () = { client = None; duneFormatter = DuneFormatter.create () }
 
   let stop t =
     DuneFormatter.dispose t.duneFormatter;
-    match !(t.client) with
+    match t.client with
     | None -> ()
     | Some (client : LanguageClient.t) ->
       client.stop () [@bs];
-      t.client := None
+      t.client <- None
 
   let start t toolchain =
     DuneFormatter.register t.duneFormatter toolchain;
@@ -51,7 +51,7 @@ module Instance = struct
       LanguageClient.make ~id:"ocaml" ~name:"OCaml Language Server"
         ~serverOptions ~clientOptions:(Client.make ())
     in
-    t.client := Some client;
+    t.client <- Some client;
     client.start () [@bs]
 end
 
