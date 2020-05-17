@@ -27,18 +27,23 @@ module Server = struct
 end
 
 module Instance = struct
-  type t = LanguageClient.t option ref
+  type t =
+    { client : LanguageClient.t option ref
+    ; duneFormatter : DuneFormatter.t
+    }
 
-  let create () = ref None
+  let create () = { client = ref None; duneFormatter = DuneFormatter.create () }
 
   let stop t =
-    match !t with
+    DuneFormatter.dispose t.duneFormatter;
+    match !(t.client) with
     | None -> ()
     | Some (client : LanguageClient.t) ->
-      (client.stop () [@bs]);
-      t := None
+      client.stop () [@bs];
+      t.client := None
 
   let start t toolchain =
+    DuneFormatter.register t.duneFormatter toolchain;
     let open Promise.Result.O in
     Toolchain.runSetup toolchain >>| fun () ->
     let serverOptions = Server.make toolchain in
@@ -46,26 +51,24 @@ module Instance = struct
       LanguageClient.make ~id:"ocaml" ~name:"OCaml Language Server"
         ~serverOptions ~clientOptions:(Client.make ())
     in
-    t := Some client;
-    (client.start () [@bs])
+    t.client := Some client;
+    client.start () [@bs]
 end
 
-let selectSandbox (instance : Instance.t) (duneFormatter : DuneFormatter.t) () =
+let selectSandbox (instance : Instance.t) () =
   let setToolchain =
     let open Promise.O in
     Toolchain.selectAndSave () >>= function
     | None -> Promise.Result.return ()
     | Some t ->
       Instance.stop instance;
-      DuneFormatter.dispose duneFormatter;
       let t = Toolchain.makeResources t in
-      DuneFormatter.register duneFormatter t;
       Instance.start instance t
   in
   let (_ : unit Promise.t) = handleError Window.showErrorMessage setToolchain in
   ()
 
-let suggestToSetupToolchain instance duneFormatter =
+let suggestToSetupToolchain instance =
   let open Promise.O in
   Vscode.Window.showInformationMessage'
     "Extension is unable to find ocamllsp automatically. Please select package \
@@ -73,30 +76,26 @@ let suggestToSetupToolchain instance duneFormatter =
     [ ("Select package manager", ()) ]
   >>| function
   | None -> ()
-  | Some () -> selectSandbox instance duneFormatter ()
+  | Some () -> selectSandbox instance ()
 
 let activate _context =
   Js.Dict.set Process.env "OCAML_LSP_SERVER_LOG" "-";
   let instance = Instance.create () in
-  let duneFormatter = DuneFormatter.create () in
   Vscode.Commands.register ~command:"ocaml.select-sandbox"
-    ~handler:(selectSandbox instance duneFormatter);
+    ~handler:(selectSandbox instance);
   let open Promise.O in
   let toolchain =
     Toolchain.ofSettings () >>| fun pm ->
     let resources, isFallback =
       match pm with
       | None ->
-        let (_ : unit Promise.t) =
-          suggestToSetupToolchain instance duneFormatter
-        in
+        let (_ : unit Promise.t) = suggestToSetupToolchain instance in
         (Toolchain.PackageManager.Global, true)
       | Some toolchain -> (toolchain, false)
     in
     (Toolchain.makeResources resources, isFallback)
   in
   toolchain >>= fun (toolchain, isFallback) ->
-  DuneFormatter.register duneFormatter toolchain;
   Instance.start instance toolchain
   |> handleError (fun e ->
          if isFallback then
