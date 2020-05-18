@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased
+
+- Add .mld syntax highlighting
+- Add highlighting for Cppo directives in OCaml files
+
 ## 0.6.1
 
 - Fix Dune formatting for unsaved files

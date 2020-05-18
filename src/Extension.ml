@@ -9,6 +9,7 @@ module Client = struct
   let make () : Vscode.LanguageClient.clientOptions =
     let documentSelector : Vscode.LanguageClient.documentSelectorItem array =
       [| { scheme = "file"; language = "ocaml" }
+       ; { scheme = "file"; language = "ocaml.interface" }
        ; { scheme = "file"; language = "reason" }
       |]
     in
