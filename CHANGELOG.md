@@ -4,6 +4,7 @@
 
 - Add .mld syntax highlighting
 - Add highlighting for Cppo directives in OCaml files
+- Add highlighting for more toplevel and topfind directives in OCaml files
 
 ## 0.6.1
 
