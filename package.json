@@ -43,11 +43,6 @@
           "type": "object",
           "default": null,
           "description": "Determines where to find the sandbox for a given project"
-        },
-        "ocaml.lsp.path": {
-          "type": "string",
-          "default": "ocamllsp",
-          "description": "Path to the LSP binary"
         }
       }
     },
