@@ -2,7 +2,7 @@
   "dependencies": {
     "@opam/merlin": "*",
     "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam#7592d32",
-    "@opam/ocamlformat": "0.14.2",
+    "@opam/ocamlformat": "0.13.0",
     "@opam/reason": "*",
     "ocaml": "4.6.x"
   },
