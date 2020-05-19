@@ -15,9 +15,7 @@ let format (document : TextDocument.t) _options _token =
 
   Cmd.make ~cmd:(Path.ofString "dune") ()
   |> Promise.Result.bind (fun duneCmd ->
-         Cmd.output duneCmd
-           ~args:[| "format-dune-file"  |]
-           ~stdin:documentText)
+         Cmd.output duneCmd ~args:[| "format-dune-file" |] ~stdin:documentText)
   |> Promise.map (function
        | Ok stdout -> [| TextEdit.replace fullDocumentRange stdout |]
        | Error _ -> [||])
