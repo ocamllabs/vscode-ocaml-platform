@@ -3,6 +3,11 @@
   "fileTypes": ["install"],
   "patterns": [
     {
+      "name": "comment.line.opam-install",
+      "begin": "#",
+      "end": "$"
+    },
+    {
       "match": "^\\s*(lib|lib_root|libexec|libexec_root|bin|sbin|toplevel|share|share_root|etc|doc|stublibs|man|misc)\\s*(:)",
       "captures": {
         "1": { "name": "entity.name.tag.opam-install" },
