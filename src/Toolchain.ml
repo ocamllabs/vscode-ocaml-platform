@@ -40,7 +40,7 @@ module PackageManager = struct
       match of_string (string json) with
       | Some s -> s
       | None ->
-        raise (DecodeError "opma | esy | global are the only valid values")
+        raise (DecodeError "opam | esy | global are the only valid values")
 
     let to_string = function
       | Opam -> "opam"
