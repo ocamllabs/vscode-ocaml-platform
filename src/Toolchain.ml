@@ -160,29 +160,44 @@ let ofSettings () : PackageManager.t option Promise.t =
 let toSettings (pm : PackageManager.t) =
   Settings.set PackageManager.Setting.t (PackageManager.toSetting pm)
 
-let selectPackageManager choices =
+module Candidate = struct
+  type t =
+    { packageManager : PackageManager.t
+    ; status : (unit, string) result
+    }
+
+  let toQuickPick { packageManager; status } =
+    let create = Window.QuickPickItem.create in
+    let detail =
+      match status with
+      | Error s -> Some (sprintf "invalid: %s" s)
+      | Ok () -> (
+        match packageManager with
+        | Opam (_, Local _) -> Some "Local switch"
+        | Opam (_, Named _) -> Some "Global switch"
+        | _ -> None )
+    in
+    match packageManager with
+    | PackageManager.Opam (_, s) ->
+      let label = Opam.Switch.toString s in
+      create ~label ?detail ()
+    | Esy (_, p) ->
+      create ?detail ~label:(Path.toString p) ~description:"Esy" ()
+    | Global ->
+      create ?detail ~label:"Global"
+        ~description:"Global toolchain inherited from the environment" ()
+
+  let ok packageManager = { packageManager; status = Ok () }
+end
+
+let selectPackageManager (choices : Candidate.t list) =
   let placeHolder =
     "Which package manager would you like to manage the toolchain?"
   in
   let choices =
-    let create = Window.QuickPickItem.create in
     List.map
-      (fun pm ->
-        let quickPick =
-          match pm with
-          | PackageManager.Opam (_, s) ->
-            let label = Opam.Switch.toString s in
-            let detail =
-              match s with
-              | Local _ -> "Local switch"
-              | Named _ -> "Global switch"
-            in
-            create ~label ~detail ()
-          | Esy (_, p) -> create ~label:(Path.toString p) ~description:"Esy" ()
-          | Global ->
-            create ~label:"Global"
-              ~description:"Global toolchain inherited from the environment" ()
-        in
+      (fun (pm : Candidate.t) ->
+        let quickPick = Candidate.toQuickPick pm in
         (quickPick, pm))
       choices
   in
@@ -205,17 +220,22 @@ let sandboxCandidates ~workspaceFolders =
       |> Promise.all
       >>| fun esys ->
       Array.to_list esys |> List.concat
-      |> List.map (fun manifest -> PackageManager.Esy (esy, manifest))
+      |> List.map (fun (manifest : Esy.discover) ->
+             { Candidate.packageManager = PackageManager.Esy (esy, manifest.file)
+             ; status = manifest.status
+             })
   in
   let opam =
     available.opam >>= function
     | None -> Promise.return []
     | Some opam ->
       Opam.switchList opam
-      >>| List.map (fun sw -> PackageManager.Opam (opam, sw))
+      >>| List.map (fun sw ->
+              let packageManager = PackageManager.Opam (opam, sw) in
+              { Candidate.packageManager; status = Ok () })
   in
   Promise.all2 (esy, opam) >>| fun (esy, opam) ->
-  (PackageManager.Global :: esy) @ opam
+  (Candidate.ok PackageManager.Global :: esy) @ opam
 
 let setupToolChain (kind : PackageManager.t) =
   match kind with
@@ -231,9 +251,14 @@ let selectAndSave () =
   sandboxCandidates ~workspaceFolders >>= fun candidates ->
   selectPackageManager candidates >>| function
   | None -> None
-  | Some choice ->
-    let (_ : unit Promise.t) = toSettings choice in
-    Some choice
+  | Some choice -> (
+    match choice.status with
+    | Error s ->
+      message `Warn "This toolchain is invalid. Error: %s" s;
+      None
+    | Ok () ->
+      let (_ : unit Promise.t) = toSettings choice.packageManager in
+      Some choice.packageManager )
 
 let getLspCommand (t : PackageManager.t) : Path.t * string array =
   let name = "ocamllsp" in
