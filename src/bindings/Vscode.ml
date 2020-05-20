@@ -133,6 +133,30 @@ module Workspace = struct
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 end
 
+module StatusBarAlignment = struct
+  type t =
+    | Left [@bs.as 1]
+    | Right [@bs.as 2]
+  [@@bs.deriving { jsConverter = newType }]
+end
+
+module StatusBarItem = struct
+  type t =
+    < alignment : StatusBarAlignment.abs_t
+    ; priority : int Js.Nullable.t
+    ; text : string [@bs.set]
+    ; tooltip : string [@bs.set]
+    ; color : string [@bs.set]
+    ; command : string [@bs.set] >
+    Js.t
+
+  external dispose : t -> unit = "dispose" [@@bs.send]
+
+  external hide : t -> unit = "hide" [@@bs.send]
+
+  external show : t -> unit = "show" [@@bs.send]
+end
+
 module Window = struct
   module QuickPickItem = struct
     type t
@@ -246,6 +270,13 @@ module Window = struct
        withProgressConfig
     -> (progress -> ('a, 'b) result Promise.t)
     -> ('a, 'b) result Promise.t = "withProgress"
+    [@@bs.module "vscode"] [@@bs.scope "window"]
+
+  external createStatusBarItem :
+       ?alignment:StatusBarAlignment.abs_t
+    -> ?priority:int
+    -> unit
+    -> StatusBarItem.t = "createStatusBarItem"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 end
 

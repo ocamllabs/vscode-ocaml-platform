@@ -27,6 +27,8 @@ end
 
 type resources
 
+val toString : resources -> string
+
 val ofSettings : unit -> PackageManager.t option Promise.t
 
 val makeResources : PackageManager.t -> resources

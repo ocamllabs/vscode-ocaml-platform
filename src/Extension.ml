@@ -29,12 +29,19 @@ end
 module Instance = struct
   type t =
     { mutable client : LanguageClient.t option
+    ; statusBarItem : StatusBarItem.t
     ; duneFormatter : DuneFormatter.t
     }
 
-  let create () = { client = None; duneFormatter = DuneFormatter.create () }
+  let create () =
+    let statusBarItem =
+      Window.createStatusBarItem ~alignment:StatusBarAlignment.(tToJs Left) ()
+    in
+    statusBarItem ## command #= "ocaml.select-sandbox";
+    { client = None; statusBarItem; duneFormatter = DuneFormatter.create () }
 
   let stop t =
+    StatusBarItem.hide t.statusBarItem;
     DuneFormatter.dispose t.duneFormatter;
     match t.client with
     | None -> ()
@@ -43,6 +50,9 @@ module Instance = struct
       t.client <- None
 
   let start t toolchain =
+    t.statusBarItem ## text
+    #= ("OCaml Platform | " ^ Toolchain.toString toolchain);
+    StatusBarItem.show t.statusBarItem;
     DuneFormatter.register t.duneFormatter toolchain;
     let open Promise.Result.O in
     Toolchain.runSetup toolchain >>| fun () ->

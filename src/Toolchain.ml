@@ -109,6 +109,8 @@ end
 
 type resources = PackageManager.t
 
+let toString = PackageManager.toString
+
 let availablePackageManagers () =
   { PackageManager.Kind.Hmap.opam = Opam.make ()
   ; esy = Esy.make ()
