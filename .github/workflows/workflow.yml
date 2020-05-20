@@ -1,16 +1,8 @@
 name: Main workflow
 
 on:
-  pull_request:
-    branches:
-      - master
-    paths-ignore:
-      - "**.md"
-  push:
-    branches:
-      - master
-    paths-ignore:
-      - "**.md"
+  - pull_request
+  - push
 
 jobs:
   build:
@@ -95,18 +87,28 @@ jobs:
       - name: Package extension
         run: yarn package
 
+      - name: Upload artifact
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ocaml-platform-${{ github.sha }}
+          path: ocaml-platform-*.vsix
+
       - name: Test extension
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: yarn test
 
       - name: Publish extension
-        if: success() && runner.os == 'Linux' && startsWith(github.ref, 'refs/tags/')
+        if: success() && runner.os == 'Linux' && contains(github.ref, 'refs/tags')
         run: yarn publish --pat ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
 
-      - name: Upload extension installer to artifact
-        if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v2
+      - name: Create Release
+        if: runner.os == 'Linux' && contains(github.ref, 'refs/tags')
+        uses: actions/create-release@v1
         with:
-          name: ocaml-platform-${{ github.sha }}
-          path: ocaml-platform-*.vsix
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

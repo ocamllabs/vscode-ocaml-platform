@@ -1,6 +1,7 @@
 open Import
 
-let format (document : TextDocument.t) _options _token =
+let getFormatter toolchain =
+ fun [@bs] (document : TextDocument.t) _options _token ->
   let lastLine = document.lineCount - 1 in
   let lastCharacter =
     String.length (TextDocument.lineAt document lastLine).text
@@ -13,14 +14,30 @@ let format (document : TextDocument.t) _options _token =
   (* text of entire document *)
   let documentText = TextDocument.getText document fullDocumentRange in
 
-  Cmd.make ~cmd:(Path.ofString "dune") ()
-  |> Promise.Result.bind (fun duneCmd ->
-         Cmd.output duneCmd
-           ~args:[| "format-dune-file"  |]
-           ~stdin:documentText)
-  |> Promise.map (function
-       | Ok stdout -> [| TextEdit.replace fullDocumentRange stdout |]
-       | Error _ -> [||])
+  let cmd, args = Toolchain.getDuneFormatter toolchain in
+  let open Promise.O in
+  (Cmd.make ~cmd () >>= function
+   | Ok command -> Cmd.output command ~args ~stdin:documentText
+   | Error _ -> Promise.resolve (Error "could not find dune executable"))
+  >>| function
+  | Ok stdout -> [| TextEdit.replace fullDocumentRange stdout |]
+  | Error msg ->
+    ignore @@ Window.showErrorMessage {j| Dune formatting failed: $msg |j};
+    [||]
 
-let formattingProvider : Languages.documentFormattingEditProvider =
-  Languages.{ provideDocumentFormattingEdits = format }
+type t = Disposable.t list ref
+
+let create () = ref []
+
+let register t toolchain =
+  t :=
+    [ "dune"; "dune-project"; "dune-workspace" ]
+    |> List.map (fun language ->
+           let open Vscode.Languages in
+           registerDocumentFormattingEditProvider
+             { language; scheme = "file" }
+             { provideDocumentFormattingEdits = getFormatter toolchain })
+
+let dispose t =
+  List.iter Disposable.dispose !t;
+  t := []

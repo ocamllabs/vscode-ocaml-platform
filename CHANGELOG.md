@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased
+
+- Fix faulty detection of esy sandboxes (#212)
+- Add support for Dune formatting in sandboxes
+
 ## 0.6.1
 
 - Fix Dune formatting for unsaved files

@@ -27,18 +27,23 @@ module Server = struct
 end
 
 module Instance = struct
-  type t = LanguageClient.t option ref
+  type t =
+    { mutable client : LanguageClient.t option
+    ; duneFormatter : DuneFormatter.t
+    }
 
-  let create () = ref None
+  let create () = { client = None; duneFormatter = DuneFormatter.create () }
 
   let stop t =
-    match !t with
+    DuneFormatter.dispose t.duneFormatter;
+    match t.client with
     | None -> ()
     | Some (client : LanguageClient.t) ->
-      (client.stop () [@bs]);
-      t := None
+      client.stop () [@bs];
+      t.client <- None
 
   let start t toolchain =
+    DuneFormatter.register t.duneFormatter toolchain;
     let open Promise.Result.O in
     Toolchain.runSetup toolchain >>| fun () ->
     let serverOptions = Server.make toolchain in
@@ -46,8 +51,8 @@ module Instance = struct
       LanguageClient.make ~id:"ocaml" ~name:"OCaml Language Server"
         ~serverOptions ~clientOptions:(Client.make ())
     in
-    t := Some client;
-    (client.start () [@bs])
+    t.client <- Some client;
+    client.start () [@bs]
 end
 
 let selectSandbox (instance : Instance.t) () =
@@ -78,11 +83,6 @@ let activate _context =
   let instance = Instance.create () in
   Vscode.Commands.register ~command:"ocaml.select-sandbox"
     ~handler:(selectSandbox instance);
-  [ "dune"; "dune-project"; "dune-workspace" ]
-  |> List.iter (fun language ->
-         Vscode.Languages.registerDocumentFormattingEditProvider
-           Vscode.Languages.{ language; scheme = "file" }
-           DuneFormatter.formattingProvider);
   let open Promise.O in
   let toolchain =
     Toolchain.ofSettings () >>| fun pm ->
