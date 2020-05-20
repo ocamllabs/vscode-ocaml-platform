@@ -1,3 +1,9 @@
+module Disposable = struct
+  type t
+
+  external dispose : t -> unit = "dispose" [@@bs.send]
+end
+
 module Range = struct
   type t
 
@@ -264,15 +270,13 @@ module Commands = struct
 end
 
 module ExtensionContext = struct
-  type disposable = { dispose : (unit -> unit[@bs]) }
-
   type t =
     { extensionPath : string
     ; globalState : memento
     ; globalStoragePath : string
     ; logPath : string
     ; storagePath : string option
-    ; subscriptions : disposable array
+    ; subscriptions : Disposable.t array
     ; workspaceState : memento
     ; asAbsolutePath : string -> string
     }
@@ -286,14 +290,15 @@ module Languages = struct
 
   type documentFormattingEditProvider =
     { provideDocumentFormattingEdits :
-           TextDocument.t
-        -> Workspace.formattingOptions
-        -> Workspace.cancellationToken
-        -> TextEdit.t array Promise.t
+        (   TextDocument.t
+         -> Workspace.formattingOptions
+         -> Workspace.cancellationToken
+         -> TextEdit.t array Promise.t
+        [@bs])
     }
 
   external registerDocumentFormattingEditProvider :
-    documentSelector -> documentFormattingEditProvider -> unit
+    documentSelector -> documentFormattingEditProvider -> Disposable.t
     = "registerDocumentFormattingEditProvider"
     [@@bs.module "vscode"] [@@bs.scope "languages"]
 end

@@ -244,6 +244,14 @@ let getLspCommand (t : PackageManager.t) : Path.t * string array =
 
 let addLspCheckArg args = Array.append args [| "--help=plain" |]
 
+let getDuneFormatter (t : PackageManager.t) : Path.t * string array =
+  let dune = "dune" in
+  let format = "format-dune-file" in
+  match t with
+  | Opam (opam, switch) -> Opam.exec opam ~switch ~args:[| dune; format |]
+  | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:[| dune; format |]
+  | Global -> (Path.ofString dune, [| format |])
+
 let runSetup resources =
   let open Promise.Result.O in
   setupToolChain resources
