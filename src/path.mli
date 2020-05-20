@@ -25,3 +25,5 @@ val join : t -> t -> t
 val withExt : t -> ext:string -> t
 
 val parent : t -> t option
+
+val isRoot : t -> bool
