@@ -1,7 +1,7 @@
 {
   "scopeName": "source.ocaml.ocamldoc",
   "name": "comment.other.ocamldoc",
-  "fileTypes": [".mld"],
+  "fileTypes": ["mld"],
   "patterns": [
     {
       "name": "comment.other.ocamldoc",

@@ -1,7 +1,7 @@
 {
   "name": "OCaml Interface",
   "scopeName": "source.ocaml.interface",
-  "fileTypes": [".mli"],
+  "fileTypes": ["mli"],
   "patterns": [
     { "include": "source.ocaml#directives" },
     { "include": "source.ocaml#comments" },
