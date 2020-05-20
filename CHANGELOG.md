@@ -4,6 +4,7 @@
 
 - Fix faulty detection of esy sandboxes (#212)
 - Add support for Dune formatting in sandboxes
+- Show statusbar item for current toolchain
 
 ## 0.6.1
 
