@@ -162,6 +162,16 @@
         "configuration": "./languages/opam.json"
       },
       {
+        "id": "ocaml.opam-install",
+        "aliases": [
+          "opam install"
+        ],
+        "extensions": [
+          ".install"
+        ],
+        "configuration": "./languages/opam-install.json"
+      },
+      {
         "id": "ocaml.META",
         "aliases": [
           "META",
@@ -315,6 +325,11 @@
         "language": "ocaml.opam",
         "scopeName": "source.ocaml.opam",
         "path": "./syntaxes/opam.json"
+      },
+      {
+        "language": "ocaml.opam-install",
+        "scopeName": "source.ocaml.opam-install",
+        "path": "./syntaxes/opam-install.json"
       },
       {
         "language": "ocaml.META",
