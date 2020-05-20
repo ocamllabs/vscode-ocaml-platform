@@ -143,7 +143,7 @@ end
 module StatusBarItem = struct
   type t =
     < alignment : StatusBarAlignment.abs_t
-    ; priority : int Js.Nullable.t
+    ; priority : int
     ; text : string [@bs.set]
     ; tooltip : string [@bs.set]
     ; color : string [@bs.set]
