@@ -14,6 +14,8 @@ val toString : t -> string
 
 val extname : t -> string
 
+val basename : t -> string
+
 val ( / ) : t -> string -> t
 
 val relative : t -> string -> t

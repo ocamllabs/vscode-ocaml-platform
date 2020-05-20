@@ -12,6 +12,8 @@ let compare = String.compare
 
 let extname t = Node.Path.extname t
 
+let basename t = Node.Path.basename t
+
 let ( / ) = Filename.concat
 
 let relative = ( / )
