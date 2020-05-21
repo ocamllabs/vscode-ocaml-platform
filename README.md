@@ -37,14 +37,6 @@ npm install esy --global
     "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam",
     "@opam/reason": "*",
     "ocaml": "4.6.x"
-  },
-  "resolutions": {
-    "@opam/dune-configurator": "2.0.1",
-    "@opam/dune-private-libs": "2.0.1",
-    "@opam/dune": "2.0.1",
-    "@opam/menhir": "20200123",
-    "@opam/menhirLib": "20200123",
-    "@opam/menhirSdk": "20200123"
   }
 }
 ```
