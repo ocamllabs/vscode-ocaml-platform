@@ -33,8 +33,7 @@ module JsError = struct
 
   external make : string -> t = "Error" [@@bs.new]
 
-  let ofPromiseError =
-    [%raw fun error -> "return error.message || 'Unknown error'"]
+  let ofPromiseError _error = [%raw "_error.message || 'Unknown error'"]
 end
 
 module Buffer = struct
@@ -201,12 +200,8 @@ module ChildProcess = struct
     Promise.make @@ fun ~resolve ~reject:_ ->
     let cp = ref [%bs.obj { exitCode = 0 }] in
     cp :=
-      exec cmd options (fun err stdout stderr ->
-          if Js.Nullable.isNullable err then (
-            resolve (Ok { exitCode = !cp##exitCode; stdout; stderr }) [@bs]
-          ) else (
-            resolve (Error {j| Exec failed during $cmd |j}) [@bs]
-          ));
+      exec cmd options (fun _err stdout stderr ->
+          (resolve { exitCode = !cp##exitCode; stdout; stderr } [@bs]));
     match stdin with
     | Some text ->
       let stdinStream = get_stdin !cp in

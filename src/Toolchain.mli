@@ -71,3 +71,6 @@ val runSetup : resources -> (unit, string) result Promise.t
 (** Extract lsp command and arguments (Eg. "opam" and [| "exec";
    "ocamllsp" |] *)
 val getLspCommand : resources -> Path.t * string array
+
+(** Extract format-dune-file command *)
+val getDuneFormatter : resources -> Path.t * string array

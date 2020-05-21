@@ -58,13 +58,10 @@ let output ~args ?cwd ?stdin { cmd; env } =
   in
   ChildProcess.exec shellString ?stdin (ChildProcess.Options.make ?cwd ~env ())
   |> Promise.map (function
-       | Error e -> Error e
-       | Ok { ChildProcess.exitCode; stdout; stderr } ->
-         if exitCode = 0 then
-           Ok stdout
-         else
-           Error
-             {j| Command $shellString failed:
+       | ChildProcess.{ exitCode = 0; stdout; stderr = _ } -> Ok stdout
+       | ChildProcess.{ exitCode; stdout = _; stderr } ->
+         Error
+           {j| Command $shellString failed:
 exitCode: $exitCode
 stderr: $stderr
 |j})

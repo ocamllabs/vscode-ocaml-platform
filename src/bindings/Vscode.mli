@@ -1,3 +1,9 @@
+module Disposable : sig
+  type t
+
+  val dispose : t -> unit
+end
+
 module Range : sig
   type t
 
@@ -195,14 +201,15 @@ module Languages : sig
 
   type documentFormattingEditProvider =
     { provideDocumentFormattingEdits :
-           TextDocument.t
-        -> Workspace.formattingOptions
-        -> Workspace.cancellationToken
-        -> TextEdit.t array Promise.t
+        (   TextDocument.t
+         -> Workspace.formattingOptions
+         -> Workspace.cancellationToken
+         -> TextEdit.t array Promise.t
+        [@bs])
     }
 
   val registerDocumentFormattingEditProvider :
-    documentSelector -> documentFormattingEditProvider -> unit
+    documentSelector -> documentFormattingEditProvider -> Disposable.t
 end
 
 module LanguageClient : sig

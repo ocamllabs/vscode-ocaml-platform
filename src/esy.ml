@@ -4,6 +4,11 @@ type t = Cmd.t
 
 let binary = Path.ofString "esy"
 
+type discover =
+  { file : Path.t
+  ; status : (unit, string) result
+  }
+
 let make () =
   Cmd.make ~cmd:binary ()
   |> Promise.map (function
@@ -21,64 +26,42 @@ let env t ~manifest =
               assert false))
 
 module Discover = struct
+  let valid file = Some { file; status = Ok () }
+
+  let invalid_json file = Some { file; status = Error "unable to parse json" }
+
   let parseFile projectRoot = function
-    | "esy.json" -> Some projectRoot |> Promise.resolve
+    | "esy.json"
     | "opam" ->
-      Fs.stat Path.(projectRoot / "opam" |> toString)
-      |> Promise.map (function
-           | Error _ -> None
-           | Ok stats -> (
-             match Fs.Stat.isDirectory stats with
-             | true ->
-               (* Is this wrong? The opam file can exist in a directroy as well *)
-               None
-             | false -> Some projectRoot ))
-    | "package.json" ->
-      let manifestFile = Path.(projectRoot / "package.json") |> Path.toString in
+      Promise.return (valid projectRoot)
+    | s when Filename.extension s = ".opam" ->
+      Promise.return (valid projectRoot)
+    | "package.json" as fname ->
+      let manifestFile = Path.(projectRoot / fname) |> Path.toString in
       Fs.readFile manifestFile
       |> Promise.map (fun manifest ->
              match Json.parse manifest with
-             | None -> None
+             | None -> invalid_json projectRoot
              | Some json ->
                if
                  ( propertyExists json "dependencies"
                  || propertyExists json "devDependencies" )
                  && propertyExists json "esy"
                then
-                 Some projectRoot
+                 valid projectRoot
                else
                  None)
-    | file -> (
-      let manifestFile = Path.(projectRoot / file) in
-      match Node.Path.extname file with
-      | ".json" ->
-        Fs.readFile (Path.toString manifestFile)
-        |> Promise.map (fun manifest ->
-               match Json.parse manifest with
-               | Some json ->
-                 if
-                   propertyExists json "dependencies"
-                   || propertyExists json "devDependencies"
-                 then
-                   Some projectRoot
-                 else
-                   None
-               | None ->
-                 Js.Console.error3 "Invalid JSON file found. Ignoring..."
-                   manifest manifestFile;
-                 None)
-      | ".opam" -> Promise.return (Some manifestFile)
-      | _ -> None |> Promise.resolve )
+    | _ -> None |> Promise.resolve
 
   let parseDir dir =
     let open Promise.O in
     (Path.toString dir |> Fs.readDir >>| function
+     | Ok res -> res
      | Error _ ->
        message `Warn
          "Unable to read %s. No esy projects will be inferred from here"
          (Path.toString dir);
-       [||]
-     | Ok res -> res)
+       [||])
     >>= fun files -> files |> Promise.Array.filterMap (parseFile dir)
 
   let parseDirsUp dir =
@@ -90,7 +73,7 @@ module Discover = struct
     in
     loop [] dir
 
-  let run ~dir : Path.t list Promise.t =
+  let run ~dir : discover list Promise.t =
     dir |> parseDirsUp |> Array.of_list |> Promise.all
     |> Promise.map (fun x -> Array.to_list (Js.Array.concatMany x [||]))
 end
@@ -138,8 +121,8 @@ let _setupBsb t ~manifest ~envWithUnzip:esyEnv =
       let eventEmitter = Setup.Bsb.make () in
       Setup.Bsb.onProgress eventEmitter (fun percent ->
           Js.Console.info2 "Percentage:" percent;
-          (progress.report
-             [%bs.obj { increment = int_of_float (percent *. 100.) }] [@bs]));
+          progress.report
+            [%bs.obj { increment = int_of_float (percent *. 100.) }] [@bs]);
       Setup.Bsb.onEnd eventEmitter (fun () ->
           (progress.report [%bs.obj { increment = 100 }] [@bs]));
       Setup.Bsb.onError eventEmitter (fun errorMsg ->
@@ -160,10 +143,10 @@ let _promptSetup fn =
 
 let _setupEsy t ~manifest =
   setupWithProgressIndicator (fun progress ->
-      (progress.report [%bs.obj { increment = int_of_float 1. }] [@bs]);
+      progress.report [%bs.obj { increment = int_of_float 1. }] [@bs];
       Cmd.output t ~cwd:manifest ~args:[||]
       |> Promise.map (fun _ ->
-             (progress.report [%bs.obj { increment = int_of_float 100. }] [@bs]);
+             progress.report [%bs.obj { increment = int_of_float 100. }] [@bs];
              Ok ()))
 
 let setupToolchain t ~manifest =

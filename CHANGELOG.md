@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fix faulty detection of esy sandboxes (#212)
+- Add support for Dune formatting in sandboxes
 - Add .mld syntax highlighting
 - Add highlighting for Cppo directives in OCaml files
 - Add highlighting for more toplevel and topfind directives in OCaml files
