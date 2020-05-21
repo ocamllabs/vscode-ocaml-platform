@@ -1,5 +1,7 @@
 open Import
 
+let selectSandboxCommandId = "ocaml.select-sandbox"
+
 let handleError f =
   Promise.then_ (function
     | Ok () -> Promise.resolve ()
@@ -37,7 +39,7 @@ module Instance = struct
     let statusBarItem =
       Window.createStatusBarItem ~alignment:StatusBarAlignment.(tToJs Left) ()
     in
-    statusBarItem ## command #= "ocaml.select-sandbox";
+    statusBarItem##command#=selectSandboxCommandId;
     { client = None; statusBarItem; duneFormatter = DuneFormatter.create () }
 
   let stop t =
@@ -91,7 +93,7 @@ let suggestToSetupToolchain instance =
 let activate _context =
   Js.Dict.set Process.env "OCAML_LSP_SERVER_LOG" "-";
   let instance = Instance.create () in
-  Vscode.Commands.register ~command:"ocaml.select-sandbox"
+  Vscode.Commands.register ~command:selectSandboxCommandId
     ~handler:(selectSandbox instance);
   let open Promise.O in
   let toolchain =
