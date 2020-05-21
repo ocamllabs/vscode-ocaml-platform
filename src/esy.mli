@@ -4,7 +4,12 @@ type t
 
 val make : unit -> t option Promise.t
 
-val discover : dir:Path.t -> Path.t list Promise.t
+type discover =
+  { file : Path.t
+  ; status : (unit, string) result
+  }
+
+val discover : dir:Path.t -> discover list Promise.t
 
 val env : t -> manifest:Path.t -> string Js.Dict.t Or_error.t Promise.t
 
