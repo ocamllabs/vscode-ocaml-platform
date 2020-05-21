@@ -31,20 +31,25 @@ end
 module Instance = struct
   type t =
     { mutable client : LanguageClient.t option
-    ; statusBarItem : StatusBarItem.t
+    ; mutable statusBarItem : StatusBarItem.t option
     ; duneFormatter : DuneFormatter.t
     }
 
   let create () =
-    let statusBarItem =
-      Window.createStatusBarItem ~alignment:StatusBarAlignment.(tToJs Left) ()
-    in
-    statusBarItem##command#=selectSandboxCommandId;
-    { client = None; statusBarItem; duneFormatter = DuneFormatter.create () }
+    { client = None
+    ; statusBarItem = None
+    ; duneFormatter = DuneFormatter.create ()
+    }
 
   let stop t =
-    StatusBarItem.hide t.statusBarItem;
     DuneFormatter.dispose t.duneFormatter;
+
+    ( match t.statusBarItem with
+    | None -> ()
+    | Some (statusBarItem : StatusBarItem.t) ->
+      StatusBarItem.dispose statusBarItem;
+      t.statusBarItem <- None );
+
     match t.client with
     | None -> ()
     | Some (client : LanguageClient.t) ->
@@ -52,10 +57,17 @@ module Instance = struct
       t.client <- None
 
   let start t toolchain =
-    t.statusBarItem ## text
-    #= ("OCaml Platform | " ^ Toolchain.toString toolchain);
-    StatusBarItem.show t.statusBarItem;
     DuneFormatter.register t.duneFormatter toolchain;
+
+    let statusBarItem =
+      Window.createStatusBarItem ~alignment:StatusBarAlignment.(tToJs Left) ()
+    in
+    let statusBarText = "OCaml Platform | " ^ Toolchain.toString toolchain in
+    statusBarItem##text#=statusBarText;
+    statusBarItem##command#=selectSandboxCommandId;
+    StatusBarItem.show statusBarItem;
+    t.statusBarItem <- Some statusBarItem;
+
     let open Promise.Result.O in
     Toolchain.runSetup toolchain >>| fun () ->
     let serverOptions = Server.make toolchain in
