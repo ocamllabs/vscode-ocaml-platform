@@ -205,7 +205,7 @@ module Window = struct
   external showErrorMessage : string -> 'a Promise.t = "showErrorMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 
-  external showWarningMessage' : string -> 'a Promise.t = "showErrorMessage"
+  external showWarningMessage' : string -> 'a Promise.t = "showWarningMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 
   let showWarningMessage m =
