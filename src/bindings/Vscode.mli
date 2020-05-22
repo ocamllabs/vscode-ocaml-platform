@@ -223,10 +223,7 @@ module LanguageClient : sig
   end
 
   module InitializeResult : sig
-    type experimental =
-      { ocamlInterface : bool Js.Nullable.t [@bs.as "ocaml.interface"] }
-
-    type serverCapabilities = { experimental : experimental Js.Nullable.t }
+    type serverCapabilities = { experimental : Js.Json.t Js.Nullable.t }
 
     type serverInfo =
       { name : string

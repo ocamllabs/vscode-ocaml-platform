@@ -56,17 +56,12 @@ module Instance = struct
     client.start () [@bs];
 
     let open Promise.O in
-    LanguageClient.onReady client >>| fun _ ->
-    let experimental =
-      Js.Nullable.toOption client.initializeResult.capabilities.experimental
-    in
-    let ocamlInterface =
-      Belt.Option.flatMap experimental @@ fun experimental ->
-      Js.Nullable.toOption experimental.ocamlInterface
-    in
-    match ocamlInterface with
-    | Some true -> Ok ()
-    | _ -> Error "ocamllsp is out of date. Please update to the latest version."
+    LanguageClient.onReady client >>| fun () ->
+    let ocamlLsp = OcamlLsp.ofInitializeResult client.initializeResult in
+    if OcamlLsp.interfaceSpecificLangId ocamlLsp then
+      Ok ()
+    else
+      Error "ocamllsp is out of date. Please update to the latest version."
 end
 
 let selectSandbox (instance : Instance.t) () =
