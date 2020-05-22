@@ -317,7 +317,7 @@ module LanguageClient = struct
     type experimental =
       { ocamlInterface : bool Js.Nullable.t [@bs.as "ocaml.interface"] }
 
-    type serverCapabilities = { experimental : experimental }
+    type serverCapabilities = { experimental : experimental Js.Nullable.t }
 
     type serverInfo =
       { name : string

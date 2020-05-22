@@ -57,9 +57,14 @@ module Instance = struct
 
     let open Promise.O in
     LanguageClient.onReady client >>| fun _ ->
-    client.initializeResult.capabilities.experimental.ocamlInterface
-    |> Js.Nullable.toOption
-    |> function
+    let experimental =
+      Js.Nullable.toOption client.initializeResult.capabilities.experimental
+    in
+    let ocamlInterface =
+      Belt.Option.flatMap experimental @@ fun experimental ->
+      Js.Nullable.toOption experimental.ocamlInterface
+    in
+    match ocamlInterface with
     | Some true -> Ok ()
     | _ -> Error "ocamllsp is out of date. Please update to the latest version."
 end
