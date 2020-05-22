@@ -352,6 +352,10 @@ module LanguageClient = struct
     ; initializeResult : InitializeResult.t
     }
 
+  let start t = (t.start () [@bs])
+
+  let stop t = (t.stop () [@bs])
+
   external make :
        id:string
     -> name:string
@@ -361,4 +365,8 @@ module LanguageClient = struct
     [@@bs.new] [@@bs.module "vscode-languageclient"]
 
   external onReady : t -> unit Promise.t = "onReady" [@@bs.send]
+
+  let initializeResult (t : t) =
+    let open Promise.O in
+    onReady t >>| fun () -> t.initializeResult
 end

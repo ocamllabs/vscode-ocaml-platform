@@ -255,11 +255,7 @@ module LanguageClient : sig
     ; options : processOptions
     }
 
-  type t =
-    { start : (unit -> unit[@bs])
-    ; stop : (unit -> unit[@bs])
-    ; initializeResult : InitializeResult.t
-    }
+  type t
 
   val make :
        id:string
@@ -268,5 +264,11 @@ module LanguageClient : sig
     -> clientOptions:clientOptions
     -> t
 
+  val stop : t -> unit
+
+  val start : t -> unit
+
   val onReady : t -> unit Promise.t
+
+  val initializeResult : t -> InitializeResult.t Promise.t
 end

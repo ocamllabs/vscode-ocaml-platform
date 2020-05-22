@@ -40,7 +40,7 @@ module Instance = struct
     match t.client with
     | None -> ()
     | Some (client : LanguageClient.t) ->
-      client.stop () [@bs];
+      LanguageClient.stop client;
       t.client <- None
 
   let start t toolchain =
@@ -53,11 +53,11 @@ module Instance = struct
         ~serverOptions ~clientOptions:(Client.make ())
     in
     t.client <- Some client;
-    client.start () [@bs];
+    LanguageClient.start client;
 
     let open Promise.O in
-    LanguageClient.onReady client >>| fun () ->
-    let ocamlLsp = OcamlLsp.ofInitializeResult client.initializeResult in
+    LanguageClient.initializeResult client >>| fun initializeResult ->
+    let ocamlLsp = OcamlLsp.ofInitializeResult initializeResult in
     if not (OcamlLsp.interfaceSpecificLangId ocamlLsp) then
       message `Warn
         "ocamllsp in this toolchain is out of date, functionality will not be \
