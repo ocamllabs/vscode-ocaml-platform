@@ -9,6 +9,7 @@ module Client = struct
   let make () : Vscode.LanguageClient.clientOptions =
     let documentSelector : Vscode.LanguageClient.documentSelectorItem array =
       [| { scheme = "file"; language = "ocaml" }
+       ; { scheme = "file"; language = "ocaml.interface" }
        ; { scheme = "file"; language = "reason" }
       |]
     in
@@ -39,20 +40,30 @@ module Instance = struct
     match t.client with
     | None -> ()
     | Some (client : LanguageClient.t) ->
-      client.stop () [@bs];
+      LanguageClient.stop client;
       t.client <- None
 
   let start t toolchain =
     DuneFormatter.register t.duneFormatter toolchain;
     let open Promise.Result.O in
-    Toolchain.runSetup toolchain >>| fun () ->
+    Toolchain.runSetup toolchain >>= fun () ->
     let serverOptions = Server.make toolchain in
     let client =
       LanguageClient.make ~id:"ocaml" ~name:"OCaml Language Server"
         ~serverOptions ~clientOptions:(Client.make ())
     in
     t.client <- Some client;
-    client.start () [@bs]
+    LanguageClient.start client;
+
+    let open Promise.O in
+    LanguageClient.initializeResult client >>| fun initializeResult ->
+    let ocamlLsp = OcamlLsp.ofInitializeResult initializeResult in
+    if not (OcamlLsp.interfaceSpecificLangId ocamlLsp) then
+      message `Warn
+        "ocamllsp in this toolchain is out of date, functionality will not be \
+         available in mli sources. Please update to a recent version and \
+         restart the server.";
+    Ok ()
 end
 
 let selectSandbox (instance : Instance.t) () =

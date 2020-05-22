@@ -222,6 +222,20 @@ module LanguageClient : sig
     [@@bs.deriving { jsConverter = newType }]
   end
 
+  module InitializeResult : sig
+    type serverCapabilities = { experimental : Js.Json.t Js.Nullable.t }
+
+    type serverInfo =
+      { name : string
+      ; version : string Js.Nullable.t
+      }
+
+    type t =
+      { capabilities : serverCapabilities
+      ; serverInfo : serverInfo Js.Nullable.t
+      }
+  end
+
   type documentSelectorItem =
     { scheme : string
     ; language : string
@@ -241,10 +255,7 @@ module LanguageClient : sig
     ; options : processOptions
     }
 
-  type t =
-    { start : (unit -> unit[@bs])
-    ; stop : (unit -> unit[@bs])
-    }
+  type t
 
   val make :
        id:string
@@ -252,4 +263,12 @@ module LanguageClient : sig
     -> serverOptions:serverOptions
     -> clientOptions:clientOptions
     -> t
+
+  val stop : t -> unit
+
+  val start : t -> unit
+
+  val onReady : t -> unit Promise.t
+
+  val initializeResult : t -> InitializeResult.t Promise.t
 end
