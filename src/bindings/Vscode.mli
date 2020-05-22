@@ -222,6 +222,23 @@ module LanguageClient : sig
     [@@bs.deriving { jsConverter = newType }]
   end
 
+  module InitializeResult : sig
+    type experimental =
+      { ocamlInterface : bool Js.Nullable.t [@bs.as "ocaml.interface"] }
+
+    type serverCapabilities = { experimental : experimental }
+
+    type serverInfo =
+      { name : string
+      ; version : string Js.Nullable.t
+      }
+
+    type t =
+      { capabilities : serverCapabilities
+      ; serverInfo : serverInfo Js.Nullable.t
+      }
+  end
+
   type documentSelectorItem =
     { scheme : string
     ; language : string
@@ -244,6 +261,7 @@ module LanguageClient : sig
   type t =
     { start : (unit -> unit[@bs])
     ; stop : (unit -> unit[@bs])
+    ; initializeResult : InitializeResult.t
     }
 
   val make :
@@ -252,4 +270,6 @@ module LanguageClient : sig
     -> serverOptions:serverOptions
     -> clientOptions:clientOptions
     -> t
+
+  val onReady : t -> unit Promise.t
 end

@@ -313,6 +313,23 @@ module LanguageClient = struct
     [@@bs.deriving { jsConverter = newType }]
   end
 
+  module InitializeResult = struct
+    type experimental =
+      { ocamlInterface : bool Js.Nullable.t [@bs.as "ocaml.interface"] }
+
+    type serverCapabilities = { experimental : experimental }
+
+    type serverInfo =
+      { name : string
+      ; version : string Js.Nullable.t
+      }
+
+    type t =
+      { capabilities : serverCapabilities
+      ; serverInfo : serverInfo Js.Nullable.t
+      }
+  end
+
   type documentSelectorItem =
     { scheme : string
     ; language : string
@@ -335,6 +352,7 @@ module LanguageClient = struct
   type t =
     { start : (unit -> unit[@bs])
     ; stop : (unit -> unit[@bs])
+    ; initializeResult : InitializeResult.t
     }
 
   external make :
@@ -344,4 +362,6 @@ module LanguageClient = struct
     -> clientOptions:clientOptions
     -> t = "LanguageClient"
     [@@bs.new] [@@bs.module "vscode-languageclient"]
+
+  external onReady : t -> unit Promise.t = "onReady" [@@bs.send]
 end

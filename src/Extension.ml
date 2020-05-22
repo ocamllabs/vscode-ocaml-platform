@@ -46,14 +46,22 @@ module Instance = struct
   let start t toolchain =
     DuneFormatter.register t.duneFormatter toolchain;
     let open Promise.Result.O in
-    Toolchain.runSetup toolchain >>| fun () ->
+    Toolchain.runSetup toolchain >>= fun () ->
     let serverOptions = Server.make toolchain in
     let client =
       LanguageClient.make ~id:"ocaml" ~name:"OCaml Language Server"
         ~serverOptions ~clientOptions:(Client.make ())
     in
     t.client <- Some client;
-    client.start () [@bs]
+    client.start () [@bs];
+
+    let open Promise.O in
+    LanguageClient.onReady client >>| fun _ ->
+    client.initializeResult.capabilities.experimental.ocamlInterface
+    |> Js.Nullable.toOption
+    |> function
+    | Some true -> Ok ()
+    | _ -> Error "ocamllsp is out of date. Please update to the latest version."
 end
 
 let selectSandbox (instance : Instance.t) () =
