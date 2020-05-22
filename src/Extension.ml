@@ -58,10 +58,12 @@ module Instance = struct
     let open Promise.O in
     LanguageClient.onReady client >>| fun () ->
     let ocamlLsp = OcamlLsp.ofInitializeResult client.initializeResult in
-    if OcamlLsp.interfaceSpecificLangId ocamlLsp then
-      Ok ()
-    else
-      Error "ocamllsp is out of date. Please update to the latest version."
+    if not (OcamlLsp.interfaceSpecificLangId ocamlLsp) then
+      message `Warn
+        "ocamllsp in this toolchain is out of date, functionality will not be \
+         available in mli sources. Please update to a recent version and \
+         restart the server.";
+    Ok ()
 end
 
 let selectSandbox (instance : Instance.t) () =
