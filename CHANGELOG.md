@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 0.7.0
 
 - Fix faulty detection of esy sandboxes (#212)
 - Add support for Dune formatting in sandboxes
