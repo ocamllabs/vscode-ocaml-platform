@@ -1,6 +1,8 @@
 module Disposable : sig
   type t
 
+  val create : dispose:(unit -> unit) -> t
+
   val dispose : t -> unit
 end
 

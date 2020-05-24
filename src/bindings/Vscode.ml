@@ -1,6 +1,8 @@
 module Disposable = struct
   type t
 
+  external create : dispose:(unit -> unit) -> t = "" [@@bs.obj]
+
   external dispose : t -> unit = "dispose" [@@bs.send]
 end
 
