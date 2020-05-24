@@ -61,13 +61,15 @@ end
 module Commands : sig
   val get : filterInternal:bool -> string array Promise.t
 
-  val register : command:string -> handler:(unit -> unit) -> unit
+  val register : command:string -> handler:(unit -> unit) -> Disposable.t
 
   val executeCommand : command:string -> args:'a list -> unit Promise.t
 end
 
 module ExtensionContext : sig
   type t
+
+  val subscribe : t -> Disposable.t -> unit
 end
 
 module WorkspaceConfiguration : sig

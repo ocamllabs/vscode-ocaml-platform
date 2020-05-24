@@ -255,7 +255,7 @@ module Commands = struct
   external get : filterInternal:bool -> string array Promise.t = "getCommands"
     [@@bs.module "vscode"] [@@bs.scope "commands"]
 
-  external register : command:string -> handler:(unit -> unit) -> unit
+  external register : command:string -> handler:(unit -> unit) -> Disposable.t
     = "registerCommand"
     [@@bs.module "vscode"] [@@bs.scope "commands"]
 
@@ -271,15 +271,19 @@ end
 
 module ExtensionContext = struct
   type t =
-    { extensionPath : string
+    < extensionPath : string
     ; globalState : memento
     ; globalStoragePath : string
     ; logPath : string
     ; storagePath : string option
     ; subscriptions : Disposable.t array
     ; workspaceState : memento
-    ; asAbsolutePath : string -> string
-    }
+    ; asAbsolutePath : string -> string >
+    Js.t
+
+  let subscribe t (x : Disposable.t) =
+    let (_ : int) = Js.Array.push x t##subscriptions in
+    ()
 end
 
 module Languages = struct
