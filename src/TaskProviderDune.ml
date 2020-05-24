@@ -1,0 +1,86 @@
+open Import
+
+let taskDefinition = { Task.type_ = "dune" }
+
+let source = "dune"
+
+let problemMatchers = [| "ocamlc" |]
+
+(* the ocamlc matcher is not able to parse ocaml compiler errors unless they
+   follow the short style. *)
+let env = Js.Dict.fromList [ ("OCAML_ERROR_STYLE", "short") ]
+
+let startsWith ~s ~prefix =
+  try
+    let prefixLen = String.length prefix in
+    let start = String.sub s 0 prefixLen in
+    String.equal start prefix
+  with _ -> false
+
+let removePrefix ~s ~prefix =
+  let prefixLen = String.length prefix in
+  let len = String.length s - prefixLen in
+  String.sub s prefixLen len
+
+let folderRelativePath folders file =
+  Array.fold_left
+    (fun acc (folder : Folder.t) ->
+      match acc with
+      | Some _ -> acc
+      | None -> (
+        match startsWith ~s:file ~prefix:folder.uri.fsPath with
+        | false -> acc
+        | true -> Some (folder, removePrefix ~s:file ~prefix:folder.uri.fsPath)
+        ))
+    None folders
+
+let provideTasks =
+ fun [@bs] cancellationToken ->
+  let open Promise.O in
+  let folders = Workspace.workspaceFolders () in
+  let excl =
+    (* ignoring dune files from _build, _opam, _esy *)
+    Some "{**/_*,}"
+  in
+  let inc = "**/{dune,dune-project,dune-workspace}" in
+  Workspace.findFiles ~inc ~excl ~maxResults:None cancellationToken
+  >>= fun dunes ->
+  let tasks =
+    Array.map
+      (fun dune ->
+        let scope, relativePath =
+          match folderRelativePath folders dune.TextDocument.fsPath with
+          | None -> (Task.Workspace, dune.fsPath)
+          | Some (folder, relativePath) -> (Task.Folder folder, relativePath)
+        in
+        let name = Printf.sprintf "build %s" relativePath in
+        let execution =
+          let cwd = Filename.dirname dune.fsPath in
+          let options =
+            Some
+              { ShellExecution.env = Some env
+              ; cwd = Some cwd
+              ; executable = None
+              ; shellArgs = None
+              ; shellQuoting = None
+              }
+          in
+          (* TODO: use toolchain to prefix command with esy or opam exec *)
+          ShellExecution.make ~commandLine:"dune build" ~options
+        in
+        let task =
+          Task.make ~taskDefinition ~scope ~source ~name ~problemMatchers
+            ~execution:(`Shell execution)
+        in
+        task.group <- Some TaskGroup.build;
+        task)
+      dunes
+  in
+  Js.Promise.resolve (Some tasks)
+
+let resolveTask =
+ fun [@bs] task _cancellationToken -> Js.Promise.resolve (Some task)
+
+let create () =
+  let provider = { TaskProvider.provideTasks; resolveTask } in
+  Tasks.registerTaskProvider ~typ:"dune" ~provider
