@@ -229,7 +229,7 @@ module Window = struct
   external showErrorMessage : string -> 'a Promise.t = "showErrorMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 
-  external showWarningMessage' : string -> 'a Promise.t = "showErrorMessage"
+  external showWarningMessage' : string -> 'a Promise.t = "showWarningMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 
   let showWarningMessage m =
@@ -286,7 +286,7 @@ module Commands = struct
   external get : filterInternal:bool -> string array Promise.t = "getCommands"
     [@@bs.module "vscode"] [@@bs.scope "commands"]
 
-  external register : command:string -> handler:(unit -> unit) -> unit
+  external register : command:string -> handler:(unit -> unit) -> Disposable.t
     = "registerCommand"
     [@@bs.module "vscode"] [@@bs.scope "commands"]
 
@@ -302,15 +302,19 @@ end
 
 module ExtensionContext = struct
   type t =
-    { extensionPath : string
+    < extensionPath : string
     ; globalState : memento
     ; globalStoragePath : string
     ; logPath : string
     ; storagePath : string option
     ; subscriptions : Disposable.t array
     ; workspaceState : memento
-    ; asAbsolutePath : string -> string
-    }
+    ; asAbsolutePath : string -> string >
+    Js.t
+
+  let subscribe t (x : Disposable.t) =
+    let (_ : int) = Js.Array.push x t##subscriptions in
+    ()
 end
 
 module Languages = struct
@@ -344,6 +348,20 @@ module LanguageClient = struct
     [@@bs.deriving { jsConverter = newType }]
   end
 
+  module InitializeResult = struct
+    type serverCapabilities = { experimental : Js.Json.t Js.Nullable.t }
+
+    type serverInfo =
+      { name : string
+      ; version : string Js.Nullable.t
+      }
+
+    type t =
+      { capabilities : serverCapabilities
+      ; serverInfo : serverInfo Js.Nullable.t
+      }
+  end
+
   type documentSelectorItem =
     { scheme : string
     ; language : string
@@ -366,7 +384,12 @@ module LanguageClient = struct
   type t =
     { start : (unit -> unit[@bs])
     ; stop : (unit -> unit[@bs])
+    ; initializeResult : InitializeResult.t
     }
+
+  let start t = (t.start () [@bs])
+
+  let stop t = (t.stop () [@bs])
 
   external make :
        id:string
@@ -375,4 +398,10 @@ module LanguageClient = struct
     -> clientOptions:clientOptions
     -> t = "LanguageClient"
     [@@bs.new] [@@bs.module "vscode-languageclient"]
+
+  external onReady : t -> unit Promise.t = "onReady" [@@bs.send]
+
+  let initializeResult (t : t) =
+    let open Promise.O in
+    onReady t >>| fun () -> t.initializeResult
 end

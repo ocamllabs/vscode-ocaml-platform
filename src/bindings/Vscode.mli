@@ -85,13 +85,15 @@ end
 module Commands : sig
   val get : filterInternal:bool -> string array Promise.t
 
-  val register : command:string -> handler:(unit -> unit) -> unit
+  val register : command:string -> handler:(unit -> unit) -> Disposable.t
 
   val executeCommand : command:string -> args:'a list -> unit Promise.t
 end
 
 module ExtensionContext : sig
   type t
+
+  val subscribe : t -> Disposable.t -> unit
 end
 
 module WorkspaceConfiguration : sig
@@ -252,6 +254,20 @@ module LanguageClient : sig
     [@@bs.deriving { jsConverter = newType }]
   end
 
+  module InitializeResult : sig
+    type serverCapabilities = { experimental : Js.Json.t Js.Nullable.t }
+
+    type serverInfo =
+      { name : string
+      ; version : string Js.Nullable.t
+      }
+
+    type t =
+      { capabilities : serverCapabilities
+      ; serverInfo : serverInfo Js.Nullable.t
+      }
+  end
+
   type documentSelectorItem =
     { scheme : string
     ; language : string
@@ -271,10 +287,7 @@ module LanguageClient : sig
     ; options : processOptions
     }
 
-  type t =
-    { start : (unit -> unit[@bs])
-    ; stop : (unit -> unit[@bs])
-    }
+  type t
 
   val make :
        id:string
@@ -282,4 +295,12 @@ module LanguageClient : sig
     -> serverOptions:serverOptions
     -> clientOptions:clientOptions
     -> t
+
+  val stop : t -> unit
+
+  val start : t -> unit
+
+  val onReady : t -> unit Promise.t
+
+  val initializeResult : t -> InitializeResult.t Promise.t
 end

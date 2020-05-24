@@ -10,6 +10,18 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
+      "outFiles": ["${workspaceRoot}/**/*.bs.js"],
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}"
+      ]
+    },
+    {
+      "name": "Extension (no disable-extensions)",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "outFiles": ["${workspaceRoot}/**/*.bs.js"],
       "args": ["--extensionDevelopmentPath=${workspaceFolder}"]
     }
   ]

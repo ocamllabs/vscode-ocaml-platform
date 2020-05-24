@@ -1,40 +1,123 @@
 {
   "name": "OCaml",
   "scopeName": "source.ocaml",
-  "fileTypes": [".ml", ".mli"],
+  "fileTypes": ["ml"],
   "patterns": [
-    {
-      "include": "#comments"
-    },
-    {
-      "include": "#strings"
-    },
-    {
-      "include": "#characters"
-    },
-    {
-      "include": "#bindings"
-    },
-    {
-      "include": "#keywords"
-    },
-    {
-      "include": "#groupings"
-    },
-    {
-      "include": "#operators"
-    },
-    {
-      "include": "#literals"
-    },
-    {
-      "include": "#types"
-    },
-    {
-      "include": "#identifiers"
-    }
+    { "include": "#directives" },
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#characters" },
+    { "include": "#attributes" },
+    { "include": "#extensions" },
+    { "include": "#signatures" },
+    { "include": "#bindings" },
+    { "include": "#keywords" },
+    { "include": "#operators" },
+    { "include": "#literals" },
+    { "include": "#types" },
+    { "include": "#identifiers" }
   ],
   "repository": {
+    "directives": {
+      "patterns": [
+        {
+          "comment": "line number directive",
+          "begin": "^\\s*(#)\\s*([0-9]+)",
+          "end": "$",
+          "beginCaptures": {
+            "1": { "name": "keyword.other.ocaml" },
+            "2": { "name": "constant.numeric.decimal.integer.ocaml" }
+          },
+          "contentName": "comment.line.directive.ocaml"
+        },
+        {
+          "comment": "toplevel directives",
+          "patterns": [
+            {
+              "comment": "general, loading codes",
+              "begin": "^\\s*(#)\\s*(help|quit|cd|directory|remove_directory|load_rec|load|use|mod_use)",
+              "end": "$",
+              "beginCaptures": {
+                "1": { "name": "keyword.other.ocaml" },
+                "2": { "name": "keyword.other.ocaml" }
+              },
+              "patterns": [{ "include": "#strings" }]
+            },
+            {
+              "comment": "environment queries",
+              "begin": "^\\s*(#)\\s*(show_class_type|show_class|show_exception|show_module_type|show_module|show_type|show_val|show)",
+              "end": "$",
+              "beginCaptures": {
+                "1": { "name": "keyword.other.ocaml" },
+                "2": { "name": "keyword.other.ocaml" }
+              },
+              "patterns": [
+                { "include": "#types" },
+                { "include": "#identifiers" }
+              ]
+            },
+            {
+              "comment": "pretty-printing, tracing",
+              "begin": "^\\s*(#)\\s*(install_printer|print_depth|print_length|remove_printer|trace|untrace_all|untrace)",
+              "end": "$",
+              "beginCaptures": {
+                "1": { "name": "keyword.other.ocaml" },
+                "2": { "name": "keyword.other.ocaml" }
+              },
+              "patterns": [
+                { "include": "#literals" },
+                { "include": "#identifiers" }
+              ]
+            },
+            {
+              "comment": "compiler options",
+              "begin": "^\\s*(#)\\s*(labels|ppx|principal|rectypes|warn_error|warnings)",
+              "end": "$",
+              "beginCaptures": {
+                "1": { "name": "keyword.other.ocaml" },
+                "2": { "name": "keyword.other.ocaml" }
+              },
+              "patterns": [
+                { "include": "#strings" },
+                { "include": "#literals" }
+              ]
+            }
+          ]
+        },
+        {
+          "comment": "topfind directives",
+          "begin": "^\\s*(#)\\s*(require|list|camlp4o|camlp4r|predicates|thread)",
+          "end": "$",
+          "beginCaptures": {
+            "1": { "name": "keyword.other.ocaml" },
+            "2": { "name": "keyword.other.ocaml" }
+          },
+          "patterns": [{ "include": "#strings" }]
+        },
+        {
+          "comment": "cppo directives",
+          "begin": "^\\s*(#)\\s*(define|undef|ifdef|ifndef|if|else|elif|endif|include|warning|error|ext|endext)",
+          "end": "$",
+          "beginCaptures": {
+            "1": { "name": "keyword.other.ocaml" },
+            "2": { "name": "keyword.other.ocaml" }
+          },
+          "patterns": [
+            { "name": "keyword.other.ocaml", "match": "\\b(defined)\\b" },
+            { "name": "keyword.other.ocaml", "match": "\\\\" },
+            { "include": "#comments" },
+            { "include": "#strings" },
+            { "include": "#characters" },
+            { "include": "#keywords" },
+            { "include": "#operators" },
+            { "include": "#literals" },
+            { "include": "#types" },
+            { "include": "#identifiers" }
+          ]
+        }
+      ]
+    },
+
     "comments": {
       "patterns": [
         {
@@ -43,18 +126,7 @@
           "begin": "\\(\\*\\*",
           "end": "\\*\\)",
           "patterns": [
-            {
-              "comment": "ocamldoc documentation tag",
-              "name": "keyword.doc-tag.ocaml",
-              "match": "\\@[a-z]+"
-            },
-            {
-              "comment": "embedded ocaml source",
-              "begin": "\\[",
-              "end": "\\]",
-              "contentName": "source.embedded.ocaml",
-              "patterns": [{ "include": "source.ocaml" }]
-            },
+            { "include": "source.ocaml.ocamldoc#markup" },
             { "include": "#comments" }
           ]
         },
@@ -64,11 +136,6 @@
           "begin": "\\(\\*",
           "end": "\\*\\)",
           "patterns": [{ "include": "#comments" }]
-        },
-        {
-          "comment": "line number directive",
-          "name": "comment.line.pragma.ocaml",
-          "match": "^#\\s*[0-9]+\\s*\".*\"(\\s*)$"
         }
       ]
     },
@@ -81,7 +148,7 @@
           "begin": "\\{(%%?[A-Za-z_][A-Za-z0-9_']*(\\.[A-Za-z_][A-Za-z0-9_']*)*\\s*)?[a-z_]*\\|",
           "end": "\\|[a-z_]*\\}",
           "beginCaptures": {
-            "1": { "patterns": [{ "include": "source.ocaml" }] }
+            "1": { "patterns": [{ "include": "$self" }] }
           },
           "patterns": [{ "include": "#strings" }]
         },
@@ -93,7 +160,7 @@
           "patterns": [
             {
               "comment": "escaped newline",
-              "name": "constant.character.escape.dune",
+              "name": "constant.character.escape.ocaml",
               "match": "\\\\$"
             },
             {
@@ -189,21 +256,55 @@
       ]
     },
 
+    "attributes": {
+      "begin": "\\[(@|@@|@@)\\s*([a-zA-Z_]+(\\.[a-zA-Z0-9_']+)*)",
+      "end": "\\]",
+      "beginCaptures": {
+        "1": { "name": "keyword.operator.attribute.ocaml" },
+        "2": {
+          "name": "keyword.other.attribute.ocaml",
+          "patterns": [
+            {
+              "name": "keyword.other.ocaml punctuation.other.period punctuation.separator.period",
+              "match": "\\."
+            }
+          ]
+        }
+      },
+      "patterns": [{ "include": "$self" }]
+    },
+
+    "extensions": {
+      "begin": "\\[(%|%%)\\s*([a-zA-Z_]+(\\.[a-zA-Z0-9_']+)*)",
+      "end": "\\]",
+      "beginCaptures": {
+        "1": { "name": "keyword.operator.extension.ocaml" },
+        "2": {
+          "name": "keyword.other.extension.ocaml",
+          "patterns": [
+            {
+              "name": "keyword.other.ocaml punctuation.other.period punctuation.separator.period",
+              "match": "\\."
+            }
+          ]
+        }
+      },
+      "patterns": [{ "include": "$self" }]
+    },
+
+    "signatures": {
+      "begin": "\\b(sig)\\b",
+      "end": "\\b(end)\\b",
+      "beginCaptures": [{ "name": "keyword.other.ocaml" }],
+      "endCaptures": [{ "name": "keyword.other.ocaml" }],
+      "patterns": [{ "include": "source.ocaml.interface" }]
+    },
+
     "bindings": {
       "patterns": [
         {
-          "comment": "optional labeled argument",
-          "name": "variable.parameter.optional.ocaml",
-          "match": "\\?([a-z_][A-Za-z0-9_']*)?"
-        },
-        {
-          "comment": "labeled argument",
-          "name": "variable.parameter.labeled.ocaml",
-          "match": "~[a-z_][A-Za-z0-9_']*"
-        },
-        {
           "comment": "for loop",
-          "match": "\\b(for)\\s([a-z_][A-Za-z0-9_']*)",
+          "match": "\\b(for)\\s+([a-z_][A-Za-z0-9_']*)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "entity.name.function.binding.ocaml" }
@@ -219,7 +320,7 @@
         },
         {
           "comment": "let expression",
-          "match": "\\b(let)\\s+(rec\\s+)?(lazy\\s+)?([a-z_][A-Za-z0-9_']*)\\b(?!\\s*,)",
+          "match": "\\b(let)\\s+(rec\\s+)?(lazy\\s+)?([a-z_][A-Za-z0-9_']*)\\s+(?!,|::)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
@@ -228,28 +329,8 @@
           }
         },
         {
-          "comment": "type declaration",
-          "match": "\\b(type)\\s+(nonrec\\s+)?(_\\s+|[+-]?'[A-Za-z][A-Za-z0-9_']*\\s+|\\(.*\\)\\s+)?([a-z_][A-Za-z0-9_']*)",
-          "captures": {
-            "1": { "name": "keyword.ocaml" },
-            "2": { "name": "keyword.ocaml" },
-            "3": { "patterns": [{ "include": "source.ocaml" }] },
-            "4": { "name": "entity.name.function.binding.ocaml" }
-          }
-        },
-        {
-          "comment": "and declaration for let bindings, type declarations, class bindings, or class type definitions",
-          "match": "\\b(and)\\s+((?:virtual|lazy)\\s+)?(_\\s+|'[A-Za-z][A-Za-z0-9_']*\\s+|\\(.*\\)\\s+)?([a-z_][A-Za-z0-9_']*)\\b(?!\\s*,)",
-          "captures": {
-            "1": { "name": "keyword.ocaml" },
-            "2": { "name": "keyword.ocaml" },
-            "3": { "patterns": [{ "include": "source.ocaml" }] },
-            "4": { "name": "entity.name.function.binding.ocaml" }
-          }
-        },
-        {
           "comment": "using binding operators",
-          "match": "\\b(let|and)([$&*+\\-/=>@^|<][!?$&*+\\-/=>@^|%:]*)\\s*(lazy\\s+)?([a-z_][A-Za-z0-9_']*)\\b(?!\\s*,)",
+          "match": "\\b(let|and)([$&*+\\-/=>@^|<][!?$&*+\\-/=>@^|%:]*)\\s*(lazy\\s+)?([a-z_][A-Za-z0-9_']*)\\s+(?!,|::)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
@@ -257,170 +338,23 @@
           }
         },
         {
-          "comment": "external declaration",
-          "begin": "\\b(external)\\s+([a-z_][A-Za-z0-9_']*)?",
-          "beginCaptures": {
-            "1": { "name": "keyword.ocaml" },
-            "2": { "name": "entity.name.function.binding.ocaml" }
-          },
-          "end": "$",
-          "patterns": [
-            {
-              "comment": "string literal",
-              "name": "string.quoted.double.ocaml",
-              "begin": "\"",
-              "end": "\""
-            },
-            { "include": "source.ocaml" }
-          ]
-        },
-        {
           "comment": "first class module packing",
           "match": "\\(\\s*(val)\\s+([a-z_][A-Za-z0-9_']*)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
-            "2": { "patterns": [{ "include": "source.ocaml" }] }
+            "2": { "patterns": [{ "include": "$self" }] }
           }
         },
-        {
-          "comment": "val declaration for class instance variables",
-          "match": "\\b(val)\\s+(virtual)\\s+(mutable)\\s+([a-z_][A-Za-z0-9_']*)",
-          "captures": {
-            "1": { "name": "keyword.ocaml" },
-            "2": { "name": "keyword.ocaml" },
-            "3": { "name": "keyword.ocaml" },
-            "4": { "name": "entity.name.function.binding.ocaml" }
-          }
-        },
-        {
-          "comment": "val declaration for let bindings or class instance variables",
-          "match": "\\b(val|val!)\\s+(mutable\\s+)?(virtual\\s+)?([a-z_][A-Za-z0-9_']*)",
-          "captures": {
-            "1": { "name": "keyword.ocaml" },
-            "2": { "name": "keyword.ocaml" },
-            "3": { "name": "keyword.ocaml" },
-            "4": { "name": "entity.name.function.binding.ocaml" }
-          }
-        },
-        {
-          "comment": "class method declaration",
-          "match": "\\b(method)\\s+(virtual)\\s+(private)\\s+([a-z_][A-Za-z0-9_']*)",
-          "captures": {
-            "1": { "name": "keyword.ocaml" },
-            "2": { "name": "keyword.ocaml" },
-            "3": { "name": "keyword.ocaml" },
-            "4": { "name": "entity.name.function.binding.ocaml" }
-          }
-        },
-        {
-          "comment": "class method declaration",
-          "match": "\\b(method|method!)\\s+(private\\s+)?(virtual\\s+)?([a-z_][A-Za-z0-9_']*)",
-          "captures": {
-            "1": { "name": "keyword.ocaml" },
-            "2": { "name": "keyword.ocaml" },
-            "3": { "name": "keyword.ocaml" },
-            "4": { "name": "entity.name.function.binding.ocaml" }
-          }
-        },
-        {
-          "comment": "class specification or class type definition with type parameters",
-          "match": "\\b(class)\\s*(\\s+type)?(\\s+virtual)?\\s*(\\[.*\\])\\s*([a-z_][A-Za-z0-9_']*)",
-          "captures": {
-            "1": { "name": "keyword.ocaml" },
-            "2": { "name": "keyword.ocaml" },
-            "3": { "name": "keyword.ocaml" },
-            "4": { "patterns": [{ "include": "source.ocaml" }] },
-            "5": { "name": "entity.name.function.binding.ocaml" }
-          }
-        },
-        {
-          "comment": "class specification or class type definition",
-          "match": "\\b(class)\\s+(type\\s+)?(virtual\\s+)?([a-z_][A-Za-z0-9_']*)",
-          "captures": {
-            "1": { "name": "keyword.ocaml" },
-            "2": { "name": "keyword.ocaml" },
-            "3": { "name": "keyword.ocaml" },
-            "4": { "name": "entity.name.function.binding.ocaml" }
-          }
-        },
-        {
-          "comment": "named self in object",
-          "match": "\\b(object)\\s*\\(\\s*([a-z_][A-Za-z0-9_']*)",
-          "captures": {
-            "1": { "name": "keyword.ocaml" },
-            "2": { "name": "entity.name.function.binding.ocaml" }
-          }
-        }
+        { "include": "source.ocaml.interface#bindings" }
       ]
     },
 
     "keywords": {
       "patterns": [
         {
-          "comment": "ocaml toplevel directive",
-          "name": "keyword.other.ocaml",
-          "match": "(#use|#load)\\b"
-        },
-        {
           "comment": "reserved ocaml keyword",
-          "name": "keyword.ocaml",
+          "name": "keyword.other.ocaml",
           "match": "\\b(and|as|assert|begin|class|constraint|do|done|downto|else|end|exception|external|for|fun|function|functor|if|in|include|inherit|initializer|lazy|let|match|method|module|mutable|new|nonrec|object|of|open|private|rec|sig|struct|then|to|try|type|val|virtual|when|while|with)\\b"
-        }
-      ]
-    },
-
-    "groupings": {
-      "patterns": [
-        {
-          "comment": "unit literal",
-          "name": "constant.language.ocaml strong",
-          "match": "\\(\\)"
-        },
-
-        {
-          "comment": "empty list",
-          "name": "constant.language.ocaml strong",
-          "match": "\\[\\]"
-        },
-
-        {
-          "comment": "empty array",
-          "name": "constant.language.ocaml strong",
-          "match": "\\[\\|\\|\\]"
-        },
-
-        {
-          "comment": "array literal",
-          "begin": "\\[\\|",
-          "beginCaptures": [{ "name": "keyword.other.ocaml" }],
-          "end": "\\|\\]",
-          "endCaptures": [{ "name": "keyword.other.ocaml" }],
-          "patterns": [{ "include": "$self" }]
-        },
-
-        {
-          "comment": "list literal",
-          "begin": "\\[",
-          "beginCaptures": [{ "name": "keyword.other.ocaml" }],
-          "end": "\\]",
-          "endCaptures": [{ "name": "keyword.other.ocaml" }],
-          "patterns": [{ "include": "$self" }]
-        },
-
-        {
-          "comment": "object duplication",
-          "begin": "{<",
-          "beginCaptures": [{ "name": "keyword.other.ocaml" }],
-          "end": ">}",
-          "endCaptures": [{ "name": "keyword.other.ocaml" }],
-          "patterns": [{ "include": "$self" }]
-        },
-
-        {
-          "comment": "record literal",
-          "begin": "{",
-          "end": "}",
-          "patterns": [{ "include": "$self" }]
         }
       ]
     },
@@ -435,7 +369,17 @@
         {
           "comment": "infix symbol",
           "name": "keyword.operator.ocaml",
-          "match": "[$&*+\\-/=>@^|%<][~!?$&*+\\-/=>@^|%<:.]*"
+          "match": "[$&*+\\-/=>@^%<][~!?$&*+\\-/=>@^|%<:.]*"
+        },
+        {
+          "comment": "infix symbol that begins with vertical bar",
+          "name": "keyword.operator.ocaml",
+          "match": "\\|[~!?$&*+\\-/=>@^|%<:.]+"
+        },
+        {
+          "comment": "vertical bar",
+          "name": "keyword.other.ocaml",
+          "match": "(?<!\\[)(\\|)(?!\\])"
         },
         {
           "comment": "infix symbol",
@@ -464,18 +408,23 @@
         },
         {
           "comment": "type annotation",
-          "name": "keyword.other.ocaml",
+          "name": "keyword.other.ocaml punctuation.other.colon punctuation.colon",
           "match": ":"
         },
         {
           "comment": "field accessor",
-          "name": "keyword.other.ocaml",
+          "name": "keyword.other.ocaml punctuation.other.period punctuation.separator.period",
           "match": "\\."
         },
         {
-          "comment": "semicolon or comma separator",
-          "name": "keyword.other.ocaml",
-          "match": "[,;]"
+          "comment": "semicolon separator",
+          "name": "keyword.other.ocaml punctuation.separator.terminator punctuation.separator.semicolon",
+          "match": ";"
+        },
+        {
+          "comment": "comma separator",
+          "name": "keyword.other.ocaml punctuation.comma punctuation.separator.comma",
+          "match": ","
         }
       ]
     },
@@ -497,49 +446,56 @@
         {
           "comment": "floating point decimal literal with exponent",
           "name": "constant.numeric.decimal.float.ocaml",
-          "match": "\\b([0-9][0-9_]*(\\.[0-9_]*)?[eE][+-]?[0-9][0-9_]*)\\b"
+          "match": "\\b([0-9][0-9_]*(\\.[0-9_]*)?[eE][+-]?[0-9][0-9_]*[g-zG-Z]?)\\b"
         },
         {
           "comment": "floating point decimal literal",
           "name": "constant.numeric.decimal.float.ocaml",
-          "match": "\\b([0-9][0-9_]*\\.[0-9_]*)\\b"
+          "match": "\\b([0-9][0-9_]*\\.[0-9_]*[g-zG-Z]?)\\b"
         },
         {
           "comment": "floating point hexadecimal literal with exponent part",
           "name": "constant.numeric.hexadecimal.float.ocaml",
-          "match": "\\b((0x|0X)[0-9A-Fa-f][0-9A-Fa-f_]*(\\.[0-9A-Fa-f_]*)?[pP][+-]?[0-9][0-9_]*)\\b"
+          "match": "\\b((0x|0X)[0-9A-Fa-f][0-9A-Fa-f_]*(\\.[0-9A-Fa-f_]*)?[pP][+-]?[0-9][0-9_]*[g-zG-Z]?)\\b"
         },
         {
           "comment": "floating point hexadecimal literal",
           "name": "constant.numeric.hexadecimal.float.ocaml",
-          "match": "\\b((0x|0X)[0-9A-Fa-f][0-9A-Fa-f_]*\\.[0-9A-Fa-f_]*)\\b"
+          "match": "\\b((0x|0X)[0-9A-Fa-f][0-9A-Fa-f_]*\\.[0-9A-Fa-f_]*[g-zG-Z]?)\\b"
         },
 
         {
           "comment": "decimal integer literal",
           "name": "constant.numeric.decimal.integer.ocaml",
-          "match": "\\b([0-9][0-9_]*(l|L|n)?)\\b"
+          "match": "\\b([0-9][0-9_]*[lLng-zG-Z]?)\\b"
         },
         {
           "comment": "hexadecimal integer literal",
           "name": "constant.numeric.hexadecimal.integer.ocaml",
-          "match": "\\b((0x|0X)[0-9A-Fa-f][0-9A-Fa-f_]*(l|L|n)?)\\b"
+          "match": "\\b((0x|0X)[0-9A-Fa-f][0-9A-Fa-f_]*[lLng-zG-Z]?)\\b"
         },
         {
           "comment": "octal integer literal",
           "name": "constant.numeric.octal.integer.ocaml",
-          "match": "\\b((0o|0O)[0-7][0-7_]*(l|L|n)?)\\b"
-        },
-        {
-          "comment": "binary integer literal",
-          "name": "constant.numeric.binary.integer.ocaml",
-          "match": "\\b((0b|0B)[0-1][0-1_]*(l|L|n)?)\\b"
+          "match": "\\b((0o|0O)[0-7][0-7_]*[lLng-zG-Z]?)\\b"
         },
 
         {
-          "comment": "polymorphic variant tag",
-          "name": "constant.language.polymorphic-variant.ocaml",
-          "match": "\\`[A-Za-z][A-Za-z0-9_']*\\b"
+          "comment": "binary integer literal",
+          "name": "constant.numeric.binary.integer.ocaml",
+          "match": "\\b((0b|0B)[0-1][0-1_]*[lLng-zG-Z]?)\\b"
+        },
+
+        {
+          "comment": "unit literal",
+          "name": "constant.language.ocaml strong",
+          "match": "\\(\\)"
+        },
+
+        {
+          "comment": "empty array",
+          "name": "constant.language.ocaml strong",
+          "match": "\\[\\|\\|\\]"
         }
       ]
     },
@@ -570,6 +526,16 @@
           "comment": "lowercase identifier",
           "name": "source.ocaml",
           "match": "\\b[a-z_][A-Za-z0-9_']*('|\\b)"
+        },
+        {
+          "comment": "polymorphic variant tag",
+          "name": "constant.language.polymorphic-variant.ocaml",
+          "match": "\\`[A-Za-z][A-Za-z0-9_']*\\b"
+        },
+        {
+          "comment": "empty list (can be used as a constructor)",
+          "name": "constant.language.ocaml strong",
+          "match": "\\[\\]"
         }
       ]
     }

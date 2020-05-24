@@ -22,6 +22,7 @@
   ],
   "activationEvents": [
     "onLanguage:ocaml",
+    "onLanguage:ocaml.interface",
     "onLanguage:reason",
     "onLanguage:dune",
     "onLanguage:dune-project",
@@ -77,11 +78,12 @@
         ],
         "pattern": [
           {
-            "regexp": "^\\s*\\bFile\\b\\s*\"(.*)\",\\s*\\bline\\b\\s*(\\d+),\\s*\\bcharacters\\b\\s*(\\d+)-(\\d+)\\s*:\\s*$",
+            "regexp": "^\\s*\\bFile\\b\\s*\"(.*)\",\\s*\\blines?\\b\\s*(\\d+)(?:-(\\d+))?,\\s*\\bcharacters\\b\\s*(\\d+)-(\\d+)\\s*:\\s*$",
             "file": 1,
             "line": 2,
-            "column": 3,
-            "endColumn": 4
+            "endLine": 3,
+            "column": 4,
+            "endColumn": 5
           },
           {
             "regexp": "^(?:\\s*\\bParse\\b\\s*)?\\s*\\b([Ee]rror|Warning)\\b\\s*(?:\\(\\s*\\bwarning\\b\\s*(\\d+)\\))?\\s*:\\s*(.*)$",
@@ -145,8 +147,18 @@
         ],
         "extensions": [
           ".ml",
-          ".mli",
           ".ocamlinit"
+        ],
+        "configuration": "./languages/ocaml.json"
+      },
+      {
+        "id": "ocaml.interface",
+        "aliases": [
+          "OCaml Interface",
+          "ocaml interface"
+        ],
+        "extensions": [
+          ".mli"
         ],
         "configuration": "./languages/ocaml.json"
       },
@@ -193,6 +205,16 @@
         ],
         "extensions": [
           "_tags"
+        ]
+      },
+      {
+        "id": "ocaml.ocamldoc",
+        "aliases": [
+          "OCamldoc",
+          "ocamldoc"
+        ],
+        "extensions": [
+          ".mld"
         ]
       },
       {
@@ -302,9 +324,19 @@
         "path": "./syntaxes/ocaml.json"
       },
       {
+        "language": "ocaml.interface",
+        "scopeName": "source.ocaml.interface",
+        "path": "./syntaxes/ocaml.interface.json"
+      },
+      {
         "language": "ocaml.ocamlbuild",
         "scopeName": "source.ocaml.ocamlbuild",
         "path": "./syntaxes/ocamlbuild.json"
+      },
+      {
+        "language": "ocaml.ocamldoc",
+        "scopeName": "source.ocaml.ocamldoc",
+        "path": "./syntaxes/ocamldoc.json"
       },
       {
         "language": "ocaml.ocamlformat",
