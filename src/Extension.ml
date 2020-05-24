@@ -116,6 +116,8 @@ let activate (extension : Vscode.ExtensionContext.t) =
   Vscode.ExtensionContext.subscribe extension
     (Vscode.Commands.register ~command:selectSandboxCommandId
        ~handler:(selectSandbox instance));
+  Vscode.ExtensionContext.subscribe extension
+    (Vscode.Disposable.create ~dispose:(fun () -> Instance.stop instance));
   let open Promise.O in
   let toolchain =
     Toolchain.ofSettings () >>| fun pm ->
