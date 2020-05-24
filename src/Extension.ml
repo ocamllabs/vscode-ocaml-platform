@@ -1,5 +1,7 @@
 open Import
 
+let selectSandboxCommandId = "ocaml.select-sandbox"
+
 module Client = struct
   let make () : Vscode.LanguageClient.clientOptions =
     let documentSelector : Vscode.LanguageClient.documentSelectorItem array =
@@ -25,13 +27,25 @@ end
 module Instance = struct
   type t =
     { mutable client : LanguageClient.t option
+    ; mutable statusBarItem : StatusBarItem.t option
     ; duneFormatter : DuneFormatter.t
     }
 
-  let create () = { client = None; duneFormatter = DuneFormatter.create () }
+  let create () =
+    { client = None
+    ; statusBarItem = None
+    ; duneFormatter = DuneFormatter.create ()
+    }
 
   let stop t =
     DuneFormatter.dispose t.duneFormatter;
+
+    ( match t.statusBarItem with
+    | None -> ()
+    | Some (statusBarItem : StatusBarItem.t) ->
+      StatusBarItem.dispose statusBarItem;
+      t.statusBarItem <- None );
+
     match t.client with
     | None -> ()
     | Some (client : LanguageClient.t) ->
@@ -40,6 +54,16 @@ module Instance = struct
 
   let start t toolchain =
     DuneFormatter.register t.duneFormatter toolchain;
+
+    let statusBarItem =
+      Window.createStatusBarItem ~alignment:StatusBarAlignment.(tToJs Left) ()
+    in
+    let statusBarText = "OCaml Platform | " ^ Toolchain.toString toolchain in
+    statusBarItem##text#=statusBarText;
+    statusBarItem##command#=selectSandboxCommandId;
+    StatusBarItem.show statusBarItem;
+    t.statusBarItem <- Some statusBarItem;
+
     let open Promise.Result.O in
     Toolchain.runSetup toolchain >>= fun () ->
     let serverOptions = Server.make toolchain in
@@ -90,7 +114,7 @@ let activate (extension : Vscode.ExtensionContext.t) =
   Js.Dict.set Process.env "OCAML_LSP_SERVER_LOG" "-";
   let instance = Instance.create () in
   Vscode.ExtensionContext.subscribe extension
-    (Vscode.Commands.register ~command:"ocaml.select-sandbox"
+    (Vscode.Commands.register ~command:selectSandboxCommandId
        ~handler:(selectSandbox instance));
   let open Promise.O in
   let toolchain =

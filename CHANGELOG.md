@@ -8,6 +8,7 @@
 - Add highlighting for Cppo directives in OCaml files
 - Add highlighting for more toplevel and topfind directives in OCaml files
 - OCaml problem matcher now understands multi line errors emitted by 4.09 (#229)
+- Show statusbar item for current toolchain
 
 ## 0.6.1
 

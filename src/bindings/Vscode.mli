@@ -58,6 +58,30 @@ module TextDocument : sig
   val lineAt : t -> int -> TextLine.t
 end
 
+module StatusBarAlignment : sig
+  type t =
+    | Left
+    | Right
+  [@@bs.deriving { jsConverter = newType }]
+end
+
+module StatusBarItem : sig
+  type t =
+    < alignment : StatusBarAlignment.abs_t
+    ; priority : int
+    ; text : string [@bs.set]
+    ; tooltip : string [@bs.set]
+    ; color : string [@bs.set]
+    ; command : string [@bs.set] >
+    Js.t
+
+  val dispose : t -> unit
+
+  val hide : t -> unit
+
+  val show : t -> unit
+end
+
 module Commands : sig
   val get : filterInternal:bool -> string array Promise.t
 
@@ -156,6 +180,12 @@ module Window : sig
        withProgressConfig
     -> (progress -> ('a, 'b) result Promise.t)
     -> ('a, 'b) result Promise.t
+
+  val createStatusBarItem :
+       ?alignment:StatusBarAlignment.abs_t
+    -> ?priority:int
+    -> unit
+    -> StatusBarItem.t
 end
 
 module Folder : sig
