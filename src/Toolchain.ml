@@ -286,4 +286,4 @@ let runSetup resources =
         Cmd.output cmd ~args:(addLspCheckArg args))
   |> Promise.map (function
        | Ok _ -> Ok ()
-       | Error msg -> Error {j| Toolchain initialisation failed: $msg |j})
+       | Error msg -> Error {j|Toolchain initialisation failed: $msg|j})

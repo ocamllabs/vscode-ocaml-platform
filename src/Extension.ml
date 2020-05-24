@@ -1,10 +1,5 @@
 open Import
 
-let handleError f =
-  Promise.then_ (function
-    | Ok () -> Promise.resolve ()
-    | Error msg -> f msg)
-
 module Client = struct
   let make () : Vscode.LanguageClient.clientOptions =
     let documentSelector : Vscode.LanguageClient.documentSelectorItem array =
@@ -76,7 +71,9 @@ let selectSandbox (instance : Instance.t) () =
       let t = Toolchain.makeResources t in
       Instance.start instance t
   in
-  let (_ : unit Promise.t) = handleError Window.showErrorMessage setToolchain in
+  let (_ : unit Promise.t) =
+    Promise.Result.iterError setToolchain ~f:Window.showErrorMessage
+  in
   ()
 
 let suggestToSetupToolchain instance =
@@ -99,20 +96,20 @@ let activate _context =
     Toolchain.ofSettings () >>| fun pm ->
     let resources, isFallback =
       match pm with
+      | Some toolchain -> (toolchain, false)
       | None ->
         let (_ : unit Promise.t) = suggestToSetupToolchain instance in
         (Toolchain.PackageManager.Global, true)
-      | Some toolchain -> (toolchain, false)
     in
     (Toolchain.makeResources resources, isFallback)
   in
   toolchain >>= fun (toolchain, isFallback) ->
   Instance.start instance toolchain
-  |> handleError (fun e ->
+  |> Promise.Result.iterError ~f:(fun e ->
          if isFallback then
            Promise.resolve ()
          else
            Window.showErrorMessage e)
   |> Promise.catch (fun e ->
          let message = Node.JsError.ofPromiseError e in
-         Window.showErrorMessage {j|Error: $message|j})
+         message `Error "Error: %s" message)

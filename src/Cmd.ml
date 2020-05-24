@@ -50,18 +50,29 @@ let output ~args ?cwd ?stdin { cmd; env } =
   let shellString =
     Js.Array.joinWith " " (Js.Array.concat args [| Path.toString cmd |])
   in
-  Js.Console.info shellString;
   let cwd =
     match cwd with
     | None -> None
     | Some cwd -> Some (Path.toString cwd)
   in
   ChildProcess.exec shellString ?stdin (ChildProcess.Options.make ?cwd ~env ())
-  |> Promise.map (function
-       | ChildProcess.{ exitCode = 0; stdout; stderr = _ } -> Ok stdout
-       | ChildProcess.{ exitCode; stdout = _; stderr } ->
-         Error
-           {j| Command $shellString failed:
-exitCode: $exitCode
-stderr: $stderr
-|j})
+  |> Promise.map (fun (res : ChildProcess.return) ->
+         let () =
+           let message =
+             [ ("cmd", Log.field (Path.toString cmd))
+             ; ("args", Log.field (Js.Array.joinWith " " args))
+             ; ("result", Log.field res)
+             ]
+           in
+           let message =
+             match cwd with
+             | None -> message
+             | Some cwd -> ("cwd", Log.field cwd) :: message
+           in
+           logJson "external command" message
+         in
+         if res.exitCode = 0 then
+           Ok res.stdout
+         else
+           let stderr = res.stderr in
+           Error {j| Command $shellString failed $stderr |j})

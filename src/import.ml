@@ -37,6 +37,11 @@ module Result = struct
   let fail x = Error x
 
   let bind x ~f = x >>= f
+
+  let mapError x ~f =
+    match x with
+    | Ok _ as x -> x
+    | Error x -> Error (f x)
 end
 
 module List = struct
@@ -69,3 +74,19 @@ let message kind fmt =
       let (_ : unit Promise.t) = k x in
       ())
     fmt
+
+module Log : sig
+  type field
+
+  val field : _ -> field
+end = struct
+  type field
+
+  external field : _ -> field = "%identity"
+end
+
+let log fmt = Printf.ksprintf (fun x -> Js.Console.log x) fmt
+
+let logJson msg (fields : (string * Log.field) list) =
+  let json = Js.Dict.fromList fields in
+  Js.Console.log2 msg json

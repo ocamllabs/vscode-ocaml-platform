@@ -55,14 +55,17 @@ module Discover = struct
 
   let parseDir dir =
     let open Promise.O in
-    (Path.toString dir |> Fs.readDir >>| function
-     | Ok res -> res
-     | Error _ ->
-       message `Warn
-         "Unable to read %s. No esy projects will be inferred from here"
-         (Path.toString dir);
-       [||])
-    >>= fun files -> files |> Promise.Array.filterMap (parseFile dir)
+    Path.toString dir |> Fs.readDir
+    >>| (function
+          | Ok res -> res
+          | Error err ->
+            let dir = Path.toString dir in
+            log "unable to read dir %s. error %s" dir err;
+            message `Warn
+              "Unable to read %s. No esy projects will be inferred from here"
+              dir;
+            [||])
+    >>= Promise.Array.filterMap (parseFile dir)
 
   let parseDirsUp dir =
     let rec loop parsedDirs dir =
