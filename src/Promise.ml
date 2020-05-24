@@ -2,6 +2,8 @@ include Js.Promise
 
 let map f promise = promise |> then_ (fun x -> resolve (f x))
 
+let bind f promise = then_ f promise
+
 let return = resolve
 
 module O = struct
@@ -32,12 +34,19 @@ module Array = struct
 end
 
 module Result = struct
-  let bind fn promise =
+  let iterError x ~f =
+    bind
+      (function
+        | Ok _ -> return ()
+        | Error e -> f e)
+      x
+
+  let bind f promise =
     let open Js.Promise in
     promise
     |> then_ (function
          | Error e -> Error e |> resolve
-         | Ok payload -> fn payload)
+         | Ok payload -> f payload)
 
   let map f x =
     x

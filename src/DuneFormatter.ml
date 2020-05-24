@@ -22,7 +22,7 @@ let getFormatter toolchain =
   >>| function
   | Ok stdout -> [| TextEdit.replace fullDocumentRange stdout |]
   | Error msg ->
-    ignore @@ Window.showErrorMessage {j| Dune formatting failed: $msg |j};
+    message `Error "Dune formatting failed: %s" msg;
     [||]
 
 type t = Disposable.t list ref

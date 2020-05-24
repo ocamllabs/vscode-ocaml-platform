@@ -33,7 +33,7 @@ let parseSwitchList out =
       | "" -> None
       | s -> Some (Switch.ofString s))
   in
-  Js.Console.log (sprintf "%d switches" (List.length result));
+  log "%d switches" (List.length result);
   result
 
 let parseEnvOutput (opamEnvOutput : string) =
@@ -57,8 +57,7 @@ let parseEnvOutput (opamEnvOutput : string) =
 let switchList t =
   Cmd.output t ~args:[| "switch"; "list"; "-s" |]
   |> Promise.map (function
-       | Error e ->
-         Js.Console.log {j|"Unable to read switches: $e"|j};
+       | Error _ ->
          message `Warn "Unable to read the list of switches.";
          []
        | Ok out -> parseSwitchList out)
