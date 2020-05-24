@@ -83,6 +83,8 @@ module Instance = struct
          available in mli sources. Please update to a recent version and \
          restart the server.";
     Ok ()
+
+  let disposable t = Disposable.create ~dispose:(fun () -> stop t)
 end
 
 let selectSandbox (instance : Instance.t) () =
@@ -116,8 +118,7 @@ let activate (extension : Vscode.ExtensionContext.t) =
   Vscode.ExtensionContext.subscribe extension
     (Vscode.Commands.register ~command:selectSandboxCommandId
        ~handler:(selectSandbox instance));
-  Vscode.ExtensionContext.subscribe extension
-    (Vscode.Disposable.create ~dispose:(fun () -> Instance.stop instance));
+  Vscode.ExtensionContext.subscribe extension (Instance.disposable instance);
   let open Promise.O in
   let toolchain =
     Toolchain.ofSettings () >>| fun pm ->
