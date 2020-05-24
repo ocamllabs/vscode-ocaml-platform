@@ -86,11 +86,12 @@ let suggestToSetupToolchain instance =
   | None -> ()
   | Some () -> selectSandbox instance ()
 
-let activate _context =
+let activate (extension : Vscode.ExtensionContext.t) =
   Js.Dict.set Process.env "OCAML_LSP_SERVER_LOG" "-";
   let instance = Instance.create () in
-  Vscode.Commands.register ~command:"ocaml.select-sandbox"
-    ~handler:(selectSandbox instance);
+  Vscode.ExtensionContext.subscribe extension
+    (Vscode.Commands.register ~command:"ocaml.select-sandbox"
+       ~handler:(selectSandbox instance));
   let open Promise.O in
   let toolchain =
     Toolchain.ofSettings () >>| fun pm ->
