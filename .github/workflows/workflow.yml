@@ -51,7 +51,7 @@ jobs:
 
       - name: Restore opam cache
         id: cache-opam
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ${{ steps.opam-root-dir-path.outputs.dir }}
           # opam cache is coupled to esy lock files, so both caches will be wiped whenever esy deps change
@@ -60,7 +60,7 @@ jobs:
             opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-
 
       - name: Restore esy cache
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ${{ steps.esy-cache-dir-path.outputs.dir }}
           key: esy-${{ matrix.os }}-${{ hashFiles('esy.lock/index.json') }}
