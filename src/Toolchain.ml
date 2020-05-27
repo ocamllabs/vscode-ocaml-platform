@@ -249,7 +249,9 @@ let makeResources kind = kind
 
 let selectAndSave () =
   let open Promise.O in
-  let workspaceFolders = Vscode.Workspace.workspaceFolders () in
+  let workspaceFolders =
+    Vscode.Workspace.workspaceFolders |. Belt.Option.getWithDefault [||]
+  in
   sandboxCandidates ~workspaceFolders >>= fun candidates ->
   selectPackageManager candidates >>| function
   | None -> None

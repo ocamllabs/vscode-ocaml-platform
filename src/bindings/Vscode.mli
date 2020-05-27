@@ -211,9 +211,9 @@ module Workspace : sig
 
   type cancellationToken = { isCancellationRequested : bool }
 
-  val name : unit -> string option
+  val name : string option
 
-  val workspaceFolders : unit -> Folder.t array
+  val workspaceFolders : Folder.t array option
 
   val onDidOpenTextDocument : (TextDocument.event -> unit) -> unit
 
