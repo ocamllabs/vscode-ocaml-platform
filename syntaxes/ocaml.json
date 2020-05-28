@@ -345,17 +345,6 @@
             "2": { "patterns": [{ "include": "$self" }] }
           }
         },
-        {
-          "comment": "locally abstract types",
-          "match": "(?:\\(|(:))\\s*(type)((?:\\s+[a-z_][A-Za-z0-9_']*)+)",
-          "captures": {
-            "1": {
-              "name": "keyword.other.ocaml punctuation.other.colon punctuation.colon"
-            },
-            "2": { "name": "keyword.ocaml" },
-            "3": { "name": "entity.name.function.binding.ocaml" }
-          }
-        },
         { "include": "source.ocaml.interface#bindings" }
       ]
     },
