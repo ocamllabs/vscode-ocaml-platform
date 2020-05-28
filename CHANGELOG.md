@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Add highlighting for locally abstract types in OCaml files
+
 ## 0.7.0
 
 - Fix faulty detection of esy sandboxes (#212)
