@@ -213,7 +213,7 @@ module Workspace : sig
 
   val name : string option
 
-  val workspaceFolders : Folder.t array option
+  val workspaceFolders : unit -> Folder.t array
 
   val onDidOpenTextDocument : (TextDocument.event -> unit) -> unit
 

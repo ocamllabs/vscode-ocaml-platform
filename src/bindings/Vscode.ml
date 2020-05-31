@@ -104,8 +104,10 @@ module Workspace = struct
   external name : string option = "name"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 
-  external workspaceFolders : Folder.t array option = "workspaceFolders"
+  external _workspaceFolders : Folder.t array option = "workspaceFolders"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
+
+  let workspaceFolders () = _workspaceFolders |. Belt.Option.getWithDefault [||]
 
   external onDidOpenTextDocument : (TextDocument.event -> unit) -> unit
     = "onDidOpenTextDocument"
