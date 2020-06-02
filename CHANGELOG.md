@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Add highlighting for locally abstract types in OCaml files
+- Add highlighting for OASIS files
 
 ## 0.7.0
 
