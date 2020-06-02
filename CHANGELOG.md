@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Add highlighting for locally abstract types in OCaml files
+- Improve OCamlbuild highlighting
 
 ## 0.7.0
 
