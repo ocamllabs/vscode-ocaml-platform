@@ -215,7 +215,8 @@
         ],
         "extensions": [
           "_oasis"
-        ]
+        ],
+        "configuration": "./languages/oasis.json"
       },
       {
         "id": "ocaml.ocamldoc",
