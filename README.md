@@ -56,6 +56,7 @@ esy
   - Menhir
   - Merlin
   - META
+  - OASIS
   - OCaml
   - OCamlbuild
   - OCamlFormat

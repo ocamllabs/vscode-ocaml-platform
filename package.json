@@ -208,6 +208,17 @@
         ]
       },
       {
+        "id": "ocaml.oasis",
+        "aliases": [
+          "OASIS",
+          "oasis"
+        ],
+        "extensions": [
+          "_oasis"
+        ],
+        "configuration": "./languages/oasis.json"
+      },
+      {
         "id": "ocaml.ocamldoc",
         "aliases": [
           "OCamldoc",
@@ -367,6 +378,11 @@
         "language": "ocaml.META",
         "scopeName": "source.ocaml.META",
         "path": "./syntaxes/META.json"
+      },
+      {
+        "language": "ocaml.oasis",
+        "scopeName": "source.ocaml.oasis",
+        "path": "./syntaxes/oasis.json"
       },
       {
         "language": "atd",
