@@ -133,6 +133,14 @@ module Workspace = struct
   external getConfiguration : string -> WorkspaceConfiguration.t
     = "getConfiguration"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
+
+  external findFiles :
+       inc:string
+    -> excl:string option
+    -> maxResults:int option
+    -> cancellationToken option
+    -> TextDocument.uri array Js.Promise.t = "findFiles"
+    [@@bs.module "vscode"] [@@bs.scope "workspace"]
 end
 
 module StatusBarAlignment = struct
@@ -406,4 +414,93 @@ module LanguageClient = struct
   let initializeResult (t : t) =
     let open Promise.O in
     onReady t >>| fun () -> t.initializeResult
+end
+
+module ShellExecution = struct
+  type escape =
+    { charsToEscape : string
+    ; escapeChar : string
+    }
+
+  type shellQuotingOptions =
+    { escape : escape option
+    ; strong : string option
+    ; weak : string option
+    }
+
+  type shellExecutionOptions =
+    { cwd : string option
+    ; env : string Js.Dict.t option
+    ; executable : string option
+    ; shellArgs : string list option
+    ; shellQuoting : shellQuotingOptions option
+    }
+
+  type t =
+    { args : string array option
+    ; command : string option
+    ; commandLine : string option
+    ; options : shellExecutionOptions option
+    }
+
+  external make :
+    commandLine:string -> options:shellExecutionOptions option -> t
+    = "ShellExecution"
+    [@@bs.module "vscode"] [@@bs.new]
+end
+
+module ProcessExecution = struct
+  type processExecutionOptions =
+    { cwd : string option
+    ; env : string Js.Dict.t option
+    }
+
+  type t =
+    { args : string array
+    ; options : processExecutionOptions option
+    ; process : string
+    }
+
+  external make :
+       process:string
+    -> args:string array
+    -> options:processExecutionOptions option
+    -> t = "ProcessExecution"
+    [@@bs.module "vscode"] [@@bs.new]
+end
+
+module Task = struct
+  type t
+
+  type taskDefinition = { type_ : string [@bs.as "type"] }
+
+  external make :
+       taskDefinition:taskDefinition
+    -> scope:([ `Folder of Folder.t ][@bs.unwrap])
+    -> name:string
+    -> source:string
+    -> execution:
+         ([ `Shell of ShellExecution.t | `Process of ProcessExecution.t ]
+         [@bs.unwrap])
+    -> problemMatchers:string list
+    -> t = "Task"
+    [@@bs.module "vscode"] [@@bs.new]
+end
+
+module TaskProvider = struct
+  type t =
+    { provideTasks :
+        (Workspace.cancellationToken option -> Task.t array option Promise.t
+        [@bs])
+    ; resolveTask :
+        (Task.t -> Workspace.cancellationToken option -> Task.t option Promise.t
+        [@bs])
+    }
+end
+
+module Tasks = struct
+  external registerTaskProvider :
+    typ:string -> provider:TaskProvider.t -> Disposable.t
+    = "registerTaskProvider"
+    [@@bs.module "vscode"] [@@bs.scope "tasks"]
 end
