@@ -205,7 +205,8 @@
         ],
         "extensions": [
           "_tags"
-        ]
+        ],
+        "configuration": "./languages/ocamlbuild.json"
       },
       {
         "id": "ocaml.oasis",

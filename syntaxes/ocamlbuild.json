@@ -1,155 +1,108 @@
 {
   "scopeName": "source.ocaml.ocamlbuild",
   "fileTypes": ["_tags"],
-  "patterns": [{ "include": "#directive" }],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#lines" },
+    {
+      "comment": "comma separator",
+      "name": "keyword.other.ocamlbuild punctuation.comma punctuation.separator.comma",
+      "match": ","
+    }
+  ],
   "repository": {
-    "directive": {
+    "comments": {
+      "comment": "line comment",
+      "name": "comment.line.ocamlbuild",
+      "begin": "#",
+      "end": "$"
+    },
+
+    "lines": {
+      "begin": "^\\s*",
+      "end": "(:)|$",
+      "endCaptures": { "1": { "name": "keyword.operator.ocamlbuild" } },
+      "patterns": [{ "include": "#expressions" }]
+    },
+
+    "expressions": {
+      "comment": "glob expressions",
       "patterns": [
         {
-          "begin": "",
-          "end": "(?=[:])",
+          "begin": "<",
+          "end": ">",
+          "beginCaptures": [{ "name": "keyword.operator.ocamlbuild" }],
+          "endCaptures": [{ "name": "keyword.operator.ocamlbuild" }],
+          "name": "string.quoted.double.ocamlbuild",
+          "patterns": [{ "include": "#patterns" }]
+        },
+        {
+          "comment": "quoted string",
+          "name": "string.quoted.double.ocamlbuild",
+          "begin": "\"",
+          "end": "\""
+        },
+        {
+          "comment": "boolean",
+          "name": "constant.language.ocamlbuild",
+          "match": "\\b(true|false)\\b"
+        },
+        {
+          "comment": "operators",
+          "name": "keyword.operator.ocamlbuild",
+          "match": "\\b(or|and|not)\\b"
+        },
+        { "include": "#variables" },
+        { "include": "$self" }
+      ]
+    },
+
+    "patterns": {
+      "comment": "glob patterns",
+      "patterns": [
+        { "name": "keyword.operator.ocamlbuild", "match": "\\?" },
+        { "name": "constant.language.ocamlbuild", "match": "\\*" },
+        {
+          "begin": "{",
+          "end": "}",
+          "beginCaptures": [{ "name": "keyword.operator.ocamlbuild" }],
+          "endCaptures": [{ "name": "keyword.operator.ocamlbuild" }],
           "patterns": [
-            {
-              "begin": "(<)",
-              "end": "(>)",
-              "beginCaptures": {
-                "1": { "name": "keyword.other" }
-              },
-              "endCaptures": {
-                "1": { "name": "keyword.other" }
-              },
-              "patterns": [
-                {
-                  "match": "(?<![\\-\\+])(?:(\\b[[:word:]]+\\b)|([*]+))[[:space:]]*([\\./])?",
-                  "captures": {
-                    "1": { "name": "string.double" },
-                    "2": { "name": "constant.language" },
-                    "3": { "name": "keyword.other" }
-                  }
-                }
-              ]
-            },
-            {
-              "match": "\\b(true)\\b",
-              "name": "constant.language"
-            },
-            {
-              "match": "\\b(and|not)\\b",
-              "name": "keyword.other"
-            },
-            {
-              "begin": "\"",
-              "end": "\"",
-              "applyEndPatternLast": true,
-              "name": "string.double"
-            }
+            { "name": "keyword.operator.ocamlbuild", "match": "," },
+            { "include": "#patterns" }
           ]
         },
         {
-          "begin": "(:)",
-          "end": "$",
-          "beginCaptures": {
-            "1": { "name": "keyword.other" }
+          "begin": "\\[\\^?",
+          "end": "\\]",
+          "beginCaptures": [{ "name": "keyword.operator.ocamlbuild" }],
+          "endCaptures": [{ "name": "keyword.operator.ocamlbuild" }]
+        }
+      ]
+    },
+
+    "variables": {
+      "comment": "pattern variables",
+      "patterns": [
+        {
+          "match": "(%)\\([^:)]*\\)",
+          "captures": {
+            "1": { "name": "keyword.operator.ocamlbuild" }
           },
-          "patterns": [
-            {
-              "begin": "\\b(for-pack)\\b(\\()",
-              "end": "(\\))",
-              "beginCaptures": {
-                "1": { "name": "variable.parameter" },
-                "2": { "name": "keyword.other" }
-              },
-              "endCaptures": {
-                "1": { "name": "keyword.other" }
-              },
-              "patterns": [
-                {
-                  "match": "(?<![\\-\\+])\\b([[:alpha:]][[:word:]]*)\\b[[:space:]]*(\\.)?",
-                  "captures": {
-                    "1": { "name": "entity.name.class" },
-                    "2": { "name": "keyword.other" }
-                  }
-                }
-              ]
-            },
-            {
-              "begin": "\\b(package)\\b(\\()",
-              "end": "(\\))",
-              "beginCaptures": {
-                "1": { "name": "storage.type" },
-                "2": { "name": "keyword.other" }
-              },
-              "endCaptures": {
-                "1": { "name": "keyword.other" }
-              },
-              "patterns": [
-                {
-                  "match": "(?<![\\-\\+])\\b([[:lower:]][[:word:]]*)\\b[[:space:]]*(\\.)?",
-                  "captures": {
-                    "1": { "name": "entity.name.class" },
-                    "2": { "name": "keyword.other" }
-                  }
-                }
-              ]
-            },
-            {
-              "begin": "\\b(warn[[:word:]]*)\\b(\\()",
-              "end": "(\\))",
-              "beginCaptures": {
-                "1": { "name": "keyword.other" },
-                "2": { "name": "keyword.other" }
-              },
-              "endCaptures": {
-                "1": { "name": "keyword.other" }
-              },
-              "patterns": [
-                {
-                  "match": "\\b([[:upper:]][[:word:]]*)\\b",
-                  "name": "constant.language"
-                },
-                {
-                  "match": "([\\-\\+])\\b(?:([[:digit:]]+)|([[:lower:]][[:word:]]*))\\b",
-                  "captures": {
-                    "1": { "name": "keyword.other" },
-                    "2": { "name": "constant.language" },
-                    "3": { "name": "variable.parameter" }
-                  }
-                }
-              ]
-            },
-            {
-              "match": "([\\-\\+])?\\b(?:([[:digit:]]+)|([[:lower:]][[:word:]]*))\\b",
-              "captures": {
-                "1": { "name": "keyword.other" },
-                "2": { "name": "constant.language" },
-                "3": { "name": "variable.parameter" },
-                "4": { "name": "keyword.other" }
-              },
-              "endCaptures": {
-                "1": { "name": "keyword.other" }
-              }
-            },
-            {
-              "begin": "(\\()",
-              "end": "(\\))",
-              "beginCaptures": {
-                "1": { "name": "keyword.other" }
-              },
-              "endCaptures": {
-                "1": { "name": "keyword.other" }
-              },
-              "patterns": [
-                {
-                  "match": "([\\-\\+])\\b(?:([[:digit:]]+)|([[:lower:]][[:word:]]*))\\b",
-                  "captures": {
-                    "1": { "name": "keyword.other" },
-                    "2": { "name": "constant.language" },
-                    "3": { "name": "variable.parameter" }
-                  }
-                }
-              ]
-            }
-          ]
+          "patterns": [{ "include": "#expressions" }]
+        },
+        {
+          "begin": "(%)\\([^:]*(:)",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.operator.ocamlbuild" },
+            "2": { "name": "keyword.operator.ocamlbuild" }
+          },
+          "patterns": [{ "include": "#expressions" }]
+        },
+        {
+          "name": "keyword.operator.ocamlbuild",
+          "match": "%"
         }
       ]
     }
