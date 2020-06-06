@@ -225,6 +225,13 @@ module Workspace : sig
   val textDocuments : TextDocument.event array
 
   val getConfiguration : string -> WorkspaceConfiguration.t
+
+  val findFiles :
+       inc:string
+    -> excl:string option
+    -> maxResults:int option
+    -> cancellationToken option
+    -> TextDocument.uri array Js.Promise.t
 end
 
 module Languages : sig
@@ -305,4 +312,84 @@ module LanguageClient : sig
   val onReady : t -> unit Promise.t
 
   val initializeResult : t -> InitializeResult.t Promise.t
+end
+
+module ShellExecution : sig
+  type escape =
+    { charsToEscape : string
+    ; escapeChar : string
+    }
+
+  type shellQuotingOptions =
+    { escape : escape option
+    ; strong : string option
+    ; weak : string option
+    }
+
+  type shellExecutionOptions =
+    { cwd : string option
+    ; env : string Js.Dict.t option
+    ; executable : string option
+    ; shellArgs : string list option
+    ; shellQuoting : shellQuotingOptions option
+    }
+
+  type t =
+    { args : string array option
+    ; command : string option
+    ; commandLine : string option
+    ; options : shellExecutionOptions option
+    }
+
+  val make : commandLine:string -> options:shellExecutionOptions option -> t
+end
+
+module ProcessExecution : sig
+  type processExecutionOptions =
+    { cwd : string option
+    ; env : string Js.Dict.t option
+    }
+
+  type t =
+    { args : string array
+    ; options : processExecutionOptions option
+    ; process : string
+    }
+
+  val make :
+       process:string
+    -> args:string array
+    -> options:processExecutionOptions option
+    -> t
+end
+
+module Task : sig
+  type t
+
+  type taskDefinition = { type_ : string [@bs.as "type"] }
+
+  val make :
+       taskDefinition:taskDefinition
+    -> scope:[ `Folder of Folder.t ]
+    -> name:string
+    -> source:string
+    -> execution:[ `Shell of ShellExecution.t | `Process of ProcessExecution.t ]
+    -> problemMatchers:string list
+    -> t
+end
+
+module TaskProvider : sig
+  type t =
+    { provideTasks :
+        (Workspace.cancellationToken option -> Task.t array option Promise.t
+        [@bs])
+    ; resolveTask :
+        (Task.t -> Workspace.cancellationToken option -> Task.t option Promise.t
+        [@bs])
+    }
+end
+
+module Tasks : sig
+  val registerTaskProvider :
+    typ:string -> provider:TaskProvider.t -> Disposable.t
 end
