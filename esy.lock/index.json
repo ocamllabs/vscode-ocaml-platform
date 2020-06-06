@@ -1,16 +1,16 @@
 {
   "checksum": "c2fdf7b3826a442598e4d81eb8f22813",
-  "root": "vscode-ocaml@link-dev:./esy.json",
+  "root": "vscode-ocaml-platform@link-dev:./esy.json",
   "node": {
-    "vscode-ocaml@link-dev:./esy.json": {
-      "id": "vscode-ocaml@link-dev:./esy.json",
-      "name": "vscode-ocaml",
+    "vscode-ocaml-platform@link-dev:./esy.json": {
+      "id": "vscode-ocaml-platform@link-dev:./esy.json",
+      "name": "vscode-ocaml-platform",
       "version": "link-dev:./esy.json",
       "source": { "type": "link-dev", "path": ".", "manifest": "esy.json" },
       "overrides": [],
       "dependencies": [
         "ocaml@4.6.1000@d41d8cd9", "@opam/reason@opam:3.6.0@2da53ff9",
-        "@opam/ocamlformat@opam:0.14.1@5e7fb2e2",
+        "@opam/ocamlformat@opam:0.14.2@d742ffd5",
         "@opam/ocaml-lsp-server@github:ocaml/ocaml-lsp:ocaml-lsp-server.opam#a83bd0921b7e11de92e878f55b6447918dbb841c@d41d8cd9"
       ],
       "devDependencies": []
@@ -490,20 +490,20 @@
         "@opam/astring@opam:0.8.3@4e5e17d5"
       ]
     },
-    "@opam/ocamlformat@opam:0.14.1@5e7fb2e2": {
-      "id": "@opam/ocamlformat@opam:0.14.1@5e7fb2e2",
+    "@opam/ocamlformat@opam:0.14.2@d742ffd5": {
+      "id": "@opam/ocamlformat@opam:0.14.2@d742ffd5",
       "name": "@opam/ocamlformat",
-      "version": "opam:0.14.1",
+      "version": "opam:0.14.2",
       "source": {
         "type": "install",
         "source": [
-          "archive:https://opam.ocaml.org/cache/sha256/4a/4a7d4575c202bd0413b2864be60000854feade9190f5530222679815bb21960f#sha256:4a7d4575c202bd0413b2864be60000854feade9190f5530222679815bb21960f",
-          "archive:https://github.com/ocaml-ppx/ocamlformat/releases/download/0.14.1/ocamlformat-0.14.1.tbz#sha256:4a7d4575c202bd0413b2864be60000854feade9190f5530222679815bb21960f"
+          "archive:https://opam.ocaml.org/cache/sha256/5f/5f9f7ac312a8f62315e25536f87601efc7788114a4a1eacc0507acf474f8f09a#sha256:5f9f7ac312a8f62315e25536f87601efc7788114a4a1eacc0507acf474f8f09a",
+          "archive:https://github.com/ocaml-ppx/ocamlformat/releases/download/0.14.2/ocamlformat-0.14.2.tbz#sha256:5f9f7ac312a8f62315e25536f87601efc7788114a4a1eacc0507acf474f8f09a"
         ],
         "opam": {
           "name": "ocamlformat",
-          "version": "0.14.1",
-          "path": "esy.lock/opam/ocamlformat.0.14.1"
+          "version": "0.14.2",
+          "path": "esy.lock/opam/ocamlformat.0.14.2"
         }
       },
       "overrides": [],
