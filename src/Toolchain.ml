@@ -279,6 +279,13 @@ let getDuneFormatter (t : PackageManager.t) : Path.t * string array =
   | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:[| dune; format |]
   | Global -> (Path.ofString dune, [| format |])
 
+let getCommand (t : PackageManager.t) bin args : Path.t * string array =
+  let binArgs = Array.of_list (bin :: args) in
+  match t with
+  | Opam (opam, switch) -> Opam.exec opam ~switch ~args:binArgs
+  | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:binArgs
+  | Global -> (Path.ofString bin, Array.of_list args)
+
 let runSetup resources =
   let open Promise.Result.O in
   setupToolChain resources

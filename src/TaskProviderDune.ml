@@ -34,6 +34,15 @@ let folderRelativePath folders file =
         ))
     None folders
 
+let commandLine () =
+  let open Promise.O in
+  Toolchain.ofSettings () >>| function
+  | None -> "dune build"
+  | Some pm ->
+    let resources = Toolchain.makeResources pm in
+    let cmd, args = Toolchain.getCommand resources "dune" [ "build" ] in
+    Js.Array.joinWith " " (Js.Array.concat args [| Path.toString cmd |])
+
 let provideTasks =
  fun [@bs] cancellationToken ->
   let open Promise.O in
@@ -45,6 +54,7 @@ let provideTasks =
   let inc = "**/{dune,dune-project,dune-workspace}" in
   Workspace.findFiles ~inc ~excl ~maxResults:None cancellationToken
   >>= fun dunes ->
+  commandLine () >>= fun commandLine ->
   let tasks =
     Array.map
       (fun dune ->
@@ -65,8 +75,7 @@ let provideTasks =
               ; shellQuoting = None
               }
           in
-          (* TODO: use toolchain to prefix command with esy or opam exec *)
-          ShellExecution.make ~commandLine:"dune build" ~options
+          ShellExecution.make ~commandLine ~options
         in
         let task =
           Task.make ~taskDefinition ~scope ~source ~name ~problemMatchers
