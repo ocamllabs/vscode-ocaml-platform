@@ -74,9 +74,7 @@ end
 module WorkspaceConfiguration = struct
   type t
 
-  external get' : t -> string -> Js.Json.t Js.Nullable.t = "get" [@@bs.send]
-
-  let get workspaceConfig key = get' workspaceConfig key |> Js.Nullable.toOption
+  external get : t -> string -> Js.Json.t option = "get" [@@bs.send]
 
   type configurationTarget =
     | Global [@bs.as 1]
@@ -103,16 +101,13 @@ module Workspace = struct
 
   type cancellationToken = { isCancellationRequested : bool }
 
-  external _name : string Js.Nullable.t = "name"
+  external name : string option = "name"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 
-  let name () = Js.Nullable.toOption _name
-
-  external _workspaceFolders : Folder.t array Js.Nullable.t = "workspaceFolders"
+  external _workspaceFolders : Folder.t array option = "workspaceFolders"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 
-  let workspaceFolders () =
-    Js.Nullable.toOption _workspaceFolders |. Belt.Option.getWithDefault [||]
+  let workspaceFolders () = _workspaceFolders |. Belt.Option.getWithDefault [||]
 
   external onDidOpenTextDocument : (TextDocument.event -> unit) -> unit
     = "onDidOpenTextDocument"
@@ -195,33 +190,28 @@ module Window = struct
     external create : ?title:string -> unit -> t = "" [@@bs.obj]
   end
 
-  external showQuickPick' :
-    string array -> QuickPickOptions.t -> string Js.Nullable.t Promise.t
+  external showQuickPick :
+    string array -> QuickPickOptions.t -> string option Promise.t
     = "showQuickPick"
     [@@bs.module "vscode"] [@@bs.scope "window"]
-
-  let showQuickPick choices quickPickOptions =
-    showQuickPick' choices quickPickOptions
-    |> Promise.map (fun choice -> choice |> Js.Nullable.toOption)
 
   external _showQuickPickItems :
        QuickPickItem.t array
     -> QuickPickOptions.t
-    -> QuickPickItem.t Js.Nullable.t Promise.t = "showQuickPick"
+    -> QuickPickItem.t option Promise.t = "showQuickPick"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 
   let showQuickPickItems choices options =
     _showQuickPickItems (Array.of_list (List.map fst choices)) options
     |> Promise.map (fun choice ->
-           choice |> Js.Nullable.toOption
-           |. Belt.Option.map (fun q -> List.assq q choices))
+           choice |. Belt.Option.map (fun q -> List.assq q choices))
 
   external showInformationMessage : string -> unit Promise.t
     = "showInformationMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]
 
   external _showInformationMessage' :
-    string -> MessageItem.t array -> MessageItem.t Js.Nullable.t Promise.t
+    string -> MessageItem.t array -> MessageItem.t option Promise.t
     = "showInformationMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"] [@@bs.variadic]
 
@@ -233,8 +223,7 @@ module Window = struct
     in
     _showInformationMessage' msg (choices |> List.map fst |> Array.of_list)
     |> Promise.map (fun choice ->
-           choice |> Js.Nullable.toOption
-           |. Belt.Option.map (fun q -> List.assq q choices))
+           choice |. Belt.Option.map (fun q -> List.assq q choices))
 
   external showErrorMessage : string -> 'a Promise.t = "showErrorMessage"
     [@@bs.module "vscode"] [@@bs.scope "window"]

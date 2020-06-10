@@ -24,7 +24,7 @@ let get t =
       None )
 
 let set t v =
-  match Vscode.Workspace.name () with
+  match Vscode.Workspace.name with
   | None -> Promise.return ()
   | Some _ ->
     let scope = WorkspaceConfiguration.configurationTargetToJs t.scope in
