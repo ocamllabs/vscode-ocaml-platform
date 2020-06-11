@@ -54,7 +54,7 @@ let provideTasks =
   let inc = "**/{dune,dune-project,dune-workspace}" in
   Workspace.findFiles ~inc ~excl ~maxResults:None cancellationToken
   >>= fun dunes ->
-  commandLine () >>= fun commandLine ->
+  commandLine () >>| fun commandLine ->
   let tasks =
     Array.map
       (fun dune ->
@@ -85,7 +85,7 @@ let provideTasks =
         task)
       dunes
   in
-  Js.Promise.resolve (Some tasks)
+  Some tasks
 
 let resolveTask =
  fun [@bs] task _cancellationToken -> Js.Promise.resolve (Some task)
