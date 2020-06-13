@@ -94,6 +94,11 @@
         ]
       }
     ],
+    "taskDefinitions": [
+      {
+        "type": "dune"
+      }
+    ],
     "languages": [
       {
         "id": "dune",
