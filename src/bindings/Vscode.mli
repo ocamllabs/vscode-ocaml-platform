@@ -388,12 +388,14 @@ module Task : sig
     | Workspace
 
   val make :
-       taskDefinition:taskDefinition
+       ?group:TaskGroup.t
+    -> taskDefinition:taskDefinition
     -> scope:scope
     -> name:string
     -> source:string
     -> execution:[ `Shell of ShellExecution.t | `Process of ProcessExecution.t ]
     -> problemMatchers:string array
+    -> unit
     -> t
 end
 

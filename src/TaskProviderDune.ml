@@ -65,12 +65,8 @@ let provideTasks =
           in
           ShellExecution.make ~commandLine ~options
         in
-        let task =
-          Task.make ~taskDefinition ~scope ~source ~name ~problemMatchers
-            ~execution:(`Shell execution)
-        in
-        task.group <- Some TaskGroup.build;
-        task)
+        Task.make ~taskDefinition ~scope ~source ~name ~problemMatchers
+          ~execution:(`Shell execution) ~group:TaskGroup.build ())
       dunes
   in
   Some tasks

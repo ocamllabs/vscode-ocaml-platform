@@ -474,7 +474,7 @@ module TaskGroup = struct
 
   external build : t = "Build" [@@bs.module "vscode"] [@@bs.scope "TaskGroup"]
 
-  external clean : t = "clean" [@@bs.module "vscode"] [@@bs.scope "TaskGroup"]
+  external clean : t = "Clean" [@@bs.module "vscode"] [@@bs.scope "TaskGroup"]
 
   external rebuild : t = "Rebuild"
     [@@bs.module "vscode"] [@@bs.scope "TaskGroup"]
@@ -507,14 +507,19 @@ module Task = struct
     -> t = "Task"
     [@@bs.module "vscode"] [@@bs.new]
 
-  let make ~taskDefinition ~scope ~name ~source ~execution ~problemMatchers =
+  let make ?group ~taskDefinition ~scope ~name ~source ~execution
+      ~problemMatchers () =
     let scope =
       match scope with
       | Folder f -> `Folder f
       | Global -> `Enum 1
       | Workspace -> `Enum 2
     in
-    _make ~taskDefinition ~scope ~name ~source ~execution ~problemMatchers
+    let task =
+      _make ~taskDefinition ~scope ~name ~source ~execution ~problemMatchers
+    in
+    task.group <- group;
+    task
 end
 
 module TaskProvider = struct
