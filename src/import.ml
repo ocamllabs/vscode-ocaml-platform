@@ -63,17 +63,12 @@ end
 module String = struct
   include String
 
-  let startsWith ~s ~prefix =
-    try
+  let chopPrefix s ~prefix =
+    if Js.String.startsWith prefix s then
       let prefixLen = String.length prefix in
-      let start = String.sub s 0 prefixLen in
-      String.equal start prefix
-    with _ -> false
-
-  let removePrefix ~s ~prefix =
-    let prefixLen = String.length prefix in
-    let len = String.length s - prefixLen in
-    String.sub s prefixLen len
+      Some (Js.String.sliceToEnd ~from:prefixLen s)
+    else
+      None
 end
 
 let sprintf = Printf.sprintf

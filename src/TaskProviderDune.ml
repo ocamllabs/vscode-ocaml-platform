@@ -35,10 +35,9 @@ let folderRelativePath folders file =
       match acc with
       | Some _ -> acc
       | None -> (
-        match String.startsWith ~s:file ~prefix:folder.uri.fsPath with
-        | false -> acc
-        | true ->
-          Some (folder, String.removePrefix ~s:file ~prefix:folder.uri.fsPath) ))
+        match String.chopPrefix file ~prefix:folder.uri.fsPath with
+        | None -> acc
+        | Some withoutPrefix -> Some (folder, withoutPrefix) ))
     None folders
 
 let commandLine () =
