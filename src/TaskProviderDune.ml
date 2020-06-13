@@ -14,6 +14,21 @@ let problemMatchers = [| "ocamlc" |]
    follow the short style. *)
 let env = Js.Dict.fromList [ ("OCAML_ERROR_STYLE", "short") ]
 
+module Setting = struct
+  type t = bool
+
+  let ofJson json =
+    let open Json.Decode in
+    bool json
+
+  let toJson (t : t) =
+    let open Json.Encode in
+    bool t
+
+  let t =
+    Settings.create ~scope:Workspace ~key:"dune.autoDetect" ~ofJson ~toJson
+end
+
 let folderRelativePath folders file =
   Array.fold_left
     (fun acc (folder : Folder.t) ->
@@ -35,8 +50,7 @@ let commandLine () =
     let cmd, args = Toolchain.getCommand resources dune_bin [ "build" ] in
     Js.Array.joinWith " " (Js.Array.concat args [| Path.toString cmd |])
 
-let provideTasks =
- fun [@bs] cancellationToken ->
+let computeTasks cancellationToken =
   let open Promise.O in
   let folders = Workspace.workspaceFolders () in
   let excl =
@@ -74,6 +88,14 @@ let provideTasks =
       dunes
   in
   Some tasks
+
+let provideTasks =
+ fun [@bs] cancellationToken ->
+  match Settings.get Setting.t with
+  | None
+  | Some false ->
+    Js.Promise.resolve None
+  | Some true -> computeTasks cancellationToken
 
 let resolveTask =
  fun [@bs] task _cancellationToken -> Js.Promise.resolve (Some task)
