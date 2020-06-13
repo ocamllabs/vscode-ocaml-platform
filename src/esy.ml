@@ -118,40 +118,6 @@ let setupWithProgressIndicator fn =
       }]
     fn
 
-let _setupBsb t ~manifest ~envWithUnzip:esyEnv =
-  setupWithProgressIndicator (fun progress ->
-      let succeeded = ref (Ok ()) in
-      let eventEmitter = Setup.Bsb.make () in
-      Setup.Bsb.onProgress eventEmitter (fun percent ->
-          Js.Console.info2 "Percentage:" percent;
-          progress.report
-            [%bs.obj { increment = int_of_float (percent *. 100.) }] [@bs]);
-      Setup.Bsb.onEnd eventEmitter (fun () ->
-          (progress.report [%bs.obj { increment = 100 }] [@bs]));
-      Setup.Bsb.onError eventEmitter (fun errorMsg ->
-          succeeded := Error errorMsg);
-      Setup.Bsb.run t esyEnv eventEmitter manifest
-      |> Promise.map (fun () -> !succeeded))
-
-(* This doesn't really belong this module, it should be the caller's job to summon UI elements *)
-let _promptSetup fn =
-  Window.showQuickPick [| "yes"; "no" |]
-    (Window.QuickPickOptions.make ~canPickMany:false
-       ~placeHolder:{j|Setup this project's toolchain with 'esy'?|j} ())
-  |> Promise.then_ (function
-       | Some choice when choice = "yes" -> fn ()
-       | Some _
-       | None ->
-         Error "Please setup the toolchain" |> Promise.resolve)
-
-let _setupEsy t ~manifest =
-  setupWithProgressIndicator (fun progress ->
-      progress.report [%bs.obj { increment = int_of_float 1. }] [@bs];
-      Cmd.output t ~cwd:manifest ~args:[||]
-      |> Promise.map (fun _ ->
-             progress.report [%bs.obj { increment = int_of_float 100. }] [@bs];
-             Ok ()))
-
 let setupToolchain t ~manifest =
   let open Promise.Result.O in
   state t ~manifest >>| function
