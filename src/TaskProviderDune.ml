@@ -10,28 +10,16 @@ let problemMatchers = [| "ocamlc" |]
    follow the short style. *)
 let env = Js.Dict.fromList [ ("OCAML_ERROR_STYLE", "short") ]
 
-let startsWith ~s ~prefix =
-  try
-    let prefixLen = String.length prefix in
-    let start = String.sub s 0 prefixLen in
-    String.equal start prefix
-  with _ -> false
-
-let removePrefix ~s ~prefix =
-  let prefixLen = String.length prefix in
-  let len = String.length s - prefixLen in
-  String.sub s prefixLen len
-
 let folderRelativePath folders file =
   Array.fold_left
     (fun acc (folder : Folder.t) ->
       match acc with
       | Some _ -> acc
       | None -> (
-        match startsWith ~s:file ~prefix:folder.uri.fsPath with
+        match String.startsWith ~s:file ~prefix:folder.uri.fsPath with
         | false -> acc
-        | true -> Some (folder, removePrefix ~s:file ~prefix:folder.uri.fsPath)
-        ))
+        | true ->
+          Some (folder, String.removePrefix ~s:file ~prefix:folder.uri.fsPath) ))
     None folders
 
 let commandLine () =

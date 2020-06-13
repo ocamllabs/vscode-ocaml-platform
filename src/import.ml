@@ -60,6 +60,22 @@ module Or_error = struct
   type 'a t = ('a, string) result
 end
 
+module String = struct
+  include String
+
+  let startsWith ~s ~prefix =
+    try
+      let prefixLen = String.length prefix in
+      let start = String.sub s 0 prefixLen in
+      String.equal start prefix
+    with _ -> false
+
+  let removePrefix ~s ~prefix =
+    let prefixLen = String.length prefix in
+    let len = String.length s - prefixLen in
+    String.sub s prefixLen len
+end
+
 let sprintf = Printf.sprintf
 
 let message kind fmt =
