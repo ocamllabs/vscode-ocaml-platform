@@ -1,8 +1,12 @@
 open Import
 
-let taskDefinition = { Task.type_ = "dune" }
+let dune_bin = "dune"
 
-let source = "dune"
+let task_type = "dune"
+
+let taskDefinition = { Task.type_ = task_type }
+
+let source = task_type
 
 let problemMatchers = [| "ocamlc" |]
 
@@ -25,10 +29,10 @@ let folderRelativePath folders file =
 let commandLine () =
   let open Promise.O in
   Toolchain.ofSettings () >>| function
-  | None -> "dune build"
+  | None -> sprintf "%s build" dune_bin
   | Some pm ->
     let resources = Toolchain.makeResources pm in
-    let cmd, args = Toolchain.getCommand resources "dune" [ "build" ] in
+    let cmd, args = Toolchain.getCommand resources dune_bin [ "build" ] in
     Js.Array.joinWith " " (Js.Array.concat args [| Path.toString cmd |])
 
 let provideTasks =
@@ -37,7 +41,7 @@ let provideTasks =
   let folders = Workspace.workspaceFolders () in
   let excl =
     (* ignoring dune files from _build, _opam, _esy *)
-    Some "{**/_*,}"
+    Some "{**/_*}"
   in
   let inc = "**/{dune,dune-project,dune-workspace}" in
   Workspace.findFiles ~inc ~excl ~maxResults:None cancellationToken
@@ -76,4 +80,4 @@ let resolveTask =
 
 let create () =
   let provider = { TaskProvider.provideTasks; resolveTask } in
-  Tasks.registerTaskProvider ~typ:"dune" ~provider
+  Tasks.registerTaskProvider ~typ:task_type ~provider
