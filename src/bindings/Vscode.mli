@@ -113,6 +113,14 @@ module WorkspaceConfiguration : sig
     t -> string -> Js.Json.t -> abs_configurationTarget -> unit Promise.t
 end
 
+module ViewColumn : sig
+  type t
+end
+
+module TextEditor : sig
+  type t
+end
+
 module Window : sig
   module QuickPickItem : sig
     type t
@@ -188,6 +196,21 @@ module Window : sig
     -> ?priority:int
     -> unit
     -> StatusBarItem.t
+
+  type textDocumentShowOptions
+
+  val textDocumentShowOptions :
+       ?preserveFocus:bool
+    -> ?preview:bool
+    -> ?selection:Range.t
+    -> ?viewColumn:ViewColumn.t
+    -> unit
+    -> textDocumentShowOptions
+
+  val showTextDocument :
+       ?options:textDocumentShowOptions
+    -> [ `Uri of TextDocument.uri | `Document of TextDocument.t ]
+    -> TextEditor.t Promise.t
 end
 
 module Folder : sig
@@ -232,6 +255,18 @@ module Workspace : sig
     -> maxResults:int option
     -> cancellationToken option
     -> TextDocument.uri array Js.Promise.t
+
+  type openTextDocumentOptions
+
+  val openTextDocumentOptions :
+    content:string -> language:string -> openTextDocumentOptions
+
+  val openTextDocument :
+       [ `Filename of string
+       | `Uri of TextDocument.uri
+       | `Interactive of openTextDocumentOptions option
+       ]
+    -> TextDocument.t Promise.t
 end
 
 module Languages : sig
