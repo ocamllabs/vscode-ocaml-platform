@@ -29,16 +29,19 @@ module Instance = struct
     { mutable client : LanguageClient.t option
     ; mutable statusBarItem : StatusBarItem.t option
     ; duneFormatter : DuneFormatter.t
+    ; taskProviderDune : TaskProviderDune.t
     }
 
   let create () =
     { client = None
     ; statusBarItem = None
     ; duneFormatter = DuneFormatter.create ()
+    ; taskProviderDune = TaskProviderDune.create ()
     }
 
   let stop t =
     DuneFormatter.dispose t.duneFormatter;
+    TaskProviderDune.dispose t.taskProviderDune;
 
     ( match t.statusBarItem with
     | None -> ()
@@ -119,7 +122,6 @@ let activate (extension : Vscode.ExtensionContext.t) =
     (Vscode.Commands.register ~command:selectSandboxCommandId
        ~handler:(selectSandbox instance));
   Vscode.ExtensionContext.subscribe extension (Instance.disposable instance);
-  Vscode.ExtensionContext.subscribe extension (TaskProviderDune.create ());
   let open Promise.O in
   let toolchain =
     Toolchain.ofSettings () >>| fun pm ->

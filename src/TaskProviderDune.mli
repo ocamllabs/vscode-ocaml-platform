@@ -4,4 +4,8 @@
     file that it can find in the workspace. It doesn't parse the dune files.
 *)
 
-val create : unit -> Vscode.Disposable.t
+type t
+
+val create : unit -> t
+
+val dispose : t -> unit

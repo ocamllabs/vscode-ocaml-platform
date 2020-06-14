@@ -1,5 +1,7 @@
 open Import
 
+type t = Disposable.t
+
 let dune_bin = "dune"
 
 let task_type = "dune"
@@ -102,3 +104,5 @@ let resolveTask =
 let create () =
   let provider = { TaskProvider.provideTasks; resolveTask } in
   Tasks.registerTaskProvider ~typ:task_type ~provider
+
+let dispose (t : t) = Disposable.dispose t
