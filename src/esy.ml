@@ -110,14 +110,6 @@ let state t ~manifest =
          else
            Pending)
 
-let setupWithProgressIndicator fn =
-  Window.withProgress
-    [%bs.obj
-      { location = Window.locationToJs Window.Notification
-      ; title = "Setting up toolchain..."
-      }]
-    fn
-
 let setupToolchain t ~manifest =
   let open Promise.Result.O in
   state t ~manifest >>| function
