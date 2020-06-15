@@ -71,6 +71,14 @@ module Folder = struct
     }
 end
 
+module ViewColumn = struct
+  type t
+end
+
+module TextEditor = struct
+  type t
+end
+
 module WorkspaceConfiguration = struct
   type t
 
@@ -136,6 +144,28 @@ module Workspace = struct
     -> cancellationToken option
     -> TextDocument.uri array Js.Promise.t = "findFiles"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
+
+  external _openTextDocument :
+       ([ `Filename of string | `Uri of TextDocument.uri ][@bs.unwrap])
+    -> TextDocument.t Promise.t = "openTextDocument"
+    [@@bs.module "vscode"] [@@bs.scope "workspace"]
+
+  type openTextDocumentOptions = < content : string ; language : string > Js.t
+
+  external openTextDocumentOptions :
+    content:string -> language:string -> openTextDocumentOptions = ""
+    [@@bs.obj]
+
+  external _openTextDocumentInteractive :
+    ?interactive:openTextDocumentOptions -> TextDocument.t Promise.t
+    = "openTextDocument"
+    [@@bs.module "vscode"] [@@bs.scope "workspace"]
+
+  let openTextDocument t =
+    match t with
+    | `Interactive interactive -> _openTextDocumentInteractive ?interactive
+    | `Filename _ as t -> _openTextDocument t
+    | `Uri _ as t -> _openTextDocument t
 end
 
 module StatusBarAlignment = struct
@@ -277,6 +307,31 @@ module Window = struct
     -> unit
     -> StatusBarItem.t = "createStatusBarItem"
     [@@bs.module "vscode"] [@@bs.scope "window"]
+
+  type textDocumentShowOptions =
+    < preserveFocus : bool option
+    ; preview : bool option
+    ; selection : Range.t option
+    ; viewColumn : ViewColumn.t option >
+    Js.t
+
+  external textDocumentShowOptions :
+       ?preserveFocus:bool
+    -> ?preview:bool
+    -> ?selection:Range.t
+    -> ?viewColumn:ViewColumn.t
+    -> unit
+    -> textDocumentShowOptions = ""
+    [@@bs.obj]
+
+  external _showTextDocument :
+       doc:([ `Uri of TextDocument.uri | `Document of TextDocument.t ]
+         [@bs.unwrap])
+    -> ?options:textDocumentShowOptions
+    -> TextEditor.t Promise.t = "showTextDocument"
+    [@@bs.module "vscode"] [@@bs.scope "window"]
+
+  let showTextDocument ?options doc = _showTextDocument ~doc ?options
 end
 
 type memento
