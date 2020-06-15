@@ -5,6 +5,7 @@
 - Add highlighting for locally abstract types in OCaml files
 - Add highlighting for OASIS files
 - Improve OCamlbuild highlighting
+- Add dune task provider
 
 ## 0.7.0
 
