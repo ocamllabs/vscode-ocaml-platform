@@ -14,7 +14,7 @@ let getFormatter toolchain =
   (* text of entire document *)
   let documentText = TextDocument.getText document fullDocumentRange in
 
-  let cmd, args = Toolchain.getDuneFormatter toolchain in
+  let cmd, args = Toolchain.getDuneCommand toolchain [ "format-dune-file" ] in
   let open Promise.O in
   (Cmd.make ~cmd () >>= function
    | Ok command -> Cmd.output command ~args ~stdin:documentText

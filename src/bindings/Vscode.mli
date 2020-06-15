@@ -211,6 +211,25 @@ module Window : sig
        ?options:textDocumentShowOptions
     -> [ `Uri of TextDocument.uri | `Document of TextDocument.t ]
     -> TextEditor.t Promise.t
+
+  module Terminal : sig
+    type t
+
+    val dispose : t -> unit
+
+    val hide : t -> unit
+
+    val sendText : t -> string -> ?addNewLine:bool -> unit -> unit
+
+    val show : t -> ?preserveFocus:bool -> unit -> unit
+  end
+
+  val createTerminal :
+       ?name:string
+    -> ?shellPath:string
+    -> ?shellArgs:string array
+    -> unit
+    -> Terminal.t
 end
 
 module Folder : sig
@@ -247,7 +266,7 @@ module Workspace : sig
 
   val textDocuments : TextDocument.event array
 
-  val getConfiguration : string -> WorkspaceConfiguration.t
+  val getConfiguration : ?section:string -> unit -> WorkspaceConfiguration.t
 
   val findFiles :
        inc:string

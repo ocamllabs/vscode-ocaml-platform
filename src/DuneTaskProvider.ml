@@ -48,7 +48,7 @@ let commandLine () =
   | None -> sprintf "%s build" dune_bin
   | Some pm ->
     let resources = Toolchain.makeResources pm in
-    let cmd, args = Toolchain.getCommand resources dune_bin [ "build" ] in
+    let cmd, args = Toolchain.getDuneCommand resources [ "build" ] in
     Js.Array.joinWith " " (Js.Array.concat args [| Path.toString cmd |])
 
 let computeTasks cancellationToken =

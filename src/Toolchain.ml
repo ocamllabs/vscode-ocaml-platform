@@ -109,7 +109,7 @@ end
 
 type resources = PackageManager.t
 
-let toString = PackageManager.toString
+let toString t = "OCaml Platform | " ^ PackageManager.toString t
 
 let availablePackageManagers () =
   { PackageManager.Kind.Hmap.opam = Opam.make ()
@@ -262,29 +262,20 @@ let selectAndSave () =
       let (_ : unit Promise.t) = toSettings choice.packageManager in
       Some choice.packageManager )
 
-let getLspCommand (t : PackageManager.t) : Path.t * string array =
-  let name = "ocamllsp" in
-  match t with
-  | Opam (opam, switch) -> Opam.exec opam ~switch ~args:[| name |]
-  | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:[| name |]
-  | Global -> (Path.ofString name, [||])
-
-let addLspCheckArg args = Array.append args [| "--help=plain" |]
-
-let getDuneFormatter (t : PackageManager.t) : Path.t * string array =
-  let dune = "dune" in
-  let format = "format-dune-file" in
-  match t with
-  | Opam (opam, switch) -> Opam.exec opam ~switch ~args:[| dune; format |]
-  | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:[| dune; format |]
-  | Global -> (Path.ofString dune, [| format |])
-
 let getCommand (t : PackageManager.t) bin args : Path.t * string array =
   let binArgs = Array.of_list (bin :: args) in
   match t with
   | Opam (opam, switch) -> Opam.exec opam ~switch ~args:binArgs
   | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:binArgs
   | Global -> (Path.ofString bin, Array.of_list args)
+
+let getLspCommand (t : PackageManager.t) : Path.t * string array =
+  getCommand t "ocamllsp" []
+
+let getDuneCommand (t : PackageManager.t) args : Path.t * string array =
+  getCommand t "dune" args
+
+let addLspCheckArg args = Array.append args [| "--help=plain" |]
 
 let runSetup resources =
   let open Promise.Result.O in

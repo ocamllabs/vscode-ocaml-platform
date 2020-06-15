@@ -35,6 +35,11 @@
         "command": "ocaml.select-sandbox",
         "category": "OCaml",
         "title": "Select sandbox for this workspace"
+      },
+      {
+        "command": "ocaml.open-terminal",
+        "category": "OCaml",
+        "title": "Open a terminal in the current sandbox"
       }
     ],
     "configuration": {

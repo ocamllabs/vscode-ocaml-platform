@@ -28,6 +28,7 @@ module Instance = struct
   type t =
     { mutable client : LanguageClient.t option
     ; mutable statusBarItem : StatusBarItem.t option
+    ; mutable terminalSandbox : TerminalSandbox.t option
     ; duneFormatter : DuneFormatter.t
     ; duneTaskProvider : DuneTaskProvider.t
     }
@@ -35,6 +36,7 @@ module Instance = struct
   let create () =
     { client = None
     ; statusBarItem = None
+    ; terminalSandbox = None
     ; duneFormatter = DuneFormatter.create ()
     ; duneTaskProvider = DuneTaskProvider.create ()
     }
@@ -42,6 +44,12 @@ module Instance = struct
   let stop t =
     DuneFormatter.dispose t.duneFormatter;
     DuneTaskProvider.dispose t.duneTaskProvider;
+
+    ( match t.terminalSandbox with
+    | None -> ()
+    | Some (terminalSandbox : TerminalSandbox.t) ->
+      TerminalSandbox.dispose terminalSandbox;
+      t.terminalSandbox <- None );
 
     ( match t.statusBarItem with
     | None -> ()
@@ -61,7 +69,7 @@ module Instance = struct
     let statusBarItem =
       Window.createStatusBarItem ~alignment:StatusBarAlignment.(tToJs Left) ()
     in
-    let statusBarText = "OCaml Platform | " ^ Toolchain.toString toolchain in
+    let statusBarText = Toolchain.toString toolchain in
     statusBarItem##text#=statusBarText;
     statusBarItem##command#=selectSandboxCommandId;
     StatusBarItem.show statusBarItem;
@@ -77,6 +85,8 @@ module Instance = struct
     t.client <- Some client;
     LanguageClient.start client;
 
+    t.terminalSandbox <- Some (TerminalSandbox.create toolchain);
+
     let open Promise.O in
     LanguageClient.initializeResult client >>| fun initializeResult ->
     let ocamlLsp = OcamlLsp.ofInitializeResult initializeResult in
@@ -86,6 +96,14 @@ module Instance = struct
          available in mli sources. Please update to a recent version and \
          restart the server.";
     Ok ()
+
+  let openTerminal t () =
+    match Option.(t.terminalSandbox >>= TerminalSandbox.openTerminal) with
+    | Some _ -> ()
+    | None ->
+      message `Error
+        "Could not open a terminal in the current sandbox. The toolchain may \
+         not have loaded yet."
 
   let disposable t = Disposable.create ~dispose:(fun () -> stop t)
 end
@@ -121,6 +139,9 @@ let activate (extension : Vscode.ExtensionContext.t) =
   Vscode.ExtensionContext.subscribe extension
     (Vscode.Commands.register ~command:selectSandboxCommandId
        ~handler:(selectSandbox instance));
+  Vscode.ExtensionContext.subscribe extension
+    (Vscode.Commands.register ~command:"ocaml.open-terminal"
+       ~handler:(Instance.openTerminal instance));
   Vscode.ExtensionContext.subscribe extension (Instance.disposable instance);
   let open Promise.O in
   let toolchain =

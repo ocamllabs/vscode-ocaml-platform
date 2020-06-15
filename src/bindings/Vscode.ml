@@ -133,8 +133,8 @@ module Workspace = struct
   external textDocuments : TextDocument.event array = "textDocuments"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 
-  external getConfiguration : string -> WorkspaceConfiguration.t
-    = "getConfiguration"
+  external getConfiguration :
+    ?section:string -> unit -> WorkspaceConfiguration.t = "getConfiguration"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 
   external findFiles :
@@ -332,6 +332,29 @@ module Window = struct
     [@@bs.module "vscode"] [@@bs.scope "window"]
 
   let showTextDocument ?options doc = _showTextDocument ~doc ?options
+
+  module Terminal = struct
+    type t
+
+    external dispose : t -> unit = "dispose" [@@bs.send]
+
+    external hide : t -> unit = "hide" [@@bs.send]
+
+    external sendText : t -> string -> ?addNewLine:bool -> unit -> unit
+      = "sendText"
+      [@@bs.send]
+
+    external show : t -> ?preserveFocus:bool -> unit -> unit = "show"
+      [@@bs.send]
+  end
+
+  external createTerminal :
+       ?name:string
+    -> ?shellPath:string
+    -> ?shellArgs:string array
+    -> unit
+    -> Terminal.t = "createTerminal"
+    [@@bs.module "vscode"] [@@bs.scope "window"]
 end
 
 type memento
