@@ -76,3 +76,6 @@ val getLspCommand : resources -> Path.t * string array
 
 (** Extract format-dune-file command *)
 val getDuneFormatter : resources -> Path.t * string array
+
+(** Extract command to run with the toolchain *)
+val getCommand : resources -> string -> string list -> Path.t * string array

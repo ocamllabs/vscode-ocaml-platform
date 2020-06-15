@@ -365,7 +365,7 @@ module ShellExecution : sig
     { cwd : string option
     ; env : string Js.Dict.t option
     ; executable : string option
-    ; shellArgs : string list option
+    ; shellArgs : string array option
     ; shellQuoting : shellQuotingOptions option
     }
 
@@ -398,18 +398,39 @@ module ProcessExecution : sig
     -> t
 end
 
-module Task : sig
+module TaskGroup : sig
   type t
 
+  val build : t
+
+  val clean : t
+
+  val rebuild : t
+
+  val test : t
+
+  val make : id:string -> label:string -> t
+end
+
+module Task : sig
   type taskDefinition = { type_ : string [@bs.as "type"] }
 
+  type t = { mutable group : TaskGroup.t option }
+
+  type scope =
+    | Folder of Folder.t
+    | Global
+    | Workspace
+
   val make :
-       taskDefinition:taskDefinition
-    -> scope:[ `Folder of Folder.t ]
+       ?group:TaskGroup.t
+    -> taskDefinition:taskDefinition
+    -> scope:scope
     -> name:string
     -> source:string
     -> execution:[ `Shell of ShellExecution.t | `Process of ProcessExecution.t ]
-    -> problemMatchers:string list
+    -> problemMatchers:string array
+    -> unit
     -> t
 end
 

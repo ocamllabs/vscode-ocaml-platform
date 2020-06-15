@@ -29,16 +29,19 @@ module Instance = struct
     { mutable client : LanguageClient.t option
     ; mutable statusBarItem : StatusBarItem.t option
     ; duneFormatter : DuneFormatter.t
+    ; duneTaskProvider : DuneTaskProvider.t
     }
 
   let create () =
     { client = None
     ; statusBarItem = None
     ; duneFormatter = DuneFormatter.create ()
+    ; duneTaskProvider = DuneTaskProvider.create ()
     }
 
   let stop t =
     DuneFormatter.dispose t.duneFormatter;
+    DuneTaskProvider.dispose t.duneTaskProvider;
 
     ( match t.statusBarItem with
     | None -> ()

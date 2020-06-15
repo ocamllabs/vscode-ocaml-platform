@@ -44,6 +44,12 @@
           "type": "object",
           "default": null,
           "description": "Determines where to find the sandbox for a given project"
+        },
+        "ocaml.dune.autoDetect": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Controls whether dune tasks should be automatically detected."
         }
       }
     },
@@ -92,6 +98,11 @@
             "message": 3
           }
         ]
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "dune"
       }
     ],
     "languages": [

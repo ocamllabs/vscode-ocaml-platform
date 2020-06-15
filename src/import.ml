@@ -60,6 +60,17 @@ module Or_error = struct
   type 'a t = ('a, string) result
 end
 
+module String = struct
+  include String
+
+  let chopPrefix s ~prefix =
+    if Js.String.startsWith prefix s then
+      let prefixLen = String.length prefix in
+      Some (Js.String.sliceToEnd ~from:prefixLen s)
+    else
+      None
+end
+
 let sprintf = Printf.sprintf
 
 let message kind fmt =

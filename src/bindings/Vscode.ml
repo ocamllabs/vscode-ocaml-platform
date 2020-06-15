@@ -476,7 +476,7 @@ module ShellExecution = struct
     { cwd : string option
     ; env : string Js.Dict.t option
     ; executable : string option
-    ; shellArgs : string list option
+    ; shellArgs : string array option
     ; shellQuoting : shellQuotingOptions option
     }
 
@@ -513,22 +513,57 @@ module ProcessExecution = struct
     [@@bs.module "vscode"] [@@bs.new]
 end
 
-module Task = struct
+module TaskGroup = struct
   type t
 
+  external build : t = "Build" [@@bs.module "vscode"] [@@bs.scope "TaskGroup"]
+
+  external clean : t = "Clean" [@@bs.module "vscode"] [@@bs.scope "TaskGroup"]
+
+  external rebuild : t = "Rebuild"
+    [@@bs.module "vscode"] [@@bs.scope "TaskGroup"]
+
+  external test : t = "Test" [@@bs.module "vscode"] [@@bs.scope "TaskGroup"]
+
+  external make : id:string -> label:string -> t = "TaskGroup"
+    [@@bs.module "vscode"] [@@bs.new]
+end
+
+module Task = struct
   type taskDefinition = { type_ : string [@bs.as "type"] }
 
-  external make :
+  type t = { mutable group : TaskGroup.t option }
+
+  type scope =
+    | Folder of Folder.t
+    | Global
+    | Workspace
+
+  external _make :
        taskDefinition:taskDefinition
-    -> scope:([ `Folder of Folder.t ][@bs.unwrap])
+    -> scope:([ `Folder of Folder.t | `Enum of int ][@bs.unwrap])
     -> name:string
     -> source:string
     -> execution:
          ([ `Shell of ShellExecution.t | `Process of ProcessExecution.t ]
          [@bs.unwrap])
-    -> problemMatchers:string list
+    -> problemMatchers:string array
     -> t = "Task"
     [@@bs.module "vscode"] [@@bs.new]
+
+  let make ?group ~taskDefinition ~scope ~name ~source ~execution
+      ~problemMatchers () =
+    let scope =
+      match scope with
+      | Folder f -> `Folder f
+      | Global -> `Enum 1
+      | Workspace -> `Enum 2
+    in
+    let task =
+      _make ~taskDefinition ~scope ~name ~source ~execution ~problemMatchers
+    in
+    task.group <- group;
+    task
 end
 
 module TaskProvider = struct
