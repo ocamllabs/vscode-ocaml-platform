@@ -2,6 +2,8 @@ open Import
 
 let selectSandboxCommandId = "ocaml.select-sandbox"
 
+let openTerminalCommandId = "ocaml.open-terminal"
+
 module Client = struct
   let make () : Vscode.LanguageClient.clientOptions =
     let documentSelector : Vscode.LanguageClient.documentSelectorItem array =
@@ -140,7 +142,7 @@ let activate (extension : Vscode.ExtensionContext.t) =
     (Vscode.Commands.register ~command:selectSandboxCommandId
        ~handler:(selectSandbox instance));
   Vscode.ExtensionContext.subscribe extension
-    (Vscode.Commands.register ~command:"ocaml.open-terminal"
+    (Vscode.Commands.register ~command:openTerminalCommandId
        ~handler:(Instance.openTerminal instance));
   Vscode.ExtensionContext.subscribe extension (Instance.disposable instance);
   let open Promise.O in
