@@ -52,26 +52,19 @@ module ShellArgs = struct
   let t = Settings.create ~scope:Global ~key ~ofJson ~toJson
 end
 
-type t =
-  { toolchain : Toolchain.resources
-  ; mutable terminals : Window.Terminal.t list
-  }
+type t = Window.Terminal.t
 
-let create toolchain = { toolchain; terminals = [] }
-
-let dispose t =
-  List.iter Window.Terminal.dispose t.terminals;
-  t.terminals <- []
-
-let openTerminal t =
+let create toolchain =
   let open Option in
   getTerminalSetting ShellPath.t >>= fun shellPath ->
   getTerminalSetting ShellArgs.t >>| fun shellArgs ->
   let shellPath, shellArgs =
-    Toolchain.getCommand t.toolchain shellPath shellArgs
+    Toolchain.getCommand toolchain shellPath shellArgs
   in
-  let name = Toolchain.toString t.toolchain in
+  let name = Toolchain.toString toolchain in
   let shellPath = Path.toString shellPath in
-  let terminal = Window.createTerminal ~name ~shellPath ~shellArgs () in
-  Window.Terminal.show terminal ();
-  t.terminals <- terminal :: t.terminals
+  Window.createTerminal ~name ~shellPath ~shellArgs ()
+
+let dispose = Window.Terminal.dispose
+
+let show t = Window.Terminal.show t ()

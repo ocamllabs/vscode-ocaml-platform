@@ -1,7 +1,7 @@
 type t
 
+val create : Toolchain.resources -> t option
+
 val dispose : t -> unit
 
-val create : Toolchain.resources -> t
-
-val openTerminal : t -> unit option
+val show : t -> unit

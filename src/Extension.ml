@@ -28,17 +28,17 @@ end
 
 module Instance = struct
   type t =
-    { mutable client : LanguageClient.t option
+    { mutable toolchain : Toolchain.resources option
+    ; mutable client : LanguageClient.t option
     ; mutable statusBarItem : StatusBarItem.t option
-    ; mutable terminalSandbox : TerminalSandbox.t option
     ; duneFormatter : DuneFormatter.t
     ; duneTaskProvider : DuneTaskProvider.t
     }
 
   let create () =
-    { client = None
+    { toolchain = None
+    ; client = None
     ; statusBarItem = None
-    ; terminalSandbox = None
     ; duneFormatter = DuneFormatter.create ()
     ; duneTaskProvider = DuneTaskProvider.create ()
     }
@@ -47,19 +47,19 @@ module Instance = struct
     DuneFormatter.dispose t.duneFormatter;
     DuneTaskProvider.dispose t.duneTaskProvider;
 
-    Option.iter t.terminalSandbox ~f:(fun terminalSandbox ->
-        TerminalSandbox.dispose terminalSandbox;
-        t.terminalSandbox <- None);
-
     Option.iter t.statusBarItem ~f:(fun statusBarItem ->
         StatusBarItem.dispose statusBarItem;
         t.statusBarItem <- None);
 
     Option.iter t.client ~f:(fun client ->
         LanguageClient.stop client;
-        t.client <- None)
+        t.client <- None);
+
+    t.toolchain <- None
 
   let start t toolchain =
+    t.toolchain <- Some toolchain;
+
     DuneFormatter.register t.duneFormatter toolchain;
 
     let statusBarItem =
@@ -81,8 +81,6 @@ module Instance = struct
     t.client <- Some client;
     LanguageClient.start client;
 
-    t.terminalSandbox <- Some (TerminalSandbox.create toolchain);
-
     let open Promise.O in
     LanguageClient.initializeResult client >>| fun initializeResult ->
     let ocamlLsp = OcamlLsp.ofInitializeResult initializeResult in
@@ -94,12 +92,12 @@ module Instance = struct
     Ok ()
 
   let openTerminal t () =
-    match Option.(t.terminalSandbox >>= TerminalSandbox.openTerminal) with
-    | Some _ -> ()
-    | None ->
-      message `Error
-        "Could not open a terminal in the current sandbox. The toolchain may \
-         not have loaded yet."
+    let open Option in
+    t.toolchain >>= TerminalSandbox.create >>| TerminalSandbox.show
+    |> iterNone ~f:(fun () ->
+           message `Error
+             "Could not open a terminal in the current sandbox. The toolchain \
+              may not have loaded yet.")
 
   let disposable t = Disposable.create ~dispose:(fun () -> stop t)
 end

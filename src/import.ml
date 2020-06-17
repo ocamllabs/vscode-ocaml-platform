@@ -37,6 +37,11 @@ module Option = struct
   let bind x ~f = x >>= f
 
   let iter t ~f = forEach t f
+
+  let iterNone t ~f =
+    match t with
+    | None -> f ()
+    | Some _ -> ()
 end
 
 module Result = struct
