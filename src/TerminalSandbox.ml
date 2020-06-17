@@ -14,12 +14,15 @@ module ShellPath = struct
     string t
 
   let key =
-    match Process.platform with
-    | "win32" -> "shell.windows"
-    | "darwin" -> "shell.osx"
-    | "linux"
-    | _ ->
-      "shell.linux"
+    let linux = "shell.linux" in
+    let map =
+      { Platform.Map.win32 = "shell.windows"
+      ; darwin = "shell.osx"
+      ; linux
+      ; other = linux
+      }
+    in
+    Platform.Map.find map Platform.t
 
   let t = Settings.create ~scope:Global ~key ~ofJson ~toJson
 end
@@ -36,12 +39,15 @@ module ShellArgs = struct
     list string t
 
   let key =
-    match Process.platform with
-    | "win32" -> "shellArgs.windows"
-    | "darwin" -> "shellArgs.osx"
-    | "linux"
-    | _ ->
-      "shellArgs.linux"
+    let linux = "shellArgs.linux" in
+    let map =
+      { Platform.Map.win32 = "shellArgs.windows"
+      ; darwin = "shellArgs.osx"
+      ; linux
+      ; other = linux
+      }
+    in
+    Platform.Map.find map Platform.t
 
   let t = Settings.create ~scope:Global ~key ~ofJson ~toJson
 end
