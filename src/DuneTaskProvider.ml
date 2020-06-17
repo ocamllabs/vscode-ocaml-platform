@@ -42,16 +42,11 @@ let folderRelativePath folders file =
         | Some withoutPrefix -> Some (folder, withoutPrefix) ))
     None folders
 
-let commandLine () =
-  let open Promise.O in
-  Toolchain.ofSettings () >>| function
-  | None -> sprintf "%s build" dune_bin
-  | Some pm ->
-    let resources = Toolchain.makeResources pm in
-    let cmd, args = Toolchain.getDuneCommand resources [ "build" ] in
-    Js.Array.joinWith " " (Js.Array.concat args [| Path.toString cmd |])
+let commandLine toolchain =
+  let cmd, args = Toolchain.getDuneCommand toolchain [ "build" ] in
+  Js.Array.joinWith " " (Js.Array.concat args [| Path.toString cmd |])
 
-let computeTasks cancellationToken =
+let computeTasks cancellationToken toolchain =
   let open Promise.O in
   let folders = Workspace.workspaceFolders () in
   let excl =
@@ -60,8 +55,8 @@ let computeTasks cancellationToken =
   in
   let inc = "**/{dune,dune-project,dune-workspace}" in
   Workspace.findFiles ~inc ~excl ~maxResults:None cancellationToken
-  >>= fun dunes ->
-  commandLine () >>| fun commandLine ->
+  >>| fun dunes ->
+  let commandLine = commandLine toolchain in
   let tasks =
     Array.map
       (fun dune ->
@@ -90,21 +85,22 @@ let computeTasks cancellationToken =
   in
   Some tasks
 
-let provideTasks =
+let provideTasks toolchain =
  fun [@bs] cancellationToken ->
   match Settings.get Setting.t with
   | None
   | Some false ->
     Js.Promise.resolve None
-  | Some true -> computeTasks cancellationToken
+  | Some true -> computeTasks cancellationToken toolchain
 
 let resolveTask =
  fun [@bs] task _cancellationToken -> Js.Promise.resolve (Some task)
 
 let create () = ref None
 
-let register t =
-  let provider = { TaskProvider.provideTasks; resolveTask } in
+let register t toolchain =
+  let provideTasks = provideTasks toolchain in
+  let provider = TaskProvider.{ provideTasks; resolveTask } in
   t := Some (Tasks.registerTaskProvider ~typ:task_type ~provider)
 
 let dispose (t : t) =

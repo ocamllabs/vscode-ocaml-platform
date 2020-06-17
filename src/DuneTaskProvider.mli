@@ -8,6 +8,6 @@ type t
 
 val create : unit -> t
 
-val register : t -> unit
+val register : t -> Toolchain.resources -> unit
 
 val dispose : t -> unit
