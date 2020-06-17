@@ -47,23 +47,17 @@ module Instance = struct
     DuneFormatter.dispose t.duneFormatter;
     DuneTaskProvider.dispose t.duneTaskProvider;
 
-    ( match t.terminalSandbox with
-    | None -> ()
-    | Some (terminalSandbox : TerminalSandbox.t) ->
-      TerminalSandbox.dispose terminalSandbox;
-      t.terminalSandbox <- None );
+    Option.iter t.terminalSandbox ~f:(fun terminalSandbox ->
+        TerminalSandbox.dispose terminalSandbox;
+        t.terminalSandbox <- None);
 
-    ( match t.statusBarItem with
-    | None -> ()
-    | Some (statusBarItem : StatusBarItem.t) ->
-      StatusBarItem.dispose statusBarItem;
-      t.statusBarItem <- None );
+    Option.iter t.statusBarItem ~f:(fun statusBarItem ->
+        StatusBarItem.dispose statusBarItem;
+        t.statusBarItem <- None);
 
-    match t.client with
-    | None -> ()
-    | Some (client : LanguageClient.t) ->
-      LanguageClient.stop client;
-      t.client <- None
+    Option.iter t.client ~f:(fun client ->
+        LanguageClient.stop client;
+        t.client <- None)
 
   let start t toolchain =
     DuneFormatter.register t.duneFormatter toolchain;

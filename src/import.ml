@@ -35,6 +35,8 @@ module Option = struct
   let return x = Some x
 
   let bind x ~f = x >>= f
+
+  let iter t ~f = forEach t f
 end
 
 module Result = struct
