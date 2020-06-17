@@ -264,10 +264,14 @@ let selectAndSave () =
 
 let getCommand (t : PackageManager.t) bin args : Path.t * string array =
   let binArgs = Array.of_list (bin :: args) in
-  match t with
-  | Opam (opam, switch) -> Opam.exec opam ~switch ~args:binArgs
-  | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:binArgs
-  | Global -> (Path.ofString bin, Array.of_list args)
+  let bin, args =
+    match t with
+    | Opam (opam, switch) -> Opam.exec opam ~switch ~args:binArgs
+    | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:binArgs
+    | Global -> (Path.ofString bin, Array.of_list args)
+  in
+  log "getCommand: %s %s" (Path.toString bin) (Js.Array.joinWith " " args);
+  (bin, args)
 
 let getLspCommand (t : PackageManager.t) : Path.t * string array =
   getCommand t "ocamllsp" []
