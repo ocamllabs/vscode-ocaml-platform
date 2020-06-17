@@ -139,18 +139,19 @@ let suggestToSetupToolchain instance =
   | None -> ()
   | Some () -> selectSandbox instance ()
 
+let registerCommands extension =
+  List.iter (function command, handler ->
+      Vscode.ExtensionContext.subscribe extension
+        (Vscode.Commands.register ~command ~handler))
+
 let activate (extension : Vscode.ExtensionContext.t) =
   Js.Dict.set Process.env "OCAML_LSP_SERVER_LOG" "-";
   let instance = Instance.create () in
-  Vscode.ExtensionContext.subscribe extension
-    (Vscode.Commands.register ~command:selectSandboxCommandId
-       ~handler:(selectSandbox instance));
-  Vscode.ExtensionContext.subscribe extension
-    (Vscode.Commands.register ~command:openTerminalCommandId
-       ~handler:(Instance.openTerminal instance));
-  Vscode.ExtensionContext.subscribe extension
-    (Vscode.Commands.register ~command:openTerminalSelectCommandId
-       ~handler:(selectSandboxAndOpenTerminal instance));
+  registerCommands extension
+    [ (selectSandboxCommandId, selectSandbox instance)
+    ; (openTerminalCommandId, Instance.openTerminal instance)
+    ; (openTerminalSelectCommandId, selectSandboxAndOpenTerminal instance)
+    ];
   Vscode.ExtensionContext.subscribe extension (Instance.disposable instance);
   let open Promise.O in
   let toolchain =
