@@ -39,7 +39,12 @@
       {
         "command": "ocaml.open-terminal",
         "category": "OCaml",
-        "title": "Open a terminal in the current sandbox"
+        "title": "Open a terminal (current sandbox)"
+      },
+      {
+        "command": "ocaml.open-terminal-select",
+        "category": "OCaml",
+        "title": "Open a terminal (select a sandbox)"
       }
     ],
     "configuration": {

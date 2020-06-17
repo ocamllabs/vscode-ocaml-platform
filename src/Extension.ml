@@ -4,6 +4,8 @@ let selectSandboxCommandId = "ocaml.select-sandbox"
 
 let openTerminalCommandId = "ocaml.open-terminal"
 
+let openTerminalSelectCommandId = "ocaml.open-terminal-select"
+
 module Client = struct
   let make () : Vscode.LanguageClient.clientOptions =
     let documentSelector : Vscode.LanguageClient.documentSelectorItem array =
@@ -103,18 +105,27 @@ module Instance = struct
   let disposable t = Disposable.create ~dispose:(fun () -> stop t)
 end
 
+let setToolchain (instance : Instance.t) =
+  let open Promise.O in
+  Toolchain.selectAndSave () >>= function
+  | None -> Promise.Result.return ()
+  | Some t ->
+    Instance.stop instance;
+    let t = Toolchain.makeResources t in
+    Instance.start instance t
+
 let selectSandbox (instance : Instance.t) () =
-  let setToolchain =
-    let open Promise.O in
-    Toolchain.selectAndSave () >>= function
-    | None -> Promise.Result.return ()
-    | Some t ->
-      Instance.stop instance;
-      let t = Toolchain.makeResources t in
-      Instance.start instance t
-  in
   let (_ : unit Promise.t) =
-    Promise.Result.iterError setToolchain ~f:Window.showErrorMessage
+    Promise.Result.iterError (setToolchain instance) ~f:Window.showErrorMessage
+  in
+  ()
+
+let selectSandboxAndOpenTerminal (instance : Instance.t) () =
+  let (_ : unit Promise.t) =
+    let open Promise.Result.O in
+    setToolchain instance
+    >>| Instance.openTerminal instance
+    |> Promise.Result.iterError ~f:Window.showErrorMessage
   in
   ()
 
@@ -137,6 +148,9 @@ let activate (extension : Vscode.ExtensionContext.t) =
   Vscode.ExtensionContext.subscribe extension
     (Vscode.Commands.register ~command:openTerminalCommandId
        ~handler:(Instance.openTerminal instance));
+  Vscode.ExtensionContext.subscribe extension
+    (Vscode.Commands.register ~command:openTerminalSelectCommandId
+       ~handler:(selectSandboxAndOpenTerminal instance));
   Vscode.ExtensionContext.subscribe extension (Instance.disposable instance);
   let open Promise.O in
   let toolchain =
