@@ -8,4 +8,6 @@ type t
 
 val create : unit -> t
 
+val register : t -> unit
+
 val dispose : t -> unit

@@ -1,6 +1,6 @@
 open Import
 
-type t = Disposable.t
+type t = Disposable.t option ref
 
 let dune_bin = "dune"
 
@@ -101,8 +101,12 @@ let provideTasks =
 let resolveTask =
  fun [@bs] task _cancellationToken -> Js.Promise.resolve (Some task)
 
-let create () =
-  let provider = { TaskProvider.provideTasks; resolveTask } in
-  Tasks.registerTaskProvider ~typ:task_type ~provider
+let create () = ref None
 
-let dispose (t : t) = Disposable.dispose t
+let register t =
+  let provider = { TaskProvider.provideTasks; resolveTask } in
+  t := Some (Tasks.registerTaskProvider ~typ:task_type ~provider)
+
+let dispose (t : t) =
+  Option.iter ~f:Disposable.dispose !t;
+  t := None

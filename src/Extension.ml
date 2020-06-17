@@ -61,6 +61,7 @@ module Instance = struct
     t.toolchain <- Some toolchain;
 
     DuneFormatter.register t.duneFormatter toolchain;
+    DuneTaskProvider.register t.duneTaskProvider;
 
     let statusBarItem =
       Window.createStatusBarItem ~alignment:StatusBarAlignment.(tToJs Left) ()
