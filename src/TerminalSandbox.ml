@@ -26,15 +26,15 @@ module ShellPath = struct
 end
 
 module ShellArgs = struct
-  type t = string list
+  type t = string list option
 
   let ofJson json =
     let open Json.Decode in
-    list string json
+    optional (list string) json
 
   let toJson (t : t) =
     let open Json.Encode in
-    list string t
+    nullable (list string) t
 
   let key =
     let linux = "shellArgs.linux" in
@@ -53,12 +53,11 @@ end
 let getShellPath () = Settings.get ~section:"ocaml.terminal" ShellPath.t
 
 let getShellArgs () =
+  let ocamlSetting = Settings.get ~section:"ocaml.terminal" ShellArgs.t in
+  let vscodeSetting = Settings.get ~section:"terminal.integrated" ShellArgs.t in
+  let open Option in
   (* extension configuration has priority over vscode settings *)
-  match Settings.get ~section:"ocaml.terminal" ShellArgs.t with
-  | None
-  | Some [] ->
-    Settings.get ~section:"terminal.integrated" ShellArgs.t
-  | args -> args
+  alternative (flatten ocamlSetting) (flatten vscodeSetting)
 
 type t = Window.Terminal.t
 

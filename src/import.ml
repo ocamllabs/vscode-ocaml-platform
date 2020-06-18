@@ -37,6 +37,12 @@ module Option = struct
     | None, r -> r
     | l, _ -> l
 
+  let flatten = function
+    | None
+    | Some None ->
+      None
+    | Some x -> x
+
   let return x = Some x
 
   let bind x ~f = x >>= f

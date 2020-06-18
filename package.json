@@ -89,21 +89,30 @@
         },
         "ocaml.terminal.shellArgs.linux": {
           "description": "The command line arguments that the terminal uses in a sandbox on Linux",
-          "type": "array",
+          "type": [
+            "array",
+            "null"
+          ],
           "items": "string",
-          "default": []
+          "default": null
         },
         "ocaml.terminal.shellArgs.osx": {
           "description": "The command line arguments that the terminal uses in a sandbox on macOS",
-          "type": "array",
+          "type": [
+            "array",
+            "null"
+          ],
           "items": "string",
-          "default": []
+          "default": null
         },
         "ocaml.terminal.shellArgs.windows": {
           "description": "The command line arguments that the terminal uses in a sandbox on Window",
-          "type": "array",
+          "type": [
+            "array",
+            "null"
+          ],
           "items": "string",
-          "default": []
+          "default": null
         }
       }
     },
