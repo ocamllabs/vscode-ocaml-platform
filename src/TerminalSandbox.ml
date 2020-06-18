@@ -1,13 +1,11 @@
 open Import
 
-let getTerminalSetting t = Settings.getSection ~section:"terminal.integrated" t
-
 module ShellPath = struct
   type t = string
 
   let ofJson json =
     let open Json.Decode in
-    string json
+    withDefault (Env.shell ()) string json
 
   let toJson (t : t) =
     let open Json.Encode in
@@ -52,12 +50,22 @@ module ShellArgs = struct
   let t = Settings.create ~scope:Global ~key ~ofJson ~toJson
 end
 
+let getShellPath () = Settings.get ~section:"ocaml.terminal" ShellPath.t
+
+let getShellArgs () =
+  (* extension configuration has priority over vscode settings *)
+  match Settings.get ~section:"ocaml.terminal" ShellArgs.t with
+  | None
+  | Some [] ->
+    Settings.get ~section:"terminal.integrated" ShellArgs.t
+  | args -> args
+
 type t = Window.Terminal.t
 
 let create toolchain =
   let open Option in
-  getTerminalSetting ShellPath.t >>= fun shellPath ->
-  getTerminalSetting ShellArgs.t >>| fun shellArgs ->
+  getShellPath () >>= fun shellPath ->
+  getShellArgs () >>| fun shellArgs ->
   let shellPath, shellArgs =
     Toolchain.getCommand toolchain shellPath shellArgs
   in
