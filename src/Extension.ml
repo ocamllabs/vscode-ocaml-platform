@@ -106,18 +106,18 @@ module Instance = struct
   let disposable t = Disposable.create ~dispose:(fun () -> stop t)
 end
 
-let setToolchain (instance : Instance.t) =
-  let open Promise.O in
-  Toolchain.selectAndSave () >>= function
-  | None -> Promise.Result.return ()
-  | Some t ->
-    Instance.stop instance;
-    let t = Toolchain.makeResources t in
-    Instance.start instance t
-
 let selectSandbox (instance : Instance.t) () =
+  let setToolchain =
+    let open Promise.O in
+    Toolchain.selectAndSave () >>= function
+    | None -> Promise.Result.return ()
+    | Some t ->
+      Instance.stop instance;
+      let t = Toolchain.makeResources t in
+      Instance.start instance t
+  in
   let (_ : unit Promise.t) =
-    Promise.Result.iterError (setToolchain instance) ~f:Window.showErrorMessage
+    Promise.Result.iterError setToolchain ~f:Window.showErrorMessage
   in
   ()
 
