@@ -37,8 +37,10 @@ val makeResources : PackageManager.t -> resources
    (ie VSCode's process environment) and the project root and produces a promise
    of resources available that can later be passed on to runSetup that can be
    called to install the toolchain. *)
-
 val selectAndSave : unit -> PackageManager.t option Promise.t
+
+(** [select] is the same as [selectAndSave] but does not save the toolchain configuration *)
+val select : unit -> PackageManager.t option Promise.t
 
 (** [runSetup] is a effectful function that triggers setup instructions
    automatically for the user. At present, this functionality

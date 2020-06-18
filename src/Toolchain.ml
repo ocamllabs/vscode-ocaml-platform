@@ -249,20 +249,23 @@ let setupToolChain (kind : PackageManager.t) =
 
 let makeResources kind = kind
 
-let selectAndSave () =
+let select () =
   let open Promise.O in
   let workspaceFolders = Vscode.Workspace.workspaceFolders () in
   sandboxCandidates ~workspaceFolders >>= fun candidates ->
-  selectPackageManager candidates >>| function
-  | None -> None
-  | Some choice -> (
-    match choice.status with
-    | Error s ->
-      message `Warn "This toolchain is invalid. Error: %s" s;
-      None
-    | Ok () ->
-      let (_ : unit Promise.t) = toSettings choice.packageManager in
-      Some choice.packageManager )
+  let open Promise.Option.O in
+  selectPackageManager candidates >>= fun { status; packageManager } ->
+  match status with
+  | Error s ->
+    message `Warn "This toolchain is invalid. Error: %s" s;
+    Promise.return None
+  | Ok () -> Promise.Option.return packageManager
+
+let selectAndSave () =
+  let open Promise.Option.O in
+  select () >>| fun packageManager ->
+  let (_ : unit Promise.t) = toSettings packageManager in
+  packageManager
 
 let getCommand (t : PackageManager.t) bin args : Path.t * string array =
   let binArgs = Array.of_list (bin :: args) in

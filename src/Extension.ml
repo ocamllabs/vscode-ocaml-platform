@@ -94,9 +94,10 @@ module Instance = struct
          restart the server.";
     Ok ()
 
-  let openTerminal t () =
+  let openTerminal ?toolchain t () =
     let open Option in
-    t.toolchain >>= TerminalSandbox.create >>| TerminalSandbox.show
+    alternative toolchain t.toolchain
+    >>= TerminalSandbox.create >>| TerminalSandbox.show
     |> iterNone ~f:(fun () ->
            message `Error
              "Could not open a terminal in the current sandbox. The toolchain \
@@ -122,10 +123,10 @@ let selectSandbox (instance : Instance.t) () =
 
 let selectSandboxAndOpenTerminal (instance : Instance.t) () =
   let (_ : unit Promise.t) =
-    let open Promise.Result.O in
-    setToolchain instance
-    >>| Instance.openTerminal instance
-    |> Promise.Result.iterError ~f:Window.showErrorMessage
+    Toolchain.select ()
+    |> Promise.Option.iter (fun toolchain ->
+           let toolchain = Toolchain.makeResources toolchain in
+           Instance.openTerminal ~toolchain instance ())
   in
   ()
 
