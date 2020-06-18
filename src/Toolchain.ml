@@ -161,7 +161,8 @@ let ofSettings () : PackageManager.t option Promise.t =
     Promise.return (Some PackageManager.Global)
 
 let toSettings (pm : PackageManager.t) =
-  Settings.set PackageManager.Setting.t (PackageManager.toSetting pm)
+  Settings.set ~section:"ocaml" PackageManager.Setting.t
+    (PackageManager.toSetting pm)
 
 module Candidate = struct
   type t =
