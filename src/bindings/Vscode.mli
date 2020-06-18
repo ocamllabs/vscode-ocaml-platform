@@ -174,7 +174,7 @@ module Window : sig
 
   and rangeEdge = { character : int }
 
-  val activeTextEditor : activeTextEditor option
+  val activeTextEditor : unit -> activeTextEditor option
 
   type location =
     | SourceControl
@@ -253,7 +253,7 @@ module Workspace : sig
 
   type cancellationToken = { isCancellationRequested : bool }
 
-  val name : string option
+  val name : unit -> string option
 
   val workspaceFolders : unit -> Folder.t array
 
@@ -264,7 +264,7 @@ module Workspace : sig
   val onDidChangeWorkspaceFolders :
     (workspaceFoldersChangeEvent -> unit) -> unit
 
-  val textDocuments : TextDocument.event array
+  val textDocuments : unit -> TextDocument.event array
 
   val getConfiguration : ?section:string -> unit -> WorkspaceConfiguration.t
 
@@ -467,4 +467,8 @@ end
 module Tasks : sig
   val registerTaskProvider :
     typ:string -> provider:TaskProvider.t -> Disposable.t
+end
+
+module Env : sig
+  val shell : unit -> string
 end

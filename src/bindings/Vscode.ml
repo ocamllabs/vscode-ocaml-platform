@@ -109,8 +109,10 @@ module Workspace = struct
 
   type cancellationToken = { isCancellationRequested : bool }
 
-  external name : string option = "name"
+  external _name : string option = "name"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
+
+  let name () = _name
 
   external _workspaceFolders : Folder.t array option = "workspaceFolders"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
@@ -130,8 +132,10 @@ module Workspace = struct
     = "onDidChangeWorkspaceFolders"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 
-  external textDocuments : TextDocument.event array = "textDocuments"
+  external _textDocuments : TextDocument.event array = "textDocuments"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
+
+  let textDocuments () = _textDocuments
 
   external getConfiguration :
     ?section:string -> unit -> WorkspaceConfiguration.t = "getConfiguration"
@@ -282,7 +286,11 @@ module Window = struct
 
   type activeTextEditor = { document : document }
 
-  external activeTextEditor : activeTextEditor option = "activeTextEditor"
+  external _activeTextEditor : activeTextEditor option = "activeTextEditor"
+    [@@bs.module "vscode"] [@@bs.scope "window"] [@@bs.val]
+
+  external activeTextEditor : unit -> activeTextEditor option
+    = "activeTextEditor"
     [@@bs.module "vscode"] [@@bs.scope "window"] [@@bs.val]
 
   type location =
@@ -605,4 +613,10 @@ module Tasks = struct
     typ:string -> provider:TaskProvider.t -> Disposable.t
     = "registerTaskProvider"
     [@@bs.module "vscode"] [@@bs.scope "tasks"]
+end
+
+module Env = struct
+  external _shell : string = "shell" [@@bs.module "vscode"] [@@bs.scope "env"]
+
+  let shell () = _shell
 end
