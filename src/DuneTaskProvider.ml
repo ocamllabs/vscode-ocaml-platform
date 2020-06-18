@@ -2,8 +2,6 @@ open Import
 
 type t = Disposable.t option ref
 
-let dune_bin = "dune"
-
 let task_type = "dune"
 
 let taskDefinition = { Task.type_ = task_type }
@@ -87,7 +85,7 @@ let computeTasks cancellationToken toolchain =
 
 let provideTasks toolchain =
  fun [@bs] cancellationToken ->
-  match Settings.get Setting.t with
+  match Settings.get ~section:"ocaml" Setting.t with
   | None
   | Some false ->
     Js.Promise.resolve None

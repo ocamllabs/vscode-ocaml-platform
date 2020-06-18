@@ -132,7 +132,8 @@ let ofSettings () : PackageManager.t option Promise.t =
       this_ this_
   in
   match
-    (Settings.get PackageManager.Setting.t : PackageManager.Setting.t option)
+    ( Settings.get ~section:"ocaml" PackageManager.Setting.t
+      : PackageManager.Setting.t option )
   with
   | None -> Promise.return None
   | Some (Esy manifest) -> (

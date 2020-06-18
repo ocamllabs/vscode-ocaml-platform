@@ -9,7 +9,7 @@ type 'a t =
 
 let create ~scope ~key ~ofJson ~toJson = { scope; key; toJson; ofJson }
 
-let getSection ?section t =
+let get ?section t =
   let section = Workspace.getConfiguration ?section () in
   match WorkspaceConfiguration.get section t.key with
   | None -> None
@@ -22,17 +22,13 @@ let getSection ?section t =
       in
       None )
 
-let setSection ?section t v =
+let set ?section t v =
   let section = Workspace.getConfiguration ?section () in
-  match Vscode.Workspace.name with
+  match Vscode.Workspace.name () with
   | None -> Promise.return ()
   | Some _ ->
     let scope = WorkspaceConfiguration.configurationTargetToJs t.scope in
     WorkspaceConfiguration.update section t.key (t.toJson v) scope
-
-let get t = getSection ~section:"ocaml" t
-
-let set t v = setSection ~section:"ocaml" t v
 
 let string =
   let toJson = Js.Json.string in
