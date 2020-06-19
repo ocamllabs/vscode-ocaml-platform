@@ -65,7 +65,7 @@
           "description": "Controls whether dune tasks should be automatically detected."
         },
         "ocaml.terminal.shell.linux": {
-          "description": "The path of the shell that the terminal uses in a sandbox on Linux",
+          "description": "The path of the shell that the sandbox terminal uses on Linux",
           "type": [
             "string",
             "null"
@@ -73,14 +73,14 @@
           "default": null
         },
         "ocaml.terminal.shell.osx": {
-          "description": "The path of the shell that the terminal uses in a sandbox on macOS",
+          "description": "The path of the shell that the sandbox terminal uses on macOS",
           "type": [
             "string",
             "null"
           ]
         },
         "ocaml.terminal.shell.windows": {
-          "description": "The path of the shell that the terminal uses in a sandbox on Windows",
+          "description": "The path of the shell that the sandbox terminal uses on Windows",
           "type": [
             "string",
             "null"
@@ -88,7 +88,7 @@
           "default": null
         },
         "ocaml.terminal.shellArgs.linux": {
-          "description": "The command line arguments that the terminal uses in a sandbox on Linux",
+          "description": "The command line arguments that the sandbox terminal uses on Linux",
           "type": [
             "array",
             "null"
@@ -97,7 +97,7 @@
           "default": null
         },
         "ocaml.terminal.shellArgs.osx": {
-          "description": "The command line arguments that the terminal uses in a sandbox on macOS",
+          "description": "The command line arguments that the sandbox terminal uses on macOS",
           "type": [
             "array",
             "null"
@@ -106,7 +106,7 @@
           "default": null
         },
         "ocaml.terminal.shellArgs.windows": {
-          "description": "The command line arguments that the terminal uses in a sandbox on Window",
+          "description": "The command line arguments that the sandbox terminal uses on Window",
           "type": [
             "array",
             "null"
