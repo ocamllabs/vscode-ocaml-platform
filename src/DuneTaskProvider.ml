@@ -98,7 +98,7 @@ let create () = ref None
 
 let register t toolchain =
   let provideTasks = provideTasks toolchain in
-  let provider = TaskProvider.{ provideTasks; resolveTask } in
+  let provider = { TaskProvider.provideTasks; resolveTask } in
   t := Some (Tasks.registerTaskProvider ~typ:task_type ~provider)
 
 let dispose (t : t) =
