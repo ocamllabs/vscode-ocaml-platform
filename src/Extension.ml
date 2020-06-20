@@ -94,10 +94,9 @@ module Instance = struct
          restart the server.";
     Ok ()
 
-  let openTerminal ?toolchain t () =
+  let openTerminal toolchain =
     let open Option in
-    alternative toolchain t.toolchain
-    >>= TerminalSandbox.create >>| TerminalSandbox.show
+    toolchain |> TerminalSandbox.create >>| TerminalSandbox.show
     |> iterNone ~f:(fun () ->
            message `Error
              "Could not open a terminal in the current sandbox. The toolchain \
@@ -121,12 +120,12 @@ let selectSandbox (instance : Instance.t) () =
   in
   ()
 
-let selectSandboxAndOpenTerminal (instance : Instance.t) () =
+let selectSandboxAndOpenTerminal () =
   let (_ : unit Promise.t) =
     Toolchain.select ()
     |> Promise.Option.iter (fun toolchain ->
            let toolchain = Toolchain.makeResources toolchain in
-           Instance.openTerminal ~toolchain instance ())
+           Instance.openTerminal toolchain)
   in
   ()
 
@@ -145,13 +144,18 @@ let registerCommands extension =
       Vscode.ExtensionContext.subscribe extension
         (Vscode.Commands.register ~command ~handler))
 
+let openTerminal (instance : Instance.t) () =
+  match instance.toolchain with
+  | None -> selectSandboxAndOpenTerminal ()
+  | Some toolchain -> Instance.openTerminal toolchain
+
 let activate (extension : Vscode.ExtensionContext.t) =
   Js.Dict.set Process.env "OCAML_LSP_SERVER_LOG" "-";
   let instance = Instance.create () in
   registerCommands extension
     [ (selectSandboxCommandId, selectSandbox instance)
-    ; (openTerminalCommandId, Instance.openTerminal instance)
-    ; (openTerminalSelectCommandId, selectSandboxAndOpenTerminal instance)
+    ; (openTerminalCommandId, openTerminal instance)
+    ; (openTerminalSelectCommandId, selectSandboxAndOpenTerminal)
     ];
   Vscode.ExtensionContext.subscribe extension (Instance.disposable instance);
   let open Promise.O in
