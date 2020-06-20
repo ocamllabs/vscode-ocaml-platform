@@ -53,11 +53,10 @@ end
 let getShellPath () = Settings.get ~section:"ocaml.terminal" ShellPath.t
 
 let getShellArgs () =
-  let ocamlSetting = Settings.get ~section:"ocaml.terminal" ShellArgs.t in
-  let vscodeSetting = Settings.get ~section:"terminal.integrated" ShellArgs.t in
-  let open Option in
-  (* extension configuration has priority over vscode settings *)
-  alternative (join ocamlSetting) (join vscodeSetting)
+  let args section = Option.join (Settings.get ~section ShellArgs.t) in
+  match args "ocaml.terminal" with
+  | Some _ as s -> s
+  | None -> args "terminal.integrated"
 
 type t = Window.Terminal.t
 

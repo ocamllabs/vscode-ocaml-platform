@@ -32,11 +32,6 @@ module Option = struct
 
   let ( >>| ) = map
 
-  let alternative l r =
-    match (l, r) with
-    | None, r -> r
-    | l, _ -> l
-
   let join = function
     | None
     | Some None ->
@@ -61,11 +56,6 @@ module Result = struct
   let ( >>= ) = flatMap
 
   let ( >>| ) = map
-
-  let alternative l r =
-    match (l, r) with
-    | Error _, r -> r
-    | l, _ -> l
 
   let return x = Ok x
 
