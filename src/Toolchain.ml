@@ -263,9 +263,9 @@ let select () =
 
 let selectAndSave () =
   let open Promise.Option.O in
-  select () >>| fun packageManager ->
-  let (_ : unit Promise.t) = toSettings packageManager in
-  packageManager
+  select () >>= fun packageManager ->
+  let open Promise.O in
+  toSettings packageManager >>| fun () -> Some packageManager
 
 let getCommand (t : PackageManager.t) bin args : Path.t * string array =
   let binArgs = Array.of_list (bin :: args) in
