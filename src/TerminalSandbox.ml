@@ -57,7 +57,7 @@ let getShellArgs () =
   let vscodeSetting = Settings.get ~section:"terminal.integrated" ShellArgs.t in
   let open Option in
   (* extension configuration has priority over vscode settings *)
-  alternative (flatten ocamlSetting) (flatten vscodeSetting)
+  alternative (join ocamlSetting) (join vscodeSetting)
 
 type t = Window.Terminal.t
 
