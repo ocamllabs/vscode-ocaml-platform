@@ -37,7 +37,7 @@ module Option = struct
     | None, r -> r
     | l, _ -> l
 
-  let flatten = function
+  let join = function
     | None
     | Some None ->
       None
