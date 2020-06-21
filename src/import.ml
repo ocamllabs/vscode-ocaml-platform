@@ -25,6 +25,31 @@ let getSubDict dict key =
 
 let hiddenEsyDir root = Path.(root / ".vscode" / "esy")
 
+module Option = struct
+  open Belt.Option
+
+  let ( >>= ) = flatMap
+
+  let ( >>| ) = map
+
+  let join = function
+    | None
+    | Some None ->
+      None
+    | Some x -> x
+
+  let return x = Some x
+
+  let bind x ~f = x >>= f
+
+  let iter t ~f = forEach t f
+
+  let iterNone t ~f =
+    match t with
+    | None -> f ()
+    | Some _ -> ()
+end
+
 module Result = struct
   open Belt.Result
 

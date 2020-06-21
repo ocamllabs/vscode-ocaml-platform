@@ -64,3 +64,36 @@ module Result = struct
     let ( >>| ) x f = map f x
   end
 end
+
+module Option = struct
+  let iter f x =
+    x
+    |> then_ (fun x ->
+           resolve
+             ( match x with
+             | None -> ()
+             | Some x -> f x ))
+
+  let bind f promise =
+    let open Js.Promise in
+    promise
+    |> then_ (function
+         | None -> resolve None
+         | Some payload -> f payload)
+
+  let map f x =
+    x
+    |> then_ (fun x ->
+           resolve
+             ( match x with
+             | None -> None
+             | Some x -> Some (f x) ))
+
+  let return x = return (Some x)
+
+  module O = struct
+    let ( >>= ) x f = bind f x
+
+    let ( >>| ) x f = map f x
+  end
+end

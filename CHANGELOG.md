@@ -6,6 +6,8 @@
 - Add highlighting for OASIS files
 - Improve OCamlbuild highlighting
 - Add dune task provider
+- Add commands `ocaml.open-terminal` and `ocaml.open-terminal-select` to open a
+  terminal in a sandbox
 
 ## 0.7.0
 

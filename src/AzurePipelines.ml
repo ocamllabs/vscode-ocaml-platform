@@ -1,4 +1,4 @@
-open Import
+open! Import
 module Https = Node.Https
 
 module RestResponse = struct
@@ -51,17 +51,13 @@ let restBase = "https://dev.azure.com/arrowresearch/"
 
 let proj = "vscode-merlin"
 
-let os =
-  match Process.platform with
-  | "darwin" -> Some "Darwin"
-  | "linux" -> Some "Linux"
-  | "win32" -> Some "Windows"
-  | _ -> None
-
 let artifactName =
-  match os with
-  | Some os -> Some {j|cache-$os-install|j}
-  | None -> None
+  let name os = Some {j|cache-$os-install|j} in
+  match Platform.t with
+  | Other -> None
+  | Win32 -> name "Win32"
+  | Darwin -> name "Darwin"
+  | Linux -> name "Linux"
 
 let master = "branchName=refs%2Fheads%2Fmaster"
 

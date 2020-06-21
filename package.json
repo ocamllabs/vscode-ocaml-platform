@@ -26,7 +26,10 @@
     "onLanguage:reason",
     "onLanguage:dune",
     "onLanguage:dune-project",
-    "onLanguage:dune-workspace"
+    "onLanguage:dune-workspace",
+    "onCommand:ocaml.select-sandbox",
+    "onCommand:ocaml.open-terminal",
+    "onCommand:ocaml.open-terminal-select"
   ],
   "icon": "assets/logo.png",
   "contributes": {
@@ -35,6 +38,16 @@
         "command": "ocaml.select-sandbox",
         "category": "OCaml",
         "title": "Select sandbox for this workspace"
+      },
+      {
+        "command": "ocaml.open-terminal",
+        "category": "OCaml",
+        "title": "Open a terminal (current sandbox)"
+      },
+      {
+        "command": "ocaml.open-terminal-select",
+        "category": "OCaml",
+        "title": "Open a terminal (select a sandbox)"
       }
     ],
     "configuration": {
@@ -50,6 +63,56 @@
           "type": "boolean",
           "default": true,
           "description": "Controls whether dune tasks should be automatically detected."
+        },
+        "ocaml.terminal.shell.linux": {
+          "description": "The path of the shell that the sandbox terminal uses on Linux",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "ocaml.terminal.shell.osx": {
+          "description": "The path of the shell that the sandbox terminal uses on macOS",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ocaml.terminal.shell.windows": {
+          "description": "The path of the shell that the sandbox terminal uses on Windows",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "ocaml.terminal.shellArgs.linux": {
+          "description": "The command line arguments that the sandbox terminal uses on Linux",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": "string",
+          "default": null
+        },
+        "ocaml.terminal.shellArgs.osx": {
+          "description": "The command line arguments that the sandbox terminal uses on macOS",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": "string",
+          "default": null
+        },
+        "ocaml.terminal.shellArgs.windows": {
+          "description": "The command line arguments that the sandbox terminal uses on Window",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": "string",
+          "default": null
         }
       }
     },

@@ -7,11 +7,10 @@ type 'a t =
   ; scope : WorkspaceConfiguration.configurationTarget
   }
 
-let section = Workspace.getConfiguration "ocaml"
-
 let create ~scope ~key ~ofJson ~toJson = { scope; key; toJson; ofJson }
 
-let get t =
+let get ?section t =
+  let section = Workspace.getConfiguration ?section () in
   match WorkspaceConfiguration.get section t.key with
   | None -> None
   | Some v -> (
@@ -23,8 +22,9 @@ let get t =
       in
       None )
 
-let set t v =
-  match Vscode.Workspace.name with
+let set ?section t v =
+  let section = Workspace.getConfiguration ?section () in
+  match Vscode.Workspace.name () with
   | None -> Promise.return ()
   | Some _ ->
     let scope = WorkspaceConfiguration.configurationTargetToJs t.scope in

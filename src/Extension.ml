@@ -2,6 +2,10 @@ open Import
 
 let selectSandboxCommandId = "ocaml.select-sandbox"
 
+let openTerminalCommandId = "ocaml.open-terminal"
+
+let openTerminalSelectCommandId = "ocaml.open-terminal-select"
+
 module Client = struct
   let make () : Vscode.LanguageClient.clientOptions =
     let documentSelector : Vscode.LanguageClient.documentSelectorItem array =
@@ -26,14 +30,16 @@ end
 
 module Instance = struct
   type t =
-    { mutable client : LanguageClient.t option
+    { mutable toolchain : Toolchain.resources option
+    ; mutable client : LanguageClient.t option
     ; mutable statusBarItem : StatusBarItem.t option
     ; duneFormatter : DuneFormatter.t
     ; duneTaskProvider : DuneTaskProvider.t
     }
 
   let create () =
-    { client = None
+    { toolchain = None
+    ; client = None
     ; statusBarItem = None
     ; duneFormatter = DuneFormatter.create ()
     ; duneTaskProvider = DuneTaskProvider.create ()
@@ -43,25 +49,26 @@ module Instance = struct
     DuneFormatter.dispose t.duneFormatter;
     DuneTaskProvider.dispose t.duneTaskProvider;
 
-    ( match t.statusBarItem with
-    | None -> ()
-    | Some (statusBarItem : StatusBarItem.t) ->
-      StatusBarItem.dispose statusBarItem;
-      t.statusBarItem <- None );
+    Option.iter t.statusBarItem ~f:(fun statusBarItem ->
+        StatusBarItem.dispose statusBarItem;
+        t.statusBarItem <- None);
 
-    match t.client with
-    | None -> ()
-    | Some (client : LanguageClient.t) ->
-      LanguageClient.stop client;
-      t.client <- None
+    Option.iter t.client ~f:(fun client ->
+        LanguageClient.stop client;
+        t.client <- None);
+
+    t.toolchain <- None
 
   let start t toolchain =
+    t.toolchain <- Some toolchain;
+
     DuneFormatter.register t.duneFormatter toolchain;
+    DuneTaskProvider.register t.duneTaskProvider toolchain;
 
     let statusBarItem =
       Window.createStatusBarItem ~alignment:StatusBarAlignment.(tToJs Left) ()
     in
-    let statusBarText = "OCaml Platform | " ^ Toolchain.toString toolchain in
+    let statusBarText = Toolchain.toString toolchain in
     statusBarItem##text#=statusBarText;
     statusBarItem##command#=selectSandboxCommandId;
     StatusBarItem.show statusBarItem;
@@ -87,6 +94,14 @@ module Instance = struct
          restart the server.";
     Ok ()
 
+  let openTerminal toolchain =
+    let open Option in
+    toolchain |> TerminalSandbox.create >>| TerminalSandbox.show
+    |> iterNone ~f:(fun () ->
+           message `Error
+             "Could not open a terminal in the current sandbox. The toolchain \
+              may not have loaded yet.")
+
   let disposable t = Disposable.create ~dispose:(fun () -> stop t)
 end
 
@@ -105,6 +120,15 @@ let selectSandbox (instance : Instance.t) () =
   in
   ()
 
+let selectSandboxAndOpenTerminal () =
+  let (_ : unit Promise.t) =
+    Toolchain.select ()
+    |> Promise.Option.iter (fun toolchain ->
+           let toolchain = Toolchain.makeResources toolchain in
+           Instance.openTerminal toolchain)
+  in
+  ()
+
 let suggestToSetupToolchain instance =
   let open Promise.O in
   Vscode.Window.showInformationMessage'
@@ -115,12 +139,24 @@ let suggestToSetupToolchain instance =
   | None -> ()
   | Some () -> selectSandbox instance ()
 
+let registerCommands extension =
+  List.iter (function command, handler ->
+      Vscode.ExtensionContext.subscribe extension
+        (Vscode.Commands.register ~command ~handler))
+
+let openTerminal (instance : Instance.t) () =
+  match instance.toolchain with
+  | None -> selectSandboxAndOpenTerminal ()
+  | Some toolchain -> Instance.openTerminal toolchain
+
 let activate (extension : Vscode.ExtensionContext.t) =
   Js.Dict.set Process.env "OCAML_LSP_SERVER_LOG" "-";
   let instance = Instance.create () in
-  Vscode.ExtensionContext.subscribe extension
-    (Vscode.Commands.register ~command:selectSandboxCommandId
-       ~handler:(selectSandbox instance));
+  registerCommands extension
+    [ (selectSandboxCommandId, selectSandbox instance)
+    ; (openTerminalCommandId, openTerminal instance)
+    ; (openTerminalSelectCommandId, selectSandboxAndOpenTerminal)
+    ];
   Vscode.ExtensionContext.subscribe extension (Instance.disposable instance);
   let open Promise.O in
   let toolchain =
