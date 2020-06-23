@@ -76,17 +76,17 @@ esy
 This extension provides options in VSCode's configuration settings. You can find
 the settings under `File > Preferences > Settings`.
 
-| Name                               | Description                                                                                             | Default    |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------- | ---------- |
-| `ocaml.sandbox`                    | Determines where to find the sandbox for a given project                                                | `null`     |
-| `ocaml.dune.autoDetect`            | Controls whether dune tasks should be automatically detected.                                           | `true`     |
-| `ocaml.trace.server`               | Controls the logging output of the language server. Valid settings are `off`, `messages`, or `verbose`. | `messages` |
-| `ocaml.terminal.shell.linux`       | The path of the shell that the sandbox terminal uses on Linux                                           | `null`     |
-| `ocaml.terminal.shell.osx`         | The path of the shell that the sandbox terminal uses on macOS                                           | `null`     |
-| `ocaml.terminal.shell.windows`     | The path of the shell that the sandbox terminal uses on Windows                                         | `null`     |
-| `ocaml.terminal.shellArgs.linux`   | The command line arguments that the sandbox terminal uses on Linux                                      | `null`     |
-| `ocaml.terminal.shellArgs.osx`     | The command line arguments that the sandbox terminal uses on macOS                                      | `null`     |
-| `ocaml.terminal.shellArgs.windows` | The command line arguments that the sandbox terminal uses on Window                                     | `null`     |
+| Name                               | Description                                                                                             | Default |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------- | ------- |
+| `ocaml.sandbox`                    | Determines where to find the sandbox for a given project                                                | `null`  |
+| `ocaml.dune.autoDetect`            | Controls whether dune tasks should be automatically detected.                                           | `true`  |
+| `ocaml.trace.server`               | Controls the logging output of the language server. Valid settings are `off`, `messages`, or `verbose`. | `off`   |
+| `ocaml.terminal.shell.linux`       | The path of the shell that the sandbox terminal uses on Linux                                           | `null`  |
+| `ocaml.terminal.shell.osx`         | The path of the shell that the sandbox terminal uses on macOS                                           | `null`  |
+| `ocaml.terminal.shell.windows`     | The path of the shell that the sandbox terminal uses on Windows                                         | `null`  |
+| `ocaml.terminal.shellArgs.linux`   | The command line arguments that the sandbox terminal uses on Linux                                      | `null`  |
+| `ocaml.terminal.shellArgs.osx`     | The command line arguments that the sandbox terminal uses on macOS                                      | `null`  |
+| `ocaml.terminal.shellArgs.windows` | The command line arguments that the sandbox terminal uses on Window                                     | `null`  |
 
 If `ocaml.terminal.shell.*` or `ocaml.terminal.shellArgs.*` is `null`, the
 configured VSCode shell and shell arguments will be used instead.
