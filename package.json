@@ -40,7 +40,7 @@
         "title": "Select sandbox for this workspace"
       },
       {
-        "command": "ocaml.restart",
+        "command": "ocaml.server.restart",
         "category": "OCaml",
         "title": "Restart language server"
       },

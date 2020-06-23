@@ -99,7 +99,7 @@ You can execute it by entering the following command at the command palette
 | Name                         | Description                        | Keyboard Shortcuts | Menu Contents |
 | ---------------------------- | ---------------------------------- | ------------------ | ------------- |
 | `ocaml.select-sandbox`       | Select sandbox for this workspace  |                    |               |
-| `ocaml.restart`              | Restart language server            |                    |               |
+| `ocaml.server.restart`       | Restart language server            |                    |               |
 | `ocaml.open-terminal`        | Open a terminal (current sandbox)  |                    |               |
 | `ocaml.open-terminal-select` | Open a terminal (select a sandbox) |                    |               |
 

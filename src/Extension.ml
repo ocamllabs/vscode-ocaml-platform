@@ -2,7 +2,7 @@ open Import
 
 let selectSandboxCommandId = "ocaml.select-sandbox"
 
-let restartCommandId = "ocaml.restart"
+let restartCommandId = "ocaml.server.restart"
 
 let openTerminalCommandId = "ocaml.open-terminal"
 
@@ -84,6 +84,7 @@ module Instance = struct
         ~serverOptions ~clientOptions:(Client.make ())
     in
     t.client <- Some client;
+    Js.Console.log client;
     LanguageClient.start client;
 
     let open Promise.O in
