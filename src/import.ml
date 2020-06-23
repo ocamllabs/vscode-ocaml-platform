@@ -96,6 +96,14 @@ module String = struct
       None
 end
 
+module Json = struct
+  include Json
+
+  external stringifyAny : 'a -> ?replacer:'b -> ?space:int -> unit -> string
+    = "stringify"
+    [@@bs.val] [@@bs.scope "JSON"]
+end
+
 let sprintf = Printf.sprintf
 
 let message kind fmt =
@@ -121,8 +129,12 @@ end = struct
   external field : _ -> field = "%identity"
 end
 
-let log fmt = Printf.ksprintf (fun x -> Js.Console.log x) fmt
+let log fmt =
+  Printf.ksprintf
+    (Output.extensionOutputChannel |. Window.OutputChannel.appendLine)
+    fmt
 
 let logJson msg (fields : (string * Log.field) list) =
-  let json = Js.Dict.fromList fields in
-  Js.Console.log2 msg json
+  let json = fields |. Js.Dict.fromList |. Json.stringifyAny ~space:2 () in
+  Output.extensionOutputChannel
+  |. Window.OutputChannel.appendLine (msg ^ " " ^ json ^ "\n")

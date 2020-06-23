@@ -16,11 +16,12 @@ module Client = struct
        ; { scheme = "file"; language = "reason" }
       |]
     in
+    let outputChannel = Output.languageServerOutputChannel in
     let revealOutputChannelOn =
       Vscode.LanguageClient.RevealOutputChannelOn.tToJs Never
     in
-    Vscode.LanguageClient.clientOptions ~documentSelector ~revealOutputChannelOn
-      ()
+    Vscode.LanguageClient.clientOptions ~documentSelector ~outputChannel
+      ~revealOutputChannelOn ()
 end
 
 module Server = struct
