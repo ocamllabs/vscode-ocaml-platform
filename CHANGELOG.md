@@ -8,6 +8,8 @@
 - Add dune task provider
 - Add commands `ocaml.open-terminal` and `ocaml.open-terminal-select` to open a
   terminal in a sandbox
+- Add `ocaml.trace.server` configuration option for the verbosity of the
+  language server logs.
 
 ## 0.7.0
 

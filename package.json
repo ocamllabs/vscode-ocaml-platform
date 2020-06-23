@@ -64,6 +64,16 @@
           "default": true,
           "description": "Controls whether dune tasks should be automatically detected."
         },
+        "ocaml.trace.server": {
+          "description": "Controls the logging output of the language server. Valid settings are `off`, `messages`, or `verbose`.",
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off"
+        },
         "ocaml.terminal.shell.linux": {
           "description": "The path of the shell that the sandbox terminal uses on Linux",
           "type": [

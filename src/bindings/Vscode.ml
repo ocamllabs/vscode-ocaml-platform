@@ -466,15 +466,11 @@ module LanguageClient = struct
     ; options : processOptions
     }
 
-  type t =
-    { start : (unit -> unit[@bs])
-    ; stop : (unit -> unit[@bs])
-    ; initializeResult : InitializeResult.t
-    }
+  type t = { initializeResult : InitializeResult.t }
 
-  let start t = (t.start () [@bs])
+  external start : t -> unit = "start" [@@bs.send]
 
-  let stop t = (t.stop () [@bs])
+  external stop : t -> unit = "stop" [@@bs.send]
 
   external make :
        id:string
