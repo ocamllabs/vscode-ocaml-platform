@@ -10,6 +10,7 @@
   terminal in a sandbox
 - Add `ocaml.trace.server` configuration option for the verbosity of the
   language server logs.
+- Add command `ocaml.server.restart` to restart the language server
 
 ## 0.7.0
 
