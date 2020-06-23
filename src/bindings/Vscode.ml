@@ -466,16 +466,7 @@ module LanguageClient = struct
     ; options : processOptions
     }
 
-  type trace =
-    | Off [@bs.as 0]
-    | Messages [@bs.as 1]
-    | Verbose [@bs.as 2]
-  [@@bs.deriving { jsConverter = newType }]
-
-  type t =
-    { initializeResult : InitializeResult.t
-    ; mutable trace : abs_trace
-    }
+  type t = { initializeResult : InitializeResult.t }
 
   external start : t -> unit = "start" [@@bs.send]
 
@@ -494,8 +485,6 @@ module LanguageClient = struct
   let initializeResult (t : t) =
     let open Promise.O in
     onReady t >>| fun () -> t.initializeResult
-
-  let setTrace (t : t) (trace : trace) = t.trace <- traceToJs trace
 end
 
 module ShellExecution = struct

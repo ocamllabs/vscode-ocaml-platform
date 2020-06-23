@@ -28,37 +28,6 @@ module Server = struct
     { command = Path.toString command; args; options = { env = Process.env } }
 end
 
-module TraceSetting = struct
-  type t = LanguageClient.trace =
-    | Off
-    | Messages
-    | Verbose
-
-  let of_string = function
-    | "off" -> Some Off
-    | "messages" -> Some Messages
-    | "verbose" -> Some Verbose
-    | _ -> None
-
-  let ofJson json =
-    let open Json.Decode in
-    match of_string (string json) with
-    | Some s -> s
-    | None ->
-      raise (DecodeError "off | messages | verbose are the only valid values")
-
-  let to_string = function
-    | Off -> "off"
-    | Messages -> "messages"
-    | Verbose -> "verbose"
-
-  let toJson (t : t) =
-    let open Json.Encode in
-    string (to_string t)
-
-  let t = Settings.create ~scope:Workspace ~key:"trace.server" ~ofJson ~toJson
-end
-
 module Instance = struct
   type t =
     { mutable toolchain : Toolchain.resources option
@@ -113,8 +82,6 @@ module Instance = struct
         ~serverOptions ~clientOptions:(Client.make ())
     in
     t.client <- Some client;
-    Settings.get ~section:"ocaml" TraceSetting.t
-    |> Option.iter ~f:(LanguageClient.setTrace client);
     LanguageClient.start client;
 
     let open Promise.O in

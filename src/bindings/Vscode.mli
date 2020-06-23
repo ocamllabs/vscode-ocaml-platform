@@ -350,11 +350,6 @@ module LanguageClient : sig
     ; options : processOptions
     }
 
-  type trace =
-    | Off
-    | Messages
-    | Verbose
-
   type t
 
   val make :
@@ -371,8 +366,6 @@ module LanguageClient : sig
   val onReady : t -> unit Promise.t
 
   val initializeResult : t -> InitializeResult.t Promise.t
-
-  val setTrace : t -> trace -> unit
 end
 
 module ShellExecution : sig
