@@ -40,6 +40,11 @@
         "title": "Select sandbox for this workspace"
       },
       {
+        "command": "ocaml.restart",
+        "category": "OCaml",
+        "title": "Restart language server"
+      },
+      {
         "command": "ocaml.open-terminal",
         "category": "OCaml",
         "title": "Open a terminal (current sandbox)"
