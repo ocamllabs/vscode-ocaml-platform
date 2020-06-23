@@ -84,7 +84,6 @@ module Instance = struct
         ~serverOptions ~clientOptions:(Client.make ())
     in
     t.client <- Some client;
-    Js.Console.log client;
     LanguageClient.start client;
 
     let open Promise.O in
