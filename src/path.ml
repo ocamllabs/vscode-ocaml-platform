@@ -10,6 +10,8 @@ let toString s = s
 
 let compare = String.compare
 
+let dirname t = Node.Path.dirname t
+
 let extname t = Node.Path.extname t
 
 let basename t = Node.Path.basename t

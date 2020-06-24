@@ -127,6 +127,8 @@ module Fs = struct
   external exists : string -> bool Promise.t = "exists"
     [@@bs.module "./fs-stub.js"]
 
+  external existsSync : string -> bool = "existsSync" [@@bs.module "fs"]
+
   external open_ : string -> string -> fd Promise.t = "open"
     [@@bs.module "./fs-stub.js"]
 
