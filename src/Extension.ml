@@ -8,6 +8,8 @@ let openTerminalCommandId = "ocaml.open-terminal"
 
 let openTerminalSelectCommandId = "ocaml.open-terminal-select"
 
+let switchImplIntfCommandId = "ocaml.switch-impl-intf"
+
 module Client = struct
   let make () : Vscode.LanguageClient.clientOptions =
     let documentSelector : Vscode.LanguageClient.documentSelectorItem array =
@@ -94,6 +96,11 @@ module Instance = struct
         "ocamllsp in this toolchain is out of date, functionality will not be \
          available in mli sources. Please update to a recent version and \
          restart the server.";
+    if not (OcamlLsp.handleSwitchImplIntf ocamlLsp) then
+      message `Warn
+        "ocamllsp in this toolchain is out of date, switching between \
+         implementation and interface files will use a less accurate fallback \
+         mechanism. Please update to a recent version and restart the server.";
     Ok ()
 
   let openTerminal toolchain =
@@ -149,6 +156,13 @@ let openTerminal (instance : Instance.t) () =
   | None -> selectSandboxAndOpenTerminal ()
   | Some toolchain -> Instance.openTerminal toolchain
 
+let switchImplIntf (instance : Instance.t) () =
+  Option.iter (Window.activeTextEditor ()) ~f:(fun { document } ->
+      let (_ : unit Promise.t) =
+        SwitchImplIntf.requestSwitch instance.client document.fileName
+      in
+      ())
+
 let suggestToSetupToolchain instance =
   let open Promise.O in
   Vscode.Window.showInformationMessage'
@@ -172,6 +186,7 @@ let activate (extension : Vscode.ExtensionContext.t) =
     ; (restartCommandId, restartInstance instance)
     ; (openTerminalCommandId, openTerminal instance)
     ; (openTerminalSelectCommandId, selectSandboxAndOpenTerminal)
+    ; (switchImplIntfCommandId, switchImplIntf instance)
     ];
   Vscode.ExtensionContext.subscribe extension (Instance.disposable instance);
   let open Promise.O in

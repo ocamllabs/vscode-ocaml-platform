@@ -33,13 +33,17 @@ module TextEdit = struct
     [@@bs.module "vscode"] [@@bs.scope "TextEdit"]
 end
 
-module TextDocument = struct
-  type uri =
+module Uri = struct
+  type t =
     { scheme : string
     ; fsPath : string
     }
 
-  type event = { uri : uri }
+  external file : string -> t = "file" [@@bs.module "vscode"] [@@bs.scope "Uri"]
+end
+
+module TextDocument = struct
+  type event = { uri : Uri.t }
 
   type endOfLine =
     | CRLF [@bs.as 2]
@@ -54,7 +58,7 @@ module TextDocument = struct
     ; isUntitled : bool
     ; languageId : string
     ; lineCount : int
-    ; uri : uri
+    ; uri : Uri.t
     ; version : int
     }
 
@@ -65,7 +69,7 @@ end
 
 module Folder = struct
   type t =
-    { uri : TextDocument.uri
+    { uri : Uri.t
     ; index : int
     ; name : string
     }
@@ -123,8 +127,7 @@ module Workspace = struct
     = "onDidOpenTextDocument"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 
-  external getWorkspaceFolder : TextDocument.uri -> Folder.t option
-    = "getWorkspaceFolder"
+  external getWorkspaceFolder : Uri.t -> Folder.t option = "getWorkspaceFolder"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 
   external onDidChangeWorkspaceFolders :
@@ -146,11 +149,11 @@ module Workspace = struct
     -> excl:string option
     -> maxResults:int option
     -> cancellationToken option
-    -> TextDocument.uri array Js.Promise.t = "findFiles"
+    -> Uri.t array Js.Promise.t = "findFiles"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 
   external _openTextDocument :
-       ([ `Filename of string | `Uri of TextDocument.uri ][@bs.unwrap])
+       ([ `Filename of string | `Uri of Uri.t ][@bs.unwrap])
     -> TextDocument.t Promise.t = "openTextDocument"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 
@@ -289,9 +292,7 @@ module Window = struct
   external _activeTextEditor : activeTextEditor option = "activeTextEditor"
     [@@bs.module "vscode"] [@@bs.scope "window"] [@@bs.val]
 
-  external activeTextEditor : unit -> activeTextEditor option
-    = "activeTextEditor"
-    [@@bs.module "vscode"] [@@bs.scope "window"] [@@bs.val]
+  let activeTextEditor () = _activeTextEditor
 
   type location =
     | SourceControl [@bs.as 1]
@@ -333,8 +334,7 @@ module Window = struct
     [@@bs.obj]
 
   external _showTextDocument :
-       doc:([ `Uri of TextDocument.uri | `Document of TextDocument.t ]
-         [@bs.unwrap])
+       doc:([ `Uri of Uri.t | `Document of TextDocument.t ][@bs.unwrap])
     -> ?options:textDocumentShowOptions
     -> TextEditor.t Promise.t = "showTextDocument"
     [@@bs.module "vscode"] [@@bs.scope "window"]
@@ -468,10 +468,6 @@ module LanguageClient = struct
 
   type t = { initializeResult : InitializeResult.t }
 
-  external start : t -> unit = "start" [@@bs.send]
-
-  external stop : t -> unit = "stop" [@@bs.send]
-
   external make :
        id:string
     -> name:string
@@ -480,7 +476,20 @@ module LanguageClient = struct
     -> t = "LanguageClient"
     [@@bs.new] [@@bs.module "vscode-languageclient"]
 
+  external start : t -> unit = "start" [@@bs.send]
+
+  external stop : t -> unit = "stop" [@@bs.send]
+
   external onReady : t -> unit Promise.t = "onReady" [@@bs.send]
+
+  external sendRequest :
+       t
+    -> string
+    -> 'a
+    -> ?token:Workspace.cancellationToken
+    -> unit
+    -> 'b Promise.t = "sendRequest"
+    [@@bs.send]
 
   let initializeResult (t : t) =
     let open Promise.O in

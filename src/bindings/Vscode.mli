@@ -30,13 +30,17 @@ module TextEdit : sig
   val replace : Range.t -> string -> t
 end
 
-module TextDocument : sig
-  type uri =
+module Uri : sig
+  type t =
     { scheme : string
     ; fsPath : string
     }
 
-  type event = { uri : uri }
+  val file : string -> t
+end
+
+module TextDocument : sig
+  type event = { uri : Uri.t }
 
   type endOfLine =
     | CRLF
@@ -51,7 +55,7 @@ module TextDocument : sig
     ; isUntitled : bool
     ; languageId : string
     ; lineCount : int
-    ; uri : uri
+    ; uri : Uri.t
     ; version : int
     }
 
@@ -209,7 +213,7 @@ module Window : sig
 
   val showTextDocument :
        ?options:textDocumentShowOptions
-    -> [ `Uri of TextDocument.uri | `Document of TextDocument.t ]
+    -> [ `Uri of Uri.t | `Document of TextDocument.t ]
     -> TextEditor.t Promise.t
 
   module Terminal : sig
@@ -234,7 +238,7 @@ end
 
 module Folder : sig
   type t =
-    { uri : TextDocument.uri
+    { uri : Uri.t
     ; index : int
     ; name : string
     }
@@ -259,7 +263,7 @@ module Workspace : sig
 
   val onDidOpenTextDocument : (TextDocument.event -> unit) -> unit
 
-  val getWorkspaceFolder : TextDocument.uri -> Folder.t option
+  val getWorkspaceFolder : Uri.t -> Folder.t option
 
   val onDidChangeWorkspaceFolders :
     (workspaceFoldersChangeEvent -> unit) -> unit
@@ -273,7 +277,7 @@ module Workspace : sig
     -> excl:string option
     -> maxResults:int option
     -> cancellationToken option
-    -> TextDocument.uri array Js.Promise.t
+    -> Uri.t array Js.Promise.t
 
   type openTextDocumentOptions
 
@@ -282,7 +286,7 @@ module Workspace : sig
 
   val openTextDocument :
        [ `Filename of string
-       | `Uri of TextDocument.uri
+       | `Uri of Uri.t
        | `Interactive of openTextDocumentOptions option
        ]
     -> TextDocument.t Promise.t
@@ -364,6 +368,14 @@ module LanguageClient : sig
   val start : t -> unit
 
   val onReady : t -> unit Promise.t
+
+  val sendRequest :
+       t
+    -> string
+    -> 'a
+    -> ?token:Workspace.cancellationToken
+    -> unit
+    -> 'b Promise.t
 
   val initializeResult : t -> InitializeResult.t Promise.t
 end

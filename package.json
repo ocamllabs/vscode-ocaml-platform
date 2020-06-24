@@ -24,6 +24,8 @@
     "onLanguage:ocaml",
     "onLanguage:ocaml.interface",
     "onLanguage:reason",
+    "onLanguage:ocaml.ocamllex",
+    "onLanguage:ocaml.menhir",
     "onLanguage:dune",
     "onLanguage:dune-project",
     "onLanguage:dune-workspace",
@@ -53,8 +55,41 @@
         "command": "ocaml.open-terminal-select",
         "category": "OCaml",
         "title": "Open a terminal (select a sandbox)"
+      },
+      {
+        "command": "ocaml.switch-impl-intf",
+        "category": "OCaml",
+        "title": "Switch implementation/interface"
       }
     ],
+    "keybindings": [
+      {
+        "command": "ocaml.switch-impl-intf",
+        "key": "Alt+O",
+        "when": "resourceExtname == .ml || resourceExtname == .mll || resourceExtname == .mly || resourceExtname == .re"
+      },
+      {
+        "command": "ocaml.switch-impl-intf",
+        "key": "Alt+O",
+        "when": "resourceExtname == .mli || resourceExtname == .rei"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "ocaml.switch-impl-intf",
+          "key": "Alt+O",
+          "when": "resourceExtname == .ml || resourceExtname == .mll || resourceExtname == .mly || resourceExtname == .re",
+          "group": "navigation"
+        },
+        {
+          "command": "ocaml.switch-impl-intf",
+          "key": "Alt+O",
+          "when": "resourceExtname == .mli || resourceExtname == .rei",
+          "group": "navigation"
+        }
+      ]
+    },
     "configuration": {
       "title": "OCaml configuration",
       "properties": {

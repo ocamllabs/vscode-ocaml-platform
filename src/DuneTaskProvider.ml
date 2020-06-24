@@ -59,7 +59,7 @@ let computeTasks cancellationToken toolchain =
     Array.map
       (fun dune ->
         let scope, relativePath =
-          match folderRelativePath folders dune.TextDocument.fsPath with
+          match folderRelativePath folders dune.Uri.fsPath with
           | None -> (Task.Workspace, dune.fsPath)
           | Some (folder, relativePath) -> (Task.Folder folder, relativePath)
         in

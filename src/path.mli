@@ -12,6 +12,8 @@ val compare : t -> t -> int
 
 val toString : t -> string
 
+val dirname : t -> string
+
 val extname : t -> string
 
 val basename : t -> string
