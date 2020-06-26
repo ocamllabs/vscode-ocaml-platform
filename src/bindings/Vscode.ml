@@ -301,14 +301,7 @@ module Window = struct
 
   type line = { range : range }
 
-  type document =
-    { getText : unit -> string
-    ; lineAt : int -> line
-    ; lineCount : int
-    ; fileName : string
-    }
-
-  type activeTextEditor = { document : document }
+  type activeTextEditor = { document : TextDocument.t }
 
   external _activeTextEditor : activeTextEditor option = "activeTextEditor"
     [@@bs.module "vscode"] [@@bs.scope "window"] [@@bs.val]
