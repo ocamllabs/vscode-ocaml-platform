@@ -364,8 +364,8 @@ module LanguageClient : sig
 
   val sendRequest :
        t
-    -> string
-    -> 'a
+    -> meth:string
+    -> data:'a
     -> ?token:Workspace.cancellationToken
     -> unit
     -> 'b Promise.t

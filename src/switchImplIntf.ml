@@ -5,8 +5,8 @@ module Lsp : sig
 end = struct
   let switch client document =
     let targetFileName : string option Promise.t =
-      LanguageClient.sendRequest client "ocaml/didSwitchImplIntf"
-        (document : TextDocument.t)
+      LanguageClient.sendRequest client ~meth:"ocaml/didSwitchImplIntf"
+        ~data:(document : TextDocument.t)
         ()
     in
     targetFileName
