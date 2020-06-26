@@ -33,6 +33,11 @@ module Array = struct
     Belt.Array.keepMap a (fun x -> x)
 end
 
+module List = struct
+  let find_map (type a b) ~(f : a -> b option t) (xs : a list) : b option t =
+    Array.findMap f (Belt.List.toArray xs)
+end
+
 module Result = struct
   let iterError x ~f =
     bind

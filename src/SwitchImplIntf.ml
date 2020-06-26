@@ -14,19 +14,19 @@ end = struct
 end
 
 module Fallback : sig
-  val switch : string -> string option
+  val switch : string -> string option Promise.t
 end = struct
   let impl = [ ".ml"; ".mll"; ".mly"; ".re" ]
 
   let intf = [ ".mli"; ".rei" ]
 
   let switchTo exts withoutExt =
-    List.find_map exts ~f:(fun ext ->
+    Promise.List.find_map exts ~f:(fun ext ->
         let targetFileName = withoutExt ^ ext in
-        if Fs.existsSync targetFileName then
-          Some targetFileName
-        else
-          None)
+        let open Promise.O in
+        Fs.exists targetFileName >>| function
+        | true -> Some targetFileName
+        | false -> None)
 
   let switch fileName =
     let ext = Filename.extension fileName in
@@ -36,7 +36,7 @@ end = struct
     else if List.mem ext impl then
       switchTo intf withoutExt
     else
-      None
+      Promise.return None
 end
 
 let requestSwitch client document =
@@ -48,10 +48,10 @@ let requestSwitch client document =
     | None ->
       log "using fallback mechanism to switch implementation/interface";
       Fallback.switch document.TextDocument.fileName
-    | Some _ as s -> s
+    | Some _ as s -> Promise.return s
   in
   let open Promise.O in
-  tryLsp client >>| tryFallback >>| function
+  tryLsp client >>= tryFallback >>| function
   | None -> message `Error "Could not find a suitable file to switch to."
   | Some targetFileName ->
     let (_ : TextEditor.t Promise.t) =
