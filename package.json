@@ -66,12 +66,7 @@
       {
         "command": "ocaml.switch-impl-intf",
         "key": "Alt+O",
-        "when": "resourceExtname == .ml || resourceExtname == .mll || resourceExtname == .mly || resourceExtname == .re"
-      },
-      {
-        "command": "ocaml.switch-impl-intf",
-        "key": "Alt+O",
-        "when": "resourceExtname == .mli || resourceExtname == .rei"
+        "when": "editorLangId  == ocaml || editorLangId  == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir"
       }
     ],
     "menus": {
@@ -79,13 +74,7 @@
         {
           "command": "ocaml.switch-impl-intf",
           "key": "Alt+O",
-          "when": "resourceExtname == .ml || resourceExtname == .mll || resourceExtname == .mly || resourceExtname == .re",
-          "group": "navigation"
-        },
-        {
-          "command": "ocaml.switch-impl-intf",
-          "key": "Alt+O",
-          "when": "resourceExtname == .mli || resourceExtname == .rei",
+          "when": "editorLangId  == ocaml || editorLangId  == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir",
           "group": "navigation"
         }
       ]
