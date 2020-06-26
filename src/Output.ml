@@ -1,4 +1,4 @@
 let languageServerOutputChannel =
   Vscode.Window.createOutputChannel "OCaml Language Server"
 
-let extensionOutputChannel = Vscode.Window.createOutputChannel "OCaml Extension"
+let extensionOutputChannel = Vscode.Window.createOutputChannel "OCaml Platform Extension"
