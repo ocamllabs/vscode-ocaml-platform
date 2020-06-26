@@ -230,6 +230,24 @@ module Window : sig
     -> ?shellArgs:string array
     -> unit
     -> Terminal.t
+
+  module OutputChannel : sig
+    type t = { name : string }
+
+    val append : t -> string -> unit
+
+    val appendLine : t -> string -> unit
+
+    val clear : t -> unit
+
+    val dispose : t -> unit
+
+    val hide : t -> unit
+
+    val show : t -> ?preserveFocus:bool -> unit -> unit
+  end
+
+  val createOutputChannel : string -> OutputChannel.t
 end
 
 module Folder : sig
@@ -338,6 +356,7 @@ module LanguageClient : sig
 
   type clientOptions =
     { documentSelector : documentSelectorItem array
+    ; outputChannel : Window.OutputChannel.t [@bs.optional]
     ; revealOutputChannelOn : RevealOutputChannelOn.abs_t [@bs.optional]
     }
   [@@bs.deriving abstract]

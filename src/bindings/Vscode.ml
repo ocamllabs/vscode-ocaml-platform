@@ -363,6 +363,27 @@ module Window = struct
     -> unit
     -> Terminal.t = "createTerminal"
     [@@bs.module "vscode"] [@@bs.scope "window"]
+
+  module OutputChannel = struct
+    type t = { name : string }
+
+    external append : t -> string -> unit = "append" [@@bs.send]
+
+    external appendLine : t -> string -> unit = "appendLine" [@@bs.send]
+
+    external clear : t -> unit = "clear" [@@bs.send]
+
+    external dispose : t -> unit = "dispose" [@@bs.send]
+
+    external hide : t -> unit = "hide" [@@bs.send]
+
+    external show : t -> ?preserveFocus:bool -> unit -> unit = "show"
+      [@@bs.send]
+  end
+
+  external createOutputChannel : string -> OutputChannel.t
+    = "createOutputChannel"
+    [@@bs.module "vscode"] [@@bs.scope "window"]
 end
 
 type memento
@@ -454,6 +475,7 @@ module LanguageClient = struct
 
   type clientOptions =
     { documentSelector : documentSelectorItem array
+    ; outputChannel : Window.OutputChannel.t [@bs.optional]
     ; revealOutputChannelOn : RevealOutputChannelOn.abs_t [@bs.optional]
     }
   [@@bs.deriving abstract]
