@@ -16,7 +16,7 @@ module Client = struct
        ; { scheme = "file"; language = "reason" }
       |]
     in
-    let outputChannel = Output.languageServerOutputChannel in
+    let (lazy outputChannel) = Output.languageServerOutputChannel in
     let revealOutputChannelOn =
       Vscode.LanguageClient.RevealOutputChannelOn.tToJs Never
     in

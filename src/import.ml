@@ -130,11 +130,10 @@ end = struct
 end
 
 let log fmt =
-  Printf.ksprintf
-    (Output.extensionOutputChannel |. Window.OutputChannel.appendLine)
-    fmt
+  let (lazy outputChannel) = Output.extensionOutputChannel in
+  Printf.ksprintf (outputChannel |. Window.OutputChannel.appendLine) fmt
 
 let logJson msg (fields : (string * Log.field) list) =
   let json = fields |. Js.Dict.fromList |. Json.stringifyAny ~space:2 () in
-  Output.extensionOutputChannel
-  |. Window.OutputChannel.appendLine (msg ^ " " ^ json ^ "\n")
+  let (lazy outputChannel) = Output.extensionOutputChannel in
+  outputChannel |. Window.OutputChannel.appendLine (msg ^ " " ^ json ^ "\n")
