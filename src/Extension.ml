@@ -159,7 +159,7 @@ let openTerminal (instance : Instance.t) () =
 let switchImplIntf (instance : Instance.t) () =
   Option.iter (Window.activeTextEditor ()) ~f:(fun { document } ->
       let (_ : unit Promise.t) =
-        SwitchImplIntf.requestSwitch instance.client document.fileName
+        SwitchImplIntf.requestSwitch instance.client document
       in
       ())
 

@@ -1,12 +1,12 @@
 open Import
 
 module Lsp : sig
-  val switch : LanguageClient.t -> string -> string option Promise.t
+  val switch : LanguageClient.t -> TextDocument.t -> string option Promise.t
 end = struct
-  let switch client fileName =
+  let switch client document =
     let targetFileName : string option Promise.t =
       LanguageClient.sendRequest client "ocaml/didSwitchImplIntf"
-        (fileName : string)
+        (document : TextDocument.t)
         ()
     in
     targetFileName |> Promise.catch (fun _ -> Promise.return None)
@@ -38,15 +38,15 @@ end = struct
       None
 end
 
-let requestSwitch client fileName =
+let requestSwitch client document =
   let tryLsp = function
-    | Some client -> Lsp.switch client fileName
+    | Some client -> Lsp.switch client document
     | None -> Promise.return None
   in
   let tryFallback = function
     | None ->
       log "using fallback mechanism to switch implementation/interface";
-      Fallback.switch fileName
+      Fallback.switch document.TextDocument.fileName
     | Some _ as s -> s
   in
   let open Promise.O in

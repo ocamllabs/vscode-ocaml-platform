@@ -160,14 +160,7 @@ module Window : sig
 
   val showWarningMessage : string -> unit Promise.t
 
-  type activeTextEditor = { document : document }
-
-  and document =
-    { getText : unit -> string
-    ; lineAt : int -> line
-    ; lineCount : int
-    ; fileName : string
-    }
+  type activeTextEditor = { document : TextDocument.t }
 
   and line = { range : range }
 
