@@ -9,7 +9,8 @@ end = struct
         (document : TextDocument.t)
         ()
     in
-    targetFileName |> Promise.catch (fun _ -> Promise.return None)
+    targetFileName
+    |> Promise.catch (fun (_ : Promise.error) -> Promise.return None)
 end
 
 module Fallback : sig
