@@ -11,7 +11,7 @@
 - Add `ocaml.trace.server` configuration option for the verbosity of the
   language server logs.
 - Add command `ocaml.server.restart` to restart the language server
-- Fix indentation rules for let-in expressions
+- Fix indentation rules for let-in expressions (#272)
 
 ## 0.7.0
 
