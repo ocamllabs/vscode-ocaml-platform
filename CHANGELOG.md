@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 0.8.0
 
 - Add highlighting for locally abstract types in OCaml files
 - Add highlighting for OASIS files
