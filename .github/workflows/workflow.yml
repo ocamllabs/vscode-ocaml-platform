@@ -101,7 +101,9 @@ jobs:
 
       - name: Publish extension
         if: success() && runner.os == 'Linux' && contains(github.ref, 'refs/tags')
-        run: yarn publish -p ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
+        run: yarn publish
+        env:
+          VSCE_PAT: ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
 
       - name: Create Release
         if: runner.os == 'Linux' && contains(github.ref, 'refs/tags')
