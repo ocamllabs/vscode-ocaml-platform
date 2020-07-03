@@ -121,6 +121,11 @@
     "comments": {
       "patterns": [
         {
+          "comment": "empty comment",
+          "name": "comment.block.ocaml",
+          "match": "\\(\\*\\*\\)"
+        },
+        {
           "comment": "ocamldoc comment",
           "name": "comment.doc.ocaml",
           "begin": "\\(\\*\\*",
