@@ -33,7 +33,8 @@ module JsError = struct
 
   external make : string -> t = "Error" [@@bs.new]
 
-  let ofPromiseError _error = [%raw "_error.message || 'Unknown error'"]
+  let ofPromiseError _error : string =
+    [%raw "_error.message || 'Unknown error'"]
 end
 
 module Buffer = struct

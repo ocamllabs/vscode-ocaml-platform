@@ -4,4 +4,7 @@
 	server. If a valid language client is not provided or the language server
 	message fails, a less accurate fallback mechanism will be used. *)
 val requestSwitch :
-  Vscode.LanguageClient.t option -> Vscode.TextDocument.t -> unit Promise.t
+     client:Vscode.LanguageClient.t option
+  -> capabilities:OcamlLsp.t option
+  -> Vscode.TextDocument.t
+  -> unit Promise.t
