@@ -36,6 +36,7 @@ module Instance = struct
   type t =
     { mutable toolchain : Toolchain.resources option
     ; mutable client : LanguageClient.t option
+    ; mutable ocamlLspCapabilities : OcamlLsp.t option
     ; mutable statusBarItem : StatusBarItem.t option
     ; duneFormatter : DuneFormatter.t
     ; duneTaskProvider : DuneTaskProvider.t
@@ -44,6 +45,7 @@ module Instance = struct
   let create () =
     { toolchain = None
     ; client = None
+    ; ocamlLspCapabilities = None
     ; statusBarItem = None
     ; duneFormatter = DuneFormatter.create ()
     ; duneTaskProvider = DuneTaskProvider.create ()
@@ -61,6 +63,7 @@ module Instance = struct
         LanguageClient.stop client;
         t.client <- None);
 
+    t.ocamlLspCapabilities <- None;
     t.toolchain <- None
 
   let start t toolchain =
@@ -91,6 +94,7 @@ module Instance = struct
     let open Promise.O in
     LanguageClient.initializeResult client >>| fun initializeResult ->
     let ocamlLsp = OcamlLsp.ofInitializeResult initializeResult in
+    t.ocamlLspCapabilities <- Some ocamlLsp;
     if
       (not (OcamlLsp.interfaceSpecificLangId ocamlLsp))
       || not (OcamlLsp.handleSwitchImplIntf ocamlLsp)
@@ -156,8 +160,10 @@ let openTerminal (instance : Instance.t) () =
 
 let switchImplIntf (instance : Instance.t) () =
   Option.iter (Window.activeTextEditor ()) ~f:(fun { document } ->
+      let client = instance.client in
+      let capabilities = instance.ocamlLspCapabilities in
       let (_ : unit Promise.t) =
-        SwitchImplIntf.requestSwitch instance.client document
+        SwitchImplIntf.requestSwitch ~client ~capabilities document
       in
       ())
 
@@ -207,5 +213,6 @@ let activate (extension : Vscode.ExtensionContext.t) =
          else
            Window.showErrorMessage e)
   |> Promise.catch (fun e ->
-         let message = Node.JsError.ofPromiseError e in
-         message `Error "Error: %s" message)
+         let errorMessage = Node.JsError.ofPromiseError e in
+         message `Error "Error: %s" errorMessage;
+         Promise.return ())

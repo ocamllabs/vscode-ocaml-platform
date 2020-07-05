@@ -10,7 +10,6 @@ end = struct
         ()
     in
     targetFileName
-    |> Promise.catch (fun (_ : Promise.error) -> Promise.return None)
 end
 
 module Fallback : sig
@@ -39,22 +38,34 @@ end = struct
       Promise.return None
 end
 
-let requestSwitch client document =
-  let tryLsp = function
-    | Some client -> Lsp.switch client document
-    | None -> Promise.return None
-  in
-  let tryFallback = function
-    | None ->
+let showSwitchError error =
+  message `Error "Error when switching implementation/interface: %s" error
+
+let requestSwitch ~client ~capabilities document =
+  let targetFileName =
+    match (client, capabilities) with
+    | Some client, Some capabilities
+      when OcamlLsp.handleSwitchImplIntf capabilities ->
+      Lsp.switch client document
+    | _ ->
       log "using fallback mechanism to switch implementation/interface";
       Fallback.switch document.TextDocument.fileName
-    | Some _ as s -> Promise.return s
   in
+
+  let showFile = function
+    | Some targetFileName ->
+      let (_ : TextEditor.t Promise.t) =
+        Window.showTextDocument (`Uri (Uri.file targetFileName))
+      in
+      ()
+    | None -> showSwitchError "Could not find a suitable file to switch to"
+  in
+
+  let onPromiseError error =
+    let errorMessage = Node.JsError.ofPromiseError error in
+    showSwitchError errorMessage;
+    Promise.return ()
+  in
+
   let open Promise.O in
-  tryLsp client >>= tryFallback >>| function
-  | None -> message `Error "Could not find a suitable file to switch to."
-  | Some targetFileName ->
-    let (_ : TextEditor.t Promise.t) =
-      Window.showTextDocument (`Uri (Uri.file targetFileName))
-    in
-    ()
+  targetFileName >>| showFile |> Promise.catch onPromiseError
