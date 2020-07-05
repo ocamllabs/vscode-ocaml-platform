@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Fix syntax highlighting of empty comments (#276)
+
 ## 0.8.0
 
 - Add highlighting for locally abstract types in OCaml files
