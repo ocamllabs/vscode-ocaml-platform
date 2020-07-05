@@ -111,16 +111,14 @@ module Instance = struct
     let open Promise.O in
     LanguageClient.initializeResult client >>| fun initializeResult ->
     let ocamlLsp = OcamlLsp.ofInitializeResult initializeResult in
-    if not (OcamlLsp.interfaceSpecificLangId ocamlLsp) then
+    if
+      (not (OcamlLsp.interfaceSpecificLangId ocamlLsp))
+      || not (OcamlLsp.handleSwitchImplIntf ocamlLsp)
+    then
       message `Warn
-        "ocamllsp in this toolchain is out of date, functionality will not be \
-         available in mli sources. Please update to a recent version and \
-         restart the server.";
-    if not (OcamlLsp.handleSwitchImplIntf ocamlLsp) then
-      message `Warn
-        "ocamllsp in this toolchain is out of date, switching between \
-         implementation and interface files will use a less accurate fallback \
-         mechanism. Please update to a recent version and restart the server.";
+        "ocamllsp in this toolchain is out of date. The following features \
+         might be unavailable or degraded in functionality: switching between \
+         implementation and interface files, functionality in mli sources";
     Ok ()
 
   let openTerminal toolchain =
