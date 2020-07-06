@@ -6,6 +6,9 @@
 
 - Stop automatically highlighting suffixed META files (#565)
 
+- Add `ocaml.debounce.server` configuration option to control the amount of time
+  the language server waits before recognizing requests
+
 ## 1.8.1
 
 - Revert automatic installation of platform tools

@@ -346,6 +346,11 @@
           ],
           "default": "off"
         },
+        "ocaml.debounce.server": {
+          "description": "Controls the amount of time (in seconds) that the language server should wait before recognizing a request.",
+          "type": "number",
+          "default": "0.25"
+        },
         "ocaml.useOcamlEnv": {
           "type": "boolean",
           "default": true,
