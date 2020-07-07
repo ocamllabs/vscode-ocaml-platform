@@ -13,6 +13,8 @@ module Client = struct
     let documentSelector : Vscode.LanguageClient.documentSelectorItem array =
       [| { scheme = "file"; language = "ocaml" }
        ; { scheme = "file"; language = "ocaml.interface" }
+       ; { scheme = "file"; language = "ocaml.ocamllex" }
+       ; { scheme = "file"; language = "ocaml.menhir" }
        ; { scheme = "file"; language = "reason" }
       |]
     in
