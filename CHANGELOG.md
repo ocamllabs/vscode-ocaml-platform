@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fix syntax highlighting of empty comments (#276)
+- Fix syntax highlighting of floating attributes (#281)
 
 ## 0.8.0
 
