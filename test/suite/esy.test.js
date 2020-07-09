@@ -45,26 +45,6 @@ suite("Basic tests", () => {
     );
     if (process.platform != "win32" && process.platform != "win64") {
       assert.equal(
-        reasonDiagnostics.length,
-        1,
-        "There should only be one diagnostic in the Reason source file"
-      );
-      assert.equal(
-        reasonDiagnostics[0].message,
-        "Warning 26: unused variable foo."
-      );
-      assert.equal(
-        reasonDiagnostics[0].severity,
-        1,
-        "Severity of this diagnostic should be 1 (Warning). It was " +
-          reasonDiagnostics[0].severity
-      );
-      assert.equal(reasonDiagnostics[0].range.start.line, 3);
-      assert.equal(reasonDiagnostics[0].range.start.character, 6);
-      assert.equal(reasonDiagnostics[0].range.end.line, 3);
-      assert.equal(reasonDiagnostics[0].range.end.character, 9);
-
-      assert.equal(
         ocamlDiagnostics.length,
         1,
         "There should only be one diagnostic in the OCaml source file"
