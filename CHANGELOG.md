@@ -4,6 +4,7 @@
 
 - Fix syntax highlighting of empty comments (#276)
 - Fix syntax highlighting of floating attributes (#281)
+- Improve highlighting of external declarations (#282)
 
 ## 0.8.0
 

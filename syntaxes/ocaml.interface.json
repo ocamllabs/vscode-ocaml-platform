@@ -54,7 +54,7 @@
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "entity.name.function.binding.ocaml" }
           },
-          "end": "$",
+          "end": "(?<=]|\")\\s*$",
           "patterns": [
             {
               "comment": "string literal",
