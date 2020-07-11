@@ -6,6 +6,7 @@
 - Fix syntax highlighting of floating attributes (#281)
 - Improve highlighting of external declarations (#282)
 - Highlight unprefixed opam files (#284)
+- Fix syntax highlighting of `module type of` (#285)
 
 ## 0.8.0
 
