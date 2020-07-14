@@ -47,8 +47,8 @@
           }
         },
         {
-          "comment": "and declaration for let bindings, type declarations, class bindings, or class type definitions",
-          "match": "\\b(and)\\s+(?!(?:module|type)\\b)((?:virtual|lazy)\\s+)?(_\\s+|'[A-Za-z][A-Za-z0-9_']*\\s+|\\(.*\\)\\s+)?([a-z_][A-Za-z0-9_']*)\\s+(?!,|::)",
+          "comment": "and declaration for let bindings, type declarations, class bindings, class type definitions, or module constraints",
+          "match": "\\b(and)\\s+(?!(?:module|type|lazy)\\b)(virtual\\s+)?(_\\s+|'[A-Za-z][A-Za-z0-9_']*\\s+|\\(.*\\)\\s+)?([a-z_][A-Za-z0-9_']*)\\s+(?!,|::)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
