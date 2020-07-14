@@ -8,6 +8,7 @@
 - Highlight unprefixed opam files (#284)
 - Fix syntax highlighting of `module type of` (#285)
 - Fix syntax highlighting of module constraints (#286)
+- Fix syntax highlighting of lazy bindings (#287)
 
 ## 0.8.0
 
