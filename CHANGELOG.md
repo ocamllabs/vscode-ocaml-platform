@@ -9,6 +9,8 @@
 - Fix syntax highlighting of `module type of` (#285)
 - Fix syntax highlighting of module constraints (#286)
 - Fix syntax highlighting of lazy bindings (#287)
+- Add syntax highlighting for new ocamlformat values: `after-when-possible`,
+  `before-except-val`, and `unset` (#288)
 
 ## 0.8.0
 

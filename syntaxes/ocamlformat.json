@@ -111,11 +111,11 @@
         },
         {
           "name": "constant.language.ocamlformat",
-          "match": "\\b(after|align|all|always|auto)\\b"
+          "match": "\\b(after-when-possible|after|align|all|always|auto)\\b"
         },
         {
           "name": "constant.language.ocamlformat",
-          "match": "\\b(before|begin-line)\\b"
+          "match": "\\b(before-except-val|before|begin-line)\\b"
         },
         {
           "name": "constant.language.ocamlformat",
@@ -179,7 +179,7 @@
         },
         {
           "name": "constant.language.ocamlformat",
-          "match": "\\b(unsafe-no)\\b"
+          "match": "\\b(unsafe-no|unset)\\b"
         },
         {
           "name": "constant.language.ocamlformat",
