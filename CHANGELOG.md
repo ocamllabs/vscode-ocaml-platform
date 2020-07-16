@@ -11,6 +11,7 @@
 - Fix syntax highlighting of lazy bindings (#287)
 - Add syntax highlighting for new ocamlformat values: `after-when-possible`,
   `before-except-val`, and `unset` (#288)
+- Improve syntax highlighting of OCaml comments that contain strings (#289)
 
 ## 0.8.0
 
