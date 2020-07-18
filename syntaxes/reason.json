@@ -141,7 +141,7 @@
       "patterns": [
         {
           "begin": "\\[(%{1,3})",
-          "end": "(?=[^_\\.'[:word:]])",
+          "end": "(?=[^_\\.'[:word:]])\\:?",
           "beginCaptures": {
             "1": { "name": "keyword.control.less" }
           },
