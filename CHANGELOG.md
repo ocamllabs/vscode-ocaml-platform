@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fix Reason syntax highlighting of binding operators (#291)
 - Fix syntax highlighting of empty comments (#276)
 - Fix syntax highlighting of floating attributes (#281)
 - Improve highlighting of external declarations (#282)
