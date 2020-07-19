@@ -113,13 +113,19 @@
       "begin": "/\\*",
       "end": "\\*/",
       "name": "comment.block",
-      "patterns": [{ "include": "#comment-block" }]
+      "patterns": [
+        { "include": "#comment-block-doc" },
+        { "include": "#comment-block" }
+      ]
     },
     "comment-block-doc": {
       "begin": "/\\*\\*(?!/)",
       "end": "\\*/",
       "name": "comment.block.documentation",
-      "patterns": [{ "include": "#comment-block" }]
+      "patterns": [
+        { "include": "#comment-block-doc" },
+        { "include": "#comment-block" }
+      ]
     },
     "condition-lhs": {
       "begin": "(?<![#\\-:!?.@*/&%^+<=>|~$\\\\])([\\?])(?![#\\-:!?.@*/&%^+<=>|~$\\\\])",
@@ -219,7 +225,8 @@
           ]
         },
         { "include": "#jsx-attributes" },
-        { "include": "#jsx-body" }
+        { "include": "#jsx-body" },
+        { "include": "#comment" }
       ]
     },
     "jsx-tail": {
@@ -444,10 +451,12 @@
       "patterns": [{ "include": "#signature-expression" }]
     },
     "module-item-let": {
-      "begin": "\\b(let)\\b",
+      "begin": "\\b(let)((%)([[:word:]\\.]+))?\\b",
       "end": "(;)|(?=}|\\b(class|constraint|exception|external|include|inherit|let|method|nonrec|open|private|type|val|with)\\b)",
       "beginCaptures": {
-        "1": { "name": "storage.type" }
+        "1": { "name": "storage.type" },
+        "3": { "name": "keyword.control.less" },
+        "4": { "name": "entity.name.class" }
       },
       "endCaptures": {
         "1": {

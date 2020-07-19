@@ -2,7 +2,6 @@
 
 ## Unreleased
 
-- Fix Reason syntax highlighting of type extensions (#292)
 - Fix syntax highlighting of empty comments (#276)
 - Fix syntax highlighting of floating attributes (#281)
 - Improve highlighting of external declarations (#282)
@@ -12,6 +11,8 @@
 - Fix syntax highlighting of lazy bindings (#287)
 - Add syntax highlighting for new ocamlformat values: `after-when-possible`,
   `before-except-val`, and `unset` (#288)
+- Fix Reason syntax highlighting of binding operators (#291)
+- Fix Reason syntax highlighting of type extensions (#292)
 
 ## 0.8.0
 
