@@ -132,6 +132,7 @@
           "end": "\\*\\)",
           "patterns": [
             { "include": "source.ocaml.ocamldoc#markup" },
+            { "include": "#strings-in-comments" },
             { "include": "#comments" }
           ]
         },
@@ -140,7 +141,25 @@
           "name": "comment.block.ocaml",
           "begin": "\\(\\*",
           "end": "\\*\\)",
-          "patterns": [{ "include": "#comments" }]
+          "patterns": [
+            { "include": "#strings-in-comments" },
+            { "include": "#comments" }
+          ]
+        }
+      ]
+    },
+
+    "strings-in-comments": {
+      "patterns": [
+        {
+          "comment": "string literal",
+          "begin": "\"",
+          "end": "\""
+        },
+        {
+          "comment": "quoted string literal",
+          "begin": "\\{[^|]*\\|",
+          "end": "\\|[^}]*\\}"
         }
       ]
     },

@@ -100,17 +100,12 @@
 
     "comments": {
       "patterns": [
+        { "include": "source.ocaml#comments" },
         {
           "comment": "c-style block comment",
           "name": "comment.block.menhir",
           "begin": "/\\*",
           "end": "\\*/"
-        },
-        {
-          "comment": "ocaml-style block comment",
-          "name": "comment.block.other.menhir",
-          "begin": "\\(\\*",
-          "end": "\\*\\)"
         },
         {
           "comment": "c-style line comment",
