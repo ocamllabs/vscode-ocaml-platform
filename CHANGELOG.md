@@ -14,6 +14,7 @@
 - Fix Reason syntax highlighting of binding operators (#291)
 - Fix Reason syntax highlighting of type extensions (#292)
 - Improve syntax highlighting of OCaml comments that contain strings (#289)
+- Fix Reason syntax highlighting of recursive modules (#295)
 
 ## 0.8.0
 
