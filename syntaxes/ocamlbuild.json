@@ -19,7 +19,7 @@
     },
 
     "lines": {
-      "begin": "^\\s*",
+      "begin": "^[[:space:]]*",
       "end": "(:)|$",
       "endCaptures": { "1": { "name": "keyword.operator.ocamlbuild" } },
       "patterns": [{ "include": "#expressions" }]

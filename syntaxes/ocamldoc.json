@@ -16,7 +16,7 @@
         {
           "comment": "ocamldoc documentation tag",
           "name": "keyword.doc-tag.ocamldoc",
-          "match": "\\@[a-z]+"
+          "match": "\\@[[:lower:]]+"
         },
         {
           "comment": "embedded ocaml source",

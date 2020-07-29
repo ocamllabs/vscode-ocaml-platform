@@ -13,7 +13,7 @@
       "patterns": [
         {
           "comment": "assignment or addition",
-          "match": "\\b([A-Za-z0-9_.]+)\\s*(\\+?=)\\s*(\".*\")",
+          "match": "\\b([[:word:].]+)[[:space:]]*(\\+?=)[[:space:]]*(\".*\")",
           "captures": {
             "1": { "name": "entity.name.tag.META" },
             "2": { "name": "keyword.operator.META" },
@@ -22,11 +22,11 @@
         },
         {
           "comment": "assignment or addition with formal predicates",
-          "begin": "\\b([A-Za-z0-9_.]+)\\s*\\(",
+          "begin": "\\b([[:word:].]+)[[:space:]]*\\(",
           "beginCaptures": {
             "1": { "name": "entity.name.tag.META" }
           },
-          "end": "\\)\\s*(\\+?=)\\s*(\".*\")",
+          "end": "\\)[[:space:]]*(\\+?=)[[:space:]]*(\".*\")",
           "endCaptures": {
             "1": { "name": "keyword.operator.META" },
             "2": { "name": "string.quoted.double.META" }
@@ -42,7 +42,7 @@
         },
         {
           "comment": "subpackage",
-          "begin": "\\b(package)\\s*(\"[^.]*\")\\s*\\(",
+          "begin": "\\b(package)[[:space:]]*(\"[^.]*\")[[:space:]]*\\(",
           "beginCaptures": {
             "1": { "name": "keyword.other.META" },
             "2": { "name": "string.quoted.double.META" }

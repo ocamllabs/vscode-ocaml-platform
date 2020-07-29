@@ -107,7 +107,7 @@
         {
           "comment": "numeric literal",
           "name": "constant.numeric.decimal.ocamlformat",
-          "match": "\\b([0-9]+(\\.[0-9]*)*)\\b"
+          "match": "\\b([[:digit:]]+(\\.[[:digit:]]*)*)\\b"
         },
         {
           "name": "constant.language.ocamlformat",
