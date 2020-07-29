@@ -37,6 +37,9 @@ npm install esy --global
     "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam",
     "@opam/reason": "*",
     "ocaml": "4.6.x"
+  },
+  "resolutions": {
+    "@opam/dune": "2.5.1"
   }
 }
 ```
