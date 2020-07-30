@@ -36,7 +36,7 @@
   ],
   "repository": {
     "rules": {
-      "match": "\\b(rule|and)\\s+([a-z][a-zA-Z0-9_']*('|\\b))",
+      "match": "\\b(rule|and)[[:space:]]+([[:lower:]][[:word:]']*('|\\b))",
       "captures": {
         "1": {
           "name": "keyword.other.ocamllex"
@@ -52,7 +52,7 @@
         {
           "comment": "ocamllex reserved keywords",
           "name": "keyword.other.ocamllex",
-          "match": "\\b(let|as|rule|and|parse|shortest|refill)\\b"
+          "match": "\\b(let|as|rule|and|parse|shortest|refill)\\b(?!')"
         },
         {
           "comment": "assignment operator",
@@ -100,7 +100,7 @@
         {
           "comment": "reference to regex pattern",
           "name": "entity.name.type.reference.ocamllex",
-          "match": "\\b[a-zA-Z][a-zA-Z0-9'_]*('|\\b)"
+          "match": "\\b[[:alpha:]][[:word:]']*('|\\b)"
         }
       ]
     }

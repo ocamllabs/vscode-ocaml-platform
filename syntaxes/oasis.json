@@ -18,7 +18,7 @@
 
     "fields": {
       "comment": "labeled field",
-      "match": "^\\s*([a-zA-Z0-9_]+)(:|\\+:|\\$:)",
+      "match": "^[[:space:]]*([[:word:]]+)(:|\\+:|\\$:)",
       "captures": {
         "1": { "name": "entity.name.tag.oasis" },
         "2": { "name": "keyword.operator.oasis" }
@@ -27,7 +27,7 @@
 
     "sections": {
       "comment": "labeled section",
-      "begin": "^\\s*(Flag|Library|Object|Executable|Document|Test|SourceRepository)",
+      "begin": "^[[:space:]]*(Flag|Library|Object|Executable|Document|Test|SourceRepository)",
       "beginCaptures": { "1": { "name": "keyword.other.oasis" } },
       "end": "$",
       "contentName": "string.other.oasis"
@@ -62,7 +62,7 @@
     },
 
     "substitution": {
-      "match": "\\$[a-zA-Z0-9_]+",
+      "match": "\\$[[:word:]]+",
       "name": "constant.language.oasis"
     }
   }

@@ -52,7 +52,7 @@
       "patterns": [
         {
           "comment": "rule name with optional parameter list",
-          "match": "([a-z][a-zA-Z0-9_]*)\\s*(?:\\(([^)]+)\\))?(?=\\s*:)",
+          "match": "([[:lower:]][[:word:]]*)[[:space:]]*(?:\\(([^)]+)\\))?(?=[[:space:]]*:)",
           "captures": {
             "1": {
               "comment": "rule name",
@@ -63,7 +63,7 @@
                 {
                   "comment": "rule parameter",
                   "name": "variable.parameter.rule.menhir",
-                  "match": "[a-zA-Z][a-zA-Z0-9_]*"
+                  "match": "[[:alpha:]][[:word:]]*"
                 }
               ]
             }
@@ -118,7 +118,7 @@
 
     "variables": {
       "comment": "labeled semantic value identifier",
-      "match": "([a-z][a-zA-Z0-9_]*)\\s*=",
+      "match": "([[:lower:]][[:word:]]*)[[:space:]]*=",
       "captures": { "1": { "name": "variable.parameter.value.menhir" } },
       "patterns": [{ "include": "#references" }]
     },
@@ -133,12 +133,12 @@
         {
           "comment": "reference to a token",
           "name": "entity.name.token.menhir",
-          "match": "[A-Z][a-zA-Z0-9_]*"
+          "match": "[[:upper:]][[:word:]]*"
         },
         {
           "comment": "reference to a production",
           "name": "entity.name.function.rule.menhir",
-          "match": "[a-z][a-zA-Z0-9_]*"
+          "match": "[[:lower:]][[:word:]]*"
         }
       ]
     },

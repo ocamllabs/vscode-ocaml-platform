@@ -8,7 +8,7 @@
       "end": "$"
     },
     {
-      "match": "^\\s*(lib|lib_root|libexec|libexec_root|bin|sbin|toplevel|share|share_root|etc|doc|stublibs|man|misc)\\s*(:)",
+      "match": "^[[:space:]]*(lib|lib_root|libexec|libexec_root|bin|sbin|toplevel|share|share_root|etc|doc|stublibs|man|misc)[[:space:]]*(:)",
       "captures": {
         "1": { "name": "entity.name.tag.opam-install" },
         "2": { "name": "keyword.operator.opam-install" }

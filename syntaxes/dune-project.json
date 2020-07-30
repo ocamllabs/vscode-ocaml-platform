@@ -8,7 +8,7 @@
       "patterns": [
         {
           "comment": "lang",
-          "begin": "\\(\\s*(lang)\\s+(dune)\\b",
+          "begin": "\\([[:space:]]*(lang)[[:space:]]+(dune)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" },
@@ -19,7 +19,7 @@
 
         {
           "comment": "name",
-          "begin": "\\(\\s*(name)\\b",
+          "begin": "\\([[:space:]]*(name)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
@@ -30,7 +30,7 @@
 
         {
           "comment": "version",
-          "begin": "\\(\\s*(version)\\b",
+          "begin": "\\([[:space:]]*(version)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
@@ -41,7 +41,7 @@
 
         {
           "comment": "implicit_transitive_deps",
-          "begin": "\\(\\s*(implicit_transitive_deps)\\b",
+          "begin": "\\([[:space:]]*(implicit_transitive_deps)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
@@ -51,7 +51,7 @@
 
         {
           "comment": "wrapped_executables",
-          "begin": "\\(\\s*(wrapped_executables)\\b",
+          "begin": "\\([[:space:]]*(wrapped_executables)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
@@ -61,7 +61,7 @@
 
         {
           "comment": "explicit_js_mode",
-          "match": "\\(\\s*(explicit_js_mode)\\s*\\)",
+          "match": "\\([[:space:]]*(explicit_js_mode)[[:space:]]*\\)",
           "captures": {
             "1": { "name": "keyword.language.dune-project" }
           }
@@ -69,7 +69,7 @@
 
         {
           "comment": "dialect",
-          "begin": "\\(\\s*(dialect)\\b",
+          "begin": "\\([[:space:]]*(dialect)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
@@ -77,7 +77,7 @@
           "patterns": [
             {
               "comment": "name",
-              "begin": "\\(\\s*(name)\\b",
+              "begin": "\\([[:space:]]*(name)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
@@ -88,7 +88,7 @@
 
             {
               "comment": "implementation/interface",
-              "begin": "\\(\\s*(implementation|interface)\\b",
+              "begin": "\\([[:space:]]*(implementation|interface)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
@@ -96,7 +96,7 @@
               "patterns": [
                 {
                   "comment": "extension/preprocess/format",
-                  "begin": "\\(\\s*(extension|preprocess|format)\\b",
+                  "begin": "\\([[:space:]]*(extension|preprocess|format)\\b",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "keyword.language.dune-project" }
@@ -112,7 +112,7 @@
 
         {
           "comment": "formatting",
-          "begin": "\\(\\s*(formatting)\\b",
+          "begin": "\\([[:space:]]*(formatting)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
@@ -123,7 +123,7 @@
               "match": "\\b(disabled)\\b"
             },
             {
-              "begin": "\\(\\s*(enabled_for)\\b",
+              "begin": "\\([[:space:]]*(enabled_for)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
@@ -136,7 +136,7 @@
 
         {
           "comment": "generate_opam_files",
-          "begin": "\\(\\s*(generate_opam_files)\\b",
+          "begin": "\\([[:space:]]*(generate_opam_files)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
@@ -146,7 +146,7 @@
 
         {
           "comment": "package",
-          "begin": "\\(\\s*(package)\\b",
+          "begin": "\\([[:space:]]*(package)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
@@ -154,7 +154,7 @@
           "patterns": [
             {
               "comment": "name",
-              "begin": "\\(\\s*(name)\\b",
+              "begin": "\\([[:space:]]*(name)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
@@ -165,7 +165,7 @@
 
             {
               "comment": "synopsis/description",
-              "begin": "\\(\\s*(synopsis|description)\\b",
+              "begin": "\\([[:space:]]*(synopsis|description)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
@@ -175,7 +175,7 @@
 
             {
               "comment": "depends/conflicts/depopts",
-              "begin": "\\(\\s*(depends|conflicts|depopts)\\b",
+              "begin": "\\([[:space:]]*(depends|conflicts|depopts)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
@@ -184,11 +184,11 @@
                 {
                   "comment": "dependency",
                   "name": "variable.other.declaration.dune-project",
-                  "match": "\\b([a-zA-Z_-]+)\\b"
+                  "match": "\\b([[:alpha:]-]+)\\b"
                 },
                 {
                   "comment": "dependency constraint",
-                  "begin": "\\(\\s*([a-zA-Z_-]+)\\b",
+                  "begin": "\\([[:space:]]*([[:alpha:]-]+)\\b",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "variable.other.declaration.dune-project" }
@@ -201,7 +201,7 @@
 
             {
               "comment": "tags",
-              "begin": "\\(\\s*(tags)\\b",
+              "begin": "\\([[:space:]]*(tags)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
@@ -212,7 +212,7 @@
 
             {
               "comment": "deprecated_package_names",
-              "begin": "\\(\\s*(deprecated_package_names)\\b",
+              "begin": "\\([[:space:]]*(deprecated_package_names)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
@@ -227,7 +227,7 @@
 
         {
           "comment": "using",
-          "begin": "\\(\\s*(using)(\\s+menhir)?\\b",
+          "begin": "\\([[:space:]]*(using)([[:space:]]+menhir)?\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" },
@@ -244,7 +244,7 @@
       "patterns": [
         {
           "comment": "license",
-          "begin": "\\(\\s*(license)\\b",
+          "begin": "\\([[:space:]]*(license)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
@@ -255,7 +255,7 @@
 
         {
           "comment": "authors/maintainers",
-          "begin": "\\(\\s*(authors|maintainers)\\b",
+          "begin": "\\([[:space:]]*(authors|maintainers)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
@@ -265,7 +265,7 @@
 
         {
           "comment": "source",
-          "begin": "\\(\\s*(source)\\b",
+          "begin": "\\([[:space:]]*(source)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
@@ -273,7 +273,7 @@
           "patterns": [
             {
               "comment": "github",
-              "begin": "\\(\\s*(github)\\b",
+              "begin": "\\([[:space:]]*(github)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
@@ -289,7 +289,7 @@
             },
             {
               "comment": "uri",
-              "begin": "\\(\\s*(uri)\\b",
+              "begin": "\\([[:space:]]*(uri)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
@@ -302,7 +302,7 @@
 
         {
           "comment": "bug_reports/homepage/documentation",
-          "begin": "\\(\\s*(bug_reports|homepage|documentation)\\b",
+          "begin": "\\([[:space:]]*(bug_reports|homepage|documentation)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
@@ -339,12 +339,12 @@
         {
           "comment": "symbol",
           "name": "constant.symbol.dune",
-          "match": "(:[a-zA-Z_-]+)\\b"
+          "match": "(:[[:alpha:]-]+)\\b"
         },
         {
           "comment": "number or version",
           "name": "constant.numeric.dune",
-          "match": "\\b([0-9](\\.[0-9]+)+)\\b"
+          "match": "\\b([[:digit:]](\\.[[:digit:]]+)+)\\b"
         },
         {
           "comment": "true or false",
@@ -361,14 +361,14 @@
         },
         {
           "comment": "boolean/predicate language",
-          "begin": "\\(\\s*(=|<>|>=|<=|<|>)",
+          "begin": "\\([[:space:]]*(=|<>|>=|<=|<|>)",
           "end": "\\)",
           "beginCaptures": { "1": { "name": "keyword.operator.dune" } },
           "patterns": [{ "include": "#general" }]
         },
         {
           "comment": "boolean/predicate language",
-          "begin": "\\(\\s*(and|or|not)\\b",
+          "begin": "\\([[:space:]]*(and|or|not)\\b",
           "end": "\\)",
           "beginCaptures": { "1": { "name": "keyword.operator.dune" } },
           "patterns": [{ "include": "#general" }]
@@ -400,12 +400,12 @@
         {
           "comment": "character from decimal ASCII code",
           "name": "constant.character.escape.dune",
-          "match": "\\\\[0-9]{3}"
+          "match": "\\\\[[:digit:]]{3}"
         },
         {
           "comment": "character from hexadecimal ASCII code",
           "name": "constant.character.escape.dune",
-          "match": "\\\\x[0-9A-Fa-f]{2}"
+          "match": "\\\\x[[:xdigit:]]{2}"
         },
         {
           "comment": "escaped variable",

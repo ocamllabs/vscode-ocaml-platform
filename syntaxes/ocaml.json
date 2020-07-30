@@ -22,7 +22,7 @@
       "patterns": [
         {
           "comment": "line number directive",
-          "begin": "^\\s*(#)\\s*([0-9]+)",
+          "begin": "^[[:space:]]*(#)[[:space:]]*([[:digit:]]+)",
           "end": "$",
           "beginCaptures": {
             "1": { "name": "keyword.other.ocaml" },
@@ -35,7 +35,7 @@
           "patterns": [
             {
               "comment": "general, loading codes",
-              "begin": "^\\s*(#)\\s*(help|quit|cd|directory|remove_directory|load_rec|load|use|mod_use)",
+              "begin": "^[[:space:]]*(#)[[:space:]]*(help|quit|cd|directory|remove_directory|load_rec|load|use|mod_use)",
               "end": "$",
               "beginCaptures": {
                 "1": { "name": "keyword.other.ocaml" },
@@ -45,7 +45,7 @@
             },
             {
               "comment": "environment queries",
-              "begin": "^\\s*(#)\\s*(show_class_type|show_class|show_exception|show_module_type|show_module|show_type|show_val|show)",
+              "begin": "^[[:space:]]*(#)[[:space:]]*(show_class_type|show_class|show_exception|show_module_type|show_module|show_type|show_val|show)",
               "end": "$",
               "beginCaptures": {
                 "1": { "name": "keyword.other.ocaml" },
@@ -58,7 +58,7 @@
             },
             {
               "comment": "pretty-printing, tracing",
-              "begin": "^\\s*(#)\\s*(install_printer|print_depth|print_length|remove_printer|trace|untrace_all|untrace)",
+              "begin": "^[[:space:]]*(#)[[:space:]]*(install_printer|print_depth|print_length|remove_printer|trace|untrace_all|untrace)",
               "end": "$",
               "beginCaptures": {
                 "1": { "name": "keyword.other.ocaml" },
@@ -71,7 +71,7 @@
             },
             {
               "comment": "compiler options",
-              "begin": "^\\s*(#)\\s*(labels|ppx|principal|rectypes|warn_error|warnings)",
+              "begin": "^[[:space:]]*(#)[[:space:]]*(labels|ppx|principal|rectypes|warn_error|warnings)",
               "end": "$",
               "beginCaptures": {
                 "1": { "name": "keyword.other.ocaml" },
@@ -86,7 +86,7 @@
         },
         {
           "comment": "topfind directives",
-          "begin": "^\\s*(#)\\s*(require|list|camlp4o|camlp4r|predicates|thread)",
+          "begin": "^[[:space:]]*(#)[[:space:]]*(require|list|camlp4o|camlp4r|predicates|thread)",
           "end": "$",
           "beginCaptures": {
             "1": { "name": "keyword.other.ocaml" },
@@ -96,7 +96,7 @@
         },
         {
           "comment": "cppo directives",
-          "begin": "^\\s*(#)\\s*(define|undef|ifdef|ifndef|if|else|elif|endif|include|warning|error|ext|endext)",
+          "begin": "^[[:space:]]*(#)[[:space:]]*(define|undef|ifdef|ifndef|if|else|elif|endif|include|warning|error|ext|endext)",
           "end": "$",
           "beginCaptures": {
             "1": { "name": "keyword.other.ocaml" },
@@ -169,10 +169,10 @@
         {
           "comment": "quoted string literal",
           "name": "string.quoted.braced.ocaml",
-          "begin": "\\{(%%?[A-Za-z_][A-Za-z0-9_']*(\\.[A-Za-z_][A-Za-z0-9_']*)*\\s*)?[a-z_]*\\|",
-          "end": "\\|[a-z_]*\\}",
+          "begin": "\\{(%%?[[:alpha:]_][[:word:]']*(\\.[[:alpha:]_][[:word:]']*)*[[:space:]]*)?[[:lower:]_]*\\|",
+          "end": "\\|[[:lower:]_]*\\}",
           "beginCaptures": {
-            "1": { "patterns": [{ "include": "$self" }] }
+            "1": { "name": "keyword.other.extension.ocaml" }
           },
           "patterns": [{ "include": "#strings" }]
         },
@@ -200,12 +200,12 @@
             {
               "comment": "character from decimal ASCII code",
               "name": "constant.character.escape.ocaml",
-              "match": "\\\\[0-9]{3}"
+              "match": "\\\\[[:digit:]]{3}"
             },
             {
               "comment": "character from hexadecimal ASCII code",
               "name": "constant.character.escape.ocaml",
-              "match": "\\\\x[0-9A-Fa-f]{2}"
+              "match": "\\\\x[[:xdigit:]]{2}"
             },
             {
               "comment": "character from octal ASCII code",
@@ -215,12 +215,12 @@
             {
               "comment": "unicode character escape sequence",
               "name": "constant.character.escape.ocaml",
-              "match": "\\\\u\\{[0-9A-Fa-f]{1,6}\\}"
+              "match": "\\\\u\\{[[:xdigit:]]{1,6}\\}"
             },
             {
               "comment": "printf format string",
               "name": "constant.character.printf.ocaml",
-              "match": "%[-0+ #]*([0-9]+|\\*)?(.([0-9]+|\\*))?[lLn]?[diunlLNxXosScCfFeEgGhHBbat!%@,]"
+              "match": "%[-0+ #]*([[:digit:]]+|\\*)?(.([[:digit:]]+|\\*))?[lLn]?[diunlLNxXosScCfFeEgGhHBbat!%@,]"
             },
             {
               "comment": "unknown escape sequence",
@@ -254,13 +254,13 @@
         {
           "comment": "character literal from decimal ASCII code",
           "name": "string.quoted.other.ocaml constant.character.ocaml",
-          "match": "'(\\\\[0-9]{3})'",
+          "match": "'(\\\\[[:digit:]]{3})'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
           "comment": "character literal from hexadecimal ASCII code",
           "name": "string.quoted.other.ocaml constant.character.ocaml",
-          "match": "'(\\\\x[0-9A-Fa-f]{2})'",
+          "match": "'(\\\\x[[:xdigit:]]{2})'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
@@ -281,7 +281,7 @@
     },
 
     "attributes": {
-      "begin": "\\[(@|@@|@@@)\\s*([a-zA-Z_]+(\\.[a-zA-Z0-9_']+)*)",
+      "begin": "\\[(@|@@|@@@)[[:space:]]*([[:alpha:]_]+(\\.[[:word:]']+)*)",
       "end": "\\]",
       "beginCaptures": {
         "1": { "name": "keyword.operator.attribute.ocaml" },
@@ -299,7 +299,7 @@
     },
 
     "extensions": {
-      "begin": "\\[(%|%%)\\s*([a-zA-Z_]+(\\.[a-zA-Z0-9_']+)*)",
+      "begin": "\\[(%|%%)[[:space:]]*([[:alpha:]_]+(\\.[[:word:]']+)*)",
       "end": "\\]",
       "beginCaptures": {
         "1": { "name": "keyword.operator.extension.ocaml" },
@@ -328,7 +328,7 @@
       "patterns": [
         {
           "comment": "for loop",
-          "match": "\\b(for)\\s+([a-z_][A-Za-z0-9_']*)",
+          "match": "\\b(for)[[:space:]]+([[:lower:]_][[:word:]']*)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "entity.name.function.binding.ocaml" }
@@ -336,7 +336,7 @@
         },
         {
           "comment": "local open/exception/module",
-          "match": "\\b(let)\\s+(open|exception|module)\\b",
+          "match": "\\b(let)[[:space:]]+(open|exception|module)\\b(?!')",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" }
@@ -344,7 +344,7 @@
         },
         {
           "comment": "let expression",
-          "match": "\\b(let)\\s+(?!lazy\\b)(rec\\s+)?([a-z_][A-Za-z0-9_']*)\\s+(?!,|::)",
+          "match": "\\b(let)[[:space:]]+(?!lazy\\b(?!'))(rec[[:space:]]+)?([[:lower:]_][[:word:]']*)[[:space:]]+(?!,|::)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
@@ -353,7 +353,7 @@
         },
         {
           "comment": "using binding operators",
-          "match": "\\b(let|and)([$&*+\\-/=>@^|<][!?$&*+\\-/=>@^|%:]*)\\s*(?!lazy\\b)([a-z_][A-Za-z0-9_']*)\\s+(?!,|::)",
+          "match": "\\b(let|and)([$&*+\\-/=>@^|<][!?$&*+\\-/=>@^|%:]*)[[:space:]]*(?!lazy\\b(?!'))([[:lower:]_][[:word:]']*)[[:space:]]+(?!,|::)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
@@ -362,7 +362,7 @@
         },
         {
           "comment": "first class module packing",
-          "match": "\\(\\s*(val)\\s+([a-z_][A-Za-z0-9_']*)",
+          "match": "\\([[:space:]]*(val)[[:space:]]+([[:lower:]_][[:word:]']*)",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "patterns": [{ "include": "$self" }] }
@@ -370,7 +370,7 @@
         },
         {
           "comment": "locally abstract types",
-          "match": "(?:\\(|(:))\\s*(type)((?:\\s+[a-z_][A-Za-z0-9_']*)+)",
+          "match": "(?:\\(|(:))[[:space:]]*(type)((?:[[:space:]]+[[:lower:]_][[:word:]']*)+)",
           "captures": {
             "1": {
               "name": "keyword.other.ocaml punctuation.other.colon punctuation.colon"
@@ -388,7 +388,7 @@
         {
           "comment": "reserved ocaml keyword",
           "name": "keyword.other.ocaml",
-          "match": "\\b(and|as|assert|begin|class|constraint|do|done|downto|else|end|exception|external|for|fun|function|functor|if|in|include|inherit|initializer|lazy|let|match|method|module|mutable|new|nonrec|object|of|open|private|rec|sig|struct|then|to|try|type|val|virtual|when|while|with)\\b"
+          "match": "\\b(and|as|assert|begin|class|constraint|do|done|downto|else|end|exception|external|for|fun|function|functor|if|in|include|inherit|initializer|lazy|let|match|method|module|mutable|new|nonrec|object|of|open|private|rec|sig|struct|then|to|try|type|val|virtual|when|while|with)\\b(?!')"
         }
       ]
     },
@@ -480,33 +480,33 @@
         {
           "comment": "floating point decimal literal with exponent",
           "name": "constant.numeric.decimal.float.ocaml",
-          "match": "\\b([0-9][0-9_]*(\\.[0-9_]*)?[eE][+-]?[0-9][0-9_]*[g-zG-Z]?)\\b"
+          "match": "\\b([[:digit:]][[:digit:]_]*(\\.[[:digit:]_]*)?[eE][+-]?[[:digit:]][[:digit:]_]*[g-zG-Z]?)\\b"
         },
         {
           "comment": "floating point decimal literal",
           "name": "constant.numeric.decimal.float.ocaml",
-          "match": "\\b([0-9][0-9_]*\\.[0-9_]*[g-zG-Z]?)\\b"
+          "match": "\\b([[:digit:]][[:digit:]_]*\\.[[:digit:]_]*[g-zG-Z]?)\\b"
         },
         {
           "comment": "floating point hexadecimal literal with exponent part",
           "name": "constant.numeric.hexadecimal.float.ocaml",
-          "match": "\\b((0x|0X)[0-9A-Fa-f][0-9A-Fa-f_]*(\\.[0-9A-Fa-f_]*)?[pP][+-]?[0-9][0-9_]*[g-zG-Z]?)\\b"
+          "match": "\\b((0x|0X)[[:xdigit:]][[:xdigit:]_]*(\\.[[:xdigit:]_]*)?[pP][+-]?[[:digit:]][[:digit:]_]*[g-zG-Z]?)\\b"
         },
         {
           "comment": "floating point hexadecimal literal",
           "name": "constant.numeric.hexadecimal.float.ocaml",
-          "match": "\\b((0x|0X)[0-9A-Fa-f][0-9A-Fa-f_]*\\.[0-9A-Fa-f_]*[g-zG-Z]?)\\b"
+          "match": "\\b((0x|0X)[[:xdigit:]][[:xdigit:]_]*\\.[[:xdigit:]_]*[g-zG-Z]?)\\b"
         },
 
         {
           "comment": "decimal integer literal",
           "name": "constant.numeric.decimal.integer.ocaml",
-          "match": "\\b([0-9][0-9_]*[lLng-zG-Z]?)\\b"
+          "match": "\\b([[:digit:]][[:digit:]_]*[lLng-zG-Z]?)\\b"
         },
         {
           "comment": "hexadecimal integer literal",
           "name": "constant.numeric.hexadecimal.integer.ocaml",
-          "match": "\\b((0x|0X)[0-9A-Fa-f][0-9A-Fa-f_]*[lLng-zG-Z]?)\\b"
+          "match": "\\b((0x|0X)[[:xdigit:]][[:xdigit:]_]*[lLng-zG-Z]?)\\b"
         },
         {
           "comment": "octal integer literal",
@@ -539,7 +539,7 @@
         {
           "comment": "type parameter",
           "name": "storage.type.ocaml",
-          "match": "'[A-Za-z][A-Za-z0-9_']*\\b"
+          "match": "'[[:alpha:]][[:word:]']*\\b"
         },
         {
           "comment": "builtin type",
@@ -554,17 +554,17 @@
         {
           "comment": "capital identifier for constructor, exception, or module",
           "name": "constant.language.capital-identifier.ocaml",
-          "match": "\\b[A-Z][A-Za-z0-9_']*('|\\b)"
+          "match": "\\b[[:upper:]][[:word:]']*('|\\b)"
         },
         {
           "comment": "lowercase identifier",
           "name": "source.ocaml",
-          "match": "\\b[a-z_][A-Za-z0-9_']*('|\\b)"
+          "match": "\\b[[:lower:]_][[:word:]']*('|\\b)"
         },
         {
           "comment": "polymorphic variant tag",
           "name": "constant.language.polymorphic-variant.ocaml",
-          "match": "\\`[A-Za-z][A-Za-z0-9_']*\\b"
+          "match": "\\`[[:alpha:]][[:word:]']*\\b"
         },
         {
           "comment": "empty list (can be used as a constructor)",

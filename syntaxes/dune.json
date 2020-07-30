@@ -8,7 +8,7 @@
     },
     {
       "name": "meta.stanza.dune",
-      "begin": "\\(\\s*(library|rule|executable|executables|rule|ocamllex|ocamlyacc|menhir|install|alias|copy_files|copy_files#|jbuild_version|include)\\s",
+      "begin": "\\([[:space:]]*(library|rule|executable|executables|rule|ocamllex|ocamlyacc|menhir|install|alias|copy_files|copy_files#|jbuild_version|include)[[:space:]]",
       "end": "\\)",
       "beginCaptures": {
         "1": {
@@ -23,7 +23,7 @@
     },
     {
       "name": "meta.stanza.library.field.dune",
-      "begin": "\\(\\s*(name|public_name|synopsis|install_c_headers|ppx_runtime_libraries|c_flags|cxx_flags|c_names|cxx_names|library_flags|c_library_flags|virtual_deps|modes|kind|wrapped|optional|self_build_stubs_archive|no_dynlink|ppx\\.driver)\\s",
+      "begin": "\\([[:space:]]*(name|public_name|synopsis|install_c_headers|ppx_runtime_libraries|c_flags|cxx_flags|c_names|cxx_names|library_flags|c_library_flags|virtual_deps|modes|kind|wrapped|optional|self_build_stubs_archive|no_dynlink|ppx\\.driver)[[:space:]]",
       "end": "\\)",
       "beginCaptures": {
         "1": {
@@ -38,7 +38,7 @@
     },
     {
       "name": "meta.stanza.rule.dune",
-      "begin": "\\(\\s*(targets|deps|locks|loc|mode|action)\\s",
+      "begin": "\\([[:space:]]*(targets|deps|locks|loc|mode|action)[[:space:]]",
       "beginCaptures": {
         "1": {
           "name": "keyword.other.dune"
@@ -53,7 +53,7 @@
     },
     {
       "name": "meta.mono-sexp.dune",
-      "match": "\\(\\s*(fallback|optional)\\s*\\)",
+      "match": "\\([[:space:]]*(fallback|optional)[[:space:]]*\\)",
       "captures": {
         "1": {
           "name": "keyword.other.dune"
@@ -62,7 +62,7 @@
     },
     {
       "name": "meta.stanza.rule.action.dune",
-      "begin": "\\(\\s*(run|chdir|setenv|with-stdout-to|with-stderr-to|with-outputs-to|ignore-stdout|ignore-stderr|ignore-outputs|progn|echo|cat|copy|copy#|system|bash|write-file|diff|diff\\?)\\s",
+      "begin": "\\([[:space:]]*(run|chdir|setenv|with-stdout-to|with-stderr-to|with-outputs-to|ignore-stdout|ignore-stderr|ignore-outputs|progn|echo|cat|copy|copy#|system|bash|write-file|diff|diff\\?)[[:space:]]",
       "end": "\\)",
       "beginCaptures": {
         "1": {
@@ -77,7 +77,7 @@
     },
     {
       "name": "meta.stanza.install.dune",
-      "begin": "\\(\\s*(section)\\s",
+      "begin": "\\([[:space:]]*(section)[[:space:]]",
       "end": "\\)",
       "beginCaptures": {
         "1": {
@@ -93,7 +93,7 @@
     },
     {
       "name": "meta.stanza.install.dune",
-      "begin": "\\(\\s*(files)\\s",
+      "begin": "\\([[:space:]]*(files)[[:space:]]",
       "end": "\\)",
       "beginCaptures": {
         "1": {
@@ -108,7 +108,7 @@
     },
     {
       "name": "meta.library.kind.dune",
-      "begin": "\\(\\s*(normal|ppx_deriver|ppx_rewriter)\\s",
+      "begin": "\\([[:space:]]*(normal|ppx_deriver|ppx_rewriter)[[:space:]]",
       "end": "\\)",
       "beginCaptures": {
         "1": {
@@ -118,7 +118,7 @@
     },
     {
       "name": "meta.stanza.executables.dune",
-      "begin": "\\(\\s*(name|link_executables|link_flags|modes)\\s",
+      "begin": "\\([[:space:]]*(name|link_executables|link_flags|modes)[[:space:]]",
       "end": "\\)",
       "beginCaptures": {
         "1": {
@@ -133,7 +133,7 @@
     },
     {
       "name": "meta.stanza.lib-or-exec.buildable.dune",
-      "begin": "\\(\\s*(preprocess|preprocessor_deps|lint|modules|modules_without_implementation|libraries|flags|ocamlc_flags|ocamlopt_flags|js_of_ocaml|allow_overlapping_dependencies|per_module)\\s",
+      "begin": "\\([[:space:]]*(preprocess|preprocessor_deps|lint|modules|modules_without_implementation|libraries|flags|ocamlc_flags|ocamlopt_flags|js_of_ocaml|allow_overlapping_dependencies|per_module)[[:space:]]",
       "end": "\\)",
       "beginCaptures": {
         "1": {
@@ -148,7 +148,7 @@
     },
     {
       "name": "meta.stanza.lib-or-exec.buildable.preprocess.dune",
-      "begin": "\\(\\s*(no_preprocessing|action|pps)\\s",
+      "begin": "\\([[:space:]]*(no_preprocessing|action|pps)[[:space:]]",
       "end": "\\)",
       "beginCaptures": {
         "1": {
@@ -163,7 +163,7 @@
     },
     {
       "name": "meta.stanza.lib-or-exec.buildable.preprocess_deps.dune",
-      "begin": "\\(\\s*(file|alias|alias_rec|glob_files|files_recursively_in)\\s",
+      "begin": "\\([[:space:]]*(file|alias|alias_rec|glob_files|files_recursively_in)[[:space:]]",
       "end": "\\)",
       "beginCaptures": {
         "1": {
@@ -178,7 +178,7 @@
     },
     {
       "name": "meta.stanza.lib-or-exec.buildable.libraries.dune",
-      "begin": "\\(\\s*(select)\\s",
+      "begin": "\\([[:space:]]*(select)[[:space:]]",
       "end": "\\)",
       "beginCaptures": {
         "1": {
@@ -201,7 +201,7 @@
     },
     {
       "name": "keyword.other.dune",
-      "match": "\\s(as|from|->)\\s"
+      "match": "[[:space:]](as|from|->)[[:space:]]"
     },
     {
       "name": "keyword.other.dune",
@@ -253,7 +253,7 @@
         },
         {
           "name": "comment.sexp.dune",
-          "begin": "#;\\s*\\(",
+          "begin": "#;[[:space:]]*\\(",
           "end": "\\)",
           "patterns": [
             {
@@ -341,7 +341,7 @@
       "patterns": [
         {
           "name": "meta.atom.dune",
-          "match": "\\b[^\\s]+\\b"
+          "match": "\\b[^[[:space:]]]+\\b"
         }
       ]
     }
