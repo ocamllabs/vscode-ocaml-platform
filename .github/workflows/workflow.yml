@@ -37,46 +37,8 @@ jobs:
       - name: Use latest esy
         run: npm install --global esy
 
-      - name: Get opam root directory path
-        id: opam-root-dir-path
-        run: echo "::set-output name=dir::$(opam config var root)"
-
-      # This step is required because esy's home directory doesn't exist at this point
-      - name: Install esy packages
-        run: esy install
-
-      - name: Get esy cache directory path
-        id: esy-cache-dir-path
-        run: node .github/workflows/print_esy_cache.js
-
-      - name: Restore opam cache
-        id: cache-opam
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.opam-root-dir-path.outputs.dir }}
-          # opam cache is coupled to esy lock files, so both caches will be wiped whenever esy deps change
-          key: opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-${{ hashFiles('esy.lock/index.json') }}
-          restore-keys: |
-            opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-
-
-      - name: Restore esy cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.esy-cache-dir-path.outputs.dir }}
-          key: esy-${{ matrix.os }}-${{ hashFiles('esy.lock/index.json') }}
-          restore-keys: esy-${{ matrix.os }}-
-
-      - name: Install opam packages
-        if: steps.cache-opam.outputs.cache-hit != 'true'
-        run: |
-          opam pin ocaml-lsp-server https://github.com/ocaml/ocaml-lsp.git --no-action
-          opam install ocaml-lsp-server ocamlformat reason --yes
-
-      - name: Build esy packages
-        # Cleanup build cache in case dependencies have changed
-        run: |
-          esy build
-          esy cleanup .
+      - name: Install and build esy packages
+        run: esy
 
       - name: Install npm packages
         run: yarn --frozen-lockfile
