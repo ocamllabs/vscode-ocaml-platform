@@ -293,9 +293,8 @@ module Https = struct
                 (resolve
                    (Error
                       (E.Failure
-                         {j|Error occurred while placing request to $url|j} [@explicit_arity
-                                                                              ]))
-                 [@bs]))))
+                         {j|Error occurred while placing request to $url|j}
+                      [@explicit_arity])) [@bs]))))
 end
 
 module Os = struct
