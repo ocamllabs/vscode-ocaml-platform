@@ -20,12 +20,14 @@ module PackageManager = struct
       | Opam
       | Esy
       | Global
+      | Custom
 
     module Hmap = struct
-      type ('opam, 'esy, 'global) t =
+      type ('opam, 'esy, 'global, 'custom) t =
         { opam : 'opam
         ; esy : 'esy
         ; global : 'global
+        ; custom : 'custom
         }
     end
 
@@ -33,6 +35,7 @@ module PackageManager = struct
       | "opam" -> Some Opam
       | "esy" -> Some Esy
       | "global" -> Some Global
+      | "custom" -> Some Custom
       | _ -> None
 
     let ofJson json =
@@ -40,12 +43,14 @@ module PackageManager = struct
       match of_string (string json) with
       | Some s -> s
       | None ->
-        raise (DecodeError "opam | esy | global are the only valid values")
+        raise
+          (DecodeError "opam | esy | global | custom are the only valid values")
 
     let to_string = function
       | Opam -> "opam"
       | Esy -> "esy"
       | Global -> "global"
+      | Custom -> "custom"
 
     let toJson s = Json.Encode.string (to_string s)
   end
@@ -54,17 +59,26 @@ module PackageManager = struct
     | Opam of Opam.t * Opam.Switch.t
     | Esy of Esy.t * Path.t
     | Global
+    | Custom of
+        { ocamllsp : string
+        ; dune : string
+        }
 
   module Setting = struct
     type t =
       | Opam of Opam.Switch.t
       | Esy of Path.t
       | Global
+      | Custom of
+          { ocamllsp : string
+          ; dune : string
+          }
 
     let kind : t -> Kind.t = function
       | Opam _ -> Opam
       | Esy _ -> Esy
       | Global -> Global
+      | Custom _ -> Custom
 
     let ofJson json =
       let open Json.Decode in
@@ -81,6 +95,17 @@ module PackageManager = struct
           field "switch" (fun js -> Opam.Switch.ofString (string js)) json
         in
         Opam switch
+      | Custom ->
+        let command name =
+          match String.trim (field name string json) with
+          | "" ->
+            let error =
+              Printf.sprintf "custom %s command must be non-empty" name
+            in
+            raise (DecodeError error)
+          | command -> command
+        in
+        Custom { ocamllsp = command "ocamllsp"; dune = command "dune" }
 
     let toJson (t : t) =
       let open Json.Encode in
@@ -91,6 +116,9 @@ module PackageManager = struct
         object_ @@ (("root", string @@ Path.toString manifest) :: kind)
       | Opam sw ->
         object_ @@ (("switch", string @@ Opam.Switch.toString sw) :: kind)
+      | Custom { ocamllsp; dune } ->
+        object_
+        @@ (("ocamllsp", string ocamllsp) :: ("dune", string dune) :: kind)
 
     let t = Settings.create ~scope:Workspace ~key:"sandbox" ~ofJson ~toJson
   end
@@ -99,12 +127,14 @@ module PackageManager = struct
     | Esy (_, root) -> Setting.Esy root
     | Opam (_, switch) -> Setting.Opam switch
     | Global -> Setting.Global
+    | Custom { ocamllsp; dune } -> Setting.Custom { ocamllsp; dune }
 
   let toString = function
     | Esy (_, root) -> Printf.sprintf "esy(%s)" (Path.toString root)
     | Opam (_, switch) ->
       Printf.sprintf "opam(%s)" (Opam.Switch.toString switch)
     | Global -> "global"
+    | Custom { ocamllsp; _ } -> Printf.sprintf "custom(%s)" ocamllsp
 end
 
 type resources = PackageManager.t
@@ -115,6 +145,7 @@ let availablePackageManagers () =
   { PackageManager.Kind.Hmap.opam = Opam.make ()
   ; esy = Esy.make ()
   ; global = ()
+  ; custom = ()
   }
 
 let ofSettings () : PackageManager.t option Promise.t =
@@ -157,8 +188,9 @@ let ofSettings () : PackageManager.t option Promise.t =
           (Opam.Switch.toString switch);
         None
       | true -> Some (PackageManager.Opam (opam, switch)) ) )
-  | Some PackageManager.Setting.Global ->
-    Promise.return (Some PackageManager.Global)
+  | Some Global -> Promise.return (Some PackageManager.Global)
+  | Some (Custom { ocamllsp; dune }) ->
+    Promise.return (Some (PackageManager.Custom { ocamllsp; dune }))
 
 let toSettings (pm : PackageManager.t) =
   Settings.set ~section:"ocaml" PackageManager.Setting.t
@@ -184,12 +216,15 @@ module Candidate = struct
     match packageManager with
     | PackageManager.Opam (_, s) ->
       let label = Opam.Switch.toString s in
-      create ~label ?detail ()
+      create ?detail ~label ()
     | Esy (_, p) ->
       create ?detail ~label:(Path.toString p) ~description:"Esy" ()
     | Global ->
       create ?detail ~label:"Global"
         ~description:"Global toolchain inherited from the environment" ()
+    | Custom _ ->
+      create ?detail ~label:"Custom"
+        ~description:"Custom toolchain using configured commands" ()
 
   let ok packageManager = { packageManager; status = Ok () }
 end
@@ -238,14 +273,24 @@ let sandboxCandidates ~workspaceFolders =
               let packageManager = PackageManager.Opam (opam, sw) in
               { Candidate.packageManager; status = Ok () })
   in
+  let global = Candidate.ok PackageManager.Global in
+  let custom =
+    Candidate.ok
+      (PackageManager.Custom { ocamllsp = "ocamllsp"; dune = "dune" })
+    (* doesn't matter what the custom fields are set to here
+       user will input custom commands in [select] *)
+  in
+
   Promise.all2 (esy, opam) >>| fun (esy, opam) ->
-  (Candidate.ok PackageManager.Global :: esy) @ opam
+  (global :: custom :: esy) @ opam
 
 let setupToolChain (kind : PackageManager.t) =
   match kind with
-  | Global -> Ok () |> Promise.resolve
-  | Opam _ -> Ok () |> Promise.resolve
   | Esy (esy, manifest) -> Esy.setupToolchain esy ~manifest
+  | Opam _
+  | Global
+  | Custom _ ->
+    Promise.Result.return ()
 
 let makeResources kind = kind
 
@@ -254,12 +299,28 @@ let select () =
   let workspaceFolders = Vscode.Workspace.workspaceFolders () in
   sandboxCandidates ~workspaceFolders >>= fun candidates ->
   let open Promise.Option.O in
-  selectPackageManager candidates >>= fun { status; packageManager } ->
-  match status with
-  | Error s ->
-    message `Warn "This toolchain is invalid. Error: %s" s;
-    Promise.return None
-  | Ok () -> Promise.Option.return packageManager
+  selectPackageManager candidates >>= function
+  | { status = Ok (); packageManager = Custom _ } ->
+    let options command =
+      let validateInput input =
+        if String.trim input = "" then
+          Some "Custom command must be non-empty"
+        else
+          None
+      in
+      Window.InputBoxOptions.make
+        ~prompt:(Printf.sprintf "Input the command to be used for %s" command)
+        ~value:command ~validateInput ()
+    in
+    Window.showInputBox (options "ocamllsp") >>| String.trim >>= fun ocamllsp ->
+    Window.showInputBox (options "dune") >>| String.trim >>= fun dune ->
+    Promise.Option.return @@ PackageManager.Custom { ocamllsp; dune }
+  | { status; packageManager } -> (
+    match status with
+    | Error s ->
+      message `Warn "This toolchain is invalid. Error: %s" s;
+      Promise.return None
+    | Ok () -> Promise.Option.return packageManager )
 
 let selectAndSave () =
   let open Promise.Option.O in
@@ -274,6 +335,16 @@ let getCommand (t : PackageManager.t) bin args : Path.t * string array =
     | Opam (opam, switch) -> Opam.exec opam ~switch ~args:binArgs
     | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:binArgs
     | Global -> (Path.ofString bin, Array.of_list args)
+    | Custom { ocamllsp; dune } -> (
+      let command =
+        match bin with
+        | "ocamllsp" -> String.split_on_char ' ' ocamllsp
+        | "dune" -> String.split_on_char ' ' dune
+        | _ -> [ bin ]
+      in
+      match command with
+      | bin :: extraArgs -> (Path.ofString bin, Array.of_list (extraArgs @ args))
+      | [] (* impossible *) -> (Path.ofString bin, Array.of_list args) )
   in
   log "getCommand: %s %s" (Path.toString bin) (Js.Array.joinWith " " args);
   (bin, args)

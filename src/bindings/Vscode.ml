@@ -218,6 +218,21 @@ module Window = struct
       [@@bs.obj]
   end
 
+  module InputBoxOptions = struct
+    type t
+
+    external make :
+         ?ignoreFocusOut:bool
+      -> ?password:bool
+      -> ?placeHolder:string
+      -> ?prompt:string
+      -> ?value:string
+      -> ?validateInput:(string -> string option)
+      -> unit
+      -> t = ""
+      [@@bs.obj]
+  end
+
   module MessageItem = struct
     type t
 
@@ -239,6 +254,10 @@ module Window = struct
     _showQuickPickItems (Array.of_list (List.map fst choices)) options
     |> Promise.map (fun choice ->
            choice |. Belt.Option.map (fun q -> List.assq q choices))
+
+  external showInputBox : InputBoxOptions.t -> string option Promise.t
+    = "showInputBox"
+    [@@bs.module "vscode"] [@@bs.scope "window"]
 
   external showInformationMessage : string -> unit Promise.t
     = "showInformationMessage"

@@ -127,13 +127,14 @@ let selectSandbox (instance : Instance.t) () =
 
 let restartInstance (instance : Instance.t) () =
   let (_ : unit Promise.t) =
-    match instance.toolchain with
+    let open Promise.O in
+    Toolchain.ofSettings () >>= function
     | None ->
       selectSandbox instance ();
       Promise.return ()
     | Some toolchain ->
       Instance.stop instance;
-      Instance.start instance toolchain
+      Instance.start instance (Toolchain.makeResources toolchain)
       |> Promise.Result.iterError ~f:Window.showErrorMessage
   in
   ()
