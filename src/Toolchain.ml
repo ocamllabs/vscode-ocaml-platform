@@ -90,19 +90,19 @@ module PackageManager = struct
         in
         Opam switch
       | Custom ->
-        let run = field "run" string json in
-        Custom run
+        let template = field "template" string json in
+        Custom template
 
     let toJson (t : t) =
       let open Json.Encode in
-      let kind = [ ("kind", Kind.toJson (kind t)) ] in
+      let kind = ("kind", Kind.toJson (kind t)) in
       match t with
-      | Global -> Json.Encode.object_ kind
+      | Global -> Json.Encode.object_ [ kind ]
       | Esy manifest ->
-        object_ @@ (("root", string @@ Path.toString manifest) :: kind)
+        object_ [ kind; ("root", string @@ Path.toString manifest) ]
       | Opam sw ->
-        object_ @@ (("switch", string @@ Opam.Switch.toString sw) :: kind)
-      | Custom run -> object_ @@ (("run", string run) :: kind)
+        object_ [ kind; ("switch", string @@ Opam.Switch.toString sw) ]
+      | Custom template -> object_ [ kind; ("template", string template) ]
 
     let t = Settings.create ~scope:Workspace ~key:"sandbox" ~ofJson ~toJson
   end
@@ -111,7 +111,7 @@ module PackageManager = struct
     | Esy (_, root) -> Setting.Esy root
     | Opam (_, switch) -> Setting.Opam switch
     | Global -> Setting.Global
-    | Custom run -> Setting.Custom run
+    | Custom template -> Setting.Custom template
 
   let toString = function
     | Esy (_, root) -> Printf.sprintf "esy(%s)" (Path.toString root)
@@ -173,7 +173,8 @@ let ofSettings () : PackageManager.t option Promise.t =
         None
       | true -> Some (PackageManager.Opam (opam, switch)) ) )
   | Some Global -> Promise.return (Some PackageManager.Global)
-  | Some (Custom run) -> Promise.return (Some (PackageManager.Custom run))
+  | Some (Custom template) ->
+    Promise.return (Some (PackageManager.Custom template))
 
 let toSettings (pm : PackageManager.t) =
   Settings.set ~section:"ocaml" PackageManager.Setting.t
@@ -294,8 +295,8 @@ let select () =
       Window.InputBoxOptions.make ~prompt:"Input a custom command template"
         ~value:"$prog $args" ~validateInput ()
     in
-    Window.showInputBox options >>| String.trim >>= fun run ->
-    Promise.Option.return @@ PackageManager.Custom run
+    Window.showInputBox options >>| String.trim >>= fun template ->
+    Promise.Option.return @@ PackageManager.Custom template
   | { status; packageManager } -> (
     match status with
     | Error s ->
@@ -316,35 +317,37 @@ let getCommand (t : PackageManager.t) bin args : Path.t * string array =
     | Opam (opam, switch) -> Opam.exec opam ~switch ~args:binArgs
     | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:binArgs
     | Global -> (Path.ofString bin, Array.of_list args)
-    | Custom run -> (
-      match
-        run
+    | Custom template ->
+      let shell = Env.shell () in
+      let command =
+        template
         |> Js.String.replace "$prog" bin
-        |> Js.String.replace "$args" (String.concat "" args)
-        |> String.split_on_char ' '
-        |> List.filter (fun arg -> arg != "")
-      with
-      | bin :: args -> (Path.ofString bin, Array.of_list args)
-      | [] (* impossible *) -> (Path.ofString bin, Array.of_list args) )
+        |> Js.String.replace "$args" (String.concat " " args)
+        |> String.trim
+      in
+      let args =
+        match Path.basename (Path.ofString shell) with
+        | "cmd.exe" -> [ "/d"; "/s"; "c"; command ]
+        | _ -> [ "-c"; command ]
+      in
+      (Path.ofString shell, Array.of_list args)
   in
   log "getCommand: %s %s" (Path.toString bin) (Js.Array.joinWith " " args);
   (bin, args)
 
-let getLspCommand (t : PackageManager.t) : Path.t * string array =
-  getCommand t "ocamllsp" []
+let getLspCommand ?(args = []) (t : PackageManager.t) : Path.t * string array =
+  getCommand t "ocamllsp" args
 
 let getDuneCommand (t : PackageManager.t) args : Path.t * string array =
   getCommand t "dune" args
-
-let addLspCheckArg args = Array.append args [| "--help=plain" |]
 
 let runSetup resources =
   let open Promise.Result.O in
   setupToolChain resources
   >>= (fun () ->
-        let cmd, args = getLspCommand resources in
-        Cmd.make ~cmd () >>= fun cmd ->
-        Cmd.output cmd ~args:(addLspCheckArg args))
+        let args = [ "--help=plain" ] in
+        let cmd, args = getLspCommand resources ~args in
+        Cmd.make ~cmd () >>= fun cmd -> Cmd.output cmd ~args)
   |> Promise.map (function
        | Ok _ -> Ok ()
        | Error msg -> Error {j|Toolchain initialisation failed: $msg|j})

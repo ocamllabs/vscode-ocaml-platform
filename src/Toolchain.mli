@@ -78,7 +78,7 @@ val getCommand : resources -> string -> string list -> Path.t * string array
 
 (** Extract lsp command and arguments (Eg. "opam" and [| "exec";
    "ocamllsp" |] *)
-val getLspCommand : resources -> Path.t * string array
+val getLspCommand : ?args:string list -> resources -> Path.t * string array
 
 (** Extract a dune command *)
 val getDuneCommand : resources -> string list -> Path.t * string array
