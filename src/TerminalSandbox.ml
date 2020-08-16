@@ -5,7 +5,10 @@ module ShellPath = struct
 
   let ofJson json =
     let open Json.Decode in
-    withDefault (Env.shell ()) string json
+    match string json with
+    | exception DecodeError _ -> Env.shell ()
+    | "" -> Env.shell ()
+    | shell -> shell
 
   let toJson (t : t) =
     let open Json.Encode in
