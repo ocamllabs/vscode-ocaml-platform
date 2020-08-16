@@ -59,20 +59,14 @@ module PackageManager = struct
     | Opam of Opam.t * Opam.Switch.t
     | Esy of Esy.t * Path.t
     | Global
-    | Custom of
-        { ocamllsp : string
-        ; dune : string
-        }
+    | Custom of string
 
   module Setting = struct
     type t =
       | Opam of Opam.Switch.t
       | Esy of Path.t
       | Global
-      | Custom of
-          { ocamllsp : string
-          ; dune : string
-          }
+      | Custom of string
 
     let kind : t -> Kind.t = function
       | Opam _ -> Opam
@@ -96,16 +90,8 @@ module PackageManager = struct
         in
         Opam switch
       | Custom ->
-        let command name =
-          match String.trim (field name string json) with
-          | "" ->
-            let error =
-              Printf.sprintf "custom %s command must be non-empty" name
-            in
-            raise (DecodeError error)
-          | command -> command
-        in
-        Custom { ocamllsp = command "ocamllsp"; dune = command "dune" }
+        let run = field "run" string json in
+        Custom run
 
     let toJson (t : t) =
       let open Json.Encode in
@@ -116,9 +102,7 @@ module PackageManager = struct
         object_ @@ (("root", string @@ Path.toString manifest) :: kind)
       | Opam sw ->
         object_ @@ (("switch", string @@ Opam.Switch.toString sw) :: kind)
-      | Custom { ocamllsp; dune } ->
-        object_
-        @@ (("ocamllsp", string ocamllsp) :: ("dune", string dune) :: kind)
+      | Custom run -> object_ @@ (("run", string run) :: kind)
 
     let t = Settings.create ~scope:Workspace ~key:"sandbox" ~ofJson ~toJson
   end
@@ -127,14 +111,14 @@ module PackageManager = struct
     | Esy (_, root) -> Setting.Esy root
     | Opam (_, switch) -> Setting.Opam switch
     | Global -> Setting.Global
-    | Custom { ocamllsp; dune } -> Setting.Custom { ocamllsp; dune }
+    | Custom run -> Setting.Custom run
 
   let toString = function
     | Esy (_, root) -> Printf.sprintf "esy(%s)" (Path.toString root)
     | Opam (_, switch) ->
       Printf.sprintf "opam(%s)" (Opam.Switch.toString switch)
     | Global -> "global"
-    | Custom { ocamllsp; _ } -> Printf.sprintf "custom(%s)" ocamllsp
+    | Custom _ -> "custom"
 end
 
 type resources = PackageManager.t
@@ -189,8 +173,7 @@ let ofSettings () : PackageManager.t option Promise.t =
         None
       | true -> Some (PackageManager.Opam (opam, switch)) ) )
   | Some Global -> Promise.return (Some PackageManager.Global)
-  | Some (Custom { ocamllsp; dune }) ->
-    Promise.return (Some (PackageManager.Custom { ocamllsp; dune }))
+  | Some (Custom run) -> Promise.return (Some (PackageManager.Custom run))
 
 let toSettings (pm : PackageManager.t) =
   Settings.set ~section:"ocaml" PackageManager.Setting.t
@@ -224,7 +207,7 @@ module Candidate = struct
         ~description:"Global toolchain inherited from the environment" ()
     | Custom _ ->
       create ?detail ~label:"Custom"
-        ~description:"Custom toolchain using configured commands" ()
+        ~description:"Custom toolchain using a command template" ()
 
   let ok packageManager = { packageManager; status = Ok () }
 end
@@ -275,8 +258,7 @@ let sandboxCandidates ~workspaceFolders =
   in
   let global = Candidate.ok PackageManager.Global in
   let custom =
-    Candidate.ok
-      (PackageManager.Custom { ocamllsp = "ocamllsp"; dune = "dune" })
+    Candidate.ok (PackageManager.Custom "$prog $args")
     (* doesn't matter what the custom fields are set to here
        user will input custom commands in [select] *)
   in
@@ -301,20 +283,19 @@ let select () =
   let open Promise.Option.O in
   selectPackageManager candidates >>= function
   | { status = Ok (); packageManager = Custom _ } ->
-    let options command =
-      let validateInput input =
-        if String.trim input = "" then
-          Some "Custom command must be non-empty"
-        else
-          None
-      in
-      Window.InputBoxOptions.make
-        ~prompt:(Printf.sprintf "Input the command to be used for %s" command)
-        ~value:command ~validateInput ()
+    let validateInput input =
+      if Js.String.includes "$prog" input && Js.String.includes "$args" input
+      then
+        None
+      else
+        Some "Command template must include $prog and $args"
     in
-    Window.showInputBox (options "ocamllsp") >>| String.trim >>= fun ocamllsp ->
-    Window.showInputBox (options "dune") >>| String.trim >>= fun dune ->
-    Promise.Option.return @@ PackageManager.Custom { ocamllsp; dune }
+    let options =
+      Window.InputBoxOptions.make ~prompt:"Input a custom command template"
+        ~value:"$prog $args" ~validateInput ()
+    in
+    Window.showInputBox options >>| String.trim >>= fun run ->
+    Promise.Option.return @@ PackageManager.Custom run
   | { status; packageManager } -> (
     match status with
     | Error s ->
@@ -335,15 +316,15 @@ let getCommand (t : PackageManager.t) bin args : Path.t * string array =
     | Opam (opam, switch) -> Opam.exec opam ~switch ~args:binArgs
     | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:binArgs
     | Global -> (Path.ofString bin, Array.of_list args)
-    | Custom { ocamllsp; dune } -> (
-      let command =
-        match bin with
-        | "ocamllsp" -> String.split_on_char ' ' ocamllsp
-        | "dune" -> String.split_on_char ' ' dune
-        | _ -> [ bin ]
-      in
-      match command with
-      | bin :: extraArgs -> (Path.ofString bin, Array.of_list (extraArgs @ args))
+    | Custom run -> (
+      match
+        run
+        |> Js.String.replace "$prog" bin
+        |> Js.String.replace "$args" (String.concat "" args)
+        |> String.split_on_char ' '
+        |> List.filter (fun arg -> arg != "")
+      with
+      | bin :: args -> (Path.ofString bin, Array.of_list args)
       | [] (* impossible *) -> (Path.ofString bin, Array.of_list args) )
   in
   log "getCommand: %s %s" (Path.toString bin) (Js.Array.joinWith " " args);

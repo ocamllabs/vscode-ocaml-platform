@@ -21,10 +21,7 @@ module PackageManager : sig
     | Opam of Opam.t * Opam.Switch.t
     | Esy of Esy.t * Path.t
     | Global
-    | Custom of
-        { ocamllsp : string
-        ; dune : string
-        }
+    | Custom of string
 
   val toString : t -> string
 end
