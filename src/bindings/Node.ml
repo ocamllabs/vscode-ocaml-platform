@@ -43,6 +43,8 @@ module Buffer = struct
 
   external from : string -> t = "from" [@@bs.val] [@@bs.scope "Buffer"]
 
+  external concat : t array -> t = "concat" [@@bs.val] [@@bs.scope "Buffer"]
+
   let ofString = from
 end
 
@@ -172,9 +174,15 @@ module Fs = struct
 end
 
 module ChildProcess = struct
-  type t = < exitCode : int > Js.t
+  type t =
+    < exitCode : int
+    ; stdout : Stream.t
+    ; stderr : Stream.t
+    ; stdin : Stream.t >
+    Js.t
 
-  external get_stdin : t -> Stream.t = "stdin" [@@bs.get]
+  external on : t -> ([ `close of int -> unit ][@bs.string]) -> unit = "on"
+    [@@bs.send]
 
   module Options = struct
     type t
@@ -186,7 +194,7 @@ module ChildProcess = struct
   external exec :
        string
     -> Options.t
-    -> (JsError.t Js.Nullable.t -> string -> string -> unit)
+    -> (< code : int > Js.t Js.Nullable.t -> string -> string -> unit)
     -> t = "exec"
     [@@bs.val] [@@bs.module "child_process"]
 
@@ -198,15 +206,49 @@ module ChildProcess = struct
 
   let exec cmd ?stdin options =
     Promise.make @@ fun ~resolve ~reject:_ ->
-    let cp = ref [%bs.obj { exitCode = 0 }] in
-    cp :=
-      exec cmd options (fun _err stdout stderr ->
-          (resolve { exitCode = !cp##exitCode; stdout; stderr } [@bs]));
+    let cp =
+      exec cmd options (fun err stdout stderr ->
+          let exitCode =
+            match Js.Nullable.toOption err with
+            | None -> 0
+            | Some err -> err##code
+          in
+          (resolve { exitCode; stdout; stderr } [@bs]))
+    in
     match stdin with
     | Some text ->
-      let stdinStream = get_stdin !cp in
-      Stream.write stdinStream text;
-      Stream.end_ stdinStream
+      Stream.write cp##stdin text;
+      Stream.end_ cp##stdin
+    | None -> ()
+
+  external spawn : string -> string array -> Options.t -> t = "spawn"
+    [@@bs.val] [@@bs.module "child_process"]
+
+  let spawn cmd args ?stdin options =
+    Promise.make @@ fun ~resolve ~reject:_ ->
+    let cp = spawn cmd args options in
+
+    let stdout = ref (Buffer.ofString "") in
+    Stream.on cp##stdout "data" (fun data ->
+        stdout := Buffer.concat [| !stdout; data |]);
+
+    let stderr = ref (Buffer.ofString "") in
+    Stream.on cp##stderr "data" (fun data ->
+        stderr := Buffer.concat [| !stderr; data |]);
+
+    on cp
+    @@ `close
+         (fun code ->
+           (resolve
+              { exitCode = code
+              ; stdout = Buffer.toString !stdout
+              ; stderr = Buffer.toString !stderr
+              } [@bs]));
+
+    match stdin with
+    | Some text ->
+      Stream.write cp##stdin text;
+      Stream.end_ cp##stdin
     | None -> ()
 end
 

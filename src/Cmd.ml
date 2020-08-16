@@ -46,22 +46,26 @@ let make ?(env = Process.env) ~cmd () =
       | Some cmd -> Ok { cmd; env } )
 
 let output ~args ?cwd ?stdin { cmd; env } =
-  (* TODO use ChildProcess.spawn to get rid of this pointless concatenation *)
-  let shellString =
-    Js.Array.joinWith " " (Js.Array.concat args [| Path.toString cmd |])
+  let quote arg =
+    (* escape double quotes *)
+    let escape = Js.String.replaceByRe [%re "/\"/g"] "\\\"" in
+    "\"" ^ escape arg ^ "\""
   in
+  let cmdString = Path.toString cmd in
+  let argString = Js.Array.joinWith " " (Array.map quote args) in
   let cwd =
     match cwd with
     | None -> None
     | Some cwd -> Some (Path.toString cwd)
   in
-  ChildProcess.exec shellString ?stdin (ChildProcess.Options.make ?cwd ~env ())
-  |> Promise.map (fun (res : ChildProcess.return) ->
+  ChildProcess.spawn cmdString args ?stdin
+    (ChildProcess.Options.make ?cwd ~env ())
+  |> Promise.map (fun (result : ChildProcess.return) ->
          let () =
            let message =
-             [ ("cmd", Log.field (Path.toString cmd))
-             ; ("args", Log.field (Js.Array.joinWith " " args))
-             ; ("result", Log.field res)
+             [ ("cmd", Log.field cmdString)
+             ; ("args", Log.field argString)
+             ; ("result", Log.field result)
              ]
            in
            let message =
@@ -71,8 +75,9 @@ let output ~args ?cwd ?stdin { cmd; env } =
            in
            logJson "external command" message
          in
-         if res.exitCode = 0 then
-           Ok res.stdout
+         if result.exitCode = 0 then
+           Ok result.stdout
          else
-           let stderr = res.stderr in
-           Error {j| Command $shellString failed $stderr |j})
+           let shellString = String.concat " " [ cmdString; argString ] in
+           let stderr = result.stderr in
+           Error {j| Command $shellString failed: $stderr |j})
