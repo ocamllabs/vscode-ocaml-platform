@@ -17,3 +17,5 @@ val output :
   -> (stdout, stderr) result Promise.t
 
 val binPath : t -> Path.t
+
+val formatArgs : string array -> string

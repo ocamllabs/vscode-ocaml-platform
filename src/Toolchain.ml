@@ -332,7 +332,7 @@ let getCommand (t : PackageManager.t) bin args : Path.t * string array =
       in
       (Path.ofString shell, Array.of_list args)
   in
-  log "getCommand: %s %s" (Path.toString bin) (Js.Array.joinWith " " args);
+  log "getCommand: %s %s" (Path.toString bin) (Cmd.formatArgs args);
   (bin, args)
 
 let getLspCommand ?(args = []) (t : PackageManager.t) : Path.t * string array =

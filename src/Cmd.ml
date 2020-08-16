@@ -45,14 +45,17 @@ let make ?(env = Process.env) ~cmd () =
       | None -> Error {j| Command "$cmd" not found |j}
       | Some cmd -> Ok { cmd; env } )
 
-let output ~args ?cwd ?stdin { cmd; env } =
+let formatArgs args =
   let quote arg =
     (* escape double quotes *)
     let escape = Js.String.replaceByRe [%re "/\"/g"] "\\\"" in
     "\"" ^ escape arg ^ "\""
   in
+  Js.Array.joinWith " " (Array.map quote args)
+
+let output ~args ?cwd ?stdin { cmd; env } =
   let cmdString = Path.toString cmd in
-  let argString = Js.Array.joinWith " " (Array.map quote args) in
+  let argString = formatArgs args in
   let cwd =
     match cwd with
     | None -> None
