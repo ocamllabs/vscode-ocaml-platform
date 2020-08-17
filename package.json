@@ -13,7 +13,7 @@
     "url": "https://github.com/ocamllabs/vscode-ocaml-platform/issues"
   },
   "homepage": "https://github.com/ocamllabs/vscode-ocaml-platform",
-  "main": "./dist/extension.js",
+  "main": "./dist/index.js",
   "engines": {
     "vscode": "^1.43.0"
   },
@@ -525,10 +525,10 @@
   "scripts": {
     "clean": "bsb -clean",
     "build:bsb": "bsb -make-world",
-    "build:webpack": "webpack --mode production",
+    "build:ncc": "ncc build src/Extension.bs.js",
     "build": "npm-run-all -s clean build:*",
     "watch:bsb": "bsb -make-world -w",
-    "watch:webpack": "webpack --mode development --watch",
+    "watch:ncc": "ncc build src/Extension.bs.js --watch",
     "watch": "npm-run-all -p watch:*",
     "test:unit": "jest src",
     "test:esy": "node ./test/runEsyTests.js",
@@ -550,19 +550,15 @@
   "devDependencies": {
     "@glennsl/bs-jest": "0.5.1",
     "@glennsl/bs-json": "5.0.2",
+    "@vercel/ncc": "0.23.0",
     "bs-platform": "7.3.2",
-    "clean-webpack-plugin": "3.0.0",
     "fs-extra": "9.0.1",
     "jest-cli": "26.4.0",
     "mocha": "7.2.0",
     "npm-run-all": "4.1.5",
     "prettier": "2.0.5",
-    "terser-webpack-plugin": "4.1.0",
     "vsce": "1.78.0",
     "vscode": "1.1.37",
-    "vscode-test": "1.4.0",
-    "webpack": "4.44.1",
-    "webpack-cli": "3.3.12",
-    "webpackbar": "4.0.0"
+    "vscode-test": "1.4.0"
   }
 }
