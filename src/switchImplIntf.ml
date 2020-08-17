@@ -6,7 +6,7 @@ end = struct
   let switch client document =
     let targetFileName : string option Promise.t =
       LanguageClient.sendRequest client ~meth:"ocamllsp/didSwitchImplIntf"
-        ~data:(document : TextDocument.t)
+        ~data:(document.TextDocument.fileName : string)
         ()
     in
     targetFileName
