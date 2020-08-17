@@ -6,6 +6,8 @@ type t =
 
 val t : t
 
+val shell : Path.t
+
 module Map : sig
   type platform
 

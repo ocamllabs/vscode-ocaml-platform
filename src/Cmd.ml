@@ -61,10 +61,10 @@ let check t =
 let toSpawn = function
   | Spawn spawn -> spawn
   | Shell commandLine ->
-    let shell = Path.ofString (Env.shell ()) in
+    let shell = Platform.shell in
     let args =
       match Path.basename shell with
-      | "cmd.exe" -> [ "/d"; "/s"; "c"; commandLine ]
+      | "cmd.exe" -> [ "/d"; "/s"; "/c"; commandLine ]
       | _ -> [ "-c"; commandLine ]
     in
     { bin = shell; args }

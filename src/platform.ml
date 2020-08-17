@@ -14,6 +14,16 @@ let of_string = function
 
 let t = of_string Process.platform
 
+let shell =
+  match t with
+  | Darwin
+  | Linux
+  | Other ->
+    Path.ofString "/bin/sh"
+  | Win32 ->
+    let comSpec = Js.Dict.get Process.env "ComSpec" in
+    Path.ofString (Option.getWithDefault comSpec "cmd.exe")
+
 module Map = struct
   type 'a t =
     { win32 : 'a
