@@ -1,9 +1,13 @@
 open Import
 
+type spawn = [ `Spawn of Path.t * string list ]
+
+type shell = [ `Shell of string ]
+
 type t =
-  { cmd : Path.t
-  ; env : string Js.Dict.t
-  }
+  [ spawn
+  | shell
+  ]
 
 type stdout = string
 
@@ -11,7 +15,7 @@ type stderr = string
 
 let pathMissingFromEnv = "'PATH' variable not found in the environment"
 
-let binPath c = c.cmd
+let append (`Spawn (bin, args1)) args2 = `Spawn (bin, args1 @ args2)
 
 let candidateFns =
   if Sys.unix then
@@ -33,54 +37,68 @@ let which path fn =
                 | true -> Some p
                 | false -> None))
 
-let make ?(env = Process.env) ~cmd () =
-  if Path.isAbsolute cmd then
-    Promise.Result.return { env; cmd }
-  else
-    match Js.Dict.get env "PATH" with
-    | None -> Error pathMissingFromEnv |> Promise.resolve
-    | Some path -> (
-      let open Promise.O in
-      which path cmd >>| function
-      | None -> Error {j| Command "$cmd" not found |j}
-      | Some cmd -> Ok { cmd; env } )
+let check t =
+  match t with
+  | `Shell _ -> Promise.Result.return t
+  | `Spawn (bin, args) -> (
+    if Path.isAbsolute bin then
+      Promise.Result.return t
+    else
+      match Js.Dict.get Process.env "PATH" with
+      | None -> Error pathMissingFromEnv |> Promise.resolve
+      | Some path -> (
+        let open Promise.O in
+        which path bin >>| function
+        | None -> Error {j| Command "$bin" not found |j}
+        | Some bin -> Ok (`Spawn (bin, args)) ) )
 
-let formatArgs args =
-  let quote arg =
-    (* escape double quotes *)
-    let escape = Js.String.replaceByRe [%re "/\"/g"] "\\\"" in
-    "\"" ^ escape arg ^ "\""
+let toSpawn = function
+  | `Spawn (bin, args) -> `Spawn (bin, args)
+  | `Shell commandLine ->
+    let shell = Path.ofString (Env.shell ()) in
+    let args =
+      match Path.basename shell with
+      | "cmd.exe" -> [ "/d"; "/s"; "c"; commandLine ]
+      | _ -> [ "-c"; commandLine ]
+    in
+    `Spawn (shell, args)
+
+let run ?cwd ?stdin = function
+  | `Spawn (bin, args) ->
+    ChildProcess.spawn (Path.toString bin) (Array.of_list args) ?stdin
+      (ChildProcess.Options.make ?cwd ())
+  | `Shell commandLine ->
+    ChildProcess.exec commandLine ?stdin (ChildProcess.Options.make ?cwd ())
+
+let log ?(cwd : string option) ?(result : ChildProcess.return option) (t : t) =
+  let message =
+    match t with
+    | `Spawn (bin, args) ->
+      [ ("bin", Log.field (Path.toString bin))
+      ; ("args", Log.field (Json.Encode.list Json.Encode.string args))
+      ]
+    | `Shell commandLine -> [ ("shell", Log.field commandLine) ]
   in
-  Js.Array.joinWith " " (Array.map quote args)
-
-let output ~args ?cwd ?stdin { cmd; env } =
-  let cmdString = Path.toString cmd in
-  let argString = formatArgs args in
-  let cwd =
+  let message =
     match cwd with
-    | None -> None
-    | Some cwd -> Some (Path.toString cwd)
+    | None -> message
+    | Some cwd -> ("cwd", Log.field cwd) :: message
   in
-  ChildProcess.spawn cmdString args ?stdin
-    (ChildProcess.Options.make ?cwd ~env ())
-  |> Promise.map (fun (result : ChildProcess.return) ->
-         let () =
-           let message =
-             [ ("cmd", Log.field cmdString)
-             ; ("args", Log.field argString)
-             ; ("result", Log.field result)
-             ]
-           in
-           let message =
-             match cwd with
-             | None -> message
-             | Some cwd -> ("cwd", Log.field cwd) :: message
-           in
-           logJson "external command" message
-         in
-         if result.exitCode = 0 then
-           Ok result.stdout
-         else
-           let shellString = String.concat " " [ cmdString; argString ] in
-           let stderr = result.stderr in
-           Error {j| Command $shellString failed: $stderr |j})
+  let message =
+    match result with
+    | None -> message
+    | Some result -> ("result", Log.field result) :: message
+  in
+  logJson "external command" message
+
+let output ?cwd ?stdin (t : t) =
+  let cwd = Option.map cwd Path.toString in
+  let open Promise.O in
+  run ?cwd ?stdin t >>| fun (result : ChildProcess.return) ->
+  log ?cwd ~result t;
+  if result.exitCode = 0 then
+    Ok result.stdout
+  else
+    let stderr = result.stderr in
+    Error
+      {j| Command failed with $stderr. See output channel for more details |j}

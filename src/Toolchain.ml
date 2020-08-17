@@ -310,35 +310,24 @@ let selectAndSave () =
   let open Promise.O in
   toSettings packageManager >>| fun () -> Some packageManager
 
-let getCommand (t : PackageManager.t) bin args : Path.t * string array =
-  let binArgs = Array.of_list (bin :: args) in
-  let bin, args =
-    match t with
-    | Opam (opam, switch) -> Opam.exec opam ~switch ~args:binArgs
-    | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:binArgs
-    | Global -> (Path.ofString bin, Array.of_list args)
-    | Custom template ->
-      let shell = Env.shell () in
-      let command =
-        template
-        |> Js.String.replace "$prog" bin
-        |> Js.String.replace "$args" (String.concat " " args)
-        |> String.trim
-      in
-      let args =
-        match Path.basename (Path.ofString shell) with
-        | "cmd.exe" -> [ "/d"; "/s"; "c"; command ]
-        | _ -> [ "-c"; command ]
-      in
-      (Path.ofString shell, Array.of_list args)
-  in
-  log "getCommand: %s %s" (Path.toString bin) (Cmd.formatArgs args);
-  (bin, args)
+let getCommand (t : PackageManager.t) bin args : Cmd.t =
+  match t with
+  | Opam (opam, switch) -> Opam.exec opam ~switch ~args:(bin :: args)
+  | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:(bin :: args)
+  | Global -> `Spawn (Path.ofString bin, args)
+  | Custom template ->
+    let command =
+      template
+      |> Js.String.replace "$prog" bin
+      |> Js.String.replace "$args" (String.concat " " args)
+      |> String.trim
+    in
+    `Shell command
 
-let getLspCommand ?(args = []) (t : PackageManager.t) : Path.t * string array =
+let getLspCommand ?(args = []) (t : PackageManager.t) : Cmd.t =
   getCommand t "ocamllsp" args
 
-let getDuneCommand (t : PackageManager.t) args : Path.t * string array =
+let getDuneCommand (t : PackageManager.t) args : Cmd.t =
   getCommand t "dune" args
 
 let runSetup resources =
@@ -346,8 +335,8 @@ let runSetup resources =
   setupToolChain resources
   >>= (fun () ->
         let args = [ "--help=plain" ] in
-        let cmd, args = getLspCommand resources ~args in
-        Cmd.make ~cmd () >>= fun cmd -> Cmd.output cmd ~args)
+        let command = getLspCommand resources ~args in
+        Cmd.check command >>= fun cmd -> Cmd.output cmd)
   |> Promise.map (function
        | Ok _ -> Ok ()
        | Error msg -> Error {j|Toolchain initialisation failed: $msg|j})

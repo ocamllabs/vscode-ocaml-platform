@@ -13,13 +13,13 @@ let getFormatter toolchain =
   in
   (* text of entire document *)
   let documentText = TextDocument.getText document fullDocumentRange in
-
-  let cmd, args = Toolchain.getDuneCommand toolchain [ "format-dune-file" ] in
+  let command = Toolchain.getDuneCommand toolchain [ "format-dune-file" ] in
+  let output =
+    let open Promise.Result.O in
+    Cmd.check command >>= fun command -> Cmd.output ~stdin:documentText command
+  in
   let open Promise.O in
-  (Cmd.make ~cmd () >>= function
-   | Ok command -> Cmd.output command ~args ~stdin:documentText
-   | Error _ -> Promise.resolve (Error "could not find dune executable"))
-  >>| function
+  output >>| function
   | Ok stdout -> [| TextEdit.replace fullDocumentRange stdout |]
   | Error msg ->
     message `Error "Dune formatting failed: %s" msg;

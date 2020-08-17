@@ -18,13 +18,13 @@ end
 
 let binary = Path.ofString "opam"
 
-type t = Cmd.t
+type t = Cmd.spawn
 
 let make () =
-  Cmd.make ~cmd:binary ()
-  |> Promise.map (function
-       | Error _ -> None
-       | Ok cmd -> Some cmd)
+  let open Promise.O in
+  `Spawn (binary, []) |> Cmd.check >>| function
+  | Error _ -> None
+  | Ok cmd -> Some cmd
 
 let parseSwitchList out =
   let lines = String.split_on_char '\n' out in
@@ -55,21 +55,24 @@ let parseEnvOutput (opamEnvOutput : string) =
     | kvs -> Ok (Js.Dict.fromList kvs) )
 
 let switchList t =
-  Cmd.output t ~args:[| "switch"; "list"; "-s" |]
-  |> Promise.map (function
-       | Error _ ->
-         message `Warn "Unable to read the list of switches.";
-         []
-       | Ok out -> parseSwitchList out)
+  let command = Cmd.append t [ "switch"; "list"; "-s" ] in
+  let open Promise.O in
+  Cmd.output command >>| function
+  | Error _ ->
+    message `Warn "Unable to read the list of switches.";
+    []
+  | Ok out -> parseSwitchList out
 
 let switchArg switch = "--switch=" ^ Switch.toString switch
 
 let env t ~switch =
-  let args = [| "env"; "--sexp"; switchArg switch |] in
-  Cmd.output t ~args |> Promise.map (Result.bind ~f:parseEnvOutput)
+  let command = Cmd.append t [ "env"; "--sexp"; switchArg switch ] in
+  let open Promise.O in
+  Cmd.output command >>| Result.bind ~f:parseEnvOutput
 
 let exec t ~switch ~args =
-  (Cmd.binPath t, Array.append [| "exec"; switchArg switch; "--" |] args)
+  Cmd.append t ("exec" :: switchArg switch :: "--" :: args)
 
 let exists t ~switch =
-  switchList t |> Promise.map (List.exists (fun sw -> sw = switch))
+  let open Promise.O in
+  switchList t >>| List.exists (fun sw -> sw = switch)

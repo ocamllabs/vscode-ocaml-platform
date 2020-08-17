@@ -67,11 +67,13 @@ let create toolchain =
   let open Option in
   getShellPath () >>= fun shellPath ->
   getShellArgs () >>| fun shellArgs ->
-  let shellPath, shellArgs =
-    Toolchain.getCommand toolchain shellPath shellArgs
+  let (`Spawn (shellPath, shellArgs) as command) =
+    Cmd.toSpawn (Toolchain.getCommand toolchain shellPath shellArgs)
   in
+  Cmd.log command;
   let name = Toolchain.toString toolchain in
   let shellPath = Path.toString shellPath in
+  let shellArgs = Array.of_list shellArgs in
   Window.createTerminal ~name ~shellPath ~shellArgs ()
 
 let dispose = Window.Terminal.dispose

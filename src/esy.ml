@@ -1,6 +1,6 @@
 open Import
 
-type t = Cmd.t
+type t = Cmd.spawn
 
 let binary = Path.ofString "esy"
 
@@ -10,20 +10,23 @@ type discover =
   }
 
 let make () =
-  Cmd.make ~cmd:binary ()
-  |> Promise.map (function
-       | Error _ -> None
-       | Ok cmd -> Some cmd)
+  let open Promise.O in
+  `Spawn (binary, []) |> Cmd.check >>| function
+  | Error _ -> None
+  | Ok cmd -> Some cmd
 
 let env t ~manifest =
-  Cmd.output t ~args:[| "command-env"; "--json"; "-P"; Path.toString manifest |]
-  |> Promise.map
-       (Result.bind ~f:(fun stdout ->
-            match Json.parse stdout with
-            | Some json -> Ok (Json.Decode.dict Json.Decode.string json)
-            | None ->
-              (* Make this a fatal error. There's no need to try very hard here *)
-              assert false))
+  let command =
+    Cmd.append t [ "command-env"; "--json"; "-P"; Path.toString manifest ]
+  in
+  let open Promise.Result.O in
+  Cmd.output command >>= fun stdout ->
+  match Json.parse stdout with
+  | Some json ->
+    Promise.Result.return (Json.Decode.dict Json.Decode.string json)
+  | None ->
+    (* Make this a fatal error. There's no need to try very hard here *)
+    assert false
 
 module Discover = struct
   let valid file = Some { file; status = Ok () }
@@ -36,22 +39,22 @@ module Discover = struct
       Promise.return (valid projectRoot)
     | s when Filename.extension s = ".opam" ->
       Promise.return (valid projectRoot)
-    | "package.json" as fname ->
+    | "package.json" as fname -> (
       let manifestFile = Path.(projectRoot / fname) |> Path.toString in
-      Fs.readFile manifestFile
-      |> Promise.map (fun manifest ->
-             match Json.parse manifest with
-             | None -> invalid_json projectRoot
-             | Some json ->
-               if
-                 ( propertyExists json "dependencies"
-                 || propertyExists json "devDependencies" )
-                 && propertyExists json "esy"
-               then
-                 valid projectRoot
-               else
-                 None)
-    | _ -> None |> Promise.resolve
+      let open Promise.O in
+      Fs.readFile manifestFile >>| fun manifest ->
+      match Json.parse manifest with
+      | None -> invalid_json projectRoot
+      | Some json ->
+        if
+          ( propertyExists json "dependencies"
+          || propertyExists json "devDependencies" )
+          && propertyExists json "esy"
+        then
+          valid projectRoot
+        else
+          None )
+    | _ -> Promise.return None
 
   let parseDir dir =
     let open Promise.O in
@@ -77,14 +80,15 @@ module Discover = struct
     loop [] dir
 
   let run ~dir : discover list Promise.t =
-    dir |> parseDirsUp |> Array.of_list |> Promise.all
-    |> Promise.map (fun x -> Array.to_list (Js.Array.concatMany x [||]))
+    let open Promise.O in
+    dir |> parseDirsUp |> Array.of_list |> Promise.all >>| fun x ->
+    Array.to_list (Js.Array.concatMany x [||])
 end
 
 let discover = Discover.run
 
 let exec t ~manifest ~args =
-  (Cmd.binPath t, Array.append [| "-P"; Path.toString manifest |] args)
+  Cmd.append t ("-P" :: Path.toString manifest :: args)
 
 module State = struct
   type t =
@@ -94,16 +98,18 @@ end
 
 let state t ~manifest =
   let rootStr = Path.toString manifest in
-  Cmd.output t ~args:[| "status"; "-P"; rootStr |]
-  |> Promise.map (function
-       | Error _ -> Ok false
-       | Ok esyOutput -> (
-         match Json.parse esyOutput with
-         | None -> Ok false
-         | Some esyResponse ->
-           esyResponse
-           |> Json.Decode.field "isProjectReadyForDev" Json.Decode.bool
-           |> Result.return ))
+  let command = Cmd.append t [ "status"; "-P"; rootStr ] in
+  let open Promise.O in
+  Cmd.output command
+  >>| (function
+        | Error _ -> Ok false
+        | Ok esyOutput -> (
+          match Json.parse esyOutput with
+          | None -> Ok false
+          | Some esyResponse ->
+            esyResponse
+            |> Json.Decode.field "isProjectReadyForDev" Json.Decode.bool
+            |> Result.return ))
   |> Promise.Result.map (fun isProjectReadyForDev ->
          if isProjectReadyForDev then
            State.Ready
@@ -116,8 +122,4 @@ let setupToolchain t ~manifest =
   | State.Ready -> ()
   | Pending ->
     let rootDir = Path.toString manifest in
-    Window.showInformationMessage
-      (Printf.sprintf "Esy dependencies are not installed. Run esy under %s"
-         rootDir)
-    |> ignore;
-    ()
+    message `Info "Esy dependencies are not installed. Run esy under %s" rootDir

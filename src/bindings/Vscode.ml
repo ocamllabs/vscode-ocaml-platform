@@ -555,9 +555,16 @@ module ShellExecution = struct
     ; options : shellExecutionOptions option
     }
 
-  external make :
-    commandLine:string -> options:shellExecutionOptions option -> t
+  external makeCommandLine :
+    ?options:shellExecutionOptions option -> commandLine:string -> t
     = "ShellExecution"
+    [@@bs.module "vscode"] [@@bs.new]
+
+  external makeCommand :
+       ?options:shellExecutionOptions option
+    -> command:string
+    -> args:string array
+    -> t = "ShellExecution"
     [@@bs.module "vscode"] [@@bs.new]
 end
 

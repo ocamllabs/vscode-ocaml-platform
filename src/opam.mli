@@ -18,6 +18,6 @@ val switchList : t -> Switch.t list Promise.t
 
 val env : t -> switch:Switch.t -> string Js.Dict.t Or_error.t Promise.t
 
-val exec : t -> switch:Switch.t -> args:string array -> Path.t * string array
+val exec : t -> switch:Switch.t -> args:string list -> [> Cmd.spawn ]
 
 val exists : t -> switch:Switch.t -> bool Promise.t

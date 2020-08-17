@@ -29,8 +29,14 @@ end
 module Server = struct
   let make (toolchain : Toolchain.resources) :
       Vscode.LanguageClient.serverOptions =
-    let command, args = Toolchain.getLspCommand toolchain in
-    { command = Path.toString command; args; options = { env = Process.env } }
+    let (`Spawn (bin, args) as command) =
+      Cmd.toSpawn (Toolchain.getLspCommand toolchain)
+    in
+    Cmd.log command;
+    { command = Path.toString bin
+    ; args = Array.of_list args
+    ; options = { env = Process.env }
+    }
 end
 
 module Instance = struct
