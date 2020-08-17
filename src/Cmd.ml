@@ -78,12 +78,9 @@ let run ?cwd ?stdin = function
 
 let log ?(cwd : string option) ?(result : ChildProcess.return option) (t : t) =
   let message =
-    match t with
-    | Spawn { bin; args } ->
-      [ ("bin", Log.field (Path.toString bin))
-      ; ("args", Log.field (Json.Encode.list Json.Encode.string args))
-      ]
-    | Shell commandLine -> [ ("shell", Log.field commandLine) ]
+    match result with
+    | None -> []
+    | Some result -> [ ("result", Log.field result) ]
   in
   let message =
     match cwd with
@@ -91,9 +88,12 @@ let log ?(cwd : string option) ?(result : ChildProcess.return option) (t : t) =
     | Some cwd -> ("cwd", Log.field cwd) :: message
   in
   let message =
-    match result with
-    | None -> message
-    | Some result -> ("result", Log.field result) :: message
+    match t with
+    | Spawn { bin; args } ->
+      ("bin", Log.field (Path.toString bin))
+      :: ("args", Log.field (Json.Encode.list Json.Encode.string args))
+      :: message
+    | Shell commandLine -> ("shell", Log.field commandLine) :: message
   in
   logJson "external command" message
 
