@@ -1,13 +1,15 @@
 open Import
 
-type spawn = [ `Spawn of Path.t * string list ]
+type shell = string
 
-type shell = [ `Shell of string ]
+type spawn =
+  { bin : Path.t
+  ; args : string list
+  }
 
 type t =
-  [ spawn
-  | shell
-  ]
+  | Shell of shell
+  | Spawn of spawn
 
 type stdout = string
 
@@ -15,7 +17,7 @@ type stderr = string
 
 let pathMissingFromEnv = "'PATH' variable not found in the environment"
 
-let append (`Spawn (bin, args1)) args2 = `Spawn (bin, args1 @ args2)
+let append { bin; args = args1 } args2 = { bin; args = args1 @ args2 }
 
 let candidateFns =
   if Sys.unix then
@@ -37,47 +39,51 @@ let which path fn =
                 | true -> Some p
                 | false -> None))
 
+let checkSpawn { bin; args } =
+  if Path.isAbsolute bin then
+    Promise.Result.return { bin; args }
+  else
+    match Js.Dict.get Process.env "PATH" with
+    | None -> Error pathMissingFromEnv |> Promise.resolve
+    | Some path -> (
+      let open Promise.O in
+      which path bin >>| function
+      | None -> Error {j| Command "$bin" not found |j}
+      | Some bin -> Ok { bin; args } )
+
 let check t =
   match t with
-  | `Shell _ -> Promise.Result.return t
-  | `Spawn (bin, args) -> (
-    if Path.isAbsolute bin then
-      Promise.Result.return t
-    else
-      match Js.Dict.get Process.env "PATH" with
-      | None -> Error pathMissingFromEnv |> Promise.resolve
-      | Some path -> (
-        let open Promise.O in
-        which path bin >>| function
-        | None -> Error {j| Command "$bin" not found |j}
-        | Some bin -> Ok (`Spawn (bin, args)) ) )
+  | Shell _ -> Promise.Result.return t
+  | Spawn spawn ->
+    let open Promise.Result.O in
+    checkSpawn spawn >>| fun s -> Spawn s
 
 let toSpawn = function
-  | `Spawn (bin, args) -> `Spawn (bin, args)
-  | `Shell commandLine ->
+  | Spawn spawn -> spawn
+  | Shell commandLine ->
     let shell = Path.ofString (Env.shell ()) in
     let args =
       match Path.basename shell with
       | "cmd.exe" -> [ "/d"; "/s"; "c"; commandLine ]
       | _ -> [ "-c"; commandLine ]
     in
-    `Spawn (shell, args)
+    { bin = shell; args }
 
 let run ?cwd ?stdin = function
-  | `Spawn (bin, args) ->
+  | Spawn { bin; args } ->
     ChildProcess.spawn (Path.toString bin) (Array.of_list args) ?stdin
       (ChildProcess.Options.make ?cwd ())
-  | `Shell commandLine ->
+  | Shell commandLine ->
     ChildProcess.exec commandLine ?stdin (ChildProcess.Options.make ?cwd ())
 
 let log ?(cwd : string option) ?(result : ChildProcess.return option) (t : t) =
   let message =
     match t with
-    | `Spawn (bin, args) ->
+    | Spawn { bin; args } ->
       [ ("bin", Log.field (Path.toString bin))
       ; ("args", Log.field (Json.Encode.list Json.Encode.string args))
       ]
-    | `Shell commandLine -> [ ("shell", Log.field commandLine) ]
+    | Shell commandLine -> [ ("shell", Log.field commandLine) ]
   in
   let message =
     match cwd with

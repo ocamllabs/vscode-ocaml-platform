@@ -11,7 +11,7 @@ type discover =
 
 let make () =
   let open Promise.O in
-  `Spawn (binary, []) |> Cmd.check >>| function
+  Cmd.checkSpawn { bin = binary; args = [] } >>| function
   | Error _ -> None
   | Ok cmd -> Some cmd
 
@@ -20,7 +20,7 @@ let env t ~manifest =
     Cmd.append t [ "command-env"; "--json"; "-P"; Path.toString manifest ]
   in
   let open Promise.Result.O in
-  Cmd.output command >>= fun stdout ->
+  Cmd.output (Spawn command) >>= fun stdout ->
   match Json.parse stdout with
   | Some json ->
     Promise.Result.return (Json.Decode.dict Json.Decode.string json)
@@ -88,7 +88,7 @@ end
 let discover = Discover.run
 
 let exec t ~manifest ~args =
-  Cmd.append t ("-P" :: Path.toString manifest :: args)
+  Cmd.Spawn (Cmd.append t ("-P" :: Path.toString manifest :: args))
 
 module State = struct
   type t =
@@ -100,7 +100,7 @@ let state t ~manifest =
   let rootStr = Path.toString manifest in
   let command = Cmd.append t [ "status"; "-P"; rootStr ] in
   let open Promise.O in
-  Cmd.output command
+  Cmd.output (Spawn command)
   >>| (function
         | Error _ -> Ok false
         | Ok esyOutput -> (

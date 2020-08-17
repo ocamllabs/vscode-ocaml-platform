@@ -314,7 +314,7 @@ let getCommand (t : PackageManager.t) bin args : Cmd.t =
   match t with
   | Opam (opam, switch) -> Opam.exec opam ~switch ~args:(bin :: args)
   | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:(bin :: args)
-  | Global -> `Spawn (Path.ofString bin, args)
+  | Global -> Spawn { bin = Path.ofString bin; args }
   | Custom template ->
     let command =
       template
@@ -322,7 +322,7 @@ let getCommand (t : PackageManager.t) bin args : Cmd.t =
       |> Js.String.replace "$args" (String.concat " " args)
       |> String.trim
     in
-    `Shell command
+    Shell command
 
 let getLspCommand ?(args = []) (t : PackageManager.t) : Cmd.t =
   getCommand t "ocamllsp" args

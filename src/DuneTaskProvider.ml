@@ -44,8 +44,8 @@ let getShellExecution toolchain options =
   let command = Toolchain.getDuneCommand toolchain [ "build" ] in
   Cmd.log command;
   match command with
-  | `Shell commandLine -> ShellExecution.makeCommandLine ~commandLine ~options
-  | `Spawn (bin, args) ->
+  | Shell commandLine -> ShellExecution.makeCommandLine ~commandLine ~options
+  | Spawn { bin; args } ->
     ShellExecution.makeCommand ~command:(Path.toString bin)
       ~args:(Array.of_list args) ~options
 

@@ -22,7 +22,7 @@ type t = Cmd.spawn
 
 let make () =
   let open Promise.O in
-  `Spawn (binary, []) |> Cmd.check >>| function
+  Cmd.checkSpawn { bin = binary; args = [] } >>| function
   | Error _ -> None
   | Ok cmd -> Some cmd
 
@@ -57,7 +57,7 @@ let parseEnvOutput (opamEnvOutput : string) =
 let switchList t =
   let command = Cmd.append t [ "switch"; "list"; "-s" ] in
   let open Promise.O in
-  Cmd.output command >>| function
+  Cmd.output (Spawn command) >>| function
   | Error _ ->
     message `Warn "Unable to read the list of switches.";
     []
@@ -68,10 +68,10 @@ let switchArg switch = "--switch=" ^ Switch.toString switch
 let env t ~switch =
   let command = Cmd.append t [ "env"; "--sexp"; switchArg switch ] in
   let open Promise.O in
-  Cmd.output command >>| Result.bind ~f:parseEnvOutput
+  Cmd.output (Spawn command) >>| Result.bind ~f:parseEnvOutput
 
 let exec t ~switch ~args =
-  Cmd.append t ("exec" :: switchArg switch :: "--" :: args)
+  Cmd.Spawn (Cmd.append t ("exec" :: switchArg switch :: "--" :: args))
 
 let exists t ~switch =
   let open Promise.O in

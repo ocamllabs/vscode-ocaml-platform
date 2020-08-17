@@ -2,22 +2,26 @@
 
 open Import
 
-type shell = [ `Shell of string ]
+type shell = string
 
-type spawn = [ `Spawn of Path.t * string list ]
+type spawn =
+  { bin : Path.t
+  ; args : string list
+  }
 
 type t =
-  [ shell
-  | spawn
-  ]
+  | Shell of shell
+  | Spawn of spawn
 
 type stdout = string
 
 type stderr = string
 
-val append : spawn -> string list -> [> spawn ]
+val append : spawn -> string list -> spawn
 
-val check : ([< shell | spawn > `Spawn ] as 'a) -> 'a Or_error.t Promise.t
+val checkSpawn : spawn -> spawn Or_error.t Promise.t
+
+val check : t -> t Or_error.t Promise.t
 
 val toSpawn : t -> spawn
 
