@@ -380,7 +380,7 @@ module LanguageClient : sig
 
   type processOptions =
     { env : string Js.Dict.t
-    ; shell : bool
+    ; shell : bool (* accepts shell path (string) as well  *)
     }
 
   type serverOptions =
