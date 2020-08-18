@@ -320,6 +320,47 @@ module Workspace : sig
     -> TextDocument.t Promise.t
 end
 
+module ThemeIcon : sig
+  type t
+
+  val file : t
+
+  val folder : t
+
+  val make : id:string -> t
+end
+
+type iconsByColorTheme = < dark : Uri.t ; light : Uri.t > Js.t
+
+type workpaceEditEntryMetadata =
+  < description : string option
+  ; iconPath :
+      [ `Uri of Uri.t
+      | `IconsByColorTheme of iconsByColorTheme
+      | `ThemeIcon of ThemeIcon.t
+      ]
+  ; label : string
+  ; needsConfirmation : bool >
+  Js.t
+
+module WorkspaceEdit : sig
+  type t
+
+  type createFileOptions
+
+  val createFileOptions :
+    ignoreIfExists:bool -> overwrite:bool -> createFileOptions
+
+  val create : unit -> t
+
+  val createFile :
+       t
+    -> ?options:createFileOptions
+    -> ?metadata:workpaceEditEntryMetadata
+    -> Uri.t
+    -> unit
+end
+
 module Languages : sig
   type documentSelector =
     { scheme : string

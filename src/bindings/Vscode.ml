@@ -177,6 +177,51 @@ module Workspace = struct
     | `Uri _ as t -> _openTextDocument t
 end
 
+module ThemeIcon = struct
+  type t
+
+  external file : t = "File" [@@bs.module "vscode"] [@@bs.scope "workspace"]
+
+  external folder : t = "Folder" [@@bs.module "vscode"] [@@bs.scope "workspace"]
+
+  external make : id:string -> t = "ThemeIcon"
+    [@@bs.new] [@@bs.module "vscode"] [@@bs.scope "workspace"]
+end
+
+type iconsByColorTheme = < dark : Uri.t ; light : Uri.t > Js.t
+
+type workpaceEditEntryMetadata =
+  < description : string option
+  ; iconPath :
+      [ `Uri of Uri.t
+      | `IconsByColorTheme of iconsByColorTheme
+      | `ThemeIcon of ThemeIcon.t
+      ]
+  ; label : string
+  ; needsConfirmation : bool >
+  Js.t
+
+module WorkspaceEdit = struct
+  type t
+
+  type createFileOptions = < ignoreIfExists : bool ; overwrite : bool > Js.t
+
+  external createFileOptions :
+    ignoreIfExists:bool -> overwrite:bool -> createFileOptions = ""
+    [@@bs.obj]
+
+  external createFile :
+       t
+    -> ?options:createFileOptions
+    -> ?metadata:workpaceEditEntryMetadata
+    -> Uri.t
+    -> unit = "createFile"
+    [@@bs.send]
+
+  external create : unit -> t = "WorkspaceEdit"
+    [@@bs.new] [@@bs.module "vscode"]
+end
+
 module StatusBarAlignment = struct
   type t =
     | Left [@bs.as 1]
