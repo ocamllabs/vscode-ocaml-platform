@@ -334,7 +334,7 @@ let runSetup resources =
   let open Promise.Result.O in
   setupToolChain resources
   >>= (fun () ->
-        let args = [ "--help=plain" ] in
+        let args = [ "--version" ] in
         let command = getLspCommand resources ~args in
         Cmd.check command >>= fun cmd -> Cmd.output cmd)
   |> Promise.map (function

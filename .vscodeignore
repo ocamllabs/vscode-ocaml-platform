@@ -16,7 +16,6 @@ azure-pipelines.yaml
 bsconfig.json
 esy.json
 Makefile
-webpack.config.js
 
 !node_modules/vscode-jsonrpc/**
 !node_modules/vscode-languageclient/**

@@ -316,7 +316,7 @@ module Https = struct
     type t = Failure of string
 
     let toString = function
-      | Failure url -> {j|Failed to place request to $url|j}
+      | Failure url -> "Failed to place request to " ^ url
   end
 
   external get : string -> (Response.t -> unit) -> unit = "get"
@@ -335,8 +335,8 @@ module Https = struct
                 (resolve
                    (Error
                       (E.Failure
-                         {j|Error occurred while placing request to $url|j}
-                      [@explicit_arity])) [@bs]))))
+                         ("Error occurred while placing request to " ^ url)))
+                 [@bs]))))
 end
 
 module Os = struct
