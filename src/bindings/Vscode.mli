@@ -435,12 +435,13 @@ module ShellExecution : sig
     }
 
   val makeCommandLine :
-    ?options:shellExecutionOptions option -> commandLine:string -> t
+    commandLine:string -> ?options:shellExecutionOptions option -> unit -> t
 
   val makeCommand :
-       ?options:shellExecutionOptions option
-    -> command:string
+       command:string
     -> args:string array
+    -> ?options:shellExecutionOptions option
+    -> unit
     -> t
 end
 
