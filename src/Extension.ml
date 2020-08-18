@@ -31,11 +31,15 @@ module Server = struct
       Vscode.LanguageClient.serverOptions =
     let command = Toolchain.getLspCommand toolchain in
     Cmd.log command;
-    let options = { LanguageClient.env = Process.env; shell = true } in
+    let env = Process.env in
     match command with
-    | Shell commandLine -> { command = commandLine; args = [||]; options }
+    | Shell commandLine ->
+      { command = commandLine; args = [||]; options = { env; shell = true } }
     | Spawn { bin; args } ->
-      { command = Path.toString bin; args = Array.of_list args; options }
+      { command = Path.toString bin
+      ; args = Array.of_list args
+      ; options = { env; shell = false }
+      }
 end
 
 module Instance = struct
