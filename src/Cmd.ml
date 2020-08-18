@@ -60,14 +60,10 @@ let check t =
 
 let toSpawn = function
   | Spawn spawn -> spawn
-  | Shell commandLine ->
-    let shell = Platform.shell in
-    let args =
-      match Path.basename shell with
-      | "cmd.exe" -> [ "/d"; "/s"; "/c"; commandLine ]
-      | _ -> [ "-c"; commandLine ]
-    in
-    { bin = shell; args }
+  | Shell commandLine -> (
+    match Platform.shell with
+    | Sh bin -> { bin; args = [ "-c"; commandLine ] }
+    | PowerShell bin -> { bin; args = [ "-c"; "& " ^ commandLine ] } )
 
 let run ?cwd ?stdin = function
   | Spawn { bin; args } ->

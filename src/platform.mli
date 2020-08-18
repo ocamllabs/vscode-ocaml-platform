@@ -6,8 +6,6 @@ type t =
 
 val t : t
 
-val shell : Path.t
-
 module Map : sig
   type platform
 
@@ -21,3 +19,9 @@ module Map : sig
   val find : 'a t -> platform -> 'a
 end
 with type platform := t
+
+type shell =
+  | Sh of Path.t
+  | PowerShell of Path.t
+
+val shell : shell
