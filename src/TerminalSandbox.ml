@@ -68,7 +68,12 @@ let create toolchain =
   getShellPath () >>= fun shellPath ->
   getShellArgs () >>| fun shellArgs ->
   let ({ Cmd.bin; args } as command) =
-    Cmd.toSpawn (Toolchain.getCommand toolchain shellPath shellArgs)
+    match Toolchain.getCommand toolchain shellPath shellArgs with
+    | Spawn spawn -> spawn
+    | Shell commandLine -> (
+      match Platform.shell with
+      | Sh bin -> { bin; args = [ "-c"; commandLine ] }
+      | PowerShell bin -> { bin; args = [ "-c"; "& " ^ commandLine ] } )
   in
   Cmd.log (Spawn command);
   let name = Toolchain.toString toolchain in

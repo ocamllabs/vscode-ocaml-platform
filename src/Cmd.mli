@@ -23,8 +23,6 @@ val checkSpawn : spawn -> spawn Or_error.t Promise.t
 
 val check : t -> t Or_error.t Promise.t
 
-val toSpawn : t -> spawn
-
 val log : ?result:ChildProcess.return -> t -> unit
 
 val output : ?stdin:string -> t -> (stdout, stderr) result Promise.t

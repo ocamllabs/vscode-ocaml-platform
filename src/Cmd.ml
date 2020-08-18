@@ -58,13 +58,6 @@ let check t =
     let open Promise.Result.O in
     checkSpawn spawn >>| fun s -> Spawn s
 
-let toSpawn = function
-  | Spawn spawn -> spawn
-  | Shell commandLine -> (
-    match Platform.shell with
-    | Sh bin -> { bin; args = [ "-c"; commandLine ] }
-    | PowerShell bin -> { bin; args = [ "-c"; "& " ^ commandLine ] } )
-
 let run ?cwd ?stdin = function
   | Spawn { bin; args } ->
     ChildProcess.spawn (Path.toString bin) (Array.of_list args) ?stdin
