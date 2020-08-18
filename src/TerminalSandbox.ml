@@ -5,7 +5,10 @@ module ShellPath = struct
 
   let ofJson json =
     let open Json.Decode in
-    withDefault (Env.shell ()) string json
+    match string json with
+    | exception DecodeError _ -> Env.shell ()
+    | "" -> Env.shell ()
+    | shell -> shell
 
   let toJson (t : t) =
     let open Json.Encode in
@@ -64,11 +67,18 @@ let create toolchain =
   let open Option in
   getShellPath () >>= fun shellPath ->
   getShellArgs () >>| fun shellArgs ->
-  let shellPath, shellArgs =
-    Toolchain.getCommand toolchain shellPath shellArgs
+  let ({ Cmd.bin; args } as command) =
+    match Toolchain.getCommand toolchain shellPath shellArgs with
+    | Spawn spawn -> spawn
+    | Shell commandLine -> (
+      match Platform.shell with
+      | Sh bin -> { bin; args = [ "-c"; commandLine ] }
+      | PowerShell bin -> { bin; args = [ "-c"; "& " ^ commandLine ] } )
   in
+  Cmd.log (Spawn command);
   let name = Toolchain.toString toolchain in
-  let shellPath = Path.toString shellPath in
+  let shellPath = Path.toString bin in
+  let shellArgs = Array.of_list args in
   Window.createTerminal ~name ~shellPath ~shellArgs ()
 
 let dispose = Window.Terminal.dispose

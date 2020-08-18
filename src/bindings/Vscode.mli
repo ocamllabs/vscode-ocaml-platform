@@ -141,11 +141,28 @@ module Window : sig
     val make : ?canPickMany:bool -> ?placeHolder:string -> unit -> t
   end
 
+  module InputBoxOptions : sig
+    type t
+
+    external make :
+         ?ignoreFocusOut:bool
+      -> ?password:bool
+      -> ?placeHolder:string
+      -> ?prompt:string
+      -> ?value:string
+      -> ?validateInput:(string -> string option)
+      -> unit
+      -> t = ""
+      [@@bs.obj]
+  end
+
   val showQuickPick :
     string array -> QuickPickOptions.t -> string option Promise.t
 
   val showQuickPickItems :
     (QuickPickItem.t * 'a) list -> QuickPickOptions.t -> 'a option Promise.t
+
+  val showInputBox : InputBoxOptions.t -> string option Promise.t
 
   val showInformationMessage : string -> unit Promise.t
 
@@ -361,7 +378,10 @@ module LanguageClient : sig
     }
   [@@bs.deriving abstract]
 
-  type processOptions = { env : string Js.Dict.t }
+  type processOptions =
+    { env : string Js.Dict.t
+    ; shell : bool (* accepts shell path (string) as well  *)
+    }
 
   type serverOptions =
     { command : string
@@ -414,7 +434,15 @@ module ShellExecution : sig
     ; options : shellExecutionOptions option
     }
 
-  val make : commandLine:string -> options:shellExecutionOptions option -> t
+  val makeCommandLine :
+    commandLine:string -> ?options:shellExecutionOptions -> unit -> t
+
+  val makeCommand :
+       command:string
+    -> args:string array
+    -> ?options:shellExecutionOptions
+    -> unit
+    -> t
 end
 
 module ProcessExecution : sig

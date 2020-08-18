@@ -218,6 +218,21 @@ module Window = struct
       [@@bs.obj]
   end
 
+  module InputBoxOptions = struct
+    type t
+
+    external make :
+         ?ignoreFocusOut:bool
+      -> ?password:bool
+      -> ?placeHolder:string
+      -> ?prompt:string
+      -> ?value:string
+      -> ?validateInput:(string -> string option)
+      -> unit
+      -> t = ""
+      [@@bs.obj]
+  end
+
   module MessageItem = struct
     type t
 
@@ -239,6 +254,10 @@ module Window = struct
     _showQuickPickItems (Array.of_list (List.map fst choices)) options
     |> Promise.map (fun choice ->
            choice |. Belt.Option.map (fun q -> List.assq q choices))
+
+  external showInputBox : InputBoxOptions.t -> string option Promise.t
+    = "showInputBox"
+    [@@bs.module "vscode"] [@@bs.scope "window"]
 
   external showInformationMessage : string -> unit Promise.t
     = "showInformationMessage"
@@ -480,7 +499,10 @@ module LanguageClient = struct
     }
   [@@bs.deriving abstract]
 
-  type processOptions = { env : string Js.Dict.t }
+  type processOptions =
+    { env : string Js.Dict.t
+    ; shell : bool (* accepts shell path (string) as well  *)
+    }
 
   type serverOptions =
     { command : string
@@ -536,9 +558,17 @@ module ShellExecution = struct
     ; options : shellExecutionOptions option
     }
 
-  external make :
-    commandLine:string -> options:shellExecutionOptions option -> t
+  external makeCommandLine :
+    commandLine:string -> ?options:shellExecutionOptions -> unit -> t
     = "ShellExecution"
+    [@@bs.module "vscode"] [@@bs.new]
+
+  external makeCommand :
+       command:string
+    -> args:string array
+    -> ?options:shellExecutionOptions
+    -> unit
+    -> t = "ShellExecution"
     [@@bs.module "vscode"] [@@bs.new]
 end
 

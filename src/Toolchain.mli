@@ -21,6 +21,7 @@ module PackageManager : sig
     | Opam of Opam.t * Opam.Switch.t
     | Esy of Esy.t * Path.t
     | Global
+    | Custom of string
 
   val toString : t -> string
 end
@@ -73,11 +74,11 @@ val runSetup : resources -> (unit, string) result Promise.t
 (* Helper utils *)
 
 (** Extract command to run with the toolchain *)
-val getCommand : resources -> string -> string list -> Path.t * string array
+val getCommand : resources -> string -> string list -> Cmd.t
 
 (** Extract lsp command and arguments (Eg. "opam" and [| "exec";
    "ocamllsp" |] *)
-val getLspCommand : resources -> Path.t * string array
+val getLspCommand : ?args:string list -> resources -> Cmd.t
 
 (** Extract a dune command *)
-val getDuneCommand : resources -> string list -> Path.t * string array
+val getDuneCommand : resources -> string list -> Cmd.t

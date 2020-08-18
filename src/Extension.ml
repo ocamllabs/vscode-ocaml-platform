@@ -29,8 +29,17 @@ end
 module Server = struct
   let make (toolchain : Toolchain.resources) :
       Vscode.LanguageClient.serverOptions =
-    let command, args = Toolchain.getLspCommand toolchain in
-    { command = Path.toString command; args; options = { env = Process.env } }
+    let command = Toolchain.getLspCommand toolchain in
+    Cmd.log command;
+    let env = Process.env in
+    match command with
+    | Shell commandLine ->
+      { command = commandLine; args = [||]; options = { env; shell = true } }
+    | Spawn { bin; args } ->
+      { command = Path.toString bin
+      ; args = Array.of_list args
+      ; options = { env; shell = false }
+      }
 end
 
 module Instance = struct
@@ -127,13 +136,14 @@ let selectSandbox (instance : Instance.t) () =
 
 let restartInstance (instance : Instance.t) () =
   let (_ : unit Promise.t) =
-    match instance.toolchain with
+    let open Promise.O in
+    Toolchain.ofSettings () >>= function
     | None ->
       selectSandbox instance ();
       Promise.return ()
     | Some toolchain ->
       Instance.stop instance;
-      Instance.start instance toolchain
+      Instance.start instance (Toolchain.makeResources toolchain)
       |> Promise.Result.iterError ~f:Window.showErrorMessage
   in
   ()

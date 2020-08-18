@@ -1,9 +1,15 @@
 open Import
 
-type t =
-  { cmd : Path.t
-  ; env : string Js.Dict.t
+type shell = string
+
+type spawn =
+  { bin : Path.t
+  ; args : string list
   }
+
+type t =
+  | Shell of shell
+  | Spawn of spawn
 
 type stdout = string
 
@@ -11,7 +17,7 @@ type stderr = string
 
 let pathMissingFromEnv = "'PATH' variable not found in the environment"
 
-let binPath c = c.cmd
+let append { bin; args = args1 } args2 = { bin; args = args1 @ args2 }
 
 let candidateFns =
   if Sys.unix then
@@ -33,46 +39,55 @@ let which path fn =
                 | true -> Some p
                 | false -> None))
 
-let make ?(env = Process.env) ~cmd () =
-  if Path.isAbsolute cmd then
-    Promise.Result.return { env; cmd }
+let checkSpawn { bin; args } =
+  if Path.isAbsolute bin then
+    Promise.Result.return { bin; args }
   else
-    match Js.Dict.get env "PATH" with
+    match Js.Dict.get Process.env "PATH" with
     | None -> Error pathMissingFromEnv |> Promise.resolve
     | Some path -> (
       let open Promise.O in
-      which path cmd >>| function
-      | None -> Error {j| Command "$cmd" not found |j}
-      | Some cmd -> Ok { cmd; env } )
+      which path bin >>| function
+      | None -> Error {j| Command "$bin" not found |j}
+      | Some bin -> Ok { bin; args } )
 
-let output ~args ?cwd ?stdin { cmd; env } =
-  (* TODO use ChildProcess.spawn to get rid of this pointless concatenation *)
-  let shellString =
-    Js.Array.joinWith " " (Js.Array.concat args [| Path.toString cmd |])
+let check t =
+  match t with
+  | Shell _ -> Promise.Result.return t
+  | Spawn spawn ->
+    let open Promise.Result.O in
+    checkSpawn spawn >>| fun s -> Spawn s
+
+let run ?cwd ?stdin = function
+  | Spawn { bin; args } ->
+    ChildProcess.spawn (Path.toString bin) (Array.of_list args) ?stdin
+      (ChildProcess.Options.make ?cwd ())
+  | Shell commandLine ->
+    ChildProcess.exec commandLine ?stdin (ChildProcess.Options.make ?cwd ())
+
+let log ?(result : ChildProcess.return option) (t : t) =
+  let message =
+    match result with
+    | None -> []
+    | Some result -> [ ("result", Log.field result) ]
   in
-  let cwd =
-    match cwd with
-    | None -> None
-    | Some cwd -> Some (Path.toString cwd)
+  let message =
+    match t with
+    | Spawn { bin; args } ->
+      ("bin", Log.field (Path.toString bin))
+      :: ("args", Log.field (Json.Encode.list Json.Encode.string args))
+      :: message
+    | Shell commandLine -> ("shell", Log.field commandLine) :: message
   in
-  ChildProcess.exec shellString ?stdin (ChildProcess.Options.make ?cwd ~env ())
-  |> Promise.map (fun (res : ChildProcess.return) ->
-         let () =
-           let message =
-             [ ("cmd", Log.field (Path.toString cmd))
-             ; ("args", Log.field (Js.Array.joinWith " " args))
-             ; ("result", Log.field res)
-             ]
-           in
-           let message =
-             match cwd with
-             | None -> message
-             | Some cwd -> ("cwd", Log.field cwd) :: message
-           in
-           logJson "external command" message
-         in
-         if res.exitCode = 0 then
-           Ok res.stdout
-         else
-           let stderr = res.stderr in
-           Error {j| Command $shellString failed $stderr |j})
+  logJson "external command" message
+
+let output ?stdin (t : t) =
+  let open Promise.O in
+  run ?stdin t >>| fun (result : ChildProcess.return) ->
+  log ~result t;
+  if result.exitCode = 0 then
+    Ok result.stdout
+  else
+    let stderr = result.stderr in
+    Error
+      {j| Command failed with $stderr. See output channel for more details |j}

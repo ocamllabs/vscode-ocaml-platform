@@ -1,19 +1,28 @@
 (** Interface for running system commands *)
 
-type t
+open Import
 
-val make :
-  ?env:string Js.Dict.t -> cmd:Path.t -> unit -> (t, string) result Promise.t
+type shell = string
+
+type spawn =
+  { bin : Path.t
+  ; args : string list
+  }
+
+type t =
+  | Shell of shell
+  | Spawn of spawn
 
 type stdout = string
 
 type stderr = string
 
-val output :
-     args:string Js.Array.t
-  -> ?cwd:Path.t
-  -> ?stdin:string
-  -> t
-  -> (stdout, stderr) result Promise.t
+val append : spawn -> string list -> spawn
 
-val binPath : t -> Path.t
+val checkSpawn : spawn -> spawn Or_error.t Promise.t
+
+val check : t -> t Or_error.t Promise.t
+
+val log : ?result:ChildProcess.return -> t -> unit
+
+val output : ?stdin:string -> t -> (stdout, stderr) result Promise.t

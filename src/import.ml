@@ -26,7 +26,7 @@ let getSubDict dict key =
 let hiddenEsyDir root = Path.(root / ".vscode" / "esy")
 
 module Option = struct
-  open Belt.Option
+  include Belt.Option
 
   let ( >>= ) = flatMap
 
@@ -51,7 +51,7 @@ module Option = struct
 end
 
 module Result = struct
-  open Belt.Result
+  include Belt.Result
 
   let ( >>= ) = flatMap
 

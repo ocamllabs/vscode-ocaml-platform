@@ -28,3 +28,16 @@ module Map = struct
     | Linux -> linux
     | Other -> other
 end
+
+type shell =
+  | Sh of Path.t
+  | PowerShell of Path.t
+
+let shell =
+  let sh = Sh (Path.ofString "/bin/sh") in
+  let powershell =
+    PowerShell
+      (Path.ofString
+         "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe")
+  in
+  Map.find { win32 = powershell; darwin = sh; linux = sh; other = sh } t

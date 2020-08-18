@@ -20,12 +20,14 @@ module PackageManager = struct
       | Opam
       | Esy
       | Global
+      | Custom
 
     module Hmap = struct
-      type ('opam, 'esy, 'global) t =
+      type ('opam, 'esy, 'global, 'custom) t =
         { opam : 'opam
         ; esy : 'esy
         ; global : 'global
+        ; custom : 'custom
         }
     end
 
@@ -33,6 +35,7 @@ module PackageManager = struct
       | "opam" -> Some Opam
       | "esy" -> Some Esy
       | "global" -> Some Global
+      | "custom" -> Some Custom
       | _ -> None
 
     let ofJson json =
@@ -40,12 +43,14 @@ module PackageManager = struct
       match of_string (string json) with
       | Some s -> s
       | None ->
-        raise (DecodeError "opam | esy | global are the only valid values")
+        raise
+          (DecodeError "opam | esy | global | custom are the only valid values")
 
     let to_string = function
       | Opam -> "opam"
       | Esy -> "esy"
       | Global -> "global"
+      | Custom -> "custom"
 
     let toJson s = Json.Encode.string (to_string s)
   end
@@ -54,17 +59,20 @@ module PackageManager = struct
     | Opam of Opam.t * Opam.Switch.t
     | Esy of Esy.t * Path.t
     | Global
+    | Custom of string
 
   module Setting = struct
     type t =
       | Opam of Opam.Switch.t
       | Esy of Path.t
       | Global
+      | Custom of string
 
     let kind : t -> Kind.t = function
       | Opam _ -> Opam
       | Esy _ -> Esy
       | Global -> Global
+      | Custom _ -> Custom
 
     let ofJson json =
       let open Json.Decode in
@@ -81,16 +89,20 @@ module PackageManager = struct
           field "switch" (fun js -> Opam.Switch.ofString (string js)) json
         in
         Opam switch
+      | Custom ->
+        let template = field "template" string json in
+        Custom template
 
     let toJson (t : t) =
       let open Json.Encode in
-      let kind = [ ("kind", Kind.toJson (kind t)) ] in
+      let kind = ("kind", Kind.toJson (kind t)) in
       match t with
-      | Global -> Json.Encode.object_ kind
+      | Global -> Json.Encode.object_ [ kind ]
       | Esy manifest ->
-        object_ @@ (("root", string @@ Path.toString manifest) :: kind)
+        object_ [ kind; ("root", string @@ Path.toString manifest) ]
       | Opam sw ->
-        object_ @@ (("switch", string @@ Opam.Switch.toString sw) :: kind)
+        object_ [ kind; ("switch", string @@ Opam.Switch.toString sw) ]
+      | Custom template -> object_ [ kind; ("template", string template) ]
 
     let t = Settings.create ~scope:Workspace ~key:"sandbox" ~ofJson ~toJson
   end
@@ -99,12 +111,14 @@ module PackageManager = struct
     | Esy (_, root) -> Setting.Esy root
     | Opam (_, switch) -> Setting.Opam switch
     | Global -> Setting.Global
+    | Custom template -> Setting.Custom template
 
   let toString = function
     | Esy (_, root) -> Printf.sprintf "esy(%s)" (Path.toString root)
     | Opam (_, switch) ->
       Printf.sprintf "opam(%s)" (Opam.Switch.toString switch)
     | Global -> "global"
+    | Custom _ -> "custom"
 end
 
 type resources = PackageManager.t
@@ -115,6 +129,7 @@ let availablePackageManagers () =
   { PackageManager.Kind.Hmap.opam = Opam.make ()
   ; esy = Esy.make ()
   ; global = ()
+  ; custom = ()
   }
 
 let ofSettings () : PackageManager.t option Promise.t =
@@ -157,8 +172,9 @@ let ofSettings () : PackageManager.t option Promise.t =
           (Opam.Switch.toString switch);
         None
       | true -> Some (PackageManager.Opam (opam, switch)) ) )
-  | Some PackageManager.Setting.Global ->
-    Promise.return (Some PackageManager.Global)
+  | Some Global -> Promise.return (Some PackageManager.Global)
+  | Some (Custom template) ->
+    Promise.return (Some (PackageManager.Custom template))
 
 let toSettings (pm : PackageManager.t) =
   Settings.set ~section:"ocaml" PackageManager.Setting.t
@@ -184,12 +200,15 @@ module Candidate = struct
     match packageManager with
     | PackageManager.Opam (_, s) ->
       let label = Opam.Switch.toString s in
-      create ~label ?detail ()
+      create ?detail ~label ()
     | Esy (_, p) ->
       create ?detail ~label:(Path.toString p) ~description:"Esy" ()
     | Global ->
       create ?detail ~label:"Global"
         ~description:"Global toolchain inherited from the environment" ()
+    | Custom _ ->
+      create ?detail ~label:"Custom"
+        ~description:"Custom toolchain using a command template" ()
 
   let ok packageManager = { packageManager; status = Ok () }
 end
@@ -238,14 +257,23 @@ let sandboxCandidates ~workspaceFolders =
               let packageManager = PackageManager.Opam (opam, sw) in
               { Candidate.packageManager; status = Ok () })
   in
+  let global = Candidate.ok PackageManager.Global in
+  let custom =
+    Candidate.ok (PackageManager.Custom "$prog $args")
+    (* doesn't matter what the custom fields are set to here
+       user will input custom commands in [select] *)
+  in
+
   Promise.all2 (esy, opam) >>| fun (esy, opam) ->
-  (Candidate.ok PackageManager.Global :: esy) @ opam
+  (global :: custom :: esy) @ opam
 
 let setupToolChain (kind : PackageManager.t) =
   match kind with
-  | Global -> Ok () |> Promise.resolve
-  | Opam _ -> Ok () |> Promise.resolve
   | Esy (esy, manifest) -> Esy.setupToolchain esy ~manifest
+  | Opam _
+  | Global
+  | Custom _ ->
+    Promise.Result.return ()
 
 let makeResources kind = kind
 
@@ -254,12 +282,27 @@ let select () =
   let workspaceFolders = Vscode.Workspace.workspaceFolders () in
   sandboxCandidates ~workspaceFolders >>= fun candidates ->
   let open Promise.Option.O in
-  selectPackageManager candidates >>= fun { status; packageManager } ->
-  match status with
-  | Error s ->
-    message `Warn "This toolchain is invalid. Error: %s" s;
-    Promise.return None
-  | Ok () -> Promise.Option.return packageManager
+  selectPackageManager candidates >>= function
+  | { status = Ok (); packageManager = Custom _ } ->
+    let validateInput input =
+      if Js.String.includes "$prog" input && Js.String.includes "$args" input
+      then
+        None
+      else
+        Some "Command template must include $prog and $args"
+    in
+    let options =
+      Window.InputBoxOptions.make ~prompt:"Input a custom command template"
+        ~value:"$prog $args" ~validateInput ()
+    in
+    Window.showInputBox options >>| String.trim >>= fun template ->
+    Promise.Option.return @@ PackageManager.Custom template
+  | { status; packageManager } -> (
+    match status with
+    | Error s ->
+      message `Warn "This toolchain is invalid. Error: %s" s;
+      Promise.return None
+    | Ok () -> Promise.Option.return packageManager )
 
 let selectAndSave () =
   let open Promise.Option.O in
@@ -267,32 +310,39 @@ let selectAndSave () =
   let open Promise.O in
   toSettings packageManager >>| fun () -> Some packageManager
 
-let getCommand (t : PackageManager.t) bin args : Path.t * string array =
-  let binArgs = Array.of_list (bin :: args) in
-  let bin, args =
-    match t with
-    | Opam (opam, switch) -> Opam.exec opam ~switch ~args:binArgs
-    | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:binArgs
-    | Global -> (Path.ofString bin, Array.of_list args)
-  in
-  log "getCommand: %s %s" (Path.toString bin) (Js.Array.joinWith " " args);
-  (bin, args)
+let getCommand (t : PackageManager.t) bin args : Cmd.t =
+  match t with
+  | Opam (opam, switch) -> Opam.exec opam ~switch ~args:(bin :: args)
+  | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:(bin :: args)
+  | Global -> Spawn { bin = Path.ofString bin; args }
+  | Custom template ->
+    let bin =
+      if String.contains bin ' ' then
+        "\"" ^ bin ^ "\""
+      else
+        bin
+    in
+    let command =
+      template
+      |> Js.String.replace "$prog" bin
+      |> Js.String.replace "$args" (String.concat " " args)
+      |> String.trim
+    in
+    Shell command
 
-let getLspCommand (t : PackageManager.t) : Path.t * string array =
-  getCommand t "ocamllsp" []
+let getLspCommand ?(args = []) (t : PackageManager.t) : Cmd.t =
+  getCommand t "ocamllsp" args
 
-let getDuneCommand (t : PackageManager.t) args : Path.t * string array =
+let getDuneCommand (t : PackageManager.t) args : Cmd.t =
   getCommand t "dune" args
-
-let addLspCheckArg args = Array.append args [| "--version" |]
 
 let runSetup resources =
   let open Promise.Result.O in
   setupToolChain resources
   >>= (fun () ->
-        let cmd, args = getLspCommand resources in
-        Cmd.make ~cmd () >>= fun cmd ->
-        Cmd.output cmd ~args:(addLspCheckArg args))
+        let args = [ "--version" ] in
+        let command = getLspCommand resources ~args in
+        Cmd.check command >>= fun cmd -> Cmd.output cmd)
   |> Promise.map (function
        | Ok _ -> Ok ()
        | Error msg -> Error {j|Toolchain initialisation failed: $msg|j})

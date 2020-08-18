@@ -40,9 +40,14 @@ let folderRelativePath folders file =
         | Some withoutPrefix -> Some (folder, withoutPrefix) ))
     None folders
 
-let commandLine toolchain =
-  let cmd, args = Toolchain.getDuneCommand toolchain [ "build" ] in
-  Js.Array.joinWith " " (Js.Array.concat args [| Path.toString cmd |])
+let getShellExecution toolchain options =
+  let command = Toolchain.getDuneCommand toolchain [ "build" ] in
+  Cmd.log command;
+  match command with
+  | Shell commandLine -> ShellExecution.makeCommandLine ~commandLine ~options ()
+  | Spawn { bin; args } ->
+    ShellExecution.makeCommand ~command:(Path.toString bin)
+      ~args:(Array.of_list args) ~options ()
 
 let computeTasks cancellationToken toolchain =
   let open Promise.O in
@@ -54,7 +59,6 @@ let computeTasks cancellationToken toolchain =
   let inc = "**/{dune,dune-project,dune-workspace}" in
   Workspace.findFiles ~inc ~excl ~maxResults:None cancellationToken
   >>| fun dunes ->
-  let commandLine = commandLine toolchain in
   let tasks =
     Array.map
       (fun dune ->
@@ -67,15 +71,14 @@ let computeTasks cancellationToken toolchain =
         let execution =
           let cwd = Filename.dirname dune.fsPath in
           let options =
-            Some
-              { ShellExecution.env = Some env
-              ; cwd = Some cwd
-              ; executable = None
-              ; shellArgs = None
-              ; shellQuoting = None
-              }
+            { ShellExecution.env = Some env
+            ; cwd = Some cwd
+            ; executable = None
+            ; shellArgs = None
+            ; shellQuoting = None
+            }
           in
-          ShellExecution.make ~commandLine ~options
+          getShellExecution toolchain options
         in
         Task.make ~taskDefinition ~scope ~source ~name ~problemMatchers
           ~execution:(`Shell execution) ~group:TaskGroup.build ())

@@ -16,6 +16,8 @@
 - Improve syntax highlighting of OCaml comments that contain strings (#289)
 - Fix Reason syntax highlighting of recursive modules (#295)
 - Improve automatic indentation of parentheses (#308)
+- Add the option to use a custom sandbox with a configurable command template
+  (#322)
 
 ## 0.8.0
 
