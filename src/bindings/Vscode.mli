@@ -378,7 +378,10 @@ module LanguageClient : sig
     }
   [@@bs.deriving abstract]
 
-  type processOptions = { env : string Js.Dict.t }
+  type processOptions =
+    { env : string Js.Dict.t
+    ; shell : bool
+    }
 
   type serverOptions =
     { command : string
