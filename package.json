@@ -536,7 +536,7 @@
     "test": "npm-run-all -s test:*",
     "vscode:prepublish": "yarn build",
     "package": "vsce package --yarn",
-    "publish": "vsce publish --yarn",
+    "deploy": "vsce publish --yarn",
     "fmt:check": "prettier --check .",
     "fmt": "prettier --write ."
   },
