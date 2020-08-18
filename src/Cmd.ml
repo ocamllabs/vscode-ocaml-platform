@@ -76,16 +76,11 @@ let run ?cwd ?stdin = function
   | Shell commandLine ->
     ChildProcess.exec commandLine ?stdin (ChildProcess.Options.make ?cwd ())
 
-let log ?(cwd : string option) ?(result : ChildProcess.return option) (t : t) =
+let log ?(result : ChildProcess.return option) (t : t) =
   let message =
     match result with
     | None -> []
     | Some result -> [ ("result", Log.field result) ]
-  in
-  let message =
-    match cwd with
-    | None -> message
-    | Some cwd -> ("cwd", Log.field cwd) :: message
   in
   let message =
     match t with
@@ -97,11 +92,10 @@ let log ?(cwd : string option) ?(result : ChildProcess.return option) (t : t) =
   in
   logJson "external command" message
 
-let output ?cwd ?stdin (t : t) =
-  let cwd = Option.map cwd Path.toString in
+let output ?stdin (t : t) =
   let open Promise.O in
-  run ?cwd ?stdin t >>| fun (result : ChildProcess.return) ->
-  log ?cwd ~result t;
+  run ?stdin t >>| fun (result : ChildProcess.return) ->
+  log ~result t;
   if result.exitCode = 0 then
     Ok result.stdout
   else

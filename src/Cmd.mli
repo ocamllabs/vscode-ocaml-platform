@@ -25,7 +25,6 @@ val check : t -> t Or_error.t Promise.t
 
 val toSpawn : t -> spawn
 
-val log : ?cwd:string -> ?result:ChildProcess.return -> t -> unit
+val log : ?result:ChildProcess.return -> t -> unit
 
-val output :
-  ?cwd:Path.t -> ?stdin:string -> t -> (stdout, stderr) result Promise.t
+val output : ?stdin:string -> t -> (stdout, stderr) result Promise.t
