@@ -1,10 +1,10 @@
 open Import
 
 module Lsp : sig
-  val switch : LanguageClient.t -> TextDocument.t -> string list Promise.t
+  val switch : LanguageClient.t -> TextDocument.t -> string array Promise.t
 end = struct
   let switch client document =
-    let targetFileName : string list Promise.t =
+    let targetFileName : string array Promise.t =
       LanguageClient.sendRequest client ~meth:"ocamllsp/didSwitchImplIntf"
         ~data:(document.TextDocument.fileName : string)
         ()
@@ -13,7 +13,7 @@ end = struct
 end
 
 module Fallback : sig
-  val switch : string -> string list Promise.t
+  val switch : string -> string array Promise.t
 end = struct
   let impl = [ ".ml"; ".mll"; ".mly"; ".re" ]
 
@@ -65,12 +65,10 @@ let requestSwitch ~client ~capabilities document =
   in
 
   let open Promise.O in
-  filesToSwitchTo >>= function
+  filesToSwitchTo >>= fun arr -> match Array.to_list arr with
   | [] -> assert false
   | [ filepath ] -> Promise.return @@ showFile filepath
   | firstCandidate :: otherCandidates as candidates ->
-    log "%s" (List.fold_left (fun a b -> a ^ "\n" ^ b) "" candidates);
-
     let firstCandidateItem =
       Window.QuickPickItem.create
         ~label:(Filename.basename firstCandidate)
@@ -92,9 +90,9 @@ let requestSwitch ~client ~capabilities document =
     Window.showQuickPickItems
       (List.combine (firstCandidateItem :: otherCandidateItems) candidates)
       options
-    >>| (fun filepath ->
-          Option.iter filepath ~f:(fun filepath ->
-              let workspaceEdit = Vscode.WorkspaceEdit.create () in
-              Vscode.WorkspaceEdit.createFile workspaceEdit (Uri.file filepath);
-              showFile filepath))
-    |> Promise.catch onPromiseError
+    >>= function
+    | None -> Promise.return ()
+    | Some filepath ->
+      Fs.writeFile filepath "" >>| fun () ->
+      showFile filepath
+
