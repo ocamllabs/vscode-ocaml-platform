@@ -284,7 +284,7 @@ let getLspCommand (t : PackageManager.t) : Path.t * string array =
 let getDuneCommand (t : PackageManager.t) args : Path.t * string array =
   getCommand t "dune" args
 
-let addLspCheckArg args = Array.append args [| "--help=plain" |]
+let addLspCheckArg args = Array.append args [| "--version" |]
 
 let runSetup resources =
   let open Promise.Result.O in
