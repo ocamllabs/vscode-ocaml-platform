@@ -71,13 +71,12 @@ let computeTasks cancellationToken toolchain =
         let execution =
           let cwd = Filename.dirname dune.fsPath in
           let options =
-            Some
-              { ShellExecution.env = Some env
-              ; cwd = Some cwd
-              ; executable = None
-              ; shellArgs = None
-              ; shellQuoting = None
-              }
+            { ShellExecution.env = Some env
+            ; cwd = Some cwd
+            ; executable = None
+            ; shellArgs = None
+            ; shellQuoting = None
+            }
           in
           getShellExecution toolchain options
         in
