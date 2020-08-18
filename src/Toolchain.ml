@@ -316,6 +316,12 @@ let getCommand (t : PackageManager.t) bin args : Cmd.t =
   | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:(bin :: args)
   | Global -> Spawn { bin = Path.ofString bin; args }
   | Custom template ->
+    let bin =
+      if String.contains bin ' ' then
+        "\"" ^ bin ^ "\""
+      else
+        bin
+    in
     let command =
       template
       |> Js.String.replace "$prog" bin
