@@ -566,14 +566,18 @@ module LanguageClient = struct
 
   external onReady : t -> unit Promise.t = "onReady" [@@bs.send]
 
-  external sendRequest :
-       t
-    -> meth:string
-    -> data:'a
-    -> ?token:Workspace.cancellationToken
-    -> unit
-    -> 'b Promise.t = "sendRequest"
+  external sendRequest : t -> string -> 'a -> 'b Promise.t = "sendRequest"
     [@@bs.send]
+
+  external sendRequest_token :
+    t -> string -> 'a -> Workspace.cancellationToken -> 'b Promise.t
+    = "sendRequest"
+    [@@bs.send]
+
+  let sendRequest t ~meth ~data ?token () =
+    match token with
+    | None -> sendRequest t meth data
+    | Some token -> sendRequest_token t meth data token
 
   let initializeResult (t : t) =
     let open Promise.O in
