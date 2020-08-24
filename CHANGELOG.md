@@ -22,7 +22,6 @@
 - Fix Reason syntax highlighting of recursive modules (#295)
 - Improve automatic indentation of parentheses (#308)
 
-
 ## 0.8.0
 
 - Add highlighting for locally abstract types in OCaml files
