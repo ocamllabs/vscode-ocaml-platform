@@ -37,22 +37,22 @@
       {
         "command": "ocaml.select-sandbox",
         "category": "OCaml",
-        "title": "Select sandbox for this workspace"
+        "title": "Select a Sandbox for this Workspace"
       },
       {
         "command": "ocaml.server.restart",
         "category": "OCaml",
-        "title": "Restart language server"
+        "title": "Restart Language Server"
       },
       {
         "command": "ocaml.open-terminal",
         "category": "OCaml",
-        "title": "Open a terminal (current sandbox)"
+        "title": "Create Terminal (Current Sandbox)"
       },
       {
         "command": "ocaml.open-terminal-select",
         "category": "OCaml",
-        "title": "Open a terminal (select a sandbox)"
+        "title": "Create Terminal (Select a Sandbox)"
       }
     ],
     "configuration": {
