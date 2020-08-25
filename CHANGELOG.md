@@ -4,6 +4,7 @@
 
 - Add the option to use a custom sandbox with a configurable command template
   (#322)
+- Fix Reason syntax highlighting of module extension (#335)
 
 ## 0.9.0
 
