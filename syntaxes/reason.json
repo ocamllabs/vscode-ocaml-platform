@@ -499,7 +499,10 @@
       "beginCaptures": {
         "1": { "name": "keyword.control.less" }
       },
-      "patterns": [{ "include": "#structure-expression" }]
+      "patterns": [
+        { "include": "#structure-expression" },
+        { "include": "#extension-node" }
+      ]
     },
     "module-item-let-module-bind-name-params": {
       "begin": "\\b([[:upper:]][[:word:]]*)\\b",
