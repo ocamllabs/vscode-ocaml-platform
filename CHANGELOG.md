@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.0.0
 
 - Add the option to use a custom sandbox with a configurable command template
   (#322)
