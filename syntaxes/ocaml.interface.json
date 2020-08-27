@@ -151,7 +151,7 @@
         {
           "comment": "reserved ocaml keyword (in interfaces)",
           "name": "keyword.other.ocaml.interface",
-          "match": "\\b(and|as|class|constraint|end|exception|external|functor|in|include|inherit|let[[:space:]]+open|module|mutable|nonrec|object|of|open|private|sig|type|val|virtual|with)\\b(?!')"
+          "match": "\\b(and|as|class|constraint|end|exception|external|functor|in|include|inherit|let[[:space:]]+open|method|module|mutable|nonrec|object|of|open|private|sig|type|val|virtual|with)\\b(?!')"
         }
       ]
     }
