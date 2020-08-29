@@ -6,6 +6,7 @@
   (#322)
 - Fix Reason syntax highlighting of module extension (#335)
 - Highlight method keyword in ocaml interface (#340)
+- Add support for opam template file (#342)
 
 ## 0.9.0
 
