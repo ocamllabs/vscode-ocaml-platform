@@ -25,7 +25,7 @@
         {
           "comment": "labeled argument",
           "name": "variable.parameter.labeled.ocaml",
-          "match": "~[[:lower:]_][[:word:]']*"
+          "match": "~([[:lower:]_][[:word:]']*)?"
         },
         {
           "comment": "module type of",
