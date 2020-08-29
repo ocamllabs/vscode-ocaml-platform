@@ -261,7 +261,8 @@
         ],
         "extensions": [
           ".opam",
-          ".opam.locked"
+          ".opam.locked",
+          ".opam.template"
         ],
         "configuration": "./languages/opam.json"
       },
