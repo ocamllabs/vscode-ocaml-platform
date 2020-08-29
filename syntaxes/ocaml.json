@@ -530,6 +530,24 @@
           "comment": "empty array",
           "name": "constant.language.ocaml strong",
           "match": "\\[\\|\\|\\]"
+        },
+        {
+          "comment": "array",
+          "begin": "\\[\\|",
+          "end": "\\|\\]",
+          "patterns": [{ "include": "$self" }]
+        },
+
+        {
+          "comment": "empty list",
+          "name": "constant.language.ocaml strong",
+          "match": "\\[\\]"
+        },
+        {
+          "comment": "list",
+          "begin": "\\[",
+          "end": "]",
+          "patterns": [{ "include": "$self" }]
         }
       ]
     },
