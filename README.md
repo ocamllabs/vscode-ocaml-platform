@@ -4,8 +4,7 @@
 
 Visual Studio Code extension for OCaml and relevant tools.
 
-_This plugin is alpha quality. Use at your own risk and please report any bugs
-you encounter._
+_Please report any bugs you encounter._
 
 ## Quick start
 
