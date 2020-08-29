@@ -379,6 +379,26 @@
             "3": { "name": "entity.name.function.binding.ocaml" }
           }
         },
+        {
+          "comment": "optional labeled argument with type",
+          "begin": "(\\?)\\([[:space:]]*([[:lower:]_][[:word:]']*)",
+          "beginCaptures": {
+            "1": { "name": "variable.parameter.optional.ocaml" },
+            "2": { "name": "variable.parameter.optional.ocaml" }
+          },
+          "end": "\\)",
+          "patterns": [{ "include": "$self" }]
+        },
+        {
+          "comment": "labeled argument with type",
+          "begin": "(~)\\([[:space:]]*([[:lower:]_][[:word:]']*)",
+          "beginCaptures": {
+            "1": { "name": "variable.parameter.labeled.ocaml" },
+            "2": { "name": "variable.parameter.labeled.ocaml" }
+          },
+          "end": "\\)",
+          "patterns": [{ "include": "$self" }]
+        },
         { "include": "source.ocaml.interface#bindings" }
       ]
     },
@@ -524,6 +544,12 @@
           "comment": "unit literal",
           "name": "constant.language.ocaml strong",
           "match": "\\(\\)"
+        },
+        {
+          "comment": "parentheses",
+          "begin": "\\(",
+          "end": "\\)",
+          "patterns": [{ "include": "$self" }]
         },
 
         {
