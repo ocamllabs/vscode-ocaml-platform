@@ -5,6 +5,7 @@
 - Highlight method keyword in ocaml interface (#340)
 - Add support for opam template file (#342)
 - Improve highlighting of labels and attributes/extensions in OCaml files (#343)
+- Add esy.json schema validation (#344)
 
 ## 1.0.0
 

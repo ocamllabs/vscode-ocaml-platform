@@ -521,6 +521,12 @@
         "language": "ocaml.ocamllex",
         "path": "./snippets/ocamllex.json"
       }
+    ],
+    "jsonValidation": [
+      {
+        "fileMatch": "esy.json",
+        "url": "https://raw.githubusercontent.com/esy/esy-schema/master/esySchema.json"
+      }
     ]
   },
   "scripts": {
