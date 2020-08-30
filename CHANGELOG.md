@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.1.0
 
 - Highlight method keyword in ocaml interface (#340)
 - Add support for opam template file (#342)
