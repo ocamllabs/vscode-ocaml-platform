@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased
+
+- Fix interaction between character literals and comments/escaped quotes in
+  OCaml files (#348)
+
 ## 1.1.0
 
 - Highlight method keyword in ocaml interface (#340)
