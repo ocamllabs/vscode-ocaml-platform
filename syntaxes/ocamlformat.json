@@ -14,7 +14,7 @@
     },
     {
       "comment": "equals sign",
-      "name": "keyword.operator.ocamlformat",
+      "name": "punctuation.separator.key-value.ocamlformat",
       "match": "="
     }
   ],
@@ -101,7 +101,7 @@
       "patterns": [
         {
           "comment": "boolean literal",
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(true|false)\\b"
         },
         {
@@ -110,79 +110,79 @@
           "match": "\\b([[:digit:]]+(\\.[[:digit:]]*)*)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(after-when-possible|after|align|all|always|auto)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(before-except-val|before|begin-line)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(closing-on-separate-line|compact|conventional)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(decimal|default|double-semicolon)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(end-line)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(fit-or-vertical|fit|force)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(hexadecimal)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(indent)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(janestreet)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(k-r|keyword-first)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(long|loose)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(multi-line-only)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(natural|nested|never|no|normal)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(ocamlformat)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(parens|preserve-one|preserve)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(separator|short|smart|space|sparse)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(terminator|tight-decl|tight|toplevel)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(unsafe-no|unset)\\b"
         },
         {
-          "name": "constant.language.ocamlformat",
+          "name": "string.other.ocamlformat",
           "match": "\\b(wrap)\\b"
         }
       ]

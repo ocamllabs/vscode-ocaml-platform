@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Highlight dashes in PKG names for .merlin files (#349)
+- Make .ocamlformat syntax highlighting more distinct (#350)
 
 ## 1.1.1
 
