@@ -55,7 +55,7 @@
       },
       "patterns": [
         {
-          "match": "(?<![\\-\\+])\\b([[:lower:]][[:word:]]*)\\b[[:space:]]*(\\.)?",
+          "match": "(?<![\\-\\+])\\b([[:lower:]][[:word:]\\-]*)\\b[[:space:]]*(\\.)?",
           "captures": {
             "1": { "name": "entity.name.class" },
             "2": { "name": "keyword.other" }

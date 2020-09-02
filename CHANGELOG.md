@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Highlight dashes in PKG names for .merlin files (#349)
+
 ## 1.1.1
 
 - Fix interaction between character literals and comments/escaped quotes in
