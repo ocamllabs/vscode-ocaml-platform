@@ -152,6 +152,10 @@
     "strings-in-comments": {
       "patterns": [
         {
+          "comment": "char literal",
+          "match": "'(\\\\)?.'"
+        },
+        {
           "comment": "string literal",
           "begin": "\"",
           "end": "\""
@@ -235,11 +239,6 @@
     "characters": {
       "patterns": [
         {
-          "comment": "character literal",
-          "name": "string.quoted.other.ocaml constant.character.ocaml",
-          "match": "'.'"
-        },
-        {
           "comment": "character literal from escaped backslash",
           "name": "string.quoted.other.ocaml constant.character.ocaml",
           "match": "'(\\\\\\\\)'",
@@ -276,6 +275,11 @@
           "captures": {
             "1": { "name": "invalid.illegal.unknown-escape.ocaml" }
           }
+        },
+        {
+          "comment": "character literal",
+          "name": "string.quoted.other.ocaml constant.character.ocaml",
+          "match": "'.'"
         }
       ]
     },
