@@ -11,8 +11,6 @@ type discover =
 
 val discover : dir:Path.t -> discover list Promise.t
 
-val env : t -> manifest:Path.t -> string Js.Dict.t Or_error.t Promise.t
-
 val exec : t -> manifest:Path.t -> args:string list -> Cmd.t
 
 val setupToolchain : t -> manifest:Path.t -> unit Or_error.t Promise.t

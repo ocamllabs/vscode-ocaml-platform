@@ -15,19 +15,6 @@ let make () =
   | Error _ -> None
   | Ok cmd -> Some cmd
 
-let env t ~manifest =
-  let command =
-    Cmd.append t [ "command-env"; "--json"; "-P"; Path.toString manifest ]
-  in
-  let open Promise.Result.O in
-  Cmd.output (Spawn command) >>= fun stdout ->
-  match Json.parse stdout with
-  | Some json ->
-    Promise.Result.return (Json.Decode.dict Json.Decode.string json)
-  | None ->
-    (* Make this a fatal error. There's no need to try very hard here *)
-    assert false
-
 module Discover = struct
   let valid file = Some { file; status = Ok () }
 
