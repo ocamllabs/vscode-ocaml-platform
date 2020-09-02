@@ -3,13 +3,7 @@
   "sources": [
     {
       "subdirs": ["bindings"],
-      "dir": "src",
-      "generators": [
-        {
-          "name": "lex",
-          "edge": ["sexp.ml", ":", "sexp.mll"]
-        }
-      ]
+      "dir": "src"
     },
     {
       "dir": "src/__tests__",
