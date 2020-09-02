@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.1.1
 
 - Fix interaction between character literals and comments/escaped quotes in
   OCaml files (#348)
