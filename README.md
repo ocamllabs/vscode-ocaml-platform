@@ -16,13 +16,15 @@ _Please report any bugs you encounter._
 3. Install [OCaml-LSP](https://github.com/ocaml/ocaml-lsp) with
    [opam](https://github.com/ocaml/opam) or [esy](https://github.com/esy/esy).
 
+### Windows
+
 If you are on Windows, there are two ways to use this extension:
 
-1. Launch VSCode from cygwin. This will let you choose a global or opam sandbox.
+1. Launch VSCode from Cygwin. This will let you choose a global or opam sandbox.
 
 2. Use a custom sandbox with
    https://fdopen.github.io/opam-repository-mingw/ocaml-env/. If it is on your
-   path you can input `ocaml-env exec -- $prog $args` for the custom command
+   PATH you can input `ocaml-env exec -- $prog $args` for the custom command
    template, or manually edit the `ocaml.sandbox` setting so it is
 
 ```javascript
