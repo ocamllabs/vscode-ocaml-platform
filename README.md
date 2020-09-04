@@ -22,8 +22,8 @@ If you are on Windows, there are two ways to use this extension:
 
 2. Use a custom sandbox with
    https://fdopen.github.io/opam-repository-mingw/ocaml-env/. If it is on your
-   path you can input ocaml-env exec -- $prog $args for the custom command
-   template, or manually edit the ocaml.sandbox settings so it is
+   path you can input `ocaml-env exec -- $prog $args` for the custom command
+   template, or manually edit the `ocaml.sandbox` setting so it is
 
 ```javascript
 "ocaml.sandbox": {
