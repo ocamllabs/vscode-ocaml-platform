@@ -27,7 +27,7 @@ If you are on Windows, there are two ways to use this extension:
    is on your PATH you can input `ocaml-env exec -- $prog $args` for the custom
    command template, or manually edit the `ocaml.sandbox` setting so it is
 
-```javascript
+```json
 "ocaml.sandbox": {
   "kind": "custom",
   "template": "ocaml-env exec -- $prog $args"
