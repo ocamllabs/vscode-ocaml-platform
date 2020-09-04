@@ -23,7 +23,7 @@ If you are on Windows, there are two ways to use this extension:
 1. Launch VSCode from Cygwin. This will let you choose a global or opam sandbox.
 
 2. Use a custom sandbox with
-   https://fdopen.github.io/opam-repository-mingw/ocaml-env/. If it is on your
+   [https://fdopen.github.io/opam-repository-mingw/ocaml-env/](ocaml-env). If it is on your
    PATH you can input `ocaml-env exec -- $prog $args` for the custom command
    template, or manually edit the `ocaml.sandbox` setting so it is
 
