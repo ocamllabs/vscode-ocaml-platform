@@ -1,5 +1,3 @@
-open Import
-
 module Switch : sig
   type t =
     | Local of Path.t
