@@ -11,15 +11,13 @@ let create ~scope ~key ~ofJson ~toJson = { scope; key; toJson; ofJson }
 
 let get ?section t =
   let section = Workspace.getConfiguration ?section () in
-  match WorkspaceConfiguration.get section t.key with
+  match Js.Nullable.toOption (WorkspaceConfiguration.get section t.key) with
   | None -> None
   | Some v -> (
     match t.ofJson v with
     | s -> Some s
     | exception Json.Decode.DecodeError msg ->
-      let (_ : unit Promise.t) =
-        Window.showErrorMessage (sprintf "Setting %s is invalid: %s" t.key msg)
-      in
+      message `Error "Setting %s is invalid: %s" t.key msg;
       None )
 
 let set ?section t v =
