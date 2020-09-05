@@ -11,7 +11,7 @@ let create ~scope ~key ~ofJson ~toJson = { scope; key; toJson; ofJson }
 
 let get ?section t =
   let section = Workspace.getConfiguration ?section () in
-  match Js.Nullable.toOption (WorkspaceConfiguration.get section t.key) with
+  match WorkspaceConfiguration.get section t.key with
   | None -> None
   | Some v -> (
     match t.ofJson v with

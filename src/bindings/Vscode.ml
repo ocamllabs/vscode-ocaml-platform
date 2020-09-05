@@ -82,7 +82,9 @@ end
 module WorkspaceConfiguration = struct
   type t
 
-  external get : t -> string -> Js.Json.t Js.Nullable.t = "get" [@@bs.send]
+  external get' : t -> string -> Js.Json.t Js.Nullable.t = "get" [@@bs.send]
+
+  let get t k = Js.Nullable.toOption (get' t k)
 
   type configurationTarget =
     | Global [@bs.as 1]

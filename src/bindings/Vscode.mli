@@ -101,7 +101,7 @@ end
 module WorkspaceConfiguration : sig
   type t
 
-  val get : t -> string -> Js.Json.t Js.Nullable.t
+  val get : t -> string -> Js.Json.t option
 
   type configurationTarget =
     | Global
