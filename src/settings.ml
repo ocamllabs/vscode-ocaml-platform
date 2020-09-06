@@ -17,9 +17,7 @@ let get ?section t =
     match t.ofJson v with
     | s -> Some s
     | exception Json.Decode.DecodeError msg ->
-      let (_ : unit Promise.t) =
-        Window.showErrorMessage (sprintf "Setting %s is invalid: %s" t.key msg)
-      in
+      message `Error "Setting %s is invalid: %s" t.key msg;
       None )
 
 let set ?section t v =
