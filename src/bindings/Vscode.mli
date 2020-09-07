@@ -37,6 +37,8 @@ module Uri : sig
     }
 
   val file : string -> t
+
+  val parse : ?strict:bool -> string -> t
 end
 
 module TextDocument : sig

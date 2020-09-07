@@ -40,6 +40,11 @@ module Uri = struct
     }
 
   external file : string -> t = "file" [@@bs.module "vscode"] [@@bs.scope "Uri"]
+
+  external _parse : string -> strict:bool -> unit -> t = "parse"
+    [@@bs.module "vscode"] [@@bs.scope "Uri"]
+
+  let parse ?(strict = true) uri = _parse uri ~strict ()
 end
 
 module TextDocument = struct
