@@ -162,8 +162,8 @@
         },
         {
           "comment": "quoted string literal",
-          "begin": "\\{[^|]*\\|",
-          "end": "\\|[^}]*\\}"
+          "begin": "\\{[[:lower:]_]*\\|",
+          "end": "\\|[[:lower:]_]*\\}"
         }
       ]
     },
