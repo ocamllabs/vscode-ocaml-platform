@@ -40,18 +40,21 @@ end = struct
   let switch _ = failwith "not implemented" (* FIXME *)
 end
 
+(** switches from the given document to an opposing document, e.g., from ml to mli file,
+    if that file exists; otherwise, creates that opposing file *)
 let requestSwitch ~client ~capabilities document =
+  (* given a file uri, opens the file if it exists;
+     otherwise, creates the file but doesn't write it to disk *)
   let showFile targetFileName =
-    Window.showTextDocument (`Uri (Uri.file targetFileName)) |> ignore
-  in
-
-  let onPromiseError error =
-    let errorMessage = Node.JsError.ofPromiseError error in
-    let showSwitchError error =
-      message `Error "Error when switching implementation/interface: %s" error
-    in
-    showSwitchError errorMessage;
-    Promise.return ()
+    let open Promise.O in
+    Vscode.Workspace.openTextDocument (`Uri (Uri.file targetFileName))
+    |> Js.Promise.catch (fun _ ->
+           (* if file does not exist *)
+           let untitledSchemeUri = "untitled:" ^ targetFileName in
+           let createFileUri = Uri.parse untitledSchemeUri in
+           Vscode.Workspace.openTextDocument (`Uri createFileUri))
+    >>= fun doc ->
+    Vscode.Window.showTextDocument (`Document doc) >>| fun _ -> ()
   in
 
   let filesToSwitchTo =
@@ -65,34 +68,35 @@ let requestSwitch ~client ~capabilities document =
   in
 
   let open Promise.O in
-  filesToSwitchTo >>= fun arr -> match Array.to_list arr with
-  | [] -> assert false
-  | [ filepath ] -> Promise.return @@ showFile filepath
-  | firstCandidate :: otherCandidates as candidates ->
-    let firstCandidateItem =
+  filesToSwitchTo >>= fun arr ->
+  match Array.to_list arr with
+  | [] ->
+    failwith
+      "all files must be mapped (can be switched to) to at least one file"
+  | [ filepath ] -> showFile filepath
+  | firstCandidate :: otherCandidates as candidates -> (
+    let fstCandidateItem =
       Window.QuickPickItem.create
         ~label:(Filename.basename firstCandidate)
         ~picked:true ()
     in
 
-    let otherCandidateItems =
+    let restCandidateItems =
       List.map
         (fun c -> Window.QuickPickItem.create ~label:(Filename.basename c) ())
         otherCandidates
     in
 
-    let options =
+    let candidateItemsWithNames =
+      List.combine (fstCandidateItem :: restCandidateItems) candidates
+    in
+
+    let file_options =
       Window.QuickPickOptions.make ~canPickMany:false
-        ~placeHolder:"Create a file:" ()
+        ~placeHolder:"Open a file..." ()
     in
 
     let open Promise.O in
-    Window.showQuickPickItems
-      (List.combine (firstCandidateItem :: otherCandidateItems) candidates)
-      options
-    >>= function
+    Window.showQuickPickItems candidateItemsWithNames file_options >>= function
     | None -> Promise.return ()
-    | Some filepath ->
-      Fs.writeFile filepath "" >>| fun () ->
-      showFile filepath
-
+    | Some filepath -> showFile filepath )
