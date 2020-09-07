@@ -5,6 +5,7 @@
 - Highlight dashes in PKG names for .merlin files (#349)
 - Make .ocamlformat syntax highlighting more distinct (#350)
 - Improve highlighting of path elements and strings in .merlin files (#355)
+- Fix highlighting of comments that contain quoted string literals (#363)
 
 ## 1.1.1
 
