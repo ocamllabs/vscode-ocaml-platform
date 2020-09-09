@@ -6,6 +6,7 @@
 - Make .ocamlformat syntax highlighting more distinct (#350)
 - Improve highlighting of path elements and strings in .merlin files (#355)
 - Fix highlighting of comments that contain quoted string literals (#363)
+- Fix highlighting of rec keyword in type-annotated functions (#364)
 
 ## 1.1.1
 
