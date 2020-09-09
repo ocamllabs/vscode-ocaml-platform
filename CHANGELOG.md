@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.1.2
 
 - Highlight dashes in PKG names for .merlin files (#349)
 - Make .ocamlformat syntax highlighting more distinct (#350)
