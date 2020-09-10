@@ -11,8 +11,8 @@
     { "include": "#extensions" },
     { "include": "#signatures" },
     { "include": "#bindings" },
-    { "include": "#keywords" },
     { "include": "#operators" },
+    { "include": "#keywords" },
     { "include": "#literals" },
     { "include": "#types" },
     { "include": "#identifiers" }
@@ -407,21 +407,11 @@
       ]
     },
 
-    "keywords": {
-      "patterns": [
-        {
-          "comment": "reserved ocaml keyword",
-          "name": "keyword.other.ocaml",
-          "match": "\\b(and|as|assert|begin|class|constraint|do|done|downto|else|end|exception|external|for|fun|function|functor|if|in|include|inherit|initializer|lazy|let|match|method|module|mutable|new|nonrec|object|of|open|private|rec|sig|struct|then|to|try|type|val|virtual|when|while|with)\\b(?!')"
-        }
-      ]
-    },
-
     "operators": {
       "patterns": [
         {
           "comment": "binding operator",
-          "name": "keyword.operator.ocaml",
+          "name": "keyword.ocaml",
           "match": "\\b(let|and)[$&*+\\-/=>@^|<][!?$&*+\\-/=>@^|%:]*"
         },
         {
@@ -483,6 +473,16 @@
           "comment": "comma separator",
           "name": "keyword.other.ocaml punctuation.comma punctuation.separator.comma",
           "match": ","
+        }
+      ]
+    },
+
+    "keywords": {
+      "patterns": [
+        {
+          "comment": "reserved ocaml keyword",
+          "name": "keyword.other.ocaml",
+          "match": "\\b(and|as|assert|begin|class|constraint|do|done|downto|else|end|exception|external|for|fun|function|functor|if|in|include|inherit|initializer|lazy|let|match|method|module|mutable|new|nonrec|object|of|open|private|rec|sig|struct|then|to|try|type|val|virtual|when|while|with)\\b(?!')"
         }
       ]
     },
