@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Consistent binding operator highlighting in OCaml files (#365)
+
 ## 1.1.2
 
 - Highlight dashes in PKG names for .merlin files (#349)

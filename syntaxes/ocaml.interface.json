@@ -8,8 +8,8 @@
     { "include": "source.ocaml#attributes" },
     { "include": "source.ocaml#extensions" },
     { "include": "#bindings" },
-    { "include": "#keywords" },
     { "include": "source.ocaml#operators" },
+    { "include": "#keywords" },
     { "include": "source.ocaml#types" },
     { "include": "source.ocaml#identifiers" }
   ],
