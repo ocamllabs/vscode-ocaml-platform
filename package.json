@@ -557,7 +557,7 @@
   "devDependencies": {
     "@glennsl/bs-jest": "0.5.1",
     "@glennsl/bs-json": "5.0.2",
-    "@vercel/ncc": "0.24.0",
+    "@vercel/ncc": "0.24.1",
     "bs-platform": "8.2.0",
     "fs-extra": "9.0.1",
     "jest-cli": "26.4.2",
