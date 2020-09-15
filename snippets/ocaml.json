@@ -25,7 +25,7 @@
   },
   "sig": {
     "prefix": "sig",
-    "body": ["sig\n${1}\nend$0"]
+    "body": ["sig\n  ${1}\nend$0"]
   },
   "module": {
     "prefix": "module",
