@@ -12,8 +12,6 @@ end = struct
     targetFileName
 end
 
-(** switches from the given document to an opposing document, e.g., from ml to mli file,
-    if that file exists; otherwise, creates that opposing file *)
 let requestSwitch ~client ~capabilities document =
   (* given a file uri, opens the file if it exists;
      otherwise, creates the file but doesn't write it to disk *)
@@ -37,7 +35,7 @@ let requestSwitch ~client ~capabilities document =
       when OcamlLsp.handleSwitchImplIntf capabilities ->
       Lsp.switch client document
     | _ -> failwith "NOT IMPLEMENTED"
-    (* FIXME : handle missing switching capability in ocamllsp *)
+    (* TODO handle more gracefully *)
   in
 
   let open Promise.O in
