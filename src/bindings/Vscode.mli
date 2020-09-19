@@ -36,9 +36,30 @@ module Uri : sig
     ; fsPath : string
     }
 
+  type change =
+    < authority : string
+    ; fragment : string
+    ; path : string
+    ; query : string
+    ; scheme : string >
+    Js.t
+
+  val make_change :
+       ?authority:string
+    -> ?fragment:string
+    -> ?path:string
+    -> ?query:string
+    -> ?scheme:string
+    -> unit
+    -> change
+
   val file : string -> t
 
+  val with_ : t -> change -> t
+
   val parse : ?strict:bool -> string -> t
+
+  val toString : t -> ?skipEncoding:bool -> unit -> string
 end
 
 module TextDocument : sig

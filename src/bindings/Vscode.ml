@@ -39,12 +39,35 @@ module Uri = struct
     ; fsPath : string
     }
 
+  type change =
+    < authority : string
+    ; fragment : string
+    ; path : string
+    ; query : string
+    ; scheme : string >
+    Js.t
+
+  external make_change :
+       ?authority:string
+    -> ?fragment:string
+    -> ?path:string
+    -> ?query:string
+    -> ?scheme:string
+    -> unit
+    -> change = ""
+    [@@bs.obj]
+
   external file : string -> t = "file" [@@bs.module "vscode"] [@@bs.scope "Uri"]
+
+  external with_ : t -> change -> t = "with" [@@bs.send]
 
   external _parse : string -> strict:bool -> unit -> t = "parse"
     [@@bs.module "vscode"] [@@bs.scope "Uri"]
 
   let parse ?(strict = true) uri = _parse uri ~strict ()
+
+  external toString : t -> ?skipEncoding:bool -> unit -> string = "toString"
+    [@@bs.send]
 end
 
 module TextDocument = struct
