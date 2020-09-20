@@ -82,7 +82,15 @@ module Instance = struct
     let statusBarItem =
       Window.createStatusBarItem ~alignment:StatusBarAlignment.(tToJs Left) ()
     in
-    let statusBarText = Toolchain.toString toolchain in
+    let packageManager = Toolchain.packageManager toolchain in
+    let statusBarText =
+      let packageIcon =
+        "$(package)"
+        (* see https://code.visualstudio.com/api/references/icons-in-labels *)
+      in
+      Printf.sprintf "%s %s" packageIcon
+      @@ Toolchain.PackageManager.toPrettyString packageManager
+    in
     statusBarItem##text#=statusBarText;
     statusBarItem##command#=selectSandboxCommandId;
     StatusBarItem.show statusBarItem;

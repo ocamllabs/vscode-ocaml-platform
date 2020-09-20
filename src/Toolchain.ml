@@ -117,11 +117,25 @@ module PackageManager = struct
     | Opam (_, switch) -> Printf.sprintf "opam(%s)" (Opam.Switch.name switch)
     | Global -> "global"
     | Custom _ -> "custom"
+
+  let toPrettyString t =
+    let print_opam = Printf.sprintf "opam(%s)" in
+    let print_esy = Printf.sprintf "esy(%s)" in
+    match t with
+    | Esy (_, root) ->
+      let projectName = Path.basename root in
+      print_esy projectName
+    | Opam (_, Named name) -> print_opam name
+    | Opam (_, Local path) ->
+      let projectName = Path.basename path in
+      print_opam projectName
+    | Global -> "Global"
+    | Custom _ -> "Custom"
 end
 
 type resources = PackageManager.t
 
-let toString t = "OCaml Platform | " ^ PackageManager.toString t
+let packageManager (t : resources) : PackageManager.t = t
 
 let availablePackageManagers () =
   { PackageManager.Kind.Hmap.opam = Opam.make ()
