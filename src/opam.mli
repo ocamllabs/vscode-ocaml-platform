@@ -5,7 +5,7 @@ module Switch : sig
 
   val ofString : string -> t
 
-  val toString : t -> string
+  val name : t -> string
 end
 
 type t

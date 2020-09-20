@@ -11,7 +11,7 @@ module Switch = struct
     else
       Named line
 
-  let toString = function
+  let name = function
     | Named s -> s
     | Local p -> Path.toString p
 end
@@ -45,7 +45,7 @@ let switchList t =
     []
   | Ok out -> parseSwitchList out
 
-let switchArg switch = "--switch=" ^ Switch.toString switch
+let switchArg switch = "--switch=" ^ Switch.name switch
 
 let exec t ~switch ~args =
   Cmd.Spawn (Cmd.append t ("exec" :: switchArg switch :: "--" :: args))
