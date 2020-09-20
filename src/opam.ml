@@ -2,8 +2,8 @@ open Import
 
 module Switch = struct
   type t =
-    | Local of Path.t
-    | Named of string
+    | Local of Path.t  (** if switch name is directory name where it's stored *)
+    | Named of string  (** if switch is stored in ~/.opam *)
 
   let make switch_name =
     if switch_name.[0] = '/' then
