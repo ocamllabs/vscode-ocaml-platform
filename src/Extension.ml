@@ -83,8 +83,8 @@ module Instance = struct
       Window.createStatusBarItem ~alignment:StatusBarAlignment.(tToJs Left) ()
     in
     let statusBarText = Toolchain.toString toolchain in
-    statusBarItem ## text #= statusBarText;
-    statusBarItem ## command #= selectSandboxCommandId;
+    statusBarItem##text#=statusBarText;
+    statusBarItem##command#=selectSandboxCommandId;
     StatusBarItem.show statusBarItem;
     t.statusBarItem <- Some statusBarItem;
 
