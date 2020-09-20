@@ -11,30 +11,31 @@ build: [
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]
 depends: [
-  "ocaml" {>= "4.06" & < "4.11"}
+  "ocaml" {>= "4.06" & < "4.12"}
   "alcotest" {with-test}
-  "base" {>= "v0.11.0" & < "v0.14"}
+  "base" {>= "v0.12.0" & < "v0.15"}
   "base-unix"
   "cmdliner"
   "dune" {>= "2.2.0"}
   "fix"
   "fpath"
   "menhir"
-  "ocaml-migrate-parsetree" {>= "1.5.0"}
+  "ocaml-migrate-parsetree" {>= "1.7.3" & < "2.0.0"}
   "ocp-indent" {with-test}
   "odoc" {>= "1.4.2"}
   "re"
-  "stdio" {< "v0.14"}
+  "stdio" {< "v0.15"}
   "uuseg" {>= "10.0.0"}
   "uutf" {>= "1.0.1"}
 ]
 synopsis: "Auto-formatter for OCaml code"
 description: "OCamlFormat is a tool to automatically format OCaml code in a uniform style."
+x-commit-hash: "e9e70f4d3aea202ec8ea4afd7ccb828b36822799"
 url {
   src:
-    "https://github.com/ocaml-ppx/ocamlformat/releases/download/0.14.2/ocamlformat-0.14.2.tbz"
+    "https://github.com/ocaml-ppx/ocamlformat/releases/download/0.15.0/ocamlformat-0.15.0.tbz"
   checksum: [
-    "sha256=5f9f7ac312a8f62315e25536f87601efc7788114a4a1eacc0507acf474f8f09a"
-    "sha512=9f526031c2225b2d3d21c1f241517b9fb87752570645df587bace7afaa5e0e60922f873843343349a2f8f80d1d3e061ce23ee5199fa61a709b877c328a6f7729"
+    "sha256=263b4a8907e1b820ae0c1db55183ac3a44c4eaa05e8f1a144baa1a9bcadf2005"
+    "sha512=2bc0b826567fa71201031a730568b822938c66c56da47b05b8896b68439da3d0a8b9bc552fa5cacab95bf9192a1b6e583655fd90095aa686daa91cd2bdf4725a"
   ]
 }

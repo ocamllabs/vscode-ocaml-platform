@@ -12,4 +12,3 @@ node_modules/
 *.bs.js
 *.log
 *.vsix
-esy.lock
