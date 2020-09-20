@@ -5,6 +5,10 @@ build:
 	yarn build
 .PHONY: build
 
+test:
+	yarn test
+.PHONY: test
+
 fmt:
 	ocamlformat --inplace --enable-outside-detected-project $(OCAML_SRCFILES)
 	refmt --in-place $(REASON_SRCFILES)
