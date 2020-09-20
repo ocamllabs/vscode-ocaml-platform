@@ -129,8 +129,8 @@ module PackageManager = struct
     | Opam (_, Local path) ->
       let projectName = Path.basename path in
       print_opam projectName
-    | Global -> "Global"
-    | Custom _ -> "Custom"
+    | Global -> "Global OCaml"
+    | Custom _ -> "Custom OCaml"
 end
 
 type resources = PackageManager.t
