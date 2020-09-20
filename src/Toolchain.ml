@@ -86,7 +86,7 @@ module PackageManager = struct
         Esy manifest
       | Opam ->
         let switch =
-          field "switch" (fun js -> Opam.Switch.ofString (string js)) json
+          field "switch" (fun js -> Opam.Switch.make (string js)) json
         in
         Opam switch
       | Custom ->

@@ -5,11 +5,11 @@ module Switch = struct
     | Local of Path.t
     | Named of string
 
-  let ofString line =
-    if line.[0] = '/' then
-      Local (Path.ofString line)
+  let make switch_name =
+    if switch_name.[0] = '/' then
+      Local (Path.ofString switch_name)
     else
-      Named line
+      Named switch_name
 
   let name = function
     | Named s -> s
@@ -31,7 +31,7 @@ let parseSwitchList out =
   let result =
     Belt.List.keepMap lines (function
       | "" -> None
-      | s -> Some (Switch.ofString s))
+      | s -> Some (Switch.make s))
   in
   log "%d switches" (List.length result);
   result
