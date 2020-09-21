@@ -378,9 +378,10 @@ module WorkspaceEdit : sig
 
   val createFile :
        t
+    -> Uri.t
     -> ?options:createFileOptions
     -> ?metadata:workpaceEditEntryMetadata
-    -> Uri.t
+    -> unit
     -> unit
 end
 

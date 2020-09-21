@@ -240,9 +240,10 @@ module WorkspaceEdit = struct
 
   external createFile :
        t
+    -> Uri.t
     -> ?options:createFileOptions
     -> ?metadata:workpaceEditEntryMetadata
-    -> Uri.t
+    -> unit
     -> unit = "createFile"
     [@@bs.send]
 
