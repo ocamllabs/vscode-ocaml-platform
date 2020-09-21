@@ -355,13 +355,11 @@ end
 
 type iconsByColorTheme = < dark : Uri.t ; light : Uri.t > Js.t
 
+type iconPath
+
 type workpaceEditEntryMetadata =
   < description : string option
-  ; iconPath :
-      [ `Uri of Uri.t
-      | `IconsByColorTheme of iconsByColorTheme
-      | `ThemeIcon of ThemeIcon.t
-      ]
+  ; iconPath : iconPath
   ; label : string
   ; needsConfirmation : bool >
   Js.t
