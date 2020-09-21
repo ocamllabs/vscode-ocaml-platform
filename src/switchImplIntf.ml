@@ -1,16 +1,9 @@
 open Import
 
-module Lsp : sig
-  val switch : LanguageClient.t -> TextDocument.t -> string array Promise.t
-end = struct
-  let switch client document =
-    let targetFileName : string array Promise.t =
-      LanguageClient.sendRequest client ~meth:"ocamllsp/switchImplIntf"
-        ~data:(Uri.toString document.TextDocument.uri ~skipEncoding:true ())
-        ()
-    in
-    targetFileName
-end
+let switch client document : string array Promise.t =
+  LanguageClient.sendRequest client ~meth:"ocamllsp/switchImplIntf"
+    ~data:(Uri.toString document.TextDocument.uri ~skipEncoding:true ())
+    ()
 
 let requestSwitch ~client ~capabilities document =
   (* given a file uri, opens the file if it exists;
@@ -33,7 +26,7 @@ let requestSwitch ~client ~capabilities document =
     match (client, capabilities) with
     | Some client, Some capabilities
       when OcamlLsp.handleSwitchImplIntf capabilities ->
-      Lsp.switch client document
+      switch client document
     | _ -> failwith "NOT IMPLEMENTED"
     (* TODO handle more gracefully *)
   in
