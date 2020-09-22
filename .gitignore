@@ -12,3 +12,5 @@ node_modules/
 *.bs.js
 *.log
 *.vsix
+
+test_extension.vsix
