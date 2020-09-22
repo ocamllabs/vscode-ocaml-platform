@@ -38,4 +38,4 @@ let ofInitializeResult (t : Vscode.LanguageClient.InitializeResult.t) =
 
 let interfaceSpecificLangId t = t.interfaceSpecificLangId
 
-let handleSwitchImplIntf t = t.handleSwitchImplIntf
+let canHandleSwitchImplIntf t = t.handleSwitchImplIntf

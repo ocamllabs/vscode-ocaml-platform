@@ -117,12 +117,13 @@ module Instance = struct
     t.ocamlLspCapabilities <- Some ocamlLsp;
     if
       (not (OcamlLsp.interfaceSpecificLangId ocamlLsp))
-      || not (OcamlLsp.handleSwitchImplIntf ocamlLsp)
+      || not (OcamlLsp.canHandleSwitchImplIntf ocamlLsp)
     then
       message `Warn
-        "ocamllsp in this toolchain is out of date. The following features \
-         might be unavailable or degraded in functionality: switching between \
-         implementation and interface files, functionality in mli sources";
+        "The installed version of ocamllsp is out of date. Some features may \
+         be unavailable or degraded in functionality: switching between \
+         implementation and interface files, functionality in mli sources. \
+         Consider updating ocamllsp.";
     Ok ()
 
   let openTerminal toolchain =
@@ -180,13 +181,24 @@ let openTerminal (instance : Instance.t) () =
   | Some toolchain -> Instance.openTerminal toolchain
 
 let switchImplIntf (instance : Instance.t) () =
-  Option.iter (Window.activeTextEditor ()) ~f:(fun { document } ->
-      let client = instance.client in
-      let capabilities = instance.ocamlLspCapabilities in
-      let (_ : unit Promise.t) =
-        SwitchImplIntf.requestSwitch ~client ~capabilities document
-      in
-      ())
+  let trySwitching () =
+    let open Option in
+    Window.activeTextEditor () >>= fun { document } ->
+    instance.client >>= fun client ->
+    (* extension needs to be activated; otherwise, just ignore the switch try *)
+    instance.ocamlLspCapabilities >>| fun ocamlLsp ->
+    (* same as for instance.client; ignore the try if it's None *)
+    if OcamlLsp.canHandleSwitchImplIntf ocamlLsp then
+      SwitchImplIntf.requestSwitch client document
+    else
+      (* if, however, ocamllsp doesn't have the capability, recommend updating ocamllsp*)
+      Promise.return
+      @@ message `Warn
+           "The installed version of ocamllsp does not support switching \
+            between implementation and interface files. Consider updating \
+            ocamllsp."
+  in
+  ignore @@ trySwitching ()
 
 let suggestToSetupToolchain instance =
   let open Promise.O in

@@ -1,42 +1,32 @@
 open Import
 
-let switch client document : string array Promise.t =
+let sendSwitchImplIntfRequest client document : string array Promise.t =
   LanguageClient.sendRequest client ~meth:"ocamllsp/switchImplIntf"
     ~data:(Uri.toString document.TextDocument.uri ~skipEncoding:true ())
     ()
 
-let requestSwitch ~client ~capabilities document =
-  (* given a file uri, opens the file if it exists;
+(* given a file uri, opens the file if it exists;
      otherwise, creates the file but doesn't write it to disk *)
-  let showFile targetFileName =
-    let open Promise.O in
-    let uri = Uri.parse targetFileName in
-    Vscode.Workspace.openTextDocument (`Uri uri)
-    |> Js.Promise.catch (fun _ ->
-           (* if file does not exist *)
-           let createFileUri =
-             Uri.with_ uri @@ Uri.make_change ~scheme:"untitled" ()
-           in
-           Vscode.Workspace.openTextDocument (`Uri createFileUri))
-    >>= fun doc ->
-    Vscode.Window.showTextDocument (`Document doc) >>| fun _ -> ()
-  in
-
-  let filesToSwitchTo =
-    match (client, capabilities) with
-    | Some client, Some capabilities
-      when OcamlLsp.handleSwitchImplIntf capabilities ->
-      switch client document
-    | _ -> failwith "NOT IMPLEMENTED"
-    (* TODO handle more gracefully *)
-  in
-
+let showFile targetFileName =
   let open Promise.O in
-  filesToSwitchTo >>= fun arr ->
+  let uri = Uri.parse targetFileName in
+  Vscode.Workspace.openTextDocument (`Uri uri)
+  |> Js.Promise.catch (fun _ ->
+         (* if file does not exist *)
+         let createFileUri =
+           Uri.with_ uri @@ Uri.make_change ~scheme:"untitled" ()
+         in
+         Vscode.Workspace.openTextDocument (`Uri createFileUri))
+  >>= fun doc ->
+  Vscode.Window.showTextDocument (`Document doc) >>| fun _ -> ()
+
+let requestSwitch client document =
+  let open Promise.O in
+  sendSwitchImplIntfRequest client document >>= fun arr ->
   match Array.to_list arr with
   | [] ->
-    failwith
-      "all files must be mapped (can be switched to) to at least one file"
+    (* 'ocamllsp/switchImplIntf' command's response array cannot be empty *)
+    assert false
   | [ filepath ] -> showFile filepath
   | firstCandidate :: otherCandidates as candidates -> (
     let fstCandidateItem =
