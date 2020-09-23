@@ -200,7 +200,7 @@ module Candidate = struct
 
   let toQuickPick { packageManager; status } =
     let create = Window.QuickPickItem.create in
-    let detail =
+    let description =
       match status with
       | Error s -> Some (sprintf "invalid: %s" s)
       | Ok () -> (
@@ -210,17 +210,21 @@ module Candidate = struct
         | _ -> None )
     in
     match packageManager with
-    | PackageManager.Opam (_, s) ->
-      let label = Opam.Switch.name s in
-      create ?detail ~label ()
+    | PackageManager.Opam (_, Named name) -> create ~label:name ?description ()
+    | Opam (_, Local path) ->
+      let projectName = Path.basename path in
+      let projectPath = Path.toString path in
+      create ~label:projectName ~detail:projectPath ?description ()
     | Esy (_, p) ->
-      create ?detail ~label:(Path.toString p) ~description:"Esy" ()
+      let projectName = Path.basename p in
+      let projectPath = Path.toString p in
+      create ~detail:projectPath ~label:projectName ~description:"Esy" ()
     | Global ->
-      create ?detail ~label:"Global"
-        ~description:"Global toolchain inherited from the environment" ()
+      create ~label:"Global" ?description
+        ~detail:"Global toolchain inherited from the environment" ()
     | Custom _ ->
-      create ?detail ~label:"Custom"
-        ~description:"Custom toolchain using a command template" ()
+      create ?description ~label:"Custom"
+        ~detail:"Custom toolchain using a command template" ()
 
   let ok packageManager = { packageManager; status = Ok () }
 end
