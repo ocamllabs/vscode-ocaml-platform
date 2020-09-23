@@ -76,7 +76,8 @@ let create toolchain =
       | PowerShell bin -> { bin; args = [ "-c"; "& " ^ commandLine ] } )
   in
   Cmd.log (Spawn command);
-  let name = Toolchain.toString toolchain in
+  let packageManager = Toolchain.packageManager toolchain in
+  let name = Toolchain.PackageManager.toPrettyString packageManager in
   let shellPath = Path.toString bin in
   let shellArgs = Array.of_list args in
   Window.createTerminal ~name ~shellPath ~shellArgs ()

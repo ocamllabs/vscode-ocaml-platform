@@ -86,7 +86,7 @@ module PackageManager = struct
         Esy manifest
       | Opam ->
         let switch =
-          field "switch" (fun js -> Opam.Switch.ofString (string js)) json
+          field "switch" (fun js -> Opam.Switch.make (string js)) json
         in
         Opam switch
       | Custom ->
@@ -100,8 +100,7 @@ module PackageManager = struct
       | Global -> Json.Encode.object_ [ kind ]
       | Esy manifest ->
         object_ [ kind; ("root", string @@ Path.toString manifest) ]
-      | Opam sw ->
-        object_ [ kind; ("switch", string @@ Opam.Switch.toString sw) ]
+      | Opam sw -> object_ [ kind; ("switch", string @@ Opam.Switch.name sw) ]
       | Custom template -> object_ [ kind; ("template", string template) ]
 
     let t = Settings.create ~scope:Workspace ~key:"sandbox" ~ofJson ~toJson
@@ -115,15 +114,28 @@ module PackageManager = struct
 
   let toString = function
     | Esy (_, root) -> Printf.sprintf "esy(%s)" (Path.toString root)
-    | Opam (_, switch) ->
-      Printf.sprintf "opam(%s)" (Opam.Switch.toString switch)
+    | Opam (_, switch) -> Printf.sprintf "opam(%s)" (Opam.Switch.name switch)
     | Global -> "global"
     | Custom _ -> "custom"
+
+  let toPrettyString t =
+    let print_opam = Printf.sprintf "opam(%s)" in
+    let print_esy = Printf.sprintf "esy(%s)" in
+    match t with
+    | Esy (_, root) ->
+      let projectName = Path.basename root in
+      print_esy projectName
+    | Opam (_, Named name) -> print_opam name
+    | Opam (_, Local path) ->
+      let projectName = Path.basename path in
+      print_opam projectName
+    | Global -> "Global OCaml"
+    | Custom _ -> "Custom OCaml"
 end
 
 type resources = PackageManager.t
 
-let toString t = "OCaml Platform | " ^ PackageManager.toString t
+let packageManager (t : resources) : PackageManager.t = t
 
 let availablePackageManagers () =
   { PackageManager.Kind.Hmap.opam = Opam.make ()
@@ -169,7 +181,7 @@ let ofSettings () : PackageManager.t option Promise.t =
         message `Warn
           "Workspace is configured to use the switch %s. This switch does not \
            exist."
-          (Opam.Switch.toString switch);
+          (Opam.Switch.name switch);
         None
       | true -> Some (PackageManager.Opam (opam, switch)) ) )
   | Some Global -> Promise.return (Some PackageManager.Global)
@@ -199,7 +211,7 @@ module Candidate = struct
     in
     match packageManager with
     | PackageManager.Opam (_, s) ->
-      let label = Opam.Switch.toString s in
+      let label = Opam.Switch.name s in
       create ?detail ~label ()
     | Esy (_, p) ->
       create ?detail ~label:(Path.toString p) ~description:"Esy" ()

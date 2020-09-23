@@ -24,15 +24,17 @@ module PackageManager : sig
     | Custom of string
 
   val toString : t -> string
+
+  val toPrettyString : t -> string
 end
 
 type resources
 
-val toString : resources -> string
-
 val ofSettings : unit -> PackageManager.t option Promise.t
 
 val makeResources : PackageManager.t -> resources
+
+val packageManager : resources -> PackageManager.t
 
 (** [selectAndSave] requires the process environment the plugin is being run in
    (ie VSCode's process environment) and the project root and produces a promise

@@ -2,16 +2,16 @@ open Import
 
 module Switch = struct
   type t =
-    | Local of Path.t
-    | Named of string
+    | Local of Path.t  (** if switch name is directory name where it's stored *)
+    | Named of string  (** if switch is stored in ~/.opam *)
 
-  let ofString line =
-    if line.[0] = '/' then
-      Local (Path.ofString line)
+  let make switch_name =
+    if switch_name.[0] = '/' then
+      Local (Path.ofString switch_name)
     else
-      Named line
+      Named switch_name
 
-  let toString = function
+  let name = function
     | Named s -> s
     | Local p -> Path.toString p
 end
@@ -31,7 +31,7 @@ let parseSwitchList out =
   let result =
     Belt.List.keepMap lines (function
       | "" -> None
-      | s -> Some (Switch.ofString s))
+      | s -> Some (Switch.make s))
   in
   log "%d switches" (List.length result);
   result
@@ -45,7 +45,7 @@ let switchList t =
     []
   | Ok out -> parseSwitchList out
 
-let switchArg switch = "--switch=" ^ Switch.toString switch
+let switchArg switch = "--switch=" ^ Switch.name switch
 
 let exec t ~switch ~args =
   Cmd.Spawn (Cmd.append t ("exec" :: switchArg switch :: "--" :: args))
