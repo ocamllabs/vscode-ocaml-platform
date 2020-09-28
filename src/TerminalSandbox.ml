@@ -61,7 +61,7 @@ let getShellArgs () =
   | Some _ as s -> s
   | None -> args "terminal.integrated"
 
-type t = Vscode.Terminal.t
+type t = Terminal.t
 
 let create toolchain =
   let open Core_kernel.Option.Monad_infix in
@@ -82,6 +82,6 @@ let create toolchain =
   let shell_args = `Strings args in
   Window.create_terminal ~name ~shell_path ~shell_args ()
 
-let dispose = Vscode.Terminal.dispose
+let dispose = Terminal.dispose
 
-let show t = Vscode.Terminal.show t ()
+let show t = Terminal.show t ()

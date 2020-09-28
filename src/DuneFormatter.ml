@@ -34,7 +34,6 @@ let register t toolchain =
   t :=
     [ "dune"; "dune-project"; "dune-workspace" ]
     |> List.map (fun language ->
-           let open Vscode.Languages in
            let selector =
              `Filter (DocumentFilter.create ~scheme:"file" ~language ())
            in
@@ -42,7 +41,8 @@ let register t toolchain =
              DocumentFormattingEditProvider.create
                ~provide_document_formatting_edits:(getFormatter toolchain)
            in
-           register_document_formatting_edit_provider ~selector ~provider)
+           Languages.register_document_formatting_edit_provider ~selector
+             ~provider)
 
 let dispose t =
   List.iter Disposable.dispose !t;

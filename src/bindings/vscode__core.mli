@@ -1948,7 +1948,7 @@ module Window : sig
   val show_information_message :
        message:string
     -> ?options:MessageOptions.t
-    -> choices:(string * 'a) list
+    -> ?choices:(string * 'a) list
     -> unit
     -> 'a or_undefined Promise.t
     [@@js.custom
@@ -1960,7 +1960,7 @@ module Window : sig
         -> MessageItem.t or_undefined Promise.t
         [@@js.global "vscode.window.showInformationMessage"]
 
-      let show_information_message ~message ?options ~choices () =
+      let show_information_message ~message ?options ?(choices = []) () =
         let choices = get_choices choices in
         let open Promise.Syntax in
         show_information_message ~message ?options ~items:(List.map fst choices)
@@ -1970,7 +1970,7 @@ module Window : sig
   val show_warning_message :
        message:string
     -> ?options:MessageOptions.t
-    -> choices:(string * 'a) list
+    -> ?choices:(string * 'a) list
     -> unit
     -> 'a or_undefined Promise.t
     [@@js.custom
@@ -1982,7 +1982,7 @@ module Window : sig
         -> MessageItem.t or_undefined Promise.t
         [@@js.global "vscode.window.showWarningMessage"]
 
-      let show_warning_message ~message ?options ~choices () =
+      let show_warning_message ~message ?options ?(choices = []) () =
         let choices = get_choices choices in
         let open Promise.Syntax in
         show_warning_message ~message ?options ~items:(List.map fst choices) ()
@@ -1991,7 +1991,7 @@ module Window : sig
   val show_error_message :
        message:string
     -> ?options:MessageOptions.t
-    -> choices:(string * 'a) list
+    -> ?choices:(string * 'a) list
     -> unit
     -> 'a or_undefined Promise.t
     [@@js.custom
@@ -2003,7 +2003,7 @@ module Window : sig
         -> MessageItem.t or_undefined Promise.t
         [@@js.global "vscode.window.showErrorMessage"]
 
-      let show_error_message ~message ?options ~choices () =
+      let show_error_message ~message ?options ?(choices = []) () =
         let choices = get_choices choices in
         let open Promise.Syntax in
         show_error_message ~message ?options ~items:(List.map fst choices) ()

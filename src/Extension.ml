@@ -11,7 +11,7 @@ let openTerminalSelectCommandId = "ocaml.open-terminal-select"
 let switchImplIntfCommandId = "ocaml.switch-impl-intf"
 
 module Client = struct
-  let make () : Vscode.LanguageClient.ClientOptions.t =
+  let make () : LanguageClient.ClientOptions.t =
     let document_selector =
       LanguageClient.DocumentSelector.
         [| language "ocaml"
@@ -22,11 +22,9 @@ module Client = struct
         |]
     in
     let (lazy output_channel) = Output.languageServerOutputChannel in
-    let reveal_output_channel_on =
-      Vscode.LanguageClient.RevealOutputChannelOn.Never
-    in
-    Vscode.LanguageClient.ClientOptions.create ~document_selector
-      ~output_channel ~reveal_output_channel_on ()
+    let reveal_output_channel_on = LanguageClient.RevealOutputChannelOn.Never in
+    LanguageClient.ClientOptions.create ~document_selector ~output_channel
+      ~reveal_output_channel_on ()
 end
 
 module Server = struct
@@ -208,7 +206,7 @@ let switchImplIntf (instance : Instance.t) () =
 
 let suggestToSetupToolchain instance =
   let open Promise.Syntax in
-  Vscode.Window.show_information_message
+  Window.show_information_message
     ~message:
       "Extension is unable to find ocamllsp automatically. Please select \
        package manager you used to install ocamllsp for this project."
@@ -221,10 +219,10 @@ let suggestToSetupToolchain instance =
 let registerCommands extension =
   List.iter (function command, callback ->
       let callback ~args:_ = callback () in
-      Vscode.ExtensionContext.subscribe extension
-        ~disposable:(Vscode.Commands.register_command ~command ~callback))
+      ExtensionContext.subscribe extension
+        ~disposable:(Commands.register_command ~command ~callback))
 
-let activate (extension : Vscode.ExtensionContext.t) =
+let activate (extension : ExtensionContext.t) =
   Process.set_env "OCAML_LSP_SERVER_LOG" "-";
   let instance = Instance.create () in
   registerCommands extension
@@ -234,7 +232,7 @@ let activate (extension : Vscode.ExtensionContext.t) =
     ; (openTerminalSelectCommandId, selectSandboxAndOpenTerminal)
     ; (switchImplIntfCommandId, switchImplIntf instance)
     ];
-  Vscode.ExtensionContext.subscribe extension
+  ExtensionContext.subscribe extension
     ~disposable:(Instance.disposable instance);
   let open Promise.Syntax in
   let toolchain =

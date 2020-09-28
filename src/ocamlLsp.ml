@@ -28,11 +28,9 @@ let ofJson (json : Jsonoo.t) =
        might be missing";
     default
 
-let ofInitializeResult (t : Vscode.LanguageClient.InitializeResult.t) =
-  match
-    Vscode.LanguageClient.(
-      InitializeResult.capabilities t |> ServerCapabilities.experimental)
-  with
+let ofInitializeResult (t : LanguageClient.InitializeResult.t) =
+  let open LanguageClient in
+  match ServerCapabilities.experimental (InitializeResult.capabilities t) with
   | None -> default
   | Some json -> (
     match Jsonoo.Decode.field "ocamllsp" ofJson json with

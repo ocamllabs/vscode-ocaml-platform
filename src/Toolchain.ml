@@ -252,10 +252,9 @@ let sandboxCandidates ~workspaceFolders =
     | None -> Promise.return []
     | Some esy ->
       workspaceFolders
-      |> List.map (fun (folder : Vscode.WorkspaceFolder.t) ->
+      |> List.map (fun (folder : WorkspaceFolder.t) ->
              let dir =
-               folder |> Vscode.WorkspaceFolder.uri |> Vscode.Uri.fs_path
-               |> Path.ofString
+               folder |> WorkspaceFolder.uri |> Uri.fs_path |> Path.ofString
              in
              Esy.discover ~dir)
       |> Promise.all_list
@@ -297,7 +296,7 @@ let makeResources kind = kind
 
 let select () =
   let open Promise.Syntax in
-  let workspaceFolders = Vscode.Workspace.workspace_folders () in
+  let workspaceFolders = Workspace.workspace_folders () in
   sandboxCandidates ~workspaceFolders >>= fun candidates ->
   let open Promise.Option.Syntax in
   selectPackageManager candidates >>= function

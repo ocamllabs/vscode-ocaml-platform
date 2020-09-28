@@ -4,14 +4,14 @@ type 'a t =
   { key : string
   ; toJson : 'a -> Jsonoo.t
   ; ofJson : Jsonoo.t -> 'a
-  ; scope : Vscode.ConfigurationTarget.t
+  ; scope : ConfigurationTarget.t
   }
 
 let create ~scope ~key ~ofJson ~toJson = { scope; key; toJson; ofJson }
 
 let get ?section t =
-  let section = Vscode.Workspace.get_configuration ?section () in
-  match Vscode.WorkspaceConfiguration.get section ~section:t.key () with
+  let section = Workspace.get_configuration ?section () in
+  match WorkspaceConfiguration.get section ~section:t.key () with
   | None -> None
   | Some v -> (
     match t.ofJson v with
@@ -21,13 +21,12 @@ let get ?section t =
       None )
 
 let set ?section t v =
-  let section = Vscode.Workspace.get_configuration ?section () in
-  match Vscode.Workspace.name () with
+  let section = Workspace.get_configuration ?section () in
+  match Workspace.name () with
   | None -> Promise.return ()
   | Some _ ->
-    Vscode.WorkspaceConfiguration.update section ~section:t.key
-      ~value:(t.toJson v) ~configuration_target:(`ConfigurationTarget t.scope)
-      ()
+    WorkspaceConfiguration.update section ~section:t.key ~value:(t.toJson v)
+      ~configuration_target:(`ConfigurationTarget t.scope) ()
 
 let string =
   let toJson = Jsonoo.Encode.string in

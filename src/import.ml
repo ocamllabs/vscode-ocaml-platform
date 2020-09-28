@@ -18,9 +18,9 @@ end
 let message kind fmt =
   let k message =
     match kind with
-    | `Warn -> Vscode.Window.show_warning_message ~message ~choices:[] ()
-    | `Info -> Vscode.Window.show_information_message ~message ~choices:[] ()
-    | `Error -> Vscode.Window.show_error_message ~message ~choices:[] ()
+    | `Warn -> Window.show_warning_message ~message ()
+    | `Info -> Window.show_information_message ~message ()
+    | `Error -> Window.show_error_message ~message ()
   in
   Printf.ksprintf
     (fun x ->
