@@ -24,6 +24,8 @@
     "onLanguage:ocaml",
     "onLanguage:ocaml.interface",
     "onLanguage:reason",
+    "onLanguage:ocaml.ocamllex",
+    "onLanguage:ocaml.menhir",
     "onLanguage:dune",
     "onLanguage:dune-project",
     "onLanguage:dune-workspace",
@@ -53,8 +55,30 @@
         "command": "ocaml.open-terminal-select",
         "category": "OCaml",
         "title": "Create Terminal (Select a Sandbox)"
+      },
+      {
+        "command": "ocaml.switch-impl-intf",
+        "category": "OCaml",
+        "title": "Switch implementation/interface"
       }
     ],
+    "keybindings": [
+      {
+        "command": "ocaml.switch-impl-intf",
+        "key": "Alt+O",
+        "when": "editorLangId  == ocaml || editorLangId  == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "ocaml.switch-impl-intf",
+          "key": "Alt+O",
+          "when": "editorLangId  == ocaml || editorLangId  == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir",
+          "group": "navigation"
+        }
+      ]
+    },
     "configuration": {
       "title": "OCaml configuration",
       "properties": {

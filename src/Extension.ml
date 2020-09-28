@@ -8,6 +8,8 @@ let openTerminalCommandId = "ocaml.open-terminal"
 
 let openTerminalSelectCommandId = "ocaml.open-terminal-select"
 
+let switchImplIntfCommandId = "ocaml.switch-impl-intf"
+
 module Client = struct
   let make () : Vscode.LanguageClient.clientOptions =
     let documentSelector : Vscode.LanguageClient.documentSelectorItem array =
@@ -46,6 +48,7 @@ module Instance = struct
   type t =
     { mutable toolchain : Toolchain.resources option
     ; mutable client : LanguageClient.t option
+    ; mutable ocamlLspCapabilities : OcamlLsp.t option
     ; mutable statusBarItem : StatusBarItem.t option
     ; duneFormatter : DuneFormatter.t
     ; duneTaskProvider : DuneTaskProvider.t
@@ -54,6 +57,7 @@ module Instance = struct
   let create () =
     { toolchain = None
     ; client = None
+    ; ocamlLspCapabilities = None
     ; statusBarItem = None
     ; duneFormatter = DuneFormatter.create ()
     ; duneTaskProvider = DuneTaskProvider.create ()
@@ -71,6 +75,7 @@ module Instance = struct
         LanguageClient.stop client;
         t.client <- None);
 
+    t.ocamlLspCapabilities <- None;
     t.toolchain <- None
 
   let start t toolchain =
@@ -109,11 +114,16 @@ module Instance = struct
     let open Promise.O in
     LanguageClient.initializeResult client >>| fun initializeResult ->
     let ocamlLsp = OcamlLsp.ofInitializeResult initializeResult in
-    if not (OcamlLsp.interfaceSpecificLangId ocamlLsp) then
+    t.ocamlLspCapabilities <- Some ocamlLsp;
+    if
+      (not (OcamlLsp.interfaceSpecificLangId ocamlLsp))
+      || not (OcamlLsp.canHandleSwitchImplIntf ocamlLsp)
+    then
       message `Warn
-        "ocamllsp in this toolchain is out of date, functionality will not be \
-         available in mli sources. Please update to a recent version and \
-         restart the server.";
+        "The installed version of ocamllsp is out of date. Some features may \
+         be unavailable or degraded in functionality: switching between \
+         implementation and interface files, functionality in mli sources. \
+         Consider updating ocamllsp.";
     Ok ()
 
   let openTerminal toolchain =
@@ -170,6 +180,26 @@ let openTerminal (instance : Instance.t) () =
   | None -> selectSandboxAndOpenTerminal ()
   | Some toolchain -> Instance.openTerminal toolchain
 
+let switchImplIntf (instance : Instance.t) () =
+  let trySwitching () =
+    let open Option in
+    Window.activeTextEditor () >>= fun { document } ->
+    instance.client >>= fun client ->
+    (* extension needs to be activated; otherwise, just ignore the switch try *)
+    instance.ocamlLspCapabilities >>| fun ocamlLsp ->
+    (* same as for instance.client; ignore the try if it's None *)
+    if OcamlLsp.canHandleSwitchImplIntf ocamlLsp then
+      SwitchImplIntf.requestSwitch client document
+    else
+      (* if, however, ocamllsp doesn't have the capability, recommend updating ocamllsp*)
+      Promise.return
+      @@ message `Warn
+           "The installed version of ocamllsp does not support switching \
+            between implementation and interface files. Consider updating \
+            ocamllsp."
+  in
+  ignore @@ trySwitching ()
+
 let suggestToSetupToolchain instance =
   let open Promise.O in
   Vscode.Window.showInformationMessage'
@@ -193,6 +223,7 @@ let activate (extension : Vscode.ExtensionContext.t) =
     ; (restartCommandId, restartInstance instance)
     ; (openTerminalCommandId, openTerminal instance)
     ; (openTerminalSelectCommandId, selectSandboxAndOpenTerminal)
+    ; (switchImplIntfCommandId, switchImplIntf instance)
     ];
   Vscode.ExtensionContext.subscribe extension (Instance.disposable instance);
   let open Promise.O in
@@ -215,5 +246,6 @@ let activate (extension : Vscode.ExtensionContext.t) =
          else
            Window.showErrorMessage e)
   |> Promise.catch (fun e ->
-         let message = Node.JsError.ofPromiseError e in
-         message `Error "Error: %s" message)
+         let errorMessage = Node.JsError.ofPromiseError e in
+         message `Error "Error: %s" errorMessage;
+         Promise.return ())

@@ -14,3 +14,12 @@ fmt:
 	refmt --in-place $(REASON_SRCFILES)
 	yarn fmt
 .PHONY: fmt
+
+# builds and packages the extension for installment
+pkg:
+	vsce package --out ./test_extension.vsix --yarn
+.PHONY: pkg
+
+# builds, packages, and installs the extension to your VS Code
+install: pkg
+	code --force --install-extension test_extension.vsix

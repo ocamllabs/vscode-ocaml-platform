@@ -33,13 +33,45 @@ module TextEdit = struct
     [@@bs.module "vscode"] [@@bs.scope "TextEdit"]
 end
 
-module TextDocument = struct
-  type uri =
+module Uri = struct
+  type t =
     { scheme : string
     ; fsPath : string
     }
 
-  type event = { uri : uri }
+  type change =
+    < authority : string
+    ; fragment : string
+    ; path : string
+    ; query : string
+    ; scheme : string >
+    Js.t
+
+  external make_change :
+       ?authority:string
+    -> ?fragment:string
+    -> ?path:string
+    -> ?query:string
+    -> ?scheme:string
+    -> unit
+    -> change = ""
+    [@@bs.obj]
+
+  external file : string -> t = "file" [@@bs.module "vscode"] [@@bs.scope "Uri"]
+
+  external with_ : t -> change -> t = "with" [@@bs.send]
+
+  external _parse : string -> strict:bool -> unit -> t = "parse"
+    [@@bs.module "vscode"] [@@bs.scope "Uri"]
+
+  let parse ?(strict = true) uri = _parse uri ~strict ()
+
+  external toString : t -> ?skipEncoding:bool -> unit -> string = "toString"
+    [@@bs.send]
+end
+
+module TextDocument = struct
+  type event = { uri : Uri.t }
 
   type endOfLine =
     | CRLF [@bs.as 2]
@@ -54,7 +86,7 @@ module TextDocument = struct
     ; isUntitled : bool
     ; languageId : string
     ; lineCount : int
-    ; uri : uri
+    ; uri : Uri.t
     ; version : int
     }
 
@@ -65,7 +97,7 @@ end
 
 module Folder = struct
   type t =
-    { uri : TextDocument.uri
+    { uri : Uri.t
     ; index : int
     ; name : string
     }
@@ -125,8 +157,7 @@ module Workspace = struct
     = "onDidOpenTextDocument"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 
-  external getWorkspaceFolder : TextDocument.uri -> Folder.t option
-    = "getWorkspaceFolder"
+  external getWorkspaceFolder : Uri.t -> Folder.t option = "getWorkspaceFolder"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 
   external onDidChangeWorkspaceFolders :
@@ -148,11 +179,11 @@ module Workspace = struct
     -> excl:string option
     -> maxResults:int option
     -> cancellationToken option
-    -> TextDocument.uri array Js.Promise.t = "findFiles"
+    -> Uri.t array Js.Promise.t = "findFiles"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 
   external _openTextDocument :
-       ([ `Filename of string | `Uri of TextDocument.uri ][@bs.unwrap])
+       ([ `Filename of string | `Uri of Uri.t ][@bs.unwrap])
     -> TextDocument.t Promise.t = "openTextDocument"
     [@@bs.module "vscode"] [@@bs.scope "workspace"]
 
@@ -172,6 +203,50 @@ module Workspace = struct
     | `Interactive interactive -> _openTextDocumentInteractive ?interactive
     | `Filename _ as t -> _openTextDocument t
     | `Uri _ as t -> _openTextDocument t
+end
+
+module ThemeIcon = struct
+  type t
+
+  external file : t = "File" [@@bs.module "vscode"] [@@bs.scope "workspace"]
+
+  external folder : t = "Folder" [@@bs.module "vscode"] [@@bs.scope "workspace"]
+
+  external make : id:string -> t = "ThemeIcon"
+    [@@bs.new] [@@bs.module "vscode"] [@@bs.scope "workspace"]
+end
+
+type iconsByColorTheme = < dark : Uri.t ; light : Uri.t > Js.t
+
+type iconPath
+
+type workpaceEditEntryMetadata =
+  < description : string option
+  ; iconPath : iconPath
+  ; label : string
+  ; needsConfirmation : bool >
+  Js.t
+
+module WorkspaceEdit = struct
+  type t
+
+  type createFileOptions = < ignoreIfExists : bool ; overwrite : bool > Js.t
+
+  external createFileOptions :
+    ignoreIfExists:bool -> overwrite:bool -> createFileOptions = ""
+    [@@bs.obj]
+
+  external createFile :
+       t
+    -> Uri.t
+    -> ?options:createFileOptions
+    -> ?metadata:workpaceEditEntryMetadata
+    -> unit
+    -> unit = "createFile"
+    [@@bs.send]
+
+  external create : unit -> t = "WorkspaceEdit"
+    [@@bs.new] [@@bs.module "vscode"]
 end
 
 module StatusBarAlignment = struct
@@ -298,21 +373,12 @@ module Window = struct
 
   type line = { range : range }
 
-  type document =
-    { getText : unit -> string
-    ; lineAt : int -> line
-    ; lineCount : int
-    ; fileName : string
-    }
-
-  type activeTextEditor = { document : document }
+  type activeTextEditor = { document : TextDocument.t }
 
   external _activeTextEditor : activeTextEditor option = "activeTextEditor"
     [@@bs.module "vscode"] [@@bs.scope "window"] [@@bs.val]
 
-  external activeTextEditor : unit -> activeTextEditor option
-    = "activeTextEditor"
-    [@@bs.module "vscode"] [@@bs.scope "window"] [@@bs.val]
+  let activeTextEditor () = _activeTextEditor
 
   type location =
     | SourceControl [@bs.as 1]
@@ -354,8 +420,7 @@ module Window = struct
     [@@bs.obj]
 
   external _showTextDocument :
-       doc:([ `Uri of TextDocument.uri | `Document of TextDocument.t ]
-         [@bs.unwrap])
+       doc:([ `Uri of Uri.t | `Document of TextDocument.t ][@bs.unwrap])
     -> ?options:textDocumentShowOptions
     -> TextEditor.t Promise.t = "showTextDocument"
     [@@bs.module "vscode"] [@@bs.scope "window"]
@@ -514,10 +579,6 @@ module LanguageClient = struct
 
   type t = { initializeResult : InitializeResult.t }
 
-  external start : t -> unit = "start" [@@bs.send]
-
-  external stop : t -> unit = "stop" [@@bs.send]
-
   external make :
        id:string
     -> name:string
@@ -526,7 +587,24 @@ module LanguageClient = struct
     -> t = "LanguageClient"
     [@@bs.new] [@@bs.module "vscode-languageclient"]
 
+  external start : t -> unit = "start" [@@bs.send]
+
+  external stop : t -> unit = "stop" [@@bs.send]
+
   external onReady : t -> unit Promise.t = "onReady" [@@bs.send]
+
+  external sendRequest : t -> string -> 'a -> 'b Promise.t = "sendRequest"
+    [@@bs.send]
+
+  external sendRequest_token :
+    t -> string -> 'a -> Workspace.cancellationToken -> 'b Promise.t
+    = "sendRequest"
+    [@@bs.send]
+
+  let sendRequest t ~meth ~data ?token () =
+    match token with
+    | None -> sendRequest t meth data
+    | Some token -> sendRequest_token t meth data token
 
   let initializeResult (t : t) =
     let open Promise.O in

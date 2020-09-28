@@ -33,7 +33,8 @@ module JsError = struct
 
   external make : string -> t = "Error" [@@bs.new]
 
-  let ofPromiseError _error = [%raw "_error.message || 'Unknown error'"]
+  let ofPromiseError _error : string =
+    [%raw "_error.message || 'Unknown error'"]
 end
 
 module Buffer = struct
@@ -126,6 +127,8 @@ module Fs = struct
 
   external exists : string -> bool Promise.t = "exists"
     [@@bs.module "./fs-stub.js"]
+
+  external existsSync : string -> bool = "existsSync" [@@bs.module "fs"]
 
   external open_ : string -> string -> fd Promise.t = "open"
     [@@bs.module "./fs-stub.js"]
