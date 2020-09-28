@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.2.0
 
 - Consistent binding operator highlighting in OCaml files (#365)
 - Switch between implementation and interface files using `Alt + O`. This
