@@ -1,7 +1,9 @@
 __tests__/
+_build/
 _esy/
 _opam/
 .vscode/
+.github/
 esy.lock/
 fixtures/
 lib/
@@ -16,6 +18,8 @@ azure-pipelines.yaml
 bsconfig.json
 esy.json
 Makefile
+
+!_build/default/src/extension.bc.js
 
 !node_modules/vscode-jsonrpc/**
 !node_modules/vscode-languageclient/**
