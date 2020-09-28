@@ -15,7 +15,6 @@ test/
 .merlin
 **/*.map
 azure-pipelines.yaml
-bsconfig.json
 esy.json
 Makefile
 
