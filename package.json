@@ -554,9 +554,11 @@
     ]
   },
   "scripts": {
-    "clean": "bsb -clean",
+    "clean": "dune clean",
+    "build:dune": "dune build src/extension.bc.js",
     "build:ncc": "ncc build _build/default/src/extension.bc.js",
     "build": "npm-run-all -s clean build:*",
+    "watch:dune": "dune build -w src/extension.bc.js",
     "watch:ncc": "ncc build src/Extension.bs.js --watch",
     "watch": "npm-run-all -p watch:*",
     "test:unit": "jest src",
