@@ -1958,7 +1958,7 @@ module Window : sig
         -> items:(MessageItem.t list[@js.variadic])
         -> unit
         -> MessageItem.t or_undefined Promise.t
-        [@@js.global]
+        [@@js.global "vscode.window.showInformationMessage"]
 
       let show_information_message ~message ?options ~choices () =
         let choices = get_choices choices in
@@ -1980,7 +1980,7 @@ module Window : sig
         -> items:(MessageItem.t list[@js.variadic])
         -> unit
         -> MessageItem.t or_undefined Promise.t
-        [@@js.global]
+        [@@js.global "vscode.window.showWarningMessage"]
 
       let show_warning_message ~message ?options ~choices () =
         let choices = get_choices choices in
@@ -2001,7 +2001,7 @@ module Window : sig
         -> items:(MessageItem.t list[@js.variadic])
         -> unit
         -> MessageItem.t or_undefined Promise.t
-        [@@js.global]
+        [@@js.global "vscode.window.showErrorMessage"]
 
       let show_error_message ~message ?options ~choices () =
         let choices = get_choices choices in
@@ -2021,7 +2021,7 @@ module Window : sig
               -> token:CancellationToken.t
               -> Ojs.t Promise.t)
         -> Ojs.t Promise.t
-        [@@js.global]
+        [@@js.global "vscode.window.withProgress"]
 
       let with_progress ~options ~task =
         let task ~progress ~token = Obj.magic (task ~progress ~token) in
