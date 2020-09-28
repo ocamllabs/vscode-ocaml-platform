@@ -38,7 +38,7 @@ module Stream = struct
 
   val write : t -> string -> unit [@@js.call]
 
-  val end_ : t -> unit [@@js.global]
+  val end_ : t -> unit [@@js.call]
 end
 
 module Fs = struct
@@ -60,11 +60,11 @@ module ChildProcess = struct
 
   val exit_code : t -> int [@@js.get]
 
-  val get_stdout : t -> Stream.t [@@js.get]
+  val get_stdout : t -> Stream.t [@@js.get "stdout"]
 
-  val get_stderr : t -> Stream.t [@@js.get]
+  val get_stderr : t -> Stream.t [@@js.get "stderr"]
 
-  val get_stdin : t -> Stream.t [@@js.get]
+  val get_stdin : t -> Stream.t [@@js.get "stdin"]
 
   val on : t -> string -> (int -> unit) -> unit [@@js.call]
 
@@ -102,7 +102,7 @@ module ChildProcess = struct
             | None -> 0
             | Some err -> code err
           in
-          (resolve { exitCode; stdout; stderr } [@bs]))
+          resolve { exitCode; stdout; stderr })
     in
     match stdin with
     | Some text ->

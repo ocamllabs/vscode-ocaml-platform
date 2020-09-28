@@ -1905,14 +1905,6 @@ end [@js.scope "vscode.workspace"]
 module Window : sig
   val active_text_editor : unit -> TextEditor.t or_undefined [@@js.get]
 
-  val show_quick_pick :
-       items:string list
-    -> ?options:QuickPickOptions.t
-    -> ?token:CancellationToken.t
-    -> unit
-    -> string or_undefined Promise.t
-    [@@js.global]
-
   val show_quick_pick_items :
        choices:(QuickPickItem.t * 'a) list
     -> ?options:QuickPickOptions.t
@@ -1920,18 +1912,26 @@ module Window : sig
     -> unit
     -> 'a or_undefined Promise.t
     [@@js.custom
-      val show_quick_pick_items :
+      val show_quick_pick :
            choices:QuickPickItem.t list
         -> ?options:QuickPickOptions.t
         -> ?token:CancellationToken.t
         -> unit
         -> QuickPickItem.t or_undefined Promise.t
-        [@@js.global "vscode.window.showQuickPickItems"]
+        [@@js.global "vscode.window.showQuickPick"]
 
       let show_quick_pick_items ~choices ?options ?token () =
         let open Promise.Syntax in
-        show_quick_pick_items ~choices:(List.map fst choices) ?options ?token ()
+        show_quick_pick ~choices:(List.map fst choices) ?options ?token ()
         >>| Option.map (fun q -> List.assq q choices)]
+
+  val show_quick_pick :
+       items:string list
+    -> ?options:QuickPickOptions.t
+    -> ?token:CancellationToken.t
+    -> unit
+    -> string or_undefined Promise.t
+    [@@js.global]
 
   val show_input_box :
        ?options:InputBoxOptions.t
