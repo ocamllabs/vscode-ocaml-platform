@@ -3,6 +3,8 @@
 ## Unreleased
 
 - Consistent binding operator highlighting in OCaml files (#365)
+- Switch between implementation and interface files using `Alt + O`. This
+  requires updating ocamllsp (#328)
 
 ## 1.1.2
 
