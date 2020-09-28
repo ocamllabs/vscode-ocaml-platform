@@ -1,29 +1,30 @@
 open Import
 
-let getFormatter toolchain =
- fun [@bs] (document : TextDocument.t) _options _token ->
-  let lastLine = document.lineCount - 1 in
-  let lastCharacter =
-    String.length (TextDocument.lineAt document lastLine).text
+let getFormatter toolchain ~document ~options:_ ~token:_ =
+  let end_line = TextDocument.line_count document - 1 in
+  let end_character =
+    TextDocument.line_at document ~line:end_line
+    |> TextLine.text |> String.length
   in
   (* selects entire document range *)
-  let fullDocumentRange =
-    Range.make ~startLine:0 ~startCharacter:0 ~endLine:lastLine
-      ~endCharacter:lastCharacter
+  let range =
+    Range.make_coordinates ~start_line:0 ~start_character:0 ~end_line
+      ~end_character
   in
   (* text of entire document *)
-  let documentText = TextDocument.getText document fullDocumentRange in
+  let documentText = TextDocument.get_text document ~range () in
   let command = Toolchain.getDuneCommand toolchain [ "format-dune-file" ] in
   let output =
-    let open Promise.Result.O in
+    let open Promise.Result.Syntax in
     Cmd.check command >>= fun command -> Cmd.output ~stdin:documentText command
   in
-  let open Promise.O in
-  output >>| function
-  | Ok stdout -> [| TextEdit.replace fullDocumentRange stdout |]
-  | Error msg ->
-    message `Error "Dune formatting failed: %s" msg;
-    [||]
+  let open Promise.Syntax in
+  `Promise
+    (output >>| function
+     | Ok new_text -> Some [ TextEdit.replace ~range ~new_text ]
+     | Error msg ->
+       message `Error "Dune formatting failed: %s" msg;
+       Some [])
 
 type t = Disposable.t list ref
 
@@ -34,9 +35,14 @@ let register t toolchain =
     [ "dune"; "dune-project"; "dune-workspace" ]
     |> List.map (fun language ->
            let open Vscode.Languages in
-           registerDocumentFormattingEditProvider
-             { language; scheme = "file" }
-             { provideDocumentFormattingEdits = getFormatter toolchain })
+           let selector =
+             `Filter (DocumentFilter.create ~scheme:"file" ~language ())
+           in
+           let provider =
+             DocumentFormattingEditProvider.create
+               ~provide_document_formatting_edits:(getFormatter toolchain)
+           in
+           register_document_formatting_edit_provider ~selector ~provider)
 
 let dispose t =
   List.iter Disposable.dispose !t;

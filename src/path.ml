@@ -2,7 +2,7 @@ type t = string
 
 let ofString s = s
 
-let isAbsolute t = Node.Path.isAbsolute t
+let isAbsolute t = not (Filename.is_relative t)
 
 let v = ofString
 
@@ -10,11 +10,11 @@ let toString s = s
 
 let compare = String.compare
 
-let dirname t = Node.Path.dirname t
+let dirname = Filename.dirname
 
-let extname t = Node.Path.extname t
+let extname t = Filename.extension t
 
-let basename t = Node.Path.basename t
+let basename t = Filename.basename t
 
 let ( / ) = Filename.concat
 

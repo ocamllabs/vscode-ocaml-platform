@@ -10,7 +10,7 @@ type discover =
   }
 
 let make () =
-  let open Promise.O in
+  let open Promise.Syntax in
   Cmd.checkSpawn { bin = binary; args = [] } >>| function
   | Error _ -> None
   | Ok cmd -> Some cmd
@@ -28,9 +28,9 @@ module Discover = struct
       Promise.return (valid projectRoot)
     | "package.json" as fname -> (
       let manifestFile = Path.(projectRoot / fname) |> Path.toString in
-      let open Promise.O in
-      Fs.readFile manifestFile >>| fun manifest ->
-      match Json.parse manifest with
+      let open Promise.Syntax in
+      Fs.read_file manifestFile >>| fun manifest ->
+      match Jsonoo.try_parse_opt manifest with
       | None -> invalid_json projectRoot
       | Some json ->
         if
@@ -44,8 +44,8 @@ module Discover = struct
     | _ -> Promise.return None
 
   let parseDir dir =
-    let open Promise.O in
-    Path.toString dir |> Fs.readDir
+    let open Promise.Syntax in
+    Path.toString dir |> Fs.read_dir
     >>| (function
           | Ok res -> res
           | Error err ->
@@ -54,8 +54,8 @@ module Discover = struct
             message `Warn
               "Unable to read %s. No esy projects will be inferred from here"
               dir;
-            [||])
-    >>= Promise.Array.filterMap (parseFile dir)
+            [])
+    >>= Promise.List.filter_map (parseFile dir)
 
   let parseDirsUp dir =
     let rec loop parsedDirs dir =
@@ -67,9 +67,8 @@ module Discover = struct
     loop [] dir
 
   let run ~dir : discover list Promise.t =
-    let open Promise.O in
-    dir |> parseDirsUp |> Array.of_list |> Promise.all >>| fun x ->
-    Array.to_list (Js.Array.concatMany x [||])
+    let open Promise.Syntax in
+    dir |> parseDirsUp |> Promise.all_list >>| List.flatten
 end
 
 let discover = Discover.run
@@ -86,17 +85,17 @@ end
 let state t ~manifest =
   let rootStr = Path.toString manifest in
   let command = Cmd.append t [ "status"; "-P"; rootStr ] in
-  let open Promise.O in
+  let open Promise.Syntax in
   Cmd.output (Spawn command)
   >>| (function
         | Error _ -> Ok false
         | Ok esyOutput -> (
-          match Json.parse esyOutput with
+          match Jsonoo.try_parse_opt esyOutput with
           | None -> Ok false
           | Some esyResponse ->
             esyResponse
-            |> Json.Decode.field "isProjectReadyForDev" Json.Decode.bool
-            |> Result.return ))
+            |> Jsonoo.Decode.field "isProjectReadyForDev" Jsonoo.Decode.bool
+            |> Core_kernel.Result.return ))
   |> Promise.Result.map (fun isProjectReadyForDev ->
          if isProjectReadyForDev then
            State.Ready
@@ -104,7 +103,7 @@ let state t ~manifest =
            Pending)
 
 let setupToolchain t ~manifest =
-  let open Promise.Result.O in
+  let open Promise.Result.Syntax in
   state t ~manifest >>| function
   | State.Ready -> ()
   | Pending ->

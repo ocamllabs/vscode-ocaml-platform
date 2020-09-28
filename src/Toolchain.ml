@@ -39,12 +39,13 @@ module PackageManager = struct
       | _ -> None
 
     let ofJson json =
-      let open Json.Decode in
+      let open Jsonoo.Decode in
       match of_string (string json) with
       | Some s -> s
       | None ->
         raise
-          (DecodeError "opam | esy | global | custom are the only valid values")
+          (Jsonoo.Decode_error
+             "opam | esy | global | custom are the only valid values")
 
     let to_string = function
       | Opam -> "opam"
@@ -52,7 +53,7 @@ module PackageManager = struct
       | Global -> "global"
       | Custom -> "custom"
 
-    let toJson s = Json.Encode.string (to_string s)
+    let toJson s = Jsonoo.Encode.string (to_string s)
   end
 
   type t =
@@ -75,7 +76,7 @@ module PackageManager = struct
       | Custom _ -> Custom
 
     let ofJson json =
-      let open Json.Decode in
+      let open Jsonoo.Decode in
       let kind = field "kind" Kind.ofJson json in
       match (kind : Kind.t) with
       | Global -> Global
@@ -94,10 +95,10 @@ module PackageManager = struct
         Custom template
 
     let toJson (t : t) =
-      let open Json.Encode in
+      let open Jsonoo.Encode in
       let kind = ("kind", Kind.toJson (kind t)) in
       match t with
-      | Global -> Json.Encode.object_ [ kind ]
+      | Global -> Jsonoo.Encode.object_ [ kind ]
       | Esy manifest ->
         object_ [ kind; ("root", string @@ Path.toString manifest) ]
       | Opam sw -> object_ [ kind; ("switch", string @@ Opam.Switch.name sw) ]
@@ -145,7 +146,7 @@ let availablePackageManagers () =
   }
 
 let ofSettings () : PackageManager.t option Promise.t =
-  let open Promise.O in
+  let open Promise.Syntax in
   let available = availablePackageManagers () in
   let notAvailable kind =
     let this_ =
@@ -170,7 +171,7 @@ let ofSettings () : PackageManager.t option Promise.t =
       None
     | Some esy -> Some (PackageManager.Esy (esy, manifest)) )
   | Some (Opam switch) -> (
-    let open Promise.O in
+    let open Promise.Syntax in
     available.opam >>= function
     | None ->
       notAvailable `Opam;
@@ -199,10 +200,10 @@ module Candidate = struct
     }
 
   let toQuickPick { packageManager; status } =
-    let create = Window.QuickPickItem.create in
+    let create = QuickPickItem.create in
     let description =
       match status with
-      | Error s -> Some (sprintf "invalid: %s" s)
+      | Error s -> Some (Printf.sprintf "invalid: %s" s)
       | Ok () -> (
         match packageManager with
         | Opam (_, Local _) -> Some "Local switch"
@@ -230,7 +231,7 @@ module Candidate = struct
 end
 
 let selectPackageManager (choices : Candidate.t list) =
-  let placeHolder =
+  let place_holder =
     "Which package manager would you like to manage the toolchain?"
   in
   let choices =
@@ -240,25 +241,26 @@ let selectPackageManager (choices : Candidate.t list) =
         (quickPick, pm))
       choices
   in
-  let options =
-    Window.QuickPickOptions.make ~canPickMany:false ~placeHolder ()
-  in
-  Window.showQuickPickItems choices options
+  let options = QuickPickOptions.create ~can_pick_many:false ~place_holder () in
+  Window.show_quick_pick_items ~choices ~options ()
 
 let sandboxCandidates ~workspaceFolders =
-  let open Promise.O in
+  let open Promise.Syntax in
   let available = availablePackageManagers () in
   let esy =
     available.esy >>= function
     | None -> Promise.return []
     | Some esy ->
       workspaceFolders
-      |> Array.map (fun (folder : Vscode.Folder.t) ->
-             let dir = Path.ofString folder.uri.fsPath in
+      |> List.map (fun (folder : Vscode.WorkspaceFolder.t) ->
+             let dir =
+               folder |> Vscode.WorkspaceFolder.uri |> Vscode.Uri.fs_path
+               |> Path.ofString
+             in
              Esy.discover ~dir)
-      |> Promise.all
+      |> Promise.all_list
       >>| fun esys ->
-      Array.to_list esys |> List.concat
+      esys |> List.concat
       |> List.map (fun (manifest : Esy.discover) ->
              { Candidate.packageManager = PackageManager.Esy (esy, manifest.file)
              ; status = manifest.status
@@ -294,24 +296,26 @@ let setupToolChain (kind : PackageManager.t) =
 let makeResources kind = kind
 
 let select () =
-  let open Promise.O in
-  let workspaceFolders = Vscode.Workspace.workspaceFolders () in
+  let open Promise.Syntax in
+  let workspaceFolders = Vscode.Workspace.workspace_folders () in
   sandboxCandidates ~workspaceFolders >>= fun candidates ->
-  let open Promise.Option.O in
+  let open Promise.Option.Syntax in
   selectPackageManager candidates >>= function
   | { status = Ok (); packageManager = Custom _ } ->
-    let validateInput input =
-      if Js.String.includes "$prog" input && Js.String.includes "$args" input
+    let validate_input ~value =
+      if
+        Core_kernel.String.is_substring value ~substring:"$prog"
+        && Core_kernel.String.is_substring value ~substring:"$args"
       then
-        None
+        Promise.return None
       else
-        Some "Command template must include $prog and $args"
+        Promise.Option.return "Command template must include $prog and $args"
     in
     let options =
-      Window.InputBoxOptions.make ~prompt:"Input a custom command template"
-        ~value:"$prog $args" ~validateInput ()
+      InputBoxOptions.create ~prompt:"Input a custom command template"
+        ~value:"$prog $args" ~validate_input ()
     in
-    Window.showInputBox options >>| String.trim >>= fun template ->
+    Window.show_input_box ~options () >>| String.trim >>= fun template ->
     Promise.Option.return @@ PackageManager.Custom template
   | { status; packageManager } -> (
     match status with
@@ -321,9 +325,9 @@ let select () =
     | Ok () -> Promise.Option.return packageManager )
 
 let selectAndSave () =
-  let open Promise.Option.O in
+  let open Promise.Option.Syntax in
   select () >>= fun packageManager ->
-  let open Promise.O in
+  let open Promise.Syntax in
   toSettings packageManager >>| fun () -> Some packageManager
 
 let getCommand (t : PackageManager.t) bin args : Cmd.t =
@@ -340,8 +344,9 @@ let getCommand (t : PackageManager.t) bin args : Cmd.t =
     in
     let command =
       template
-      |> Js.String.replace "$prog" bin
-      |> Js.String.replace "$args" (String.concat " " args)
+      |> Core_kernel.String.substr_replace_all ~pattern:"$prog" ~with_:bin
+      |> Core_kernel.String.substr_replace_all ~pattern:"$args"
+           ~with_:(String.concat " " args)
       |> String.trim
     in
     Shell command
@@ -353,7 +358,7 @@ let getDuneCommand (t : PackageManager.t) args : Cmd.t =
   getCommand t "dune" args
 
 let runSetup resources =
-  let open Promise.Result.O in
+  let open Promise.Result.Syntax in
   setupToolChain resources
   >>= (fun () ->
         let args = [ "--version" ] in
@@ -361,4 +366,5 @@ let runSetup resources =
         Cmd.check command >>= fun cmd -> Cmd.output cmd)
   |> Promise.map (function
        | Ok _ -> Ok ()
-       | Error msg -> Error {j|Toolchain initialisation failed: $msg|j})
+       | Error msg ->
+         Error (Printf.sprintf "Toolchain initialisation failed: %s" msg))

@@ -1,5 +1,5 @@
 let languageServerOutputChannel =
-  lazy (Vscode.Window.createOutputChannel "OCaml Language Server")
+  lazy (Vscode.Window.create_output_channel ~name:"OCaml Language Server")
 
 let extensionOutputChannel =
-  lazy (Vscode.Window.createOutputChannel "OCaml Platform Extension")
+  lazy (Vscode.Window.create_output_channel ~name:"OCaml Platform Extension")

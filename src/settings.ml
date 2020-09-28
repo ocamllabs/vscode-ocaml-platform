@@ -2,33 +2,34 @@ open Import
 
 type 'a t =
   { key : string
-  ; toJson : 'a -> Js.Json.t
-  ; ofJson : Js.Json.t -> 'a
-  ; scope : WorkspaceConfiguration.configurationTarget
+  ; toJson : 'a -> Jsonoo.t
+  ; ofJson : Jsonoo.t -> 'a
+  ; scope : Vscode.ConfigurationTarget.t
   }
 
 let create ~scope ~key ~ofJson ~toJson = { scope; key; toJson; ofJson }
 
 let get ?section t =
-  let section = Workspace.getConfiguration ?section () in
-  match WorkspaceConfiguration.get section t.key with
+  let section = Vscode.Workspace.get_configuration ?section () in
+  match Vscode.WorkspaceConfiguration.get section ~section:t.key () with
   | None -> None
   | Some v -> (
     match t.ofJson v with
     | s -> Some s
-    | exception Json.Decode.DecodeError msg ->
+    | exception Jsonoo.Decode_error msg ->
       message `Error "Setting %s is invalid: %s" t.key msg;
       None )
 
 let set ?section t v =
-  let section = Workspace.getConfiguration ?section () in
+  let section = Vscode.Workspace.get_configuration ?section () in
   match Vscode.Workspace.name () with
   | None -> Promise.return ()
   | Some _ ->
-    let scope = WorkspaceConfiguration.configurationTargetToJs t.scope in
-    WorkspaceConfiguration.update section t.key (t.toJson v) scope
+    Vscode.WorkspaceConfiguration.update section ~section:t.key
+      ~value:(t.toJson v) ~configuration_target:(`ConfigurationTarget t.scope)
+      ()
 
 let string =
-  let toJson = Js.Json.string in
-  let ofJson (y : Js.Json.t) = Json.Decode.string y in
+  let toJson = Jsonoo.Encode.string in
+  let ofJson = Jsonoo.Decode.string in
   create ~ofJson ~toJson

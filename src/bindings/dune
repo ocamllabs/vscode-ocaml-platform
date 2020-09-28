@@ -1,0 +1,33 @@
+(library
+ (name interop)
+ (modules interop)
+ (preprocess
+  (pps gen_js_api.ppx))
+ (libraries core_kernel js_of_ocaml gen_js_api)
+ (modes byte))
+
+(library
+ (name node)
+ (modules node)
+ (preprocess
+  (pps gen_js_api.ppx))
+ (js_of_ocaml
+  (javascript_files node-stub.js))
+ (libraries core_kernel interop promise_jsoo jsonoo js_of_ocaml gen_js_api)
+ (modes byte))
+
+(library
+ (name vscode)
+ (modules vscode vscode__core vscode__languageclient)
+ (preprocess
+  (pps gen_js_api.ppx))
+ (js_of_ocaml
+  (javascript_files vscode_require.js vscode__languageclient_require.js))
+ (libraries core_kernel interop promise_jsoo jsonoo js_of_ocaml gen_js_api)
+ (modes byte))
+
+(rule
+ (targets vscode__core.ml)
+ (deps vscode__core.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps})))

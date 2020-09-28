@@ -1,0 +1,7 @@
+(executable
+ (name extension)
+ (libraries core_kernel vscode node interop promise_jsoo jsonoo js_of_ocaml
+   gen_js_api)
+ (preprocess
+  (pps js_of_ocaml-ppx))
+ (modes js))

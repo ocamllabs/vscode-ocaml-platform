@@ -21,7 +21,7 @@ let binary = Path.ofString "opam"
 type t = Cmd.spawn
 
 let make () =
-  let open Promise.O in
+  let open Promise.Syntax in
   Cmd.checkSpawn { bin = binary; args = [] } >>| function
   | Error _ -> None
   | Ok cmd -> Some cmd
@@ -29,16 +29,18 @@ let make () =
 let parseSwitchList out =
   let lines = String.split_on_char '\n' out in
   let result =
-    Belt.List.keepMap lines (function
-      | "" -> None
-      | s -> Some (Switch.make s))
+    lines
+    |> List.filter_map (function
+         | "" -> None
+         | s -> Some (Switch.make s))
   in
+
   log "%d switches" (List.length result);
   result
 
 let switchList t =
   let command = Cmd.append t [ "switch"; "list"; "-s" ] in
-  let open Promise.O in
+  let open Promise.Syntax in
   Cmd.output (Spawn command) >>| function
   | Error _ ->
     message `Warn "Unable to read the list of switches.";
@@ -51,5 +53,5 @@ let exec t ~switch ~args =
   Cmd.Spawn (Cmd.append t ("exec" :: switchArg switch :: "--" :: args))
 
 let exists t ~switch =
-  let open Promise.O in
+  let open Promise.Syntax in
   switchList t >>| List.exists (fun sw -> sw = switch)
