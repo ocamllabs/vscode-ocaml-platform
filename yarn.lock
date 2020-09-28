@@ -5176,10 +5176,10 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-vsce@1.79.5:
-  version "1.79.5"
-  resolved "https://registry.yarnpkg.com/vsce/-/vsce-1.79.5.tgz#622d947aed97632d460e68ec774eac41f550102d"
-  integrity sha512-KZFOthGwxWFwoGqwrkzfTfyCZGuniTofnJ1a/dCzQ2HP93u1UuCKrTQyGT+SuGHu8sNqdBYNe0hb9GC3qCN7fg==
+vsce@1.80.0:
+  version "1.80.0"
+  resolved "https://registry.yarnpkg.com/vsce/-/vsce-1.80.0.tgz#2d1557a9e777429eadb630e16534a7a53f218fc8"
+  integrity sha512-pnJT0LttCd5k1fJRsTOer8NvgesMYxLZYTUwuVWVOgONK9w+U5Yf32rtm4cX374TsHZbBwUr6ZFLP36wyDD8/g==
   dependencies:
     azure-devops-node-api "^7.2.0"
     chalk "^2.4.2"
