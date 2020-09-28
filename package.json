@@ -13,7 +13,7 @@
     "url": "https://github.com/ocamllabs/vscode-ocaml-platform/issues"
   },
   "homepage": "https://github.com/ocamllabs/vscode-ocaml-platform",
-  "main": "./dist/index.js",
+  "main": "./_build/default/src/extension.bc.js",
   "engines": {
     "vscode": "^1.43.0"
   },
@@ -555,12 +555,8 @@
   },
   "scripts": {
     "clean": "dune clean",
-    "build:dune": "dune build src/extension.bc.js",
-    "build:ncc": "ncc build _build/default/src/extension.bc.js",
-    "build": "npm-run-all -s clean build:*",
-    "watch:dune": "dune build -w src/extension.bc.js",
-    "watch:ncc": "ncc build src/Extension.bs.js --watch",
-    "watch": "npm-run-all -p watch:*",
+    "build": "dune build src/extension.bc.js",
+    "watch": "dune build -w src/extension.bc.js",
     "test:unit": "jest src",
     "test:esy": "node ./test/runEsyTests.js",
     "test:opam": "node ./test/runOpamTests.js",
@@ -581,7 +577,6 @@
   "devDependencies": {
     "@glennsl/bs-jest": "0.5.1",
     "@glennsl/bs-json": "5.0.2",
-    "@vercel/ncc": "0.24.1",
     "bs-platform": "8.2.0",
     "fs-extra": "9.0.1",
     "jest-cli": "26.4.2",
