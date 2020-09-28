@@ -1,1 +1,1 @@
-joo_global_object.vscode = require("vscode-languageclient");
+joo_global_object.vscode_languageclient = require("vscode-languageclient");

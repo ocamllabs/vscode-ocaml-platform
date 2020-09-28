@@ -2,7 +2,7 @@ var promisify = require("util").promisify;
 var fs = require("fs");
 var child_process = require("child_process");
 
-joo_global_object.set_env = function (key, value) {
+joo_global_object.setEnv = function (key, value) {
   process.env[key] = value;
 };
 
