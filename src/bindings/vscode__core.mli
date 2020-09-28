@@ -1923,7 +1923,7 @@ module Window : sig
       let show_quick_pick_items ~choices ?options ?token () =
         let open Promise.Syntax in
         show_quick_pick ~choices:(List.map fst choices) ?options ?token ()
-        >>| Option.map (fun q -> List.assq q choices)]
+        >>| Option.map (fun q -> List.assoc q choices)]
 
   val show_quick_pick :
        items:string list
@@ -1965,7 +1965,7 @@ module Window : sig
         let open Promise.Syntax in
         show_information_message ~message ?options ~items:(List.map fst choices)
           ()
-        >>| Option.map (fun q -> List.assq q choices)]
+        >>| Option.map (fun q -> List.assoc q choices)]
 
   val show_warning_message :
        message:string
@@ -1986,7 +1986,7 @@ module Window : sig
         let choices = get_choices choices in
         let open Promise.Syntax in
         show_warning_message ~message ?options ~items:(List.map fst choices) ()
-        >>| Option.map (fun q -> List.assq q choices)]
+        >>| Option.map (fun q -> List.assoc q choices)]
 
   val show_error_message :
        message:string
@@ -2007,7 +2007,7 @@ module Window : sig
         let choices = get_choices choices in
         let open Promise.Syntax in
         show_error_message ~message ?options ~items:(List.map fst choices) ()
-        >>| Option.map (fun q -> List.assq q choices)]
+        >>| Option.map (fun q -> List.assoc q choices)]
 
   val with_progress :
        options:ProgressOptions.t
