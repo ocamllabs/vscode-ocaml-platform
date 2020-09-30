@@ -192,9 +192,9 @@ module Uri : sig
         iter_set change "fragment" Ojs.string_to_js fragment;
         with_ this change]
 
-  val to_string : t -> ?skip_encoding:bool -> unit -> string
+  val to_string : t -> ?skip_encoding:bool -> unit -> string [@@js.call]
 
-  val to_json : t -> Jsonoo.t
+  val to_json : t -> Jsonoo.t [@@js.call]
 end [@js.scope "vscode.Uri"]
 
 module TextDocument : sig
