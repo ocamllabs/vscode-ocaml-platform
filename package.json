@@ -59,7 +59,11 @@
       {
         "command": "ocaml.switch-impl-intf",
         "category": "OCaml",
-        "title": "Switch implementation/interface"
+        "title": "Switch implementation/interface",
+        "icon": {
+          "light": "assets/switch-impl-intf.light.svg",
+          "dark": "assets/switch-impl-intf.dark.svg"
+        }
       }
     ],
     "keybindings": [
