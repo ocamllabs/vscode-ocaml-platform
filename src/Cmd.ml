@@ -66,26 +66,26 @@ let run ?cwd ?stdin = function
     ChildProcess.exec commandLine ?stdin (ChildProcess.Options.create ?cwd ())
 
 let log ?(result : ChildProcess.return option) (t : t) =
+  let open Jsonoo.Encode in
   let message =
     match result with
     | None -> []
     | Some result ->
       [ ( "result"
-        , Jsonoo.Encode.object_
-            [ ("exitCode", Jsonoo.Encode.int result.exitCode)
-            ; ("stdout", Jsonoo.Encode.string result.stdout)
-            ; ("stderr", Jsonoo.Encode.string result.stderr)
+        , object_
+            [ ("exitCode", int result.exitCode)
+            ; ("stdout", string result.stdout)
+            ; ("stderr", string result.stderr)
             ] )
       ]
   in
   let message =
     match t with
     | Spawn { bin; args } ->
-      ("bin", Jsonoo.Encode.string (Path.toString bin))
-      :: ("args", Jsonoo.Encode.list Jsonoo.Encode.string args)
+      ("bin", string (Path.toString bin))
+      :: ("args", list string args)
       :: message
-    | Shell commandLine ->
-      ("shell", Jsonoo.Encode.string commandLine) :: message
+    | Shell commandLine -> ("shell", string commandLine) :: message
   in
   logJson "external command" message
 

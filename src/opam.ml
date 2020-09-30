@@ -34,7 +34,6 @@ let parseSwitchList out =
          | "" -> None
          | s -> Some (Switch.make s))
   in
-
   log "%d switches" (List.length result);
   result
 

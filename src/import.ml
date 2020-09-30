@@ -28,16 +28,6 @@ let message kind fmt =
       ())
     fmt
 
-module Log : sig
-  type field
-
-  val field : _ -> field
-end = struct
-  type field
-
-  external field : _ -> field = "%identity"
-end
-
 let log fmt =
   let (lazy outputChannel) = Output.extensionOutputChannel in
   let write line = OutputChannel.append_line outputChannel ~value:line in
