@@ -8,7 +8,7 @@ let definition = TaskDefinition.create ~type_:task_type ()
 
 let source = task_type
 
-let problem_matchers = `Strings [ "$ocamlc" ]
+let problem_matchers = [ "$ocamlc" ]
 
 (* the ocamlc matcher is not able to parse ocaml compiler errors unless they
    follow the short style. *)

@@ -25,9 +25,3 @@
   (javascript_files vscode_require.js vscode__languageclient_require.js))
  (libraries core_kernel interop promise_jsoo jsonoo js_of_ocaml gen_js_api)
  (modes byte))
-
-(rule
- (targets vscode__core.ml)
- (deps vscode__core.mli)
- (action
-  (run %{bin:gen_js_api} %{deps})))
