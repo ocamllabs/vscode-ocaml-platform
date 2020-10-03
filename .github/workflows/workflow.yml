@@ -85,7 +85,7 @@ jobs:
         run: yarn fmt:check
 
       - name: Package extension
-        run: yarn package
+        run: opam exec -- yarn package
 
       - name: Upload artifact
         if: runner.os == 'Linux'
