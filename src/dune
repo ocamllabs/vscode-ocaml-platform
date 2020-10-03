@@ -1,4 +1,5 @@
 (executable
  (name extension)
- (libraries core_kernel vscode node interop promise_jsoo jsonoo js_of_ocaml)
+ (libraries vscode node core_kernel promise_jsoo jsonoo js_of_ocaml
+   gen_js_api)
  (modes js))

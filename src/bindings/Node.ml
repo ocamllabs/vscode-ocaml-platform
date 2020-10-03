@@ -7,7 +7,8 @@ module Process = struct
 
   val env : unit -> string Dict.t [@@js.get "process.env"]
 
-  val set_env : string -> string -> unit [@@js.global]
+  let set_env key value =
+    Ojs.set (Ojs.variable "process") key (Ojs.string_to_js value)
 end
 
 module JsError = struct
@@ -42,7 +43,7 @@ module Stream = struct
 end
 
 module Fs = struct
-  val read_dir : string -> string list Promise.t [@@js.global]
+  val read_dir : string -> string list Promise.t [@@js.global "fs.readDir"]
 
   let read_dir path =
     read_dir path
@@ -50,15 +51,13 @@ module Fs = struct
     |> Promise.catch ~rejected:(fun error ->
            Promise.return (Error (JsError.ofPromiseError error)))
 
-  val read_file : string -> string Promise.t [@@js.global]
+  val read_file : string -> string Promise.t [@@js.global "fs.readFile"]
 
-  val exists : string -> bool Promise.t [@@js.global]
+  val exists : string -> bool Promise.t [@@js.global "fs.exists"]
 end
 
 module ChildProcess = struct
   type t = private Ojs.t [@@js]
-
-  val exit_code : t -> int [@@js.get]
 
   val get_stdout : t -> Stream.t [@@js.get "stdout"]
 
@@ -85,7 +84,7 @@ module ChildProcess = struct
     -> Options.t
     -> (exec_result or_undefined -> string -> string -> unit)
     -> t
-    [@@js.global]
+    [@@js.global "child_process.exec"]
 
   type return =
     { exitCode : int
@@ -110,7 +109,8 @@ module ChildProcess = struct
       Stream.end_ (get_stdin cp)
     | None -> ()
 
-  val spawn : string -> string array -> Options.t -> t [@@js.global]
+  val spawn : string -> string array -> Options.t -> t
+    [@@js.global "child_process.spawn"]
 
   let spawn cmd args ?stdin options =
     Promise.make @@ fun ~resolve ~reject:_ ->
