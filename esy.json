@@ -1,8 +1,24 @@
 {
+  "esy": {
+    "build": "dune build src/extension.bc.js",
+    "buildsInSource": "_build"
+  },
+  "scripts": {
+    "clean": "dune clean",
+    "watch": "dune build -w src/extension.bc.js"
+  },
   "dependencies": {
+    "ocaml": "4.10.x",
+    "@esy-ocaml/reason": "3.6.2",
+    "@opam/js_of_ocaml": "3.7.1",
+    "@opam/gen_js_api": "1.0.6",
+    "@opam/core_kernel": "v0.14.0",
+    "@opam/promise_jsoo": "0.2.0",
+    "@opam/jsonoo": "0.2.0"
+  },
+  "devDependencies": {
+    "@opam/dune": "2.7.1",
     "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam",
-    "@opam/ocamlformat": "0.15.0",
-    "@opam/reason": "*",
-    "ocaml": "4.6.x"
+    "@opam/ocamlformat": "0.15.0"
   }
 }
