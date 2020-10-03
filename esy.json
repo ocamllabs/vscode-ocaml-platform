@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "ocaml": "4.10.x",
-    "@esy-ocaml/reason": "3.6.2",
+    "@opam/reason": "3.6.0",
     "@opam/js_of_ocaml": "3.7.1",
     "@opam/gen_js_api": "1.0.6",
     "@opam/core_kernel": "v0.14.0",
