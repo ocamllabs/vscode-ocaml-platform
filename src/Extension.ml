@@ -255,8 +255,6 @@ let activate (extension : ExtensionContext.t) =
          message `Error "Error: %s" error_message;
          Promise.return ())
 
-let _ =
-  Js_of_ocaml.Js.export_all
-    (object%js
-       method activate extension = activate extension
-    end)
+let () =
+  let open Js_of_ocaml.Js in
+  export "activate" (wrap_callback activate)
