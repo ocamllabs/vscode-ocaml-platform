@@ -11,7 +11,7 @@ module RevealOutputChannelOn : sig
 end
 
 module ServerCapabilities : sig
-  type t = Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -23,12 +23,7 @@ module ServerCapabilities : sig
 end
 
 module InitializeResult : sig
-  type server_info =
-    { name : string
-    ; version : string option
-    }
-
-  type t = Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -36,11 +31,16 @@ module InitializeResult : sig
 
   val capabilities : t -> ServerCapabilities.t
 
+  type server_info =
+    { name : string
+    ; version : string option
+    }
+
   val server_info : t -> server_info option
 end
 
 module DocumentFilter : sig
-  type t = Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -63,22 +63,22 @@ module DocumentFilter : sig
 end
 
 module DocumentSelector : sig
-  type selectors =
+  type t = selectors array
+
+  and selectors =
     [ `Filter of DocumentFilter.t
     | `String of string
     ]
 
-  val language : ?scheme:string -> string -> selectors
-
-  type t = selectors array
-
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+
+  val language : ?scheme:string -> ?pattern:string -> string -> selectors
 end
 
 module ClientOptions : sig
-  type t = Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -99,7 +99,7 @@ module ClientOptions : sig
 end
 
 module ExecutableOptions : sig
-  type t = Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -123,7 +123,7 @@ module ExecutableOptions : sig
 end
 
 module Executable : sig
-  type t = Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -146,7 +146,7 @@ end
 module ServerOptions = Executable
 
 module LanguageClient : sig
-  type t = Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 

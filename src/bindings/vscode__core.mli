@@ -1,5 +1,5 @@
 module Disposable : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -13,7 +13,7 @@ module Disposable : sig
 end
 
 module Command : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -37,7 +37,7 @@ module Command : sig
 end
 
 module Position : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -67,7 +67,7 @@ module Position : sig
 end
 
 module Range : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -103,7 +103,7 @@ module Range : sig
 end
 
 module TextLine : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -142,7 +142,7 @@ module EndOfLine : sig
 end
 
 module TextEdit : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -166,7 +166,7 @@ module TextEdit : sig
 end
 
 module Uri : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -206,7 +206,7 @@ module Uri : sig
 end
 
 module TextDocument : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -255,7 +255,7 @@ module TextDocument : sig
 end
 
 module WorkspaceFolder : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -313,7 +313,7 @@ module Selection : sig
 end
 
 module TextEditorEdit : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -384,7 +384,7 @@ module TextEditorRevealType : sig
 end
 
 module TextEditorOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -418,7 +418,7 @@ module TextEditorOptions : sig
 end
 
 module TextEditorDecorationType : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -434,7 +434,7 @@ module TextEditorDecorationType : sig
 end
 
 module MarkdownString : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -456,7 +456,7 @@ module MarkdownString : sig
 end
 
 module ThemeColor : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -466,7 +466,7 @@ module ThemeColor : sig
 end
 
 module ThemableDecorationAttachmentRenderOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -524,7 +524,7 @@ module ThemableDecorationAttachmentRenderOptions : sig
 end
 
 module ThemableDecorationInstanceRenderOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -542,7 +542,7 @@ module ThemableDecorationInstanceRenderOptions : sig
 end
 
 module DecorationInstanceRenderOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -560,7 +560,7 @@ module DecorationInstanceRenderOptions : sig
 end
 
 module DecorationOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -586,7 +586,7 @@ module DecorationOptions : sig
 end
 
 module SnippetString : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -602,7 +602,7 @@ module SnippetString : sig
 
   val append_place_holder :
        t
-    -> value:[ `Function of t -> unit | `String of string ]
+    -> value:[ `String of string | `Function of t -> unit ]
     -> ?number:int
     -> unit
     -> t
@@ -612,12 +612,12 @@ module SnippetString : sig
   val append_variable :
        t
     -> name:string
-    -> default_value:[ `Function of t -> unit | `String of string ]
+    -> default_value:[ `String of string | `Function of t -> unit ]
     -> t
 end
 
 module TextEditor : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -625,8 +625,8 @@ module TextEditor : sig
 
   type insert_snippet_location =
     [ `Position of Position.t
-    | `Positions of Position.t list
     | `Range of Range.t
+    | `Positions of Position.t list
     | `Ranges of Range.t list
     ]
 
@@ -663,7 +663,7 @@ module TextEditor : sig
        t
     -> decoration_type:TextEditorDecorationType.t
     -> ranges_or_options:
-         [ `Options of DecorationOptions.t list | `Ranges of Range.t list ]
+         [ `Ranges of Range.t list | `Options of DecorationOptions.t list ]
     -> unit
 
   val reveal_range :
@@ -682,15 +682,15 @@ module ConfigurationTarget : sig
 end
 
 module WorkspaceConfiguration : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
 
   type configuration_target =
-    [ `Bool of bool
-    | `ConfigurationTarget of ConfigurationTarget.t
+    [ `ConfigurationTarget of ConfigurationTarget.t
+    | `Bool of bool
     ]
 
   type inspect_result =
@@ -733,7 +733,7 @@ module StatusBarAlignment : sig
 end
 
 module AccessibilityInformation : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -747,7 +747,7 @@ module AccessibilityInformation : sig
 end
 
 module StatusBarItem : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -759,8 +759,8 @@ module StatusBarItem : sig
     ]
 
   type command =
-    [ `Command of Command.t
-    | `String of string
+    [ `String of string
+    | `Command of Command.t
     ]
 
   val alignment : t -> StatusBarAlignment.t
@@ -801,7 +801,7 @@ module StatusBarItem : sig
 end
 
 module WorkspaceFoldersChangeEvent : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -816,7 +816,7 @@ module WorkspaceFoldersChangeEvent : sig
 end
 
 module FormattingOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -839,7 +839,7 @@ module Event : sig
 end
 
 module CancellationToken : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -856,7 +856,7 @@ module CancellationToken : sig
 end
 
 module QuickPickItem : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -883,7 +883,7 @@ module QuickPickItem : sig
 end
 
 module QuickPickOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -919,8 +919,8 @@ end
 
 module ProviderResult : sig
   type 'a t =
-    [ `Promise of 'a option Promise.t
-    | `Value of 'a option
+    [ `Value of 'a option
+    | `Promise of 'a option Promise.t
     ]
 
   val t_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
@@ -929,7 +929,7 @@ module ProviderResult : sig
 end
 
 module InputBoxOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -962,7 +962,7 @@ module InputBoxOptions : sig
 end
 
 module MessageItem : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -976,7 +976,7 @@ module MessageItem : sig
 end
 
 module Location : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -988,7 +988,7 @@ module Location : sig
 
   val make :
        uri:Uri.t
-    -> range_or_position:[ `Position of Position.t | `Range of Range.t ]
+    -> range_or_position:[ `Range of Range.t | `Position of Position.t ]
     -> t
 end
 
@@ -1004,18 +1004,18 @@ module ProgressLocation : sig
 end
 
 module ProgressOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
 
-  type view_id_location = { view_id : string }
-
   type location =
     [ `ProgressLocation of ProgressLocation.t
     | `ViewIdLocation of view_id_location
     ]
+
+  and view_id_location = { view_id : string }
 
   val location : t -> location
 
@@ -1028,7 +1028,7 @@ module ProgressOptions : sig
 end
 
 module TextDocumentShowOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1052,7 +1052,7 @@ module TextDocumentShowOptions : sig
 end
 
 module TerminalOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1084,7 +1084,7 @@ module TerminalOptions : sig
 end
 
 module TerminalDimensions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1098,7 +1098,7 @@ module TerminalDimensions : sig
 end
 
 module Pseudoterminal : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1132,7 +1132,7 @@ module Pseudoterminal : sig
 end
 
 module ExtensionTerminalOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1146,7 +1146,7 @@ module ExtensionTerminalOptions : sig
 end
 
 module TerminalExitStatus : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1158,15 +1158,15 @@ module TerminalExitStatus : sig
 end
 
 module Terminal : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
 
   type creation_options =
-    [ `ExtensionTerminalOptions of ExtensionTerminalOptions.t
-    | `TerminalOptions of TerminalOptions.t
+    [ `TerminalOptions of TerminalOptions.t
+    | `ExtensionTerminalOptions of ExtensionTerminalOptions.t
     ]
 
   val name : t -> string
@@ -1189,7 +1189,7 @@ module Terminal : sig
 end
 
 module OutputChannel : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1213,7 +1213,7 @@ module OutputChannel : sig
 end
 
 module Memento : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1236,7 +1236,7 @@ module EnvironmentVariableMutatorType : sig
 end
 
 module EnvironmentVariableMutator : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1248,7 +1248,7 @@ module EnvironmentVariableMutator : sig
 end
 
 module EnvironmentVariableCollection : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1290,7 +1290,7 @@ module ExtensionMode : sig
 end
 
 module ExtensionContext : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1322,7 +1322,7 @@ module ExtensionContext : sig
 end
 
 module ShellQuotingOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1334,8 +1334,8 @@ module ShellQuotingOptions : sig
     }
 
   type escape =
-    [ `Literal of escape_literal
-    | `String of string
+    [ `String of string
+    | `Literal of escape_literal
     ]
 
   val escape : t -> escape option
@@ -1348,7 +1348,7 @@ module ShellQuotingOptions : sig
 end
 
 module ShellExecutionOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1386,7 +1386,7 @@ module ShellQuoting : sig
 end
 
 module ShellQuotedString : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1400,15 +1400,15 @@ module ShellQuotedString : sig
 end
 
 module ShellExecution : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
 
   type shell_string =
-    [ `ShellQuotedString of ShellQuotedString.t
-    | `String of string
+    [ `String of string
+    | `ShellQuotedString of ShellQuotedString.t
     ]
 
   val make_command_line :
@@ -1431,7 +1431,7 @@ module ShellExecution : sig
 end
 
 module ProcessExecutionOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1446,7 +1446,7 @@ module ProcessExecutionOptions : sig
 end
 
 module ProcessExecution : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1470,7 +1470,7 @@ module ProcessExecution : sig
 end
 
 module TaskDefinition : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1486,7 +1486,7 @@ module TaskDefinition : sig
 end
 
 module CustomExecution : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1499,7 +1499,7 @@ module CustomExecution : sig
 end
 
 module RelativePattern : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1517,8 +1517,8 @@ end
 
 module GlobPattern : sig
   type t =
-    [ `RelativePattern of RelativePattern.t
-    | `String of string
+    [ `String of string
+    | `RelativePattern of RelativePattern.t
     ]
 
   val t_to_js : t -> Ojs.t
@@ -1527,7 +1527,7 @@ module GlobPattern : sig
 end
 
 module DocumentFilter : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1550,9 +1550,8 @@ module DocumentSelector : sig
     ]
 
   type t =
-    [ `Filter of DocumentFilter.t
+    [ selectors
     | `List of selectors list
-    | `String of string
     ]
 
   val t_to_js : t -> Ojs.t
@@ -1561,7 +1560,7 @@ module DocumentSelector : sig
 end
 
 module DocumentFormattingEditProvider : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1584,7 +1583,7 @@ module DocumentFormattingEditProvider : sig
 end
 
 module TaskGroup : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1611,7 +1610,7 @@ module TaskScope : sig
 end
 
 module RunOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1645,7 +1644,7 @@ module TaskPanelKind : sig
 end
 
 module TaskPresentationOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1675,16 +1674,16 @@ module TaskPresentationOptions : sig
 end
 
 module Task : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
 
   type execution =
-    [ `CustomExecution of CustomExecution.t
-    | `ProcessExecution of ProcessExecution.t
+    [ `ProcessExecution of ProcessExecution.t
     | `ShellExecution of ShellExecution.t
+    | `CustomExecution of CustomExecution.t
     ]
 
   val make :
@@ -1721,7 +1720,7 @@ module Task : sig
 end
 
 module TaskProvider : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1750,8 +1749,8 @@ end
 
 module ConfigurationScope : sig
   type t =
-    [ `TextDocument of TextDocument.t
-    | `Uri of Uri.t
+    [ `Uri of Uri.t
+    | `TextDocument of TextDocument.t
     | `WorkspaceFolder of WorkspaceFolder.t
     ]
 
@@ -1759,7 +1758,7 @@ module ConfigurationScope : sig
 end
 
 module MessageOptions : sig
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1776,7 +1775,7 @@ module Progress : sig
     ; increment : int option
     }
 
-  type t = private Ojs.t
+  type t
 
   val t_of_js : Ojs.t -> t
 
@@ -1822,9 +1821,9 @@ module Workspace : sig
     }
 
   val open_text_document :
-       [ `Filename of string
+       [ `Uri of Uri.t
+       | `Filename of string
        | `Interactive of text_document_options option
-       | `Uri of Uri.t
        ]
     -> TextDocument.t Promise.t
 end
@@ -1899,8 +1898,8 @@ module Window : sig
 
   val create_terminal_from_options :
        options:
-         [ `ExtensionTerminalOptions of ExtensionTerminalOptions.t
-         | `TerminalOptions of TerminalOptions.t
+         [ `TerminalOptions of TerminalOptions.t
+         | `ExtensionTerminalOptions of ExtensionTerminalOptions.t
          ]
     -> Terminal.t
 

@@ -66,10 +66,10 @@ module DocumentSelector = struct
     | "string" -> `String (Ojs.string_of_js js_val)
     | _ -> `Filter (DocumentFilter.t_of_js js_val)
 
-  let language ?(scheme = "file") l =
-    `Filter (DocumentFilter.create_language ~scheme ~language:l ())
-
   type t = selectors array [@@js]
+
+  let language ?(scheme = "file") ?pattern l =
+    `Filter (DocumentFilter.create_language ~language:l ~scheme ?pattern ())
 end
 
 module ClientOptions = struct
