@@ -553,13 +553,9 @@
     ]
   },
   "scripts": {
-    "clean": "dune clean",
-    "build": "dune build src/extension.bc.js",
-    "watch": "dune build -w src/extension.bc.js",
     "test:esy": "node ./test/runEsyTests.js",
     "test:opam": "node ./test/runOpamTests.js",
     "test": "npm-run-all -s test:*",
-    "vscode:prepublish": "yarn build",
     "package": "vsce package --yarn",
     "deploy": "vsce publish --yarn",
     "fmt:check": "prettier --check .",
