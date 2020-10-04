@@ -24,7 +24,7 @@ fmt:
 .PHONY: fmt
 
 # builds and packages the extension for installment
-pkg:
+pkg: build
 	vsce package --out ./test_extension.vsix --yarn
 .PHONY: pkg
 
