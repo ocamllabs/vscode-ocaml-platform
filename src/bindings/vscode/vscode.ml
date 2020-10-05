@@ -175,11 +175,11 @@ module Uri = struct
 
   let with_ this ?scheme ?authority ?path ?query ?fragment () =
     let change = Ojs.obj [||] in
-    iter_set change "scheme" Ojs.string_to_js scheme;
-    iter_set change "authority" Ojs.string_to_js authority;
-    iter_set change "path" Ojs.string_to_js path;
-    iter_set change "query" Ojs.string_to_js query;
-    iter_set change "fragment" Ojs.string_to_js fragment;
+    iter_set change "scheme" [%js.of: string] scheme;
+    iter_set change "authority" [%js.of: string] authority;
+    iter_set change "path" [%js.of: string] path;
+    iter_set change "query" [%js.of: string] query;
+    iter_set change "fragment" [%js.of: string] fragment;
     with_ this change
 
   val toString : t -> ?skipEncoding:bool -> unit -> string [@@js.call]
@@ -292,11 +292,11 @@ module TextEditorEdit = struct
 
   let replaceLocation_of_js js_val =
     if Ojs.has_property js_val "anchor" then
-      `Position (Selection.t_of_js js_val)
+      `Position ([%js.to: Position.t] js_val)
     else if Ojs.has_property js_val "start" then
-      `Range (Range.t_of_js js_val)
+      `Range ([%js.to: Range.t] js_val)
     else
-      `Selection (Selection.t_of_js js_val)
+      `Selection ([%js.to: Selection.t] js_val)
 
   type deleteLocation =
     ([ `Range of Range.t
@@ -307,9 +307,9 @@ module TextEditorEdit = struct
 
   let deleteLocation_of_js js_val =
     if Ojs.has_property js_val "anchor" then
-      `Selection (Selection.t_of_js js_val)
+      `Selection ([%js.to: Selection.t] js_val)
     else
-      `Range (Range.t_of_js js_val)
+      `Range ([%js.to: Range.t] js_val)
 
   val replace : t -> location:replaceLocation -> value:string -> unit
     [@@js.call]
@@ -369,8 +369,8 @@ module TextEditorOptions = struct
 
   let tabSize_of_js js_val =
     match Ojs.type_of js_val with
-    | "number" -> `Int (Ojs.int_of_js js_val)
-    | "string" -> `String (Ojs.string_of_js js_val)
+    | "number" -> `Int ([%js.to: int] js_val)
+    | "string" -> `String ([%js.to: string] js_val)
     | _ -> assert false
 
   type insertSpaces =
@@ -382,8 +382,8 @@ module TextEditorOptions = struct
 
   let insertSpaces_of_js js_val =
     match Ojs.type_of js_val with
-    | "boolean" -> `Bool (Ojs.bool_of_js js_val)
-    | "string" -> `String (Ojs.string_of_js js_val)
+    | "boolean" -> `Bool ([%js.to: bool] js_val)
+    | "string" -> `String ([%js.to: string] js_val)
     | _ -> assert false
 
   val tabSize : t -> tabSize or_undefined [@@js.get]
@@ -454,8 +454,8 @@ module ThemableDecorationAttachmentRenderOptions = struct
 
   let contentIconPath_of_js js_val =
     match Ojs.type_of js_val with
-    | "string" -> `String (Ojs.string_of_js js_val)
-    | _ -> `Uri (Uri.t_of_js js_val)
+    | "string" -> `String ([%js.to: string] js_val)
+    | _ -> `Uri ([%js.to: Uri.t] js_val)
 
   type color =
     ([ `String of string
@@ -466,8 +466,8 @@ module ThemableDecorationAttachmentRenderOptions = struct
 
   let color_of_js js_val =
     match Ojs.type_of js_val with
-    | "string" -> `String (Ojs.string_of_js js_val)
-    | _ -> `ThemeColor (ThemeColor.t_of_js js_val)
+    | "string" -> `String ([%js.to: string] js_val)
+    | _ -> `ThemeColor ([%js.to: ThemeColor.t] js_val)
 
   val contentText : t -> string or_undefined [@@js.get]
 
@@ -557,9 +557,9 @@ module DecorationOptions = struct
 
   let hoverMessage_of_js js_val =
     if Ojs.has_property js_val "value" then
-      `MarkdownString (MarkdownString.t_of_js js_val)
+      `MarkdownString ([%js.to: MarkdownString.t] js_val)
     else
-      `MarkdownStrings (Ojs.list_of_js MarkdownString.t_of_js js_val)
+      `MarkdownStrings ([%js.to: MarkdownString.t list] js_val)
 
   val range : t -> Range.t [@@js.get]
 
@@ -641,8 +641,8 @@ module TextEditor = struct
 
   let edit this ~callback ?undoStopBefore ?undoStopAfter () =
     let options = Ojs.obj [||] in
-    iter_set options "undoStopBefore" Ojs.bool_to_js undoStopBefore;
-    iter_set options "undoStopAfter" Ojs.bool_to_js undoStopAfter;
+    iter_set options "undoStopBefore" [%js.of: bool] undoStopBefore;
+    iter_set options "undoStopAfter" [%js.of: bool] undoStopAfter;
     edit this ~callback options ()
 
   val insertSnippet :
@@ -655,8 +655,8 @@ module TextEditor = struct
 
   let insertSnippet this ~snippet ?location ?undoStopBefore ?undoStopAfter () =
     let options = Ojs.obj [||] in
-    iter_set options "undoStopBefore" Ojs.bool_to_js undoStopBefore;
-    iter_set options "undoStopAfter" Ojs.bool_to_js undoStopAfter;
+    iter_set options "undoStopBefore" [%js.of: bool] undoStopBefore;
+    iter_set options "undoStopAfter" [%js.of: bool] undoStopAfter;
     insertSnippet this ~snippet ?location options
 
   val setDecorations :
@@ -751,8 +751,8 @@ module StatusBarItem = struct
 
   let color_of_js js_val =
     match Ojs.type_of js_val with
-    | "string" -> `String (Ojs.string_of_js js_val)
-    | _ -> `ThemeColor (ThemeColor.t_of_js js_val)
+    | "string" -> `String ([%js.to: string] js_val)
+    | _ -> `ThemeColor ([%js.to: ThemeColor.t] js_val)
 
   type command =
     ([ `String of string
@@ -763,8 +763,8 @@ module StatusBarItem = struct
 
   let command_of_js js_val =
     match Ojs.type_of js_val with
-    | "string" -> `String (Ojs.string_of_js js_val)
-    | _ -> `Command (Command.t_of_js js_val)
+    | "string" -> `String ([%js.to: string] js_val)
+    | _ -> `Command ([%js.to: Command.t] js_val)
 
   val alignment : t -> StatusBarAlignment.t [@@js.get]
 
@@ -838,7 +838,7 @@ module Event = struct
     let (disposable : Ojs.t) =
       Ojs.call js_fun "call" [| Ojs.null; js_listener |]
     in
-    Disposable.t_of_js disposable
+    [%js.to: Disposable.t] disposable
 
   let t_to_js ml_to_js ml_fun =
     Ojs.fun_to_js 1 @@ fun js_listener ->
@@ -846,7 +846,7 @@ module Event = struct
       ignore @@ Ojs.call js_listener "call" [| Ojs.null; ml_to_js ml_arg |]
     in
     let (disposable : Disposable.t) = ml_fun ~listener:ml_listener in
-    Disposable.t_to_js disposable
+    [%js.to: Disposable.t] disposable
 end
 
 module CancellationToken = struct
@@ -897,8 +897,8 @@ module QuickPickOptions = struct
 
   let onDidSelectItemArgs_of_js js_val =
     match Ojs.type_of js_val with
-    | "string" -> `String (Ojs.string_of_js js_val)
-    | _ -> `QuickPickItem (QuickPickItem.t_of_js js_val)
+    | "string" -> `String ([%js.to: string] js_val)
+    | _ -> `QuickPickItem ([%js.to: QuickPickItem.t] js_val)
 
   val matchOnDescription : t -> bool or_undefined [@@js.get]
 
@@ -931,15 +931,15 @@ module ProviderResult = struct
     | `Promise of 'a or_undefined Promise.t
     ]
 
-  let t_to_js toJs = function
-    | `Value v -> or_undefined_to_js toJs v
-    | `Promise p -> Promise.t_to_js (or_undefined_to_js toJs) p
+  let t_to_js to_js = function
+    | `Value v -> or_undefined_to_js to_js v
+    | `Promise p -> Promise.t_to_js (or_undefined_to_js to_js) p
 
-  let t_of_js ofJs js_val =
+  let t_of_js of_js js_val =
     if Ojs.has_property js_val "then" then
-      `Promise (Promise.t_of_js (or_undefined_of_js ofJs) js_val)
+      `Promise (Promise.t_of_js (or_undefined_of_js of_js) js_val)
     else
-      `Value (or_undefined_of_js ofJs js_val)
+      `Value (or_undefined_of_js of_js js_val)
 end
 
 module InputBoxOptions = struct
@@ -1021,8 +1021,8 @@ module ProgressOptions = struct
 
   let location_of_js js_val =
     match Ojs.type_of js_val with
-    | "number" -> `ProgressLocation (ProgressLocation.t_of_js js_val)
-    | _ -> `ViewIdLocation (viewIdLocation_of_js js_val)
+    | "number" -> `ProgressLocation ([%js.to: ProgressLocation.t] js_val)
+    | _ -> `ViewIdLocation ([%js.to: viewIdLocation] js_val)
 
   val location : t -> location [@@js.get]
 
@@ -1068,8 +1068,8 @@ module TerminalOptions = struct
 
   let shellArgs_of_js js_val =
     match Ojs.type_of js_val with
-    | "string" -> `Arg (Ojs.string_of_js js_val)
-    | _ -> `Args (Ojs.list_of_js Ojs.string_of_js js_val)
+    | "string" -> `Arg ([%js.to: string] js_val)
+    | _ -> `Args ([%js.to: string list] js_val)
 
   type cwd =
     ([ `String of string
@@ -1080,8 +1080,8 @@ module TerminalOptions = struct
 
   let cwd_of_js js_val =
     match Ojs.type_of js_val with
-    | "string" -> `String (Ojs.string_of_js js_val)
-    | _ -> `Uri (Uri.t_of_js js_val)
+    | "string" -> `String ([%js.to: string] js_val)
+    | _ -> `Uri ([%js.to: Uri.t] js_val)
 
   val name : t -> string or_undefined [@@js.get]
 
@@ -1173,9 +1173,9 @@ module Terminal = struct
 
   let creationOptions_of_js js_val =
     if Ojs.has_property js_val "pty" then
-      `ExtensionTerminalOptions (ExtensionTerminalOptions.t_of_js js_val)
+      `ExtensionTerminalOptions ([%js.to: ExtensionTerminalOptions.t] js_val)
     else
-      `TerminalOptions (TerminalOptions.t_of_js js_val)
+      `TerminalOptions ([%js.to: TerminalOptions.t] js_val)
 
   val name : t -> string [@@js.get]
 
@@ -1328,8 +1328,8 @@ module ShellQuotingOptions = struct
 
   let escape_of_js js_val =
     match Ojs.type_of js_val with
-    | "string" -> `String (Ojs.string_of_js js_val)
-    | _ -> `Literal (escapeLiteral_of_js js_val)
+    | "string" -> `String ([%js.to: string] js_val)
+    | _ -> `Literal ([%js.to: escapeLiteral] js_val)
 
   val escape : t -> escape or_undefined [@@js.get]
 
@@ -1395,8 +1395,8 @@ module ShellExecution = struct
 
   let shellString_of_js js_val =
     match Ojs.type_of js_val with
-    | "string" -> `String (Ojs.string_of_js js_val)
-    | _ -> `ShellQuotedString (ShellQuotedString.t_of_js js_val)
+    | "string" -> `String ([%js.to: string] js_val)
+    | _ -> `ShellQuotedString ([%js.to: ShellQuotedString.t] js_val)
 
   val makeCommandLine :
     commandLine:string -> ?options:ShellExecutionOptions.t -> unit -> t
@@ -1461,8 +1461,7 @@ module TaskDefinition = struct
   let setAttribute = Ojs.set
 
   let create ~type_ ?(attributes = []) () =
-    let obj = Ojs.obj [| ("type", Ojs.string_to_js type_) |] in
-
+    let obj = Ojs.obj [| ("type", [%js.of: string] type_) |] in
     Core_kernel.List.iter attributes ~f:(fun (k, v) -> Ojs.set obj k v);
     obj
 end
@@ -1502,8 +1501,8 @@ module GlobPattern = struct
 
   let t_of_js js_val =
     match Ojs.type_of js_val with
-    | "string" -> `String (Ojs.string_of_js js_val)
-    | _ -> `RelativePattern (RelativePattern.t_of_js js_val)
+    | "string" -> `String ([%js.to: string] js_val)
+    | _ -> `RelativePattern ([%js.to: RelativePattern.t] js_val)
 end
 
 module DocumentFilter = struct
@@ -1521,33 +1520,33 @@ module DocumentFilter = struct
 end
 
 module DocumentSelector = struct
-  type selectors =
+  type selector =
     ([ `Filter of DocumentFilter.t
      | `String of string
      ]
     [@js.union])
   [@@js]
 
-  let selectors_of_js js_val =
+  let selector_of_js js_val =
     match Ojs.type_of js_val with
-    | "string" -> `String (Ojs.string_of_js js_val)
-    | _ -> `Filter (DocumentFilter.t_of_js js_val)
+    | "string" -> `String ([%js.to: string] js_val)
+    | _ -> `Filter ([%js.to: DocumentFilter.t] js_val)
 
   type t =
     ([ `Filter of DocumentFilter.t
      | `String of string
-     | `List of selectors list
+     | `List of selector list
      ]
     [@js.union])
   [@@js]
 
   let t_of_js js_val =
     if Ojs.type_of js_val = "string" then
-      `String (Ojs.string_of_js js_val)
+      `String ([%js.to: string] js_val)
     else if Ojs.has_property js_val "length" then
-      `List (Ojs.list_of_js selectors_of_js js_val)
+      `List ([%js.to: selector list] js_val)
     else
-      `Filter (DocumentFilter.t_of_js js_val)
+      `Filter ([%js.to: DocumentFilter.t] js_val)
 end
 
 module DocumentFormattingEditProvider = struct
@@ -1590,15 +1589,15 @@ module TaskScope = struct
     | Workspace
 
   let t_to_js = function
-    | Folder f -> WorkspaceFolder.t_to_js f
-    | Global -> Ojs.int_to_js 1
-    | Workspace -> Ojs.int_to_js 2
+    | Folder f -> [%js.of: WorkspaceFolder.t] f
+    | Global -> [%js.of: int] 1
+    | Workspace -> [%js.of: int] 2
 
   let t_of_js js_val =
     match Ojs.type_of js_val with
-    | "number" when Ojs.int_of_js js_val = 1 -> Global
-    | "number" when Ojs.int_of_js js_val = 2 -> Workspace
-    | _ -> Folder (WorkspaceFolder.t_of_js js_val)
+    | "number" when [%js.to: int] js_val = 1 -> Global
+    | "number" when [%js.to: int] js_val = 2 -> Workspace
+    | _ -> Folder ([%js.to: WorkspaceFolder.t] js_val)
 end
 
 module RunOptions = struct
@@ -1665,11 +1664,11 @@ module Task = struct
 
   let execution_of_js js_val =
     if Ojs.has_property js_val "process" then
-      `ProcessExecution (ProcessExecution.t_of_js js_val)
+      `ProcessExecution ([%js.to: ProcessExecution.t] js_val)
     else if Ojs.has_property js_val "command" then
-      `ShellExecution (ShellExecution.t_of_js js_val)
+      `ShellExecution ([%js.to: ShellExecution.t] js_val)
     else
-      `CustomExecution (CustomExecution.t_of_js js_val)
+      `CustomExecution ([%js.to: CustomExecution.t] js_val)
 
   val make :
        definition:TaskDefinition.t

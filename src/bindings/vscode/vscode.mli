@@ -1537,14 +1537,14 @@ module DocumentFilter : sig
 end
 
 module DocumentSelector : sig
-  type selectors =
+  type selector =
     [ `Filter of DocumentFilter.t
     | `String of string
     ]
 
   type t =
-    [ selectors
-    | `List of selectors list
+    [ selector
+    | `List of selector list
     ]
 
   val t_to_js : t -> Ojs.t

@@ -63,9 +63,9 @@ module DocumentFilter : sig
 end
 
 module DocumentSelector : sig
-  type t = selectors array
+  type t = selector array
 
-  and selectors =
+  and selector =
     [ `Filter of DocumentFilter.t
     | `String of string
     ]
@@ -74,7 +74,7 @@ module DocumentSelector : sig
 
   val t_to_js : t -> Ojs.t
 
-  val language : ?scheme:string -> ?pattern:string -> string -> selectors
+  val language : ?scheme:string -> ?pattern:string -> string -> selector
 end
 
 module ClientOptions : sig

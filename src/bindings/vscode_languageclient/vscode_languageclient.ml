@@ -54,19 +54,19 @@ module DocumentFilter = struct
 end
 
 module DocumentSelector = struct
-  type selectors =
+  type selector =
     ([ `Filter of DocumentFilter.t
      | `String of string
      ]
     [@js.union])
   [@@js]
 
-  let selectors_of_js js_val =
+  let selector_of_js js_val =
     match Ojs.type_of js_val with
-    | "string" -> `String (Ojs.string_of_js js_val)
-    | _ -> `Filter (DocumentFilter.t_of_js js_val)
+    | "string" -> `String ([%js.to: string] js_val)
+    | _ -> `Filter ([%js.to: DocumentFilter.t] js_val)
 
-  type t = selectors array [@@js]
+  type t = selector array [@@js]
 
   let language ?(scheme = "file") ?pattern l =
     `Filter (DocumentFilter.createLanguage ~language:l ~scheme ?pattern ())
@@ -129,7 +129,7 @@ module Executable = (* interface *) struct
     [@@js.builder]
 end
 
-module ServerOptions = Executable (* TODO other union types *)
+module ServerOptions = Executable
 
 module LanguageClient = struct
   type t = private (* class *) Ojs.t [@@js]
