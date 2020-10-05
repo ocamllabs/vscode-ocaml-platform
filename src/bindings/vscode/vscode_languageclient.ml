@@ -18,7 +18,7 @@ module ServerCapabilities = struct
 end
 
 module InitializeResult = struct
-  type server_info =
+  type serverInfo =
     { name : string
     ; version : string or_undefined
     }
@@ -28,7 +28,7 @@ module InitializeResult = struct
 
   val capabilities : t -> ServerCapabilities.t [@@js.get]
 
-  val server_info : t -> server_info or_undefined [@@js.get]
+  val serverInfo : t -> serverInfo or_undefined [@@js.get]
 end
 
 module DocumentFilter = struct
@@ -40,15 +40,15 @@ module DocumentFilter = struct
 
   val pattern : t -> string or_undefined [@@js.get]
 
-  val create_language :
+  val createLanguage :
     language:string -> ?scheme:string -> ?pattern:string -> unit -> t
     [@@js.builder]
 
-  val create_scheme :
+  val createScheme :
     ?language:string -> scheme:string -> ?pattern:string -> unit -> t
     [@@js.builder]
 
-  val create_pattern :
+  val createPattern :
     ?language:string -> ?scheme:string -> pattern:string -> unit -> t
     [@@js.builder]
 end
@@ -69,22 +69,22 @@ module DocumentSelector = struct
   type t = selectors array [@@js]
 
   let language ?(scheme = "file") ?pattern l =
-    `Filter (DocumentFilter.create_language ~language:l ~scheme ?pattern ())
+    `Filter (DocumentFilter.createLanguage ~language:l ~scheme ?pattern ())
 end
 
 module ClientOptions = struct
   type t = private (* interface *) Ojs.t [@@js]
 
-  val document_selector : t -> DocumentSelector.t or_undefined [@@js.get]
+  val documentSelector : t -> DocumentSelector.t or_undefined [@@js.get]
 
-  val output_channel : t -> Vscode_core.OutputChannel.t or_undefined [@@js.get]
+  val outputChannel : t -> Vscode_core.OutputChannel.t or_undefined [@@js.get]
 
-  val reveal_output_channel_on : t -> RevealOutputChannelOn.t [@@js.get]
+  val revealOutputChannelOn : t -> RevealOutputChannelOn.t [@@js.get]
 
   val create :
-       ?document_selector:DocumentSelector.t
-    -> ?output_channel:Vscode_core.OutputChannel.t
-    -> ?reveal_output_channel_on:RevealOutputChannelOn.t
+       ?documentSelector:DocumentSelector.t
+    -> ?outputChannel:Vscode_core.OutputChannel.t
+    -> ?revealOutputChannelOn:RevealOutputChannelOn.t
     -> unit
     -> t
     [@@js.builder]
@@ -137,9 +137,9 @@ module LanguageClient = struct
   val make :
        id:string
     -> name:string
-    -> server_options:ServerOptions.t
-    -> client_options:ClientOptions.t
-    -> ?force_debug:bool
+    -> serverOptions:ServerOptions.t
+    -> clientOptions:ClientOptions.t
+    -> ?forceDebug:bool
     -> unit
     -> t
     [@@js.new "vscode_languageclient.LanguageClient"]
@@ -148,15 +148,15 @@ module LanguageClient = struct
 
   val stop : t -> unit [@@js.call]
 
-  val on_ready : t -> Promise.void [@@js.call]
+  val onReady : t -> Promise.void [@@js.call]
 
-  val initialize_result : t -> InitializeResult.t [@@js.get]
+  val initializeResult : t -> InitializeResult.t [@@js.get]
 
-  let ready_initialize_result t =
+  let readyInitializeResult t =
     let open Promise.Syntax in
-    on_ready t >>= fun () -> Promise.return (initialize_result t)
+    onReady t >>= fun () -> Promise.return (initializeResult t)
 
-  val send_request :
+  val sendRequest :
        t
     -> meth:string
     -> data:Jsonoo.t

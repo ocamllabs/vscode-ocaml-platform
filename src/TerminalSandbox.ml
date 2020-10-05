@@ -78,9 +78,9 @@ let create toolchain =
   Cmd.log (Spawn command);
   let packageManager = Toolchain.packageManager toolchain in
   let name = Toolchain.PackageManager.toPrettyString packageManager in
-  let shell_path = Path.toString bin in
-  let shell_args = `Strings args in
-  Window.create_terminal ~name ~shell_path ~shell_args ()
+  let shellPath = Path.toString bin in
+  let shellArgs = `Strings args in
+  Window.createTerminal ~name ~shellPath ~shellArgs ()
 
 let dispose = Terminal.dispose
 

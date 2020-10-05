@@ -231,7 +231,7 @@ module Candidate = struct
 end
 
 let selectPackageManager (choices : Candidate.t list) =
-  let place_holder =
+  let placeHolder =
     "Which package manager would you like to manage the toolchain?"
   in
   let choices =
@@ -241,8 +241,8 @@ let selectPackageManager (choices : Candidate.t list) =
         (quickPick, pm))
       choices
   in
-  let options = QuickPickOptions.create ~can_pick_many:false ~place_holder () in
-  Window.show_quick_pick_items ~choices ~options ()
+  let options = QuickPickOptions.create ~canPickMany:false ~placeHolder () in
+  Window.showQuickPickItems ~choices ~options ()
 
 let sandboxCandidates ~workspaceFolders =
   let open Promise.Syntax in
@@ -254,7 +254,7 @@ let sandboxCandidates ~workspaceFolders =
       workspaceFolders
       |> List.map (fun (folder : WorkspaceFolder.t) ->
              let dir =
-               folder |> WorkspaceFolder.uri |> Uri.fs_path |> Path.ofString
+               folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.ofString
              in
              Esy.discover ~dir)
       |> Promise.all_list
@@ -296,12 +296,12 @@ let makeResources kind = kind
 
 let select () =
   let open Promise.Syntax in
-  let workspaceFolders = Workspace.workspace_folders () in
+  let workspaceFolders = Workspace.workspaceFolders () in
   sandboxCandidates ~workspaceFolders >>= fun candidates ->
   let open Promise.Option.Syntax in
   selectPackageManager candidates >>= function
   | { status = Ok (); packageManager = Custom _ } ->
-    let validate_input ~value =
+    let validateInput ~value =
       if
         Core_kernel.String.is_substring value ~substring:"$prog"
         && Core_kernel.String.is_substring value ~substring:"$args"
@@ -312,9 +312,9 @@ let select () =
     in
     let options =
       InputBoxOptions.create ~prompt:"Input a custom command template"
-        ~value:"$prog $args" ~validate_input ()
+        ~value:"$prog $args" ~validateInput ()
     in
-    Window.show_input_box ~options () >>| String.trim >>= fun template ->
+    Window.showInputBox ~options () >>| String.trim >>= fun template ->
     Promise.Option.return @@ PackageManager.Custom template
   | { status; packageManager } -> (
     match status with

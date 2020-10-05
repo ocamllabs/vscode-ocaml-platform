@@ -49,19 +49,19 @@ module Position : sig
 
   val make : line:int -> character:int -> t
 
-  val is_before : t -> other:t -> bool
+  val isBefore : t -> other:t -> bool
 
-  val is_before_or_equal : t -> other:t -> bool
+  val isBeforeOrEqual : t -> other:t -> bool
 
-  val is_after : t -> other:t -> bool
+  val isAfter : t -> other:t -> bool
 
-  val is_after_or_equal : t -> other:t -> bool
+  val isAfterOrEqual : t -> other:t -> bool
 
-  val is_equal : t -> other:t -> bool
+  val isEqual : t -> other:t -> bool
 
-  val compare_to : t -> other:t -> int
+  val compareTo : t -> other:t -> int
 
-  val translate : t -> ?line_delta:int -> ?character_delta:int -> unit -> t
+  val translate : t -> ?lineDelta:int -> ?characterDelta:int -> unit -> t
 
   val with_ : t -> ?line:int -> ?character:int -> unit -> t
 end
@@ -77,23 +77,19 @@ module Range : sig
 
   val end_ : t -> Position.t
 
-  val make_positions : start:Position.t -> end_:Position.t -> t
+  val makePositions : start:Position.t -> end_:Position.t -> t
 
-  val make_coordinates :
-       start_line:int
-    -> start_character:int
-    -> end_line:int
-    -> end_character:int
-    -> t
+  val makeCoordinates :
+    startLine:int -> startCharacter:int -> endLine:int -> endCharacter:int -> t
 
-  val is_empty : t -> bool
+  val isEmpty : t -> bool
 
-  val is_single_line : t -> bool
+  val isSingleLine : t -> bool
 
   val contains :
-    t -> position_or_range:[ `Position of Position.t | `Range of t ] -> bool
+    t -> positionOrRange:[ `Position of Position.t | `Range of t ] -> bool
 
-  val is_equal : t -> other:t -> bool
+  val isEqual : t -> other:t -> bool
 
   val intersection : t -> range:t -> t option
 
@@ -109,25 +105,25 @@ module TextLine : sig
 
   val t_to_js : t -> Ojs.t
 
-  val line_number : t -> int
+  val lineNumber : t -> int
 
   val text : t -> string
 
   val range : t -> Range.t
 
-  val range_including_line_break : t -> Range.t
+  val rangeIncludingLineBreak : t -> Range.t
 
-  val first_non_whitespace_character_index : t -> int
+  val firstNonWhitespaceCharacterIndex : t -> int
 
-  val is_empty_or_whitespace : t -> bool
+  val isEmptyOrWhitespace : t -> bool
 
   val create :
-       line_number:int
+       lineNumber:int
     -> text:string
     -> range:Range.t
-    -> range_including_line_break:Range.t
-    -> first_non_whitespace_character_index:int
-    -> is_empty_or_whitespace:bool
+    -> rangeIncludingLineBreak:Range.t
+    -> firstNonWhitespaceCharacterIndex:int
+    -> isEmptyOrWhitespace:bool
     -> t
 end
 
@@ -148,21 +144,21 @@ module TextEdit : sig
 
   val t_to_js : t -> Ojs.t
 
-  val replace : range:Range.t -> new_text:string -> t
+  val replace : range:Range.t -> newText:string -> t
 
-  val insert : position:Position.t -> new_text:string -> t
+  val insert : position:Position.t -> newText:string -> t
 
   val delete : Range.t -> t
 
-  val set_end_of_line : EndOfLine.t -> t
+  val setEndOfLine : EndOfLine.t -> t
 
   val range : t -> Range.t
 
-  val new_text : t -> string
+  val newText : t -> string
 
-  val new_eol : t -> EndOfLine.t option
+  val newEol : t -> EndOfLine.t option
 
-  val make : range:Range.t -> new_text:string -> t
+  val make : range:Range.t -> newText:string -> t
 end
 
 module Uri : sig
@@ -176,7 +172,7 @@ module Uri : sig
 
   val file : string -> t
 
-  val join_path : t -> path_segments:string list -> t
+  val joinPath : t -> pathSegments:string list -> t
 
   val scheme : t -> string
 
@@ -188,7 +184,7 @@ module Uri : sig
 
   val fragment : t -> string
 
-  val fs_path : t -> string
+  val fsPath : t -> string
 
   val with_ :
        t
@@ -200,9 +196,9 @@ module Uri : sig
     -> unit
     -> t
 
-  val to_string : t -> ?skip_encoding:bool -> unit -> string
+  val toString : t -> ?skipEncoding:bool -> unit -> string
 
-  val to_json : t -> Jsonoo.t
+  val toJson : t -> Jsonoo.t
 end
 
 module TextDocument : sig
@@ -214,44 +210,44 @@ module TextDocument : sig
 
   val uri : t -> Uri.t
 
-  val file_name : t -> string
+  val fileName : t -> string
 
-  val is_untitled : t -> bool
+  val isUntitled : t -> bool
 
-  val language_id : t -> string
+  val languageId : t -> string
 
   val version : t -> int
 
-  val is_dirty : t -> bool
+  val isDirty : t -> bool
 
-  val is_closed : t -> bool
+  val isClosed : t -> bool
 
   val save : t -> bool Promise.t
 
   val eol : t -> EndOfLine.t
 
-  val line_count : t -> int
+  val lineCount : t -> int
 
-  val line_at : t -> line:int -> TextLine.t
+  val lineAt : t -> line:int -> TextLine.t
 
-  val line_at_position : t -> position:Position.t -> TextLine.t
+  val lineAtPosition : t -> position:Position.t -> TextLine.t
 
-  val offset_at : t -> position:Position.t -> int
+  val offsetAt : t -> position:Position.t -> int
 
-  val position_at : t -> offset:int -> Position.t
+  val positionAt : t -> offset:int -> Position.t
 
-  val get_text : t -> ?range:Range.t -> unit -> string
+  val getText : t -> ?range:Range.t -> unit -> string
 
-  val get_word_range_at_position :
+  val getWordRangeAtPosition :
        t
     -> position:Position.t
     -> ?regex:Js_of_ocaml.Regexp.regexp
     -> unit
     -> Range.t option
 
-  val validate_range : t -> range:Range.t -> Range.t
+  val validateRange : t -> range:Range.t -> Range.t
 
-  val validate_position : t -> position:Position.t -> Position.t
+  val validatePosition : t -> position:Position.t -> Position.t
 end
 
 module WorkspaceFolder : sig
@@ -300,16 +296,16 @@ module Selection : sig
 
   val active : t -> Position.t
 
-  val make_positions : anchor:Position.t -> active:Position.t -> t
+  val makePositions : anchor:Position.t -> active:Position.t -> t
 
-  val make_coordinates :
-       anchor_line:int
-    -> anchor_character:int
-    -> active_line:int
-    -> active_character:int
+  val makeCoordinates :
+       anchorLine:int
+    -> anchorCharacter:int
+    -> activeLine:int
+    -> activeCharacter:int
     -> t
 
-  val is_reversed : t -> bool
+  val isReversed : t -> bool
 end
 
 module TextEditorEdit : sig
@@ -319,30 +315,30 @@ module TextEditorEdit : sig
 
   val t_to_js : t -> Ojs.t
 
-  type replace_location =
+  type replaceLocation =
     [ `Position of Position.t
     | `Range of Range.t
     | `Selection of Selection.t
     ]
 
-  type delete_location =
+  type deleteLocation =
     [ `Range of Range.t
     | `Selection of Selection.t
     ]
 
-  val replace : t -> location:replace_location -> value:string -> unit
+  val replace : t -> location:replaceLocation -> value:string -> unit
 
   val insert : t -> location:Position.t -> value:string -> unit
 
-  val delete : t -> location:delete_location -> unit
+  val delete : t -> location:deleteLocation -> unit
 
-  val set_end_of_line : t -> end_of_line:EndOfLine.t -> t
+  val setEndOfLine : t -> endOfLine:EndOfLine.t -> t
 
   val create :
-       replace:(location:replace_location -> value:string -> unit)
+       replace:(location:replaceLocation -> value:string -> unit)
     -> insert:(location:Position.t -> value:string -> unit)
-    -> delete:(location:delete_location -> unit)
-    -> set_end_of_line:(end_of_line:EndOfLine.t -> t)
+    -> delete:(location:deleteLocation -> unit)
+    -> setEndOfLine:(endOfLine:EndOfLine.t -> t)
     -> t
 end
 
@@ -351,9 +347,9 @@ module TextEditorCursorStyle : sig
     | Line
     | Block
     | Underline
-    | Line_thin
-    | Block_outline
-    | Underline_thin
+    | LineThin
+    | BlockOutline
+    | UnderlineThin
 
   val t_of_js : Ojs.t -> t
 
@@ -374,9 +370,9 @@ end
 module TextEditorRevealType : sig
   type t =
     | Default
-    | In_center
-    | In_center_if_outside_viewport
-    | At_top
+    | InCenter
+    | InCenterIfOutsideViewport
+    | AtTop
 
   val t_of_js : Ojs.t -> t
 
@@ -390,29 +386,29 @@ module TextEditorOptions : sig
 
   val t_to_js : t -> Ojs.t
 
-  type tab_size =
+  type tabSize =
     [ `Int of int
     | `String of string
     ]
 
-  type insert_spaces =
+  type insertSpaces =
     [ `Bool of bool
     | `String of string
     ]
 
-  val tab_size : t -> tab_size option
+  val tabSize : t -> tabSize option
 
-  val insert_spaces : t -> insert_spaces option
+  val insertSpaces : t -> insertSpaces option
 
-  val cursor_style : t -> TextEditorCursorStyle.t option
+  val cursorStyle : t -> TextEditorCursorStyle.t option
 
-  val line_numbers : t -> TextEditorLineNumbersStyle.t option
+  val lineNumbers : t -> TextEditorLineNumbersStyle.t option
 
   val create :
-       ?tab_size:tab_size
-    -> ?insert_spaces:insert_spaces
-    -> ?cursor_style:TextEditorCursorStyle.t
-    -> ?line_numbers:TextEditorLineNumbersStyle.t
+       ?tabSize:tabSize
+    -> ?insertSpaces:insertSpaces
+    -> ?cursorStyle:TextEditorCursorStyle.t
+    -> ?lineNumbers:TextEditorLineNumbersStyle.t
     -> unit
     -> t
 end
@@ -442,17 +438,17 @@ module MarkdownString : sig
 
   val value : t -> string
 
-  val is_trusted : t -> bool option
+  val isTrusted : t -> bool option
 
-  val support_theme_icons : t -> bool option
+  val supportThemeIcons : t -> bool option
 
-  val make : ?value:string -> ?support_theme_icons:bool -> unit -> t
+  val make : ?value:string -> ?supportThemeIcons:bool -> unit -> t
 
-  val append_text : t -> value:string -> t
+  val appendText : t -> value:string -> t
 
-  val append_markdown : t -> value:string -> t
+  val appendMarkdown : t -> value:string -> t
 
-  val append_codeblock : t -> value:string -> ?language:string -> unit -> t
+  val appendCodeblock : t -> value:string -> ?language:string -> unit -> t
 end
 
 module ThemeColor : sig
@@ -472,7 +468,7 @@ module ThemableDecorationAttachmentRenderOptions : sig
 
   val t_to_js : t -> Ojs.t
 
-  type content_icon_path =
+  type contentIconPath =
     [ `String of string
     | `Uri of Uri.t
     ]
@@ -482,23 +478,23 @@ module ThemableDecorationAttachmentRenderOptions : sig
     | `ThemeColor of ThemeColor.t
     ]
 
-  val content_text : t -> string option
+  val contentText : t -> string option
 
-  val content_icon_path : t -> content_icon_path option
+  val contentIconPath : t -> contentIconPath option
 
   val border : t -> string option
 
-  val border_color : t -> color option
+  val borderColor : t -> color option
 
-  val font_style : t -> string option
+  val fontStyle : t -> string option
 
-  val font_weight : t -> string option
+  val fontWeight : t -> string option
 
-  val text_decoration : t -> string option
+  val textDecoration : t -> string option
 
   val color : t -> color option
 
-  val background_color : t -> color option
+  val backgroundColor : t -> color option
 
   val margin : t -> string option
 
@@ -507,15 +503,15 @@ module ThemableDecorationAttachmentRenderOptions : sig
   val height : t -> string option
 
   val create :
-       ?content_text:string
-    -> ?content_icon_path:content_icon_path
+       ?contentText:string
+    -> ?contentIconPath:contentIconPath
     -> ?border:string
-    -> ?border_color:color
-    -> ?font_style:string
-    -> ?font_weight:string
-    -> ?text_decoration:string
+    -> ?borderColor:color
+    -> ?fontStyle:string
+    -> ?fontWeight:string
+    -> ?textDecoration:string
     -> ?color:color
-    -> ?background_color:color
+    -> ?backgroundColor:color
     -> ?margin:string
     -> ?width:string
     -> ?height:string
@@ -566,21 +562,21 @@ module DecorationOptions : sig
 
   val t_to_js : t -> Ojs.t
 
-  type hover_message =
+  type hoverMessage =
     [ `MarkdownString of MarkdownString.t
     | `MarkdownStrings of MarkdownString.t list
     ]
 
   val range : t -> Range.t
 
-  val hover_message : t -> hover_message option
+  val hoverMessage : t -> hoverMessage option
 
-  val render_options : t -> DecorationInstanceRenderOptions.t option
+  val renderOptions : t -> DecorationInstanceRenderOptions.t option
 
   val create :
        range:Range.t
-    -> ?hover_message:hover_message
-    -> ?render_options:DecorationInstanceRenderOptions.t option
+    -> ?hoverMessage:hoverMessage
+    -> ?renderOptions:DecorationInstanceRenderOptions.t option
     -> unit
     -> t
 end
@@ -596,23 +592,23 @@ module SnippetString : sig
 
   val make : ?value:string -> unit -> t
 
-  val append_text : t -> string:string -> t
+  val appendText : t -> string:string -> t
 
-  val append_tab_stop : t -> number:int -> t
+  val appendTabStop : t -> number:int -> t
 
-  val append_place_holder :
+  val appendPlaceHolder :
        t
     -> value:[ `String of string | `Function of t -> unit ]
     -> ?number:int
     -> unit
     -> t
 
-  val append_choice : t -> values:string list -> ?number:int -> unit -> t
+  val appendChoice : t -> values:string list -> ?number:int -> unit -> t
 
-  val append_variable :
+  val appendVariable :
        t
     -> name:string
-    -> default_value:[ `String of string | `Function of t -> unit ]
+    -> defaultValue:[ `String of string | `Function of t -> unit ]
     -> t
 end
 
@@ -623,7 +619,7 @@ module TextEditor : sig
 
   val t_to_js : t -> Ojs.t
 
-  type insert_snippet_location =
+  type insertSnippetLocation =
     [ `Position of Position.t
     | `Range of Range.t
     | `Positions of Position.t list
@@ -636,45 +632,45 @@ module TextEditor : sig
 
   val selections : t -> Selection.t list
 
-  val visible_ranges : t -> Range.t list
+  val visibleRanges : t -> Range.t list
 
   val options : t -> TextEditorOptions.t
 
-  val view_column : t -> ViewColumn.t option
+  val viewColumn : t -> ViewColumn.t option
 
   val edit :
        t
-    -> callback:(edit_builder:TextEditorEdit.t -> unit)
-    -> ?undo_stop_before:bool
-    -> ?undo_stop_after:bool
+    -> callback:(editBuilder:TextEditorEdit.t -> unit)
+    -> ?undoStopBefore:bool
+    -> ?undoStopAfter:bool
     -> unit
     -> bool Promise.t
 
-  val insert_snippet :
+  val insertSnippet :
        t
     -> snippet:SnippetString.t
-    -> ?location:insert_snippet_location
-    -> ?undo_stop_before:bool
-    -> ?undo_stop_after:bool
+    -> ?location:insertSnippetLocation
+    -> ?undoStopBefore:bool
+    -> ?undoStopAfter:bool
     -> unit
     -> bool Promise.t
 
-  val set_decorations :
+  val setDecorations :
        t
-    -> decoration_type:TextEditorDecorationType.t
-    -> ranges_or_options:
+    -> decorationType:TextEditorDecorationType.t
+    -> rangesOrOptions:
          [ `Ranges of Range.t list | `Options of DecorationOptions.t list ]
     -> unit
 
-  val reveal_range :
-    t -> range:Range.t -> ?reveal_type:TextEditorRevealType.t -> unit -> unit
+  val revealRange :
+    t -> range:Range.t -> ?revealType:TextEditorRevealType.t -> unit -> unit
 end
 
 module ConfigurationTarget : sig
   type t =
     | Global
     | Workspace
-    | Workspace_folder
+    | WorkspaceFolder
 
   val t_of_js : Ojs.t -> t
 
@@ -688,36 +684,36 @@ module WorkspaceConfiguration : sig
 
   val t_to_js : t -> Ojs.t
 
-  type configuration_target =
+  type configurationTarget =
     [ `ConfigurationTarget of ConfigurationTarget.t
     | `Bool of bool
     ]
 
-  type inspect_result =
+  type inspectResult =
     { key : string
-    ; default_value : Jsonoo.t option
-    ; global_value : Jsonoo.t option
-    ; workspace_value : Jsonoo.t option
-    ; workspace_folder_value : Jsonoo.t option
-    ; default_language_value : Jsonoo.t option
-    ; global_language_value : Jsonoo.t option
-    ; workspace_language_value : Jsonoo.t option
-    ; workspace_folder_language_value : Jsonoo.t option
-    ; language_ids : string option
+    ; defaultValue : Jsonoo.t option
+    ; globalValue : Jsonoo.t option
+    ; workspaceValue : Jsonoo.t option
+    ; workspaceFolderValue : Jsonoo.t option
+    ; defaultLanguageValue : Jsonoo.t option
+    ; globalLanguageValue : Jsonoo.t option
+    ; workspaceLanguageValue : Jsonoo.t option
+    ; workspaceFolderLanguageValue : Jsonoo.t option
+    ; languageIds : string option
     }
 
   val get : t -> section:string -> unit -> Jsonoo.t option
 
   val has : t -> section:string -> bool
 
-  val inspect : t -> section:string -> inspect_result
+  val inspect : t -> section:string -> inspectResult
 
   val update :
        t
     -> section:string
     -> value:Jsonoo.t
-    -> ?configuration_target:configuration_target
-    -> ?override_in_language:bool
+    -> ?configurationTarget:configurationTarget
+    -> ?overrideInLanguage:bool
     -> unit
     -> Promise.void
 end
@@ -775,7 +771,7 @@ module StatusBarItem : sig
 
   val command : t -> command option
 
-  val accessibility_information : t -> AccessibilityInformation.t option
+  val accessibilityInformation : t -> AccessibilityInformation.t option
 
   val set_alignment : t -> StatusBarAlignment.t -> unit
 
@@ -789,7 +785,7 @@ module StatusBarItem : sig
 
   val set_command : t -> command -> unit
 
-  val set_accessibility_information : t -> AccessibilityInformation.t -> unit
+  val set_accessibilityInformation : t -> AccessibilityInformation.t -> unit
 
   val show : t -> unit
 
@@ -822,11 +818,11 @@ module FormattingOptions : sig
 
   val t_to_js : t -> Ojs.t
 
-  val tab_size : t -> int
+  val tabSize : t -> int
 
-  val insert_spaces : t -> bool
+  val insertSpaces : t -> bool
 
-  val create : tab_size:int -> insert_spaces:bool -> t
+  val create : tabSize:int -> insertSpaces:bool -> t
 end
 
 module Event : sig
@@ -845,14 +841,12 @@ module CancellationToken : sig
 
   val t_to_js : t -> Ojs.t
 
-  val is_cancellation_requested : t -> bool
+  val isCancellationRequested : t -> bool
 
-  val on_cancellation_requested : t -> Ojs.t Event.t
+  val onCancellationRequested : t -> Ojs.t Event.t
 
   val create :
-       is_cancellation_requested:bool
-    -> on_cancellation_requested:Ojs.t Event.t
-    -> t
+    isCancellationRequested:bool -> onCancellationRequested:Ojs.t Event.t -> t
 end
 
 module QuickPickItem : sig
@@ -870,14 +864,14 @@ module QuickPickItem : sig
 
   val picked : t -> bool option
 
-  val always_show : t -> bool option
+  val alwaysShow : t -> bool option
 
   val create :
        label:string
     -> ?description:string
     -> ?detail:string
     -> ?picked:bool
-    -> ?always_show:bool
+    -> ?alwaysShow:bool
     -> unit
     -> t
 end
@@ -889,30 +883,30 @@ module QuickPickOptions : sig
 
   val t_to_js : t -> Ojs.t
 
-  type on_did_select_item_args =
+  type onDidSelectItemArgs =
     [ `QuickPickItem of QuickPickItem.t
     | `String of string
     ]
 
-  val match_on_description : t -> bool option
+  val matchOnDescription : t -> bool option
 
-  val match_on_detail : t -> bool option
+  val matchOnDetail : t -> bool option
 
-  val place_holder : t -> string option
+  val placeHolder : t -> string option
 
-  val ignore_focus_out : t -> bool option
+  val ignoreFocusOut : t -> bool option
 
-  val can_pick_many : t -> bool option
+  val canPickMany : t -> bool option
 
-  val on_did_select_item : t -> (on_did_select_item_args -> unit) option
+  val onDidSelectItem : t -> (onDidSelectItemArgs -> unit) option
 
   val create :
-       ?match_on_description:bool
-    -> ?match_on_detail:bool
-    -> ?place_holder:string
-    -> ?ignore_focus_out:bool
-    -> ?can_pick_many:bool
-    -> ?on_did_select_item:(item:on_did_select_item_args -> unit)
+       ?matchOnDescription:bool
+    -> ?matchOnDetail:bool
+    -> ?placeHolder:string
+    -> ?ignoreFocusOut:bool
+    -> ?canPickMany:bool
+    -> ?onDidSelectItem:(item:onDidSelectItemArgs -> unit)
     -> unit
     -> t
 end
@@ -937,26 +931,26 @@ module InputBoxOptions : sig
 
   val value : t -> string option
 
-  val value_selection : t -> (int * int) option
+  val valueSelection : t -> (int * int) option
 
   val prompt : t -> string option
 
-  val place_holder : t -> string option
+  val placeHolder : t -> string option
 
   val password : t -> bool option
 
-  val ignore_focus_out : t -> bool option
+  val ignoreFocusOut : t -> bool option
 
-  val validate_input : t -> (string -> string ProviderResult.t) option
+  val validateInput : t -> (string -> string ProviderResult.t) option
 
   val create :
        ?value:string
-    -> ?value_selection:int * int
+    -> ?valueSelection:int * int
     -> ?prompt:string
-    -> ?place_holder:string
+    -> ?placeHolder:string
     -> ?password:bool
-    -> ?ignore_focus_out:bool
-    -> ?validate_input:(value:string -> string option Promise.t)
+    -> ?ignoreFocusOut:bool
+    -> ?validateInput:(value:string -> string option Promise.t)
     -> unit
     -> t
 end
@@ -970,9 +964,9 @@ module MessageItem : sig
 
   val title : t -> string
 
-  val is_close_affordance : t -> bool option
+  val isCloseAffordance : t -> bool option
 
-  val create : title:string -> ?is_close_affordance:bool -> unit -> t
+  val create : title:string -> ?isCloseAffordance:bool -> unit -> t
 end
 
 module Location : sig
@@ -988,13 +982,13 @@ module Location : sig
 
   val make :
        uri:Uri.t
-    -> range_or_position:[ `Range of Range.t | `Position of Position.t ]
+    -> rangeOrPosition:[ `Range of Range.t | `Position of Position.t ]
     -> t
 end
 
 module ProgressLocation : sig
   type t =
-    | Source_control
+    | SourceControl
     | Window
     | Notification
 
@@ -1012,10 +1006,10 @@ module ProgressOptions : sig
 
   type location =
     [ `ProgressLocation of ProgressLocation.t
-    | `ViewIdLocation of view_id_location
+    | `ViewIdLocation of viewIdLocation
     ]
 
-  and view_id_location = { view_id : string }
+  and viewIdLocation = { viewId : string }
 
   val location : t -> location
 
@@ -1034,17 +1028,17 @@ module TextDocumentShowOptions : sig
 
   val t_to_js : t -> Ojs.t
 
-  val view_column : t -> ViewColumn.t option
+  val viewColumn : t -> ViewColumn.t option
 
-  val preserve_focus : t -> bool option
+  val preserveFocus : t -> bool option
 
   val preview : t -> bool option
 
   val selection : t -> Range.t option
 
   val create :
-       view_column:ViewColumn.t
-    -> ?preserve_focus:bool
+       viewColumn:ViewColumn.t
+    -> ?preserveFocus:bool
     -> ?preview:bool
     -> ?selection:Range.t
     -> unit
@@ -1058,7 +1052,7 @@ module TerminalOptions : sig
 
   val t_to_js : t -> Ojs.t
 
-  type shell_args =
+  type shellArgs =
     [ `Arg of string
     | `Args of string list
     ]
@@ -1070,17 +1064,17 @@ module TerminalOptions : sig
 
   val name : t -> string option
 
-  val shell_path : t -> string option
+  val shellPath : t -> string option
 
-  val shell_args : t -> shell_args option
+  val shellArgs : t -> shellArgs option
 
   val cwd : t -> cwd option
 
   val env : t -> (string, string option) Core_kernel.Hashtbl.t option
 
-  val strict_env : t -> bool
+  val strictEnv : t -> bool
 
-  val hide_from_user : t -> bool
+  val hideFromUser : t -> bool
 end
 
 module TerminalDimensions : sig
@@ -1104,29 +1098,28 @@ module Pseudoterminal : sig
 
   val t_to_js : t -> Ojs.t
 
-  val on_did_write : t -> string Event.t
+  val onDidWrite : t -> string Event.t
 
-  val on_did_override_dimensions :
-    t -> TerminalDimensions.t option Event.t option
+  val onDidOverrideDimensions : t -> TerminalDimensions.t option Event.t option
 
-  val on_did_close : t -> int option Event.t option
+  val onDidClose : t -> int option Event.t option
 
-  val open_ : t -> ?initial_dimensions:TerminalDimensions.t -> unit -> unit
+  val open_ : t -> ?initialDimensions:TerminalDimensions.t -> unit -> unit
 
   val close : t -> unit
 
-  val handle_input : t -> (data:string -> unit) option
+  val handleInput : t -> (data:string -> unit) option
 
-  val set_dimensions : t -> (dimensions:TerminalDimensions.t -> unit) option
+  val setDimensions : t -> (dimensions:TerminalDimensions.t -> unit) option
 
   val create :
-       on_did_write:string Event.t
-    -> ?on_did_override_dimensions:TerminalDimensions.t option Event.t
-    -> ?on_did_close:int option Event.t
-    -> open_:(?initial_dimensions:TerminalDimensions.t -> unit -> unit)
+       onDidWrite:string Event.t
+    -> ?onDidOverrideDimensions:TerminalDimensions.t option Event.t
+    -> ?onDidClose:int option Event.t
+    -> open_:(?initialDimensions:TerminalDimensions.t -> unit -> unit)
     -> close:(unit -> unit)
-    -> ?handle_input:(data:string -> unit)
-    -> ?set_dimensions:(dimensions:TerminalDimensions.t -> unit)
+    -> ?handleInput:(data:string -> unit)
+    -> ?setDimensions:(dimensions:TerminalDimensions.t -> unit)
     -> unit
     -> t
 end
@@ -1164,22 +1157,22 @@ module Terminal : sig
 
   val t_to_js : t -> Ojs.t
 
-  type creation_options =
+  type creationOptions =
     [ `TerminalOptions of TerminalOptions.t
     | `ExtensionTerminalOptions of ExtensionTerminalOptions.t
     ]
 
   val name : t -> string
 
-  val process_id : t -> int option Promise.t
+  val processId : t -> int option Promise.t
 
-  val creation_options : t -> creation_options
+  val creationOptions : t -> creationOptions
 
-  val exit_status : t -> TerminalExitStatus.t option
+  val exitStatus : t -> TerminalExitStatus.t option
 
-  val send_text : t -> text:string -> ?add_new_line:bool -> unit -> unit
+  val sendText : t -> text:string -> ?addNewLine:bool -> unit -> unit
 
-  val show : t -> ?preserve_focus:bool -> unit -> unit
+  val show : t -> ?preserveFocus:bool -> unit -> unit
 
   val hide : t -> unit
 
@@ -1199,11 +1192,11 @@ module OutputChannel : sig
 
   val append : t -> value:string -> unit
 
-  val append_line : t -> value:string -> unit
+  val appendLine : t -> value:string -> unit
 
   val clear : t -> unit
 
-  val show : t -> ?preserve_focus:bool -> unit -> unit
+  val show : t -> ?preserveFocus:bool -> unit -> unit
 
   val hide : t -> unit
 
@@ -1264,7 +1257,7 @@ module EnvironmentVariableCollection : sig
 
   val get : t -> variable:string -> EnvironmentVariableMutator.t option
 
-  val for_each :
+  val forEach :
        t
     -> callback:
          (   variable:string
@@ -1298,25 +1291,25 @@ module ExtensionContext : sig
 
   val subscriptions : t -> Disposable.t list
 
-  val workspace_state : t -> Memento.t
+  val workspaceState : t -> Memento.t
 
-  val global_state : t -> Memento.t
+  val globalState : t -> Memento.t
 
-  val extension_uri : t -> Uri.t
+  val extensionUri : t -> Uri.t
 
-  val extension_path : t -> string
+  val extensionPath : t -> string
 
-  val environment_variable_collection : t -> EnvironmentVariableCollection.t
+  val environmentVariableCollection : t -> EnvironmentVariableCollection.t
 
-  val as_absolute_path : t -> relative_path:string -> string
+  val asAbsolutePath : t -> relativePath:string -> string
 
-  val storage_uri : t -> Uri.t option
+  val storageUri : t -> Uri.t option
 
-  val global_storage_uri : t -> Uri.t
+  val globalStorageUri : t -> Uri.t
 
-  val log_uri : t -> Uri.t
+  val logUri : t -> Uri.t
 
-  val extension_mode : t -> ExtensionMode.t
+  val extensionMode : t -> ExtensionMode.t
 
   val subscribe : t -> disposable:Disposable.t -> unit
 end
@@ -1328,14 +1321,14 @@ module ShellQuotingOptions : sig
 
   val t_to_js : t -> Ojs.t
 
-  type escape_literal =
-    { escape_char : string
-    ; chars_to_escape : string
+  type escapeLiteral =
+    { escapeChar : string
+    ; charsToEscape : string
     }
 
   type escape =
     [ `String of string
-    | `Literal of escape_literal
+    | `Literal of escapeLiteral
     ]
 
   val escape : t -> escape option
@@ -1356,9 +1349,9 @@ module ShellExecutionOptions : sig
 
   val executable : t -> string option
 
-  val shell_args : t -> string list
+  val shellArgs : t -> string list
 
-  val shell_quoting : t -> ShellQuotingOptions.t option
+  val shellQuoting : t -> ShellQuotingOptions.t option
 
   val cwd : t -> string option
 
@@ -1366,8 +1359,8 @@ module ShellExecutionOptions : sig
 
   val create :
        ?executable:string
-    -> ?shell_args:string list
-    -> ?shell_quoting:ShellQuotingOptions.t
+    -> ?shellArgs:string list
+    -> ?shellQuoting:ShellQuotingOptions.t
     -> ?cwd:string
     -> ?env:(string, string) Core_kernel.Hashtbl.t
     -> unit
@@ -1406,26 +1399,26 @@ module ShellExecution : sig
 
   val t_to_js : t -> Ojs.t
 
-  type shell_string =
+  type shellString =
     [ `String of string
     | `ShellQuotedString of ShellQuotedString.t
     ]
 
-  val make_command_line :
-    command_line:string -> ?options:ShellExecutionOptions.t -> unit -> t
+  val makeCommandLine :
+    commandLine:string -> ?options:ShellExecutionOptions.t -> unit -> t
 
-  val make_command_args :
-       command:shell_string
-    -> args:shell_string list
+  val makeCommandArgs :
+       command:shellString
+    -> args:shellString list
     -> ?options:ShellExecutionOptions.t
     -> unit
     -> t
 
-  val command_line : t -> string option
+  val commandLine : t -> string option
 
-  val command : t -> shell_string
+  val command : t -> shellString
 
-  val args : t -> shell_string list
+  val args : t -> shellString list
 
   val options : t -> ShellExecutionOptions.t option
 end
@@ -1452,10 +1445,10 @@ module ProcessExecution : sig
 
   val t_to_js : t -> Ojs.t
 
-  val make_process :
+  val makeProcess :
     process:string -> ?options:ProcessExecutionOptions.t -> unit -> t
 
-  val make_process_args :
+  val makeProcessArgs :
        process:string
     -> args:string list
     -> ?options:ProcessExecutionOptions.t
@@ -1478,9 +1471,9 @@ module TaskDefinition : sig
 
   val type_ : t -> string
 
-  val get_attribute : t -> string -> Ojs.t
+  val getAttribute : t -> string -> Ojs.t
 
-  val set_attribute : t -> string -> Ojs.t -> unit
+  val setAttribute : t -> string -> Ojs.t -> unit
 
   val create : type_:string -> ?attributes:(string * Ojs.t) list -> unit -> t
 end
@@ -1494,7 +1487,7 @@ module CustomExecution : sig
 
   val make :
        callback:
-         (resolved_definition:TaskDefinition.t -> Pseudoterminal.t Promise.t)
+         (resolvedDefinition:TaskDefinition.t -> Pseudoterminal.t Promise.t)
     -> t
 end
 
@@ -1566,7 +1559,7 @@ module DocumentFormattingEditProvider : sig
 
   val t_to_js : t -> Ojs.t
 
-  val provide_document_formatting_edits :
+  val provideDocumentFormattingEdits :
        t
     -> document:TextDocument.t
     -> options:FormattingOptions.t
@@ -1574,7 +1567,7 @@ module DocumentFormattingEditProvider : sig
     -> TextEdit.t list ProviderResult.t
 
   val create :
-       provide_document_formatting_edits:
+       provideDocumentFormattingEdits:
          (   document:TextDocument.t
           -> options:FormattingOptions.t
           -> token:CancellationToken.t
@@ -1616,9 +1609,9 @@ module RunOptions : sig
 
   val t_to_js : t -> Ojs.t
 
-  val reevaluate_on_rerun : t -> bool option
+  val reevaluateOnRerun : t -> bool option
 
-  val create : ?reevaluate_on_rerun:bool -> unit -> t
+  val create : ?reevaluateOnRerun:bool -> unit -> t
 end
 
 module TaskRevealKind : sig
@@ -1658,7 +1651,7 @@ module TaskPresentationOptions : sig
 
   val panel : t -> TaskPanelKind.t option
 
-  val show_reuse_message : t -> bool option
+  val showReuseMessage : t -> bool option
 
   val clear : t -> bool option
 
@@ -1667,7 +1660,7 @@ module TaskPresentationOptions : sig
     -> ?echo:bool
     -> ?focus:bool
     -> ?panel:TaskPanelKind.t
-    -> ?show_reuse_message:bool
+    -> ?showReuseMessage:bool
     -> ?clear:bool
     -> unit
     -> t
@@ -1692,7 +1685,7 @@ module Task : sig
     -> name:string
     -> source:string
     -> ?execution:execution
-    -> ?problem_matchers:string list
+    -> ?problemMatchers:string list
     -> unit
     -> t
 
@@ -1706,15 +1699,15 @@ module Task : sig
 
   val execution : t -> execution option
 
-  val is_background : t -> bool
+  val isBackground : t -> bool
 
   val source : t -> string
 
   val group : t -> TaskGroup.t option
 
-  val presentation_options : t -> TaskPresentationOptions.t
+  val presentationOptions : t -> TaskPresentationOptions.t
 
-  val run_options : t -> RunOptions.t
+  val runOptions : t -> RunOptions.t
 
   val set_group : t -> TaskGroup.t -> unit
 end
@@ -1726,10 +1719,10 @@ module TaskProvider : sig
 
   val t_to_js : t -> Ojs.t
 
-  val provide_tasks :
+  val provideTasks :
     t -> ?token:CancellationToken.t -> unit -> Task.t list ProviderResult.t
 
-  val resolve_tasks :
+  val resolveTasks :
        t
     -> task:Task.t
     -> ?token:CancellationToken.t
@@ -1737,9 +1730,9 @@ module TaskProvider : sig
     -> Task.t ProviderResult.t
 
   val create :
-       provide_tasks:
+       provideTasks:
          (?token:CancellationToken.t -> unit -> Task.t list ProviderResult.t)
-    -> resolve_tasks:
+    -> resolveTasks:
          (   task:Task.t
           -> ?token:CancellationToken.t
           -> unit
@@ -1785,155 +1778,155 @@ module Progress : sig
 end
 
 module Workspace : sig
-  val workspace_folders : unit -> WorkspaceFolder.t list
+  val workspaceFolders : unit -> WorkspaceFolder.t list
 
   val name : unit -> string option
 
-  val workspace_file : unit -> Uri.t option
+  val workspaceFile : unit -> Uri.t option
 
-  val text_documents : unit -> TextDocument.t list
+  val textDocuments : unit -> TextDocument.t list
 
-  val on_did_change_workspace_folders : WorkspaceFolder.t Event.t
+  val onDidChangeWorkspaceFolders : WorkspaceFolder.t Event.t
 
-  val get_workspace_folder : uri:Uri.t -> WorkspaceFolder.t option
+  val getWorkspaceFolder : uri:Uri.t -> WorkspaceFolder.t option
 
-  val on_did_open_text_document : TextDocument.t Event.t
+  val onDidOpenTextDocument : TextDocument.t Event.t
 
-  val on_did_close_text_document : TextDocument.t Event.t
+  val onDidCloseTextDocument : TextDocument.t Event.t
 
-  val get_configuration :
+  val getConfiguration :
        ?section:string
     -> ?scope:ConfigurationScope.t
     -> unit
     -> WorkspaceConfiguration.t
 
-  val find_files :
+  val findFiles :
        includes:GlobPattern.t
     -> ?excludes:GlobPattern.t
-    -> ?max_results:int
+    -> ?maxResults:int
     -> ?token:CancellationToken.t
     -> unit
     -> Uri.t list Promise.t
 
-  type text_document_options =
+  type textDocumentOptions =
     { language : string
     ; content : string
     }
 
-  val open_text_document :
+  val openTextDocument :
        [ `Uri of Uri.t
        | `Filename of string
-       | `Interactive of text_document_options option
+       | `Interactive of textDocumentOptions option
        ]
     -> TextDocument.t Promise.t
 end
 
 module Window : sig
-  val active_text_editor : unit -> TextEditor.t option
+  val activeTextEditor : unit -> TextEditor.t option
 
-  val show_quick_pick_items :
+  val showQuickPickItems :
        choices:(QuickPickItem.t * 'a) list
     -> ?options:QuickPickOptions.t
     -> ?token:CancellationToken.t
     -> unit
     -> 'a option Promise.t
 
-  val show_quick_pick :
+  val showQuickPick :
        items:string list
     -> ?options:QuickPickOptions.t
     -> ?token:CancellationToken.t
     -> unit
     -> string option Promise.t
 
-  val show_input_box :
+  val showInputBox :
        ?options:InputBoxOptions.t
     -> ?token:CancellationToken.t
     -> unit
     -> string option Promise.t
 
-  val get_choices : (string * 'a) list -> (MessageItem.t * 'a) list
+  val getChoices : (string * 'a) list -> (MessageItem.t * 'a) list
 
-  val show_information_message :
+  val showInformationMessage :
        message:string
     -> ?options:MessageOptions.t
     -> ?choices:(string * 'a) list
     -> unit
     -> 'a option Promise.t
 
-  val show_warning_message :
+  val showWarningMessage :
        message:string
     -> ?options:MessageOptions.t
     -> ?choices:(string * 'a) list
     -> unit
     -> 'a option Promise.t
 
-  val show_error_message :
+  val showErrorMessage :
        message:string
     -> ?options:MessageOptions.t
     -> ?choices:(string * 'a) list
     -> unit
     -> 'a option Promise.t
 
-  val with_progress :
+  val withProgress :
        options:ProgressOptions.t
     -> task:(progress:Progress.t -> token:CancellationToken.t -> 'a)
     -> 'b
 
-  val create_status_bar_item :
+  val createStatusBarItem :
     ?alignment:StatusBarAlignment.t -> ?priority:int -> unit -> StatusBarItem.t
 
-  val show_text_document :
+  val showTextDocument :
        document:[ `TextDocument of TextDocument.t | `Uri of Uri.t ]
     -> ?column:ViewColumn.t
-    -> ?preserve_focus:bool
+    -> ?preserveFocus:bool
     -> unit
     -> TextEditor.t Promise.t
 
-  val create_terminal :
+  val createTerminal :
        ?name:string
-    -> ?shell_path:string
-    -> ?shell_args:[ `String of string | `Strings of string list ]
+    -> ?shellPath:string
+    -> ?shellArgs:[ `String of string | `Strings of string list ]
     -> unit
     -> Terminal.t
 
-  val create_terminal_from_options :
+  val createTerminalFromOptions :
        options:
          [ `TerminalOptions of TerminalOptions.t
          | `ExtensionTerminalOptions of ExtensionTerminalOptions.t
          ]
     -> Terminal.t
 
-  val create_output_channel : name:string -> OutputChannel.t
+  val createOutputChannel : name:string -> OutputChannel.t
 end
 
 module Commands : sig
-  val register_command :
+  val registerCommand :
     command:string -> callback:(args:Ojs.t list -> unit) -> Disposable.t
 
-  val register_text_editor_command :
+  val registerTextEditorCommand :
        command:string
     -> callback:
-         (   text_editor:TextEditor.t
+         (   textEditor:TextEditor.t
           -> edit:TextEditorEdit.t
           -> args:Ojs.t list
           -> unit)
     -> Disposable.t
 
-  val execute_command :
+  val executeCommand :
     command:string -> args:Ojs.t list -> Ojs.t option Promise.t
 
-  val get_commands : ?filter_internal:bool -> unit -> string list Promise.t
+  val getCommands : ?filterInternal:bool -> unit -> string list Promise.t
 end
 
 module Languages : sig
-  val register_document_formatting_edit_provider :
+  val registerDocumentFormattingEditProvider :
        selector:DocumentSelector.t
     -> provider:DocumentFormattingEditProvider.t
     -> Disposable.t
 end
 
 module Tasks : sig
-  val register_task_provider :
+  val registerTaskProvider :
     type_:string -> provider:TaskProvider.t -> Disposable.t
 end
 

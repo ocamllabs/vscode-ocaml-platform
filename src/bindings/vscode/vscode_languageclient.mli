@@ -31,12 +31,12 @@ module InitializeResult : sig
 
   val capabilities : t -> ServerCapabilities.t
 
-  type server_info =
+  type serverInfo =
     { name : string
     ; version : string option
     }
 
-  val server_info : t -> server_info option
+  val serverInfo : t -> serverInfo option
 end
 
 module DocumentFilter : sig
@@ -52,13 +52,13 @@ module DocumentFilter : sig
 
   val pattern : t -> string option
 
-  val create_language :
+  val createLanguage :
     language:string -> ?scheme:string -> ?pattern:string -> unit -> t
 
-  val create_scheme :
+  val createScheme :
     ?language:string -> scheme:string -> ?pattern:string -> unit -> t
 
-  val create_pattern :
+  val createPattern :
     ?language:string -> ?scheme:string -> pattern:string -> unit -> t
 end
 
@@ -84,16 +84,16 @@ module ClientOptions : sig
 
   val t_to_js : t -> Ojs.t
 
-  val document_selector : t -> DocumentSelector.t option
+  val documentSelector : t -> DocumentSelector.t option
 
-  val output_channel : t -> Vscode_core.OutputChannel.t option
+  val outputChannel : t -> Vscode_core.OutputChannel.t option
 
-  val reveal_output_channel_on : t -> RevealOutputChannelOn.t
+  val revealOutputChannelOn : t -> RevealOutputChannelOn.t
 
   val create :
-       ?document_selector:DocumentSelector.t
-    -> ?output_channel:Vscode_core.OutputChannel.t
-    -> ?reveal_output_channel_on:RevealOutputChannelOn.t
+       ?documentSelector:DocumentSelector.t
+    -> ?outputChannel:Vscode_core.OutputChannel.t
+    -> ?revealOutputChannelOn:RevealOutputChannelOn.t
     -> unit
     -> t
 end
@@ -155,9 +155,9 @@ module LanguageClient : sig
   val make :
        id:string
     -> name:string
-    -> server_options:ServerOptions.t
-    -> client_options:ClientOptions.t
-    -> ?force_debug:bool
+    -> serverOptions:ServerOptions.t
+    -> clientOptions:ClientOptions.t
+    -> ?forceDebug:bool
     -> unit
     -> t
 
@@ -165,13 +165,13 @@ module LanguageClient : sig
 
   val stop : t -> unit
 
-  val on_ready : t -> Promise.void
+  val onReady : t -> Promise.void
 
-  val initialize_result : t -> InitializeResult.t
+  val initializeResult : t -> InitializeResult.t
 
-  val ready_initialize_result : t -> InitializeResult.t Promise.t
+  val readyInitializeResult : t -> InitializeResult.t Promise.t
 
-  val send_request :
+  val sendRequest :
        t
     -> meth:string
     -> data:Jsonoo.t

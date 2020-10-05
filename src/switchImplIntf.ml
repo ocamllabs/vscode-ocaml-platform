@@ -2,11 +2,11 @@ open Import
 
 let sendSwitchImplIntfRequest client document : string array Promise.t =
   let data =
-    Uri.to_string (TextDocument.uri document) ~skip_encoding:true ()
+    Uri.toString (TextDocument.uri document) ~skipEncoding:true ()
     |> Jsonoo.Encode.string
   in
   let open Promise.Syntax in
-  LanguageClient.send_request client ~meth:"ocamllsp/switchImplIntf" ~data ()
+  LanguageClient.sendRequest client ~meth:"ocamllsp/switchImplIntf" ~data ()
   >>| Jsonoo.Decode.(array string)
 
 (* given a file uri, opens the file if it exists;
@@ -14,13 +14,13 @@ let sendSwitchImplIntfRequest client document : string array Promise.t =
 let showFile targetFileName =
   let open Promise.Syntax in
   let uri = Uri.parse targetFileName () in
-  Workspace.open_text_document (`Uri uri)
+  Workspace.openTextDocument (`Uri uri)
   |> Promise.catch ~rejected:(fun _ ->
          (* if file does not exist *)
          let createFileUri = Uri.with_ uri ~scheme:"untitled" () in
-         Workspace.open_text_document (`Uri createFileUri))
+         Workspace.openTextDocument (`Uri createFileUri))
   >>= fun doc ->
-  Window.show_text_document ~document:(`TextDocument doc) () >>| fun _ -> ()
+  Window.showTextDocument ~document:(`TextDocument doc) () >>| fun _ -> ()
 
 let requestSwitch client document =
   let open Promise.Syntax in
@@ -48,12 +48,12 @@ let requestSwitch client document =
     in
 
     let file_options =
-      QuickPickOptions.create ~can_pick_many:false
-        ~place_holder:"Open a file..." ()
+      QuickPickOptions.create ~canPickMany:false ~placeHolder:"Open a file..."
+        ()
     in
 
     let open Promise.Syntax in
-    Window.show_quick_pick_items ~choices:candidateItemsWithNames
+    Window.showQuickPickItems ~choices:candidateItemsWithNames
       ~options:file_options ()
     >>= function
     | None -> Promise.return ()

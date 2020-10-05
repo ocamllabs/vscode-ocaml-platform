@@ -1,18 +1,16 @@
 open Import
 
 let getFormatter toolchain ~document ~options:_ ~token:_ =
-  let end_line = TextDocument.line_count document - 1 in
-  let end_character =
-    TextDocument.line_at document ~line:end_line
-    |> TextLine.text |> String.length
+  let endLine = TextDocument.lineCount document - 1 in
+  let endCharacter =
+    TextDocument.lineAt document ~line:endLine |> TextLine.text |> String.length
   in
   (* selects entire document range *)
   let range =
-    Range.make_coordinates ~start_line:0 ~start_character:0 ~end_line
-      ~end_character
+    Range.makeCoordinates ~startLine:0 ~startCharacter:0 ~endLine ~endCharacter
   in
   (* text of entire document *)
-  let documentText = TextDocument.get_text document ~range () in
+  let documentText = TextDocument.getText document ~range () in
   let command = Toolchain.getDuneCommand toolchain [ "format-dune-file" ] in
   let output =
     let open Promise.Result.Syntax in
@@ -21,7 +19,7 @@ let getFormatter toolchain ~document ~options:_ ~token:_ =
   let open Promise.Syntax in
   `Promise
     (output >>| function
-     | Ok new_text -> Some [ TextEdit.replace ~range ~new_text ]
+     | Ok newText -> Some [ TextEdit.replace ~range ~newText ]
      | Error msg ->
        message `Error "Dune formatting failed: %s" msg;
        Some [])
@@ -39,10 +37,9 @@ let register t toolchain =
            in
            let provider =
              DocumentFormattingEditProvider.create
-               ~provide_document_formatting_edits:(getFormatter toolchain)
+               ~provideDocumentFormattingEdits:(getFormatter toolchain)
            in
-           Languages.register_document_formatting_edit_provider ~selector
-             ~provider)
+           Languages.registerDocumentFormattingEditProvider ~selector ~provider)
 
 let dispose t =
   List.iter Disposable.dispose !t;

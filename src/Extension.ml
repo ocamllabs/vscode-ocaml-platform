@@ -12,7 +12,7 @@ let switchImplIntfCommandId = "ocaml.switch-impl-intf"
 
 module Client = struct
   let make () : LanguageClient.ClientOptions.t =
-    let document_selector =
+    let documentSelector =
       LanguageClient.DocumentSelector.
         [| language "ocaml"
          ; language "ocaml.interface"
@@ -21,10 +21,10 @@ module Client = struct
          ; language "reason"
         |]
     in
-    let (lazy output_channel) = Output.languageServerOutputChannel in
-    let reveal_output_channel_on = LanguageClient.RevealOutputChannelOn.Never in
-    LanguageClient.ClientOptions.create ~document_selector ~output_channel
-      ~reveal_output_channel_on ()
+    let (lazy outputChannel) = Output.languageServerOutputChannel in
+    let revealOutputChannelOn = LanguageClient.RevealOutputChannelOn.Never in
+    LanguageClient.ClientOptions.create ~documentSelector ~outputChannel
+      ~revealOutputChannelOn ()
 end
 
 module Server = struct
@@ -87,7 +87,7 @@ module Instance = struct
     DuneTaskProvider.register t.duneTaskProvider toolchain;
 
     let statusBarItem =
-      Window.create_status_bar_item ~alignment:StatusBarAlignment.Left ()
+      Window.createStatusBarItem ~alignment:StatusBarAlignment.Left ()
     in
     let packageManager = Toolchain.packageManager toolchain in
     let statusBarText =
@@ -105,17 +105,17 @@ module Instance = struct
 
     let open Promise.Result.Syntax in
     Toolchain.runSetup toolchain >>= fun () ->
-    let server_options = Server.make toolchain in
-    let client_options = Client.make () in
+    let serverOptions = Server.make toolchain in
+    let clientOptions = Client.make () in
     let client =
       LanguageClient.make ~id:"ocaml" ~name:"OCaml Language Server"
-        ~server_options ~client_options ()
+        ~serverOptions ~clientOptions ()
     in
     t.client <- Some client;
     LanguageClient.start client;
 
     let open Promise.Syntax in
-    LanguageClient.ready_initialize_result client >>| fun initializeResult ->
+    LanguageClient.readyInitializeResult client >>| fun initializeResult ->
     let ocamlLsp = OcamlLsp.ofInitializeResult initializeResult in
     t.ocamlLspCapabilities <- Some ocamlLsp;
     if
@@ -187,7 +187,7 @@ let openTerminal (instance : Instance.t) () =
 let switchImplIntf (instance : Instance.t) () =
   let trySwitching () =
     let open Core_kernel.Option.Monad_infix in
-    Window.active_text_editor () >>| TextEditor.document >>= fun document ->
+    Window.activeTextEditor () >>| TextEditor.document >>= fun document ->
     instance.client >>= fun client ->
     (* extension needs to be activated; otherwise, just ignore the switch try *)
     instance.ocamlLspCapabilities >>| fun ocamlLsp ->
@@ -206,7 +206,7 @@ let switchImplIntf (instance : Instance.t) () =
 
 let suggestToSetupToolchain instance =
   let open Promise.Syntax in
-  Window.show_information_message
+  Window.showInformationMessage
     ~message:
       "Extension is unable to find ocamllsp automatically. Please select \
        package manager you used to install ocamllsp for this project."
@@ -220,7 +220,7 @@ let registerCommands extension =
   List.iter (function command, callback ->
       let callback ~args:_ = callback () in
       ExtensionContext.subscribe extension
-        ~disposable:(Commands.register_command ~command ~callback))
+        ~disposable:(Commands.registerCommand ~command ~callback))
 
 let activate (extension : ExtensionContext.t) =
   Process.set_env "OCAML_LSP_SERVER_LOG" "-";
