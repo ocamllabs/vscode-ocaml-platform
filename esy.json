@@ -1,6 +1,6 @@
 {
   "esy": {
-    "build": "make build",
+    "build": "dune build @vscode",
     "buildsInSource": "_build"
   },
   "dependencies": {

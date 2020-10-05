@@ -2,11 +2,11 @@ OCAML_SRCFILES = $(shell git ls-files "*.ml" "*.mli")
 REASON_SRCFILES = $(shell git ls-files "*.re" "*.rei")
 
 build:
-	dune build src/extension.bc.js
+	dune build @vscode
 .PHONY: build
 
 watch:
-	dune build -w src/extension.bc.js
+	dune build @vscode -w
 .PHONY: watch
 
 clean:
