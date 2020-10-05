@@ -10,41 +10,36 @@ let openTerminalSelectCommandId = "ocaml.open-terminal-select"
 
 let switchImplIntfCommandId = "ocaml.switch-impl-intf"
 
-module Client = struct
-  let make () : LanguageClient.ClientOptions.t =
-    let documentSelector =
-      LanguageClient.DocumentSelector.
-        [| language "ocaml"
-         ; language "ocaml.interface"
-         ; language "ocaml.ocamllex"
-         ; language "ocaml.menhir"
-         ; language "reason"
-        |]
-    in
-    let (lazy outputChannel) = Output.languageServerOutputChannel in
-    let revealOutputChannelOn = LanguageClient.RevealOutputChannelOn.Never in
-    LanguageClient.ClientOptions.create ~documentSelector ~outputChannel
-      ~revealOutputChannelOn ()
-end
+let clientOptions () : LanguageClient.ClientOptions.t =
+  let documentSelector =
+    LanguageClient.DocumentSelector.
+      [| language "ocaml"
+       ; language "ocaml.interface"
+       ; language "ocaml.ocamllex"
+       ; language "ocaml.menhir"
+       ; language "reason"
+      |]
+  in
+  let (lazy outputChannel) = Output.languageServerOutputChannel in
+  let revealOutputChannelOn = LanguageClient.RevealOutputChannelOn.Never in
+  LanguageClient.ClientOptions.create ~documentSelector ~outputChannel
+    ~revealOutputChannelOn ()
 
-module Server = struct
-  let make (toolchain : Toolchain.resources) : LanguageClient.ServerOptions.t =
-    let command = Toolchain.getLspCommand toolchain in
-    Cmd.log command;
-    let env = Process.Env.as_map () in
-    match command with
-    | Shell command ->
-      let options =
-        LanguageClient.ExecutableOptions.create ~env ~shell:true ()
-      in
-      LanguageClient.Executable.create ~command ~options ()
-    | Spawn { bin; args } ->
-      let command = Path.toString bin in
-      let options =
-        LanguageClient.ExecutableOptions.create ~env ~shell:false ()
-      in
-      LanguageClient.Executable.create ~command ~args ~options ()
-end
+let serverOptions (toolchain : Toolchain.resources) :
+    LanguageClient.ServerOptions.t =
+  let command = Toolchain.getLspCommand toolchain in
+  Cmd.log command;
+  let env = Process.Env.as_map () in
+  match command with
+  | Shell command ->
+    let options = LanguageClient.ExecutableOptions.create ~env ~shell:true () in
+    LanguageClient.Executable.create ~command ~options ()
+  | Spawn { bin; args } ->
+    let command = Path.toString bin in
+    let options =
+      LanguageClient.ExecutableOptions.create ~env ~shell:false ()
+    in
+    LanguageClient.Executable.create ~command ~args ~options ()
 
 module Instance = struct
   type t =
@@ -105,8 +100,8 @@ module Instance = struct
 
     let open Promise.Result.Syntax in
     Toolchain.runSetup toolchain >>= fun () ->
-    let serverOptions = Server.make toolchain in
-    let clientOptions = Client.make () in
+    let serverOptions = serverOptions toolchain in
+    let clientOptions = clientOptions () in
     let client =
       LanguageClient.make ~id:"ocaml" ~name:"OCaml Language Server"
         ~serverOptions ~clientOptions ()
