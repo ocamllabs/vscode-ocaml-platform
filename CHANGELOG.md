@@ -4,6 +4,7 @@
 
 - Replace "Switch implementation/interface" navigator button with a custom icon
   (#383)
+- Add `Alt + D` keyboard shortcut for destruct code action (#384)
 
 ## 1.2.0
 
