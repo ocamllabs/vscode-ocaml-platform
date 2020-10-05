@@ -77,13 +77,13 @@ module ClientOptions = struct
 
   val document_selector : t -> DocumentSelector.t or_undefined [@@js.get]
 
-  val output_channel : t -> Vscode__core.OutputChannel.t or_undefined [@@js.get]
+  val output_channel : t -> Vscode_core.OutputChannel.t or_undefined [@@js.get]
 
   val reveal_output_channel_on : t -> RevealOutputChannelOn.t [@@js.get]
 
   val create :
        ?document_selector:DocumentSelector.t
-    -> ?output_channel:Vscode__core.OutputChannel.t
+    -> ?output_channel:Vscode_core.OutputChannel.t
     -> ?reveal_output_channel_on:RevealOutputChannelOn.t
     -> unit
     -> t
@@ -160,7 +160,7 @@ module LanguageClient = struct
        t
     -> meth:string
     -> data:Jsonoo.t
-    -> ?token:Vscode__core.CancellationToken.t
+    -> ?token:Vscode_core.CancellationToken.t
     -> unit
     -> Jsonoo.t Promise.t
     [@@js.call]

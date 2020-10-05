@@ -86,13 +86,13 @@ module ClientOptions : sig
 
   val document_selector : t -> DocumentSelector.t option
 
-  val output_channel : t -> Vscode__core.OutputChannel.t option
+  val output_channel : t -> Vscode_core.OutputChannel.t option
 
   val reveal_output_channel_on : t -> RevealOutputChannelOn.t
 
   val create :
        ?document_selector:DocumentSelector.t
-    -> ?output_channel:Vscode__core.OutputChannel.t
+    -> ?output_channel:Vscode_core.OutputChannel.t
     -> ?reveal_output_channel_on:RevealOutputChannelOn.t
     -> unit
     -> t
@@ -175,7 +175,7 @@ module LanguageClient : sig
        t
     -> meth:string
     -> data:Jsonoo.t
-    -> ?token:Vscode__core.CancellationToken.t
+    -> ?token:Vscode_core.CancellationToken.t
     -> unit
     -> Jsonoo.t Promise.t
 end

@@ -1,0 +1,5 @@
+(library
+ (name interop)
+ (modules interop)
+ (libraries core_kernel js_of_ocaml gen_js_api)
+ (modes byte))
