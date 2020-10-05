@@ -67,6 +67,14 @@
         "command": "ocaml.switch-impl-intf",
         "key": "Alt+O",
         "when": "editorLangId  == ocaml || editorLangId  == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir"
+      },
+      {
+        "command": "editor.action.codeAction",
+        "key": "Alt+D",
+        "args": {
+          "kind": "destruct"
+        },
+        "when": "editorLangId  == ocaml || editorLangId == reason"
       }
     ],
     "menus": {
