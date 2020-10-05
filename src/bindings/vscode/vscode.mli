@@ -1070,7 +1070,7 @@ module TerminalOptions : sig
 
   val cwd : t -> cwd option
 
-  val env : t -> (string, string option) Core_kernel.Hashtbl.t option
+  val env : t -> (string, string option) Core_kernel.Map.Poly.t option
 
   val strictEnv : t -> bool
 
@@ -1355,14 +1355,14 @@ module ShellExecutionOptions : sig
 
   val cwd : t -> string option
 
-  val env : t -> (string, string) Core_kernel.Hashtbl.t option
+  val env : t -> (string, string) Core_kernel.Map.Poly.t option
 
   val create :
        ?executable:string
     -> ?shellArgs:string list
     -> ?shellQuoting:ShellQuotingOptions.t
     -> ?cwd:string
-    -> ?env:(string, string) Core_kernel.Hashtbl.t
+    -> ?env:(string, string) Core_kernel.Map.Poly.t
     -> unit
     -> t
 end
@@ -1432,10 +1432,10 @@ module ProcessExecutionOptions : sig
 
   val cwd : t -> string option
 
-  val env : t -> (string, string) Core_kernel.Hashtbl.t option
+  val env : t -> (string, string) Core_kernel.Map.Poly.t option
 
   val create :
-    ?cwd:string -> ?env:(string, string) Core_kernel.Hashtbl.t -> unit -> t
+    ?cwd:string -> ?env:(string, string) Core_kernel.Map.Poly.t -> unit -> t
 end
 
 module ProcessExecution : sig

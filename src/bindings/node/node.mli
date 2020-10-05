@@ -3,9 +3,13 @@ module Process : sig
 
   val platform : string
 
-  val env : unit -> (string, string) Core_kernel.Hashtbl.t
+  module Env : sig
+    val get : string -> string option
 
-  val set_env : string -> string -> unit
+    val set : string -> string -> unit
+
+    val as_map : unit -> (string, string) Core_kernel.Map.Poly.t
+  end
 end
 
 module JsError : sig
@@ -59,7 +63,7 @@ module ChildProcess : sig
     type t
 
     val create :
-      ?cwd:string -> ?env:(string, string) Core_kernel.Hashtbl.t -> unit -> t
+      ?cwd:string -> ?env:(string, string) Core_kernel.Map.Poly.t -> unit -> t
   end
 
   type return =

@@ -35,25 +35,24 @@ module Regexp = struct
   let t_of_js : Ojs.t -> Js_of_ocaml.Regexp.regexp = Obj.magic
 end
 
-module Dict = struct
+module JsDict = struct
   open Core_kernel
 
-  type 'a t = (string, 'a) Hashtbl.t
+  type 'a t = (string, 'a) Map.Poly.t
 
-  let t_to_js to_js tbl =
+  let t_to_js to_js m =
     let obj = Ojs.empty_obj () in
     let set ~key ~data = Ojs.set obj key (to_js data) in
-    Hashtbl.iteri tbl ~f:set;
+    Map.iteri ~f:set m;
     obj
 
   let t_of_js of_js obj =
-    let count = ref 0 in
-    Ojs.iter_properties obj (fun (_ : string) -> count := !count + 1);
-    let tbl = Hashtbl.Poly.create () in
-    let set key =
-      let data = of_js (Ojs.get obj key) in
-      Hashtbl.add_exn tbl ~key ~data
+    let iteri ~f =
+      Ojs.iter_properties obj (fun key ->
+          let data = of_js (Ojs.get obj key) in
+          f ~key ~data)
     in
-    Ojs.iter_properties obj set;
-    tbl
+    match Map.Poly.of_iteri ~iteri with
+    | `Ok m -> m
+    | `Duplicate_key _ -> assert false
 end

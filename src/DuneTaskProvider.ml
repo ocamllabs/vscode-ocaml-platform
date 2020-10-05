@@ -12,10 +12,7 @@ let problemMatchers = [ "$ocamlc" ]
 
 (* the ocamlc matcher is not able to parse ocaml compiler errors unless they
    follow the short style. *)
-let env =
-  Core_kernel.Hashtbl.of_alist_exn
-    (module Core_kernel.String)
-    [ ("OCAML_ERROR_STYLE", "short") ]
+let env = Core_kernel.Map.Poly.of_alist_exn [ ("OCAML_ERROR_STYLE", "short") ]
 
 module Setting = struct
   type t = bool

@@ -107,7 +107,7 @@ module ExecutableOptions : sig
 
   val cwd : t -> string option
 
-  val env : t -> (string, string) Core_kernel.Hashtbl.t option
+  val env : t -> (string, string) Core_kernel.Map.Poly.t option
 
   val detached : t -> bool option
 
@@ -115,7 +115,7 @@ module ExecutableOptions : sig
 
   val create :
        ?cwd:string
-    -> ?env:(string, string) Core_kernel.Hashtbl.t
+    -> ?env:(string, string) Core_kernel.Map.Poly.t
     -> ?detached:bool
     -> ?shell:bool
     -> unit

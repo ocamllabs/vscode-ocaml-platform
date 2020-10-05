@@ -5,10 +5,15 @@ module Process = struct
 
   val platform : string [@@js.global "process.platform"]
 
-  val env : unit -> string Dict.t [@@js.get "process.env"]
+  module Env = struct
+    val env : Ojs.t [@@js.global "process.env"]
 
-  let set_env key value =
-    Ojs.set (Ojs.variable "process") key (Ojs.string_to_js value)
+    let get k = or_undefined_of_js Ojs.string_of_js (Ojs.get env k)
+
+    let set k v = Ojs.set env k (Ojs.string_to_js v)
+
+    let as_map () = JsDict.t_of_js Ojs.string_of_js env
+  end
 end
 
 module JsError = struct
@@ -72,7 +77,7 @@ module ChildProcess = struct
   module Options = struct
     type t = private Ojs.t [@@js]
 
-    val create : ?cwd:string -> ?env:string Dict.t -> unit -> t [@@js.builder]
+    val create : ?cwd:string -> ?env:string JsDict.t -> unit -> t [@@js.builder]
   end
 
   type exec_result = private Ojs.t [@@js]

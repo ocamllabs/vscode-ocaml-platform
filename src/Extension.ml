@@ -31,7 +31,7 @@ module Server = struct
   let make (toolchain : Toolchain.resources) : LanguageClient.ServerOptions.t =
     let command = Toolchain.getLspCommand toolchain in
     Cmd.log command;
-    let env = Process.env () in
+    let env = Process.Env.as_map () in
     match command with
     | Shell command ->
       let options =
@@ -223,7 +223,7 @@ let registerCommands extension =
         ~disposable:(Commands.registerCommand ~command ~callback))
 
 let activate (extension : ExtensionContext.t) =
-  Process.set_env "OCAML_LSP_SERVER_LOG" "-";
+  Process.Env.set "OCAML_LSP_SERVER_LOG" "-";
   let instance = Instance.create () in
   registerCommands extension
     [ (selectSandboxCommandId, selectSandbox instance)
