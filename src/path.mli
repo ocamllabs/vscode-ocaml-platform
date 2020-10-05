@@ -2,15 +2,13 @@
 
 type t
 
-val ofString : string -> t
+val of_string : string -> t
 
-val isAbsolute : t -> bool
+val to_string : t -> string
 
-val v : string -> t
+val is_absolute : t -> bool
 
 val compare : t -> t -> int
-
-val toString : t -> string
 
 val dirname : t -> string
 
@@ -26,8 +24,8 @@ val relative_all : t -> string list -> t
 
 val join : t -> t -> t
 
-val withExt : t -> ext:string -> t
+val with_ext : t -> ext:string -> t
 
 val parent : t -> t option
 
-val isRoot : t -> bool
+val is_root : t -> bool

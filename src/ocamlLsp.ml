@@ -7,19 +7,20 @@ type t =
 
 let default = { interfaceSpecificLangId = false; handleSwitchImplIntf = false }
 
-let defaultField key decode default json =
+let default_field key decode default json =
   let open Jsonoo.Decode in
   try_default default (field key decode) json
 
-let ofJson (json : Jsonoo.t) =
+let of_json (json : Jsonoo.t) =
   let open Jsonoo.Decode in
   try
     let interfaceSpecificLangId =
-      defaultField "interfaceSpecificLangId" bool
+      default_field "interfaceSpecificLangId" bool
         default.interfaceSpecificLangId json
     in
     let handleSwitchImplIntf =
-      defaultField "handleSwitchImplIntf" bool default.handleSwitchImplIntf json
+      default_field "handleSwitchImplIntf" bool default.handleSwitchImplIntf
+        json
     in
     { interfaceSpecificLangId; handleSwitchImplIntf }
   with Jsonoo.Decode_error _ ->
@@ -28,12 +29,12 @@ let ofJson (json : Jsonoo.t) =
        might be missing";
     default
 
-let ofInitializeResult (t : LanguageClient.InitializeResult.t) =
+let of_initialize_result (t : LanguageClient.InitializeResult.t) =
   let open LanguageClient in
   match ServerCapabilities.experimental (InitializeResult.capabilities t) with
   | None -> default
   | Some json -> (
-    match Jsonoo.Decode.field "ocamllsp" ofJson json with
+    match Jsonoo.Decode.field "ocamllsp" of_json json with
     | s -> s
     | exception Jsonoo.Decode_error _ -> default )
 

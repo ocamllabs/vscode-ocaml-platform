@@ -1,6 +1,6 @@
 open Import
 
-let getFormatter toolchain ~document ~options:_ ~token:_ =
+let get_formatter toolchain ~document ~options:_ ~token:_ =
   let endLine = TextDocument.lineCount document - 1 in
   let endCharacter =
     TextDocument.lineAt document ~line:endLine |> TextLine.text |> String.length
@@ -10,11 +10,11 @@ let getFormatter toolchain ~document ~options:_ ~token:_ =
     Range.makeCoordinates ~startLine:0 ~startCharacter:0 ~endLine ~endCharacter
   in
   (* text of entire document *)
-  let documentText = TextDocument.getText document ~range () in
-  let command = Toolchain.getDuneCommand toolchain [ "format-dune-file" ] in
+  let document_text = TextDocument.getText document ~range () in
+  let command = Toolchain.get_dune_command toolchain [ "format-dune-file" ] in
   let output =
     let open Promise.Result.Syntax in
-    Cmd.check command >>= fun command -> Cmd.output ~stdin:documentText command
+    Cmd.check command >>= fun command -> Cmd.output ~stdin:document_text command
   in
   let open Promise.Syntax in
   `Promise
@@ -37,7 +37,7 @@ let register t toolchain =
            in
            let provider =
              DocumentFormattingEditProvider.create
-               ~provideDocumentFormattingEdits:(getFormatter toolchain)
+               ~provideDocumentFormattingEdits:(get_formatter toolchain)
            in
            Languages.registerDocumentFormattingEditProvider ~selector ~provider)
 

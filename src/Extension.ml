@@ -1,16 +1,16 @@
 open Import
 
-let selectSandboxCommandId = "ocaml.select-sandbox"
+let select_sandbox_command_id = "ocaml.select-sandbox"
 
-let restartCommandId = "ocaml.server.restart"
+let restart_command_id = "ocaml.server.restart"
 
-let openTerminalCommandId = "ocaml.open-terminal"
+let open_terminal_command_id = "ocaml.open-terminal"
 
-let openTerminalSelectCommandId = "ocaml.open-terminal-select"
+let open_terminal_select_command_id = "ocaml.open-terminal-select"
 
-let switchImplIntfCommandId = "ocaml.switch-impl-intf"
+let switch_impl_intf_command_id = "ocaml.switch-impl-intf"
 
-let clientOptions () : LanguageClient.ClientOptions.t =
+let client_options () : LanguageClient.ClientOptions.t =
   let documentSelector =
     LanguageClient.DocumentSelector.
       [| language "ocaml"
@@ -20,14 +20,14 @@ let clientOptions () : LanguageClient.ClientOptions.t =
        ; language "reason"
       |]
   in
-  let (lazy outputChannel) = Output.languageServerOutputChannel in
+  let (lazy outputChannel) = Output.language_server_output_channel in
   let revealOutputChannelOn = LanguageClient.RevealOutputChannelOn.Never in
   LanguageClient.ClientOptions.create ~documentSelector ~outputChannel
     ~revealOutputChannelOn ()
 
-let serverOptions (toolchain : Toolchain.resources) :
+let server_options (toolchain : Toolchain.resources) :
     LanguageClient.ServerOptions.t =
-  let command = Toolchain.getLspCommand toolchain in
+  let command = Toolchain.get_lsp_command toolchain in
   Cmd.log command;
   let env = Process.Env.as_map () in
   match command with
@@ -35,7 +35,7 @@ let serverOptions (toolchain : Toolchain.resources) :
     let options = LanguageClient.ExecutableOptions.create ~env ~shell:true () in
     LanguageClient.Executable.create ~command ~options ()
   | Spawn { bin; args } ->
-    let command = Path.toString bin in
+    let command = Path.to_string bin in
     let options =
       LanguageClient.ExecutableOptions.create ~env ~shell:false ()
     in
@@ -45,63 +45,64 @@ module Instance = struct
   type t =
     { mutable toolchain : Toolchain.resources option
     ; mutable client : LanguageClient.t option
-    ; mutable ocamlLspCapabilities : OcamlLsp.t option
-    ; mutable statusBarItem : StatusBarItem.t option
-    ; duneFormatter : DuneFormatter.t
-    ; duneTaskProvider : DuneTaskProvider.t
+    ; mutable ocaml_lsp_capabilities : OcamlLsp.t option
+    ; mutable status_bar_item : StatusBarItem.t option
+    ; dune_formatter : DuneFormatter.t
+    ; dune_task_provider : DuneTaskProvider.t
     }
 
   let create () =
     { toolchain = None
     ; client = None
-    ; ocamlLspCapabilities = None
-    ; statusBarItem = None
-    ; duneFormatter = DuneFormatter.create ()
-    ; duneTaskProvider = DuneTaskProvider.create ()
+    ; ocaml_lsp_capabilities = None
+    ; status_bar_item = None
+    ; dune_formatter = DuneFormatter.create ()
+    ; dune_task_provider = DuneTaskProvider.create ()
     }
 
   let stop t =
-    DuneFormatter.dispose t.duneFormatter;
-    DuneTaskProvider.dispose t.duneTaskProvider;
+    DuneFormatter.dispose t.dune_formatter;
+    DuneTaskProvider.dispose t.dune_task_provider;
 
-    Core_kernel.Option.iter t.statusBarItem ~f:(fun statusBarItem ->
-        StatusBarItem.dispose statusBarItem;
-        t.statusBarItem <- None);
+    Core_kernel.Option.iter t.status_bar_item ~f:(fun status_bar_item ->
+        StatusBarItem.dispose status_bar_item;
+        t.status_bar_item <- None);
 
     Core_kernel.Option.iter t.client ~f:(fun client ->
         LanguageClient.stop client;
         t.client <- None);
 
-    t.ocamlLspCapabilities <- None;
+    t.ocaml_lsp_capabilities <- None;
     t.toolchain <- None
 
   let start t toolchain =
     t.toolchain <- Some toolchain;
 
-    DuneFormatter.register t.duneFormatter toolchain;
-    DuneTaskProvider.register t.duneTaskProvider toolchain;
+    DuneFormatter.register t.dune_formatter toolchain;
+    DuneTaskProvider.register t.dune_task_provider toolchain;
 
-    let statusBarItem =
+    let status_bar_item =
       Window.createStatusBarItem ~alignment:StatusBarAlignment.Left ()
     in
-    let packageManager = Toolchain.packageManager toolchain in
-    let statusBarText =
-      let packageIcon =
+    let package_manager = Toolchain.package_manager toolchain in
+    let status_bar_text =
+      let package_icon =
         "$(package)"
         (* see https://code.visualstudio.com/api/references/icons-in-labels *)
       in
-      Printf.sprintf "%s %s" packageIcon
-      @@ Toolchain.PackageManager.toPrettyString packageManager
+      Printf.sprintf "%s %s" package_icon
+      @@ Toolchain.PackageManager.to_pretty_string package_manager
     in
-    StatusBarItem.set_text statusBarItem statusBarText;
-    StatusBarItem.set_command statusBarItem (`String selectSandboxCommandId);
-    StatusBarItem.show statusBarItem;
-    t.statusBarItem <- Some statusBarItem;
+    StatusBarItem.set_text status_bar_item status_bar_text;
+    StatusBarItem.set_command status_bar_item
+      (`String select_sandbox_command_id);
+    StatusBarItem.show status_bar_item;
+    t.status_bar_item <- Some status_bar_item;
 
     let open Promise.Result.Syntax in
-    Toolchain.runSetup toolchain >>= fun () ->
-    let serverOptions = serverOptions toolchain in
-    let clientOptions = clientOptions () in
+    Toolchain.run_setup toolchain >>= fun () ->
+    let serverOptions = server_options toolchain in
+    let clientOptions = client_options () in
     let client =
       LanguageClient.make ~id:"ocaml" ~name:"OCaml Language Server"
         ~serverOptions ~clientOptions ()
@@ -110,9 +111,9 @@ module Instance = struct
     LanguageClient.start client;
 
     let open Promise.Syntax in
-    LanguageClient.readyInitializeResult client >>| fun initializeResult ->
-    let ocamlLsp = OcamlLsp.ofInitializeResult initializeResult in
-    t.ocamlLspCapabilities <- Some ocamlLsp;
+    LanguageClient.readyInitializeResult client >>| fun initialize_result ->
+    let ocamlLsp = OcamlLsp.of_initialize_result initialize_result in
+    t.ocaml_lsp_capabilities <- Some ocamlLsp;
     if
       (not (OcamlLsp.interfaceSpecificLangId ocamlLsp))
       || not (OcamlLsp.canHandleSwitchImplIntf ocamlLsp)
@@ -124,7 +125,7 @@ module Instance = struct
          Consider updating ocamllsp.";
     Ok ()
 
-  let openTerminal toolchain =
+  let open_terminal toolchain =
     let open Core_kernel.Option.Monad_infix in
     match toolchain |> TerminalSandbox.create >>| TerminalSandbox.show with
     | Some _ -> ()
@@ -136,59 +137,59 @@ module Instance = struct
   let disposable t = Disposable.make ~dispose:(fun () -> stop t)
 end
 
-let selectSandbox (instance : Instance.t) () =
-  let setToolchain =
+let select_sandbox (instance : Instance.t) () =
+  let set_toolchain =
     let open Promise.Syntax in
-    Toolchain.selectAndSave () >>= function
+    Toolchain.select_and_save () >>= function
     | None -> Promise.Result.return ()
     | Some t ->
       Instance.stop instance;
-      let t = Toolchain.makeResources t in
+      let t = Toolchain.make_resources t in
       Instance.start instance t
   in
   let (_ : unit Promise.t) =
-    Promise.Result.iter setToolchain ~error:(message `Error "%s")
+    Promise.Result.iter set_toolchain ~error:(message `Error "%s")
   in
   ()
 
-let restartInstance (instance : Instance.t) () =
+let restart_instance (instance : Instance.t) () =
   let (_ : unit Promise.t) =
     let open Promise.Syntax in
-    Toolchain.ofSettings () >>= function
+    Toolchain.of_settings () >>= function
     | None ->
-      selectSandbox instance ();
+      select_sandbox instance ();
       Promise.return ()
     | Some toolchain ->
       Instance.stop instance;
-      Instance.start instance (Toolchain.makeResources toolchain)
+      Instance.start instance (Toolchain.make_resources toolchain)
       |> Promise.Result.iter ~error:(message `Error "%s")
   in
   ()
 
-let selectSandboxAndOpenTerminal () =
+let select_sandbox_and_open_terminal () =
   let (_ : unit Promise.t) =
     Toolchain.select ()
     |> Promise.Option.iter (fun toolchain ->
-           let toolchain = Toolchain.makeResources toolchain in
-           Instance.openTerminal toolchain)
+           let toolchain = Toolchain.make_resources toolchain in
+           Instance.open_terminal toolchain)
   in
   ()
 
-let openTerminal (instance : Instance.t) () =
+let open_terminal (instance : Instance.t) () =
   match instance.toolchain with
-  | None -> selectSandboxAndOpenTerminal ()
-  | Some toolchain -> Instance.openTerminal toolchain
+  | None -> select_sandbox_and_open_terminal ()
+  | Some toolchain -> Instance.open_terminal toolchain
 
-let switchImplIntf (instance : Instance.t) () =
-  let trySwitching () =
+let switch_impl_intf (instance : Instance.t) () =
+  let try_switching () =
     let open Core_kernel.Option.Monad_infix in
     Window.activeTextEditor () >>| TextEditor.document >>= fun document ->
     instance.client >>= fun client ->
     (* extension needs to be activated; otherwise, just ignore the switch try *)
-    instance.ocamlLspCapabilities >>| fun ocamlLsp ->
+    instance.ocaml_lsp_capabilities >>| fun ocamlLsp ->
     (* same as for instance.client; ignore the try if it's None *)
     if OcamlLsp.canHandleSwitchImplIntf ocamlLsp then
-      SwitchImplIntf.requestSwitch client document
+      SwitchImplIntf.request_switch client document
     else
       (* if, however, ocamllsp doesn't have the capability, recommend updating ocamllsp*)
       Promise.return
@@ -197,9 +198,9 @@ let switchImplIntf (instance : Instance.t) () =
             between implementation and interface files. Consider updating \
             ocamllsp."
   in
-  ignore @@ trySwitching ()
+  ignore @@ try_switching ()
 
-let suggestToSetupToolchain instance =
+let suggest_to_setup_toolchain instance =
   let open Promise.Syntax in
   Window.showInformationMessage
     ~message:
@@ -209,9 +210,9 @@ let suggestToSetupToolchain instance =
     ()
   >>| function
   | None -> ()
-  | Some () -> selectSandbox instance ()
+  | Some () -> select_sandbox instance ()
 
-let registerCommands extension =
+let register_commands extension =
   List.iter (function command, callback ->
       let callback ~args:_ = callback () in
       ExtensionContext.subscribe extension
@@ -220,31 +221,31 @@ let registerCommands extension =
 let activate (extension : ExtensionContext.t) =
   Process.Env.set "OCAML_LSP_SERVER_LOG" "-";
   let instance = Instance.create () in
-  registerCommands extension
-    [ (selectSandboxCommandId, selectSandbox instance)
-    ; (restartCommandId, restartInstance instance)
-    ; (openTerminalCommandId, openTerminal instance)
-    ; (openTerminalSelectCommandId, selectSandboxAndOpenTerminal)
-    ; (switchImplIntfCommandId, switchImplIntf instance)
+  register_commands extension
+    [ (select_sandbox_command_id, select_sandbox instance)
+    ; (restart_command_id, restart_instance instance)
+    ; (open_terminal_command_id, open_terminal instance)
+    ; (open_terminal_select_command_id, select_sandbox_and_open_terminal)
+    ; (switch_impl_intf_command_id, switch_impl_intf instance)
     ];
   ExtensionContext.subscribe extension
     ~disposable:(Instance.disposable instance);
   let open Promise.Syntax in
   let toolchain =
-    Toolchain.ofSettings () >>| fun pm ->
-    let resources, isFallback =
+    Toolchain.of_settings () >>| fun pm ->
+    let resources, is_fallback =
       match pm with
       | Some toolchain -> (toolchain, false)
       | None ->
-        let (_ : unit Promise.t) = suggestToSetupToolchain instance in
+        let (_ : unit Promise.t) = suggest_to_setup_toolchain instance in
         (Toolchain.PackageManager.Global, true)
     in
-    (Toolchain.makeResources resources, isFallback)
+    (Toolchain.make_resources resources, is_fallback)
   in
-  toolchain >>= fun (toolchain, isFallback) ->
+  toolchain >>= fun (toolchain, is_fallback) ->
   Instance.start instance toolchain
   |> Promise.Result.iter ~error:(fun e ->
-         if not isFallback then message `Error "%s" e)
+         if not is_fallback then message `Error "%s" e)
   |> Promise.catch ~rejected:(fun e ->
          let error_message = Node.JsError.ofPromiseError e in
          message `Error "Error: %s" error_message;

@@ -7,26 +7,26 @@ module Switch = struct
 
   let make switch_name =
     if switch_name.[0] = '/' then
-      Local (Path.ofString switch_name)
+      Local (Path.of_string switch_name)
     else
       Named switch_name
 
   let name = function
     | Named s -> s
-    | Local p -> Path.toString p
+    | Local p -> Path.to_string p
 end
 
-let binary = Path.ofString "opam"
+let binary = Path.of_string "opam"
 
 type t = Cmd.spawn
 
 let make () =
   let open Promise.Syntax in
-  Cmd.checkSpawn { bin = binary; args = [] } >>| function
+  Cmd.check_spawn { bin = binary; args = [] } >>| function
   | Error _ -> None
   | Ok cmd -> Some cmd
 
-let parseSwitchList out =
+let parse_switch_list out =
   let lines = String.split_on_char '\n' out in
   let result =
     lines
@@ -37,20 +37,20 @@ let parseSwitchList out =
   log "%d switches" (List.length result);
   result
 
-let switchList t =
+let switch_list t =
   let command = Cmd.append t [ "switch"; "list"; "-s" ] in
   let open Promise.Syntax in
   Cmd.output (Spawn command) >>| function
   | Error _ ->
     message `Warn "Unable to read the list of switches.";
     []
-  | Ok out -> parseSwitchList out
+  | Ok out -> parse_switch_list out
 
-let switchArg switch = "--switch=" ^ Switch.name switch
+let switch_arg switch = "--switch=" ^ Switch.name switch
 
 let exec t ~switch ~args =
-  Cmd.Spawn (Cmd.append t ("exec" :: switchArg switch :: "--" :: args))
+  Cmd.Spawn (Cmd.append t ("exec" :: switch_arg switch :: "--" :: args))
 
 let exists t ~switch =
   let open Promise.Syntax in
-  switchList t >>| List.exists (fun sw -> sw = switch)
+  switch_list t >>| List.exists (fun sw -> sw = switch)

@@ -19,7 +19,7 @@ type stderr = string
 
 val append : spawn -> string list -> spawn
 
-val checkSpawn : spawn -> spawn Or_error.t Promise.t
+val check_spawn : spawn -> spawn Or_error.t Promise.t
 
 val check : t -> t Or_error.t Promise.t
 

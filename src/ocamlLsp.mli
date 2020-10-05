@@ -2,7 +2,7 @@ open Import
 
 type t
 
-val ofInitializeResult : LanguageClient.InitializeResult.t -> t
+val of_initialize_result : LanguageClient.InitializeResult.t -> t
 
 val interfaceSpecificLangId : t -> bool
 

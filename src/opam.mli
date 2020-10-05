@@ -12,7 +12,7 @@ type t
 
 val make : unit -> t option Promise.t
 
-val switchList : t -> Switch.t list Promise.t
+val switch_list : t -> Switch.t list Promise.t
 
 val exec : t -> switch:Switch.t -> args:string list -> Cmd.t
 

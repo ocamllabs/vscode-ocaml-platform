@@ -9,12 +9,12 @@ module Process = Node.Process
 module ChildProcess = Node.ChildProcess
 module Fs = Node.Fs
 
-let envSep =
+let env_sep =
   match Sys.unix with
   | true -> ':'
   | false -> ';'
 
-let propertyExists json property =
+let property_exists json property =
   Ojs.has_property (Jsonoo.t_to_js json) property
 
 module Or_error = struct
@@ -35,11 +35,11 @@ let message kind fmt =
     fmt
 
 let log fmt =
-  let (lazy outputChannel) = Output.extensionOutputChannel in
-  let write line = OutputChannel.appendLine outputChannel ~value:line in
+  let (lazy output_channel) = Output.extension_output_channel in
+  let write line = OutputChannel.appendLine output_channel ~value:line in
   Printf.ksprintf write fmt
 
-let logJson msg (fields : (string * Jsonoo.t) list) =
+let log_json msg (fields : (string * Jsonoo.t) list) =
   let json = Jsonoo.Encode.object_ fields |> Jsonoo.stringify ~spaces:2 in
-  let (lazy outputChannel) = Output.extensionOutputChannel in
-  OutputChannel.appendLine outputChannel ~value:(msg ^ " " ^ json ^ "\n")
+  let (lazy output_channel) = Output.extension_output_channel in
+  OutputChannel.appendLine output_channel ~value:(msg ^ " " ^ json ^ "\n")

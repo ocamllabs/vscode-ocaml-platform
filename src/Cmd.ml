@@ -15,36 +15,36 @@ type stdout = string
 
 type stderr = string
 
-let pathMissingFromEnv = "'PATH' variable not found in the environment"
+let path_missing_from_env = "'PATH' variable not found in the environment"
 
 let append { bin; args = args1 } args2 = { bin; args = args1 @ args2 }
 
-let candidateFns =
+let candidate_fns =
   if Sys.unix then
     fun x ->
   [| x |]
   else
     fun x ->
-  [| ".exe"; ".cmd" |] |> Array.map (fun ext -> Path.withExt x ~ext)
+  [| ".exe"; ".cmd" |] |> Array.map (fun ext -> Path.with_ext x ~ext)
 
 let which path fn =
-  let candidates = candidateFns fn in
-  Core_kernel.String.split ~on:envSep path
+  let candidates = candidate_fns fn in
+  Core_kernel.String.split ~on:env_sep path
   |> Promise.List.find_map (fun p ->
-         let p = Path.ofString p in
+         let p = Path.of_string p in
          Array.map (Path.join p) candidates
          |> Promise.Array.find_map (fun p ->
                 let open Promise.Syntax in
-                Fs.exists (Path.toString p) >>| function
+                Fs.exists (Path.to_string p) >>| function
                 | true -> Some p
                 | false -> None))
 
-let checkSpawn { bin; args } =
-  if Path.isAbsolute bin then
+let check_spawn { bin; args } =
+  if Path.is_absolute bin then
     Promise.Result.return { bin; args }
   else
     match Core_kernel.Map.find (Process.Env.as_map ()) "PATH" with
-    | None -> Error pathMissingFromEnv |> Promise.resolve
+    | None -> Error path_missing_from_env |> Promise.resolve
     | Some path -> (
       let open Promise.Syntax in
       which path bin >>| function
@@ -56,14 +56,14 @@ let check t =
   | Shell _ -> Promise.Result.return t
   | Spawn spawn ->
     let open Promise.Result.Syntax in
-    checkSpawn spawn >>| fun s -> Spawn s
+    check_spawn spawn >>| fun s -> Spawn s
 
 let run ?cwd ?stdin = function
   | Spawn { bin; args } ->
-    ChildProcess.spawn (Path.toString bin) (Array.of_list args) ?stdin
+    ChildProcess.spawn (Path.to_string bin) (Array.of_list args) ?stdin
       (ChildProcess.Options.create ?cwd ())
-  | Shell commandLine ->
-    ChildProcess.exec commandLine ?stdin (ChildProcess.Options.create ?cwd ())
+  | Shell command_line ->
+    ChildProcess.exec command_line ?stdin (ChildProcess.Options.create ?cwd ())
 
 let log ?(result : ChildProcess.return option) (t : t) =
   let open Jsonoo.Encode in
@@ -82,12 +82,12 @@ let log ?(result : ChildProcess.return option) (t : t) =
   let message =
     match t with
     | Spawn { bin; args } ->
-      ("bin", string (Path.toString bin))
+      ("bin", string (Path.to_string bin))
       :: ("args", list string args)
       :: message
-    | Shell commandLine -> ("shell", string commandLine) :: message
+    | Shell command_line -> ("shell", string command_line) :: message
   in
-  logJson "external command" message
+  log_json "external command" message
 
 let output ?stdin (t : t) =
   let open Promise.Syntax in
