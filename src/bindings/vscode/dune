@@ -1,6 +1,5 @@
 (library
  (name vscode)
- (modules vscode vscode_core vscode_languageclient)
  (preprocess
   (pps gen_js_api.ppx))
  (js_of_ocaml

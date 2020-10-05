@@ -1,6 +1,5 @@
 (library
  (name node)
- (modules node)
  (preprocess
   (pps gen_js_api.ppx))
  (js_of_ocaml

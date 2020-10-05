@@ -1,4 +1,10 @@
 include Vscode
+
+module LanguageClient = struct
+  include Vscode_languageclient
+  include Vscode_languageclient.LanguageClient
+end
+
 module Process = Node.Process
 module ChildProcess = Node.ChildProcess
 module Fs = Node.Fs

@@ -1,6 +1,8 @@
+open Import
+
 type t
 
-val ofInitializeResult : Vscode.LanguageClient.InitializeResult.t -> t
+val ofInitializeResult : LanguageClient.InitializeResult.t -> t
 
 val interfaceSpecificLangId : t -> bool
 
