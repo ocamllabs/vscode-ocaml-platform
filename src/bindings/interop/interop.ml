@@ -1,8 +1,9 @@
-type 'a or_undefined = 'a option
-
-type 'a maybe_list = 'a list
+let iter_set obj field f value =
+  Option.iter (fun value -> Ojs.set obj field (f value)) value
 
 let undefined = Ojs.variable "undefined"
+
+type 'a or_undefined = 'a option
 
 let or_undefined_of_js ml_of_js js_val =
   if js_val != undefined && js_val != Ojs.null then
@@ -14,6 +15,8 @@ let or_undefined_to_js ml_to_js = function
   | Some ml_val -> ml_to_js ml_val
   | None -> undefined
 
+type 'a maybe_list = 'a list
+
 let maybe_list_of_js ml_of_js js_val =
   if js_val != undefined && js_val != Ojs.null then
     Ojs.list_of_js ml_of_js js_val
@@ -23,9 +26,6 @@ let maybe_list_of_js ml_of_js js_val =
 let maybe_list_to_js ml_to_js = function
   | [] -> undefined
   | xs -> Ojs.list_to_js ml_to_js xs
-
-let iter_set obj field f value =
-  Option.iter (fun value -> Ojs.set obj field (f value)) value
 
 module Regexp = struct
   type t = Js_of_ocaml.Regexp.regexp
