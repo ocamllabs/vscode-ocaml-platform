@@ -18,7 +18,7 @@ azure-pipelines.yaml
 esy.json
 Makefile
 
-!_build/default/src/extension.bc.js
+!_build/default/src/vscode_ocaml_platform.bc.js
 
 !node_modules/vscode-jsonrpc/**
 !node_modules/vscode-languageclient/**
