@@ -75,7 +75,7 @@ module ChildProcess = struct
   module Options = struct
     type t = private Ojs.t [@@js]
 
-    val create : ?cwd:string -> ?env:string JsDict.t -> unit -> t [@@js.builder]
+    val create : ?cwd:string -> ?env:string Dict.t -> unit -> t [@@js.builder]
   end
 
   type exec_result = private Ojs.t [@@js]

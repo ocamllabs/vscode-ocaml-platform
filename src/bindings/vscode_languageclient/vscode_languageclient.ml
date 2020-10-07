@@ -95,7 +95,7 @@ module ExecutableOptions = struct
 
   val cwd : t -> string or_undefined [@@js.get]
 
-  val env : t -> string JsDict.t or_undefined [@@js.get]
+  val env : t -> string Dict.t or_undefined [@@js.get]
 
   val detached : t -> bool or_undefined [@@js.get]
 
@@ -103,7 +103,7 @@ module ExecutableOptions = struct
 
   val create :
        ?cwd:string
-    -> ?env:string JsDict.t
+    -> ?env:string Dict.t
     -> ?detached:bool
     -> ?shell:bool
     -> unit

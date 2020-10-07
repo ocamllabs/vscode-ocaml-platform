@@ -20,10 +20,12 @@ module Regexp : sig
   val t_of_js : Ojs.t -> Js_of_ocaml.Regexp.regexp
 end
 
-module JsDict : sig
-  type 'a t = (string, 'a) Core_kernel.Map.Poly.t
+module Dict : sig
+  include Map.S with type key = string
 
-  val t_to_js : ('a -> Ojs.t) -> (string, 'a) Core_kernel.Map.Poly.t -> Ojs.t
+  val t_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
 
-  val t_of_js : (Ojs.t -> 'a) -> Ojs.t -> (string, 'a) Core_kernel.Map.Poly.t
+  val t_of_js : (Ojs.t -> 'a) -> Ojs.t -> 'a t
+
+  val of_alist : (string * 'a) list -> 'a t
 end
