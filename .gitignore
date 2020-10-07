@@ -1,3 +1,4 @@
+_build/
 _esy/
 _opam/
 .vscode-test/
@@ -5,11 +6,9 @@ dist/
 lib/
 node_modules/
 
-.bsb.lock
 .DS_Store
 .merlin
 .vscode/settings.json
-*.bs.js
 *.log
 *.vsix
 

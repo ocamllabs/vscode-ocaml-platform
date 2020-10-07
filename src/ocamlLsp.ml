@@ -7,34 +7,36 @@ type t =
 
 let default = { interfaceSpecificLangId = false; handleSwitchImplIntf = false }
 
-let defaultField key decode default json =
-  let open Json.Decode in
-  withDefault default (field key decode) json
+let default_field key decode default json =
+  let open Jsonoo.Decode in
+  try_default default (field key decode) json
 
-let ofJson (json : Js.Json.t) =
-  let open Json.Decode in
+let of_json (json : Jsonoo.t) =
+  let open Jsonoo.Decode in
   try
     let interfaceSpecificLangId =
-      defaultField "interfaceSpecificLangId" bool
+      default_field "interfaceSpecificLangId" bool
         default.interfaceSpecificLangId json
     in
     let handleSwitchImplIntf =
-      defaultField "handleSwitchImplIntf" bool default.handleSwitchImplIntf json
+      default_field "handleSwitchImplIntf" bool default.handleSwitchImplIntf
+        json
     in
     { interfaceSpecificLangId; handleSwitchImplIntf }
-  with DecodeError _ ->
+  with Jsonoo.Decode_error _ ->
     message `Warn
       "unexpected experimental capabilities from lsp server. Some features \
        might be missing";
     default
 
-let ofInitializeResult (t : Vscode.LanguageClient.InitializeResult.t) =
-  match Js.Nullable.toOption t.capabilities.experimental with
+let of_initialize_result (t : LanguageClient.InitializeResult.t) =
+  let open LanguageClient in
+  match ServerCapabilities.experimental (InitializeResult.capabilities t) with
   | None -> default
   | Some json -> (
-    match Json.Decode.field "ocamllsp" ofJson json with
+    match Jsonoo.Decode.field "ocamllsp" of_json json with
     | s -> s
-    | exception Json.Decode.DecodeError _ -> default )
+    | exception Jsonoo.Decode_error _ -> default )
 
 let interfaceSpecificLangId t = t.interfaceSpecificLangId
 

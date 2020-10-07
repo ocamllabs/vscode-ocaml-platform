@@ -38,13 +38,14 @@ module PackageManager = struct
       | "custom" -> Some Custom
       | _ -> None
 
-    let ofJson json =
-      let open Json.Decode in
+    let of_json json =
+      let open Jsonoo.Decode in
       match of_string (string json) with
       | Some s -> s
       | None ->
         raise
-          (DecodeError "opam | esy | global | custom are the only valid values")
+          (Jsonoo.Decode_error
+             "opam | esy | global | custom are the only valid values")
 
     let to_string = function
       | Opam -> "opam"
@@ -52,7 +53,7 @@ module PackageManager = struct
       | Global -> "global"
       | Custom -> "custom"
 
-    let toJson s = Json.Encode.string (to_string s)
+    let to_json s = Jsonoo.Encode.string (to_string s)
   end
 
   type t =
@@ -74,14 +75,14 @@ module PackageManager = struct
       | Global -> Global
       | Custom _ -> Custom
 
-    let ofJson json =
-      let open Json.Decode in
-      let kind = field "kind" Kind.ofJson json in
+    let of_json json =
+      let open Jsonoo.Decode in
+      let kind = field "kind" Kind.of_json json in
       match (kind : Kind.t) with
       | Global -> Global
       | Esy ->
         let manifest =
-          field "root" (fun js -> Path.ofString (string js)) json
+          field "root" (fun js -> Path.of_string (string js)) json
         in
         Esy manifest
       | Opam ->
@@ -93,61 +94,61 @@ module PackageManager = struct
         let template = field "template" string json in
         Custom template
 
-    let toJson (t : t) =
-      let open Json.Encode in
-      let kind = ("kind", Kind.toJson (kind t)) in
+    let to_json (t : t) =
+      let open Jsonoo.Encode in
+      let kind = ("kind", Kind.to_json (kind t)) in
       match t with
-      | Global -> Json.Encode.object_ [ kind ]
+      | Global -> Jsonoo.Encode.object_ [ kind ]
       | Esy manifest ->
-        object_ [ kind; ("root", string @@ Path.toString manifest) ]
+        object_ [ kind; ("root", string @@ Path.to_string manifest) ]
       | Opam sw -> object_ [ kind; ("switch", string @@ Opam.Switch.name sw) ]
       | Custom template -> object_ [ kind; ("template", string template) ]
 
-    let t = Settings.create ~scope:Workspace ~key:"sandbox" ~ofJson ~toJson
+    let t = Settings.create ~scope:Workspace ~key:"sandbox" ~of_json ~to_json
   end
 
-  let toSetting = function
+  let to_setting = function
     | Esy (_, root) -> Setting.Esy root
     | Opam (_, switch) -> Setting.Opam switch
     | Global -> Setting.Global
     | Custom template -> Setting.Custom template
 
-  let toString = function
-    | Esy (_, root) -> Printf.sprintf "esy(%s)" (Path.toString root)
+  let to_string = function
+    | Esy (_, root) -> Printf.sprintf "esy(%s)" (Path.to_string root)
     | Opam (_, switch) -> Printf.sprintf "opam(%s)" (Opam.Switch.name switch)
     | Global -> "global"
     | Custom _ -> "custom"
 
-  let toPrettyString t =
+  let to_pretty_string t =
     let print_opam = Printf.sprintf "opam(%s)" in
     let print_esy = Printf.sprintf "esy(%s)" in
     match t with
     | Esy (_, root) ->
-      let projectName = Path.basename root in
-      print_esy projectName
+      let project_name = Path.basename root in
+      print_esy project_name
     | Opam (_, Named name) -> print_opam name
     | Opam (_, Local path) ->
-      let projectName = Path.basename path in
-      print_opam projectName
+      let project_name = Path.basename path in
+      print_opam project_name
     | Global -> "Global OCaml"
     | Custom _ -> "Custom OCaml"
 end
 
 type resources = PackageManager.t
 
-let packageManager (t : resources) : PackageManager.t = t
+let package_manager (t : resources) : PackageManager.t = t
 
-let availablePackageManagers () =
+let available_package_managers () =
   { PackageManager.Kind.Hmap.opam = Opam.make ()
   ; esy = Esy.make ()
   ; global = ()
   ; custom = ()
   }
 
-let ofSettings () : PackageManager.t option Promise.t =
-  let open Promise.O in
-  let available = availablePackageManagers () in
-  let notAvailable kind =
+let of_settings () : PackageManager.t option Promise.t =
+  let open Promise.Syntax in
+  let available = available_package_managers () in
+  let not_available kind =
     let this_ =
       match kind with
       | `Esy -> "esy"
@@ -166,14 +167,14 @@ let ofSettings () : PackageManager.t option Promise.t =
   | Some (Esy manifest) -> (
     available.esy >>| function
     | None ->
-      notAvailable `Esy;
+      not_available `Esy;
       None
     | Some esy -> Some (PackageManager.Esy (esy, manifest)) )
   | Some (Opam switch) -> (
-    let open Promise.O in
+    let open Promise.Syntax in
     available.opam >>= function
     | None ->
-      notAvailable `Opam;
+      not_available `Opam;
       Promise.return None
     | Some opam -> (
       Opam.exists opam ~switch >>| function
@@ -188,37 +189,37 @@ let ofSettings () : PackageManager.t option Promise.t =
   | Some (Custom template) ->
     Promise.return (Some (PackageManager.Custom template))
 
-let toSettings (pm : PackageManager.t) =
+let to_settings (pm : PackageManager.t) =
   Settings.set ~section:"ocaml" PackageManager.Setting.t
-    (PackageManager.toSetting pm)
+    (PackageManager.to_setting pm)
 
 module Candidate = struct
   type t =
-    { packageManager : PackageManager.t
+    { package_manager : PackageManager.t
     ; status : (unit, string) result
     }
 
-  let toQuickPick { packageManager; status } =
-    let create = Window.QuickPickItem.create in
+  let to_quick_pick { package_manager; status } =
+    let create = QuickPickItem.create in
     let description =
       match status with
-      | Error s -> Some (sprintf "invalid: %s" s)
+      | Error s -> Some (Printf.sprintf "invalid: %s" s)
       | Ok () -> (
-        match packageManager with
+        match package_manager with
         | Opam (_, Local _) -> Some "Local switch"
         | Opam (_, Named _) -> Some "Global switch"
         | _ -> None )
     in
-    match packageManager with
+    match package_manager with
     | PackageManager.Opam (_, Named name) -> create ~label:name ?description ()
     | Opam (_, Local path) ->
-      let projectName = Path.basename path in
-      let projectPath = Path.toString path in
-      create ~label:projectName ~detail:projectPath ?description ()
+      let project_name = Path.basename path in
+      let project_path = Path.to_string path in
+      create ~label:project_name ~detail:project_path ?description ()
     | Esy (_, p) ->
-      let projectName = Path.basename p in
-      let projectPath = Path.toString p in
-      create ~detail:projectPath ~label:projectName ~description:"Esy" ()
+      let project_name = Path.basename p in
+      let project_path = Path.to_string p in
+      create ~detail:project_path ~label:project_name ~description:"Esy" ()
     | Global ->
       create ~label:"Global" ?description
         ~detail:"Global toolchain inherited from the environment" ()
@@ -226,41 +227,42 @@ module Candidate = struct
       create ?description ~label:"Custom"
         ~detail:"Custom toolchain using a command template" ()
 
-  let ok packageManager = { packageManager; status = Ok () }
+  let ok package_manager = { package_manager; status = Ok () }
 end
 
-let selectPackageManager (choices : Candidate.t list) =
+let select_package_manager (choices : Candidate.t list) =
   let placeHolder =
     "Which package manager would you like to manage the toolchain?"
   in
   let choices =
     List.map
       (fun (pm : Candidate.t) ->
-        let quickPick = Candidate.toQuickPick pm in
-        (quickPick, pm))
+        let quick_pick = Candidate.to_quick_pick pm in
+        (quick_pick, pm))
       choices
   in
-  let options =
-    Window.QuickPickOptions.make ~canPickMany:false ~placeHolder ()
-  in
-  Window.showQuickPickItems choices options
+  let options = QuickPickOptions.create ~canPickMany:false ~placeHolder () in
+  Window.showQuickPickItems ~choices ~options ()
 
-let sandboxCandidates ~workspaceFolders =
-  let open Promise.O in
-  let available = availablePackageManagers () in
+let sandbox_candidates ~workspace_folders =
+  let open Promise.Syntax in
+  let available = available_package_managers () in
   let esy =
     available.esy >>= function
     | None -> Promise.return []
     | Some esy ->
-      workspaceFolders
-      |> Array.map (fun (folder : Vscode.Folder.t) ->
-             let dir = Path.ofString folder.uri.fsPath in
+      workspace_folders
+      |> List.map (fun (folder : WorkspaceFolder.t) ->
+             let dir =
+               folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string
+             in
              Esy.discover ~dir)
-      |> Promise.all
+      |> Promise.all_list
       >>| fun esys ->
-      Array.to_list esys |> List.concat
+      esys |> List.concat
       |> List.map (fun (manifest : Esy.discover) ->
-             { Candidate.packageManager = PackageManager.Esy (esy, manifest.file)
+             { Candidate.package_manager =
+                 PackageManager.Esy (esy, manifest.file)
              ; status = manifest.status
              })
   in
@@ -268,10 +270,10 @@ let sandboxCandidates ~workspaceFolders =
     available.opam >>= function
     | None -> Promise.return []
     | Some opam ->
-      Opam.switchList opam
+      Opam.switch_list opam
       >>| List.map (fun sw ->
-              let packageManager = PackageManager.Opam (opam, sw) in
-              { Candidate.packageManager; status = Ok () })
+              let package_manager = PackageManager.Opam (opam, sw) in
+              { Candidate.package_manager; status = Ok () })
   in
   let global = Candidate.ok PackageManager.Global in
   let custom =
@@ -283,54 +285,56 @@ let sandboxCandidates ~workspaceFolders =
   Promise.all2 (esy, opam) >>| fun (esy, opam) ->
   (global :: custom :: esy) @ opam
 
-let setupToolChain (kind : PackageManager.t) =
+let setup_toolchain (kind : PackageManager.t) =
   match kind with
-  | Esy (esy, manifest) -> Esy.setupToolchain esy ~manifest
+  | Esy (esy, manifest) -> Esy.setup_toolchain esy ~manifest
   | Opam _
   | Global
   | Custom _ ->
     Promise.Result.return ()
 
-let makeResources kind = kind
+let make_resources kind = kind
 
 let select () =
-  let open Promise.O in
-  let workspaceFolders = Vscode.Workspace.workspaceFolders () in
-  sandboxCandidates ~workspaceFolders >>= fun candidates ->
-  let open Promise.Option.O in
-  selectPackageManager candidates >>= function
-  | { status = Ok (); packageManager = Custom _ } ->
-    let validateInput input =
-      if Js.String.includes "$prog" input && Js.String.includes "$args" input
+  let open Promise.Syntax in
+  let workspace_folders = Workspace.workspaceFolders () in
+  sandbox_candidates ~workspace_folders >>= fun candidates ->
+  let open Promise.Option.Syntax in
+  select_package_manager candidates >>= function
+  | { status = Ok (); package_manager = Custom _ } ->
+    let validateInput ~value =
+      if
+        Core_kernel.String.is_substring value ~substring:"$prog"
+        && Core_kernel.String.is_substring value ~substring:"$args"
       then
-        None
+        Promise.return None
       else
-        Some "Command template must include $prog and $args"
+        Promise.Option.return "Command template must include $prog and $args"
     in
     let options =
-      Window.InputBoxOptions.make ~prompt:"Input a custom command template"
+      InputBoxOptions.create ~prompt:"Input a custom command template"
         ~value:"$prog $args" ~validateInput ()
     in
-    Window.showInputBox options >>| String.trim >>= fun template ->
+    Window.showInputBox ~options () >>| String.trim >>= fun template ->
     Promise.Option.return @@ PackageManager.Custom template
-  | { status; packageManager } -> (
+  | { status; package_manager } -> (
     match status with
     | Error s ->
       message `Warn "This toolchain is invalid. Error: %s" s;
       Promise.return None
-    | Ok () -> Promise.Option.return packageManager )
+    | Ok () -> Promise.Option.return package_manager )
 
-let selectAndSave () =
-  let open Promise.Option.O in
-  select () >>= fun packageManager ->
-  let open Promise.O in
-  toSettings packageManager >>| fun () -> Some packageManager
+let select_and_save () =
+  let open Promise.Option.Syntax in
+  select () >>= fun package_manager ->
+  let open Promise.Syntax in
+  to_settings package_manager >>| fun () -> Some package_manager
 
-let getCommand (t : PackageManager.t) bin args : Cmd.t =
+let get_command (t : PackageManager.t) bin args : Cmd.t =
   match t with
   | Opam (opam, switch) -> Opam.exec opam ~switch ~args:(bin :: args)
   | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:(bin :: args)
-  | Global -> Spawn { bin = Path.ofString bin; args }
+  | Global -> Spawn { bin = Path.of_string bin; args }
   | Custom template ->
     let bin =
       if String.contains bin ' ' then
@@ -340,25 +344,27 @@ let getCommand (t : PackageManager.t) bin args : Cmd.t =
     in
     let command =
       template
-      |> Js.String.replace "$prog" bin
-      |> Js.String.replace "$args" (String.concat " " args)
+      |> Core_kernel.String.substr_replace_all ~pattern:"$prog" ~with_:bin
+      |> Core_kernel.String.substr_replace_all ~pattern:"$args"
+           ~with_:(String.concat " " args)
       |> String.trim
     in
     Shell command
 
-let getLspCommand ?(args = []) (t : PackageManager.t) : Cmd.t =
-  getCommand t "ocamllsp" args
+let get_lsp_command ?(args = []) (t : PackageManager.t) : Cmd.t =
+  get_command t "ocamllsp" args
 
-let getDuneCommand (t : PackageManager.t) args : Cmd.t =
-  getCommand t "dune" args
+let get_dune_command (t : PackageManager.t) args : Cmd.t =
+  get_command t "dune" args
 
-let runSetup resources =
-  let open Promise.Result.O in
-  setupToolChain resources
+let run_setup resources =
+  let open Promise.Result.Syntax in
+  setup_toolchain resources
   >>= (fun () ->
         let args = [ "--version" ] in
-        let command = getLspCommand resources ~args in
+        let command = get_lsp_command resources ~args in
         Cmd.check command >>= fun cmd -> Cmd.output cmd)
   |> Promise.map (function
        | Ok _ -> Ok ()
-       | Error msg -> Error {j|Toolchain initialisation failed: $msg|j})
+       | Error msg ->
+         Error (Printf.sprintf "Toolchain initialisation failed: %s" msg))

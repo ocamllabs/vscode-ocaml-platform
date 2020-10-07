@@ -1,22 +1,26 @@
-OCAML_SRCFILES = $(shell git ls-files "*.ml" "*.mli")
-REASON_SRCFILES = $(shell git ls-files "*.re" "*.rei")
-
 build:
-	yarn build
+	dune build @vscode
 .PHONY: build
+
+watch:
+	dune build @vscode -w
+.PHONY: watch
+
+clean:
+	dune clean
+.PHONY: clean
 
 test:
 	yarn test
 .PHONY: test
 
 fmt:
-	ocamlformat --inplace --enable-outside-detected-project $(OCAML_SRCFILES)
-	refmt --in-place $(REASON_SRCFILES)
+	dune build @fmt --auto-promote;
 	yarn fmt
 .PHONY: fmt
 
 # builds and packages the extension for installment
-pkg:
+pkg: build
 	vsce package --out ./test_extension.vsix --yarn
 .PHONY: pkg
 

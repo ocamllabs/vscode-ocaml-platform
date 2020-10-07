@@ -1,7 +1,9 @@
 __tests__/
+_build/
 _esy/
 _opam/
 .vscode/
+.github/
 esy.lock/
 fixtures/
 lib/
@@ -13,9 +15,10 @@ test/
 .merlin
 **/*.map
 azure-pipelines.yaml
-bsconfig.json
 esy.json
 Makefile
+
+!_build/default/src/vscode_ocaml_platform.bc.js
 
 !node_modules/vscode-jsonrpc/**
 !node_modules/vscode-languageclient/**

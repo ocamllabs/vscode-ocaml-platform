@@ -1,139 +1,45 @@
 include Vscode
+
+module LanguageClient = struct
+  include Vscode_languageclient
+  include Vscode_languageclient.LanguageClient
+end
+
 module Process = Node.Process
 module ChildProcess = Node.ChildProcess
 module Fs = Node.Fs
 
-let envSep =
+let env_sep =
   match Sys.unix with
-  | true -> ":"
-  | false -> ";"
+  | true -> ':'
+  | false -> ';'
 
-let propertyExists json property =
-  let open Js.Json in
-  match classify json with
-  | JSONObject json -> (
-    match Js.Dict.get json property with
-    | Some j -> (
-      match classify j with
-      | JSONNull -> false
-      | _ -> true )
-    | None -> false )
-  | _ -> false
-
-let getSubDict dict key =
-  ((dict |. Js.Dict.get) key |. Belt.Option.flatMap) Js.Json.decodeObject
-
-let hiddenEsyDir root = Path.(root / ".vscode" / "esy")
-
-module Option = struct
-  include Belt.Option
-
-  let ( >>= ) = flatMap
-
-  let ( >>| ) = map
-
-  let join = function
-    | None
-    | Some None ->
-      None
-    | Some x -> x
-
-  let return x = Some x
-
-  let bind x ~f = x >>= f
-
-  let iter t ~f = forEach t f
-
-  let iterNone t ~f =
-    match t with
-    | None -> f ()
-    | Some _ -> ()
-end
-
-module Result = struct
-  include Belt.Result
-
-  let ( >>= ) = flatMap
-
-  let ( >>| ) = map
-
-  let return x = Ok x
-
-  let fail x = Error x
-
-  let bind x ~f = x >>= f
-
-  let mapError x ~f =
-    match x with
-    | Ok _ as x -> x
-    | Error x -> Error (f x)
-end
-
-module List = struct
-  include List
-
-  let rec find_map xs ~f =
-    match xs with
-    | [] -> None
-    | x :: xs -> (
-      match f x with
-      | None -> find_map xs ~f
-      | Some _ as e -> e )
-end
+let property_exists json property =
+  Ojs.has_property (Jsonoo.t_to_js json) property
 
 module Or_error = struct
   type 'a t = ('a, string) result
 end
 
-module String = struct
-  include String
-
-  let chopPrefix s ~prefix =
-    if Js.String.startsWith prefix s then
-      let prefixLen = String.length prefix in
-      Some (Js.String.sliceToEnd ~from:prefixLen s)
-    else
-      None
-end
-
-module Json = struct
-  include Json
-
-  external stringifyAny : 'a -> ?replacer:'b -> ?space:int -> unit -> string
-    = "stringify"
-    [@@bs.val] [@@bs.scope "JSON"]
-end
-
-let sprintf = Printf.sprintf
-
 let message kind fmt =
-  let k =
+  let k message =
     match kind with
-    | `Warn -> Window.showWarningMessage
-    | `Info -> Window.showInformationMessage
-    | `Error -> Window.showErrorMessage
+    | `Warn -> Window.showWarningMessage ~message ()
+    | `Info -> Window.showInformationMessage ~message ()
+    | `Error -> Window.showInformationMessage ~message ()
   in
   Printf.ksprintf
     (fun x ->
-      let (_ : unit Promise.t) = k x in
+      let (_ : _ option Promise.t) = k x in
       ())
     fmt
 
-module Log : sig
-  type field
-
-  val field : _ -> field
-end = struct
-  type field
-
-  external field : _ -> field = "%identity"
-end
-
 let log fmt =
-  let (lazy outputChannel) = Output.extensionOutputChannel in
-  Printf.ksprintf (outputChannel |. Window.OutputChannel.appendLine) fmt
+  let (lazy output_channel) = Output.extension_output_channel in
+  let write line = OutputChannel.appendLine output_channel ~value:line in
+  Printf.ksprintf write fmt
 
-let logJson msg (fields : (string * Log.field) list) =
-  let json = fields |. Js.Dict.fromList |. Json.stringifyAny ~space:2 () in
-  let (lazy outputChannel) = Output.extensionOutputChannel in
-  outputChannel |. Window.OutputChannel.appendLine (msg ^ " " ^ json ^ "\n")
+let log_json msg (fields : (string * Jsonoo.t) list) =
+  let json = Jsonoo.Encode.object_ fields |> Jsonoo.stringify ~spaces:2 in
+  let (lazy output_channel) = Output.extension_output_channel in
+  OutputChannel.appendLine output_channel ~value:(msg ^ " " ^ json ^ "\n")

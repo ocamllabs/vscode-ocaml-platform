@@ -10,22 +10,22 @@ let projectUri = Uri.file(projectPath);
 suite("Basic tests", () => {
   test("Esy", async () => {
     await vscode.commands.executeCommand("vscode.openFolder", projectUri);
-    let reasonDocument = await vscode.workspace.openTextDocument(
-      Uri.file(path.join(projectPath, "bin", "SampleEsyApp.re"))
+    let ocamlDocument1 = await vscode.workspace.openTextDocument(
+      Uri.file(path.join(projectPath, "bin", "SampleEsyApp.ml"))
     );
 
-    let ocamlDocument = await vscode.workspace.openTextDocument(
+    let ocamlDocument2 = await vscode.workspace.openTextDocument(
       Uri.file(path.join(projectPath, "bin", "CamlUtil.ml"))
     );
 
     assert.equal(
-      reasonDocument.languageId,
-      "reason",
-      "Must be identified as a Reason document"
+      ocamlDocument1.languageId,
+      "ocaml",
+      "Must be identified as an OCaml document"
     );
 
     assert.equal(
-      ocamlDocument.languageId,
+      ocamlDocument2.languageId,
       "ocaml",
       "Must be identified as an OCaml document"
     );

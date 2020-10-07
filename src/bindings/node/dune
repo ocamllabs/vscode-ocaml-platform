@@ -1,0 +1,8 @@
+(library
+ (name node)
+ (preprocess
+  (pps gen_js_api.ppx))
+ (js_of_ocaml
+  (javascript_files node_stub.js))
+ (libraries interop core_kernel promise_jsoo jsonoo gen_js_api)
+ (modes byte))

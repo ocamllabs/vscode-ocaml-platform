@@ -16,32 +16,30 @@ suite("Basic tests", () => {
     }
 
     let sampleOpamSrc = path.join(fixtureSrcDir, "sample-opam");
-    projectPath = path.join(os.tmpdir(), "sample-opam");
+    let projectPath = path.join(os.tmpdir(), "sample-opam");
     let opamRoot = path.join(os.tmpdir(), "opam-root");
     fs.copySync(sampleOpamSrc, projectPath);
     cp.execSync(`mkdir -p ${opamRoot}`);
     cp.execSync(`sh -c 'opam install . --deps-only --yes > /dev/null'`, {
       cwd: projectPath,
     }).toString();
-    projectUri = Uri.file(projectPath);
+    let projectUri = Uri.file(projectPath);
     await vscode.commands.executeCommand("vscode.openFolder", projectUri);
-    reasonDocument = await vscode.workspace.openTextDocument(
-      Uri.file(path.join(projectPath, "foo.re"))
+    let ocamlDocument1 = await vscode.workspace.openTextDocument(
+      Uri.file(path.join(projectPath, "foo.ml"))
     );
 
-    ocamlDocument = await vscode.workspace.openTextDocument(
+    let ocamlDocument2 = await vscode.workspace.openTextDocument(
       Uri.file(path.join(projectPath, "main.ml"))
     );
 
-    // TODO: re-enable
-    // assert.equal(
-    //   reasonDocument.languageId,
-    //   "reason",
-    //   "Must be identified as a Reason document"
-    // );
-
     assert.equal(
-      ocamlDocument.languageId,
+      ocamlDocument1.languageId,
+      "ocaml",
+      "Must be identified as an OCaml document"
+    );
+    assert.equal(
+      ocamlDocument2.languageId,
       "ocaml",
       "Must be identified as an OCaml document"
     );

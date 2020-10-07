@@ -1,20 +1,18 @@
 type t = string
 
-let ofString s = s
+let of_string s = s
 
-let isAbsolute t = Node.Path.isAbsolute t
+let to_string s = s
 
-let v = ofString
-
-let toString s = s
+let is_absolute t = not (Filename.is_relative t)
 
 let compare = String.compare
 
-let dirname t = Node.Path.dirname t
+let dirname = Filename.dirname
 
-let extname t = Node.Path.extname t
+let extname t = Filename.extension t
 
-let basename t = Node.Path.basename t
+let basename t = Filename.basename t
 
 let ( / ) = Filename.concat
 
@@ -24,14 +22,14 @@ let relative_all p xs = List.fold_left Filename.concat p xs
 
 let join x y = Filename.concat x y
 
-let withExt x ~ext = x ^ ext
+let with_ext x ~ext = x ^ ext
 
-let isRoot = function
+let is_root = function
   | "" -> true
   | x -> Filename.dirname x = x
 
 let parent x =
-  if isRoot x then
+  if is_root x then
     None
   else
     Some (Filename.dirname x)

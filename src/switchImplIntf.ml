@@ -1,56 +1,60 @@
 open Import
 
-let sendSwitchImplIntfRequest client document : string array Promise.t =
-  LanguageClient.sendRequest client ~meth:"ocamllsp/switchImplIntf"
-    ~data:(Uri.toString document.TextDocument.uri ~skipEncoding:true ())
-    ()
+let send_switch_impl_intf_request client document : string array Promise.t =
+  let data =
+    Uri.toString (TextDocument.uri document) ~skipEncoding:true ()
+    |> Jsonoo.Encode.string
+  in
+  let open Promise.Syntax in
+  LanguageClient.sendRequest client ~meth:"ocamllsp/switchImplIntf" ~data ()
+  >>| Jsonoo.Decode.(array string)
 
 (* given a file uri, opens the file if it exists;
      otherwise, creates the file but doesn't write it to disk *)
-let showFile targetFileName =
-  let open Promise.O in
-  let uri = Uri.parse targetFileName in
-  Vscode.Workspace.openTextDocument (`Uri uri)
-  |> Js.Promise.catch (fun _ ->
+let show_file target_file_name =
+  let open Promise.Syntax in
+  let uri = Uri.parse target_file_name () in
+  Workspace.openTextDocument (`Uri uri)
+  |> Promise.catch ~rejected:(fun _ ->
          (* if file does not exist *)
-         let createFileUri =
-           Uri.with_ uri @@ Uri.make_change ~scheme:"untitled" ()
-         in
-         Vscode.Workspace.openTextDocument (`Uri createFileUri))
+         let create_file_uri = Uri.with_ uri ~scheme:"untitled" () in
+         Workspace.openTextDocument (`Uri create_file_uri))
   >>= fun doc ->
-  Vscode.Window.showTextDocument (`Document doc) >>| fun _ -> ()
+  Window.showTextDocument ~document:(`TextDocument doc) () >>| fun _ -> ()
 
-let requestSwitch client document =
-  let open Promise.O in
-  sendSwitchImplIntfRequest client document >>= fun arr ->
+let request_switch client document =
+  let open Promise.Syntax in
+  send_switch_impl_intf_request client document >>= fun arr ->
   match Array.to_list arr with
   | [] ->
     (* 'ocamllsp/switchImplIntf' command's response array cannot be empty *)
     assert false
-  | [ filepath ] -> showFile filepath
-  | firstCandidate :: otherCandidates as candidates -> (
-    let fstCandidateItem =
-      Window.QuickPickItem.create
-        ~label:(Filename.basename firstCandidate)
+  | [ filepath ] -> show_file filepath
+  | first_candidate :: other_candidates as candidates -> (
+    let first_candidate_item =
+      QuickPickItem.create
+        ~label:(Filename.basename first_candidate)
         ~picked:true ()
     in
 
-    let restCandidateItems =
+    let rest_candidate_items =
       List.map
-        (fun c -> Window.QuickPickItem.create ~label:(Filename.basename c) ())
-        otherCandidates
+        (fun c -> QuickPickItem.create ~label:(Filename.basename c) ())
+        other_candidates
     in
 
-    let candidateItemsWithNames =
-      List.combine (fstCandidateItem :: restCandidateItems) candidates
+    let candidate_items_with_names =
+      List.combine (first_candidate_item :: rest_candidate_items) candidates
     in
 
     let file_options =
-      Window.QuickPickOptions.make ~canPickMany:false
-        ~placeHolder:"Open a file..." ()
+      QuickPickOptions.create ~canPickMany:false ~placeHolder:"Open a file..."
+        ()
     in
 
-    let open Promise.O in
-    Window.showQuickPickItems candidateItemsWithNames file_options >>= function
+    let open Promise.Syntax in
+    Window.showQuickPickItems ~choices:candidate_items_with_names
+      ~options:file_options ()
+    >>= function
     | None -> Promise.return ()
-    | Some filepath -> showFile filepath )
+    | Some filepath -> show_file filepath )

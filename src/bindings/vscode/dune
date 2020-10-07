@@ -1,0 +1,8 @@
+(library
+ (name vscode)
+ (preprocess
+  (pps gen_js_api.ppx))
+ (js_of_ocaml
+  (javascript_files vscode_stub.js))
+ (libraries interop core_kernel promise_jsoo jsonoo js_of_ocaml gen_js_api)
+ (modes byte))

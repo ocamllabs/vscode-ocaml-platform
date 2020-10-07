@@ -1,7 +1,7 @@
-(** [languageServerOutputChannel] is the output channel
+(** [language_server_output_channel] is the output channel
     that should be used by all ocamllsp LanguageClients *)
-val languageServerOutputChannel : Vscode.Window.OutputChannel.t Lazy.t
+val language_server_output_channel : Vscode.OutputChannel.t Lazy.t
 
-(** [extensionOutputChannel] is the output channel
+(** [extension_output_channel] is the output channel
     that should be used for logs by the extension *)
-val extensionOutputChannel : Vscode.Window.OutputChannel.t Lazy.t
+val extension_output_channel : Vscode.OutputChannel.t Lazy.t

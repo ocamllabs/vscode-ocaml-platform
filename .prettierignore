@@ -6,4 +6,4 @@ dist/
 esy.lock/
 .vscode-test/
 _opam
-*.bs.js
+_build

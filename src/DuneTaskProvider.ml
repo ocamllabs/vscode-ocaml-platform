@@ -4,106 +4,104 @@ type t = Disposable.t option ref
 
 let task_type = "dune"
 
-let taskDefinition = { Task.type_ = task_type }
+let definition = TaskDefinition.create ~type_:task_type ()
 
 let source = task_type
 
-let problemMatchers = [| "$ocamlc" |]
+let problemMatchers = [ "$ocamlc" ]
 
 (* the ocamlc matcher is not able to parse ocaml compiler errors unless they
    follow the short style. *)
-let env = Js.Dict.fromList [ ("OCAML_ERROR_STYLE", "short") ]
+let env = Core_kernel.Map.Poly.of_alist_exn [ ("OCAML_ERROR_STYLE", "short") ]
 
 module Setting = struct
   type t = bool
 
-  let ofJson json =
-    let open Json.Decode in
+  let of_json json =
+    let open Jsonoo.Decode in
     bool json
 
-  let toJson (t : t) =
-    let open Json.Encode in
+  let to_json (t : t) =
+    let open Jsonoo.Encode in
     bool t
 
   let t =
-    Settings.create ~scope:Workspace ~key:"dune.autoDetect" ~ofJson ~toJson
+    Settings.create ~scope:Workspace ~key:"dune.autoDetect" ~of_json ~to_json
 end
 
-let folderRelativePath folders file =
-  Array.fold_left
-    (fun acc (folder : Folder.t) ->
+let folder_relative_path folders file =
+  List.fold_left
+    (fun acc (folder : WorkspaceFolder.t) ->
       match acc with
       | Some _ -> acc
       | None -> (
-        match String.chopPrefix file ~prefix:folder.uri.fsPath with
+        let prefix = Uri.fsPath (WorkspaceFolder.uri folder) in
+        match Core_kernel.String.chop_prefix file ~prefix with
         | None -> acc
-        | Some withoutPrefix -> Some (folder, withoutPrefix) ))
+        | Some without_prefix -> Some (folder, without_prefix) ))
     None folders
 
-let getShellExecution toolchain options =
-  let command = Toolchain.getDuneCommand toolchain [ "build" ] in
+let get_shell_execution toolchain options =
+  let command = Toolchain.get_dune_command toolchain [ "build" ] in
   Cmd.log command;
   match command with
   | Shell commandLine -> ShellExecution.makeCommandLine ~commandLine ~options ()
   | Spawn { bin; args } ->
-    ShellExecution.makeCommand ~command:(Path.toString bin)
-      ~args:(Array.of_list args) ~options ()
+    let command = `String (Path.to_string bin) in
+    let args = List.map (fun a -> `String a) args in
+    ShellExecution.makeCommandArgs ~command ~args ~options ()
 
-let computeTasks cancellationToken toolchain =
-  let open Promise.O in
+let compute_tasks ?token toolchain =
+  let open Promise.Syntax in
   let folders = Workspace.workspaceFolders () in
-  let excl =
+  let excludes =
     (* ignoring dune files from _build, _opam, _esy *)
-    Some "{**/_*}"
+    `String "{**/_*}"
   in
-  let inc = "**/{dune,dune-project,dune-workspace}" in
-  Workspace.findFiles ~inc ~excl ~maxResults:None cancellationToken
-  >>| fun dunes ->
+  let includes = `String "**/{dune,dune-project,dune-workspace}" in
+  Workspace.findFiles ~includes ~excludes ?token () >>| fun dunes ->
   let tasks =
-    Array.map
+    List.map
       (fun dune ->
-        let scope, relativePath =
-          match folderRelativePath folders dune.Uri.fsPath with
-          | None -> (Task.Workspace, dune.fsPath)
-          | Some (folder, relativePath) -> (Task.Folder folder, relativePath)
+        let scope, relative_path =
+          match folder_relative_path folders (Uri.fsPath dune) with
+          | None -> (TaskScope.Workspace, Uri.fsPath dune)
+          | Some (folder, relative_path) ->
+            (TaskScope.Folder folder, relative_path)
         in
-        let name = Printf.sprintf "build %s" relativePath in
+        let name = Printf.sprintf "build %s" relative_path in
         let execution =
-          let cwd = Filename.dirname dune.fsPath in
-          let options =
-            { ShellExecution.env = Some env
-            ; cwd = Some cwd
-            ; executable = None
-            ; shellArgs = None
-            ; shellQuoting = None
-            }
-          in
-          getShellExecution toolchain options
+          let cwd = Filename.dirname (Uri.fsPath dune) in
+          let options = ShellExecutionOptions.create ~env ~cwd () in
+          get_shell_execution toolchain options
         in
-        Task.make ~taskDefinition ~scope ~source ~name ~problemMatchers
-          ~execution:(`Shell execution) ~group:TaskGroup.build ())
+        let task =
+          Task.make ~definition ~scope ~source ~name ~problemMatchers
+            ~execution:(`ShellExecution execution) ()
+        in
+        Task.set_group task TaskGroup.build;
+        task)
       dunes
   in
   Some tasks
 
-let provideTasks toolchain =
- fun [@bs] cancellationToken ->
+let provide_tasks toolchain ?token () =
   match Settings.get ~section:"ocaml" Setting.t with
   | None
   | Some false ->
-    Js.Promise.resolve None
-  | Some true -> computeTasks cancellationToken toolchain
+    `Promise (Promise.return None)
+  | Some true -> `Promise (compute_tasks ?token toolchain)
 
-let resolveTask =
- fun [@bs] task _cancellationToken -> Js.Promise.resolve (Some task)
+let resolve_tasks ~task ?token:_ () = `Promise (Promise.Option.return task)
 
 let create () = ref None
 
 let register t toolchain =
-  let provideTasks = provideTasks toolchain in
-  let provider = { TaskProvider.provideTasks; resolveTask } in
-  t := Some (Tasks.registerTaskProvider ~typ:task_type ~provider)
+  let provideTasks = provide_tasks toolchain in
+  let resolveTasks = resolve_tasks in
+  let provider = TaskProvider.create ~provideTasks ~resolveTasks in
+  t := Some (Tasks.registerTaskProvider ~type_:task_type ~provider)
 
 let dispose (t : t) =
-  Option.iter ~f:Disposable.dispose !t;
+  Core_kernel.Option.iter ~f:Disposable.dispose !t;
   t := None

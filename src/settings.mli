@@ -7,11 +7,10 @@ val get : ?section:string -> 'a t -> 'a option
 val set : ?section:string -> 'a t -> 'a -> unit Promise.t
 
 val create :
-     scope:WorkspaceConfiguration.configurationTarget
+     scope:ConfigurationTarget.t
   -> key:string
-  -> ofJson:(Js.Json.t -> 'a)
-  -> toJson:('a -> Js.Json.t)
+  -> of_json:(Jsonoo.t -> 'a)
+  -> to_json:('a -> Jsonoo.t)
   -> 'a t
 
-val string :
-  scope:WorkspaceConfiguration.configurationTarget -> key:string -> string t
+val string : scope:ConfigurationTarget.t -> key:string -> string t

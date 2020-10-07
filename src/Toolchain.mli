@@ -4,7 +4,7 @@
    ([Toolchain.init])
 
    2. Run a setup that would setup the toolchain provided that basic
-   requirements are met ([Toolchain.runSetup])
+   requirements are met ([Toolchain.run_setup])
 
    3. Helper functions that extract the tools from the setup toolchain. This
    includes just [ocamllsp] right now, but in future could include others like
@@ -23,29 +23,29 @@ module PackageManager : sig
     | Global
     | Custom of string
 
-  val toString : t -> string
+  val to_string : t -> string
 
-  val toPrettyString : t -> string
+  val to_pretty_string : t -> string
 end
 
 type resources
 
-val ofSettings : unit -> PackageManager.t option Promise.t
+val of_settings : unit -> PackageManager.t option Promise.t
 
-val makeResources : PackageManager.t -> resources
+val make_resources : PackageManager.t -> resources
 
-val packageManager : resources -> PackageManager.t
+val package_manager : resources -> PackageManager.t
 
-(** [selectAndSave] requires the process environment the plugin is being run in
+(** [select_and_save] requires the process environment the plugin is being run in
    (ie VSCode's process environment) and the project root and produces a promise
    of resources available that can later be passed on to runSetup that can be
    called to install the toolchain. *)
-val selectAndSave : unit -> PackageManager.t option Promise.t
+val select_and_save : unit -> PackageManager.t option Promise.t
 
 (** [select] is the same as [selectAndSave] but does not save the toolchain configuration *)
 val select : unit -> PackageManager.t option Promise.t
 
-(** [runSetup] is a effectful function that triggers setup instructions
+(** [run_setup] is an effectful function that triggers setup instructions
    automatically for the user. At present, this functionality
    resides in the plugin itself for bucklescript users - to
    reliably use ocamllsp for bucklescript users, a sandboxed
@@ -60,7 +60,7 @@ val select : unit -> PackageManager.t option Promise.t
    download the toolchain artifacts and compile it from source in
    the same workflow.
 
-   [runSetup] is capable of setting up the toolchain for bucklescript
+   [run_setup] is capable of setting up the toolchain for bucklescript
    project using both Opam and Esy users. It provides and abstracted
    way to setup the toolchain, so that we (developers) have the
    flexibility to iterate and improve how the toolchain it provided.
@@ -68,19 +68,19 @@ val select : unit -> PackageManager.t option Promise.t
    A hard requirement for runSetup is to not get in the way to
    existing setups. If users already have working toolchains installed
    via some other toolchain/package manager (Nix, system wide managers
-   like yum/apt/brew or Duniverse), [runSetup] must co-operate and
+   like yum/apt/brew or Duniverse), [run_setup] must co-operate and
    detect such installations.
  *)
-val runSetup : resources -> (unit, string) result Promise.t
+val run_setup : resources -> (unit, string) result Promise.t
 
 (* Helper utils *)
 
 (** Extract command to run with the toolchain *)
-val getCommand : resources -> string -> string list -> Cmd.t
+val get_command : resources -> string -> string list -> Cmd.t
 
 (** Extract lsp command and arguments (Eg. "opam" and [| "exec";
    "ocamllsp" |] *)
-val getLspCommand : ?args:string list -> resources -> Cmd.t
+val get_lsp_command : ?args:string list -> resources -> Cmd.t
 
 (** Extract a dune command *)
-val getDuneCommand : resources -> string list -> Cmd.t
+val get_dune_command : resources -> string list -> Cmd.t
