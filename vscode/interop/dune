@@ -1,4 +1,5 @@
 (library
+ (public_name vscode.interop)
  (name interop)
  (libraries js_of_ocaml gen_js_api)
  (modes byte))
