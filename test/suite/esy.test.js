@@ -11,7 +11,7 @@ suite("Basic tests", () => {
   test("Esy", async () => {
     await vscode.commands.executeCommand("vscode.openFolder", projectUri);
     let reasonDocument = await vscode.workspace.openTextDocument(
-      Uri.file(path.join(projectPath, "bin", "SampleEsyApp.re"))
+      Uri.file(path.join(projectPath, "bin", "SampleEsyApp.ml"))
     );
 
     let ocamlDocument = await vscode.workspace.openTextDocument(

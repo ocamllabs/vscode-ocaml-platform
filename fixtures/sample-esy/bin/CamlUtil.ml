@@ -1,3 +1,3 @@
 let foo _ =
-  let bar = "bar" in
+  let _bar = "bar" in
   ()
