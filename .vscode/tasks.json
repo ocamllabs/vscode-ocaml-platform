@@ -4,10 +4,10 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "npm",
-      "script": "watch",
-      "problemMatcher": "$tsc-watch",
-      "isBackground": true,
+      "type": "shell",
+      "command": "dune build @vscode -w",
+      "label": "dune build @vscode -w",
+      "problemMatcher": "$ocamlc",
       "presentation": {
         "reveal": "never"
       },
