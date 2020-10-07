@@ -1,13 +1,1 @@
 (dirs :standard \ node_modules)
-
-(subdir
- dist
- (rule
-  (alias vscode)
-  (mode
-   (promote (until-clean)))
-  (action
-   (progn
-    (system "mkdir -p dist")
-    (copy %{project_root}/src/vscode_ocaml_platform.bc.js
-      ./vscode_ocaml_platform.js)))))
