@@ -1,6 +1,3 @@
-OCAML_SRCFILES = $(shell git ls-files "*.ml" "*.mli")
-REASON_SRCFILES = $(shell git ls-files "*.re" "*.rei")
-
 build:
 	dune build @vscode
 .PHONY: build
@@ -18,8 +15,7 @@ test:
 .PHONY: test
 
 fmt:
-	ocamlformat --inplace --enable-outside-detected-project $(OCAML_SRCFILES)
-	refmt --in-place $(REASON_SRCFILES)
+	dune build @fmt --auto-promote;
 	yarn fmt
 .PHONY: fmt
 
