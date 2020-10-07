@@ -70,7 +70,7 @@ jobs:
         if: steps.cache-opam.outputs.cache-hit != 'true'
         run: |
           opam pin ocaml-lsp-server https://github.com/ocaml/ocaml-lsp.git --no-action
-          opam install ocaml-lsp-server ocamlformat reason --yes
+          opam install ocaml-lsp-server ocamlformat --yes
 
       - name: Build esy packages
         # Cleanup build cache in case dependencies have changed
