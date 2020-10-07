@@ -11,7 +11,7 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "outFiles": [
-        "${workspaceRoot}/_build/default/src/vscode_ocaml_platform.bc.js"
+        "${workspaceRoot}/dist/vscode_ocaml_platform.js"
       ],
       "args": [
         "--disable-extensions",
@@ -24,7 +24,7 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "outFiles": [
-        "${workspaceRoot}/_build/default/src/vscode_ocaml_platform.bc.js"
+        "${workspaceRoot}/dist/vscode_ocaml_platform.js"
       ],
       "args": ["--extensionDevelopmentPath=${workspaceFolder}"]
     }
