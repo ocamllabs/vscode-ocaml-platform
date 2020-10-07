@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.3.0
 
 - Replace "Switch implementation/interface" navigator button with a custom icon
   (#383)
