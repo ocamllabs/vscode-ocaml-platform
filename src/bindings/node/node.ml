@@ -11,8 +11,6 @@ module Process = struct
     let get k = [%js.to: string or_undefined] (Ojs.get env k)
 
     let set k v = Ojs.set env k ([%js.of: string] v)
-
-    let as_map () = [%js.to: string JsDict.t] env
   end
 end
 

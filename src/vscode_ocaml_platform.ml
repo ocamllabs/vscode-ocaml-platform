@@ -29,16 +29,13 @@ let server_options (toolchain : Toolchain.resources) :
     LanguageClient.ServerOptions.t =
   let command = Toolchain.get_lsp_command toolchain in
   Cmd.log command;
-  let env = Process.Env.as_map () in
   match command with
   | Shell command ->
-    let options = LanguageClient.ExecutableOptions.create ~env ~shell:true () in
+    let options = LanguageClient.ExecutableOptions.create ~shell:true () in
     LanguageClient.Executable.create ~command ~options ()
   | Spawn { bin; args } ->
     let command = Path.to_string bin in
-    let options =
-      LanguageClient.ExecutableOptions.create ~env ~shell:false ()
-    in
+    let options = LanguageClient.ExecutableOptions.create ~shell:false () in
     LanguageClient.Executable.create ~command ~args ~options ()
 
 module Instance = struct

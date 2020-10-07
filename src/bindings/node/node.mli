@@ -7,8 +7,6 @@ module Process : sig
     val get : string -> string option
 
     val set : string -> string -> unit
-
-    val as_map : unit -> (string, string) Core_kernel.Map.Poly.t
   end
 end
 
