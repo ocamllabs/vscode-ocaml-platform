@@ -31,7 +31,7 @@ let create () = ref []
 let register t toolchain =
   t :=
     [ "dune"; "dune-project"; "dune-workspace" ]
-    |> List.map (fun language ->
+    |> List.map ~f:(fun language ->
            let selector =
              `Filter (DocumentFilter.create ~scheme:"file" ~language ())
            in
@@ -42,5 +42,5 @@ let register t toolchain =
            Languages.registerDocumentFormattingEditProvider ~selector ~provider)
 
 let dispose t =
-  List.iter Disposable.dispose !t;
+  List.iter ~f:Disposable.dispose !t;
   t := []

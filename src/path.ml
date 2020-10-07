@@ -1,5 +1,7 @@
 type t = string
 
+let equal = String.equal
+
 let of_string s = s
 
 let to_string s = s
