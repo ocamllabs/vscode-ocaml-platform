@@ -43,7 +43,7 @@ let check_spawn { bin; args } =
   if Path.is_absolute bin then
     Promise.Result.return { bin; args }
   else
-    match Core_kernel.Map.find (Process.Env.as_map ()) "PATH" with
+    match Process.Env.get "PATH" with
     | None -> Error path_missing_from_env |> Promise.resolve
     | Some path -> (
       let open Promise.Syntax in
