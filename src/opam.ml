@@ -6,7 +6,7 @@ module Switch = struct
     | Named of string  (** if switch is stored in ~/.opam *)
 
   let make switch_name =
-    if switch_name.[0] = '/' then
+    if Char.equal switch_name.[0] '/' then
       Local (Path.of_string switch_name)
     else
       Named switch_name
@@ -14,6 +14,12 @@ module Switch = struct
   let name = function
     | Named s -> s
     | Local p -> Path.to_string p
+
+  let equal x y =
+    match (x, y) with
+    | Local x, Local y -> Path.equal x y
+    | Named x, Named y -> String.equal x y
+    | _, _ -> false
 end
 
 let binary = Path.of_string "opam"
@@ -27,10 +33,10 @@ let make () =
   | Ok cmd -> Some cmd
 
 let parse_switch_list out =
-  let lines = String.split_on_char '\n' out in
+  let lines = String.split_on_chars ~on:[ '\n' ] out in
   let result =
     lines
-    |> List.filter_map (function
+    |> List.filter_map ~f:(function
          | "" -> None
          | s -> Some (Switch.make s))
   in
@@ -53,4 +59,4 @@ let exec t ~switch ~args =
 
 let exists t ~switch =
   let open Promise.Syntax in
-  switch_list t >>| List.exists (fun sw -> sw = switch)
+  switch_list t >>| List.exists ~f:(fun sw -> Switch.equal sw switch)

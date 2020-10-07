@@ -39,12 +39,12 @@ let request_switch client document =
 
     let rest_candidate_items =
       List.map
-        (fun c -> QuickPickItem.create ~label:(Filename.basename c) ())
+        ~f:(fun c -> QuickPickItem.create ~label:(Filename.basename c) ())
         other_candidates
     in
 
     let candidate_items_with_names =
-      List.combine (first_candidate_item :: rest_candidate_items) candidates
+      List.zip_exn (first_candidate_item :: rest_candidate_items) candidates
     in
 
     let file_options =

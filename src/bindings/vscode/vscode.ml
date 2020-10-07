@@ -1091,7 +1091,7 @@ module TerminalOptions = struct
 
   val cwd : t -> cwd or_undefined [@@js.get]
 
-  val env : t -> string or_undefined JsDict.t or_undefined [@@js.get]
+  val env : t -> string or_undefined Dict.t or_undefined [@@js.get]
 
   val strictEnv : t -> bool [@@js.get]
 
@@ -1352,14 +1352,14 @@ module ShellExecutionOptions = struct
 
   val cwd : t -> string or_undefined [@@js.get]
 
-  val env : t -> string JsDict.t or_undefined [@@js.get]
+  val env : t -> string Dict.t or_undefined [@@js.get]
 
   val create :
        ?executable:string
     -> ?shellArgs:string list
     -> ?shellQuoting:ShellQuotingOptions.t
     -> ?cwd:string
-    -> ?env:string JsDict.t
+    -> ?env:string Dict.t
     -> unit
     -> t
     [@@js.builder]
@@ -1424,9 +1424,9 @@ module ProcessExecutionOptions = struct
 
   val cwd : t -> string or_undefined [@@js.get]
 
-  val env : t -> string JsDict.t or_undefined [@@js.get]
+  val env : t -> string Dict.t or_undefined [@@js.get]
 
-  val create : ?cwd:string -> ?env:string JsDict.t -> unit -> t [@@js.builder]
+  val create : ?cwd:string -> ?env:string Dict.t -> unit -> t [@@js.builder]
 end
 
 module ProcessExecution = struct
@@ -1456,13 +1456,14 @@ module TaskDefinition = struct
 
   val type_ : t -> string [@@js.get]
 
-  let getAttribute = Ojs.get
+  let get_attribute = Ojs.get
 
-  let setAttribute = Ojs.set
+  let set_attribute = Ojs.set
 
   let create ~type_ ?(attributes = []) () =
     let obj = Ojs.obj [| ("type", [%js.of: string] type_) |] in
-    Core_kernel.List.iter attributes ~f:(fun (k, v) -> Ojs.set obj k v);
+    let set (key, value) = Ojs.set obj key value in
+    List.iter set attributes;
     obj
 end
 

@@ -61,11 +61,11 @@ module Instance = struct
     DuneFormatter.dispose t.dune_formatter;
     DuneTaskProvider.dispose t.dune_task_provider;
 
-    Core_kernel.Option.iter t.status_bar_item ~f:(fun status_bar_item ->
+    Option.iter t.status_bar_item ~f:(fun status_bar_item ->
         StatusBarItem.dispose status_bar_item;
         t.status_bar_item <- None);
 
-    Core_kernel.Option.iter t.client ~f:(fun client ->
+    Option.iter t.client ~f:(fun client ->
         LanguageClient.stop client;
         t.client <- None);
 
@@ -123,7 +123,7 @@ module Instance = struct
     Ok ()
 
   let open_terminal toolchain =
-    let open Core_kernel.Option.Monad_infix in
+    let open Option.Monad_infix in
     match toolchain |> TerminalSandbox.create >>| TerminalSandbox.show with
     | Some _ -> ()
     | None ->
@@ -179,7 +179,7 @@ let open_terminal (instance : Instance.t) () =
 
 let switch_impl_intf (instance : Instance.t) () =
   let try_switching () =
-    let open Core_kernel.Option.Monad_infix in
+    let open Option.Monad_infix in
     Window.activeTextEditor () >>| TextEditor.document >>= fun document ->
     instance.client >>= fun client ->
     (* extension needs to be activated; otherwise, just ignore the switch try *)
@@ -210,7 +210,7 @@ let suggest_to_setup_toolchain instance =
   | Some () -> select_sandbox instance ()
 
 let register_commands extension =
-  List.iter (function command, callback ->
+  List.iter ~f:(function command, callback ->
       let callback ~args:_ = callback () in
       ExtensionContext.subscribe extension
         ~disposable:(Commands.registerCommand ~command ~callback))

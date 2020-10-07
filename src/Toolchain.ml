@@ -236,7 +236,7 @@ let select_package_manager (choices : Candidate.t list) =
   in
   let choices =
     List.map
-      (fun (pm : Candidate.t) ->
+      ~f:(fun (pm : Candidate.t) ->
         let quick_pick = Candidate.to_quick_pick pm in
         (quick_pick, pm))
       choices
@@ -252,7 +252,7 @@ let sandbox_candidates ~workspace_folders =
     | None -> Promise.return []
     | Some esy ->
       workspace_folders
-      |> List.map (fun (folder : WorkspaceFolder.t) ->
+      |> List.map ~f:(fun (folder : WorkspaceFolder.t) ->
              let dir =
                folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string
              in
@@ -260,7 +260,7 @@ let sandbox_candidates ~workspace_folders =
       |> Promise.all_list
       >>| fun esys ->
       esys |> List.concat
-      |> List.map (fun (manifest : Esy.discover) ->
+      |> List.map ~f:(fun (manifest : Esy.discover) ->
              { Candidate.package_manager =
                  PackageManager.Esy (esy, manifest.file)
              ; status = manifest.status
@@ -271,7 +271,7 @@ let sandbox_candidates ~workspace_folders =
     | None -> Promise.return []
     | Some opam ->
       Opam.switch_list opam
-      >>| List.map (fun sw ->
+      >>| List.map ~f:(fun sw ->
               let package_manager = PackageManager.Opam (opam, sw) in
               { Candidate.package_manager; status = Ok () })
   in
@@ -304,8 +304,8 @@ let select () =
   | { status = Ok (); package_manager = Custom _ } ->
     let validateInput ~value =
       if
-        Core_kernel.String.is_substring value ~substring:"$prog"
-        && Core_kernel.String.is_substring value ~substring:"$args"
+        String.is_substring value ~substring:"$prog"
+        && String.is_substring value ~substring:"$args"
       then
         Promise.return None
       else
@@ -315,7 +315,7 @@ let select () =
       InputBoxOptions.create ~prompt:"Input a custom command template"
         ~value:"$prog $args" ~validateInput ()
     in
-    Window.showInputBox ~options () >>| String.trim >>= fun template ->
+    Window.showInputBox ~options () >>| String.strip >>= fun template ->
     Promise.Option.return @@ PackageManager.Custom template
   | { status; package_manager } -> (
     match status with
@@ -344,10 +344,10 @@ let get_command (t : PackageManager.t) bin args : Cmd.t =
     in
     let command =
       template
-      |> Core_kernel.String.substr_replace_all ~pattern:"$prog" ~with_:bin
-      |> Core_kernel.String.substr_replace_all ~pattern:"$args"
-           ~with_:(String.concat " " args)
-      |> String.trim
+      |> String.substr_replace_all ~pattern:"$prog" ~with_:bin
+      |> String.substr_replace_all ~pattern:"$args"
+           ~with_:(String.concat ~sep:" " args)
+      |> String.strip
     in
     Shell command
 

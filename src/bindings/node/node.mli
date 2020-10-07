@@ -60,8 +60,7 @@ module ChildProcess : sig
   module Options : sig
     type t
 
-    val create :
-      ?cwd:string -> ?env:(string, string) Core_kernel.Map.Poly.t -> unit -> t
+    val create : ?cwd:string -> ?env:string Interop.Dict.t -> unit -> t
   end
 
   type return =

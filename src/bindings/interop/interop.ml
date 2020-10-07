@@ -1,5 +1,6 @@
-let iter_set obj field f value =
-  Option.iter (fun value -> Ojs.set obj field (f value)) value
+let iter_set obj field f = function
+  | Some value -> Ojs.set obj field (f value)
+  | None -> ()
 
 let undefined = Ojs.variable "undefined"
 
@@ -35,24 +36,23 @@ module Regexp = struct
   let t_of_js : Ojs.t -> Js_of_ocaml.Regexp.regexp = Obj.magic
 end
 
-module JsDict = struct
-  open Core_kernel
+module Dict = struct
+  module StringMap = Map.Make (String)
 
-  type 'a t = (string, 'a) Map.Poly.t
+  let t_to_js value_to_js ml_map =
+    let to_js (k, v) = (k, value_to_js v) in
+    StringMap.to_seq ml_map |> Seq.map to_js |> Array.of_seq |> Ojs.obj
 
-  let t_to_js to_js m =
-    let obj = Ojs.empty_obj () in
-    let set ~key ~data = Ojs.set obj key (to_js data) in
-    Map.iteri ~f:set m;
-    obj
-
-  let t_of_js of_js obj =
-    let iteri ~f =
-      Ojs.iter_properties obj (fun key ->
-          let data = of_js (Ojs.get obj key) in
-          f ~key ~data)
+  let t_of_js value_of_js js_obj =
+    let ml_map = ref StringMap.empty in
+    let iter key =
+      let value = value_of_js (Ojs.get js_obj key) in
+      ml_map := StringMap.add key value !ml_map
     in
-    match Map.Poly.of_iteri ~iteri with
-    | `Ok m -> m
-    | `Duplicate_key _ -> assert false
+    Ojs.iter_properties js_obj iter;
+    !ml_map
+
+  let of_alist alist = StringMap.of_seq (List.to_seq alist)
+
+  include StringMap
 end

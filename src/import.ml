@@ -17,6 +17,8 @@ let env_sep =
 let property_exists json property =
   Ojs.has_property (Jsonoo.t_to_js json) property
 
+include Core_kernel
+
 module Or_error = struct
   type 'a t = ('a, string) result
 end

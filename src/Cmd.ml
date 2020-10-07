@@ -25,14 +25,14 @@ let candidate_fns =
   [| x |]
   else
     fun x ->
-  [| ".exe"; ".cmd" |] |> Array.map (fun ext -> Path.with_ext x ~ext)
+  [| ".exe"; ".cmd" |] |> Array.map ~f:(fun ext -> Path.with_ext x ~ext)
 
 let which path fn =
   let candidates = candidate_fns fn in
-  Core_kernel.String.split ~on:env_sep path
+  String.split ~on:env_sep path
   |> Promise.List.find_map (fun p ->
          let p = Path.of_string p in
-         Array.map (Path.join p) candidates
+         Array.map candidates ~f:(Path.join p)
          |> Promise.Array.find_map (fun p ->
                 let open Promise.Syntax in
                 Fs.exists (Path.to_string p) >>| function

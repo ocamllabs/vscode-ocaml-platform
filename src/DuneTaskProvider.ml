@@ -12,7 +12,7 @@ let problemMatchers = [ "$ocamlc" ]
 
 (* the ocamlc matcher is not able to parse ocaml compiler errors unless they
    follow the short style. *)
-let env = Core_kernel.Map.Poly.of_alist_exn [ ("OCAML_ERROR_STYLE", "short") ]
+let env = Interop.Dict.of_alist [ ("OCAML_ERROR_STYLE", "short") ]
 
 module Setting = struct
   type t = bool
@@ -31,15 +31,15 @@ end
 
 let folder_relative_path folders file =
   List.fold_left
-    (fun acc (folder : WorkspaceFolder.t) ->
+    ~f:(fun acc (folder : WorkspaceFolder.t) ->
       match acc with
       | Some _ -> acc
       | None -> (
         let prefix = Uri.fsPath (WorkspaceFolder.uri folder) in
-        match Core_kernel.String.chop_prefix file ~prefix with
+        match String.chop_prefix file ~prefix with
         | None -> acc
         | Some without_prefix -> Some (folder, without_prefix) ))
-    None folders
+    ~init:None folders
 
 let get_shell_execution toolchain options =
   let command = Toolchain.get_dune_command toolchain [ "build" ] in
@@ -48,7 +48,7 @@ let get_shell_execution toolchain options =
   | Shell commandLine -> ShellExecution.makeCommandLine ~commandLine ~options ()
   | Spawn { bin; args } ->
     let command = `String (Path.to_string bin) in
-    let args = List.map (fun a -> `String a) args in
+    let args = List.map ~f:(fun a -> `String a) args in
     ShellExecution.makeCommandArgs ~command ~args ~options ()
 
 let compute_tasks ?token toolchain =
@@ -61,8 +61,7 @@ let compute_tasks ?token toolchain =
   let includes = `String "**/{dune,dune-project,dune-workspace}" in
   Workspace.findFiles ~includes ~excludes ?token () >>| fun dunes ->
   let tasks =
-    List.map
-      (fun dune ->
+    List.map dunes ~f:(fun dune ->
         let scope, relative_path =
           match folder_relative_path folders (Uri.fsPath dune) with
           | None -> (TaskScope.Workspace, Uri.fsPath dune)
@@ -81,7 +80,6 @@ let compute_tasks ?token toolchain =
         in
         Task.set_group task TaskGroup.build;
         task)
-      dunes
   in
   Some tasks
 
@@ -103,5 +101,5 @@ let register t toolchain =
   t := Some (Tasks.registerTaskProvider ~type_:task_type ~provider)
 
 let dispose (t : t) =
-  Core_kernel.Option.iter ~f:Disposable.dispose !t;
+  Option.iter ~f:Disposable.dispose !t;
   t := None

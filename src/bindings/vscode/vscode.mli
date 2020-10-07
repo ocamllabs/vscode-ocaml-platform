@@ -1070,7 +1070,7 @@ module TerminalOptions : sig
 
   val cwd : t -> cwd option
 
-  val env : t -> (string, string option) Core_kernel.Map.Poly.t option
+  val env : t -> string option Interop.Dict.t option
 
   val strictEnv : t -> bool
 
@@ -1355,14 +1355,14 @@ module ShellExecutionOptions : sig
 
   val cwd : t -> string option
 
-  val env : t -> (string, string) Core_kernel.Map.Poly.t option
+  val env : t -> string Interop.Dict.t option
 
   val create :
        ?executable:string
     -> ?shellArgs:string list
     -> ?shellQuoting:ShellQuotingOptions.t
     -> ?cwd:string
-    -> ?env:(string, string) Core_kernel.Map.Poly.t
+    -> ?env:string Interop.Dict.t
     -> unit
     -> t
 end
@@ -1432,10 +1432,9 @@ module ProcessExecutionOptions : sig
 
   val cwd : t -> string option
 
-  val env : t -> (string, string) Core_kernel.Map.Poly.t option
+  val env : t -> string Interop.Dict.t option
 
-  val create :
-    ?cwd:string -> ?env:(string, string) Core_kernel.Map.Poly.t -> unit -> t
+  val create : ?cwd:string -> ?env:string Interop.Dict.t -> unit -> t
 end
 
 module ProcessExecution : sig
@@ -1471,9 +1470,9 @@ module TaskDefinition : sig
 
   val type_ : t -> string
 
-  val getAttribute : t -> string -> Ojs.t
+  val get_attribute : t -> string -> Ojs.t
 
-  val setAttribute : t -> string -> Ojs.t -> unit
+  val set_attribute : t -> string -> Ojs.t -> unit
 
   val create : type_:string -> ?attributes:(string * Ojs.t) list -> unit -> t
 end

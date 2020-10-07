@@ -24,7 +24,7 @@ module Discover = struct
     | "esy.json"
     | "opam" ->
       Promise.return (valid project_root)
-    | s when Filename.extension s = ".opam" ->
+    | s when String.equal (Caml.Filename.extension s) ".opam" ->
       Promise.return (valid project_root)
     | "package.json" as fname -> (
       let manifest_file = Path.(project_root / fname) |> Path.to_string in
@@ -68,7 +68,7 @@ module Discover = struct
 
   let run ~dir : discover list Promise.t =
     let open Promise.Syntax in
-    dir |> parse_dirs_up |> Promise.all_list >>| List.flatten
+    dir |> parse_dirs_up |> Promise.all_list >>| List.concat
 end
 
 let discover = Discover.run
@@ -95,7 +95,7 @@ let state t ~manifest =
           | Some esy_response ->
             esy_response
             |> Jsonoo.Decode.field "isProjectReadyForDev" Jsonoo.Decode.bool
-            |> Core_kernel.Result.return ))
+            |> Result.return ))
   |> Promise.Result.map (fun is_project_ready_for_dev ->
          if is_project_ready_for_dev then
            State.Ready
