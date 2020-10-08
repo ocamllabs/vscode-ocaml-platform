@@ -11,7 +11,7 @@
    debuggers, REPLs etc that could be shipped with [vscode-ocaml-platform] plugin
    itself
 
-   The separation between init, runSetup and extraction helpers exist so that we
+   The separation between [init], [run_setup] and extraction helpers exist so that we
    can handle missing tools gracefully (ie provide degraded performance, direct
    user to install missing tools etc). Having a single [Toolchain.make()], for
    instance, would not make it this flexible. *)
@@ -38,11 +38,11 @@ val package_manager : resources -> Package_manager.t
 
 (** [select_and_save] requires the process environment the plugin is being run in
    (ie VSCode's process environment) and the project root and produces a promise
-   of resources available that can later be passed on to runSetup that can be
+   of resources available that can later be passed on to [run_setup] that can be
    called to install the toolchain. *)
 val select_and_save : unit -> Package_manager.t option Promise.t
 
-(** [select] is the same as [selectAndSave] but does not save the toolchain configuration *)
+(** [select] is the same as [select_and_save] but does not save the toolchain configuration *)
 val select : unit -> Package_manager.t option Promise.t
 
 (** [run_setup] is an effectful function that triggers setup instructions
@@ -65,7 +65,7 @@ val select : unit -> Package_manager.t option Promise.t
    way to setup the toolchain, so that we (developers) have the
    flexibility to iterate and improve how the toolchain it provided.
 
-   A hard requirement for runSetup is to not get in the way to
+   A hard requirement for [run_setup] is to not get in the way to
    existing setups. If users already have working toolchains installed
    via some other toolchain/package manager (Nix, system wide managers
    like yum/apt/brew or Duniverse), [run_setup] must co-operate and
@@ -78,8 +78,7 @@ val run_setup : resources -> (unit, string) result Promise.t
 (** Extract command to run with the toolchain *)
 val get_command : resources -> string -> string list -> Cmd.t
 
-(** Extract lsp command and arguments (Eg. "opam" and [| "exec";
-   "ocamllsp" |] *)
+(** Extract lsp command and arguments *)
 val get_lsp_command : ?args:string list -> resources -> Cmd.t
 
 (** Extract a dune command *)

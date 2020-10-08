@@ -1,16 +1,16 @@
 open Import
 
 (* Terminology:
-   - PackageManager: represents supported package managers
+   - Package_manager: represents supported package managers
      with Global as the fallback
-   - projectRoot is different from PackageManager root (Eg. Opam
-     (Path.ofString "/foo/bar")). Project root
+   - project_root is different from Package_manager root (Eg. Opam
+     (Path.of_string "/foo/bar")). Project root
      is the directory where manifest file (opam/esy.json/package.json)
-     was found. PackageManager root is the directory that contains the
+     was found. Package_manager root is the directory that contains the
      manifest file responsible for setting up the toolchain - the two
      are same for Esy and Opam project but different for
      bucklescript. Bucklescript projects have this manifest file
-     abstracted away from the user (atleast at the moment)
+     abstracted away from the user (at least at the moment)
    - Manifest: abstracts functions handling manifest files
      of the supported package managers *)
 
