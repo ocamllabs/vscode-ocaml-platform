@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.3.1
+
+- Fix bug that prevented the extension from initializing properly when installed
+  from the marketplace (#398)
+
 ## 1.3.0
 
 - Replace "Switch implementation/interface" navigator button with a custom icon
