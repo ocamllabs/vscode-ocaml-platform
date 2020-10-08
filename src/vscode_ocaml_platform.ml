@@ -42,10 +42,10 @@ module Instance = struct
   type t =
     { mutable toolchain : Toolchain.resources option
     ; mutable client : LanguageClient.t option
-    ; mutable ocaml_lsp_capabilities : OcamlLsp.t option
+    ; mutable ocaml_lsp_capabilities : Ocaml_lsp.t option
     ; mutable status_bar_item : StatusBarItem.t option
-    ; dune_formatter : DuneFormatter.t
-    ; dune_task_provider : DuneTaskProvider.t
+    ; dune_formatter : Dune_formatter.t
+    ; dune_task_provider : Dune_task_provider.t
     }
 
   let create () =
@@ -53,13 +53,13 @@ module Instance = struct
     ; client = None
     ; ocaml_lsp_capabilities = None
     ; status_bar_item = None
-    ; dune_formatter = DuneFormatter.create ()
-    ; dune_task_provider = DuneTaskProvider.create ()
+    ; dune_formatter = Dune_formatter.create ()
+    ; dune_task_provider = Dune_task_provider.create ()
     }
 
   let stop t =
-    DuneFormatter.dispose t.dune_formatter;
-    DuneTaskProvider.dispose t.dune_task_provider;
+    Dune_formatter.dispose t.dune_formatter;
+    Dune_task_provider.dispose t.dune_task_provider;
 
     Option.iter t.status_bar_item ~f:(fun status_bar_item ->
         StatusBarItem.dispose status_bar_item;
@@ -75,8 +75,8 @@ module Instance = struct
   let start t toolchain =
     t.toolchain <- Some toolchain;
 
-    DuneFormatter.register t.dune_formatter toolchain;
-    DuneTaskProvider.register t.dune_task_provider toolchain;
+    Dune_formatter.register t.dune_formatter toolchain;
+    Dune_task_provider.register t.dune_task_provider toolchain;
 
     let status_bar_item =
       Window.createStatusBarItem ~alignment:StatusBarAlignment.Left ()
@@ -88,7 +88,7 @@ module Instance = struct
         (* see https://code.visualstudio.com/api/references/icons-in-labels *)
       in
       Printf.sprintf "%s %s" package_icon
-      @@ Toolchain.PackageManager.to_pretty_string package_manager
+      @@ Toolchain.Package_manager.to_pretty_string package_manager
     in
     StatusBarItem.set_text status_bar_item status_bar_text;
     StatusBarItem.set_command status_bar_item
@@ -109,11 +109,11 @@ module Instance = struct
 
     let open Promise.Syntax in
     LanguageClient.readyInitializeResult client >>| fun initialize_result ->
-    let ocamlLsp = OcamlLsp.of_initialize_result initialize_result in
+    let ocamlLsp = Ocaml_lsp.of_initialize_result initialize_result in
     t.ocaml_lsp_capabilities <- Some ocamlLsp;
     if
-      (not (OcamlLsp.interfaceSpecificLangId ocamlLsp))
-      || not (OcamlLsp.canHandleSwitchImplIntf ocamlLsp)
+      (not (Ocaml_lsp.interfaceSpecificLangId ocamlLsp))
+      || not (Ocaml_lsp.can_handle_switch_impl_intf ocamlLsp)
     then
       message `Warn
         "The installed version of ocamllsp is out of date. Some features may \
@@ -124,7 +124,7 @@ module Instance = struct
 
   let open_terminal toolchain =
     let open Option.Monad_infix in
-    match toolchain |> TerminalSandbox.create >>| TerminalSandbox.show with
+    match toolchain |> Terminal_sandbox.create >>| Terminal_sandbox.show with
     | Some _ -> ()
     | None ->
       message `Error
@@ -185,8 +185,8 @@ let switch_impl_intf (instance : Instance.t) () =
     (* extension needs to be activated; otherwise, just ignore the switch try *)
     instance.ocaml_lsp_capabilities >>| fun ocamlLsp ->
     (* same as for instance.client; ignore the try if it's None *)
-    if OcamlLsp.canHandleSwitchImplIntf ocamlLsp then
-      SwitchImplIntf.request_switch client document
+    if Ocaml_lsp.can_handle_switch_impl_intf ocamlLsp then
+      Switch_impl_intf.request_switch client document
     else
       (* if, however, ocamllsp doesn't have the capability, recommend updating ocamllsp*)
       Promise.return
@@ -235,7 +235,7 @@ let activate (extension : ExtensionContext.t) =
       | Some toolchain -> (toolchain, false)
       | None ->
         let (_ : unit Promise.t) = suggest_to_setup_toolchain instance in
-        (Toolchain.PackageManager.Global, true)
+        (Toolchain.Package_manager.Global, true)
     in
     (Toolchain.make_resources resources, is_fallback)
   in

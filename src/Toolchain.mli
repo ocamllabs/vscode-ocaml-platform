@@ -16,7 +16,7 @@
    user to install missing tools etc). Having a single [Toolchain.make()], for
    instance, would not make it this flexible. *)
 
-module PackageManager : sig
+module Package_manager : sig
   type t =
     | Opam of Opam.t * Opam.Switch.t
     | Esy of Esy.t * Path.t
@@ -30,20 +30,20 @@ end
 
 type resources
 
-val of_settings : unit -> PackageManager.t option Promise.t
+val of_settings : unit -> Package_manager.t option Promise.t
 
-val make_resources : PackageManager.t -> resources
+val make_resources : Package_manager.t -> resources
 
-val package_manager : resources -> PackageManager.t
+val package_manager : resources -> Package_manager.t
 
 (** [select_and_save] requires the process environment the plugin is being run in
    (ie VSCode's process environment) and the project root and produces a promise
    of resources available that can later be passed on to runSetup that can be
    called to install the toolchain. *)
-val select_and_save : unit -> PackageManager.t option Promise.t
+val select_and_save : unit -> Package_manager.t option Promise.t
 
 (** [select] is the same as [selectAndSave] but does not save the toolchain configuration *)
-val select : unit -> PackageManager.t option Promise.t
+val select : unit -> Package_manager.t option Promise.t
 
 (** [run_setup] is an effectful function that triggers setup instructions
    automatically for the user. At present, this functionality

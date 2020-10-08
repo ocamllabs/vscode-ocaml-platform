@@ -6,4 +6,4 @@ val of_initialize_result : LanguageClient.InitializeResult.t -> t
 
 val interfaceSpecificLangId : t -> bool
 
-val canHandleSwitchImplIntf : t -> bool
+val can_handle_switch_impl_intf : t -> bool

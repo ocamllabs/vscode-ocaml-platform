@@ -40,4 +40,4 @@ let of_initialize_result (t : LanguageClient.InitializeResult.t) =
 
 let interfaceSpecificLangId t = t.interfaceSpecificLangId
 
-let canHandleSwitchImplIntf t = t.handleSwitchImplIntf
+let can_handle_switch_impl_intf t = t.handleSwitchImplIntf
