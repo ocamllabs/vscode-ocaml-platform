@@ -49,15 +49,15 @@ jobs:
         id: esy-cache-dir-path
         run: node .github/workflows/print_esy_cache.js
 
-      - name: Restore opam cache
-        id: cache-opam
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.opam-root-dir-path.outputs.dir }}
-          # opam cache is coupled to esy lock files, so both caches will be wiped whenever esy deps change
-          key: opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-${{ hashFiles('esy.lock/index.json') }}
-          restore-keys: |
-            opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-
+      # - name: Restore opam cache
+      #   id: cache-opam
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: ${{ steps.opam-root-dir-path.outputs.dir }}
+      #     # opam cache is coupled to esy lock files, so both caches will be wiped whenever esy deps change
+      #     key: opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-${{ hashFiles('esy.lock/index.json') }}
+      #     restore-keys: |
+      #       opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-
 
       - name: Restore esy cache
         uses: actions/cache@v2
