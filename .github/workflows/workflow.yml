@@ -71,12 +71,16 @@ jobs:
         run: |
           opam pin ocaml-lsp-server https://github.com/ocaml/ocaml-lsp.git --no-action
           opam install ocaml-lsp-server ocamlformat --yes
+          opam install --deps-only .
 
       - name: Build esy packages
         # Cleanup build cache in case dependencies have changed
         run: |
           esy build
           esy cleanup .
+
+      - name: Build extension
+        run: opam exec -- dune build @vscode
 
       - name: Install npm packages
         run: yarn --frozen-lockfile
