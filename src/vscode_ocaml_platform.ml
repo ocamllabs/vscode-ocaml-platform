@@ -109,11 +109,11 @@ module Instance = struct
 
     let open Promise.Syntax in
     LanguageClient.readyInitializeResult client >>| fun initialize_result ->
-    let ocamlLsp = Ocaml_lsp.of_initialize_result initialize_result in
-    t.ocaml_lsp_capabilities <- Some ocamlLsp;
+    let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
+    t.ocaml_lsp_capabilities <- Some ocaml_lsp;
     if
-      (not (Ocaml_lsp.has_interface_specific_lang_id ocamlLsp))
-      || not (Ocaml_lsp.can_handle_switch_impl_intf ocamlLsp)
+      (not (Ocaml_lsp.has_interface_specific_lang_id ocaml_lsp))
+      || not (Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp)
     then
       message `Warn
         "The installed version of ocamllsp is out of date. Some features may \
@@ -183,9 +183,9 @@ let switch_impl_intf (instance : Instance.t) () =
     Window.activeTextEditor () >>| TextEditor.document >>= fun document ->
     instance.client >>= fun client ->
     (* extension needs to be activated; otherwise, just ignore the switch try *)
-    instance.ocaml_lsp_capabilities >>| fun ocamlLsp ->
+    instance.ocaml_lsp_capabilities >>| fun ocaml_lsp ->
     (* same as for instance.client; ignore the try if it's None *)
-    if Ocaml_lsp.can_handle_switch_impl_intf ocamlLsp then
+    if Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp then
       Switch_impl_intf.request_switch client document
     else
       (* if, however, ocamllsp doesn't have the capability, recommend updating ocamllsp*)
