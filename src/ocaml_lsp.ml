@@ -38,6 +38,6 @@ let of_initialize_result (t : LanguageClient.InitializeResult.t) =
     | s -> s
     | exception Jsonoo.Decode_error _ -> default )
 
-let interfaceSpecificLangId t = t.interfaceSpecificLangId
+let has_interface_specific_lang_id t = t.interfaceSpecificLangId
 
-let canHandleSwitchImplIntf t = t.handleSwitchImplIntf
+let can_handle_switch_impl_intf t = t.handleSwitchImplIntf

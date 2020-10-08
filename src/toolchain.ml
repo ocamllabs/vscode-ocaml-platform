@@ -1,20 +1,20 @@
 open Import
 
 (* Terminology:
-   - PackageManager: represents supported package managers
+   - Package_manager: represents supported package managers
      with Global as the fallback
-   - projectRoot is different from PackageManager root (Eg. Opam
-     (Path.ofString "/foo/bar")). Project root
+   - project_root is different from Package_manager root (Eg. Opam
+     (Path.of_string "/foo/bar")). Project root
      is the directory where manifest file (opam/esy.json/package.json)
-     was found. PackageManager root is the directory that contains the
+     was found. Package_manager root is the directory that contains the
      manifest file responsible for setting up the toolchain - the two
      are same for Esy and Opam project but different for
      bucklescript. Bucklescript projects have this manifest file
-     abstracted away from the user (atleast at the moment)
+     abstracted away from the user (at least at the moment)
    - Manifest: abstracts functions handling manifest files
      of the supported package managers *)
 
-module PackageManager = struct
+module Package_manager = struct
   module Kind = struct
     type t =
       | Opam
@@ -134,18 +134,18 @@ module PackageManager = struct
     | Custom _ -> "Custom OCaml"
 end
 
-type resources = PackageManager.t
+type resources = Package_manager.t
 
-let package_manager (t : resources) : PackageManager.t = t
+let package_manager (t : resources) : Package_manager.t = t
 
 let available_package_managers () =
-  { PackageManager.Kind.Hmap.opam = Opam.make ()
+  { Package_manager.Kind.Hmap.opam = Opam.make ()
   ; esy = Esy.make ()
   ; global = ()
   ; custom = ()
   }
 
-let of_settings () : PackageManager.t option Promise.t =
+let of_settings () : Package_manager.t option Promise.t =
   let open Promise.Syntax in
   let available = available_package_managers () in
   let not_available kind =
@@ -160,8 +160,8 @@ let of_settings () : PackageManager.t option Promise.t =
       this_ this_
   in
   match
-    ( Settings.get ~section:"ocaml" PackageManager.Setting.t
-      : PackageManager.Setting.t option )
+    ( Settings.get ~section:"ocaml" Package_manager.Setting.t
+      : Package_manager.Setting.t option )
   with
   | None -> Promise.return None
   | Some (Esy manifest) -> (
@@ -169,7 +169,7 @@ let of_settings () : PackageManager.t option Promise.t =
     | None ->
       not_available `Esy;
       None
-    | Some esy -> Some (PackageManager.Esy (esy, manifest)) )
+    | Some esy -> Some (Package_manager.Esy (esy, manifest)) )
   | Some (Opam switch) -> (
     let open Promise.Syntax in
     available.opam >>= function
@@ -184,18 +184,18 @@ let of_settings () : PackageManager.t option Promise.t =
            exist."
           (Opam.Switch.name switch);
         None
-      | true -> Some (PackageManager.Opam (opam, switch)) ) )
-  | Some Global -> Promise.return (Some PackageManager.Global)
+      | true -> Some (Package_manager.Opam (opam, switch)) ) )
+  | Some Global -> Promise.return (Some Package_manager.Global)
   | Some (Custom template) ->
-    Promise.return (Some (PackageManager.Custom template))
+    Promise.return (Some (Package_manager.Custom template))
 
-let to_settings (pm : PackageManager.t) =
-  Settings.set ~section:"ocaml" PackageManager.Setting.t
-    (PackageManager.to_setting pm)
+let to_settings (pm : Package_manager.t) =
+  Settings.set ~section:"ocaml" Package_manager.Setting.t
+    (Package_manager.to_setting pm)
 
 module Candidate = struct
   type t =
-    { package_manager : PackageManager.t
+    { package_manager : Package_manager.t
     ; status : (unit, string) result
     }
 
@@ -211,7 +211,7 @@ module Candidate = struct
         | _ -> None )
     in
     match package_manager with
-    | PackageManager.Opam (_, Named name) -> create ~label:name ?description ()
+    | Package_manager.Opam (_, Named name) -> create ~label:name ?description ()
     | Opam (_, Local path) ->
       let project_name = Path.basename path in
       let project_path = Path.to_string path in
@@ -262,7 +262,7 @@ let sandbox_candidates ~workspace_folders =
       esys |> List.concat
       |> List.map ~f:(fun (manifest : Esy.discover) ->
              { Candidate.package_manager =
-                 PackageManager.Esy (esy, manifest.file)
+                 Package_manager.Esy (esy, manifest.file)
              ; status = manifest.status
              })
   in
@@ -272,12 +272,12 @@ let sandbox_candidates ~workspace_folders =
     | Some opam ->
       Opam.switch_list opam
       >>| List.map ~f:(fun sw ->
-              let package_manager = PackageManager.Opam (opam, sw) in
+              let package_manager = Package_manager.Opam (opam, sw) in
               { Candidate.package_manager; status = Ok () })
   in
-  let global = Candidate.ok PackageManager.Global in
+  let global = Candidate.ok Package_manager.Global in
   let custom =
-    Candidate.ok (PackageManager.Custom "$prog $args")
+    Candidate.ok (Package_manager.Custom "$prog $args")
     (* doesn't matter what the custom fields are set to here
        user will input custom commands in [select] *)
   in
@@ -285,7 +285,7 @@ let sandbox_candidates ~workspace_folders =
   Promise.all2 (esy, opam) >>| fun (esy, opam) ->
   (global :: custom :: esy) @ opam
 
-let setup_toolchain (kind : PackageManager.t) =
+let setup_toolchain (kind : Package_manager.t) =
   match kind with
   | Esy (esy, manifest) -> Esy.setup_toolchain esy ~manifest
   | Opam _
@@ -316,7 +316,7 @@ let select () =
         ~value:"$prog $args" ~validateInput ()
     in
     Window.showInputBox ~options () >>| String.strip >>= fun template ->
-    Promise.Option.return @@ PackageManager.Custom template
+    Promise.Option.return @@ Package_manager.Custom template
   | { status; package_manager } -> (
     match status with
     | Error s ->
@@ -330,7 +330,7 @@ let select_and_save () =
   let open Promise.Syntax in
   to_settings package_manager >>| fun () -> Some package_manager
 
-let get_command (t : PackageManager.t) bin args : Cmd.t =
+let get_command (t : Package_manager.t) bin args : Cmd.t =
   match t with
   | Opam (opam, switch) -> Opam.exec opam ~switch ~args:(bin :: args)
   | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:(bin :: args)
@@ -351,10 +351,10 @@ let get_command (t : PackageManager.t) bin args : Cmd.t =
     in
     Shell command
 
-let get_lsp_command ?(args = []) (t : PackageManager.t) : Cmd.t =
+let get_lsp_command ?(args = []) (t : Package_manager.t) : Cmd.t =
   get_command t "ocamllsp" args
 
-let get_dune_command (t : PackageManager.t) args : Cmd.t =
+let get_dune_command (t : Package_manager.t) args : Cmd.t =
   get_command t "dune" args
 
 let run_setup resources =
