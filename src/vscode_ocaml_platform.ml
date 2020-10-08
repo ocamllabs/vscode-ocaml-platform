@@ -112,7 +112,7 @@ module Instance = struct
     let ocamlLsp = Ocaml_lsp.of_initialize_result initialize_result in
     t.ocaml_lsp_capabilities <- Some ocamlLsp;
     if
-      (not (Ocaml_lsp.interfaceSpecificLangId ocamlLsp))
+      (not (Ocaml_lsp.has_interface_specific_lang_id ocamlLsp))
       || not (Ocaml_lsp.can_handle_switch_impl_intf ocamlLsp)
     then
       message `Warn
