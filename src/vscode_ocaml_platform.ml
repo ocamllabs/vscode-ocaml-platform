@@ -195,7 +195,8 @@ let switch_impl_intf (instance : Instance.t) () =
             between implementation and interface files. Consider updating \
             ocamllsp."
   in
-  ignore @@ try_switching ()
+  let (_ : unit Promise.t option) = try_switching () in
+  ()
 
 let suggest_to_setup_toolchain instance =
   let open Promise.Syntax in
