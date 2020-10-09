@@ -8,7 +8,7 @@ let of_string s = s
 
 let to_string s = s
 
-let delimiter = Node.Path.delimiter.[0]
+let delimiter = Node.Path.delimiter
 
 let is_absolute t = Node.Path.isAbsolute t
 

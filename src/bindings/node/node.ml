@@ -48,6 +48,10 @@ end
 module Path = struct
   val delimiter : string [@@js.global "path.delimiter"]
 
+  let delimiter =
+    assert (String.length delimiter = 1);
+    delimiter.[0]
+
   val basename : string -> string [@@js.global "path.basename"]
 
   val dirname : string -> string [@@js.global "path.dirname"]

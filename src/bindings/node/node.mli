@@ -49,7 +49,7 @@ module Stream : sig
 end
 
 module Path : sig
-  val delimiter : string
+  val delimiter : char
 
   val basename : string -> string
 
