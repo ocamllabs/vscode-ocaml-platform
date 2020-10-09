@@ -4,6 +4,7 @@
 
 - Fix incomplete error message for missing commands (#400)
 - Fix highlighting of quoted string literals that contain quotes (#403)
+- Fix path handling for global sandboxes on Windows (#401)
 
 ## 1.3.1
 
