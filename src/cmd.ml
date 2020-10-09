@@ -19,21 +19,19 @@ let path_missing_from_env = "'PATH' variable not found in the environment"
 
 let append { bin; args = args1 } args2 = { bin; args = args1 @ args2 }
 
-let candidate_fns =
-  if Sys.unix then
-    fun x ->
-  [| x |]
-  else
-    fun x ->
-  [| ".exe"; ".cmd" |] |> Array.map ~f:(fun ext -> Path.with_ext x ~ext)
+let candidates bin =
+  let bin_ext ext = Path.with_ext bin ~ext in
+  match Platform.t with
+  | Win32 -> [ bin_ext ".exe"; bin_ext ".cmd" ]
+  | _ -> [ bin ]
 
-let which path fn =
-  let candidates = candidate_fns fn in
-  String.split ~on:env_sep path
+let which path bin =
+  String.split ~on:Path.delimiter path
   |> Promise.List.find_map (fun p ->
          let p = Path.of_string p in
-         Array.map candidates ~f:(Path.join p)
-         |> Promise.Array.find_map (fun p ->
+         candidates bin
+         |> List.map ~f:(Path.join p)
+         |> Promise.List.find_map (fun p ->
                 let open Promise.Syntax in
                 Fs.exists (Path.to_string p) >>| function
                 | true -> Some p

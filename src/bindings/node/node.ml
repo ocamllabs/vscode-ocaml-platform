@@ -45,6 +45,24 @@ module Stream = struct
   val end_ : t -> unit [@@js.call]
 end
 
+module Path = struct
+  val delimiter : string [@@js.global "path.delimiter"]
+
+  let delimiter =
+    assert (String.length delimiter = 1);
+    delimiter.[0]
+
+  val basename : string -> string [@@js.global "path.basename"]
+
+  val dirname : string -> string [@@js.global "path.dirname"]
+
+  val extname : string -> string [@@js.global "path.extname"]
+
+  val isAbsolute : string -> bool [@@js.global "path.isAbsolute"]
+
+  val join : (string list[@js.variadic]) -> string [@@js.global "path.join"]
+end
+
 module Fs = struct
   val read_dir : string -> string list Promise.t [@@js.global "fs.readDir"]
 

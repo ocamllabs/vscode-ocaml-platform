@@ -9,11 +9,6 @@ module Process = Node.Process
 module ChildProcess = Node.ChildProcess
 module Fs = Node.Fs
 
-let env_sep =
-  match Sys.unix with
-  | true -> ':'
-  | false -> ';'
-
 let property_exists json property =
   Ojs.has_property (Jsonoo.t_to_js json) property
 

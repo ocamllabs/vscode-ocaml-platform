@@ -1,5 +1,4 @@
 var fs = require("fs");
-var child_process = require("child_process");
 var promisify = require("util").promisify;
 
 joo_global_object.fs = {
@@ -8,7 +7,6 @@ joo_global_object.fs = {
   exists: promisify(fs.exists),
 };
 
-joo_global_object.child_process = {
-  exec: child_process.exec,
-  spawn: child_process.spawn,
-};
+joo_global_object.child_process = require("child_process");
+
+joo_global_object.path = require("path");

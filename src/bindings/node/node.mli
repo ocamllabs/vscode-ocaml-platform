@@ -48,6 +48,20 @@ module Stream : sig
   val end_ : t -> unit
 end
 
+module Path : sig
+  val delimiter : char
+
+  val basename : string -> string
+
+  val dirname : string -> string
+
+  val extname : string -> string
+
+  val isAbsolute : string -> bool
+
+  val join : string list -> string
+end
+
 module Fs : sig
   val read_dir : string -> (string list, string) result Promise.t
 
