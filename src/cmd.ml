@@ -48,7 +48,8 @@ let check_spawn { bin; args } =
     | Some path -> (
       let open Promise.Syntax in
       which path bin >>| function
-      | None -> Error {j| Command "$bin" not found |j}
+      | None ->
+        Error (Printf.sprintf "Command %s not found" (Path.to_string bin))
       | Some bin -> Ok { bin; args } )
 
 let check t =
