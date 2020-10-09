@@ -177,8 +177,7 @@
           "end": "\\|[[:lower:]_]*\\}",
           "beginCaptures": {
             "1": { "name": "keyword.other.extension.ocaml" }
-          },
-          "patterns": [{ "include": "#strings" }]
+          }
         },
         {
           "comment": "string literal",
