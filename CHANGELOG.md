@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Fix incomplete error message for missing commands (#400)
+
 ## 1.3.1
 
 - Fix bug that prevented the extension from initializing properly when installed
