@@ -828,10 +828,9 @@ end
 module Event : sig
   type 'a t = listener:('a -> unit) -> Disposable.t
 
-  val t_of_js : (Ojs.t -> 'a) -> Ojs.t -> listener:('a -> 'b) -> Disposable.t
+  val t_of_js : (Ojs.t -> 'a) -> Ojs.t -> 'a t
 
-  val t_to_js :
-    ('a -> Ojs.t) -> (listener:('a -> unit) -> Disposable.t) -> Ojs.t
+  val t_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
 end
 
 module CancellationToken : sig

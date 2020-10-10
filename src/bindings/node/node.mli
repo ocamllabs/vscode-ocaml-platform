@@ -11,13 +11,7 @@ module Process : sig
 end
 
 module JsError : sig
-  type t = Promise.error
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
-  val ofPromiseError : Promise.error -> string
+  val message : Promise.error -> string
 end
 
 module Buffer : sig
@@ -27,7 +21,7 @@ module Buffer : sig
 
   val t_to_js : t -> Ojs.t
 
-  val to_string : t -> string
+  val toString : t -> string
 
   val from : string -> t
 
@@ -63,9 +57,9 @@ module Path : sig
 end
 
 module Fs : sig
-  val read_dir : string -> (string list, string) result Promise.t
+  val readDir : string -> (string list, string) result Promise.t
 
-  val read_file : string -> string Promise.t
+  val readFile : string -> string Promise.t
 
   val exists : string -> bool Promise.t
 end
