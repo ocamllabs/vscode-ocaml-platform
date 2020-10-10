@@ -15,9 +15,7 @@ module Process = struct
 end
 
 module JsError = struct
-  type t = Promise.error [@@js]
-
-  let ofPromiseError (error : Promise.error) =
+  let message (error : Promise.error) =
     let js_error = [%js.of: Promise.error] error in
     if Ojs.has_property js_error "message" then
       [%js.to: string] (Ojs.get js_error "message")
@@ -28,7 +26,7 @@ end
 module Buffer = struct
   type t = private Ojs.t [@@js]
 
-  val to_string : t -> string [@@js.call]
+  val toString : t -> string [@@js.call]
 
   val from : string -> t [@@js.global "Buffer.from"]
 
@@ -64,15 +62,15 @@ module Path = struct
 end
 
 module Fs = struct
-  val read_dir : string -> string list Promise.t [@@js.global "fs.readDir"]
+  val readDir : string -> string list Promise.t [@@js.global "fs.readDir"]
 
-  let read_dir path =
-    read_dir path
+  let readDir path =
+    readDir path
     |> Promise.then_ ~fulfilled:Promise.Result.return
     |> Promise.catch ~rejected:(fun error ->
-           Promise.return (Error (JsError.ofPromiseError error)))
+           Promise.return (Error (JsError.message error)))
 
-  val read_file : string -> string Promise.t [@@js.global "fs.readFile"]
+  val readFile : string -> string Promise.t [@@js.global "fs.readFile"]
 
   val exists : string -> bool Promise.t [@@js.global "fs.exists"]
 end
@@ -148,8 +146,8 @@ module ChildProcess = struct
     ( on_close cp @@ fun code ->
       resolve
         { exitCode = code
-        ; stdout = Buffer.to_string !stdout
-        ; stderr = Buffer.to_string !stderr
+        ; stdout = Buffer.toString !stdout
+        ; stderr = Buffer.toString !stderr
         } );
 
     match stdin with

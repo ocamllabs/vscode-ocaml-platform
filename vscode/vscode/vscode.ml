@@ -830,8 +830,8 @@ end
 module Event = struct
   type 'a t = listener:('a -> unit) -> Disposable.t
 
-  let t_of_js ml_of_js js_fun =
-   fun [@js.dummy] ~listener:ml_listener ->
+  let t_of_js (ml_of_js : Ojs.t -> 'a) (js_fun : Ojs.t) : 'a t =
+   fun ~listener:ml_listener ->
     let js_listener =
       Ojs.fun_to_js 1 @@ fun js_arg -> ml_listener (ml_of_js js_arg)
     in
@@ -840,13 +840,13 @@ module Event = struct
     in
     [%js.to: Disposable.t] disposable
 
-  let t_to_js ml_to_js ml_fun =
+  let t_to_js (ml_to_js : 'a -> Ojs.t) (ml_fun : 'a t) : Ojs.t =
     Ojs.fun_to_js 1 @@ fun js_listener ->
     let ml_listener ml_arg =
       ignore @@ Ojs.call js_listener "call" [| Ojs.null; ml_to_js ml_arg |]
     in
     let (disposable : Disposable.t) = ml_fun ~listener:ml_listener in
-    [%js.to: Disposable.t] disposable
+    [%js.of: Disposable.t] disposable
 end
 
 module CancellationToken = struct
@@ -931,15 +931,15 @@ module ProviderResult = struct
     | `Promise of 'a or_undefined Promise.t
     ]
 
-  let t_to_js to_js = function
-    | `Value v -> or_undefined_to_js to_js v
-    | `Promise p -> Promise.t_to_js (or_undefined_to_js to_js) p
+  let t_to_js ml_to_js = function
+    | `Value v -> or_undefined_to_js ml_to_js v
+    | `Promise p -> Promise.t_to_js (or_undefined_to_js ml_to_js) p
 
-  let t_of_js of_js js_val =
+  let t_of_js ml_of_js js_val =
     if Ojs.has_property js_val "then" then
-      `Promise (Promise.t_of_js (or_undefined_of_js of_js) js_val)
+      `Promise (Promise.t_of_js (or_undefined_of_js ml_of_js) js_val)
     else
-      `Value (or_undefined_of_js of_js js_val)
+      `Value (or_undefined_of_js ml_of_js js_val)
 end
 
 module InputBoxOptions = struct

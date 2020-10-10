@@ -245,7 +245,7 @@ let activate (extension : ExtensionContext.t) =
   |> Promise.Result.iter ~error:(fun e ->
          if not is_fallback then message `Error "%s" e)
   |> Promise.catch ~rejected:(fun e ->
-         let error_message = Node.JsError.ofPromiseError e in
+         let error_message = Node.JsError.message e in
          message `Error "Error: %s" error_message;
          Promise.return ())
 

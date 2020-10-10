@@ -29,7 +29,7 @@ module Discover = struct
     | "package.json" as fname -> (
       let manifest_file = Path.(project_root / fname) |> Path.to_string in
       let open Promise.Syntax in
-      Fs.read_file manifest_file >>| fun manifest ->
+      Fs.readFile manifest_file >>| fun manifest ->
       match Jsonoo.try_parse_opt manifest with
       | None -> invalid_json project_root
       | Some json ->
@@ -45,7 +45,7 @@ module Discover = struct
 
   let parse_dir dir =
     let open Promise.Syntax in
-    Path.to_string dir |> Fs.read_dir
+    Path.to_string dir |> Fs.readDir
     >>| (function
           | Ok res -> res
           | Error err ->
