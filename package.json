@@ -15,7 +15,7 @@
   "homepage": "https://github.com/ocamllabs/vscode-ocaml-platform",
   "main": "./_build/default/src/vscode_ocaml_platform.bc.js",
   "engines": {
-    "vscode": "^1.49.0"
+    "vscode": "^1.50.0"
   },
   "categories": [
     "Programming Languages"
