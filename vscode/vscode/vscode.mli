@@ -1718,23 +1718,15 @@ module TaskProvider : sig
   val t_to_js : t -> Ojs.t
 
   val provideTasks :
-    t -> ?token:CancellationToken.t -> unit -> Task.t list ProviderResult.t
+    t -> token:CancellationToken.t -> Task.t list ProviderResult.t
 
   val resolveTasks :
-       t
-    -> task:Task.t
-    -> ?token:CancellationToken.t
-    -> unit
-    -> Task.t ProviderResult.t
+    t -> task:Task.t -> token:CancellationToken.t -> Task.t ProviderResult.t
 
   val create :
-       provideTasks:
-         (?token:CancellationToken.t -> unit -> Task.t list ProviderResult.t)
+       provideTasks:(token:CancellationToken.t -> Task.t list ProviderResult.t)
     -> resolveTasks:
-         (   task:Task.t
-          -> ?token:CancellationToken.t
-          -> unit
-          -> Task.t ProviderResult.t)
+         (task:Task.t -> token:CancellationToken.t -> Task.t ProviderResult.t)
     -> t
 end
 

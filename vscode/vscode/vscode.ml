@@ -1709,25 +1709,17 @@ module TaskProvider = struct
   type t = private (* interface *) Ojs.t [@@js]
 
   val provideTasks :
-    t -> ?token:CancellationToken.t -> unit -> Task.t list ProviderResult.t
+    t -> token:CancellationToken.t -> Task.t list ProviderResult.t
     [@@js.call]
 
   val resolveTasks :
-       t
-    -> task:Task.t
-    -> ?token:CancellationToken.t
-    -> unit
-    -> Task.t ProviderResult.t
+    t -> task:Task.t -> token:CancellationToken.t -> Task.t ProviderResult.t
     [@@js.call]
 
   val create :
-       provideTasks:
-         (?token:CancellationToken.t -> unit -> Task.t list ProviderResult.t)
+       provideTasks:(token:CancellationToken.t -> Task.t list ProviderResult.t)
     -> resolveTasks:
-         (   task:Task.t
-          -> ?token:CancellationToken.t
-          -> unit
-          -> Task.t ProviderResult.t)
+         (task:Task.t -> token:CancellationToken.t -> Task.t ProviderResult.t)
     -> t
     [@@js.builder]
 end
