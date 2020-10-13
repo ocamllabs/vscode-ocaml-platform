@@ -51,7 +51,7 @@ let get_shell_execution toolchain options =
     let args = List.map ~f:(fun a -> `String a) args in
     ShellExecution.makeCommandArgs ~command ~args ~options ()
 
-let compute_tasks ?token toolchain =
+let compute_tasks token toolchain =
   let open Promise.Syntax in
   let folders = Workspace.workspaceFolders () in
   let excludes =
@@ -59,7 +59,7 @@ let compute_tasks ?token toolchain =
     `String "{**/_*}"
   in
   let includes = `String "**/{dune,dune-project,dune-workspace}" in
-  Workspace.findFiles ~includes ~excludes ?token () >>| fun dunes ->
+  Workspace.findFiles ~includes ~excludes ~token () >>| fun dunes ->
   let tasks =
     List.map dunes ~f:(fun dune ->
         let scope, relative_path =
@@ -83,14 +83,14 @@ let compute_tasks ?token toolchain =
   in
   Some tasks
 
-let provide_tasks toolchain ?token () =
+let provide_tasks toolchain ~token =
   match Settings.get ~section:"ocaml" Setting.t with
   | None
   | Some false ->
     `Promise (Promise.return None)
-  | Some true -> `Promise (compute_tasks ?token toolchain)
+  | Some true -> `Promise (compute_tasks token toolchain)
 
-let resolve_tasks ~task ?token:_ () = `Promise (Promise.Option.return task)
+let resolve_tasks ~task ~token:_ = `Promise (Promise.Option.return task)
 
 let create () = ref None
 
