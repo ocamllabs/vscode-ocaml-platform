@@ -49,15 +49,15 @@ jobs:
         id: esy-cache-dir-path
         run: node .github/workflows/print_esy_cache.js
 
-      - name: Restore opam cache
-        id: cache-opam
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.opam-root-dir-path.outputs.dir }}
-          # opam cache is coupled to esy lock files, so both caches will be wiped whenever esy deps change
-          key: opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-${{ hashFiles('esy.lock/index.json') }}
-          restore-keys: |
-            opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-
+      # - name: Restore opam cache
+      #   id: cache-opam
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: ${{ steps.opam-root-dir-path.outputs.dir }}
+      #     # opam cache is coupled to esy lock files, so both caches will be wiped whenever esy deps change
+      #     key: opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-${{ hashFiles('esy.lock/index.json') }}
+      #     restore-keys: |
+      #       opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-
 
       - name: Restore esy cache
         uses: actions/cache@v2
@@ -71,12 +71,16 @@ jobs:
         run: |
           opam pin ocaml-lsp-server https://github.com/ocaml/ocaml-lsp.git --no-action
           opam install ocaml-lsp-server ocamlformat --yes
+          opam install --deps-only .
 
       - name: Build esy packages
         # Cleanup build cache in case dependencies have changed
         run: |
           esy build
           esy cleanup .
+
+      - name: Build extension
+        run: opam exec -- dune build @vscode
 
       - name: Install npm packages
         run: yarn --frozen-lockfile

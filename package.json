@@ -13,7 +13,7 @@
     "url": "https://github.com/ocamllabs/vscode-ocaml-platform/issues"
   },
   "homepage": "https://github.com/ocamllabs/vscode-ocaml-platform",
-  "main": "./_build/default/src/vscode_ocaml_platform.bc.js",
+  "main": "./dist/vscode_ocaml_platform.js",
   "engines": {
     "vscode": "^1.50.0"
   },

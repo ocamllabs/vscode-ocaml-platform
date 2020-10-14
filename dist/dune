@@ -1,0 +1,7 @@
+(rule
+ (alias vscode)
+ (mode
+  (promote (until-clean)))
+ (action
+  (copy %{project_root}/src/vscode_ocaml_platform.bc.js
+    ./vscode_ocaml_platform.js)))

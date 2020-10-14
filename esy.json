@@ -1,8 +1,4 @@
 {
-  "esy": {
-    "build": "dune build @vscode",
-    "buildsInSource": "_build"
-  },
   "dependencies": {
     "ocaml": "4.11.x",
     "@opam/js_of_ocaml": "3.7.1",

@@ -2,7 +2,7 @@ _build/
 _esy/
 _opam/
 .vscode-test/
-dist/
+dist/*.js
 lib/
 node_modules/
 
