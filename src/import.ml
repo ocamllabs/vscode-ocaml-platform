@@ -14,6 +14,16 @@ let property_exists json property =
 
 include Core_kernel
 
+module Option = struct
+  include Option
+
+  module O = struct
+    let ( let* ) x f = bind ~f x
+
+    let ( let+ ) x f = map ~f x
+  end
+end
+
 module Or_error = struct
   type 'a t = ('a, string) result
 end

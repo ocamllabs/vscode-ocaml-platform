@@ -6,25 +6,31 @@ let send_switch_impl_intf_request client document : string array Promise.t =
     |> Jsonoo.Encode.string
   in
   let open Promise.Syntax in
-  LanguageClient.sendRequest client ~meth:"ocamllsp/switchImplIntf" ~data ()
-  >>| Jsonoo.Decode.(array string)
+  let+ response =
+    LanguageClient.sendRequest client ~meth:"ocamllsp/switchImplIntf" ~data ()
+  in
+  Jsonoo.Decode.(array string) response
 
 (* given a file uri, opens the file if it exists;
      otherwise, creates the file but doesn't write it to disk *)
 let show_file target_file_name =
   let open Promise.Syntax in
   let uri = Uri.parse target_file_name () in
-  Workspace.openTextDocument (`Uri uri)
-  |> Promise.catch ~rejected:(fun _ ->
-         (* if file does not exist *)
-         let create_file_uri = Uri.with_ uri ~scheme:"untitled" () in
-         Workspace.openTextDocument (`Uri create_file_uri))
-  >>= fun doc ->
-  Window.showTextDocument ~document:(`TextDocument doc) () >>| fun _ -> ()
+  let* doc =
+    Workspace.openTextDocument (`Uri uri)
+    |> Promise.catch ~rejected:(fun _ ->
+           (* if file does not exist *)
+           let create_file_uri = Uri.with_ uri ~scheme:"untitled" () in
+           Workspace.openTextDocument (`Uri create_file_uri))
+  in
+  let+ (_ : TextEditor.t) =
+    Window.showTextDocument ~document:(`TextDocument doc) ()
+  in
+  ()
 
 let request_switch client document =
   let open Promise.Syntax in
-  send_switch_impl_intf_request client document >>= fun arr ->
+  let* arr = send_switch_impl_intf_request client document in
   match Array.to_list arr with
   | [] ->
     (* 'ocamllsp/switchImplIntf' command's response array cannot be empty *)
@@ -53,8 +59,10 @@ let request_switch client document =
     in
 
     let open Promise.Syntax in
-    Window.showQuickPickItems ~choices:candidate_items_with_names
-      ~options:file_options ()
-    >>= function
+    let* choice =
+      Window.showQuickPickItems ~choices:candidate_items_with_names
+        ~options:file_options ()
+    in
+    match choice with
     | None -> Promise.return ()
     | Some filepath -> show_file filepath )

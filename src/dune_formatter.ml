@@ -14,15 +14,19 @@ let get_formatter toolchain ~document ~options:_ ~token:_ =
   let command = Toolchain.get_dune_command toolchain [ "format-dune-file" ] in
   let output =
     let open Promise.Result.Syntax in
-    Cmd.check command >>= fun command -> Cmd.output ~stdin:document_text command
+    let* command = Cmd.check command in
+    Cmd.output ~stdin:document_text command
   in
-  let open Promise.Syntax in
-  `Promise
-    (output >>| function
-     | Ok newText -> Some [ TextEdit.replace ~range ~newText ]
-     | Error msg ->
-       message `Error "Dune formatting failed: %s" msg;
-       Some [])
+  let promise =
+    let open Promise.Syntax in
+    let+ output = output in
+    match output with
+    | Ok newText -> Some [ TextEdit.replace ~range ~newText ]
+    | Error msg ->
+      message `Error "Dune formatting failed: %s" msg;
+      Some []
+  in
+  `Promise promise
 
 type t = Disposable.t list ref
 

@@ -66,8 +66,7 @@ module Fs = struct
 
   let readDir path =
     readDir path
-    |> Promise.then_ ~fulfilled:Promise.Result.return
-    |> Promise.catch ~rejected:(fun error ->
+    |> Promise.then_ ~fulfilled:Promise.Result.return ~rejected:(fun error ->
            Promise.return (Error (JsError.message error)))
 
   val readFile : string -> encoding:string -> string Promise.t

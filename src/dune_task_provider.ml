@@ -59,7 +59,7 @@ let compute_tasks token toolchain =
     `String "{**/_*}"
   in
   let includes = `String "**/{dune,dune-project,dune-workspace}" in
-  Workspace.findFiles ~includes ~excludes ~token () >>| fun dunes ->
+  let+ dunes = Workspace.findFiles ~includes ~excludes ~token () in
   let tasks =
     List.map dunes ~f:(fun dune ->
         let scope, relative_path =

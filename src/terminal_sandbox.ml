@@ -64,9 +64,9 @@ let get_shell_args () =
 type t = Terminal.t
 
 let create toolchain =
-  let open Option.Monad_infix in
-  get_shell_path () >>= fun shell_path ->
-  get_shell_args () >>| fun shell_args ->
+  let open Option.O in
+  let* shell_path = get_shell_path () in
+  let+ shell_args = get_shell_args () in
   let ({ Cmd.bin; args } as command) =
     match Toolchain.get_command toolchain shell_path shell_args with
     | Spawn spawn -> spawn
