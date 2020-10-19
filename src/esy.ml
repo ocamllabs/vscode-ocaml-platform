@@ -18,6 +18,8 @@ let make () =
 module Discover = struct
   let valid file = Some { file; status = Ok () }
 
+  let compare l r = Path.compare l.file r.file
+
   let invalid_json file = Some { file; status = Error "unable to parse json" }
 
   let parse_file project_root = function
@@ -56,6 +58,7 @@ module Discover = struct
               dir;
             [])
     >>= Promise.List.filter_map (parse_file dir)
+    >>| List.dedup_and_sort ~compare
 
   let parse_dirs_up dir =
     let rec loop parsed_dirs dir =
