@@ -1755,7 +1755,7 @@ module Progress = struct
 end
 
 module Workspace = struct
-  val workspaceFolders : unit -> WorkspaceFolder.t list
+  val workspaceFolders : unit -> WorkspaceFolder.t maybe_list
     [@@js.get "vscode.workspace.workspaceFolders"]
 
   val name : unit -> string or_undefined [@@js.get "vscode.workspace.name"]
