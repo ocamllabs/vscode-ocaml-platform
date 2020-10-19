@@ -55,7 +55,7 @@ npm install esy --global
 ```json
 {
   "dependencies": {
-    "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam",
+    "@opam/ocaml-lsp-server": "1.1.0",
     "@opam/reason": "*",
     "ocaml": "4.6.x"
   }
