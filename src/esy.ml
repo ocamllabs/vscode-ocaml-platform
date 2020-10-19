@@ -25,30 +25,27 @@ module Discover = struct
     | 0 -> compare_status l.status r.status
     | n -> n
 
-  let invalid_package_json file =
-    Some { file; status = Error "unable to parse package.json" }
+  let invalid_json file json_file =
+    Some { file; status = Error ("unable to parse " ^ json_file) }
+
+  let is_esy_compatible filename json =
+    String.equal filename "esy.json"
+    || ( property_exists json "dependencies"
+       || property_exists json "devDependencies" )
+       && property_exists json "esy"
 
   let parse_file project_root = function
-    | "esy.json"
-    | "opam" ->
-      Promise.return (valid project_root)
+    | "opam" -> Promise.return (valid project_root)
     | s when String.equal (Caml.Filename.extension s) ".opam" ->
       Promise.return (valid project_root)
-    | "package.json" as fname -> (
+    | ("esy.json" | "package.json") as fname -> (
       let manifest_file = Path.(project_root / fname) |> Path.to_string in
       let open Promise.Syntax in
       Fs.readFile manifest_file >>| fun manifest ->
       match Jsonoo.try_parse_opt manifest with
-      | None -> invalid_package_json project_root
-      | Some json ->
-        if
-          ( property_exists json "dependencies"
-          || property_exists json "devDependencies" )
-          && property_exists json "esy"
-        then
-          valid project_root
-        else
-          None )
+      | None -> invalid_json project_root fname
+      | Some json when is_esy_compatible fname json -> valid project_root
+      | _ -> None )
     | _ -> Promise.return None
 
   let parse_dir dir =
