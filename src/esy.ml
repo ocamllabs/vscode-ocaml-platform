@@ -18,7 +18,12 @@ let make () =
 module Discover = struct
   let valid file = Some { file; status = Ok () }
 
-  let compare l r = Path.compare l.file r.file
+  let compare l r =
+    let compare_file = Path.compare in
+    let compare_status = Result.compare Unit.compare String.compare in
+    match compare_file l.file r.file with
+    | 0 -> compare_status l.status r.status
+    | n -> n
 
   let invalid_json file = Some { file; status = Error "unable to parse json" }
 
