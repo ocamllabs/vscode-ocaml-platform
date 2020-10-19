@@ -70,7 +70,10 @@ module Fs = struct
     |> Promise.catch ~rejected:(fun error ->
            Promise.return (Error (JsError.message error)))
 
-  val readFile : string -> string Promise.t [@@js.global "fs.readFile"]
+  val readFile : string -> encoding:string -> string Promise.t
+    [@@js.global "fs.readFile"]
+
+  let readFile = readFile ~encoding:"utf8"
 
   val exists : string -> bool Promise.t [@@js.global "fs.exists"]
 end
