@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Fix sandbox functionality when a folder is not opened (#409)
+
 ## 1.3.2
 
 - Fix incomplete error message for missing commands (#400)
