@@ -25,7 +25,8 @@ module Discover = struct
     | 0 -> compare_status l.status r.status
     | n -> n
 
-  let invalid_json file = Some { file; status = Error "unable to parse json" }
+  let invalid_package_json file =
+    Some { file; status = Error "unable to parse package.json" }
 
   let parse_file project_root = function
     | "esy.json"
@@ -38,7 +39,7 @@ module Discover = struct
       let open Promise.Syntax in
       Fs.readFile manifest_file >>| fun manifest ->
       match Jsonoo.try_parse_opt manifest with
-      | None -> invalid_json project_root
+      | None -> invalid_package_json project_root
       | Some json ->
         if
           ( property_exists json "dependencies"

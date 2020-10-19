@@ -208,6 +208,7 @@ module Candidate = struct
         match package_manager with
         | Opam (_, Local _) -> Some "Local switch"
         | Opam (_, Named _) -> Some "Global switch"
+        | Esy _ -> Some "Esy"
         | _ -> None )
     in
     match package_manager with
@@ -219,7 +220,7 @@ module Candidate = struct
     | Esy (_, p) ->
       let project_name = Path.basename p in
       let project_path = Path.to_string p in
-      create ~detail:project_path ~label:project_name ~description:"Esy" ()
+      create ~detail:project_path ~label:project_name ?description ()
     | Global ->
       create ~label:"Global" ?description
         ~detail:"Global toolchain inherited from the environment" ()
