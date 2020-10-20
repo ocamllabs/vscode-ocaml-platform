@@ -4,6 +4,8 @@
 
 - Fix sandbox functionality when a folder is not opened (#409)
 - Remove duplicate esy sandboxes from package manager selection (#412)
+- Allow selecting specific configuration files (esy.json, package.json, .opam)
+  for Esy sandboxes (#415)
 
 ## 1.3.2
 

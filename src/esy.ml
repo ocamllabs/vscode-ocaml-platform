@@ -4,8 +4,25 @@ type t = Cmd.spawn
 
 let binary = Path.of_string "esy"
 
+module Manifest = struct
+  type t =
+    { root : Path.t
+    ; file : string option
+    }
+
+  let path = function
+    | { root; file = None } -> root
+    | { root; file = Some file } -> Path.(root / file)
+
+  let to_string manifest = Path.to_string (path manifest)
+
+  let to_pretty_string = function
+    | { root; file = None } -> Path.basename root
+    | { root; file = Some file } -> Path.basename root ^ "/" ^ file
+end
+
 type discover =
-  { file : Path.t
+  { manifest : Manifest.t
   ; status : (unit, string) result
   }
 
@@ -16,20 +33,14 @@ let make () =
   | Ok cmd -> Some cmd
 
 module Discover = struct
-  let valid file = Some { file; status = Ok () }
+  let valid root file =
+    Some { manifest = { root; file = Some file }; status = Ok () }
 
-  let compare l r =
-    let compare_file = Path.compare in
-    let compare_status = Result.compare Unit.compare String.compare in
-    match compare_file l.file r.file with
-    | 0 -> compare_status l.status r.status
-    | n -> n
-
-  let invalid_json file json_file =
+  let invalid_json root json_file =
     let message =
       Printf.sprintf "Esy manifest file '%s' is not a valid json file" json_file
     in
-    Some { file; status = Error message }
+    Some { manifest = { root; file = Some json_file }; status = Error message }
 
   let is_esy_compatible filename json =
     String.equal filename "esy.json"
@@ -38,16 +49,17 @@ module Discover = struct
        && property_exists json "esy"
 
   let parse_file project_root = function
-    | "opam" -> Promise.return (valid project_root)
-    | s when String.equal (Caml.Filename.extension s) ".opam" ->
-      Promise.return (valid project_root)
-    | ("esy.json" | "package.json") as fname -> (
-      let manifest_file = Path.(project_root / fname) |> Path.to_string in
+    | "opam" -> Promise.return (valid project_root "opam")
+    | opam_file when String.equal (Caml.Filename.extension opam_file) ".opam" ->
+      Promise.return (valid project_root opam_file)
+    | ("esy.json" | "package.json") as filename -> (
+      let manifest_file = Path.(project_root / filename) |> Path.to_string in
       let open Promise.Syntax in
       Fs.readFile manifest_file >>| fun manifest ->
       match Jsonoo.try_parse_opt manifest with
-      | None -> invalid_json project_root fname
-      | Some json when is_esy_compatible fname json -> valid project_root
+      | None -> invalid_json project_root filename
+      | Some json when is_esy_compatible filename json ->
+        valid project_root filename
       | _ -> None )
     | _ -> Promise.return None
 
@@ -64,7 +76,6 @@ module Discover = struct
               dir;
             [])
     >>= Promise.List.filter_map (parse_file dir)
-    >>| List.dedup_and_sort ~compare
 
   let parse_dirs_up dir =
     let rec loop parsed_dirs dir =
@@ -83,7 +94,8 @@ end
 let discover = Discover.run
 
 let exec t ~manifest ~args =
-  Cmd.Spawn (Cmd.append t ("-P" :: Path.to_string manifest :: args))
+  Cmd.Spawn
+    (Cmd.append t ("-P" :: Path.to_string (Manifest.path manifest) :: args))
 
 module State = struct
   type t =
@@ -92,8 +104,8 @@ module State = struct
 end
 
 let state t ~manifest =
-  let root_str = Path.to_string manifest in
-  let command = Cmd.append t [ "status"; "-P"; root_str ] in
+  let path_str = Path.to_string (Manifest.path manifest) in
+  let command = Cmd.append t [ "status"; "-P"; path_str ] in
   let open Promise.Syntax in
   Cmd.output (Spawn command)
   >>| (function
@@ -116,6 +128,6 @@ let setup_toolchain t ~manifest =
   state t ~manifest >>| function
   | State.Ready -> ()
   | Pending ->
-    let root_dir = Path.to_string manifest in
+    let root_dir = Path.to_string manifest.root in
     message `Info "Esy dependencies are not installed. Run esy under %s"
       root_dir
