@@ -38,7 +38,7 @@ module Discover = struct
 
   let invalid_json root json_file =
     let message =
-      Printf.sprintf "Esy manifest file '%s' is not a valid json file" json_file
+      Printf.sprintf "manifest file '%s' is not a valid json file" json_file
     in
     Some { manifest = { root; file = Some json_file }; status = Error message }
 

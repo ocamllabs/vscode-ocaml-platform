@@ -208,15 +208,20 @@ module Candidate = struct
 
   let to_quick_pick { package_manager; status } =
     let create = QuickPickItem.create in
+    let pm_description =
+      match package_manager with
+      | Opam (_, Local _) -> Some "Local switch"
+      | Opam (_, Named _) -> Some "Global switch"
+      | Esy _ -> Some "Esy"
+      | _ -> None
+    in
     let description =
-      match status with
-      | Error s -> Some (Printf.sprintf "Invalid sandbox: %s" s)
-      | Ok () -> (
-        match package_manager with
-        | Opam (_, Local _) -> Some "Local switch"
-        | Opam (_, Named _) -> Some "Global switch"
-        | Esy _ -> Some "Esy"
-        | _ -> None )
+      match (pm_description, status) with
+      | Some pm, Error s ->
+        Some (Printf.sprintf "%s [Invalid sandbox: %s]" pm s)
+      | None, Error s -> Some (Printf.sprintf "[Invalid sandbox: %s]" s)
+      | Some pm, Ok () -> Some pm
+      | None, Ok () -> None
     in
     match package_manager with
     | Package_manager.Opam (_, Named name) -> create ~label:name ?description ()
