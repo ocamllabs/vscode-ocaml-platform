@@ -545,7 +545,7 @@
 
         {
           "comment": "unit literal",
-          "name": "constant.language.ocaml strong",
+          "name": "constant.language.ocaml",
           "match": "\\(\\)"
         },
         {
@@ -557,7 +557,7 @@
 
         {
           "comment": "empty array",
-          "name": "constant.language.ocaml strong",
+          "name": "constant.language.ocaml",
           "match": "\\[\\|\\|\\]"
         },
         {
@@ -569,7 +569,7 @@
 
         {
           "comment": "empty list",
-          "name": "constant.language.ocaml strong",
+          "name": "constant.language.ocaml",
           "match": "\\[\\]"
         },
         {
@@ -615,7 +615,7 @@
         },
         {
           "comment": "empty list (can be used as a constructor)",
-          "name": "constant.language.ocaml strong",
+          "name": "constant.language.ocaml",
           "match": "\\[\\]"
         }
       ]
