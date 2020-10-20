@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fix sandbox functionality when a folder is not opened (#409)
+- Remove duplicate esy sandboxes from package manager selection (#412)
 
 ## 1.3.2
 
