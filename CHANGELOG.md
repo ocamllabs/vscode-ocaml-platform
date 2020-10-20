@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Stop highlighting ocaml unit/array/list literals with bold (#416)
+
 ## 1.3.3
 
 - Fix sandbox functionality when a folder is not opened (#409)
