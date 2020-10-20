@@ -203,7 +203,7 @@ module Candidate = struct
     let create = QuickPickItem.create in
     let description =
       match status with
-      | Error s -> Some (Printf.sprintf "invalid: %s" s)
+      | Error s -> Some (Printf.sprintf "Invalid sandbox: %s" s)
       | Ok () -> (
         match package_manager with
         | Opam (_, Local _) -> Some "Local switch"

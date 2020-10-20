@@ -26,10 +26,10 @@ module Discover = struct
     | n -> n
 
   let invalid_json file json_file =
-    Some
-      { file
-      ; status = Error ("unable to parse " ^ json_file ^ " file for Esy")
-      }
+    let message =
+      Printf.sprintf "Esy manifest file '%s' is not a valid json file" json_file
+    in
+    Some { file; status = Error message }
 
   let is_esy_compatible filename json =
     String.equal filename "esy.json"
