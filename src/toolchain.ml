@@ -58,14 +58,14 @@ module Package_manager = struct
 
   type t =
     | Opam of Opam.t * Opam.Switch.t
-    | Esy of Esy.t * Path.t
+    | Esy of Esy.t * Esy.Manifest.t
     | Global
     | Custom of string
 
   module Setting = struct
     type t =
       | Opam of Opam.Switch.t
-      | Esy of Path.t
+      | Esy of Esy.Manifest.t
       | Global
       | Custom of string
 
@@ -81,10 +81,11 @@ module Package_manager = struct
       match (kind : Kind.t) with
       | Global -> Global
       | Esy ->
-        let manifest =
-          field "root" (fun js -> Path.of_string (string js)) json
+        let root =
+          field "root" (fun root -> Path.of_string (string root)) json
         in
-        Esy manifest
+        let file = try_optional (field "file" string) json in
+        Esy { root; file }
       | Opam ->
         let switch =
           field "switch" (fun js -> Opam.Switch.make (string js)) json
@@ -99,8 +100,14 @@ module Package_manager = struct
       let kind = ("kind", Kind.to_json (kind t)) in
       match t with
       | Global -> Jsonoo.Encode.object_ [ kind ]
-      | Esy manifest ->
-        object_ [ kind; ("root", string @@ Path.to_string manifest) ]
+      | Esy { root; file = None } ->
+        object_ [ kind; ("root", string @@ Path.to_string root) ]
+      | Esy { root; file = Some file } ->
+        object_
+          [ kind
+          ; ("root", string @@ Path.to_string root)
+          ; ("file", string file)
+          ]
       | Opam sw -> object_ [ kind; ("switch", string @@ Opam.Switch.name sw) ]
       | Custom template -> object_ [ kind; ("template", string template) ]
 
@@ -114,7 +121,7 @@ module Package_manager = struct
     | Custom template -> Setting.Custom template
 
   let to_string = function
-    | Esy (_, root) -> Printf.sprintf "esy(%s)" (Path.to_string root)
+    | Esy (_, root) -> Printf.sprintf "esy(%s)" (Esy.Manifest.to_string root)
     | Opam (_, switch) -> Printf.sprintf "opam(%s)" (Opam.Switch.name switch)
     | Global -> "global"
     | Custom _ -> "custom"
@@ -123,8 +130,8 @@ module Package_manager = struct
     let print_opam = Printf.sprintf "opam(%s)" in
     let print_esy = Printf.sprintf "esy(%s)" in
     match t with
-    | Esy (_, root) ->
-      let project_name = Path.basename root in
+    | Esy (_, manifest) ->
+      let project_name = Esy.Manifest.to_pretty_string manifest in
       print_esy project_name
     | Opam (_, Named name) -> print_opam name
     | Opam (_, Local path) ->
@@ -201,15 +208,20 @@ module Candidate = struct
 
   let to_quick_pick { package_manager; status } =
     let create = QuickPickItem.create in
+    let pm_description =
+      match package_manager with
+      | Opam (_, Local _) -> Some "Local switch"
+      | Opam (_, Named _) -> Some "Global switch"
+      | Esy _ -> Some "Esy"
+      | _ -> None
+    in
     let description =
-      match status with
-      | Error s -> Some (Printf.sprintf "Invalid sandbox: %s" s)
-      | Ok () -> (
-        match package_manager with
-        | Opam (_, Local _) -> Some "Local switch"
-        | Opam (_, Named _) -> Some "Global switch"
-        | Esy _ -> Some "Esy"
-        | _ -> None )
+      match (pm_description, status) with
+      | Some pm, Error s ->
+        Some (Printf.sprintf "%s [Invalid sandbox: %s]" pm s)
+      | None, Error s -> Some (Printf.sprintf "[Invalid sandbox: %s]" s)
+      | Some pm, Ok () -> Some pm
+      | None, Ok () -> None
     in
     match package_manager with
     | Package_manager.Opam (_, Named name) -> create ~label:name ?description ()
@@ -217,9 +229,9 @@ module Candidate = struct
       let project_name = Path.basename path in
       let project_path = Path.to_string path in
       create ~label:project_name ~detail:project_path ?description ()
-    | Esy (_, p) ->
-      let project_name = Path.basename p in
-      let project_path = Path.to_string p in
+    | Esy (_, manifest) ->
+      let project_name = Esy.Manifest.to_pretty_string manifest in
+      let project_path = Esy.Manifest.to_string manifest in
       create ~detail:project_path ~label:project_name ?description ()
     | Global ->
       create ~label:"Global" ?description
@@ -261,10 +273,10 @@ let sandbox_candidates ~workspace_folders =
       |> Promise.all_list
       >>| fun esys ->
       esys |> List.concat
-      |> List.map ~f:(fun (manifest : Esy.discover) ->
+      |> List.map ~f:(fun (discover : Esy.discover) ->
              { Candidate.package_manager =
-                 Package_manager.Esy (esy, manifest.file)
-             ; status = manifest.status
+                 Package_manager.Esy (esy, discover.manifest)
+             ; status = discover.status
              })
   in
   let opam =

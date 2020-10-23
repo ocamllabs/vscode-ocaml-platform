@@ -19,7 +19,7 @@
 module Package_manager : sig
   type t =
     | Opam of Opam.t * Opam.Switch.t
-    | Esy of Esy.t * Path.t
+    | Esy of Esy.t * Esy.Manifest.t
     | Global
     | Custom of string
 
