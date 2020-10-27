@@ -165,26 +165,30 @@ let of_settings () : Package_manager.t option Promise.t =
   with
   | None -> Promise.return None
   | Some (Esy manifest) -> (
-    available.esy >>| function
+    let+ esy = available.esy in
+    match esy with
     | None ->
       not_available `Esy;
       None
     | Some esy -> Some (Package_manager.Esy (esy, manifest)) )
   | Some (Opam switch) -> (
     let open Promise.Syntax in
-    available.opam >>= function
+    let* opam = available.opam in
+    match opam with
     | None ->
       not_available `Opam;
       Promise.return None
-    | Some opam -> (
-      Opam.exists opam ~switch >>| function
-      | false ->
+    | Some opam ->
+      let+ exists = Opam.exists opam ~switch in
+      if exists then
+        Some (Package_manager.Opam (opam, switch))
+      else (
         message `Warn
           "Workspace is configured to use the switch %s. This switch does not \
            exist."
           (Opam.Switch.name switch);
         None
-      | true -> Some (Package_manager.Opam (opam, switch)) ) )
+      ) )
   | Some Global -> Promise.return (Some Package_manager.Global)
   | Some (Custom template) ->
     Promise.return (Some (Package_manager.Custom template))
@@ -249,18 +253,20 @@ let sandbox_candidates ~workspace_folders =
   let open Promise.Syntax in
   let available = available_package_managers () in
   let esy =
-    available.esy >>= function
+    let* esy = available.esy in
+    match esy with
     | None -> Promise.return []
     | Some esy ->
-      workspace_folders
-      |> List.map ~f:(fun (folder : WorkspaceFolder.t) ->
-             let dir =
-               folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string
-             in
-             Esy.discover ~dir)
-      |> Promise.all_list
-      >>| fun esys ->
-      esys |> List.concat
+      let+ esys =
+        workspace_folders
+        |> List.map ~f:(fun (folder : WorkspaceFolder.t) ->
+               let dir =
+                 folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string
+               in
+               Esy.discover ~dir)
+        |> Promise.all_list
+      in
+      List.concat esys
       |> List.map ~f:(fun (manifest : Esy.discover) ->
              { Candidate.package_manager =
                  Package_manager.Esy (esy, manifest.file)
@@ -268,13 +274,14 @@ let sandbox_candidates ~workspace_folders =
              })
   in
   let opam =
-    available.opam >>= function
+    let* opam = available.opam in
+    match opam with
     | None -> Promise.return []
     | Some opam ->
-      Opam.switch_list opam
-      >>| List.map ~f:(fun sw ->
-              let package_manager = Package_manager.Opam (opam, sw) in
-              { Candidate.package_manager; status = Ok () })
+      let+ switches = Opam.switch_list opam in
+      List.map switches ~f:(fun sw ->
+          let package_manager = Package_manager.Opam (opam, sw) in
+          { Candidate.package_manager; status = Ok () })
   in
   let global = Candidate.ok Package_manager.Global in
   let custom =
@@ -283,7 +290,7 @@ let sandbox_candidates ~workspace_folders =
        user will input custom commands in [select] *)
   in
 
-  Promise.all2 (esy, opam) >>| fun (esy, opam) ->
+  let+ esy, opam = Promise.all2 (esy, opam) in
   (global :: custom :: esy) @ opam
 
 let setup_toolchain (kind : Package_manager.t) =
@@ -299,9 +306,10 @@ let make_resources kind = kind
 let select () =
   let open Promise.Syntax in
   let workspace_folders = Workspace.workspaceFolders () in
-  sandbox_candidates ~workspace_folders >>= fun candidates ->
+  let* candidates = sandbox_candidates ~workspace_folders in
   let open Promise.Option.Syntax in
-  select_package_manager candidates >>= function
+  let* candidate = select_package_manager candidates in
+  match candidate with
   | { status = Ok (); package_manager = Custom _ } ->
     let validateInput ~value =
       if
@@ -316,7 +324,8 @@ let select () =
       InputBoxOptions.create ~prompt:"Input a custom command template"
         ~value:"$prog $args" ~validateInput ()
     in
-    Window.showInputBox ~options () >>| String.strip >>= fun template ->
+    let* input = Window.showInputBox ~options () in
+    let template = String.strip input in
     Promise.Option.return @@ Package_manager.Custom template
   | { status; package_manager } -> (
     match status with
@@ -327,9 +336,10 @@ let select () =
 
 let select_and_save () =
   let open Promise.Option.Syntax in
-  select () >>= fun package_manager ->
+  let* package_manager = select () in
   let open Promise.Syntax in
-  to_settings package_manager >>| fun () -> Some package_manager
+  let+ () = to_settings package_manager in
+  Some package_manager
 
 let get_command (t : Package_manager.t) bin args : Cmd.t =
   match t with
@@ -359,13 +369,15 @@ let get_dune_command (t : Package_manager.t) args : Cmd.t =
   get_command t "dune" args
 
 let run_setup resources =
-  let open Promise.Result.Syntax in
-  setup_toolchain resources
-  >>= (fun () ->
-        let args = [ "--version" ] in
-        let command = get_lsp_command resources ~args in
-        Cmd.check command >>= fun cmd -> Cmd.output cmd)
-  |> Promise.map (function
-       | Ok _ -> Ok ()
-       | Error msg ->
-         Error (Printf.sprintf "Toolchain initialisation failed: %s" msg))
+  let open Promise.Syntax in
+  let+ output =
+    let open Promise.Result.Syntax in
+    let* () = setup_toolchain resources in
+    let args = [ "--version" ] in
+    let* command = Cmd.check (get_lsp_command resources ~args) in
+    Cmd.output command
+  in
+  match output with
+  | Ok _ -> Ok ()
+  | Error msg ->
+    Error (Printf.sprintf "Toolchain initialisation failed: %s" msg)

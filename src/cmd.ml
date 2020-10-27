@@ -33,9 +33,11 @@ let which path bin =
          |> List.map ~f:(Path.join p)
          |> Promise.List.find_map (fun p ->
                 let open Promise.Syntax in
-                Fs.exists (Path.to_string p) >>| function
-                | true -> Some p
-                | false -> None))
+                let+ exists = Fs.exists (Path.to_string p) in
+                if exists then
+                  Some p
+                else
+                  None))
 
 let check_spawn { bin; args } =
   if Path.is_absolute bin then
@@ -45,7 +47,8 @@ let check_spawn { bin; args } =
     | None -> Error path_missing_from_env |> Promise.resolve
     | Some path -> (
       let open Promise.Syntax in
-      which path bin >>| function
+      let+ which_path = which path bin in
+      match which_path with
       | None ->
         Error (Printf.sprintf "Command %s not found" (Path.to_string bin))
       | Some bin -> Ok { bin; args } )
@@ -55,7 +58,8 @@ let check t =
   | Shell _ -> Promise.Result.return t
   | Spawn spawn ->
     let open Promise.Result.Syntax in
-    check_spawn spawn >>| fun s -> Spawn s
+    let+ s = check_spawn spawn in
+    Spawn s
 
 let run ?cwd ?stdin = function
   | Spawn { bin; args } ->
@@ -90,7 +94,7 @@ let log ?(result : ChildProcess.return option) (t : t) =
 
 let output ?stdin (t : t) =
   let open Promise.Syntax in
-  run ?stdin t >>| fun (result : ChildProcess.return) ->
+  let+ (result : ChildProcess.return) = run ?stdin t in
   log ~result t;
   if result.exitCode = 0 then
     Ok result.stdout

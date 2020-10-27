@@ -154,7 +154,8 @@ module LanguageClient = struct
 
   let readyInitializeResult t =
     let open Promise.Syntax in
-    onReady t >>= fun () -> Promise.return (initializeResult t)
+    let+ () = onReady t in
+    initializeResult t
 
   val sendRequest :
        t

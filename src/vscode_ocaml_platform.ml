@@ -97,7 +97,7 @@ module Instance = struct
     t.status_bar_item <- Some status_bar_item;
 
     let open Promise.Result.Syntax in
-    Toolchain.run_setup toolchain >>= fun () ->
+    let* () = Toolchain.run_setup toolchain in
     let serverOptions = server_options toolchain in
     let clientOptions = client_options () in
     let client =
@@ -108,7 +108,7 @@ module Instance = struct
     LanguageClient.start client;
 
     let open Promise.Syntax in
-    LanguageClient.readyInitializeResult client >>| fun initialize_result ->
+    let+ initialize_result = LanguageClient.readyInitializeResult client in
     let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
     t.ocaml_lsp_capabilities <- Some ocaml_lsp;
     if
@@ -123,9 +123,8 @@ module Instance = struct
     Ok ()
 
   let open_terminal toolchain =
-    let open Option.Monad_infix in
-    match toolchain |> Terminal_sandbox.create >>| Terminal_sandbox.show with
-    | Some _ -> ()
+    match Terminal_sandbox.create toolchain with
+    | Some terminal -> Terminal_sandbox.show terminal
     | None ->
       message `Error
         "Could not open a terminal in the current sandbox. The toolchain may \
@@ -137,7 +136,8 @@ end
 let select_sandbox (instance : Instance.t) () =
   let set_toolchain =
     let open Promise.Syntax in
-    Toolchain.select_and_save () >>= function
+    let* package_manager = Toolchain.select_and_save () in
+    match package_manager with
     | None -> Promise.Result.return ()
     | Some t ->
       Instance.stop instance;
@@ -152,7 +152,8 @@ let select_sandbox (instance : Instance.t) () =
 let restart_instance (instance : Instance.t) () =
   let (_ : unit Promise.t) =
     let open Promise.Syntax in
-    Toolchain.of_settings () >>= function
+    let* package_manager = Toolchain.of_settings () in
+    match package_manager with
     | None ->
       select_sandbox instance ();
       Promise.return ()
@@ -164,11 +165,11 @@ let restart_instance (instance : Instance.t) () =
   ()
 
 let select_sandbox_and_open_terminal () =
-  let (_ : unit Promise.t) =
-    Toolchain.select ()
-    |> Promise.Option.iter (fun toolchain ->
-           let toolchain = Toolchain.make_resources toolchain in
-           Instance.open_terminal toolchain)
+  let (_ : unit option Promise.t) =
+    let open Promise.Option.Syntax in
+    let+ toolchain = Toolchain.select () in
+    let toolchain = Toolchain.make_resources toolchain in
+    Instance.open_terminal toolchain
   in
   ()
 
@@ -179,11 +180,12 @@ let open_terminal (instance : Instance.t) () =
 
 let switch_impl_intf (instance : Instance.t) () =
   let try_switching () =
-    let open Option.Monad_infix in
-    Window.activeTextEditor () >>| TextEditor.document >>= fun document ->
-    instance.client >>= fun client ->
+    let open Option.O in
+    let* editor = Window.activeTextEditor () in
+    let document = TextEditor.document editor in
+    let* client = instance.client in
     (* extension needs to be activated; otherwise, just ignore the switch try *)
-    instance.ocaml_lsp_capabilities >>| fun ocaml_lsp ->
+    let+ ocaml_lsp = instance.ocaml_lsp_capabilities in
     (* same as for instance.client; ignore the try if it's None *)
     if Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp then
       Switch_impl_intf.request_switch client document
@@ -200,13 +202,15 @@ let switch_impl_intf (instance : Instance.t) () =
 
 let suggest_to_setup_toolchain instance =
   let open Promise.Syntax in
-  Window.showInformationMessage
-    ~message:
-      "Extension is unable to find ocamllsp automatically. Please select \
-       package manager you used to install ocamllsp for this project."
-    ~choices:[ ("Select package manager", ()) ]
-    ()
-  >>| function
+  let+ selection =
+    Window.showInformationMessage
+      ~message:
+        "Extension is unable to find ocamllsp automatically. Please select \
+         package manager you used to install ocamllsp for this project."
+      ~choices:[ ("Select package manager", ()) ]
+      ()
+  in
+  match selection with
   | None -> ()
   | Some () -> select_sandbox instance ()
 
@@ -230,7 +234,7 @@ let activate (extension : ExtensionContext.t) =
     ~disposable:(Instance.disposable instance);
   let open Promise.Syntax in
   let toolchain =
-    Toolchain.of_settings () >>| fun pm ->
+    let+ pm = Toolchain.of_settings () in
     let resources, is_fallback =
       match pm with
       | Some toolchain -> (toolchain, false)
@@ -240,7 +244,7 @@ let activate (extension : ExtensionContext.t) =
     in
     (Toolchain.make_resources resources, is_fallback)
   in
-  toolchain >>= fun (toolchain, is_fallback) ->
+  let* toolchain, is_fallback = toolchain in
   Instance.start instance toolchain
   |> Promise.Result.iter ~error:(fun e ->
          if not is_fallback then message `Error "%s" e)

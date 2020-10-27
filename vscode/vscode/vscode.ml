@@ -1823,9 +1823,11 @@ module Window = struct
     [@@js.global "vscode.window.showQuickPick"]
 
   let showQuickPickItems ~choices ?options ?token () =
-    let open Promise.Syntax in
-    showQuickPick ~choices:(List.map fst choices) ?options ?token ()
-    >>| Option.map (fun q -> List.assoc q choices)
+    let open Promise.Option.Syntax in
+    let+ item =
+      showQuickPick ~choices:(List.map fst choices) ?options ?token ()
+    in
+    List.assoc item choices
 
   val showQuickPick :
        items:string list
@@ -1856,9 +1858,11 @@ module Window = struct
 
   let showInformationMessage ~message ?options ?(choices = []) () =
     let choices = getChoices choices in
-    let open Promise.Syntax in
-    showInformationMessage ~message ?options ~items:(List.map fst choices) ()
-    >>| Option.map (fun q -> List.assoc q choices)
+    let open Promise.Option.Syntax in
+    let+ item =
+      showInformationMessage ~message ?options ~items:(List.map fst choices) ()
+    in
+    List.assoc item choices
 
   val showWarningMessage :
        message:string
@@ -1870,9 +1874,11 @@ module Window = struct
 
   let showWarningMessage ~message ?options ?(choices = []) () =
     let choices = getChoices choices in
-    let open Promise.Syntax in
-    showWarningMessage ~message ?options ~items:(List.map fst choices) ()
-    >>| Option.map (fun q -> List.assoc q choices)
+    let open Promise.Option.Syntax in
+    let+ item =
+      showWarningMessage ~message ?options ~items:(List.map fst choices) ()
+    in
+    List.assoc item choices
 
   val showErrorMessage :
        message:string
@@ -1884,9 +1890,11 @@ module Window = struct
 
   let showErrorMessage ~message ?options ?(choices = []) () =
     let choices = getChoices choices in
-    let open Promise.Syntax in
-    showErrorMessage ~message ?options ~items:(List.map fst choices) ()
-    >>| Option.map (fun q -> List.assoc q choices)
+    let open Promise.Option.Syntax in
+    let+ item =
+      showErrorMessage ~message ?options ~items:(List.map fst choices) ()
+    in
+    List.assoc item choices
 
   val withProgress :
        options:ProgressOptions.t

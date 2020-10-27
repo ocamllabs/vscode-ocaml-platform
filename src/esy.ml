@@ -11,7 +11,8 @@ type discover =
 
 let make () =
   let open Promise.Syntax in
-  Cmd.check_spawn { bin = binary; args = [] } >>| function
+  let+ spawn = Cmd.check_spawn { bin = binary; args = [] } in
+  match spawn with
   | Error _ -> None
   | Ok cmd -> Some cmd
 
@@ -44,7 +45,7 @@ module Discover = struct
     | ("esy.json" | "package.json") as fname -> (
       let manifest_file = Path.(project_root / fname) |> Path.to_string in
       let open Promise.Syntax in
-      Fs.readFile manifest_file >>| fun manifest ->
+      let+ manifest = Fs.readFile manifest_file in
       match Jsonoo.try_parse_opt manifest with
       | None -> invalid_json project_root fname
       | Some json when is_esy_compatible fname json -> valid project_root
@@ -53,18 +54,17 @@ module Discover = struct
 
   let parse_dir dir =
     let open Promise.Syntax in
-    Path.to_string dir |> Fs.readDir
-    >>| (function
-          | Ok res -> res
-          | Error err ->
-            let dir = Path.to_string dir in
-            log "unable to read dir %s. error %s" dir err;
-            message `Warn
-              "Unable to read %s. No esy projects will be inferred from here"
-              dir;
-            [])
-    >>= Promise.List.filter_map (parse_file dir)
-    >>| List.dedup_and_sort ~compare
+    let* dirs = Path.to_string dir |> Fs.readDir in
+    match dirs with
+    | Ok res ->
+      let+ dirs = Promise.List.filter_map (parse_file dir) res in
+      List.dedup_and_sort dirs ~compare
+    | Error err ->
+      let dir = Path.to_string dir in
+      log "unable to read dir %s. error %s" dir err;
+      message `Warn
+        "Unable to read %s. No esy projects will be inferred from here" dir;
+      Promise.return []
 
   let parse_dirs_up dir =
     let rec loop parsed_dirs dir =
@@ -77,7 +77,8 @@ module Discover = struct
 
   let run ~dir : discover list Promise.t =
     let open Promise.Syntax in
-    dir |> parse_dirs_up |> Promise.all_list >>| List.concat
+    let+ discovered = dir |> parse_dirs_up |> Promise.all_list in
+    List.concat discovered
 end
 
 let discover = Discover.run
@@ -94,26 +95,29 @@ end
 let state t ~manifest =
   let root_str = Path.to_string manifest in
   let command = Cmd.append t [ "status"; "-P"; root_str ] in
-  let open Promise.Syntax in
-  Cmd.output (Spawn command)
-  >>| (function
-        | Error _ -> Ok false
-        | Ok esy_output -> (
-          match Jsonoo.try_parse_opt esy_output with
-          | None -> Ok false
-          | Some esy_response ->
-            esy_response
-            |> Jsonoo.Decode.field "isProjectReadyForDev" Jsonoo.Decode.bool
-            |> Result.return ))
-  |> Promise.Result.map (fun is_project_ready_for_dev ->
-         if is_project_ready_for_dev then
-           State.Ready
-         else
-           Pending)
+  let open Promise.Result.Syntax in
+  let+ is_project_ready_for_dev =
+    let open Promise.Syntax in
+    let+ output = Cmd.output (Spawn command) in
+    match output with
+    | Error _ -> Ok false
+    | Ok esy_output -> (
+      match Jsonoo.try_parse_opt esy_output with
+      | None -> Ok false
+      | Some esy_response ->
+        esy_response
+        |> Jsonoo.Decode.field "isProjectReadyForDev" Jsonoo.Decode.bool
+        |> Result.return )
+  in
+  if is_project_ready_for_dev then
+    State.Ready
+  else
+    Pending
 
 let setup_toolchain t ~manifest =
   let open Promise.Result.Syntax in
-  state t ~manifest >>| function
+  let+ toolchain_state = state t ~manifest in
+  match toolchain_state with
   | State.Ready -> ()
   | Pending ->
     let root_dir = Path.to_string manifest in
