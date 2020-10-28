@@ -27,6 +27,10 @@
     "prefix": "sig",
     "body": ["sig\n  ${1}\nend$0"]
   },
+  "struct": {
+    "prefix": "struct",
+    "body": ["struct\n  ${1}\nend$0"]
+  },
   "module": {
     "prefix": "module",
     "body": ["module ${1:M} = struct\n  ${2}\nend$0"]
