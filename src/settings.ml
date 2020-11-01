@@ -32,3 +32,25 @@ let string =
   let to_json = Jsonoo.Encode.string in
   let of_json = Jsonoo.Decode.string in
   create ~of_json ~to_json
+
+let workspace_folder_var = "${workspaceFolder}"
+
+let workspace_path () =
+  match Workspace.workspaceFolders () with
+  | workspace_folder :: _ ->
+    Some (workspace_folder |> WorkspaceFolder.uri |> Uri.fsPath)
+  | [] -> None
+
+let resolve_workspace_var setting =
+  let path =
+    match workspace_path () with
+    | Some path -> path
+    | None -> Process.cwd ()
+  in
+  String.substr_replace_all setting ~pattern:workspace_folder_var ~with_:path
+
+let substitute_workspace_var setting =
+  match workspace_path () with
+  | Some path ->
+    String.substr_replace_all setting ~pattern:path ~with_:workspace_folder_var
+  | None -> setting
