@@ -34,6 +34,10 @@ module Regexp = struct
   let t_to_js : Js_of_ocaml.Regexp.regexp -> Ojs.t = Obj.magic
 
   let t_of_js : Ojs.t -> Js_of_ocaml.Regexp.regexp = Obj.magic
+
+  type replacer = string -> (string list[@js.variadic]) -> string [@@js]
+
+  val replace : string -> regexp:t -> replacer:replacer -> string [@@js.call]
 end
 
 module Dict = struct

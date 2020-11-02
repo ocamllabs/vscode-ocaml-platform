@@ -15,8 +15,8 @@ val create :
 
 val string : scope:ConfigurationTarget.t -> key:string -> string t
 
-(** replace ${workspaceFolder} with the first workspace folder that is open *)
-val resolve_workspace_var : string -> string
+(** replace ${workspaceFolder:folder_name} variables with workspace folder paths *)
+val resolve_workspace_vars : string -> string
 
-(** replace the path of the first open workspace folder with ${workspaceFolder} *)
-val substitute_workspace_var : string -> string
+(** replace workspace folder paths with ${workspaceFolder:folder_name} variables *)
+val substitute_workspace_vars : string -> string

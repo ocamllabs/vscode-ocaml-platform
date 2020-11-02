@@ -18,6 +18,10 @@ module Regexp : sig
   val t_to_js : Js_of_ocaml.Regexp.regexp -> Ojs.t
 
   val t_of_js : Ojs.t -> Js_of_ocaml.Regexp.regexp
+
+  type replacer = string -> string list -> string
+
+  val replace : string -> regexp:t -> replacer:replacer -> string
 end
 
 module Dict : sig

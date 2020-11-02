@@ -33,24 +33,28 @@ let string =
   let of_json = Jsonoo.Decode.string in
   create ~of_json ~to_json
 
-let workspace_folder_var = "${workspaceFolder}"
+let workspace_folder_var folder =
+  Printf.sprintf "${workspaceFolder:%s}" (WorkspaceFolder.name folder)
 
-let workspace_path () =
-  match Workspace.workspaceFolders () with
-  | workspace_folder :: _ ->
-    Some (workspace_folder |> WorkspaceFolder.uri |> Uri.fsPath)
-  | [] -> None
+let workspace_folder_path folder = Uri.fsPath (WorkspaceFolder.uri folder)
 
-let resolve_workspace_var setting =
-  let path =
-    match workspace_path () with
-    | Some path -> path
-    | None -> Process.cwd ()
+let resolve_workspace_vars setting =
+  let find_folder name =
+    let pred folder = String.equal name (WorkspaceFolder.name folder) in
+    List.find ~f:pred (Workspace.workspaceFolders ())
   in
-  String.substr_replace_all setting ~pattern:workspace_folder_var ~with_:path
+  let regexp = Js_of_ocaml.Regexp.regexp "\\$\\{workspaceFolder:([^}]+)\\}" in
+  let replacer matched = function
+    | [] -> assert false (* name will always be captured *)
+    | name :: _ -> (
+      match find_folder name with
+      | Some folder -> workspace_folder_path folder
+      | None -> matched )
+  in
+  Interop.Regexp.replace setting ~regexp ~replacer
 
-let substitute_workspace_var setting =
-  match workspace_path () with
-  | Some path ->
-    String.substr_replace_all setting ~pattern:path ~with_:workspace_folder_var
-  | None -> setting
+let substitute_workspace_vars setting =
+  List.fold (Workspace.workspaceFolders ()) ~init:setting ~f:(fun acc folder ->
+      String.substr_replace_all acc
+        ~pattern:(workspace_folder_path folder)
+        ~with_:(workspace_folder_var folder))

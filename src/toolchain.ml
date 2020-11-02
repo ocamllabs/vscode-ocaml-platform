@@ -77,7 +77,7 @@ module Package_manager = struct
 
     let of_json json =
       let open Jsonoo.Decode in
-      let decode_vars json = Settings.resolve_workspace_var (string json) in
+      let decode_vars json = Settings.resolve_workspace_vars (string json) in
       let kind = field "kind" Kind.of_json json in
       match (kind : Kind.t) with
       | Global -> Global
@@ -97,7 +97,7 @@ module Package_manager = struct
 
     let to_json (t : t) =
       let open Jsonoo.Encode in
-      let encode_vars str = string (Settings.substitute_workspace_var str) in
+      let encode_vars str = string (Settings.substitute_workspace_vars str) in
       let kind = ("kind", Kind.to_json (kind t)) in
       match t with
       | Global -> Jsonoo.Encode.object_ [ kind ]
