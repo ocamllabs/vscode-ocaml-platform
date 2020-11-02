@@ -4,6 +4,7 @@
 
 - Stop highlighting ocaml unit/array/list literals with bold (#416)
 - Add a snippet `struct end` with prefix `struct` (#420)
+- Only restart the language server for the `ocaml.server.restart` command (#426)
 
 ## 1.3.3
 

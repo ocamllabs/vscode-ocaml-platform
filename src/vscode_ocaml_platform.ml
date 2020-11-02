@@ -57,6 +57,11 @@ module Instance = struct
     ; dune_task_provider = Dune_task_provider.create ()
     }
 
+  let stop_language_server t =
+    Option.iter t.client ~f:(fun client ->
+        LanguageClient.stop client;
+        t.client <- None)
+
   let stop t =
     Dune_formatter.dispose t.dune_formatter;
     Dune_task_provider.dispose t.dune_task_provider;
@@ -65,37 +70,12 @@ module Instance = struct
         StatusBarItem.dispose status_bar_item;
         t.status_bar_item <- None);
 
-    Option.iter t.client ~f:(fun client ->
-        LanguageClient.stop client;
-        t.client <- None);
+    stop_language_server t;
 
     t.ocaml_lsp_capabilities <- None;
     t.toolchain <- None
 
-  let start t toolchain =
-    t.toolchain <- Some toolchain;
-
-    Dune_formatter.register t.dune_formatter toolchain;
-    Dune_task_provider.register t.dune_task_provider toolchain;
-
-    let status_bar_item =
-      Window.createStatusBarItem ~alignment:StatusBarAlignment.Left ()
-    in
-    let package_manager = Toolchain.package_manager toolchain in
-    let status_bar_text =
-      let package_icon =
-        "$(package)"
-        (* see https://code.visualstudio.com/api/references/icons-in-labels *)
-      in
-      Printf.sprintf "%s %s" package_icon
-      @@ Toolchain.Package_manager.to_pretty_string package_manager
-    in
-    StatusBarItem.set_text status_bar_item status_bar_text;
-    StatusBarItem.set_command status_bar_item
-      (`String select_sandbox_command_id);
-    StatusBarItem.show status_bar_item;
-    t.status_bar_item <- Some status_bar_item;
-
+  let start_language_server t toolchain =
     let open Promise.Result.Syntax in
     let* () = Toolchain.run_setup toolchain in
     let serverOptions = server_options toolchain in
@@ -121,6 +101,32 @@ module Instance = struct
          implementation and interface files, functionality in mli sources. \
          Consider updating ocamllsp.";
     Ok ()
+
+  let start t toolchain =
+    t.toolchain <- Some toolchain;
+
+    Dune_formatter.register t.dune_formatter toolchain;
+    Dune_task_provider.register t.dune_task_provider toolchain;
+
+    let status_bar_item =
+      Window.createStatusBarItem ~alignment:StatusBarAlignment.Left ()
+    in
+    let package_manager = Toolchain.package_manager toolchain in
+    let status_bar_text =
+      let package_icon =
+        "$(package)"
+        (* see https://code.visualstudio.com/api/references/icons-in-labels *)
+      in
+      Printf.sprintf "%s %s" package_icon
+      @@ Toolchain.Package_manager.to_pretty_string package_manager
+    in
+    StatusBarItem.set_text status_bar_item status_bar_text;
+    StatusBarItem.set_command status_bar_item
+      (`String select_sandbox_command_id);
+    StatusBarItem.show status_bar_item;
+    t.status_bar_item <- Some status_bar_item;
+
+    start_language_server t toolchain
 
   let open_terminal toolchain =
     match Terminal_sandbox.create toolchain with
@@ -158,8 +164,9 @@ let restart_instance (instance : Instance.t) () =
       select_sandbox instance ();
       Promise.return ()
     | Some toolchain ->
-      Instance.stop instance;
-      Instance.start instance (Toolchain.make_resources toolchain)
+      Instance.stop_language_server instance;
+      Instance.start_language_server instance
+        (Toolchain.make_resources toolchain)
       |> Promise.Result.iter ~error:(message `Error "%s")
   in
   ()
