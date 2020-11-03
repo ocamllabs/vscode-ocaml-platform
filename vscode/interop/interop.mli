@@ -19,7 +19,12 @@ module Regexp : sig
 
   val t_of_js : Ojs.t -> Js_of_ocaml.Regexp.regexp
 
-  type replacer = string -> string list -> string
+  type replacer =
+       matched:string
+    -> captures:string list
+    -> offset:int
+    -> string:string
+    -> string
 
   val replace : string -> regexp:t -> replacer:replacer -> string
 end

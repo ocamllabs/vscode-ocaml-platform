@@ -44,12 +44,14 @@ let resolve_workspace_vars setting =
     List.find ~f:pred (Workspace.workspaceFolders ())
   in
   let regexp = Js_of_ocaml.Regexp.regexp "\\$\\{workspaceFolder:([^}]+)\\}" in
-  let replacer matched = function
-    | [] -> assert false (* name will always be captured *)
-    | name :: _ -> (
+  let replacer ~matched ~captures ~offset:_ ~string:_ =
+    match captures with
+    | [ name ] -> (
       match find_folder name with
       | Some folder -> workspace_folder_path folder
       | None -> matched )
+    | _ -> assert false
+    (* name will always be captured *)
   in
   Interop.Regexp.replace setting ~regexp ~replacer
 

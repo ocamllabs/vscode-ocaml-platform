@@ -35,9 +35,34 @@ module Regexp = struct
 
   let t_of_js : Ojs.t -> Js_of_ocaml.Regexp.regexp = Obj.magic
 
-  type replacer = string -> (string list[@js.variadic]) -> string [@@js]
+  val replace :
+       string
+    -> regexp:t
+    -> replacer:(string -> (Ojs.t list[@js.variadic]) -> string)
+    -> string
+    [@@js.call]
 
-  val replace : string -> regexp:t -> replacer:replacer -> string [@@js.call]
+  type replacer =
+       matched:string
+    -> captures:string list
+    -> offset:int
+    -> string:string
+    -> string
+
+  let replace s ~regexp ~replacer =
+    let rec separate acc = function
+      | offset :: string :: _ when Ojs.type_of offset = "number" ->
+        (List.rev acc, [%js.to: int] offset, [%js.to: string] string)
+      | capture :: args -> separate ([%js.to: string] capture :: acc) args
+      | _ -> assert false
+      (* replacer arguments will always be terminated with
+         a numeric offset and final string *)
+    in
+    let js_replacer matched args =
+      let captures, offset, string = separate [] args in
+      replacer ~matched ~captures ~offset ~string
+    in
+    replace s ~regexp ~replacer:js_replacer
 end
 
 module Dict = struct
