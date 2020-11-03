@@ -277,7 +277,7 @@
         },
         {
           "comment": "character literal",
-          "name": "string.quoted.other.ocaml constant.character.ocaml",
+          "name": "string.quoted.single.ocaml",
           "match": "'.'"
         }
       ]
