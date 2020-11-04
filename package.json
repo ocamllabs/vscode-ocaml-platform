@@ -197,7 +197,7 @@
         ],
         "pattern": [
           {
-            "regexp": "^\\s*\\bFile\\b\\s*\"(.*)\",\\s*\\blines?\\b\\s*(\\d+)(?:-(\\d+))?,\\s*\\bcharacters\\b\\s*(\\d+)-(\\d+)\\s*:\\s*$",
+            "regexp": "^\\s*\\bFile\\b\\s*\"(.*)\",\\s*\\blines?\\b\\s*(\\d+)(?:-(\\d+))?(?:,\\s*\\bcharacters\\b\\s*(\\d+)-(\\d+)\\s*)?:\\s*$",
             "file": 1,
             "line": 2,
             "endLine": 3,
