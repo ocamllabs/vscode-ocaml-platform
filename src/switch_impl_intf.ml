@@ -65,4 +65,4 @@ let request_switch client document =
     in
     match choice with
     | None -> Promise.return ()
-    | Some filepath -> show_file filepath )
+    | Some filepath -> show_file filepath)

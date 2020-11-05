@@ -73,7 +73,7 @@ let create toolchain =
     | Shell command_line -> (
       match Platform.shell with
       | Sh bin -> { bin; args = [ "-c"; command_line ] }
-      | PowerShell bin -> { bin; args = [ "-c"; "& " ^ command_line ] } )
+      | PowerShell bin -> { bin; args = [ "-c"; "& " ^ command_line ] })
   in
   Cmd.log (Spawn command);
   let name = Toolchain.to_pretty_string toolchain in

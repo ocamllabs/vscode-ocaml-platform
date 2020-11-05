@@ -10,6 +10,6 @@
   "devDependencies": {
     "@opam/dune": "2.7.1",
     "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam",
-    "@opam/ocamlformat": "0.15.0"
+    "@opam/ocamlformat": "0.16.0"
   }
 }

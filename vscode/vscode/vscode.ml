@@ -993,8 +993,8 @@ module Location = struct
 
   val make :
        uri:Uri.t
-    -> rangeOrPosition:([ `Range of Range.t | `Position of Position.t ]
-         [@js.union])
+    -> rangeOrPosition:
+         ([ `Range of Range.t | `Position of Position.t ][@js.union])
     -> t
     [@@js.new "vscode.Location"]
 end
@@ -1485,7 +1485,8 @@ module RelativePattern = struct
   val pattern : t -> string [@@js.get]
 
   val make :
-       base:([ `WorkspaceFolder of WorkspaceFolder.t | `String of string ]
+       base:
+         ([ `WorkspaceFolder of WorkspaceFolder.t | `String of string ]
          [@js.union])
     -> pattern:string
     -> t
@@ -1931,7 +1932,8 @@ module Window = struct
        options:
          ([ `TerminalOptions of TerminalOptions.t
           | `ExtensionTerminalOptions of ExtensionTerminalOptions.t
-          ][@js.union])
+          ]
+         [@js.union])
     -> Terminal.t
     [@@js.global "vscode.window.createTerminal"]
 

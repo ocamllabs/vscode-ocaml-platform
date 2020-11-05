@@ -51,7 +51,7 @@ let check_spawn { bin; args } =
       match which_path with
       | None ->
         Error (Printf.sprintf "Command %s not found" (Path.to_string bin))
-      | Some bin -> Ok { bin; args } )
+      | Some bin -> Ok { bin; args })
 
 let check t =
   match t with

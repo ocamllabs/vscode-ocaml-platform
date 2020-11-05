@@ -162,7 +162,7 @@ let of_settings () : t option Promise.t =
     | None ->
       not_available `Esy;
       None
-    | Some esy -> Some (Esy (esy, manifest)) )
+    | Some esy -> Some (Esy (esy, manifest)))
   | Some (Opam switch) -> (
     let open Promise.Syntax in
     let* opam = available.opam in
@@ -180,7 +180,7 @@ let of_settings () : t option Promise.t =
            exist."
           (Opam.Switch.name switch);
         None
-      ) )
+      ))
   | Some Global -> Promise.return (Some Global)
   | Some (Custom template) -> Promise.return (Some (Custom template))
 
@@ -209,7 +209,7 @@ module Candidate = struct
         | Opam (_, Local _) -> Some "Local switch"
         | Opam (_, Named _) -> Some "Global switch"
         | Esy _ -> Some "Esy"
-        | _ -> None )
+        | _ -> None)
     in
     match toolchain with
     | Opam (_, Named name) -> create ~label:name ?description ()
@@ -325,7 +325,7 @@ let select_toolchain () =
     | Error s ->
       show_message `Warn "This toolchain is invalid. Error: %s" s;
       Promise.return None
-    | Ok () -> Promise.Option.return toolchain )
+    | Ok () -> Promise.Option.return toolchain)
 
 let select_toolchain_and_save () =
   let open Promise.Option.Syntax in

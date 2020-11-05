@@ -36,7 +36,7 @@ let folder_relative_path folders file =
         let prefix = Uri.fsPath (WorkspaceFolder.uri folder) in
         match String.chop_prefix file ~prefix with
         | None -> acc
-        | Some without_prefix -> Some (folder, without_prefix) ))
+        | Some without_prefix -> Some (folder, without_prefix)))
     ~init:None folders
 
 let get_shell_execution toolchain options =
