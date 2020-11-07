@@ -77,31 +77,34 @@ module Package_manager = struct
 
     let of_json json =
       let open Jsonoo.Decode in
+      let decode_vars json = Settings.resolve_workspace_vars (string json) in
       let kind = field "kind" Kind.of_json json in
       match (kind : Kind.t) with
       | Global -> Global
       | Esy ->
         let manifest =
-          field "root" (fun js -> Path.of_string (string js)) json
+          field "root" (fun js -> Path.of_string (decode_vars js)) json
         in
         Esy manifest
       | Opam ->
         let switch =
-          field "switch" (fun js -> Opam.Switch.make (string js)) json
+          field "switch" (fun js -> Opam.Switch.make (decode_vars js)) json
         in
         Opam switch
       | Custom ->
-        let template = field "template" string json in
+        let template = field "template" decode_vars json in
         Custom template
 
     let to_json (t : t) =
       let open Jsonoo.Encode in
+      let encode_vars str = string (Settings.substitute_workspace_vars str) in
       let kind = ("kind", Kind.to_json (kind t)) in
       match t with
       | Global -> Jsonoo.Encode.object_ [ kind ]
       | Esy manifest ->
-        object_ [ kind; ("root", string @@ Path.to_string manifest) ]
-      | Opam sw -> object_ [ kind; ("switch", string @@ Opam.Switch.name sw) ]
+        object_ [ kind; ("root", encode_vars @@ Path.to_string manifest) ]
+      | Opam switch ->
+        object_ [ kind; ("switch", encode_vars @@ Opam.Switch.name switch) ]
       | Custom template -> object_ [ kind; ("template", string template) ]
 
     let t = Settings.create ~scope:Workspace ~key:"sandbox" ~of_json ~to_json

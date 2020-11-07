@@ -32,3 +32,31 @@ let string =
   let to_json = Jsonoo.Encode.string in
   let of_json = Jsonoo.Decode.string in
   create ~of_json ~to_json
+
+let workspace_folder_var folder =
+  Printf.sprintf "${workspaceFolder:%s}" (WorkspaceFolder.name folder)
+
+let workspace_folder_path folder = Uri.fsPath (WorkspaceFolder.uri folder)
+
+let resolve_workspace_vars setting =
+  let find_folder name =
+    let pred folder = String.equal name (WorkspaceFolder.name folder) in
+    List.find ~f:pred (Workspace.workspaceFolders ())
+  in
+  let regexp = Js_of_ocaml.Regexp.regexp "\\$\\{workspaceFolder:([^}]+)\\}" in
+  let replacer ~matched ~captures ~offset:_ ~string:_ =
+    match captures with
+    | [ name ] -> (
+      match find_folder name with
+      | Some folder -> workspace_folder_path folder
+      | None -> matched )
+    | _ -> assert false
+    (* name will always be captured *)
+  in
+  Interop.Regexp.replace setting ~regexp ~replacer
+
+let substitute_workspace_vars setting =
+  List.fold (Workspace.workspaceFolders ()) ~init:setting ~f:(fun acc folder ->
+      String.substr_replace_all acc
+        ~pattern:(workspace_folder_path folder)
+        ~with_:(workspace_folder_var folder))

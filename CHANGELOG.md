@@ -7,6 +7,8 @@
 - Only restart the language server for the `ocaml.server.restart` command (#426)
 - Use highlighting for character literals which is consistent with other
   languages in VS Code (#428)
+- Allow using `${workspaceFolder:folder_name}` placeholder variables in sandbox
+  configurations for portable settings.json files (#424)
 
 ## 1.3.3
 
