@@ -55,7 +55,7 @@ suite("Basic tests", () => {
     );
 
     let messageRegex = new RegExp(
-      "^(?:\\s*\\bParse\\b\\s*)?\\s*\\b([Ee]rror|Warning)\\b\\s*(?:\\(\\s*\\bwarning\\b\\s*(\\d+)\\))?\\s*:\\s*(.*)$"
+      "^(?:\\s*\\bParse\\b\\s*)?\\s*\\b([Ee]rror|Warning)\\b\\s*(?:(?:\\(\\s*\\bwarning\\b\\s*)?(\\d+)\\)?)?\\s*:\\s*(.*)$"
     );
 
     for (const [problem, expected] of Object.entries(problemLocations)) {
