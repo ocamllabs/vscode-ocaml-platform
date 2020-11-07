@@ -567,6 +567,7 @@
   "scripts": {
     "test:esy": "node ./test/runEsyTests.js",
     "test:opam": "node ./test/runOpamTests.js",
+    "test:problems": "node ./test/runProblemMatcherTests.js",
     "test": "npm-run-all -s test:*",
     "package": "vsce package --yarn",
     "deploy": "vsce publish --yarn",
