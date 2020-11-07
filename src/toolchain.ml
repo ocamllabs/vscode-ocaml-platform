@@ -105,7 +105,7 @@ module Package_manager = struct
         object_ [ kind; ("root", encode_vars @@ Path.to_string manifest) ]
       | Opam switch ->
         object_ [ kind; ("switch", encode_vars @@ Opam.Switch.name switch) ]
-      | Custom template -> object_ [ kind; ("template", encode_vars template) ]
+      | Custom template -> object_ [ kind; ("template", string template) ]
 
     let t = Settings.create ~scope:Workspace ~key:"sandbox" ~of_json ~to_json
   end
