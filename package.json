@@ -197,7 +197,7 @@
         ],
         "pattern": [
           {
-            "regexp": "^\\s*\\bFile\\b\\s*\"(.*)\",\\s*\\blines?\\b\\s*(\\d+)(?:-(\\d+))?,\\s*\\bcharacters\\b\\s*(\\d+)-(\\d+)\\s*:\\s*$",
+            "regexp": "^\\s*\\bFile\\b\\s*\"(.*)\",\\s*\\blines?\\b\\s*(\\d+)(?:-(\\d+))?(?:,\\s*\\bcharacters\\b\\s*(\\d+)-(\\d+)\\s*)?:\\s*$",
             "file": 1,
             "line": 2,
             "endLine": 3,
@@ -205,7 +205,7 @@
             "endColumn": 5
           },
           {
-            "regexp": "^(?:\\s*\\bParse\\b\\s*)?\\s*\\b([Ee]rror|Warning)\\b\\s*(?:\\(\\s*\\bwarning\\b\\s*(\\d+)\\))?\\s*:\\s*(.*)$",
+            "regexp": "^(?:\\s*\\bParse\\b\\s*)?\\s*\\b([Ee]rror|Warning)\\b\\s*(?:(?:\\(\\s*\\bwarning\\b\\s*)?(\\d+)\\)?)?\\s*:\\s*(.*)$",
             "severity": 1,
             "code": 2,
             "message": 3
@@ -567,6 +567,7 @@
   "scripts": {
     "test:esy": "node ./test/runEsyTests.js",
     "test:opam": "node ./test/runOpamTests.js",
+    "test:problems": "node ./test/runProblemMatcherTests.js",
     "test": "npm-run-all -s test:*",
     "package": "vsce package --yarn",
     "deploy": "vsce publish --yarn",
