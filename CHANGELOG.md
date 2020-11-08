@@ -9,6 +9,8 @@
   languages in VS Code (#428)
 - Allow using `${workspaceFolder:folder_name}` placeholder variables in sandbox
   configurations for portable settings.json files (#424)
+- Fix OCaml problem matcher for warning codes and error messages without
+  characters (#429)
 
 ## 1.3.3
 
