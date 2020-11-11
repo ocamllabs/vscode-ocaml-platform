@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.4.0
 
 - Stop highlighting ocaml unit/array/list literals with bold (#416)
 - Add a snippet `struct end` with prefix `struct` (#420)
