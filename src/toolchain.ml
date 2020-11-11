@@ -137,9 +137,11 @@ module Package_manager = struct
     | Custom _ -> "Custom OCaml"
 end
 
-type resources = Package_manager.t
+type t = { package_manager : Package_manager.t }
 
-let package_manager (t : resources) : Package_manager.t = t
+let make package_manager = { package_manager }
+
+let package_manager t = t.package_manager
 
 let available_package_managers () =
   { Package_manager.Kind.Hmap.opam = Opam.make ()
@@ -304,8 +306,6 @@ let setup_toolchain (kind : Package_manager.t) =
   | Custom _ ->
     Promise.Result.return ()
 
-let make_resources kind = kind
-
 let select () =
   let open Promise.Syntax in
   let workspace_folders = Workspace.workspaceFolders () in
@@ -344,8 +344,8 @@ let select_and_save () =
   let+ () = to_settings package_manager in
   Some package_manager
 
-let get_command (t : Package_manager.t) bin args : Cmd.t =
-  match t with
+let get_command (t : t) bin args : Cmd.t =
+  match t.package_manager with
   | Opam (opam, switch) -> Opam.exec opam ~switch ~args:(bin :: args)
   | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:(bin :: args)
   | Global -> Spawn { bin = Path.of_string bin; args }
@@ -365,19 +365,18 @@ let get_command (t : Package_manager.t) bin args : Cmd.t =
     in
     Shell command
 
-let get_lsp_command ?(args = []) (t : Package_manager.t) : Cmd.t =
-  get_command t "ocamllsp" args
+let get_lsp_command ?(args = []) t : Cmd.t = get_command t "ocamllsp" args
 
-let get_dune_command (t : Package_manager.t) args : Cmd.t =
-  get_command t "dune" args
+let get_dune_command t args : Cmd.t = get_command t "dune" args
 
-let run_setup resources =
+let run_setup t =
+  let package_manager = t.package_manager in
   let open Promise.Syntax in
   let+ output =
     let open Promise.Result.Syntax in
-    let* () = setup_toolchain resources in
+    let* () = setup_toolchain package_manager in
     let args = [ "--version" ] in
-    let* command = Cmd.check (get_lsp_command resources ~args) in
+    let* command = Cmd.check (get_lsp_command t ~args) in
     Cmd.output command
   in
   match output with

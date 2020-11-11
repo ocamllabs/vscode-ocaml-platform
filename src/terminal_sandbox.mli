@@ -1,6 +1,6 @@
 type t
 
-val create : Toolchain.resources -> t option
+val create : Toolchain.t -> t option
 
 val dispose : t -> unit
 

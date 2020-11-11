@@ -10,7 +10,7 @@ let open_terminal_select_command_id = "ocaml.open-terminal-select"
 
 let switch_impl_intf_command_id = "ocaml.switch-impl-intf"
 
-let client_options () : LanguageClient.ClientOptions.t =
+let client_options () =
   let documentSelector =
     LanguageClient.DocumentSelector.
       [| language "ocaml"
@@ -25,8 +25,7 @@ let client_options () : LanguageClient.ClientOptions.t =
   LanguageClient.ClientOptions.create ~documentSelector ~outputChannel
     ~revealOutputChannelOn ()
 
-let server_options (toolchain : Toolchain.resources) :
-    LanguageClient.ServerOptions.t =
+let server_options toolchain =
   let command = Toolchain.get_lsp_command toolchain in
   Cmd.log command;
   match command with
@@ -40,7 +39,7 @@ let server_options (toolchain : Toolchain.resources) :
 
 module Instance = struct
   type t =
-    { mutable toolchain : Toolchain.resources option
+    { mutable toolchain : Toolchain.t option
     ; mutable client : LanguageClient.t option
     ; mutable ocaml_lsp_capabilities : Ocaml_lsp.t option
     ; mutable status_bar_item : StatusBarItem.t option
@@ -145,9 +144,9 @@ let select_sandbox (instance : Instance.t) () =
     let* package_manager = Toolchain.select_and_save () in
     match package_manager with
     | None -> Promise.Result.return ()
-    | Some t ->
+    | Some pm ->
       Instance.stop instance;
-      let t = Toolchain.make_resources t in
+      let t = Toolchain.make pm in
       Instance.start instance t
   in
   let (_ : unit Promise.t) =
@@ -163,10 +162,9 @@ let restart_instance (instance : Instance.t) () =
     | None ->
       select_sandbox instance ();
       Promise.return ()
-    | Some toolchain ->
+    | Some pm ->
       Instance.stop_language_server instance;
-      Instance.start_language_server instance
-        (Toolchain.make_resources toolchain)
+      Instance.start_language_server instance (Toolchain.make pm)
       |> Promise.Result.iter ~error:(message `Error "%s")
   in
   ()
@@ -174,8 +172,8 @@ let restart_instance (instance : Instance.t) () =
 let select_sandbox_and_open_terminal () =
   let (_ : unit option Promise.t) =
     let open Promise.Option.Syntax in
-    let+ toolchain = Toolchain.select () in
-    let toolchain = Toolchain.make_resources toolchain in
+    let+ pm = Toolchain.select () in
+    let toolchain = Toolchain.make pm in
     Instance.open_terminal toolchain
   in
   ()
@@ -244,12 +242,12 @@ let activate (extension : ExtensionContext.t) =
     let+ pm = Toolchain.of_settings () in
     let resources, is_fallback =
       match pm with
-      | Some toolchain -> (toolchain, false)
+      | Some pm -> (pm, false)
       | None ->
         let (_ : unit Promise.t) = suggest_to_setup_toolchain instance in
         (Toolchain.Package_manager.Global, true)
     in
-    (Toolchain.make_resources resources, is_fallback)
+    (Toolchain.make resources, is_fallback)
   in
   let* toolchain, is_fallback = toolchain in
   Instance.start instance toolchain

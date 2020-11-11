@@ -28,13 +28,13 @@ module Package_manager : sig
   val to_pretty_string : t -> string
 end
 
-type resources
+type t
 
 val of_settings : unit -> Package_manager.t option Promise.t
 
-val make_resources : Package_manager.t -> resources
+val make : Package_manager.t -> t
 
-val package_manager : resources -> Package_manager.t
+val package_manager : t -> Package_manager.t
 
 (** [select_and_save] requires the process environment the plugin is being run in
    (ie VSCode's process environment) and the project root and produces a promise
@@ -71,15 +71,15 @@ val select : unit -> Package_manager.t option Promise.t
    like yum/apt/brew or Duniverse), [run_setup] must co-operate and
    detect such installations.
  *)
-val run_setup : resources -> (unit, string) result Promise.t
+val run_setup : t -> (unit, string) result Promise.t
 
 (* Helper utils *)
 
 (** Extract command to run with the toolchain *)
-val get_command : resources -> string -> string list -> Cmd.t
+val get_command : t -> string -> string list -> Cmd.t
 
 (** Extract lsp command and arguments *)
-val get_lsp_command : ?args:string list -> resources -> Cmd.t
+val get_lsp_command : ?args:string list -> t -> Cmd.t
 
 (** Extract a dune command *)
-val get_dune_command : resources -> string list -> Cmd.t
+val get_dune_command : t -> string list -> Cmd.t
