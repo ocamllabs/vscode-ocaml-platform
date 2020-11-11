@@ -25,8 +25,8 @@ let candidates bin =
   | Win32 -> [ bin_ext ".exe"; bin_ext ".cmd" ]
   | _ -> [ bin ]
 
-let which path bin =
-  String.split ~on:Path.delimiter path
+let which path_env_var bin =
+  String.split ~on:Path.delimiter path_env_var
   |> Promise.List.find_map (fun p ->
          let p = Path.of_string p in
          candidates bin
