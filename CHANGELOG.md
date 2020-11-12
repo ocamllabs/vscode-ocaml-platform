@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Highlight `rec` keyword in OCaml mli files for recursive modules (#434)
+
 ## 1.4.0
 
 - Stop highlighting ocaml unit/array/list literals with bold (#416)
