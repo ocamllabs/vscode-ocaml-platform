@@ -2,14 +2,6 @@ open Import
 
 let select_sandbox_command_id = "ocaml.select-sandbox"
 
-let restart_command_id = "ocaml.server.restart"
-
-let open_terminal_command_id = "ocaml.open-terminal"
-
-let open_terminal_select_command_id = "ocaml.open-terminal-select"
-
-let switch_impl_intf_command_id = "ocaml.switch-impl-intf"
-
 let client_options () =
   let documentSelector =
     LanguageClient.DocumentSelector.
@@ -138,72 +130,110 @@ module Instance = struct
   let disposable t = Disposable.make ~dispose:(fun () -> stop t)
 end
 
-let select_sandbox (instance : Instance.t) () =
-  let set_toolchain =
-    let open Promise.Syntax in
-    let* package_manager = Toolchain.select_and_save () in
-    match package_manager with
-    | None -> Promise.Result.return ()
-    | Some pm ->
-      Instance.stop instance;
-      let t = Toolchain.make pm in
-      Instance.start instance t
-  in
-  let (_ : unit Promise.t) =
-    Promise.Result.iter set_toolchain ~error:(message `Error "%s")
-  in
-  ()
+module ExtensionCommands = struct
+  type command =
+    { id : string
+    ; handler : Instance.t -> unit -> unit
+    }
 
-let restart_instance (instance : Instance.t) () =
-  let (_ : unit Promise.t) =
-    let open Promise.Syntax in
-    let* package_manager = Toolchain.of_settings () in
-    match package_manager with
-    | None ->
-      select_sandbox instance ();
-      Promise.return ()
-    | Some pm ->
-      Instance.stop_language_server instance;
-      Instance.start_language_server instance (Toolchain.make pm)
-      |> Promise.Result.iter ~error:(message `Error "%s")
-  in
-  ()
+  let command id handler = { id; handler }
 
-let select_sandbox_and_open_terminal () =
-  let (_ : unit option Promise.t) =
-    let open Promise.Option.Syntax in
-    let+ pm = Toolchain.select () in
-    let toolchain = Toolchain.make pm in
-    Instance.open_terminal toolchain
-  in
-  ()
+  let select_sandbox =
+    let handler (instance : Instance.t) () =
+      let set_toolchain =
+        let open Promise.Syntax in
+        let* package_manager = Toolchain.select_and_save () in
+        match package_manager with
+        | None -> Promise.Result.return ()
+        | Some pm ->
+          Instance.stop instance;
+          let t = Toolchain.make pm in
+          Instance.start instance t
+      in
+      let (_ : unit Promise.t) =
+        Promise.Result.iter set_toolchain ~error:(message `Error "%s")
+      in
+      ()
+    in
+    command select_sandbox_command_id handler
 
-let open_terminal (instance : Instance.t) () =
-  match instance.toolchain with
-  | None -> select_sandbox_and_open_terminal ()
-  | Some toolchain -> Instance.open_terminal toolchain
+  let restart_instance =
+    let handler (instance : Instance.t) () =
+      let (_ : unit Promise.t) =
+        let open Promise.Syntax in
+        let* package_manager = Toolchain.of_settings () in
+        match package_manager with
+        | None ->
+          select_sandbox.handler instance ();
+          Promise.return ()
+        | Some pm ->
+          Instance.stop_language_server instance;
+          Instance.start_language_server instance (Toolchain.make pm)
+          |> Promise.Result.iter ~error:(message `Error "%s")
+      in
+      ()
+    in
+    command "ocaml.server.restart" handler
 
-let switch_impl_intf (instance : Instance.t) () =
-  let try_switching () =
-    let open Option.O in
-    let* editor = Window.activeTextEditor () in
-    let document = TextEditor.document editor in
-    let* client = instance.client in
-    (* extension needs to be activated; otherwise, just ignore the switch try *)
-    let+ ocaml_lsp = instance.ocaml_lsp_capabilities in
-    (* same as for instance.client; ignore the try if it's None *)
-    if Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp then
-      Switch_impl_intf.request_switch client document
-    else
-      (* if, however, ocamllsp doesn't have the capability, recommend updating ocamllsp*)
-      Promise.return
-      @@ message `Warn
-           "The installed version of ocamllsp does not support switching \
-            between implementation and interface files. Consider updating \
-            ocamllsp."
-  in
-  let (_ : unit Promise.t option) = try_switching () in
-  ()
+  let select_sandbox_and_open_terminal =
+    let handler _instance () =
+      let (_ : unit option Promise.t) =
+        let open Promise.Option.Syntax in
+        let+ pm = Toolchain.select () in
+        let toolchain = Toolchain.make pm in
+        Instance.open_terminal toolchain
+      in
+      ()
+    in
+    command "ocaml.open-terminal-select" handler
+
+  let open_terminal =
+    let handler (instance : Instance.t) () =
+      match instance.toolchain with
+      | None -> select_sandbox_and_open_terminal.handler instance ()
+      | Some toolchain -> Instance.open_terminal toolchain
+    in
+    command "ocaml.open-terminal" handler
+
+  let switch_impl_intf =
+    let handler (instance : Instance.t) () =
+      let try_switching () =
+        let open Option.O in
+        let* editor = Window.activeTextEditor () in
+        let document = TextEditor.document editor in
+        let* client = instance.client in
+        (* extension needs to be activated; otherwise, just ignore the switch try *)
+        let+ ocaml_lsp = instance.ocaml_lsp_capabilities in
+        (* same as for instance.client; ignore the try if it's None *)
+        if Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp then
+          Switch_impl_intf.request_switch client document
+        else
+          (* if, however, ocamllsp doesn't have the capability, recommend updating ocamllsp*)
+          Promise.return
+          @@ message `Warn
+               "The installed version of ocamllsp does not support switching \
+                between implementation and interface files. Consider updating \
+                ocamllsp."
+      in
+      let (_ : unit Promise.t option) = try_switching () in
+      ()
+    in
+    command "ocaml.switch-impl-intf" handler
+
+  let register_all_commands extension instance =
+    let register_command { id; handler } =
+      let callback ~args:_ = handler instance () in
+      let disposable = Commands.registerCommand ~command:id ~callback in
+      ExtensionContext.subscribe extension ~disposable
+    in
+    List.iter ~f:register_command
+      [ select_sandbox
+      ; restart_instance
+      ; open_terminal
+      ; select_sandbox_and_open_terminal
+      ; switch_impl_intf
+      ]
+end
 
 let suggest_to_setup_toolchain instance =
   let open Promise.Syntax in
@@ -217,24 +247,12 @@ let suggest_to_setup_toolchain instance =
   in
   match selection with
   | None -> ()
-  | Some () -> select_sandbox instance ()
-
-let register_commands extension =
-  List.iter ~f:(function command, callback ->
-      let callback ~args:_ = callback () in
-      ExtensionContext.subscribe extension
-        ~disposable:(Commands.registerCommand ~command ~callback))
+  | Some () -> ExtensionCommands.select_sandbox.handler instance ()
 
 let activate (extension : ExtensionContext.t) =
   Process.Env.set "OCAML_LSP_SERVER_LOG" "-";
   let instance = Instance.create () in
-  register_commands extension
-    [ (select_sandbox_command_id, select_sandbox instance)
-    ; (restart_command_id, restart_instance instance)
-    ; (open_terminal_command_id, open_terminal instance)
-    ; (open_terminal_select_command_id, select_sandbox_and_open_terminal)
-    ; (switch_impl_intf_command_id, switch_impl_intf instance)
-    ];
+  ExtensionCommands.register_all_commands extension instance;
   ExtensionContext.subscribe extension
     ~disposable:(Instance.disposable instance);
   let open Promise.Syntax in
