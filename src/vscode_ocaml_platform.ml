@@ -42,7 +42,7 @@ module Instance = struct
     { mutable toolchain : Toolchain.t option
     ; mutable client : LanguageClient.t option
     ; mutable ocaml_lsp_capabilities : Ocaml_lsp.t option
-    ; mutable status_bar_item : StatusBarItem.t option
+    ; mutable sandbox_info : StatusBarItem.t option
     ; dune_formatter : Dune_formatter.t
     ; dune_task_provider : Dune_task_provider.t
     }
@@ -51,7 +51,7 @@ module Instance = struct
     { toolchain = None
     ; client = None
     ; ocaml_lsp_capabilities = None
-    ; status_bar_item = None
+    ; sandbox_info = None
     ; dune_formatter = Dune_formatter.create ()
     ; dune_task_provider = Dune_task_provider.create ()
     }
@@ -65,9 +65,9 @@ module Instance = struct
     Dune_formatter.dispose t.dune_formatter;
     Dune_task_provider.dispose t.dune_task_provider;
 
-    Option.iter t.status_bar_item ~f:(fun status_bar_item ->
+    Option.iter t.sandbox_info ~f:(fun status_bar_item ->
         StatusBarItem.dispose status_bar_item;
-        t.status_bar_item <- None);
+        t.sandbox_info <- None);
 
     stop_language_server t;
 
@@ -101,17 +101,12 @@ module Instance = struct
          Consider updating ocamllsp.";
     Ok ()
 
-  let start t toolchain =
-    t.toolchain <- Some toolchain;
-
-    Dune_formatter.register t.dune_formatter toolchain;
-    Dune_task_provider.register t.dune_task_provider toolchain;
-
+  let make_sandbox_info toolchain =
     let status_bar_item =
       Window.createStatusBarItem ~alignment:StatusBarAlignment.Left ()
     in
     let package_manager = Toolchain.package_manager toolchain in
-    let status_bar_text =
+    let status_bar_item_text =
       let package_icon =
         "$(package)"
         (* see https://code.visualstudio.com/api/references/icons-in-labels *)
@@ -119,12 +114,17 @@ module Instance = struct
       Printf.sprintf "%s %s" package_icon
       @@ Toolchain.Package_manager.to_pretty_string package_manager
     in
-    StatusBarItem.set_text status_bar_item status_bar_text;
+    StatusBarItem.set_text status_bar_item status_bar_item_text;
     StatusBarItem.set_command status_bar_item
       (`String select_sandbox_command_id);
     StatusBarItem.show status_bar_item;
-    t.status_bar_item <- Some status_bar_item;
+    status_bar_item
 
+  let start t toolchain =
+    t.toolchain <- Some toolchain;
+    Dune_formatter.register t.dune_formatter toolchain;
+    Dune_task_provider.register t.dune_task_provider toolchain;
+    t.sandbox_info <- Some (make_sandbox_info toolchain);
     start_language_server t toolchain
 
   let open_terminal toolchain =
