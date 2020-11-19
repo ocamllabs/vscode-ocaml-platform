@@ -50,3 +50,5 @@ let log_json msg (fields : (string * Jsonoo.t) list) =
   let json = Jsonoo.Encode.object_ fields |> Jsonoo.stringify ~spaces:2 in
   let (lazy output_channel) = Output.extension_output_channel in
   OutputChannel.appendLine output_channel ~value:(msg ^ " " ^ json ^ "\n")
+
+let select_sandbox_command_id = "ocaml.select-sandbox"
