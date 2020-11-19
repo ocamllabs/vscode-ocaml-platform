@@ -26,7 +26,7 @@ let select_sandbox =
   in
   command select_sandbox_command_id handler
 
-let restart_instance =
+let restart_language_server =
   let handler (instance : Extension_instance.t) () =
     let (_ : unit Promise.t) =
       let open Promise.Syntax in
@@ -97,7 +97,7 @@ let register_all_commands extension instance =
   in
   List.iter ~f:register_command
     [ select_sandbox
-    ; restart_instance
+    ; restart_language_server
     ; open_terminal
     ; select_sandbox_and_open_terminal
     ; switch_impl_intf
