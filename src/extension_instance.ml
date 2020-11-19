@@ -79,27 +79,38 @@ let start_language_server t toolchain =
        Consider updating ocamllsp.";
   Ok ()
 
-let make_sandbox_info toolchain =
-  let status_bar_item =
-    Window.createStatusBarItem ~alignment:StatusBarAlignment.Left ()
-  in
-  let package_manager = Toolchain.package_manager toolchain in
-  let status_bar_item_text =
-    let package_icon =
-      "$(package)"
-      (* see https://code.visualstudio.com/api/references/icons-in-labels *)
-    in
-    Printf.sprintf "%s %s" package_icon
+module Sandbox_info : sig
+  val make : Toolchain.t -> StatusBarItem.t
+
+  val _update : StatusBarItem.t -> new_toolchain:Toolchain.t -> unit
+end = struct
+  let make_status_bar_item_text package_manager =
+    Printf.sprintf "%s %s" LabelIcons.package
     @@ Toolchain.Package_manager.to_pretty_string package_manager
-  in
-  StatusBarItem.set_text status_bar_item status_bar_item_text;
-  StatusBarItem.set_command status_bar_item (`String select_sandbox_command_id);
-  StatusBarItem.show status_bar_item;
-  status_bar_item
+
+  let make toolchain =
+    let status_bar_item =
+      Window.createStatusBarItem ~alignment:StatusBarAlignment.Left ()
+    in
+    let status_bar_item_text =
+      make_status_bar_item_text @@ Toolchain.package_manager toolchain
+    in
+    StatusBarItem.set_text status_bar_item status_bar_item_text;
+    StatusBarItem.set_command status_bar_item
+      (`String select_sandbox_command_id);
+    StatusBarItem.show status_bar_item;
+    status_bar_item
+
+  let _update sandbox_info ~new_toolchain =
+    let status_bar_item_text =
+      make_status_bar_item_text @@ Toolchain.package_manager new_toolchain
+    in
+    StatusBarItem.set_text sandbox_info status_bar_item_text
+end
 
 let start t toolchain =
   t.toolchain <- Some toolchain;
-  t.sandbox_info <- Some (make_sandbox_info toolchain);
+  t.sandbox_info <- Some (Sandbox_info.make toolchain);
   start_language_server t toolchain
 
 let open_terminal toolchain =
