@@ -382,4 +382,6 @@ let run_setup t =
   match output with
   | Ok _ -> Ok ()
   | Error msg ->
+    (* TODO: if ocamllsp not found, suggest to install it on press of a button;
+       consider checking and suggesting installation for other tools: formatter, etc. *)
     Error (Printf.sprintf "Toolchain initialisation failed: %s" msg)
