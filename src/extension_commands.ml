@@ -7,7 +7,13 @@ type command =
            [handler extension_instance] is passed as a callback to [Commands.registerCommand] *)
   }
 
-let command id handler = { id; handler }
+let commands = ref []
+
+(** creates a new command and stores in a mutable [commands] list *)
+let command id handler =
+  let command = { id; handler } in
+  commands := command :: !commands;
+  command
 
 let select_sandbox =
   let handler (instance : Extension_instance.t) () =
@@ -99,10 +105,4 @@ let register_all_commands extension instance =
     let disposable = Commands.registerCommand ~command:id ~callback in
     ExtensionContext.subscribe extension ~disposable
   in
-  List.iter ~f:register_command
-    [ select_sandbox
-    ; restart_language_server
-    ; open_terminal
-    ; select_sandbox_and_open_terminal
-    ; switch_impl_intf
-    ]
+  List.iter ~f:register_command !commands
