@@ -33,8 +33,15 @@ let activate (extension : ExtensionContext.t) =
     (Toolchain.make resources, is_fallback)
   in
   Extension_instance.start instance toolchain
-  |> Promise.Result.iter ~error:(fun e ->
-         if not is_fallback then show_message `Error "%s" e)
+  |> Promise.Result.iter
+       ~ok:(fun () ->
+         let _register_dune_formatter : unit =
+           Dune_formatter.register instance
+           |> List.iter ~f:(fun disposable ->
+                  ExtensionContext.subscribe extension ~disposable)
+         in
+         ())
+       ~error:(fun e -> if not is_fallback then show_message `Error "%s" e)
   |> Promise.catch ~rejected:(fun e ->
          let error_message = Node.JsError.message e in
          show_message `Error "Error: %s" error_message;

@@ -5,7 +5,6 @@ type t =
   ; mutable client : LanguageClient.t option
   ; mutable ocaml_lsp : Ocaml_lsp.t option
   ; mutable sandbox_info : StatusBarItem.t option
-  ; dune_formatter : Dune_formatter.t
   ; dune_task_provider : Dune_task_provider.t
   }
 

@@ -5,7 +5,6 @@ type t =
   ; mutable client : LanguageClient.t option
   ; mutable ocaml_lsp : Ocaml_lsp.t option
   ; mutable sandbox_info : StatusBarItem.t option
-  ; dune_formatter : Dune_formatter.t
   ; dune_task_provider : Dune_task_provider.t
   }
 
@@ -14,7 +13,6 @@ let create () =
   ; client = None
   ; ocaml_lsp = None
   ; sandbox_info = None
-  ; dune_formatter = Dune_formatter.create ()
   ; dune_task_provider = Dune_task_provider.create ()
   }
 
@@ -51,7 +49,6 @@ let stop_language_server t =
       t.client <- None)
 
 let stop t =
-  Dune_formatter.dispose t.dune_formatter;
   Dune_task_provider.dispose t.dune_task_provider;
 
   Option.iter t.sandbox_info ~f:(fun status_bar_item ->
@@ -110,7 +107,6 @@ let make_sandbox_info toolchain =
 
 let start t toolchain =
   t.toolchain <- Some toolchain;
-  Dune_formatter.register t.dune_formatter toolchain;
   Dune_task_provider.register t.dune_task_provider toolchain;
   t.sandbox_info <- Some (make_sandbox_info toolchain);
   start_language_server t toolchain
