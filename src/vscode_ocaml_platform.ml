@@ -40,6 +40,10 @@ let activate (extension : ExtensionContext.t) =
            |> List.iter ~f:(fun disposable ->
                   ExtensionContext.subscribe extension ~disposable)
          in
+         let _register_dune_task_provider : unit =
+           let disposable = Dune_task_provider.register instance in
+           ExtensionContext.subscribe extension ~disposable
+         in
          ())
        ~error:(fun e -> if not is_fallback then show_message `Error "%s" e)
   |> Promise.catch ~rejected:(fun e ->
