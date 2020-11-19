@@ -10,9 +10,7 @@ let suggest_to_setup_toolchain instance =
       ~choices:[ ("Select package manager", ()) ]
       ()
   in
-  match selection with
-  | None -> ()
-  | Some () -> Extension_commands.select_sandbox.handler instance ()
+  Option.iter selection ~f:(Extension_commands.select_sandbox.handler instance)
 
 let activate (extension : ExtensionContext.t) =
   (* this env var update disables ocaml-lsp's logging to a file
