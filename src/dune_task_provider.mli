@@ -4,4 +4,4 @@
     file that it can find in the workspace. It doesn't parse the dune files.
 *)
 
-val register : Extension_instance.t -> Vscode.Disposable.t
+val register : Vscode.ExtensionContext.t -> Extension_instance.t -> unit

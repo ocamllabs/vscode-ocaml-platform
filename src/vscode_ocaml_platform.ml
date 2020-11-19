@@ -43,8 +43,7 @@ let activate (extension : ExtensionContext.t) =
            Dune_formatter.register extension instance
          in
          let _register_dune_task_provider : unit =
-           let disposable = Dune_task_provider.register instance in
-           ExtensionContext.subscribe extension ~disposable
+           Dune_task_provider.register extension instance
          in
          if
            is_fallback

@@ -92,8 +92,9 @@ let provide_tasks instance ~token =
 
 let resolve_tasks ~task ~token:_ = `Promise (Promise.Option.return task)
 
-let register instance =
+let register extension instance =
   let provideTasks = provide_tasks instance in
   let resolveTasks = resolve_tasks in
   let provider = TaskProvider.create ~provideTasks ~resolveTasks in
-  Tasks.registerTaskProvider ~type_:task_type ~provider
+  let disposable = Tasks.registerTaskProvider ~type_:task_type ~provider in
+  ExtensionContext.subscribe extension ~disposable
