@@ -32,19 +32,11 @@ let activate (extension : ExtensionContext.t) =
   |> Promise.Result.iter
        ~ok:(fun instance ->
          (* register things with vscode, making sure to register their disposables *)
-         let _register_extension_commands : unit =
-           Extension_commands.register_all_commands extension instance
-         in
-         let _register_extension_instance : unit =
-           ExtensionContext.subscribe extension
-             ~disposable:(Extension_instance.disposable instance)
-         in
-         let _register_dune_formatter : unit =
-           Dune_formatter.register extension instance
-         in
-         let _register_dune_task_provider : unit =
-           Dune_task_provider.register extension instance
-         in
+         ExtensionContext.subscribe extension
+           ~disposable:(Extension_instance.disposable instance);
+         Extension_commands.register_all_commands extension instance;
+         Dune_formatter.register extension instance;
+         Dune_task_provider.register extension instance;
          if
            is_fallback
            (* if the toolchain we just set up is a fallback sandbox,
