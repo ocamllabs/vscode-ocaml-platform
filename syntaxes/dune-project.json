@@ -236,6 +236,17 @@
           "patterns": [{ "include": "#general" }]
         },
 
+        {
+          "comment": "cram",
+          "begin": "\\([[:space:]]*(cram)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-project" }
+          },
+          "contentName": "variable.other.declaration.dune-project",
+          "patterns": [{ "include": "#general" }]
+        },
+
         { "include": "#opam-metadata" }
       ]
     },
