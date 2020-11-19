@@ -3,7 +3,7 @@ open Import
 type t =
   { mutable toolchain : Toolchain.t option
   ; mutable client : LanguageClient.t option
-  ; mutable ocaml_lsp_capabilities : Ocaml_lsp.t option
+  ; mutable ocaml_lsp : Ocaml_lsp.t option
   ; mutable sandbox_info : StatusBarItem.t option
   ; dune_formatter : Dune_formatter.t
   ; dune_task_provider : Dune_task_provider.t
@@ -12,7 +12,7 @@ type t =
 let create () =
   { toolchain = None
   ; client = None
-  ; ocaml_lsp_capabilities = None
+  ; ocaml_lsp = None
   ; sandbox_info = None
   ; dune_formatter = Dune_formatter.create ()
   ; dune_task_provider = Dune_task_provider.create ()
@@ -60,7 +60,7 @@ let stop t =
 
   stop_language_server t;
 
-  t.ocaml_lsp_capabilities <- None;
+  t.ocaml_lsp <- None;
   t.toolchain <- None
 
 let start_language_server t toolchain =
@@ -78,7 +78,7 @@ let start_language_server t toolchain =
   let open Promise.Syntax in
   let+ initialize_result = LanguageClient.readyInitializeResult client in
   let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
-  t.ocaml_lsp_capabilities <- Some ocaml_lsp;
+  t.ocaml_lsp <- Some ocaml_lsp;
   if
     (not (Ocaml_lsp.has_interface_specific_lang_id ocaml_lsp))
     || not (Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp)

@@ -72,7 +72,7 @@ let switch_impl_intf =
       let document = TextEditor.document editor in
       let* client = instance.client in
       (* extension needs to be activated; otherwise, just ignore the switch try *)
-      let+ ocaml_lsp = instance.ocaml_lsp_capabilities in
+      let+ ocaml_lsp = instance.ocaml_lsp in
       (* same as for instance.client; ignore the try if it's None *)
       if Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp then
         Switch_impl_intf.request_switch client document
