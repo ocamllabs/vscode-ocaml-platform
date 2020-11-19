@@ -18,7 +18,7 @@ let command id handler =
 let select_sandbox =
   let handler (instance : Extension_instance.t) () =
     let open Promise.Syntax in
-    let current_toolchain = instance.toolchain in
+    let current_toolchain = Extension_instance.toolchain instance in
     let (_ : unit Promise.t) =
       let* package_manager = Toolchain.select_sandbox () in
       match package_manager with
@@ -34,7 +34,7 @@ let select_sandbox =
             |> Promise.Result.iter ~error:(fun e ->
                    show_message `Error "Error: %s" e)
           in
-          Toolchain.save_to_settings instance.toolchain
+          Toolchain.save_to_settings new_toolchain
     in
     ()
   in
@@ -42,15 +42,9 @@ let select_sandbox =
 
 let restart_language_server =
   let handler (instance : Extension_instance.t) () =
-    let open Promise.Syntax in
     let (_ : unit Promise.t) =
-      LanguageClient.stop instance.client;
-      let+ r = Extension_instance.start_language_server instance.toolchain in
-      match r with
-      | Ok (client, ocaml_lsp) ->
-        instance.client <- client;
-        instance.ocaml_lsp <- ocaml_lsp
-      | Error e -> show_message `Error "%s" e
+      Extension_instance.restart_language_server instance
+      |> Promise.Result.iter ~error:(show_message `Error "%s")
     in
     ()
   in
@@ -70,7 +64,7 @@ let select_sandbox_and_open_terminal =
 
 let open_terminal =
   let handler (instance : Extension_instance.t) () =
-    Extension_instance.open_terminal instance.toolchain
+    Extension_instance.toolchain instance |> Extension_instance.open_terminal
   in
   command Extension_consts.Commands.open_terminal handler
 
@@ -80,9 +74,9 @@ let switch_impl_intf =
       let open Option.O in
       let+ editor = Window.activeTextEditor () in
       let document = TextEditor.document editor in
-      let client = instance.client in
+      let client = Extension_instance.language_client instance in
       (* extension needs to be activated; otherwise, just ignore the switch try *)
-      let ocaml_lsp = instance.ocaml_lsp in
+      let ocaml_lsp = Extension_instance.ocaml_lsp instance in
       (* same as for instance.client; ignore the try if it's None *)
       if Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp then
         Switch_impl_intf.request_switch client document

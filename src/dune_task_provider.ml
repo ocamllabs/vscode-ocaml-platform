@@ -87,7 +87,7 @@ let provide_tasks instance ~token =
   | Some false ->
     `Promise (Promise.return None)
   | Some true ->
-    let toolchain = instance.Extension_instance.toolchain in
+    let toolchain = Extension_instance.toolchain instance in
     `Promise (compute_tasks token toolchain)
 
 let resolve_tasks ~task ~token:_ = `Promise (Promise.Option.return task)

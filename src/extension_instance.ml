@@ -7,6 +7,12 @@ type t =
   ; sandbox_info : StatusBarItem.t
   }
 
+let toolchain t = t.toolchain
+
+let language_client t = t.client
+
+let ocaml_lsp t = t.ocaml_lsp
+
 let client_options () =
   let documentSelector =
     LanguageClient.DocumentSelector.
@@ -64,6 +70,13 @@ let start_language_server toolchain =
        Consider updating ocamllsp.";
 
   Ok (client, ocaml_lsp)
+
+let restart_language_server t =
+  let open Promise.Result.Syntax in
+  LanguageClient.stop t.client;
+  let+ language_client, ocaml_lsp = start_language_server t.toolchain in
+  t.client <- language_client;
+  t.ocaml_lsp <- ocaml_lsp
 
 module Sandbox_info : sig
   val make : Toolchain.t -> StatusBarItem.t
