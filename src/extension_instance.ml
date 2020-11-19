@@ -69,8 +69,8 @@ let start_language_server t toolchain =
   let serverOptions = server_options toolchain in
   let clientOptions = client_options () in
   let client =
-    LanguageClient.make ~id:"ocaml" ~name:"OCaml Language Server" ~serverOptions
-      ~clientOptions ()
+    LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
+      ~serverOptions ~clientOptions ()
   in
   t.client <- Some client;
   LanguageClient.start client;
