@@ -103,3 +103,6 @@ let output ?stdin (t : t) =
       (Printf.sprintf
          "Command failed with %s See output channel for more details"
          result.stderr)
+
+let equal_spawn s1 s2 =
+  Path.equal s1.bin s2.bin && List.equal String.equal s1.args s2.args

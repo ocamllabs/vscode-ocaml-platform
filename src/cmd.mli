@@ -26,3 +26,5 @@ val check : t -> t Or_error.t Promise.t
 val log : ?result:ChildProcess.return -> t -> unit
 
 val output : ?stdin:string -> t -> (stdout, stderr) result Promise.t
+
+val equal_spawn : spawn -> spawn -> bool

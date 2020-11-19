@@ -63,3 +63,5 @@ let exists t ~switch =
   let open Promise.Syntax in
   let+ switches = switch_list t in
   List.exists switches ~f:(Switch.equal switch)
+
+let equal o1 o2 = Cmd.equal_spawn o1 o2

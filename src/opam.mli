@@ -19,3 +19,5 @@ val switch_list : t -> Switch.t list Promise.t
 val exec : t -> switch:Switch.t -> args:string list -> Cmd.t
 
 val exists : t -> switch:Switch.t -> bool Promise.t
+
+val equal : t -> t -> bool

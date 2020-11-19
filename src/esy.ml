@@ -123,3 +123,5 @@ let setup_toolchain t ~manifest =
     let root_dir = Path.to_string manifest in
     show_message `Info "Esy dependencies are not installed. Run esy under %s"
       root_dir
+
+let equal e1 e2 = Cmd.equal_spawn e1 e2

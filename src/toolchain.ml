@@ -112,9 +112,10 @@ module Package_manager = struct
 
   let equal pm1 pm2 =
     match (pm1, pm2) with
-    | Opam (_, s1), Opam (_, s2) -> Opam.Switch.equal s1 s2
-    | Esy (_, p1), Esy (_, p2) -> Path.equal p1 p2
     | Global, Global -> true
+    | Esy (e1, p1), Esy (e2, p2) -> Path.equal p1 p2 && Esy.equal e1 e2
+    | Opam (o1, s1), Opam (o2, s2) ->
+      Opam.Switch.equal s1 s2 && Opam.equal o1 o2
     | Custom s1, Custom s2 -> String.equal s1 s2
     | _, _ -> false
 
