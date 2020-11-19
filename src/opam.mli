@@ -6,6 +6,8 @@ module Switch : sig
   val make : string -> t
 
   val name : t -> string
+
+  val equal : t -> t -> bool
 end
 
 type t
