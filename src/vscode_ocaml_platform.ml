@@ -250,13 +250,15 @@ let suggest_to_setup_toolchain instance =
   | Some () -> ExtensionCommands.select_sandbox.handler instance ()
 
 let activate (extension : ExtensionContext.t) =
+  (* this env var update disables ocaml-lsp's logging to a file
+     because we use vscode [output] pane for logs *)
   Process.Env.set "OCAML_LSP_SERVER_LOG" "-";
   let instance = Instance.create () in
   ExtensionCommands.register_all_commands extension instance;
   ExtensionContext.subscribe extension
     ~disposable:(Instance.disposable instance);
   let open Promise.Syntax in
-  let toolchain =
+  let* toolchain, is_fallback =
     let+ pm = Toolchain.of_settings () in
     let resources, is_fallback =
       match pm with
@@ -267,7 +269,6 @@ let activate (extension : ExtensionContext.t) =
     in
     (Toolchain.make resources, is_fallback)
   in
-  let* toolchain, is_fallback = toolchain in
   Instance.start instance toolchain
   |> Promise.Result.iter ~error:(fun e ->
          if not is_fallback then message `Error "%s" e)
