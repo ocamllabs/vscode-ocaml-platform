@@ -34,7 +34,7 @@ let get_formatter instance ~document ~options:_ ~token:_ =
   in
   `Promise promise
 
-let register instance =
+let register extension instance =
   [ "dune"; "dune-project"; "dune-workspace" ]
   |> List.map ~f:(fun language ->
          let selector =
@@ -45,3 +45,5 @@ let register instance =
              ~provideDocumentFormattingEdits:(get_formatter instance)
          in
          Languages.registerDocumentFormattingEditProvider ~selector ~provider)
+  |> List.iter ~f:(fun disposable ->
+         ExtensionContext.subscribe extension ~disposable)

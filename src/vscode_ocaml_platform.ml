@@ -40,9 +40,7 @@ let activate (extension : ExtensionContext.t) =
              ~disposable:(Extension_instance.disposable instance)
          in
          let _register_dune_formatter : unit =
-           Dune_formatter.register instance
-           |> List.iter ~f:(fun disposable ->
-                  ExtensionContext.subscribe extension ~disposable)
+           Dune_formatter.register extension instance
          in
          let _register_dune_task_provider : unit =
            let disposable = Dune_task_provider.register instance in
