@@ -68,7 +68,7 @@ let start_language_server toolchain =
 module Sandbox_info : sig
   val make : Toolchain.t -> StatusBarItem.t
 
-  val _update : StatusBarItem.t -> new_toolchain:Toolchain.t -> unit
+  val update : StatusBarItem.t -> new_toolchain:Toolchain.t -> unit
 end = struct
   let make_status_bar_item_text package_manager =
     Printf.sprintf "%s %s" LabelIcons.package
@@ -87,7 +87,7 @@ end = struct
     StatusBarItem.show status_bar_item;
     status_bar_item
 
-  let _update sandbox_info ~new_toolchain =
+  let update sandbox_info ~new_toolchain =
     let status_bar_item_text =
       make_status_bar_item_text @@ Toolchain.package_manager new_toolchain
     in
@@ -101,7 +101,7 @@ let make toolchain =
   { toolchain; client; ocaml_lsp; sandbox_info }
 
 let update_on_new_toolchain t new_toolchain =
-  Sandbox_info._update t.sandbox_info ~new_toolchain;
+  Sandbox_info.update t.sandbox_info ~new_toolchain;
   LanguageClient.stop t.client;
   let open Promise.Result.Syntax in
   let+ client, ocaml_lsp = start_language_server new_toolchain in
