@@ -306,7 +306,7 @@ let setup_toolchain (kind : Package_manager.t) =
   | Custom _ ->
     Promise.Result.return ()
 
-let select () =
+let select_sandbox () =
   let open Promise.Syntax in
   let workspace_folders = Workspace.workspaceFolders () in
   let* candidates = sandbox_candidates ~workspace_folders in
@@ -337,9 +337,9 @@ let select () =
       Promise.return None
     | Ok () -> Promise.Option.return package_manager )
 
-let select_and_save () =
+let select_sandbox_and_save () =
   let open Promise.Option.Syntax in
-  let* package_manager = select () in
+  let* package_manager = select_sandbox () in
   let open Promise.Syntax in
   let+ () = to_settings package_manager in
   Some package_manager

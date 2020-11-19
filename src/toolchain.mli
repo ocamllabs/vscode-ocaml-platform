@@ -36,14 +36,14 @@ val make : Package_manager.t -> t
 
 val package_manager : t -> Package_manager.t
 
-(** [select_and_save] requires the process environment the plugin is being run in
+(** [select_sandbox_and_save] requires the process environment the plugin is being run in
    (ie VSCode's process environment) and the project root and produces a promise
    of resources available that can later be passed on to [run_setup] that can be
    called to install the toolchain. *)
-val select_and_save : unit -> Package_manager.t option Promise.t
+val select_sandbox_and_save : unit -> Package_manager.t option Promise.t
 
-(** [select] is the same as [select_and_save] but does not save the toolchain configuration *)
-val select : unit -> Package_manager.t option Promise.t
+(** [select_sandbox] is the same as [select_sandbox_and_save] but does not save the toolchain configuration *)
+val select_sandbox : unit -> Package_manager.t option Promise.t
 
 (** [run_setup] is an effectful function that triggers setup instructions
    automatically for the user. At present, this functionality

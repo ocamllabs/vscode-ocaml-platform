@@ -13,7 +13,7 @@ let select_sandbox =
   let handler (instance : Extension_instance.t) () =
     let set_toolchain =
       let open Promise.Syntax in
-      let* package_manager = Toolchain.select_and_save () in
+      let* package_manager = Toolchain.select_sandbox_and_save () in
       match package_manager with
       | None (* selection cancelled *) -> Promise.Result.return ()
       | Some pm ->
@@ -50,7 +50,7 @@ let select_sandbox_and_open_terminal =
   let handler _instance () =
     let (_ : unit option Promise.t) =
       let open Promise.Option.Syntax in
-      let+ pm = Toolchain.select () in
+      let+ pm = Toolchain.select_sandbox () in
       let toolchain = Toolchain.make pm in
       Extension_instance.open_terminal toolchain
     in
