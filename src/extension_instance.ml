@@ -30,8 +30,8 @@ let client_options () =
   in
   let (lazy outputChannel) = Output.language_server_output_channel in
   let revealOutputChannelOn = LanguageClient.RevealOutputChannelOn.Never in
-  LanguageClient.ClientOptions.create ~documentSelector ~outputChannel
-    ~revealOutputChannelOn ()
+  LanguageClient.ClientOptions.create ~outputChannel ~revealOutputChannelOn
+    ~documentSelector ()
 
 let server_options toolchain =
   let command = Toolchain.get_lsp_command toolchain in
