@@ -1,14 +1,11 @@
 open Import
 
 type t =
-  { mutable toolchain : Toolchain.t option
-  ; mutable client : LanguageClient.t option
-  ; mutable ocaml_lsp : Ocaml_lsp.t option
-  ; mutable sandbox_info : StatusBarItem.t option
+  { mutable toolchain : Toolchain.t
+  ; mutable client : LanguageClient.t
+  ; mutable ocaml_lsp : Ocaml_lsp.t
+  ; sandbox_info : StatusBarItem.t
   }
-
-let create () =
-  { toolchain = None; client = None; ocaml_lsp = None; sandbox_info = None }
 
 let client_options () =
   let documentSelector =
@@ -37,47 +34,36 @@ let server_options toolchain =
     let options = LanguageClient.ExecutableOptions.create ~shell:false () in
     LanguageClient.Executable.create ~command ~args ~options ()
 
-let stop_language_server t =
-  Option.iter t.client ~f:(fun client ->
-      LanguageClient.stop client;
-      t.client <- None)
-
-let stop t =
-  Option.iter t.sandbox_info ~f:(fun status_bar_item ->
-      StatusBarItem.dispose status_bar_item;
-      t.sandbox_info <- None);
-
-  stop_language_server t;
-
-  t.ocaml_lsp <- None;
-  t.toolchain <- None
-
-let start_language_server t toolchain =
+let start_language_server toolchain =
   let open Promise.Result.Syntax in
   let* () = Toolchain.run_setup toolchain in
+
   let serverOptions = server_options toolchain in
   let clientOptions = client_options () in
   let client =
     LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
       ~serverOptions ~clientOptions ()
   in
-  t.client <- Some client;
   LanguageClient.start client;
 
   let open Promise.Syntax in
   let+ initialize_result = LanguageClient.readyInitializeResult client in
   let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
-  t.ocaml_lsp <- Some ocaml_lsp;
   if
     (not (Ocaml_lsp.has_interface_specific_lang_id ocaml_lsp))
     || not (Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp)
+    (* TODO: switch to ocaml-lsp version based approach
+       Using [initializeResult] of [LanguageClient] we can get ocaml-lsp's version.
+       We can use versions instead of capabilities to suggest the user to update their
+       ocaml-lsp. *)
   then
     show_message `Warn
       "The installed version of ocamllsp is out of date. Some features may be \
        unavailable or degraded in functionality: switching between \
        implementation and interface files, functionality in mli sources. \
        Consider updating ocamllsp.";
-  Ok ()
+
+  Ok (client, ocaml_lsp)
 
 module Sandbox_info : sig
   val make : Toolchain.t -> StatusBarItem.t
@@ -108,10 +94,21 @@ end = struct
     StatusBarItem.set_text sandbox_info status_bar_item_text
 end
 
-let start t toolchain =
-  t.toolchain <- Some toolchain;
-  t.sandbox_info <- Some (Sandbox_info.make toolchain);
-  start_language_server t toolchain
+let make toolchain =
+  let sandbox_info = Sandbox_info.make toolchain in
+  let open Promise.Result.Syntax in
+  let+ client, ocaml_lsp = start_language_server toolchain in
+  { toolchain; client; ocaml_lsp; sandbox_info }
+
+let update_on_new_toolchain t new_toolchain =
+  Sandbox_info._update t.sandbox_info ~new_toolchain;
+  LanguageClient.stop t.client;
+  let open Promise.Result.Syntax in
+  let+ client, ocaml_lsp = start_language_server new_toolchain in
+  t.toolchain <- new_toolchain;
+  t.client <- client;
+  t.ocaml_lsp <- ocaml_lsp;
+  ()
 
 let open_terminal toolchain =
   match Terminal_sandbox.create toolchain with
@@ -121,4 +118,13 @@ let open_terminal toolchain =
       "Could not open a terminal in the current sandbox. The toolchain may not \
        have loaded yet."
 
-let disposable t = Disposable.make ~dispose:(fun () -> stop t)
+let disposable t =
+  Disposable.make ~dispose:(fun () ->
+      (* [stop] is not defined in the toplevel module becase
+         we don't want anyone to it, only vscode when the extension is no longer needed;
+         a user calling [stop] would leave the extension in a corrupt state *)
+      let stop instance =
+        StatusBarItem.dispose instance.sandbox_info;
+        LanguageClient.stop instance.client
+      in
+      stop t)

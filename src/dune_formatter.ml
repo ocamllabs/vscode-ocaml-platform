@@ -14,7 +14,7 @@ let get_formatter instance ~document ~options:_ ~token:_ =
   let command =
     let toolchain =
       (* we're gonna remove [value_exn] use later (we refactor instance creation) *)
-      Option.value_exn instance.Extension_instance.toolchain
+      instance.Extension_instance.toolchain
     in
     Toolchain.get_dune_command toolchain [ "format-dune-file" ]
   in

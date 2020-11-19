@@ -36,6 +36,10 @@ val make : Package_manager.t -> t
 
 val package_manager : t -> Package_manager.t
 
+val equal : t -> t -> bool
+
+val save_to_settings : t -> unit Promise.t
+
 (** [select_sandbox_and_save] requires the process environment the plugin is being run in
    (ie VSCode's process environment) and the project root and produces a promise
    of resources available that can later be passed on to [run_setup] that can be

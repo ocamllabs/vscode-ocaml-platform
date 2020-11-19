@@ -1,21 +1,19 @@
 open Import
 
 type t =
-  { mutable toolchain : Toolchain.t option
-  ; mutable client : LanguageClient.t option
-  ; mutable ocaml_lsp : Ocaml_lsp.t option
-  ; mutable sandbox_info : StatusBarItem.t option
+  { mutable toolchain : Toolchain.t
+  ; mutable client : LanguageClient.t
+  ; mutable ocaml_lsp : Ocaml_lsp.t
+  ; sandbox_info : StatusBarItem.t
   }
 
-val create : unit -> t
+val make : Toolchain.t -> (t, string) result Promise.t
 
-val start : t -> Toolchain.t -> (unit, string) result Promise.t
+val update_on_new_toolchain :
+  t -> Toolchain.t -> (unit, string) result Promise.t
 
-val stop : t -> unit
-
-val start_language_server : t -> Toolchain.t -> (unit, string) result Promise.t
-
-val stop_language_server : t -> unit
+val start_language_server :
+  Toolchain.t -> (LanguageClient.t * Ocaml_lsp.t, string) result Promise.t
 
 val open_terminal : Toolchain.t -> unit
 

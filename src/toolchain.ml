@@ -110,6 +110,14 @@ module Package_manager = struct
     let t = Settings.create ~scope:Workspace ~key:"sandbox" ~of_json ~to_json
   end
 
+  let equal pm1 pm2 =
+    match (pm1, pm2) with
+    | Opam (_, s1), Opam (_, s2) -> Opam.Switch.equal s1 s2
+    | Esy (_, p1), Esy (_, p2) -> Path.equal p1 p2
+    | Global, Global -> true
+    | Custom s1, Custom s2 -> String.equal s1 s2
+    | _, _ -> false
+
   let to_setting = function
     | Esy (_, root) -> Setting.Esy root
     | Opam (_, switch) -> Setting.Opam switch
@@ -142,6 +150,8 @@ type t = { package_manager : Package_manager.t }
 let make package_manager = { package_manager }
 
 let package_manager t = t.package_manager
+
+let equal t1 t2 = Package_manager.equal t1.package_manager t2.package_manager
 
 let available_package_managers () =
   { Package_manager.Kind.Hmap.opam = Opam.make ()
@@ -198,9 +208,9 @@ let of_settings () : Package_manager.t option Promise.t =
   | Some (Custom template) ->
     Promise.return (Some (Package_manager.Custom template))
 
-let to_settings (pm : Package_manager.t) =
+let save_to_settings { package_manager } =
   Settings.set ~section:"ocaml" Package_manager.Setting.t
-    (Package_manager.to_setting pm)
+    (Package_manager.to_setting package_manager)
 
 module Candidate = struct
   type t =
@@ -341,7 +351,7 @@ let select_sandbox_and_save () =
   let open Promise.Option.Syntax in
   let* package_manager = select_sandbox () in
   let open Promise.Syntax in
-  let+ () = to_settings package_manager in
+  let+ () = save_to_settings { package_manager } in
   Some package_manager
 
 let get_command (t : t) bin args : Cmd.t =
