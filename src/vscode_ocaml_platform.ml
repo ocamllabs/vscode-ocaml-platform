@@ -86,7 +86,7 @@ module Instance = struct
       (not (Ocaml_lsp.has_interface_specific_lang_id ocaml_lsp))
       || not (Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp)
     then
-      message `Warn
+      show_message `Warn
         "The installed version of ocamllsp is out of date. Some features may \
          be unavailable or degraded in functionality: switching between \
          implementation and interface files, functionality in mli sources. \
@@ -123,7 +123,7 @@ module Instance = struct
     match Terminal_sandbox.create toolchain with
     | Some terminal -> Terminal_sandbox.show terminal
     | None ->
-      message `Error
+      show_message `Error
         "Could not open a terminal in the current sandbox. The toolchain may \
          not have loaded yet."
 
@@ -151,7 +151,7 @@ module ExtensionCommands = struct
           Instance.start instance t
       in
       let (_ : unit Promise.t) =
-        Promise.Result.iter set_toolchain ~error:(message `Error "%s")
+        Promise.Result.iter set_toolchain ~error:(show_message `Error "%s")
       in
       ()
     in
@@ -169,7 +169,7 @@ module ExtensionCommands = struct
         | Some pm ->
           Instance.stop_language_server instance;
           Instance.start_language_server instance (Toolchain.make pm)
-          |> Promise.Result.iter ~error:(message `Error "%s")
+          |> Promise.Result.iter ~error:(show_message `Error "%s")
       in
       ()
     in
@@ -210,7 +210,7 @@ module ExtensionCommands = struct
         else
           (* if, however, ocamllsp doesn't have the capability, recommend updating ocamllsp*)
           Promise.return
-          @@ message `Warn
+          @@ show_message `Warn
                "The installed version of ocamllsp does not support switching \
                 between implementation and interface files. Consider updating \
                 ocamllsp."
@@ -271,10 +271,10 @@ let activate (extension : ExtensionContext.t) =
   in
   Instance.start instance toolchain
   |> Promise.Result.iter ~error:(fun e ->
-         if not is_fallback then message `Error "%s" e)
+         if not is_fallback then show_message `Error "%s" e)
   |> Promise.catch ~rejected:(fun e ->
          let error_message = Node.JsError.message e in
-         message `Error "Error: %s" error_message;
+         show_message `Error "Error: %s" error_message;
          Promise.return ())
 
 let () =

@@ -50,7 +50,7 @@ let switch_list t =
   let+ output = Cmd.output (Spawn command) in
   match output with
   | Error _ ->
-    message `Warn "Unable to read the list of switches.";
+    show_message `Warn "Unable to read the list of switches.";
     []
   | Ok out -> parse_switch_list out
 

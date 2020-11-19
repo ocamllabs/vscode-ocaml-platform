@@ -159,7 +159,7 @@ let of_settings () : Package_manager.t option Promise.t =
       | `Esy -> "esy"
       | `Opam -> "opam"
     in
-    message `Warn
+    show_message `Warn
       "This workspace is configured to use an %s sandbox, but %s isn't \
        available"
       this_ this_
@@ -188,7 +188,7 @@ let of_settings () : Package_manager.t option Promise.t =
       if exists then
         Some (Package_manager.Opam (opam, switch))
       else (
-        message `Warn
+        show_message `Warn
           "Workspace is configured to use the switch %s. This switch does not \
            exist."
           (Opam.Switch.name switch);
@@ -333,7 +333,7 @@ let select () =
   | { status; package_manager } -> (
     match status with
     | Error s ->
-      message `Warn "This toolchain is invalid. Error: %s" s;
+      show_message `Warn "This toolchain is invalid. Error: %s" s;
       Promise.return None
     | Ok () -> Promise.Option.return package_manager )
 

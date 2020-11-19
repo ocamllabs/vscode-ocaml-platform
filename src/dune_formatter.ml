@@ -23,7 +23,7 @@ let get_formatter toolchain ~document ~options:_ ~token:_ =
     match output with
     | Ok newText -> Some [ TextEdit.replace ~range ~newText ]
     | Error msg ->
-      message `Error "Dune formatting failed: %s" msg;
+      show_message `Error "Dune formatting failed: %s" msg;
       Some []
   in
   `Promise promise

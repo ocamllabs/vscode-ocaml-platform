@@ -62,7 +62,7 @@ module Discover = struct
     | Error err ->
       let dir = Path.to_string dir in
       log "unable to read dir %s. error %s" dir err;
-      message `Warn
+      show_message `Warn
         "Unable to read %s. No esy projects will be inferred from here" dir;
       Promise.return []
 
@@ -121,5 +121,5 @@ let setup_toolchain t ~manifest =
   | State.Ready -> ()
   | Pending ->
     let root_dir = Path.to_string manifest in
-    message `Info "Esy dependencies are not installed. Run esy under %s"
+    show_message `Info "Esy dependencies are not installed. Run esy under %s"
       root_dir
