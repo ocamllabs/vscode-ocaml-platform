@@ -120,8 +120,8 @@ let open_terminal toolchain =
 
 let disposable t =
   Disposable.make ~dispose:(fun () ->
-      (* [stop] is not defined in the toplevel module becase
-         we don't want anyone to it, only vscode when the extension is no longer needed;
+      (* [stop] is not defined in the toplevel module because
+         we don't want anyone to call it, only vscode when the extension is no longer needed;
          a user calling [stop] would leave the extension in a corrupt state *)
       let stop instance =
         StatusBarItem.dispose instance.sandbox_info;
