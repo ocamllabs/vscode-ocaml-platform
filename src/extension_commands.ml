@@ -3,6 +3,8 @@ open Import
 type command =
   { id : string
   ; handler : Extension_instance.t -> unit -> unit
+        (* [handler] is intended to be used partially applied;
+           [handler extension_instance] is passed as a callback to [Commands.registerCommand] *)
   }
 
 let command id handler = { id; handler }
@@ -13,7 +15,7 @@ let select_sandbox =
       let open Promise.Syntax in
       let* package_manager = Toolchain.select_and_save () in
       match package_manager with
-      | None -> Promise.Result.return ()
+      | None (* selection cancelled *) -> Promise.Result.return ()
       | Some pm ->
         Extension_instance.stop instance;
         let t = Toolchain.make pm in
