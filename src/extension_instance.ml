@@ -83,7 +83,7 @@ end = struct
     in
     StatusBarItem.set_text status_bar_item status_bar_item_text;
     StatusBarItem.set_command status_bar_item
-      (`String select_sandbox_command_id);
+      (`String Extension_consts.Commands.select_sandbox);
     StatusBarItem.show status_bar_item;
     status_bar_item
 

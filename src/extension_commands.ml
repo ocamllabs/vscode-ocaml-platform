@@ -38,7 +38,7 @@ let select_sandbox =
     in
     ()
   in
-  command select_sandbox_command_id handler
+  command Extension_consts.Commands.select_sandbox handler
 
 let restart_language_server =
   let handler (instance : Extension_instance.t) () =
@@ -54,7 +54,7 @@ let restart_language_server =
     in
     ()
   in
-  command "ocaml.server.restart" handler
+  command Extension_consts.Commands.restart_language_server handler
 
 let select_sandbox_and_open_terminal =
   let handler _instance () =
@@ -66,13 +66,13 @@ let select_sandbox_and_open_terminal =
     in
     ()
   in
-  command "ocaml.open-terminal-select" handler
+  command Extension_consts.Commands.select_sandbox_and_open_terminal handler
 
 let open_terminal =
   let handler (instance : Extension_instance.t) () =
     Extension_instance.open_terminal instance.toolchain
   in
-  command "ocaml.open-terminal" handler
+  command Extension_consts.Commands.open_terminal handler
 
 let switch_impl_intf =
   let handler (instance : Extension_instance.t) () =
@@ -97,7 +97,7 @@ let switch_impl_intf =
     let (_ : unit Promise.t option) = try_switching () in
     ()
   in
-  command "ocaml.switch-impl-intf" handler
+  command Extension_consts.Commands.switch_impl_intf handler
 
 let register_all_commands extension instance =
   let register_command { id; handler } =
