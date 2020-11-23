@@ -1923,3 +1923,7 @@ end
 module Env : sig
   val shell : unit -> string
 end
+
+module LabelIcons : sig
+  val package : string
+end

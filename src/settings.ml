@@ -17,7 +17,7 @@ let get ?section t =
     match t.of_json v with
     | s -> Some s
     | exception Jsonoo.Decode_error msg ->
-      message `Error "Setting %s is invalid: %s" t.key msg;
+      show_message `Error "Setting %s is invalid: %s" t.key msg;
       None )
 
 let set ?section t v =

@@ -1,6 +1,6 @@
 open Import
 
-let get_formatter toolchain ~document ~options:_ ~token:_ =
+let get_formatter instance ~document ~options:_ ~token:_ =
   let endLine = TextDocument.lineCount document - 1 in
   let endCharacter =
     TextDocument.lineAt document ~line:endLine |> TextLine.text |> String.length
@@ -11,7 +11,10 @@ let get_formatter toolchain ~document ~options:_ ~token:_ =
   in
   (* text of entire document *)
   let document_text = TextDocument.getText document ~range () in
-  let command = Toolchain.get_dune_command toolchain [ "format-dune-file" ] in
+  let command =
+    let toolchain = Extension_instance.toolchain instance in
+    Toolchain.get_dune_command toolchain [ "format-dune-file" ]
+  in
   let output =
     let open Promise.Result.Syntax in
     let* command = Cmd.check command in
@@ -23,28 +26,21 @@ let get_formatter toolchain ~document ~options:_ ~token:_ =
     match output with
     | Ok newText -> Some [ TextEdit.replace ~range ~newText ]
     | Error msg ->
-      message `Error "Dune formatting failed: %s" msg;
+      show_message `Error "Dune formatting failed: %s" msg;
       Some []
   in
   `Promise promise
 
-type t = Disposable.t list ref
-
-let create () = ref []
-
-let register t toolchain =
-  t :=
-    [ "dune"; "dune-project"; "dune-workspace" ]
-    |> List.map ~f:(fun language ->
-           let selector =
-             `Filter (DocumentFilter.create ~scheme:"file" ~language ())
-           in
-           let provider =
-             DocumentFormattingEditProvider.create
-               ~provideDocumentFormattingEdits:(get_formatter toolchain)
-           in
-           Languages.registerDocumentFormattingEditProvider ~selector ~provider)
-
-let dispose t =
-  List.iter ~f:Disposable.dispose !t;
-  t := []
+let register extension instance =
+  [ "dune"; "dune-project"; "dune-workspace" ]
+  |> List.map ~f:(fun language ->
+         let selector =
+           `Filter (DocumentFilter.create ~scheme:"file" ~language ())
+         in
+         let provider =
+           DocumentFormattingEditProvider.create
+             ~provideDocumentFormattingEdits:(get_formatter instance)
+         in
+         Languages.registerDocumentFormattingEditProvider ~selector ~provider)
+  |> List.iter ~f:(fun disposable ->
+         ExtensionContext.subscribe extension ~disposable)

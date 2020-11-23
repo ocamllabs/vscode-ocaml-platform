@@ -24,7 +24,7 @@ let of_json (json : Jsonoo.t) =
     in
     { interfaceSpecificLangId; handleSwitchImplIntf }
   with Jsonoo.Decode_error _ ->
-    message `Warn
+    show_message `Warn
       "unexpected experimental capabilities from lsp server. Some features \
        might be missing";
     default

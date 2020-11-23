@@ -4,10 +4,6 @@
     file that it can find in the workspace. It doesn't parse the dune files.
 *)
 
-type t
-
-val create : unit -> t
-
-val register : t -> Toolchain.resources -> unit
-
-val dispose : t -> unit
+(** registers dune task provider within the vscode task providers;
+    takes care of subscribing the disposable to the extension context *)
+val register : Vscode.ExtensionContext.t -> Extension_instance.t -> unit

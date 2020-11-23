@@ -110,6 +110,15 @@ module Package_manager = struct
     let t = Settings.create ~scope:Workspace ~key:"sandbox" ~of_json ~to_json
   end
 
+  let equal pm1 pm2 =
+    match (pm1, pm2) with
+    | Global, Global -> true
+    | Esy (e1, p1), Esy (e2, p2) -> Path.equal p1 p2 && Esy.equal e1 e2
+    | Opam (o1, s1), Opam (o2, s2) ->
+      Opam.Switch.equal s1 s2 && Opam.equal o1 o2
+    | Custom s1, Custom s2 -> String.equal s1 s2
+    | _, _ -> false
+
   let to_setting = function
     | Esy (_, root) -> Setting.Esy root
     | Opam (_, switch) -> Setting.Opam switch
@@ -137,9 +146,13 @@ module Package_manager = struct
     | Custom _ -> "Custom OCaml"
 end
 
-type resources = Package_manager.t
+type t = Package_manager.t
 
-let package_manager (t : resources) : Package_manager.t = t
+let make (t : Package_manager.t) : t = t
+
+let package_manager (t : t) : Package_manager.t = t
+
+let equal t1 t2 = Package_manager.equal t1 t2
 
 let available_package_managers () =
   { Package_manager.Kind.Hmap.opam = Opam.make ()
@@ -157,7 +170,7 @@ let of_settings () : Package_manager.t option Promise.t =
       | `Esy -> "esy"
       | `Opam -> "opam"
     in
-    message `Warn
+    show_message `Warn
       "This workspace is configured to use an %s sandbox, but %s isn't \
        available"
       this_ this_
@@ -186,7 +199,7 @@ let of_settings () : Package_manager.t option Promise.t =
       if exists then
         Some (Package_manager.Opam (opam, switch))
       else (
-        message `Warn
+        show_message `Warn
           "Workspace is configured to use the switch %s. This switch does not \
            exist."
           (Opam.Switch.name switch);
@@ -196,9 +209,9 @@ let of_settings () : Package_manager.t option Promise.t =
   | Some (Custom template) ->
     Promise.return (Some (Package_manager.Custom template))
 
-let to_settings (pm : Package_manager.t) =
+let save_to_settings package_manager =
   Settings.set ~section:"ocaml" Package_manager.Setting.t
-    (Package_manager.to_setting pm)
+    (Package_manager.to_setting package_manager)
 
 module Candidate = struct
   type t =
@@ -304,9 +317,7 @@ let setup_toolchain (kind : Package_manager.t) =
   | Custom _ ->
     Promise.Result.return ()
 
-let make_resources kind = kind
-
-let select () =
+let select_sandbox () =
   let open Promise.Syntax in
   let workspace_folders = Workspace.workspaceFolders () in
   let* candidates = sandbox_candidates ~workspace_folders in
@@ -333,18 +344,18 @@ let select () =
   | { status; package_manager } -> (
     match status with
     | Error s ->
-      message `Warn "This toolchain is invalid. Error: %s" s;
+      show_message `Warn "This toolchain is invalid. Error: %s" s;
       Promise.return None
     | Ok () -> Promise.Option.return package_manager )
 
-let select_and_save () =
+let select_sandbox_and_save () =
   let open Promise.Option.Syntax in
-  let* package_manager = select () in
+  let* package_manager = select_sandbox () in
   let open Promise.Syntax in
-  let+ () = to_settings package_manager in
+  let+ () = save_to_settings package_manager in
   Some package_manager
 
-let get_command (t : Package_manager.t) bin args : Cmd.t =
+let get_command (t : t) bin args : Cmd.t =
   match t with
   | Opam (opam, switch) -> Opam.exec opam ~switch ~args:(bin :: args)
   | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:(bin :: args)
@@ -365,22 +376,23 @@ let get_command (t : Package_manager.t) bin args : Cmd.t =
     in
     Shell command
 
-let get_lsp_command ?(args = []) (t : Package_manager.t) : Cmd.t =
-  get_command t "ocamllsp" args
+let get_lsp_command ?(args = []) t : Cmd.t = get_command t "ocamllsp" args
 
-let get_dune_command (t : Package_manager.t) args : Cmd.t =
-  get_command t "dune" args
+let get_dune_command t args : Cmd.t = get_command t "dune" args
 
-let run_setup resources =
+let run_setup t =
+  let package_manager = t in
   let open Promise.Syntax in
   let+ output =
     let open Promise.Result.Syntax in
-    let* () = setup_toolchain resources in
+    let* () = setup_toolchain package_manager in
     let args = [ "--version" ] in
-    let* command = Cmd.check (get_lsp_command resources ~args) in
+    let* command = Cmd.check (get_lsp_command t ~args) in
     Cmd.output command
   in
   match output with
   | Ok _ -> Ok ()
   | Error msg ->
+    (* TODO: if ocamllsp not found, suggest to install it on press of a button;
+       consider checking and suggesting installation for other tools: formatter, etc. *)
     Error (Printf.sprintf "Toolchain initialisation failed: %s" msg)

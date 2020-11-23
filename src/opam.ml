@@ -50,7 +50,7 @@ let switch_list t =
   let+ output = Cmd.output (Spawn command) in
   match output with
   | Error _ ->
-    message `Warn "Unable to read the list of switches.";
+    show_message `Warn "Unable to read the list of switches.";
     []
   | Ok out -> parse_switch_list out
 
@@ -63,3 +63,5 @@ let exists t ~switch =
   let open Promise.Syntax in
   let+ switches = switch_list t in
   List.exists switches ~f:(Switch.equal switch)
+
+let equal o1 o2 = Cmd.equal_spawn o1 o2

@@ -1,9 +1,3 @@
-type t
-
-val create : unit -> t
-
-(** register formatters for dune, dune-project, and dune-workspace files *)
-val register : t -> Toolchain.resources -> unit
-
-(** dispose registered formatters *)
-val dispose : t -> unit
+(** register formatters for dune, dune-project, and dune-workspace files;
+    takes care of subscribing of the disposable to the execution context *)
+val register : Vscode.ExtensionContext.t -> Extension_instance.t -> unit

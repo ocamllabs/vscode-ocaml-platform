@@ -1,7 +1,5 @@
 open Import
 
-type t = Disposable.t option ref
-
 let task_type = "dune"
 
 let definition = TaskDefinition.create ~type_:task_type ()
@@ -83,23 +81,20 @@ let compute_tasks token toolchain =
   in
   Some tasks
 
-let provide_tasks toolchain ~token =
+let provide_tasks instance ~token =
   match Settings.get ~section:"ocaml" Setting.t with
   | None
   | Some false ->
     `Promise (Promise.return None)
-  | Some true -> `Promise (compute_tasks token toolchain)
+  | Some true ->
+    let toolchain = Extension_instance.toolchain instance in
+    `Promise (compute_tasks token toolchain)
 
 let resolve_tasks ~task ~token:_ = `Promise (Promise.Option.return task)
 
-let create () = ref None
-
-let register t toolchain =
-  let provideTasks = provide_tasks toolchain in
+let register extension instance =
+  let provideTasks = provide_tasks instance in
   let resolveTasks = resolve_tasks in
   let provider = TaskProvider.create ~provideTasks ~resolveTasks in
-  t := Some (Tasks.registerTaskProvider ~type_:task_type ~provider)
-
-let dispose (t : t) =
-  Option.iter ~f:Disposable.dispose !t;
-  t := None
+  let disposable = Tasks.registerTaskProvider ~type_:task_type ~provider in
+  ExtensionContext.subscribe extension ~disposable

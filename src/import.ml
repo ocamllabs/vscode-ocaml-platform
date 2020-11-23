@@ -28,7 +28,7 @@ module Or_error = struct
   type 'a t = ('a, string) result
 end
 
-let message kind fmt =
+let show_message kind fmt =
   let k message =
     match kind with
     | `Warn -> Window.showWarningMessage ~message ()
@@ -37,7 +37,7 @@ let message kind fmt =
   in
   Printf.ksprintf
     (fun x ->
-      let (_ : _ option Promise.t) = k x in
+      let (_ : unit option Promise.t) = k x in
       ())
     fmt
 
