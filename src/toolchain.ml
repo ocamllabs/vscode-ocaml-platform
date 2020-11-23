@@ -146,13 +146,13 @@ module Package_manager = struct
     | Custom _ -> "Custom OCaml"
 end
 
-type t = { package_manager : Package_manager.t }
+type t = Package_manager.t
 
-let make package_manager = { package_manager }
+let make (t : Package_manager.t) : t = t
 
-let package_manager t = t.package_manager
+let package_manager (t : t) : Package_manager.t = t
 
-let equal t1 t2 = Package_manager.equal t1.package_manager t2.package_manager
+let equal t1 t2 = Package_manager.equal t1 t2
 
 let available_package_managers () =
   { Package_manager.Kind.Hmap.opam = Opam.make ()
@@ -209,7 +209,7 @@ let of_settings () : Package_manager.t option Promise.t =
   | Some (Custom template) ->
     Promise.return (Some (Package_manager.Custom template))
 
-let save_to_settings { package_manager } =
+let save_to_settings package_manager =
   Settings.set ~section:"ocaml" Package_manager.Setting.t
     (Package_manager.to_setting package_manager)
 
@@ -352,11 +352,11 @@ let select_sandbox_and_save () =
   let open Promise.Option.Syntax in
   let* package_manager = select_sandbox () in
   let open Promise.Syntax in
-  let+ () = save_to_settings { package_manager } in
+  let+ () = save_to_settings package_manager in
   Some package_manager
 
 let get_command (t : t) bin args : Cmd.t =
-  match t.package_manager with
+  match t with
   | Opam (opam, switch) -> Opam.exec opam ~switch ~args:(bin :: args)
   | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:(bin :: args)
   | Global -> Spawn { bin = Path.of_string bin; args }
@@ -381,7 +381,7 @@ let get_lsp_command ?(args = []) t : Cmd.t = get_command t "ocamllsp" args
 let get_dune_command t args : Cmd.t = get_command t "dune" args
 
 let run_setup t =
-  let package_manager = t.package_manager in
+  let package_manager = t in
   let open Promise.Syntax in
   let+ output =
     let open Promise.Result.Syntax in
