@@ -16,38 +16,30 @@
    user to install missing tools etc). Having a single [Toolchain.make()], for
    instance, would not make it this flexible. *)
 
-module Package_manager : sig
-  type t =
-    | Opam of Opam.t * Opam.Switch.t
-    | Esy of Esy.t * Path.t
-    | Global
-    | Custom of string
-
-  val to_string : t -> string
-
-  val to_pretty_string : t -> string
-end
-
-type t
-
-val of_settings : unit -> Package_manager.t option Promise.t
-
-val make : Package_manager.t -> t
-
-val package_manager : t -> Package_manager.t
+type t =
+  | Opam of Opam.t * Opam.Switch.t
+  | Esy of Esy.t * Path.t
+  | Global
+  | Custom of string
 
 val equal : t -> t -> bool
 
+val to_string : t -> string
+
+val to_pretty_string : t -> string
+
+val of_settings : unit -> t option Promise.t
+
 val save_to_settings : t -> unit Promise.t
 
-(** [select_sandbox_and_save] requires the process environment the plugin is being run in
+(** [select_toolchain_and_save] requires the process environment the plugin is being run in
    (ie VSCode's process environment) and the project root and produces a promise
    of resources available that can later be passed on to [run_setup] that can be
    called to install the toolchain. *)
-val select_sandbox_and_save : unit -> Package_manager.t option Promise.t
+val select_toolchain_and_save : unit -> t option Promise.t
 
-(** [select_sandbox] is the same as [select_sandbox_and_save] but does not save the toolchain configuration *)
-val select_sandbox : unit -> Package_manager.t option Promise.t
+(** [select_toolchain] is the same as [select_toolchain_and_save] but does not save the toolchain configuration *)
+val select_toolchain : unit -> t option Promise.t
 
 (** [run_setup] is an effectful function that triggers setup instructions
    automatically for the user. At present, this functionality

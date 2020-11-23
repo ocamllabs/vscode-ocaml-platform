@@ -20,11 +20,10 @@ let select_sandbox =
     let open Promise.Syntax in
     let current_toolchain = Extension_instance.toolchain instance in
     let (_ : unit Promise.t) =
-      let* package_manager = Toolchain.select_sandbox () in
-      match package_manager with
+      let* toolchain = Toolchain.select_toolchain () in
+      match toolchain with
       | None (* sandbox selection cancelled *) -> Promise.return ()
-      | Some pm ->
-        let new_toolchain = Toolchain.make pm in
+      | Some new_toolchain ->
         if Toolchain.equal current_toolchain new_toolchain then
           (* TODO: or should we relaunch so that user wishes to "restart" their toolchain *)
           Promise.return ()
@@ -54,8 +53,7 @@ let select_sandbox_and_open_terminal =
   let handler _instance () =
     let (_ : unit option Promise.t) =
       let open Promise.Option.Syntax in
-      let+ pm = Toolchain.select_sandbox () in
-      let toolchain = Toolchain.make pm in
+      let+ toolchain = Toolchain.select_toolchain () in
       Extension_instance.open_terminal toolchain
     in
     ()
