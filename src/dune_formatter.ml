@@ -13,7 +13,6 @@ let get_formatter instance ~document ~options:_ ~token:_ =
   let document_text = TextDocument.getText document ~range () in
   let command =
     let toolchain =
-      (* we're gonna remove [value_exn] use later (we refactor instance creation) *)
       Extension_instance.toolchain instance
     in
     Toolchain.get_dune_command toolchain [ "format-dune-file" ]
