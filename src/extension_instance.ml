@@ -133,5 +133,5 @@ let open_terminal toolchain =
 
 let disposable t =
   Disposable.make ~dispose:(fun () ->
-      StatusBarItem.dispose instance.sandbox_info;
-      LanguageClient.stop instance.client)
+      StatusBarItem.dispose t.sandbox_info;
+      LanguageClient.stop t.client)
