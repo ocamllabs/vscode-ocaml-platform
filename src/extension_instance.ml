@@ -83,17 +83,15 @@ module Sandbox_info : sig
 
   val update : StatusBarItem.t -> new_toolchain:Toolchain.t -> unit
 end = struct
-  let make_status_bar_item_text package_manager =
+  let make_status_bar_item_text toolchain =
     Printf.sprintf "%s %s" LabelIcons.package
-    @@ Toolchain.Package_manager.to_pretty_string package_manager
+    @@ Toolchain.to_pretty_string toolchain
 
   let make toolchain =
     let status_bar_item =
       Window.createStatusBarItem ~alignment:StatusBarAlignment.Left ()
     in
-    let status_bar_item_text =
-      make_status_bar_item_text @@ Toolchain.package_manager toolchain
-    in
+    let status_bar_item_text = make_status_bar_item_text toolchain in
     StatusBarItem.set_text status_bar_item status_bar_item_text;
     StatusBarItem.set_command status_bar_item
       (`String Extension_consts.Commands.select_sandbox);
@@ -101,9 +99,7 @@ end = struct
     status_bar_item
 
   let update sandbox_info ~new_toolchain =
-    let status_bar_item_text =
-      make_status_bar_item_text @@ Toolchain.package_manager new_toolchain
-    in
+    let status_bar_item_text = make_status_bar_item_text new_toolchain in
     StatusBarItem.set_text sandbox_info status_bar_item_text
 end
 
