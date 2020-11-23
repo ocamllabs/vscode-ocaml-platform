@@ -33,14 +33,13 @@ let make () =
   | Error _ -> None
   | Ok cmd -> Some cmd
 
+let parse_switch = function
+  | "" -> None
+  | s -> Some (Switch.make (String.strip s))
+
 let parse_switch_list out =
   let lines = String.split_on_chars ~on:[ '\n' ] out in
-  let result =
-    lines
-    |> List.filter_map ~f:(function
-         | "" -> None
-         | s -> Some (Switch.make s))
-  in
+  let result = lines |> List.filter_map ~f:parse_switch in
   log "%d switches" (List.length result);
   result
 
@@ -53,6 +52,16 @@ let switch_list t =
     show_message `Warn "Unable to read the list of switches.";
     []
   | Ok out -> parse_switch_list out
+
+let switch_show ?cwd t =
+  let command = Cmd.append t [ "switch"; "show" ] in
+  let open Promise.Syntax in
+  let+ output = Cmd.output ?cwd (Spawn command) in
+  match output with
+  | Error _ ->
+    show_message `Warn "Unable to read the current switch.";
+    None
+  | Ok out -> parse_switch out
 
 let switch_arg switch = "--switch=" ^ Switch.name switch
 

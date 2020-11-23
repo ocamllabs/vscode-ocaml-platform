@@ -16,6 +16,8 @@ val make : unit -> t option Promise.t
 
 val switch_list : t -> Switch.t list Promise.t
 
+val switch_show : ?cwd:string -> t -> Switch.t option Promise.t
+
 val exec : t -> switch:Switch.t -> args:string list -> Cmd.t
 
 val exists : t -> switch:Switch.t -> bool Promise.t

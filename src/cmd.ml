@@ -92,9 +92,9 @@ let log ?(result : ChildProcess.return option) (t : t) =
   in
   log_json "external command" message
 
-let output ?stdin (t : t) =
+let output ?cwd ?stdin (t : t) =
   let open Promise.Syntax in
-  let+ (result : ChildProcess.return) = run ?stdin t in
+  let+ (result : ChildProcess.return) = run ?stdin ?cwd t in
   log ~result t;
   if result.exitCode = 0 then
     Ok result.stdout

@@ -184,6 +184,56 @@ let of_settings () : t option Promise.t =
   | Some Global -> Promise.return (Some Global)
   | Some (Custom template) -> Promise.return (Some (Custom template))
 
+let detect_esy_sandbox esy () =
+  let open Promise.Syntax in
+  let* _esy = esy in
+  (* TODO: Implement esy sandbox detection *)
+  Promise.return None
+
+let detect_opam_sandbox ~project_root opam () =
+  let open Promise.Syntax in
+  let* opam = opam in
+  match opam with
+  | None -> Promise.return None
+  | Some opam -> (
+    let+ switch = Opam.switch_show ~cwd:project_root opam in
+    match switch with
+    | Some (Named "default") -> Some Global
+    | Some switch -> Some (Opam (opam, switch))
+    | None -> None )
+
+let detect () =
+  let rec aux = function
+    | [] -> Promise.return None
+    | el :: rest -> (
+      let open Promise.Syntax in
+      let* sandbox_opt = el () in
+      match sandbox_opt with
+      | Some x -> Promise.return (Some x)
+      | None -> aux rest )
+  in
+  match Workspace.workspaceFolders () with
+  | [] -> Promise.return None
+  | [ workspace_folder ] ->
+    let workspace_folder =
+      workspace_folder |> WorkspaceFolder.uri |> Uri.path
+    in
+    let available = available_toolchains () in
+    aux
+      [ detect_esy_sandbox available.esy
+      ; detect_opam_sandbox ~project_root:workspace_folder available.opam
+      ]
+  | _ ->
+    (* If there are several workspace folders, skip the detection entirely. *)
+    Promise.return None
+
+let of_settings_or_detect () =
+  let open Promise.Syntax in
+  let* package_manager_opt = of_settings () in
+  match package_manager_opt with
+  | Some package_manager -> Promise.return (Some package_manager)
+  | None -> detect ()
+
 let save_to_settings toolchain =
   let to_setting = function
     | Esy (_, root) -> Setting.Esy root
