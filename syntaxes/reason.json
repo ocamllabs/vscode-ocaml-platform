@@ -595,7 +595,6 @@
       "patterns": [{ "include": "#value-expression" }]
     },
     "module-item-let-value-bind-name-or-pattern": {
-      "begin": "(?<=[^[:word:]]and|^and|[^[:word:]]external|^external|[^[:word:]]let|^let|[^[:word:]]method|^method|[^[:word:]]rec|^rec)[[:space:]]*",
       "end": "(?<=[^[:space:]])|(?=[[:space:]]|[;:}=]|\\b(and|as|class|constraint|exception|external|for|include|inherit|let|method|module|nonrec|open|private|rec|switch|try|type|val|while|with)\\b)",
       "patterns": [
         { "include": "#comment" },
@@ -611,33 +610,8 @@
       ]
     },
     "module-item-let-value-bind-name-params-type-body": {
-      "begin": "(?<=[^[:word:]]and|^and|[^[:word:]]external|^external|[^[:word:]]let|^let|[^[:word:]]method|^method|[^[:word:]]rec|^rec)",
       "end": "(?=[;}]|\\b(and|class|constraint|exception|external|include|inherit|let|method|module|nonrec|open|private|rec|type|val|with)\\b)",
       "patterns": [
-        {
-          "comment": "FIXME; hack for punned arguments",
-          "begin": "(::)",
-          "end": "(?<=[[:space:]])",
-          "beginCaptures": {
-            "1": { "name": "keyword.control" }
-          },
-          "patterns": [
-            { "include": "#pattern" },
-            {
-              "begin": "(=)",
-              "end": "(\\?)|(?<=[^[:space:]=][[:space:]])(?=[[:space:]]*+[^\\.])",
-              "beginCaptures": {
-                "1": {
-                  "name": "markup.inserted keyword.control.less message.error"
-                }
-              },
-              "endCaptures": {
-                "1": { "name": "storage.type" }
-              },
-              "patterns": [{ "include": "#value-expression-atomic-with-paths" }]
-            }
-          ]
-        },
         { "include": "#module-item-let-value-bind-name-or-pattern" },
         { "include": "#module-item-let-value-bind-params-type" },
         { "include": "#module-item-let-value-bind-type" },
