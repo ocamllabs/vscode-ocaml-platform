@@ -57,7 +57,8 @@ let start_language_server toolchain =
   let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
   if
     (not (Ocaml_lsp.has_interface_specific_lang_id ocaml_lsp))
-    || not (Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp)
+    || (not (Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp))
+    || not (Ocaml_lsp.can_handle_infer_intf ocaml_lsp)
     (* TODO: switch to ocaml-lsp version based approach
        Using [initializeResult] of [LanguageClient] we can get ocaml-lsp's version.
        We can use versions instead of capabilities to suggest the user to update their
