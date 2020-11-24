@@ -92,6 +92,19 @@ module State = struct
     | Pending
 end
 
+let find_manifest_in_dir dir =
+  let open Promise.Syntax in
+  let esy_file = Filename.concat dir "esy.json" in
+  let package_file = Filename.concat dir "package.json" in
+  let* esy_file_exists = Fs.exists esy_file in
+  let+ package_file_exists = Fs.exists package_file in
+  if esy_file_exists then
+    Some esy_file
+  else if package_file_exists then
+    Some package_file
+  else
+    None
+
 let state t ~manifest =
   let root_str = Path.to_string manifest in
   let command = Cmd.append t [ "status"; "-P"; root_str ] in

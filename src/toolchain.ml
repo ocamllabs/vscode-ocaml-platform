@@ -184,11 +184,23 @@ let of_settings () : t option Promise.t =
   | Some Global -> Promise.return (Some Global)
   | Some (Custom template) -> Promise.return (Some (Custom template))
 
-let detect_esy_sandbox esy () =
+let detect_esy_sandbox ~project_root esy () =
   let open Promise.Syntax in
-  let* _esy = esy in
-  (* TODO: Implement esy sandbox detection *)
-  Promise.return None
+  let* esy = esy in
+  let* esy_build_dir_exists = Fs.exists (Filename.concat project_root "_esy") in
+  let* manifest = Esy.find_manifest_in_dir project_root in
+  match (esy, esy_build_dir_exists, manifest) with
+  | Some esy, true, Some manifest ->
+    (* Some projects have both use both Esy and Opam, we can't assume that the user
+       wants to use Esy just by looking for an "esy.json" file.
+
+       Instead, we assume the user wants to use esy if these three conditions are met:
+        - The esy command is in the user's system
+        - There is an _esy build directory in the project root
+        - There is an Esy manifest file in the project root
+    *)
+    Promise.return (Some (Esy (esy, Path.of_string manifest)))
+  | _ -> Promise.return None
 
 let detect_opam_sandbox ~project_root opam () =
   let open Promise.Syntax in
@@ -215,13 +227,13 @@ let detect () =
   match Workspace.workspaceFolders () with
   | [] -> Promise.return None
   | [ workspace_folder ] ->
-    let workspace_folder =
+    let project_root = workspace_folder |> WorkspaceFolder.uri |> Uri.path in
       workspace_folder |> WorkspaceFolder.uri |> Uri.path
     in
     let available = available_toolchains () in
     aux
-      [ detect_esy_sandbox available.esy
-      ; detect_opam_sandbox ~project_root:workspace_folder available.opam
+      [ detect_esy_sandbox ~project_root available.esy
+      ; detect_opam_sandbox ~project_root available.opam
       ]
   | _ ->
     (* If there are several workspace folders, skip the detection entirely. *)
