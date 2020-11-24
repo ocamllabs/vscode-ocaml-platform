@@ -7,6 +7,7 @@
 - Fix reason highlighting of let extensions (#447)
 - Improve highlighting of Menhir new syntax (#450)
 - Improve Menhir syntax highlighting (#455)
+- Add `Alt + P` keyboard shortcut for infer interface code action (#448)
 
 ## 1.4.0
 
