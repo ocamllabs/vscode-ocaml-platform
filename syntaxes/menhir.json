@@ -113,13 +113,14 @@
           "comment": "production",
           "begin": ":|\\|",
           "beginCaptures": [{ "name": "keyword.other.menhir" }],
-          "end": "(?={|<)",
+          "end": "$",
           "patterns": [
             { "include": "#comments" },
             { "include": "#variables" },
             { "include": "#references" },
             { "include": "#operators" },
-            { "include": "source.ocaml#strings" }
+            { "include": "source.ocaml#strings" },
+            { "include": "#actions" }
           ]
         },
         { "include": "#actions" }
@@ -167,7 +168,7 @@
 
     "variables": {
       "comment": "labeled semantic value identifier",
-      "match": "([[:lower:]][[:word:]]*|~)[[:space:]]*(=)",
+      "match": "([[:lower:]_][[:word:]']*|~)[[:space:]]*(=)",
       "captures": {
         "1": { "name": "variable.parameter.value.menhir" },
         "2": { "name": "keyword.other.menhir" }
@@ -196,9 +197,23 @@
     },
 
     "operators": {
-      "comment": "rule modifier (?, +, *, |, or ;)",
-      "match": "[?+*|;]",
-      "name": "keyword.operator.menhir"
+      "patterns": [
+        {
+          "comment": "rule modifier (?, +, *)",
+          "match": "[?+*]",
+          "name": "keyword.operator.menhir"
+        },
+        {
+          "comment": "vertical bar",
+          "match": "\\|",
+          "name": "keyword.other.menhir"
+        },
+        {
+          "comment": "semicolon",
+          "match": ";",
+          "name": "keyword.other.menhir punctuation.separator.terminator punctuation.separator.semicolon"
+        }
+      ]
     }
   }
 }
