@@ -51,6 +51,41 @@
     "rules": {
       "patterns": [
         {
+          "comment": "new rule syntax with optional parameter list",
+          "begin": "(let)[[:space:]]*([[:lower:]][[:word:]]*)[[:space:]]*(?:\\(([^)]+)\\))?[[:space:]]*(:=|==)",
+          "end": "$",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.other.menhir"
+            },
+            "2": {
+              "comment": "rule name",
+              "name": "entity.name.function.rule.menhir"
+            },
+            "3": {
+              "patterns": [
+                {
+                  "comment": "rule parameter",
+                  "name": "variable.parameter.rule.menhir",
+                  "match": "[[:alpha:]][[:word:]]*"
+                }
+              ]
+            },
+            "4": {
+              "name": "keyword.other.menhir"
+            }
+          },
+          "patterns": [
+            { "include": "#comments" },
+            { "include": "#variables" },
+            { "include": "#references" },
+            { "include": "#operators" },
+            { "include": "source.ocaml#strings" },
+            { "include": "#actions" }
+          ]
+        },
+
+        {
           "comment": "rule name with optional parameter list",
           "match": "([[:lower:]][[:word:]]*)[[:space:]]*(?:\\(([^)]+)\\))?(?=[[:space:]]*:)",
           "captures": {
@@ -78,7 +113,7 @@
           "comment": "production",
           "begin": ":|\\|",
           "beginCaptures": [{ "name": "keyword.other.menhir" }],
-          "end": "(?={)",
+          "end": "(?={|<)",
           "patterns": [
             { "include": "#comments" },
             { "include": "#variables" },
@@ -87,11 +122,25 @@
             { "include": "source.ocaml#strings" }
           ]
         },
+        { "include": "#actions" }
+      ]
+    },
+
+    "actions": {
+      "patterns": [
         {
           "comment": "ocaml semantic action",
           "begin": "{",
           "beginCaptures": [{ "name": "keyword.other.menhir" }],
           "end": "}",
+          "endCaptures": [{ "name": "keyword.other.menhir" }],
+          "patterns": [{ "include": "source.ocaml" }]
+        },
+        {
+          "comment": "point-free ocaml semantic action",
+          "begin": "<",
+          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "end": ">",
           "endCaptures": [{ "name": "keyword.other.menhir" }],
           "patterns": [{ "include": "source.ocaml" }]
         }
@@ -118,8 +167,11 @@
 
     "variables": {
       "comment": "labeled semantic value identifier",
-      "match": "([[:lower:]][[:word:]]*)[[:space:]]*=",
-      "captures": { "1": { "name": "variable.parameter.value.menhir" } },
+      "match": "([[:lower:]][[:word:]]*|~)[[:space:]]*(=)",
+      "captures": {
+        "1": { "name": "variable.parameter.value.menhir" },
+        "2": { "name": "keyword.other.menhir" }
+      },
       "patterns": [{ "include": "#references" }]
     },
 
@@ -144,8 +196,8 @@
     },
 
     "operators": {
-      "comment": "rule modifier (?, +, *, or |)",
-      "match": "[?+*|]",
+      "comment": "rule modifier (?, +, *, |, or ;)",
+      "match": "[?+*|;]",
       "name": "keyword.operator.menhir"
     }
   }
