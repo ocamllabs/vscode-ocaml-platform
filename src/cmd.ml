@@ -61,7 +61,9 @@ let check t =
     let+ s = check_spawn spawn in
     Spawn s
 
-let run ?cwd ?stdin = function
+let run ?cwd ?stdin =
+  let cwd = Option.map cwd ~f:Path.to_string in
+  function
   | Spawn { bin; args } ->
     ChildProcess.spawn (Path.to_string bin) (Array.of_list args) ?stdin
       (ChildProcess.Options.create ?cwd ())

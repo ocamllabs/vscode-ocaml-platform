@@ -58,10 +58,10 @@ let switch_show ?cwd t =
   let open Promise.Syntax in
   let+ output = Cmd.output ?cwd (Spawn command) in
   match output with
+  | Ok out -> parse_switch out
   | Error _ ->
     show_message `Warn "Unable to read the current switch.";
     None
-  | Ok out -> parse_switch out
 
 let switch_arg switch = "--switch=" ^ Switch.name switch
 

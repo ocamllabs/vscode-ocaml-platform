@@ -94,16 +94,17 @@ end
 
 let find_manifest_in_dir dir =
   let open Promise.Syntax in
-  let esy_file = Filename.concat dir "esy.json" in
-  let package_file = Filename.concat dir "package.json" in
-  let* esy_file_exists = Fs.exists esy_file in
-  let+ package_file_exists = Fs.exists package_file in
-  if esy_file_exists then
-    Some esy_file
-  else if package_file_exists then
-    Some package_file
-  else
-    None
+  let esy_file = Path.(dir / "esy.json") in
+  let package_file = Path.(dir / "package.json") in
+  try
+    [ esy_file; package_file ]
+    |> Promise.List.find_map (fun path ->
+           let+ file_exists = path |> Path.to_string |> Fs.exists in
+           if file_exists then
+             Some path
+           else
+             None)
+  with Assert_failure _ -> Promise.return None
 
 let state t ~manifest =
   let root_str = Path.to_string manifest in
