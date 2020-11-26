@@ -577,6 +577,12 @@
           "begin": "\\[",
           "end": "]",
           "patterns": [{ "include": "$self" }]
+        },
+        {
+          "comment": "braces",
+          "begin": "\\{",
+          "end": "\\}",
+          "patterns": [{ "include": "$self" }]
         }
       ]
     },
