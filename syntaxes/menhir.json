@@ -130,6 +130,7 @@
             { "include": "#prec" },
             { "include": "#operators" },
             { "include": "source.ocaml#strings" },
+            { "include": "source.ocaml#attributes" },
             { "include": "#new-actions" },
             {
               "comment": "production",
@@ -142,7 +143,8 @@
                 { "include": "#references" },
                 { "include": "#prec" },
                 { "include": "#operators" },
-                { "include": "source.ocaml#strings" }
+                { "include": "source.ocaml#strings" },
+                { "include": "source.ocaml#attributes" }
               ]
             }
           ]
@@ -173,6 +175,7 @@
             { "include": "#prec" },
             { "include": "#operators" },
             { "include": "source.ocaml#strings" },
+            { "include": "source.ocaml#attributes" },
             { "include": "#actions" },
             {
               "comment": "production",
@@ -185,7 +188,8 @@
                 { "include": "#references" },
                 { "include": "#prec" },
                 { "include": "#operators" },
-                { "include": "source.ocaml#strings" }
+                { "include": "source.ocaml#strings" },
+                { "include": "source.ocaml#attributes" }
               ]
             }
           ]
