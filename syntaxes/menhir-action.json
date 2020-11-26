@@ -9,7 +9,7 @@
       },
       "end": "\\)",
       "patterns": [
-        { "include": "#~anon-capture" },
+        { "include": "#anon-capture" },
         { "include": "#token-name" },
         { "include": "#production-name" }
       ]
@@ -18,10 +18,10 @@
       "match": "\\$(?:startpos|endpos|symbolstartpos|startofs|endofs|symbolstartofs|loc|sloc)\\b",
       "name": "keyword.other.menhir"
     },
-    { "include": "#~anon-capture" }
+    { "include": "#anon-capture" }
   ],
   "repository": {
-    "~anon-capture": {
+    "anon-capture": {
       "match": "\\$[[:digit:]]+\\b",
       "name": "keyword.other.menhir"
     }

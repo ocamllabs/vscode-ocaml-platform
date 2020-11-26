@@ -43,7 +43,7 @@
           "beginCaptures": [{ "name": "keyword.other.menhir" }],
           "end": "(?=%)",
           "patterns": [
-            { "include": "#~type-annotation" },
+            { "include": "#type-annotation" },
             { "include": "#token-name" },
             { "include": "source.ocaml#strings" },
             { "include": "#comments" }
@@ -66,7 +66,7 @@
           "beginCaptures": [{ "name": "keyword.other.menhir" }],
           "end": "(?=%)",
           "patterns": [
-            { "include": "#~type-annotation" },
+            { "include": "#type-annotation" },
             { "include": "#production-name" },
             { "include": "#comments" }
           ]
@@ -76,11 +76,11 @@
           "name": "keyword.other.menhir",
           "match": "%(?:parameter|attribute)\\b"
         },
-        { "include": "#~type-annotation" },
+        { "include": "#type-annotation" },
         { "include": "source.ocaml#strings" }
       ],
       "repository": {
-        "~type-annotation": {
+        "type-annotation": {
           "comment": "ocaml type annotation for token",
           "begin": "<",
           "end": ">",
@@ -257,11 +257,11 @@
           "endCaptures": {
             "1": { "name": "keyword.other.menhir" }
           },
-          "patterns": [{ "include": "#~pattern" }]
+          "patterns": [{ "include": "#pattern" }]
         }
       ],
       "repository": {
-        "~pattern": {
+        "pattern": {
           "patterns": [
             {
               "match": "[[:lower:]_][[:word:]]*|~",
@@ -270,7 +270,7 @@
             {
               "begin": "\\(",
               "end": "\\)",
-              "patterns": [{ "include": "#~pattern" }]
+              "patterns": [{ "include": "#pattern" }]
             }
           ]
         }
