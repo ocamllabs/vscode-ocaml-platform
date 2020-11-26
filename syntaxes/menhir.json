@@ -8,10 +8,7 @@
       "comment": "sequence of declarations",
       "begin": "(?=%[^%])",
       "end": "(?=%%)",
-      "patterns": [
-        { "include": "#comments" },
-        { "include": "#declarations" }
-      ]
+      "patterns": [{ "include": "#comments" }, { "include": "#declarations" }]
     },
     {
       "comment": "sequence of rules",
@@ -19,10 +16,7 @@
       "beginCaptures": [{ "name": "keyword.other.menhir" }],
       "end": "%%",
       "endCaptures": [{ "name": "keyword.other.menhir" }],
-      "patterns": [
-        { "include": "#comments" },
-        { "include": "#rules" }
-      ]
+      "patterns": [{ "include": "#comments" }, { "include": "#rules" }]
     },
     { "include": "source.ocaml" }
   ],
