@@ -123,6 +123,11 @@
           "comment": "declaration for public or inline rule",
           "name": "keyword.other.directive.menhir",
           "match": "%(?:public|inline)\\b"
+        },
+        {
+          "comment": "reserved keywords/operators for new syntax",
+          "name": "keyword.other.menhir",
+          "match": "\\blet\\b|:=|=="
         }
       ]
     },
