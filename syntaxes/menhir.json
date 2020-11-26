@@ -58,6 +58,7 @@
             { "include": "#type-annotation" },
             { "include": "#token-name" },
             { "include": "source.ocaml#strings" },
+            { "include": "source.ocaml#attributes" },
             { "include": "#comments" }
           ]
         },
@@ -90,7 +91,7 @@
         },
         {
           "comment": "attribute declaration",
-          "begin": "%(?:attribute\\b)?",
+          "begin": "%(?:attribute\\b|(?=\\[))",
           "beginCaptures": [{ "name": "keyword.other.menhir" }],
           "end": "(?=%)",
           "patterns": [
