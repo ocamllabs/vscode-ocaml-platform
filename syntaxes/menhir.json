@@ -8,7 +8,10 @@
       "comment": "sequence of declarations",
       "begin": "(?=%[^%])",
       "end": "(?=%%)",
-      "patterns": [{ "include": "#comments" }, { "include": "#declarations" }]
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#declarations" }
+      ]
     },
     {
       "comment": "sequence of rules",
@@ -16,7 +19,10 @@
       "beginCaptures": [{ "name": "keyword.other.menhir" }],
       "end": "%%",
       "endCaptures": [{ "name": "keyword.other.menhir" }],
-      "patterns": [{ "include": "#comments" }, { "include": "#rules" }]
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#rules" }
+      ]
     },
     { "include": "source.ocaml" }
   ],
@@ -32,32 +38,70 @@
           "patterns": [{ "include": "source.ocaml" }]
         },
         {
-          "comment": "builtin declaration",
-          "name": "keyword.other.menhir",
-          "match": "(%parameter|%token|%nonassoc|%left|%right|%type|%start|%attribute|%on_error_reduce)\\b"
+          "comment": "token declaration",
+          "begin": "%token\\b",
+          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "end": "(?=%)",
+          "patterns": [
+            { "include": "#~type-annotation" },
+            { "include": "#token-name" },
+            { "include": "source.ocaml#strings" },
+            { "include": "#comments" }
+          ]
         },
         {
+          "comment": "associativity declaration",
+          "begin": "%(?:nonassoc|left|right)\\b",
+          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "end": "(?=%)",
+          "patterns": [
+            { "include": "#token-name" },
+            { "include": "#production-name" },
+            { "include": "#comments" }
+          ]
+        },
+        {
+          "comment": "type/start/on_error_reduce declaration",
+          "begin": "%(?:type|start|on_error_reduce)\\b",
+          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "end": "(?=%)",
+          "patterns": [
+            { "include": "#~type-annotation" },
+            { "include": "#production-name" },
+            { "include": "#comments" }
+          ]
+        },
+        {
+          "comment": "builtin declaration",
+          "name": "keyword.other.menhir",
+          "match": "%(?:parameter|attribute)\\b"
+        },
+        { "include": "#~type-annotation" },
+        { "include": "source.ocaml#strings" }
+      ],
+      "repository": {
+        "~type-annotation": {
           "comment": "ocaml type annotation for token",
           "begin": "<",
           "end": ">",
           "beginCaptures": [{ "name": "keyword.other.menhir" }],
           "endCaptures": [{ "name": "keyword.other.menhir" }],
           "patterns": [{ "include": "source.ocaml" }]
-        },
-        { "include": "source.ocaml#strings" }
-      ]
+        }
+      }
     },
-
+    "prec": {
+      "match": "%prec\\b",
+      "name": "keyword.other.menhir"
+    },
     "rules": {
       "patterns": [
         {
           "comment": "new rule syntax with optional parameter list",
-          "begin": "(let)[[:space:]]*([[:lower:]][[:word:]]*)[[:space:]]*(?:\\(([^)]+)\\))?[[:space:]]*(:=|==)",
-          "end": "$",
+          "begin": "(let)[[:space:]]+([[:lower:]_][[:word:]]*)[[:space:]]*(?:\\(([^)]+)\\)[[:space:]]*)?(:=|==)",
+          "end": "(?=let\\b|[[:lower:]_][[:word:]]*[[:space:]]*(?:\\([^)]+\\)[[:space:]]*)?:|%(?!prec\\b))",
           "beginCaptures": {
-            "1": {
-              "name": "keyword.other.menhir"
-            },
+            "1": { "name": "keyword.other.menhir" },
             "2": {
               "comment": "rule name",
               "name": "entity.name.function.rule.menhir"
@@ -67,28 +111,40 @@
                 {
                   "comment": "rule parameter",
                   "name": "variable.parameter.rule.menhir",
-                  "match": "[[:alpha:]][[:word:]]*"
+                  "match": "[[:alpha:]_][[:word:]]*"
                 }
               ]
             },
-            "4": {
-              "name": "keyword.other.menhir"
-            }
+            "4": { "name": "keyword.other.menhir" }
           },
           "patterns": [
             { "include": "#comments" },
-            { "include": "#variables" },
+            { "include": "#new-variables" },
             { "include": "#references" },
+            { "include": "#prec" },
             { "include": "#operators" },
             { "include": "source.ocaml#strings" },
-            { "include": "#actions" }
+            { "include": "#new-actions" },
+            {
+              "comment": "production",
+              "begin": "[:|]",
+              "beginCaptures": [{ "name": "keyword.other.menhir" }],
+              "end": "(?=[{<|]|let\\b|[[:lower:]_][[:word:]]*[[:space:]]*(?:\\([^)]+\\)[[:space:]]*)?:|%(?!prec\\b))",
+              "patterns": [
+                { "include": "#comments" },
+                { "include": "#new-variables" },
+                { "include": "#references" },
+                { "include": "#prec" },
+                { "include": "#operators" },
+                { "include": "source.ocaml#strings" }
+              ]
+            }
           ]
         },
-
         {
           "comment": "rule name with optional parameter list",
-          "match": "([[:lower:]][[:word:]]*)[[:space:]]*(?:\\(([^)]+)\\))?(?=[[:space:]]*:)",
-          "captures": {
+          "begin": "([[:lower:]_][[:word:]]*)[[:space:]]*(?:\\(([^)]+)\\))?(?=[[:space:]]*:)",
+          "beginCaptures": {
             "1": {
               "comment": "rule name",
               "name": "entity.name.function.rule.menhir"
@@ -98,45 +154,55 @@
                 {
                   "comment": "rule parameter",
                   "name": "variable.parameter.rule.menhir",
-                  "match": "[[:alpha:]][[:word:]]*"
+                  "match": "[[:alpha:]_][[:word:]]*"
                 }
               ]
             }
-          }
-        },
-        {
-          "comment": "declaration for public or inline rule; precedence annotation",
-          "name": "keyword.other.directive.menhir",
-          "match": "%public|%inline|%prec"
-        },
-        {
-          "comment": "production",
-          "begin": ":|\\|",
-          "beginCaptures": [{ "name": "keyword.other.menhir" }],
-          "end": "$",
+          },
+          "end": "(?=let\\b|[[:lower:]_][[:word:]]*[[:space:]]*(?:\\([^)]+\\)[[:space:]]*)?:|%(?!prec\\b))",
           "patterns": [
             { "include": "#comments" },
             { "include": "#variables" },
             { "include": "#references" },
+            { "include": "#prec" },
             { "include": "#operators" },
             { "include": "source.ocaml#strings" },
-            { "include": "#actions" }
+            { "include": "#actions" },
+            {
+              "comment": "production",
+              "begin": "[:|]",
+              "beginCaptures": [{ "name": "keyword.other.menhir" }],
+              "end": "(?=[{<|]|let\\b|[[:lower:]_][[:word:]]*[[:space:]]*(?:\\([^)]+\\)[[:space:]]*)?:|%(?!prec\\b))",
+              "patterns": [
+                { "include": "#comments" },
+                { "include": "#variables" },
+                { "include": "#references" },
+                { "include": "#prec" },
+                { "include": "#operators" },
+                { "include": "source.ocaml#strings" }
+              ]
+            }
           ]
         },
-        { "include": "#actions" }
+        {
+          "comment": "declaration for public or inline rule; precedence annotation",
+          "name": "keyword.other.directive.menhir",
+          "match": "%(?:public|inline|prec)\\b"
+        }
       ]
     },
-
     "actions": {
+      "comment": "ocaml semantic action",
+      "contentName": "source.embedded-action.menhir",
+      "begin": "{",
+      "beginCaptures": [{ "name": "keyword.other.menhir" }],
+      "end": "}",
+      "endCaptures": [{ "name": "keyword.other.menhir" }],
+      "patterns": [{ "include": "source.ocaml" }]
+    },
+    "new-actions": {
       "patterns": [
-        {
-          "comment": "ocaml semantic action",
-          "begin": "{",
-          "beginCaptures": [{ "name": "keyword.other.menhir" }],
-          "end": "}",
-          "endCaptures": [{ "name": "keyword.other.menhir" }],
-          "patterns": [{ "include": "source.ocaml" }]
-        },
+        { "include": "#actions" },
         {
           "comment": "point-free ocaml semantic action",
           "begin": "<",
@@ -147,7 +213,6 @@
         }
       ]
     },
-
     "comments": {
       "patterns": [
         { "include": "source.ocaml#comments" },
@@ -165,17 +230,62 @@
         }
       ]
     },
-
     "variables": {
       "comment": "labeled semantic value identifier",
-      "match": "([[:lower:]_][[:word:]']*|~)[[:space:]]*(=)",
+      "match": "([[:lower:]_][[:word:]]*)[[:space:]]*(=)",
       "captures": {
         "1": { "name": "variable.parameter.value.menhir" },
         "2": { "name": "keyword.other.menhir" }
       },
       "patterns": [{ "include": "#references" }]
     },
-
+    "new-variables": {
+      "patterns": [
+        { "include": "#variables" },
+        {
+          "comment": "punned semantic value capture",
+          "match": "(~)[[:space:]]*(=)",
+          "captures": {
+            "1": { "name": "variable.parameter.value.menhir" },
+            "2": { "name": "keyword.other.menhir" }
+          }
+        },
+        {
+          "comment": "destructured semantic value capture",
+          "begin": "(?<![[:word:]][[:space:]]*)\\(",
+          "end": "\\)[[:space:]]*(=)",
+          "endCaptures": {
+            "1": { "name": "keyword.other.menhir" }
+          },
+          "patterns": [{ "include": "#~pattern" }]
+        }
+      ],
+      "repository": {
+        "~pattern": {
+          "patterns": [
+            {
+              "match": "[[:lower:]_][[:word:]]*|~",
+              "name": "variable.parameter.value.menhir"
+            },
+            {
+              "begin": "\\(",
+              "end": "\\)",
+              "patterns": [{ "include": "#~pattern" }]
+            }
+          ]
+        }
+      }
+    },
+    "token-name": {
+      "comment": "reference to a token",
+      "name": "constant.other.token.menhir",
+      "match": "[[:upper:]][[:word:]]*"
+    },
+    "production-name": {
+      "comment": "reference to a production",
+      "name": "entity.name.function.rule.menhir",
+      "match": "[[:lower:]_][[:word:]]*"
+    },
     "references": {
       "patterns": [
         {
@@ -183,19 +293,10 @@
           "name": "support.function.rule.menhir",
           "match": "\\b(endrule|midrule|option|ioption|boption|loption|pair|separated_pair|preceded|terminated|delimited|list|nonempty_list|separated_list|separated_nonempty_list|rev|flatten|append)\\b"
         },
-        {
-          "comment": "reference to a token",
-          "name": "entity.name.token.menhir",
-          "match": "[[:upper:]][[:word:]]*"
-        },
-        {
-          "comment": "reference to a production",
-          "name": "entity.name.function.rule.menhir",
-          "match": "[[:lower:]][[:word:]]*"
-        }
+        { "include": "#token-name" },
+        { "include": "#production-name" }
       ]
     },
-
     "operators": {
       "patterns": [
         {
