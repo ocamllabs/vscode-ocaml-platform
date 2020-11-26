@@ -66,9 +66,21 @@
           ]
         },
         {
-          "comment": "builtin declaration",
+          "comment": "parameter declaration",
           "name": "keyword.other.menhir",
-          "match": "%(?:parameter|attribute)\\b"
+          "match": "%parameter\\b"
+        },
+        {
+          "comment": "attribute declaration",
+          "begin": "%(?:attribute\\b)?",
+          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "end": "(?=%)",
+          "patterns": [
+            { "include": "source.ocaml#attributes" },
+            { "include": "#token-name" },
+            { "include": "#production-name" },
+            { "include": "#comments" }
+          ]
         },
         { "include": "#type-annotation" },
         { "include": "source.ocaml#strings" }
