@@ -489,9 +489,19 @@
         "path": "./syntaxes/ocamllex.json"
       },
       {
+        "scopeName": "source.action.menhir",
+        "path": "./syntaxes/menhir-action.json",
+        "injectTo": [
+          "source.ocaml"
+        ]
+      },
+      {
         "language": "ocaml.menhir",
         "scopeName": "source.ocaml.menhir",
-        "path": "./syntaxes/menhir.json"
+        "path": "./syntaxes/menhir.json",
+        "embeddedLanguages": {
+          "source.embedded-action.menhir": "source.action.menhir"
+        }
       },
       {
         "language": "ocaml.opam",

@@ -6,6 +6,7 @@
 - Highlight `cram` stanza in dune-project files (#441)
 - Fix reason highlighting of let extensions (#447)
 - Improve highlighting of Menhir new syntax (#450)
+- Improve Menhir syntax highlighting (#455)
 
 ## 1.4.0
 
