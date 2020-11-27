@@ -213,18 +213,16 @@ let detect_opam_sandbox ~project_root opam () =
 let detect () =
   match Workspace.workspaceFolders () with
   | [] -> Promise.return None
-  | [ workspace_folder ] -> (
+  | [ workspace_folder ] ->
     let project_root =
       workspace_folder |> WorkspaceFolder.uri |> Uri.path |> Path.of_string
     in
     let available = available_toolchains () in
-    try
-      Promise.List.find_map
-        (fun f -> f ())
-        [ detect_esy_sandbox ~project_root available.esy
-        ; detect_opam_sandbox ~project_root available.opam
-        ]
-    with Assert_failure _ -> Promise.return None )
+    Promise.List.find_map
+      (fun f -> f ())
+      [ detect_esy_sandbox ~project_root available.esy
+      ; detect_opam_sandbox ~project_root available.opam
+      ]
   | _ ->
     (* If there are several workspace folders, skip the detection entirely. *)
     Promise.return None
