@@ -10,8 +10,8 @@
       "end": "\\)",
       "patterns": [
         { "include": "#anon-capture" },
-        { "include": "#token-name" },
-        { "include": "#production-name" }
+        { "include": "source.ocaml.menhir#token-name" },
+        { "include": "source.ocaml.menhir#production-name" }
       ]
     },
     {
