@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.5.0
 
 - Highlight `rec` keyword in OCaml mli files for recursive modules (#434)
 - Highlight `cram` stanza in dune-project files (#441)
