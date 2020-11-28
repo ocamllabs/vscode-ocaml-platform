@@ -192,17 +192,23 @@ let detect_esy_sandbox ~project_root esy () =
   in
   let+ manifest = Esy.find_manifest_in_dir project_root in
   match (esy, esy_build_dir_exists, manifest) with
-  | Some esy, true, Some _ ->
-    (* Some projects have both use both Esy and Opam, we can't assume that the user
-       wants to use Esy just by looking for an "esy.json" file.
+  | Some esy, true, _
+  | Some esy, _, Some _ ->
+    (* Esy can be used with [esy.json], [package.json], or without any of those.
+        So we check if we find an [_esy] directory, which means the user created an Esy sandbox.
 
-       Instead, we assume the user wants to use esy if these three conditions are met:
-        - The esy command is in the user's system
-        - There is an _esy build directory in the project root
-        - There is an Esy manifest file in the project root
+       If we don't, but there is an [esy.json] file, we can assume the user wants to use Esy.
     *)
     Some (Esy (esy, project_root))
   | _ -> None
+
+let detect_opam_local_switch ~project_root opam () =
+  let open Promise.Option.Syntax in
+  let* opam = opam in
+  let* switch = Opam.switch_show ~cwd:project_root opam in
+  match switch with
+  | Local _ as switch -> Promise.Option.return (Opam (opam, switch))
+  | _ -> Promise.return None
 
 let detect_opam_sandbox ~project_root opam () =
   let open Promise.Option.Syntax in
@@ -220,7 +226,8 @@ let detect () =
     let available = available_toolchains () in
     Promise.List.find_map
       (fun f -> f ())
-      [ detect_esy_sandbox ~project_root available.esy
+      [ detect_opam_local_switch ~project_root available.opam
+      ; detect_esy_sandbox ~project_root available.esy
       ; detect_opam_sandbox ~project_root available.opam
       ]
   | _ ->
