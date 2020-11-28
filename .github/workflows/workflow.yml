@@ -111,7 +111,9 @@ jobs:
 
       - name: Publish extension to Open VSX
         if: success() && runner.os == 'Linux' && contains(github.ref, 'refs/tags')
-        run: yarn deploy:ovsx ocaml-platform-*.vsix --pat ${{ secrets.OPEN_VSX_TOKEN }}
+        run: yarn deploy:ovsx ocaml-platform-*.vsix --pat "$OVSX_PAT"
+        env:
+          OVSX_PAT: ${{ secrets.OPEN_VSX_TOKEN }}
 
       - name: Create Release
         if: runner.os == 'Linux' && contains(github.ref, 'refs/tags')
