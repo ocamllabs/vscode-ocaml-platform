@@ -96,15 +96,10 @@ let find_manifest_in_dir dir =
   let open Promise.Syntax in
   let esy_file = Path.(dir / "esy.json") in
   let package_file = Path.(dir / "package.json") in
-  try
-    [ esy_file; package_file ]
-    |> Promise.List.find_map (fun path ->
-           let+ file_exists = path |> Path.to_string |> Fs.exists in
-           if file_exists then
-             Some path
-           else
-             None)
-  with Assert_failure _ -> Promise.return None
+  [ esy_file; package_file ]
+  |> Promise.List.find_map (fun path ->
+         let+ file_exists = path |> Path.to_string |> Fs.exists in
+         Option.some_if file_exists path)
 
 let state t ~manifest =
   let root_str = Path.to_string manifest in

@@ -3,7 +3,7 @@ module Switch : sig
     | Local of Path.t
     | Named of string
 
-  val make : string -> t
+  val of_string : string -> t option
 
   val name : t -> string
 

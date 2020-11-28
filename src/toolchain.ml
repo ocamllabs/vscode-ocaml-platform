@@ -114,10 +114,12 @@ module Setting = struct
       in
       Esy manifest
     | Opam ->
-      let switch =
-        field "switch" (fun js -> Opam.Switch.make (decode_vars js)) json
-      in
-      Opam switch
+      field "switch"
+        (fun js ->
+          match Opam.Switch.of_string (decode_vars js) with
+          | Some switch -> Opam switch
+          | None -> Global)
+        json
     | Custom ->
       let template = field "template" decode_vars json in
       Custom template
@@ -185,22 +187,24 @@ let of_settings () : t option Promise.t =
   | Some (Custom template) -> Promise.return (Some (Custom template))
 
 let detect_esy_sandbox ~project_root esy () =
-  let open Promise.Syntax in
+  let open Promise.Option.Syntax in
   let* esy = esy in
-  let* esy_build_dir_exists =
-    Fs.exists Path.(project_root / "_esy" |> Path.to_string)
+  let open Promise.Syntax in
+  let+ esy_build_dir_exists, manifest =
+    Promise.all2
+      ( Fs.exists Path.(project_root / "_esy" |> Path.to_string)
+      , Esy.find_manifest_in_dir project_root )
   in
-  let+ manifest = Esy.find_manifest_in_dir project_root in
-  match (esy, esy_build_dir_exists, manifest) with
-  | Some esy, true, _
-  | Some esy, _, Some _ ->
+  match (esy_build_dir_exists, manifest) with
+  | true, _
+  | _, Some _ ->
     (* Esy can be used with [esy.json], [package.json], or without any of those.
         So we check if we find an [_esy] directory, which means the user created an Esy sandbox.
 
        If we don't, but there is an [esy.json] file, we can assume the user wants to use Esy.
     *)
     Some (Esy (esy, project_root))
-  | _ -> None
+  | false, None -> None
 
 let detect_opam_local_switch ~project_root opam () =
   let open Promise.Option.Syntax in
@@ -208,7 +212,7 @@ let detect_opam_local_switch ~project_root opam () =
   let* switch = Opam.switch_show ~cwd:project_root opam in
   match switch with
   | Local _ as switch -> Promise.Option.return (Opam (opam, switch))
-  | _ -> Promise.return None
+  | Named _ -> Promise.return None
 
 let detect_opam_sandbox ~project_root opam () =
   let open Promise.Option.Syntax in
