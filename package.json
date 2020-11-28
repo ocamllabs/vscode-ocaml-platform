@@ -588,7 +588,8 @@
     "test:problems": "node ./test/runProblemMatcherTests.js",
     "test": "npm-run-all -s test:*",
     "package": "vsce package --yarn",
-    "deploy": "vsce publish --yarn",
+    "deploy:vsce": "vsce publish --yarn",
+    "deploy:ovsx": "ovsx publish --yarn",
     "fmt:check": "prettier --check .",
     "fmt": "prettier --write ."
   },
@@ -596,12 +597,13 @@
     "vscode-languageclient": "6.1.3"
   },
   "devDependencies": {
+    "@types/vscode": "1.51.0",
     "fs-extra": "9.0.1",
     "mocha": "7.2.0",
     "npm-run-all": "4.1.5",
+    "ovsx": "0.1.0-next.980e5cf",
     "prettier": "2.2.0",
     "vsce": "1.81.1",
-    "@types/vscode": "1.51.0",
     "vscode-test": "1.4.1"
   }
 }

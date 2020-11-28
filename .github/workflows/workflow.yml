@@ -99,15 +99,21 @@ jobs:
           path: ocaml-platform-*.vsix
 
       - name: Test extension
-        uses: GabrielBB/xvfb-action@v1.0
+        uses: GabrielBB/xvfb-action@v1
         with:
           run: yarn test
 
-      - name: Publish extension
+      - name: Publish extension to VSCode Marketplace
         if: success() && runner.os == 'Linux' && contains(github.ref, 'refs/tags')
-        run: yarn deploy
+        run: yarn deploy:vsce
         env:
           VSCE_PAT: ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
+
+      - name: Publish extension to Open VSX
+        if: success() && runner.os == 'Linux' && contains(github.ref, 'refs/tags')
+        run: yarn deploy:ovsx ocaml-platform-*.vsix --pat "$OVSX_PAT"
+        env:
+          OVSX_PAT: ${{ secrets.OPEN_VSX_TOKEN }}
 
       - name: Create Release
         if: runner.os == 'Linux' && contains(github.ref, 'refs/tags')
