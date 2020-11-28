@@ -1,41 +1,71 @@
 open Import
 
-let send_switch_impl_intf_request client document : string array Promise.t =
-  let data =
-    Uri.toString (TextDocument.uri document) ~skipEncoding:true ()
-    |> Jsonoo.Encode.string
-  in
+let send_switch_impl_intf_request client uri : string array Promise.t =
+  let data = Jsonoo.Encode.string uri in
   let open Promise.Syntax in
   let+ response =
     LanguageClient.sendRequest client ~meth:"ocamllsp/switchImplIntf" ~data ()
   in
   Jsonoo.Decode.(array string) response
 
+let send_infer_intf_request client uri : string Promise.t =
+  let data = Jsonoo.Encode.string uri in
+  let open Promise.Syntax in
+  let+ response =
+    LanguageClient.sendRequest client ~meth:"ocamllsp/inferIntf" ~data ()
+  in
+  Jsonoo.Decode.string response
+
+let insert_inferred_intf source_uri client editor =
+  let open Promise.Syntax in
+  if String.is_suffix source_uri ~suffix:".ml" then
+    (* If the source file was a .ml, infer the interface *)
+    let+ inferred_intf = send_infer_intf_request client source_uri in
+    let (_ : bool Promise.t) =
+      TextEditor.edit editor
+        ~callback:(fun ~editBuilder ->
+          TextEditorEdit.insert editBuilder
+            ~location:(Position.make ~line:1 ~character:1)
+            ~value:inferred_intf)
+        ()
+    in
+    ()
+  else
+    Promise.return ()
+
 (* given a file uri, opens the file if it exists;
      otherwise, creates the file but doesn't write it to disk *)
-let show_file target_file_name =
+let show_file target_uri =
   let open Promise.Syntax in
-  let uri = Uri.parse target_file_name () in
-  let* doc =
+  let uri = Uri.parse target_uri () in
+  let* doc, new_file =
     Workspace.openTextDocument (`Uri uri)
-    |> Promise.catch ~rejected:(fun _ ->
+    |> Promise.then_
+         ~fulfilled:(fun doc -> Promise.return (doc, false))
+         ~rejected:(fun (_ : Promise.error) ->
            (* if file does not exist *)
            let create_file_uri = Uri.with_ uri ~scheme:"untitled" () in
-           Workspace.openTextDocument (`Uri create_file_uri))
+           let+ doc = Workspace.openTextDocument (`Uri create_file_uri) in
+           (doc, true))
   in
-  let+ (_ : TextEditor.t) =
-    Window.showTextDocument ~document:(`TextDocument doc) ()
-  in
-  ()
+  let+ editor = Window.showTextDocument ~document:(`TextDocument doc) () in
+  (editor, new_file)
 
 let request_switch client document =
   let open Promise.Syntax in
-  let* arr = send_switch_impl_intf_request client document in
+  let source_uri =
+    Uri.toString (TextDocument.uri document) ~skipEncoding:true ()
+  in
+  let* arr = send_switch_impl_intf_request client source_uri in
   match Array.to_list arr with
   | [] ->
     (* 'ocamllsp/switchImplIntf' command's response array cannot be empty *)
     assert false
-  | [ filepath ] -> show_file filepath
+  | [ filepath ] -> (
+    let* result = show_file filepath in
+    match result with
+    | editor, true -> insert_inferred_intf source_uri client editor
+    | _ -> Promise.return () )
   | first_candidate :: other_candidates as candidates -> (
     let first_candidate_item =
       QuickPickItem.create
@@ -65,4 +95,8 @@ let request_switch client document =
     in
     match choice with
     | None -> Promise.return ()
-    | Some filepath -> show_file filepath )
+    | Some filepath -> (
+      let* result = show_file filepath in
+      match result with
+      | editor, true -> insert_inferred_intf source_uri client editor
+      | _ -> Promise.return () ) )

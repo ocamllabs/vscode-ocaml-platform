@@ -3,9 +3,14 @@ open! Import
 type t =
   { interfaceSpecificLangId : bool
   ; handleSwitchImplIntf : bool
+  ; handleInferIntf : bool
   }
 
-let default = { interfaceSpecificLangId = false; handleSwitchImplIntf = false }
+let default =
+  { interfaceSpecificLangId = false
+  ; handleSwitchImplIntf = false
+  ; handleInferIntf = false
+  }
 
 let default_field key decode default json =
   let open Jsonoo.Decode in
@@ -22,7 +27,10 @@ let of_json (json : Jsonoo.t) =
       default_field "handleSwitchImplIntf" bool default.handleSwitchImplIntf
         json
     in
-    { interfaceSpecificLangId; handleSwitchImplIntf }
+    let handleInferIntf =
+      default_field "handleInferIntf" bool default.handleInferIntf json
+    in
+    { interfaceSpecificLangId; handleSwitchImplIntf; handleInferIntf }
   with Jsonoo.Decode_error _ ->
     show_message `Warn
       "unexpected experimental capabilities from lsp server. Some features \
@@ -41,3 +49,5 @@ let of_initialize_result (t : LanguageClient.InitializeResult.t) =
 let has_interface_specific_lang_id t = t.interfaceSpecificLangId
 
 let can_handle_switch_impl_intf t = t.handleSwitchImplIntf
+
+let can_handle_infer_intf t = t.handleSwitchImplIntf
