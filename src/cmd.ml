@@ -61,7 +61,9 @@ let check t =
     let+ s = check_spawn spawn in
     Spawn s
 
-let run ?cwd ?stdin = function
+let run ?cwd ?stdin =
+  let cwd = Option.map cwd ~f:Path.to_string in
+  function
   | Spawn { bin; args } ->
     ChildProcess.spawn (Path.to_string bin) (Array.of_list args) ?stdin
       (ChildProcess.Options.create ?cwd ())
@@ -92,9 +94,9 @@ let log ?(result : ChildProcess.return option) (t : t) =
   in
   log_json "external command" message
 
-let output ?stdin (t : t) =
+let output ?cwd ?stdin (t : t) =
   let open Promise.Syntax in
-  let+ (result : ChildProcess.return) = run ?stdin t in
+  let+ (result : ChildProcess.return) = run ?stdin ?cwd t in
   log ~result t;
   if result.exitCode = 0 then
     Ok result.stdout

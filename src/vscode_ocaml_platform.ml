@@ -19,11 +19,7 @@ let activate (extension : ExtensionContext.t) =
      because we use vscode [output] pane for logs *)
   Process.Env.set "OCAML_LSP_SERVER_LOG" "-";
   let open Promise.Syntax in
-  let* toolchain =
-    Toolchain.of_settings ()
-    (* TODO: implement [Toolchain.from_settings_or_detect] that would
-       either get the sandbox from the settings or detect in a smart way (not simply Global) *)
-  in
+  let* toolchain = Toolchain.of_settings_or_detect () in
   let is_fallback = Option.is_empty toolchain in
   let toolchain = Option.value toolchain ~default:Toolchain.Global in
   Extension_instance.make toolchain
