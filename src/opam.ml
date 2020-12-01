@@ -8,6 +8,7 @@ module Switch = struct
   let of_string = function
     | "" -> None
     | switch_name ->
+      let switch_name = String.strip switch_name in
       if Char.equal switch_name.[0] '/' then
         Some (Local (Path.of_string switch_name))
       else
