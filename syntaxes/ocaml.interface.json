@@ -28,15 +28,6 @@
           "match": "~([[:lower:]_][[:word:]']*)?"
         },
         {
-          "comment": "module type of",
-          "match": "\\b(module)[[:space:]]+(type)[[:space:]]+(of)\\b",
-          "captures": {
-            "1": { "name": "keyword.ocaml" },
-            "2": { "name": "keyword.ocaml" },
-            "3": { "name": "keyword.ocaml" }
-          }
-        },
-        {
           "comment": "type declaration",
           "match": "\\b(type)[[:space:]]+(nonrec[[:space:]]+)?(_[[:space:]]+|[+-]?'[[:alpha:]][[:word:]']*[[:space:]]+|\\(.*\\)[[:space:]]+)?([[:lower:]_][[:word:]']*)",
           "captures": {
@@ -142,6 +133,17 @@
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "entity.name.function.binding.ocaml" }
           }
+        },
+        {
+          "comment": "module type of",
+          "begin": "\\b(module)[[:space:]]+(type)[[:space:]]+(of)\\b",
+          "beginCaptures": {
+            "1": { "name": "keyword.ocaml" },
+            "2": { "name": "keyword.ocaml" },
+            "3": { "name": "keyword.ocaml" }
+          },
+          "end": "(?=val|external|type|exception|class|module|open|include|=)",
+          "patterns": [{ "include": "source.ocaml" }]
         }
       ]
     },

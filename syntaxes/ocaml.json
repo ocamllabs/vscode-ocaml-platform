@@ -9,7 +9,7 @@
     { "include": "#characters" },
     { "include": "#attributes" },
     { "include": "#extensions" },
-    { "include": "#signatures" },
+    { "include": "#modules" },
     { "include": "#bindings" },
     { "include": "#operators" },
     { "include": "#keywords" },
@@ -319,12 +319,23 @@
       "patterns": [{ "include": "$self" }]
     },
 
-    "signatures": {
-      "begin": "\\b(sig)\\b",
-      "end": "\\b(end)\\b",
-      "beginCaptures": [{ "name": "keyword.other.ocaml" }],
-      "endCaptures": [{ "name": "keyword.other.ocaml" }],
-      "patterns": [{ "include": "source.ocaml.interface" }]
+    "modules": {
+      "patterns": [
+        {
+          "begin": "\\b(sig)\\b",
+          "end": "\\b(end)\\b",
+          "beginCaptures": [{ "name": "keyword.other.ocaml" }],
+          "endCaptures": [{ "name": "keyword.other.ocaml" }],
+          "patterns": [{ "include": "source.ocaml.interface" }]
+        },
+        {
+          "begin": "\\b(struct)\\b",
+          "end": "\\b(end)\\b",
+          "beginCaptures": [{ "name": "keyword.other.ocaml" }],
+          "endCaptures": [{ "name": "keyword.other.ocaml" }],
+          "patterns": [{ "include": "$self" }]
+        }
+      ]
     },
 
     "bindings": {
@@ -489,12 +500,6 @@
     "literals": {
       "patterns": [
         {
-          "comment": "wildcard underscore",
-          "name": "constant.language.ocaml",
-          "match": "\\b_\\b"
-        },
-
-        {
           "comment": "boolean literal",
           "name": "constant.language.boolean.ocaml",
           "match": "\\b(true|false)\\b"
@@ -592,7 +597,12 @@
         {
           "comment": "type parameter",
           "name": "storage.type.ocaml",
-          "match": "'[[:alpha:]][[:word:]']*\\b"
+          "match": "'[[:alpha:]][[:word:]']*\\b|'_\\b"
+        },
+        {
+          "comment": "weak type parameter",
+          "name": "storage.type.weak.ocaml",
+          "match": "'_[[:alpha:]][[:word:]']*\\b"
         },
         {
           "comment": "builtin type",
@@ -604,6 +614,11 @@
 
     "identifiers": {
       "patterns": [
+        {
+          "comment": "wildcard underscore",
+          "name": "constant.language.ocaml",
+          "match": "\\b_\\b"
+        },
         {
           "comment": "capital identifier for constructor, exception, or module",
           "name": "constant.language.capital-identifier.ocaml",
