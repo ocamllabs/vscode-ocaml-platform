@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Improve highlighting of type parameters and `module type of` (#461)
+
 ## 1.5.0
 
 - Highlight `rec` keyword in OCaml mli files for recursive modules (#434)
