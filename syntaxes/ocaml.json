@@ -221,9 +221,21 @@
               "match": "\\\\u\\{[[:xdigit:]]{1,6}\\}"
             },
             {
-              "comment": "printf format string",
+              "comment": "printf string",
               "name": "constant.character.printf.ocaml",
               "match": "%[-0+ #]*([[:digit:]]+|\\*)?(.([[:digit:]]+|\\*))?[lLn]?[diunlLNxXosScCfFeEgGhHBbat!%@,]"
+            },
+            {
+              "comment": "format string",
+              "name": "keyword.other.format.ocaml",
+              "begin": "@[\\[;{]?<",
+              "end": ">",
+              "patterns": [{ "include": "$self" }]
+            },
+            {
+              "comment": "format string",
+              "name": "keyword.other.format.ocaml",
+              "match": "@([\\[\\], ;.{}?]|\\\\n)"
             },
             {
               "comment": "unknown escape sequence",

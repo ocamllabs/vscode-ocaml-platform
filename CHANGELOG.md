@@ -1,5 +1,9 @@
 # Change Log
 
+# Unreleased
+
+- Highlight `@` format indication characters in OCaml strings (#462)
+
 ## 1.5.0
 
 - Highlight `rec` keyword in OCaml mli files for recursive modules (#434)
