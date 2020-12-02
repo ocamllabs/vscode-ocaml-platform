@@ -3,8 +3,9 @@ open Import
 type command =
   { id : string
   ; handler : Extension_instance.t -> unit -> unit
-        (* [handler] is intended to be used partially applied;
-           [handler extension_instance] is passed as a callback to [Commands.registerCommand] *)
+        (* [handler] is intended to be used partially applied; [handler
+           extension_instance] is passed as a callback to
+           [Commands.registerCommand] *)
   }
 
 let commands = ref []
@@ -25,7 +26,8 @@ let select_sandbox =
       | None (* sandbox selection cancelled *) -> Promise.return ()
       | Some new_sandbox ->
         if Sandbox.equal current_sandbox new_sandbox then
-          (* TODO: or should we relaunch so that user wishes to "restart" their sandbox *)
+          (* TODO: or should we relaunch so that user wishes to "restart" their
+             sandbox *)
           Promise.return ()
         else
           let* () =
@@ -79,7 +81,8 @@ let switch_impl_intf =
       if Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp then
         Switch_impl_intf.request_switch client document
       else
-        (* if, however, ocamllsp doesn't have the capability, recommend updating ocamllsp*)
+        (* if, however, ocamllsp doesn't have the capability, recommend updating
+           ocamllsp*)
         Promise.return
         @@ show_message `Warn
              "The installed version of ocamllsp does not support switching \

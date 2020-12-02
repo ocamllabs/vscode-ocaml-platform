@@ -59,10 +59,9 @@ let start_language_server sandbox =
     (not (Ocaml_lsp.has_interface_specific_lang_id ocaml_lsp))
     || (not (Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp))
     || not (Ocaml_lsp.can_handle_infer_intf ocaml_lsp)
-    (* TODO: switch to ocaml-lsp version based approach
-       Using [initializeResult] of [LanguageClient] we can get ocaml-lsp's version.
-       We can use versions instead of capabilities to suggest the user to update their
-       ocaml-lsp. *)
+    (* TODO: switch to ocaml-lsp version based approach Using [initializeResult]
+       of [LanguageClient] we can get ocaml-lsp's version. We can use versions
+       instead of capabilities to suggest the user to update their ocaml-lsp. *)
   then
     show_message `Warn
       "The installed version of ocamllsp is out of date. Some features may be \

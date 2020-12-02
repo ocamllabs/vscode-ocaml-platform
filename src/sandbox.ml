@@ -1,18 +1,14 @@
 open Import
 
-(* Terminology:
-   - Sandbox: represents supported sandboxes with Global as
-     the fallback
-   - project_root is different from Package_manager root (Eg. Opam
-     (Path.of_string "/foo/bar")). Project root
-     is the directory where manifest file (opam/esy.json/package.json)
-     was found. Package_manager root is the directory that contains the
-     manifest file responsible for setting up the sandbox - the two
-     are same for Esy and Opam project but different for
-     bucklescript. Bucklescript projects have this manifest file
-     abstracted away from the user (at least at the moment)
-   - Manifest: abstracts functions handling manifest files
-     of the supported package managers *)
+(* Terminology: - Sandbox: represents supported sandboxes with Global as the
+   fallback - project_root is different from Package_manager root (Eg. Opam
+   (Path.of_string "/foo/bar")). Project root is the directory where manifest
+   file (opam/esy.json/package.json) was found. Package_manager root is the
+   directory that contains the manifest file responsible for setting up the
+   sandbox - the two are same for Esy and Opam project but different for
+   bucklescript. Bucklescript projects have this manifest file abstracted away
+   from the user (at least at the moment) - Manifest: abstracts functions
+   handling manifest files of the supported package managers *)
 
 type t =
   | Opam of Opam.t * Opam.Switch.t
@@ -199,10 +195,11 @@ let detect_esy_sandbox ~project_root esy () =
   | true, _
   | _, Some _ ->
     (* Esy can be used with [esy.json], [package.json], or without any of those.
-        So we check if we find an [_esy] directory, which means the user created an Esy sandbox.
+       So we check if we find an [_esy] directory, which means the user created
+       an Esy sandbox.
 
-       If we don't, but there is an [esy.json] file, we can assume the user wants to use Esy.
-    *)
+       If we don't, but there is an [esy.json] file, we can assume the user
+       wants to use Esy. *)
     Some (Esy (esy, project_root))
   | false, None -> None
 
@@ -342,8 +339,8 @@ let sandbox_candidates ~workspace_folders =
   let global = Candidate.ok Global in
   let custom =
     Candidate.ok (Custom "$prog $args")
-    (* doesn't matter what the custom fields are set to here
-       user will input custom commands in [select] *)
+    (* doesn't matter what the custom fields are set to here user will input
+       custom commands in [select] *)
   in
 
   let+ esy, opam = Promise.all2 (esy, opam) in
@@ -434,5 +431,6 @@ let run_setup sandbox =
   | Ok _ -> Ok ()
   | Error msg ->
     (* TODO: if ocamllsp not found, suggest to install it on press of a button;
-       consider checking and suggesting installation for other tools: formatter, etc. *)
+       consider checking and suggesting installation for other tools: formatter,
+       etc. *)
     Error (Printf.sprintf "Sandbox initialisation failed: %s" msg)
