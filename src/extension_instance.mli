@@ -10,8 +10,7 @@ val language_client : t -> LanguageClient.t
 
 val ocaml_lsp : t -> Ocaml_lsp.t
 
-val update_on_new_sandbox :
-  t -> Sandbox.t -> (unit, string) result Promise.t
+val update_on_new_sandbox : t -> Sandbox.t -> (unit, string) result Promise.t
 
 val start_language_server :
   Sandbox.t -> (LanguageClient.t * Ocaml_lsp.t, string) result Promise.t
