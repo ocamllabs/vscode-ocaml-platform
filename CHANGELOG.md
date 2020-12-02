@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Improve highlighting of type parameters and `module type of` (#461)
+- Detect Opam and Esy sandboxes (#445)
 
 ## 1.5.0
 
