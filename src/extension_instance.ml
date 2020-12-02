@@ -1,13 +1,13 @@
 open Import
 
 type t =
-  { mutable toolchain : Toolchain.t
+  { mutable sandbox : Sandbox.t
   ; mutable client : LanguageClient.t
   ; mutable ocaml_lsp : Ocaml_lsp.t
   ; sandbox_info : StatusBarItem.t
   }
 
-let toolchain t = t.toolchain
+let sandbox t = t.sandbox
 
 let language_client t = t.client
 
@@ -28,8 +28,8 @@ let client_options () =
   LanguageClient.ClientOptions.create ~outputChannel ~revealOutputChannelOn
     ~documentSelector ()
 
-let server_options toolchain =
-  let command = Toolchain.get_lsp_command toolchain in
+let server_options sandbox =
+  let command = Sandbox.get_lsp_command sandbox in
   Cmd.log command;
   match command with
   | Shell command ->
@@ -40,11 +40,11 @@ let server_options toolchain =
     let options = LanguageClient.ExecutableOptions.create ~shell:false () in
     LanguageClient.Executable.create ~command ~args ~options ()
 
-let start_language_server toolchain =
+let start_language_server sandbox =
   let open Promise.Result.Syntax in
-  let* () = Toolchain.run_setup toolchain in
+  let* () = Sandbox.run_setup sandbox in
 
-  let serverOptions = server_options toolchain in
+  let serverOptions = server_options sandbox in
   let clientOptions = client_options () in
   let client =
     LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
@@ -75,57 +75,57 @@ let start_language_server toolchain =
 let restart_language_server t =
   let open Promise.Result.Syntax in
   LanguageClient.stop t.client;
-  let+ language_client, ocaml_lsp = start_language_server t.toolchain in
+  let+ language_client, ocaml_lsp = start_language_server t.sandbox in
   t.client <- language_client;
   t.ocaml_lsp <- ocaml_lsp
 
 module Sandbox_info : sig
-  val make : Toolchain.t -> StatusBarItem.t
+  val make : Sandbox.t -> StatusBarItem.t
 
-  val update : StatusBarItem.t -> new_toolchain:Toolchain.t -> unit
+  val update : StatusBarItem.t -> new_sandbox:Sandbox.t -> unit
 end = struct
-  let make_status_bar_item_text toolchain =
+  let make_status_bar_item_text sandbox =
     Printf.sprintf "%s %s" LabelIcons.package
-    @@ Toolchain.to_pretty_string toolchain
+    @@ Sandbox.to_pretty_string sandbox
 
-  let make toolchain =
+  let make sandbox =
     let status_bar_item =
       Window.createStatusBarItem ~alignment:StatusBarAlignment.Left ()
     in
-    let status_bar_item_text = make_status_bar_item_text toolchain in
+    let status_bar_item_text = make_status_bar_item_text sandbox in
     StatusBarItem.set_text status_bar_item status_bar_item_text;
     StatusBarItem.set_command status_bar_item
       (`String Extension_consts.Commands.select_sandbox);
     StatusBarItem.show status_bar_item;
     status_bar_item
 
-  let update sandbox_info ~new_toolchain =
-    let status_bar_item_text = make_status_bar_item_text new_toolchain in
+  let update sandbox_info ~new_sandbox =
+    let status_bar_item_text = make_status_bar_item_text new_sandbox in
     StatusBarItem.set_text sandbox_info status_bar_item_text
 end
 
-let make toolchain =
-  let sandbox_info = Sandbox_info.make toolchain in
+let make sandbox =
+  let sandbox_info = Sandbox_info.make sandbox in
   let open Promise.Result.Syntax in
-  let+ client, ocaml_lsp = start_language_server toolchain in
-  { toolchain; client; ocaml_lsp; sandbox_info }
+  let+ client, ocaml_lsp = start_language_server sandbox in
+  { sandbox; client; ocaml_lsp; sandbox_info }
 
-let update_on_new_toolchain t new_toolchain =
-  Sandbox_info.update t.sandbox_info ~new_toolchain;
+let update_on_new_sandbox t new_sandbox =
+  Sandbox_info.update t.sandbox_info ~new_sandbox;
   LanguageClient.stop t.client;
   let open Promise.Result.Syntax in
-  let+ client, ocaml_lsp = start_language_server new_toolchain in
-  t.toolchain <- new_toolchain;
+  let+ client, ocaml_lsp = start_language_server new_sandbox in
+  t.sandbox <- new_sandbox;
   t.client <- client;
   t.ocaml_lsp <- ocaml_lsp;
   ()
 
-let open_terminal toolchain =
-  match Terminal_sandbox.create toolchain with
+let open_terminal sandbox =
+  match Terminal_sandbox.create sandbox with
   | Some terminal -> Terminal_sandbox.show terminal
   | None ->
     show_message `Error
-      "Could not open a terminal in the current sandbox. The toolchain may not \
+      "Could not open a terminal in the current sandbox. The sandbox may not \
        have loaded yet."
 
 let disposable t =

@@ -18,22 +18,22 @@ let command id handler =
 let select_sandbox =
   let handler (instance : Extension_instance.t) () =
     let open Promise.Syntax in
-    let current_toolchain = Extension_instance.toolchain instance in
+    let current_sandbox = Extension_instance.sandbox instance in
     let (_ : unit Promise.t) =
-      let* toolchain = Toolchain.select_toolchain () in
-      match toolchain with
+      let* sandbox = Sandbox.select_sandbox () in
+      match sandbox with
       | None (* sandbox selection cancelled *) -> Promise.return ()
-      | Some new_toolchain ->
-        if Toolchain.equal current_toolchain new_toolchain then
-          (* TODO: or should we relaunch so that user wishes to "restart" their toolchain *)
+      | Some new_sandbox ->
+        if Sandbox.equal current_sandbox new_sandbox then
+          (* TODO: or should we relaunch so that user wishes to "restart" their sandbox *)
           Promise.return ()
         else
           let* () =
-            Extension_instance.update_on_new_toolchain instance new_toolchain
+            Extension_instance.update_on_new_sandbox instance new_sandbox
             |> Promise.Result.iter ~error:(fun e ->
                    show_message `Error "Error: %s" e)
           in
-          Toolchain.save_to_settings new_toolchain
+          Sandbox.save_to_settings new_sandbox
     in
     ()
   in
@@ -53,8 +53,8 @@ let select_sandbox_and_open_terminal =
   let handler _instance () =
     let (_ : unit option Promise.t) =
       let open Promise.Option.Syntax in
-      let+ toolchain = Toolchain.select_toolchain () in
-      Extension_instance.open_terminal toolchain
+      let+ sandbox = Sandbox.select_sandbox () in
+      Extension_instance.open_terminal sandbox
     in
     ()
   in
@@ -62,7 +62,7 @@ let select_sandbox_and_open_terminal =
 
 let open_terminal =
   let handler (instance : Extension_instance.t) () =
-    Extension_instance.toolchain instance |> Extension_instance.open_terminal
+    Extension_instance.sandbox instance |> Extension_instance.open_terminal
   in
   command Extension_consts.Commands.open_terminal handler
 

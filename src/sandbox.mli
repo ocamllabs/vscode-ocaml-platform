@@ -1,19 +1,19 @@
-(** Toolchain.ml exposes functions that let us
+(** Sandbox.ml exposes functions that let us
 
-   1. Run initial checks in the environment looking for a reliable toolchain
-   ([Toolchain.init])
+   1. Run initial checks in the environment looking for a reliable sandbox
+   ([Sandbox.init])
 
-   2. Run a setup that would setup the toolchain provided that basic
-   requirements are met ([Toolchain.run_setup])
+   2. Run a setup that would setup the sandbox provided that basic
+   requirements are met ([Sandbox.run_setup])
 
-   3. Helper functions that extract the tools from the setup toolchain. This
+   3. Helper functions that extract the tools from the setup sandbox. This
    includes just [ocamllsp] right now, but in future could include others like
    debuggers, REPLs etc that could be shipped with [vscode-ocaml-platform] plugin
    itself
 
    The separation between [init], [run_setup] and extraction helpers exist so that we
    can handle missing tools gracefully (ie provide degraded performance, direct
-   user to install missing tools etc). Having a single [Toolchain.make()], for
+   user to install missing tools etc). Having a single [Sandbox.make()], for
    instance, would not make it this flexible. *)
 
 type t =
@@ -36,38 +36,38 @@ val of_settings_or_detect : unit -> t option Promise.t
 
 val save_to_settings : t -> unit Promise.t
 
-(** [select_toolchain_and_save] requires the process environment the plugin is being run in
+(** [select_sandbox_and_save] requires the process environment the plugin is being run in
    (ie VSCode's process environment) and the project root and produces a promise
    of resources available that can later be passed on to [run_setup] that can be
-   called to install the toolchain. *)
-val select_toolchain_and_save : unit -> t option Promise.t
+   called to install the sandbox. *)
+val select_sandbox_and_save : unit -> t option Promise.t
 
-(** [select_toolchain] is the same as [select_toolchain_and_save] but does not save the toolchain configuration *)
-val select_toolchain : unit -> t option Promise.t
+(** [select_sandbox] is the same as [select_sandbox_and_save] but does not save the sandbox configuration *)
+val select_sandbox : unit -> t option Promise.t
 
 (** [run_setup] is an effectful function that triggers setup instructions
    automatically for the user. At present, this functionality
    resides in the plugin itself for bucklescript users - to
    reliably use ocamllsp for bucklescript users, a sandboxed
    environment provides a reliable way to setup the OCaml
-   toolchain. {{: https://github.com/prometheansacrifice/esy-mode#npm-and-bucklescript-build-system-managed-projects} More details }
+   sandbox. {{: https://github.com/prometheansacrifice/esy-mode#npm-and-bucklescript-build-system-managed-projects} More details }
    We use Esy to provide
 
    1. A scrubbed environment with just OCaml tools in it - this is
    necessary since OCaml tools are closely tied to compiler versions and
    look into the global environments to find plugins (Eg. Merlin and Reason)
    2. Relocatable assets so that users can
-   download the toolchain artifacts and compile it from source in
+   download the sandbox artifacts and compile it from source in
    the same workflow.
 
-   [run_setup] is capable of setting up the toolchain for bucklescript
+   [run_setup] is capable of setting up the sandbox for bucklescript
    project using both Opam and Esy users. It provides and abstracted
-   way to setup the toolchain, so that we (developers) have the
-   flexibility to iterate and improve how the toolchain it provided.
+   way to setup the sandbox, so that we (developers) have the
+   flexibility to iterate and improve how the sandbox it provided.
 
    A hard requirement for [run_setup] is to not get in the way to
-   existing setups. If users already have working toolchains installed
-   via some other toolchain/package manager (Nix, system wide managers
+   existing setups. If users already have working sandboxes installed
+   via some other sandbox/package manager (Nix, system wide managers
    like yum/apt/brew or Duniverse), [run_setup] must co-operate and
    detect such installations.
  *)
@@ -75,7 +75,7 @@ val run_setup : t -> (unit, string) result Promise.t
 
 (* Helper utils *)
 
-(** Extract command to run with the toolchain *)
+(** Extract command to run with the sandbox *)
 val get_command : t -> string -> string list -> Cmd.t
 
 (** Extract lsp command and arguments *)

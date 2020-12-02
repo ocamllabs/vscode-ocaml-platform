@@ -123,10 +123,10 @@ let state t ~manifest =
   else
     Pending
 
-let setup_toolchain t ~manifest =
+let setup_sandbox t ~manifest =
   let open Promise.Result.Syntax in
-  let+ toolchain_state = state t ~manifest in
-  match toolchain_state with
+  let+ sandbox_state = state t ~manifest in
+  match sandbox_state with
   | State.Ready -> ()
   | Pending ->
     let root_dir = Path.to_string manifest in
