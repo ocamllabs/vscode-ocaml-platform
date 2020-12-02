@@ -55,8 +55,8 @@ module Regexp = struct
         (List.rev acc, [%js.to: int] offset, [%js.to: string] string)
       | capture :: args -> separate ([%js.to: string] capture :: acc) args
       | _ -> assert false
-      (* replacer arguments will always be terminated with
-         a numeric offset and final string *)
+      (* replacer arguments will always be terminated with a numeric offset and
+         final string *)
     in
     let js_replacer matched args =
       let captures, offset, string = separate [] args in

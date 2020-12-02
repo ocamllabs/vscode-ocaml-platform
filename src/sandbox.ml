@@ -1,18 +1,14 @@
 open Import
 
-(* Terminology:
-   - Toolchain: represents supported toolchains with Global as
-     the fallback
-   - project_root is different from Package_manager root (Eg. Opam
-     (Path.of_string "/foo/bar")). Project root
-     is the directory where manifest file (opam/esy.json/package.json)
-     was found. Package_manager root is the directory that contains the
-     manifest file responsible for setting up the toolchain - the two
-     are same for Esy and Opam project but different for
-     bucklescript. Bucklescript projects have this manifest file
-     abstracted away from the user (at least at the moment)
-   - Manifest: abstracts functions handling manifest files
-     of the supported package managers *)
+(* Terminology: - Sandbox: represents supported sandboxes with Global as the
+   fallback - project_root is different from Package_manager root (Eg. Opam
+   (Path.of_string "/foo/bar")). Project root is the directory where manifest
+   file (opam/esy.json/package.json) was found. Package_manager root is the
+   directory that contains the manifest file responsible for setting up the
+   sandbox - the two are same for Esy and Opam project but different for
+   bucklescript. Bucklescript projects have this manifest file abstracted away
+   from the user (at least at the moment) - Manifest: abstracts functions
+   handling manifest files of the supported package managers *)
 
 type t =
   | Opam of Opam.t * Opam.Switch.t
@@ -139,12 +135,12 @@ module Setting = struct
   let t = Settings.create ~scope:Workspace ~key:"sandbox" ~of_json ~to_json
 end
 
-let available_toolchains () =
+let available_sandboxes () =
   { Kind.Hmap.opam = Opam.make (); esy = Esy.make (); global = (); custom = () }
 
 let of_settings () : t option Promise.t =
   let open Promise.Syntax in
-  let available = available_toolchains () in
+  let available = available_sandboxes () in
   let not_available kind =
     let this_ =
       match kind with
@@ -199,10 +195,11 @@ let detect_esy_sandbox ~project_root esy () =
   | true, _
   | _, Some _ ->
     (* Esy can be used with [esy.json], [package.json], or without any of those.
-        So we check if we find an [_esy] directory, which means the user created an Esy sandbox.
+       So we check if we find an [_esy] directory, which means the user created
+       an Esy sandbox.
 
-       If we don't, but there is an [esy.json] file, we can assume the user wants to use Esy.
-    *)
+       If we don't, but there is an [esy.json] file, we can assume the user
+       wants to use Esy. *)
     Some (Esy (esy, project_root))
   | false, None -> None
 
@@ -227,7 +224,7 @@ let detect () =
     let project_root =
       workspace_folder |> WorkspaceFolder.uri |> Uri.path |> Path.of_string
     in
-    let available = available_toolchains () in
+    let available = available_sandboxes () in
     Promise.List.find_map
       (fun f -> f ())
       [ detect_opam_local_switch ~project_root available.opam
@@ -245,34 +242,34 @@ let of_settings_or_detect () =
   | Some package_manager -> Promise.return (Some package_manager)
   | None -> detect ()
 
-let save_to_settings toolchain =
+let save_to_settings sandbox =
   let to_setting = function
     | Esy (_, root) -> Setting.Esy root
     | Opam (_, switch) -> Setting.Opam switch
     | Global -> Setting.Global
     | Custom template -> Setting.Custom template
   in
-  Settings.set ~section:"ocaml" Setting.t (to_setting toolchain)
+  Settings.set ~section:"ocaml" Setting.t (to_setting sandbox)
 
 module Candidate = struct
   type nonrec t =
-    { toolchain : t
+    { sandbox : t
     ; status : (unit, string) result
     }
 
-  let to_quick_pick { toolchain; status } =
+  let to_quick_pick { sandbox; status } =
     let create = QuickPickItem.create in
     let description =
       match status with
       | Error s -> Some (Printf.sprintf "Invalid sandbox: %s" s)
       | Ok () -> (
-        match toolchain with
+        match sandbox with
         | Opam (_, Local _) -> Some "Local switch"
         | Opam (_, Named _) -> Some "Global switch"
         | Esy _ -> Some "Esy"
         | _ -> None )
     in
-    match toolchain with
+    match sandbox with
     | Opam (_, Named name) -> create ~label:name ?description ()
     | Opam (_, Local path) ->
       let project_name = Path.basename path in
@@ -284,31 +281,31 @@ module Candidate = struct
       create ~detail:project_path ~label:project_name ?description ()
     | Global ->
       create ~label:"Global" ?description
-        ~detail:"Global toolchain inherited from the environment" ()
+        ~detail:"Global sandbox inherited from the environment" ()
     | Custom _ ->
       create ?description ~label:"Custom"
-        ~detail:"Custom toolchain using a command template" ()
+        ~detail:"Custom sandbox using a command template" ()
 
-  let ok toolchain = { toolchain; status = Ok () }
+  let ok sandbox = { sandbox; status = Ok () }
 end
 
-let select_toolchain (choices : Candidate.t list) =
+let select_sandbox (choices : Candidate.t list) =
   let placeHolder =
-    "Which package manager would you like to manage the toolchain?"
+    "Which package manager would you like to manage the sandbox?"
   in
   let choices =
     List.map
-      ~f:(fun (toolchain : Candidate.t) ->
-        let quick_pick = Candidate.to_quick_pick toolchain in
-        (quick_pick, toolchain))
+      ~f:(fun (sandbox : Candidate.t) ->
+        let quick_pick = Candidate.to_quick_pick sandbox in
+        (quick_pick, sandbox))
       choices
   in
   let options = QuickPickOptions.create ~canPickMany:false ~placeHolder () in
   Window.showQuickPickItems ~choices ~options ()
 
-let toolchain_candidates ~workspace_folders =
+let sandbox_candidates ~workspace_folders =
   let open Promise.Syntax in
-  let available = available_toolchains () in
+  let available = available_sandboxes () in
   let esy =
     let* esy = available.esy in
     match esy with
@@ -325,7 +322,7 @@ let toolchain_candidates ~workspace_folders =
       in
       List.concat esys
       |> List.map ~f:(fun (manifest : Esy.discover) ->
-             { Candidate.toolchain = Esy (esy, manifest.file)
+             { Candidate.sandbox = Esy (esy, manifest.file)
              ; status = manifest.status
              })
   in
@@ -336,35 +333,35 @@ let toolchain_candidates ~workspace_folders =
     | Some opam ->
       let+ switches = Opam.switch_list opam in
       List.map switches ~f:(fun sw ->
-          let toolchain = Opam (opam, sw) in
-          { Candidate.toolchain; status = Ok () })
+          let sandbox = Opam (opam, sw) in
+          { Candidate.sandbox; status = Ok () })
   in
   let global = Candidate.ok Global in
   let custom =
     Candidate.ok (Custom "$prog $args")
-    (* doesn't matter what the custom fields are set to here
-       user will input custom commands in [select] *)
+    (* doesn't matter what the custom fields are set to here user will input
+       custom commands in [select] *)
   in
 
   let+ esy, opam = Promise.all2 (esy, opam) in
   (global :: custom :: esy) @ opam
 
-let setup_toolchain (kind : t) =
+let setup_sandbox (kind : t) =
   match kind with
-  | Esy (esy, manifest) -> Esy.setup_toolchain esy ~manifest
+  | Esy (esy, manifest) -> Esy.setup_sandbox esy ~manifest
   | Opam _
   | Global
   | Custom _ ->
     Promise.Result.return ()
 
-let select_toolchain () =
+let select_sandbox () =
   let open Promise.Syntax in
   let workspace_folders = Workspace.workspaceFolders () in
-  let* candidates = toolchain_candidates ~workspace_folders in
+  let* candidates = sandbox_candidates ~workspace_folders in
   let open Promise.Option.Syntax in
-  let* candidate = select_toolchain candidates in
+  let* candidate = select_sandbox candidates in
   match candidate with
-  | { status = Ok (); toolchain = Custom _ } ->
+  | { status = Ok (); sandbox = Custom _ } ->
     let validateInput ~value =
       if
         String.is_substring value ~substring:"$prog"
@@ -381,22 +378,22 @@ let select_toolchain () =
     let* input = Window.showInputBox ~options () in
     let template = String.strip input in
     Promise.Option.return @@ Custom template
-  | { status; toolchain } -> (
+  | { status; sandbox } -> (
     match status with
     | Error s ->
-      show_message `Warn "This toolchain is invalid. Error: %s" s;
+      show_message `Warn "This sandbox is invalid. Error: %s" s;
       Promise.return None
-    | Ok () -> Promise.Option.return toolchain )
+    | Ok () -> Promise.Option.return sandbox )
 
-let select_toolchain_and_save () =
+let select_sandbox_and_save () =
   let open Promise.Option.Syntax in
-  let* toolchain = select_toolchain () in
+  let* sandbox = select_sandbox () in
   let open Promise.Syntax in
-  let+ () = save_to_settings toolchain in
-  Some toolchain
+  let+ () = save_to_settings sandbox in
+  Some sandbox
 
-let get_command toolchain bin args : Cmd.t =
-  match toolchain with
+let get_command sandbox bin args : Cmd.t =
+  match sandbox with
   | Opam (opam, switch) -> Opam.exec opam ~switch ~args:(bin :: args)
   | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:(bin :: args)
   | Global -> Spawn { bin = Path.of_string bin; args }
@@ -416,23 +413,24 @@ let get_command toolchain bin args : Cmd.t =
     in
     Shell command
 
-let get_lsp_command ?(args = []) toolchain : Cmd.t =
-  get_command toolchain "ocamllsp" args
+let get_lsp_command ?(args = []) sandbox : Cmd.t =
+  get_command sandbox "ocamllsp" args
 
-let get_dune_command toolchain args : Cmd.t = get_command toolchain "dune" args
+let get_dune_command sandbox args : Cmd.t = get_command sandbox "dune" args
 
-let run_setup toolchain =
+let run_setup sandbox =
   let open Promise.Syntax in
   let+ output =
     let open Promise.Result.Syntax in
-    let* () = setup_toolchain toolchain in
+    let* () = setup_sandbox sandbox in
     let args = [ "--version" ] in
-    let* command = Cmd.check (get_lsp_command toolchain ~args) in
+    let* command = Cmd.check (get_lsp_command sandbox ~args) in
     Cmd.output command
   in
   match output with
   | Ok _ -> Ok ()
   | Error msg ->
     (* TODO: if ocamllsp not found, suggest to install it on press of a button;
-       consider checking and suggesting installation for other tools: formatter, etc. *)
-    Error (Printf.sprintf "Toolchain initialisation failed: %s" msg)
+       consider checking and suggesting installation for other tools: formatter,
+       etc. *)
+    Error (Printf.sprintf "Sandbox initialisation failed: %s" msg)

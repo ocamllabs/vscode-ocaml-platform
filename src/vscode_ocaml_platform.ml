@@ -15,17 +15,18 @@ let suggest_to_pick_sandbox instance =
   Option.iter selection ~f:(Extension_commands.select_sandbox.handler instance)
 
 let activate (extension : ExtensionContext.t) =
-  (* this env var update disables ocaml-lsp's logging to a file
-     because we use vscode [output] pane for logs *)
+  (* this env var update disables ocaml-lsp's logging to a file because we use
+     vscode [output] pane for logs *)
   Process.Env.set "OCAML_LSP_SERVER_LOG" "-";
   let open Promise.Syntax in
-  let* toolchain = Toolchain.of_settings_or_detect () in
-  let is_fallback = Option.is_empty toolchain in
-  let toolchain = Option.value toolchain ~default:Toolchain.Global in
-  Extension_instance.make toolchain
+  let* sandbox = Sandbox.of_settings_or_detect () in
+  let is_fallback = Option.is_empty sandbox in
+  let sandbox = Option.value sandbox ~default:Sandbox.Global in
+  Extension_instance.make sandbox
   |> Promise.Result.iter
        ~ok:(fun instance ->
-         (* register things with vscode, making sure to register their disposables *)
+         (* register things with vscode, making sure to register their
+            disposables *)
          ExtensionContext.subscribe extension
            ~disposable:(Extension_instance.disposable instance);
          Extension_commands.register_all_commands extension instance;
@@ -33,13 +34,13 @@ let activate (extension : ExtensionContext.t) =
          Dune_task_provider.register extension instance;
          if
            is_fallback
-           (* if the toolchain we just set up is a fallback sandbox,
-              we create a pop-up message to offer the user to pick a sandbox they want;
-              note: if the user picks another sandbox in the pop-up,
-                we redo part of work we have just done;
-                this is the case because we can't wait or rely on user to pick a sandbox:
-                they may ignore the pop-up leaving the extension hanging, so we use fallback;
-                w/ a proper detection mechanism, we would redo work in rare cases *)
+           (* if the sandbox we just set up is a fallback sandbox, we create a
+              pop-up message to offer the user to pick a sandbox they want;
+              note: if the user picks another sandbox in the pop-up, we redo
+              part of work we have just done; this is the case because we can't
+              wait or rely on user to pick a sandbox: they may ignore the pop-up
+              leaving the extension hanging, so we use fallback; w/ a proper
+              detection mechanism, we would redo work in rare cases *)
          then
            let (_ : unit Promise.t) = suggest_to_pick_sandbox instance in
            ())
