@@ -158,7 +158,8 @@
         {
           "comment": "string literal",
           "begin": "\"",
-          "end": "\""
+          "end": "\"",
+          "patterns": [{ "match": "\\\\\\\\" }, { "match": "\\\\\"" }]
         },
         {
           "comment": "quoted string literal",

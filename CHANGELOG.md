@@ -4,6 +4,7 @@
 
 - Improve highlighting of type parameters and `module type of` (#461)
 - Fix highlighting of escaped character literals (#467)
+- Fix highlighting of comments that contain strings with escaped quotes (#469)
 
 ## 1.5.0
 
