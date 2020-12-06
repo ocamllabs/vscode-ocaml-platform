@@ -12,4 +12,4 @@ module Commands = struct
   let switch_impl_intf = ocaml_prefixed "switch-impl-intf"
 end
 
-(* TODO: add other constants such as settings keywords etc *)
+(* TODO: Refactor the code so that we don't need any "constants" module *)
