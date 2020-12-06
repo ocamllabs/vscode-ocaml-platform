@@ -41,47 +41,50 @@ let server_options sandbox =
     let options = LanguageClient.ExecutableOptions.create ~shell:false () in
     LanguageClient.Executable.create ~command ~args ~options ()
 
-let start_language_server sandbox =
-  let open Promise.Result.Syntax in
-  let* () = Sandbox.run_setup sandbox in
-
-  let serverOptions = server_options sandbox in
-  let clientOptions = client_options () in
-  let client =
-    LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
-      ~serverOptions ~clientOptions ()
-  in
-  LanguageClient.start client;
-
-  let open Promise.Syntax in
-  let+ initialize_result = LanguageClient.readyInitializeResult client in
-  let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
-  if
-    (not (Ocaml_lsp.has_interface_specific_lang_id ocaml_lsp))
-    || (not (Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp))
-    || not (Ocaml_lsp.can_handle_infer_intf ocaml_lsp)
-    (* TODO: switch to ocaml-lsp version based approach Using [initializeResult]
-       of [LanguageClient] we can get ocaml-lsp's version. We can use versions
-       instead of capabilities to suggest the user to update their ocaml-lsp. *)
-  then
-    show_message `Warn
-      "The installed version of ocamllsp is out of date. Some features may be \
-       unavailable or degraded in functionality: switching between \
-       implementation and interface files, functionality in mli sources. \
-       Consider updating ocamllsp.";
-
-  Ok (client, ocaml_lsp)
-
 let stop_server t =
   Option.iter t.lsp_client ~f:(fun (client, _) ->
       t.lsp_client <- None;
       LanguageClient.stop client)
 
-let restart_language_server t =
-  let open Promise.Result.Syntax in
+let start_language_server t =
   stop_server t;
-  let+ language_client, ocaml_lsp = start_language_server t.sandbox in
-  t.lsp_client <- Some (language_client, ocaml_lsp)
+  let res =
+    let open Promise.Result.Syntax in
+    let* () = Sandbox.run_setup t.sandbox in
+
+    let serverOptions = server_options t.sandbox in
+    let clientOptions = client_options () in
+    let client =
+      LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
+        ~serverOptions ~clientOptions ()
+    in
+    LanguageClient.start client;
+
+    let open Promise.Syntax in
+    let+ initialize_result = LanguageClient.readyInitializeResult client in
+    let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
+    t.lsp_client <- Some (client, ocaml_lsp);
+    if
+      (not (Ocaml_lsp.has_interface_specific_lang_id ocaml_lsp))
+      || (not (Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp))
+      || not (Ocaml_lsp.can_handle_infer_intf ocaml_lsp)
+      (* TODO: switch to ocaml-lsp version based approach Using
+         [initializeResult] of [LanguageClient] we can get ocaml-lsp's version.
+         We can use versions instead of capabilities to suggest the user to
+         update their ocaml-lsp. *)
+    then
+      show_message `Warn
+        "The installed version of ocamllsp is out of date. Some features may \
+         be unavailable or degraded in functionality: switching between \
+         implementation and interface files, functionality in mli sources. \
+         Consider updating ocamllsp.";
+    Ok ()
+  in
+  let open Promise.Syntax in
+  let+ res = res in
+  match res with
+  | Ok () -> ()
+  | Error s -> show_message `Error "Error starting server: %s" s
 
 module Sandbox_info : sig
   val make : Sandbox.t -> StatusBarItem.t
@@ -108,23 +111,14 @@ end = struct
     StatusBarItem.set_text sandbox_info status_bar_item_text
 end
 
-let make sandbox =
+let make () =
+  let sandbox = Sandbox.Global in
   let sandbox_info = Sandbox_info.make sandbox in
-  let open Promise.Syntax in
-  let+ lsp_client =
-    let+ lsp_client = start_language_server sandbox in
-    match lsp_client with
-    | Ok c -> Some c
-    | Error m ->
-      show_message `Error "Failed to initilize server: %s" m;
-      None
-  in
-  { sandbox; lsp_client; sandbox_info }
+  { sandbox; lsp_client = None; sandbox_info }
 
-let update_on_new_sandbox t new_sandbox =
+let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
-  t.sandbox <- new_sandbox;
-  restart_language_server t
+  t.sandbox <- new_sandbox
 
 let open_terminal sandbox =
   match Terminal_sandbox.create sandbox with

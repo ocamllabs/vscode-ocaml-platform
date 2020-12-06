@@ -19,23 +19,14 @@ let command id handler =
 let select_sandbox =
   let handler (instance : Extension_instance.t) () =
     let open Promise.Syntax in
-    let current_sandbox = Extension_instance.sandbox instance in
     let (_ : unit Promise.t) =
       let* sandbox = Sandbox.select_sandbox () in
       match sandbox with
       | None (* sandbox selection cancelled *) -> Promise.return ()
       | Some new_sandbox ->
-        if Sandbox.equal current_sandbox new_sandbox then
-          (* TODO: or should we relaunch so that user wishes to "restart" their
-             sandbox *)
-          Promise.return ()
-        else
-          let* () =
-            Extension_instance.update_on_new_sandbox instance new_sandbox
-            |> Promise.Result.iter ~error:(fun e ->
-                   show_message `Error "Error: %s" e)
-          in
-          Sandbox.save_to_settings new_sandbox
+        Extension_instance.set_sandbox instance new_sandbox;
+        let (_ : unit Promise.t) = Sandbox.save_to_settings new_sandbox in
+        Extension_instance.start_language_server instance
     in
     ()
   in
@@ -44,8 +35,7 @@ let select_sandbox =
 let restart_language_server =
   let handler (instance : Extension_instance.t) () =
     let (_ : unit Promise.t) =
-      Extension_instance.restart_language_server instance
-      |> Promise.Result.iter ~error:(show_message `Error "%s")
+      Extension_instance.start_language_server instance
     in
     ()
   in
