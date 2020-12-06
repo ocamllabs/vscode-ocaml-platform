@@ -74,20 +74,20 @@ let switch_impl_intf =
       let open Option.O in
       let+ editor = Window.activeTextEditor () in
       let document = TextEditor.document editor in
-      let client = Extension_instance.language_client instance in
-      (* extension needs to be activated; otherwise, just ignore the switch try *)
-      let ocaml_lsp = Extension_instance.ocaml_lsp instance in
-      (* same as for instance.client; ignore the try if it's None *)
-      if Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp then
-        Switch_impl_intf.request_switch client document
-      else
-        (* if, however, ocamllsp doesn't have the capability, recommend updating
-           ocamllsp*)
-        Promise.return
-        @@ show_message `Warn
-             "The installed version of ocamllsp does not support switching \
-              between implementation and interface files. Consider updating \
-              ocamllsp."
+      match Extension_instance.lsp_client instance with
+      | None -> Promise.return (show_message `Warn "ocamllsp is not running.")
+      | Some (client, ocaml_lsp) ->
+        (* same as for instance.client; ignore the try if it's None *)
+        if Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp then
+          Switch_impl_intf.request_switch client document
+        else
+          (* if, however, ocamllsp doesn't have the capability, recommend
+             updating ocamllsp*)
+          Promise.return
+          @@ show_message `Warn
+               "The installed version of ocamllsp does not support switching \
+                between implementation and interface files. Consider updating \
+                ocamllsp."
     in
     let (_ : unit Promise.t option) = try_switching () in
     ()

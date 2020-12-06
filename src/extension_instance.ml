@@ -2,16 +2,17 @@ open Import
 
 type t =
   { mutable sandbox : Sandbox.t
-  ; mutable client : LanguageClient.t
-  ; mutable ocaml_lsp : Ocaml_lsp.t
+  ; mutable lsp_client : (LanguageClient.t * Ocaml_lsp.t) option
   ; sandbox_info : StatusBarItem.t
   }
 
 let sandbox t = t.sandbox
 
-let language_client t = t.client
+let language_client t = Option.map ~f:fst t.lsp_client
 
-let ocaml_lsp t = t.ocaml_lsp
+let ocaml_lsp t = Option.map ~f:snd t.lsp_client
+
+let lsp_client t = t.lsp_client
 
 let client_options () =
   let documentSelector =
@@ -71,12 +72,16 @@ let start_language_server sandbox =
 
   Ok (client, ocaml_lsp)
 
+let stop_server t =
+  Option.iter t.lsp_client ~f:(fun (client, _) ->
+      t.lsp_client <- None;
+      LanguageClient.stop client)
+
 let restart_language_server t =
   let open Promise.Result.Syntax in
-  LanguageClient.stop t.client;
+  stop_server t;
   let+ language_client, ocaml_lsp = start_language_server t.sandbox in
-  t.client <- language_client;
-  t.ocaml_lsp <- ocaml_lsp
+  t.lsp_client <- Some (language_client, ocaml_lsp)
 
 module Sandbox_info : sig
   val make : Sandbox.t -> StatusBarItem.t
@@ -105,19 +110,21 @@ end
 
 let make sandbox =
   let sandbox_info = Sandbox_info.make sandbox in
-  let open Promise.Result.Syntax in
-  let+ client, ocaml_lsp = start_language_server sandbox in
-  { sandbox; client; ocaml_lsp; sandbox_info }
+  let open Promise.Syntax in
+  let+ lsp_client =
+    let+ lsp_client = start_language_server sandbox in
+    match lsp_client with
+    | Ok c -> Some c
+    | Error m ->
+      show_message `Error "Failed to initilize server: %s" m;
+      None
+  in
+  { sandbox; lsp_client; sandbox_info }
 
 let update_on_new_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
-  LanguageClient.stop t.client;
-  let open Promise.Result.Syntax in
-  let+ client, ocaml_lsp = start_language_server new_sandbox in
   t.sandbox <- new_sandbox;
-  t.client <- client;
-  t.ocaml_lsp <- ocaml_lsp;
-  ()
+  restart_language_server t
 
 let open_terminal sandbox =
   match Terminal_sandbox.create sandbox with
@@ -130,4 +137,4 @@ let open_terminal sandbox =
 let disposable t =
   Disposable.make ~dispose:(fun () ->
       StatusBarItem.dispose t.sandbox_info;
-      LanguageClient.stop t.client)
+      stop_server t)

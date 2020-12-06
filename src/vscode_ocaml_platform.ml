@@ -22,33 +22,25 @@ let activate (extension : ExtensionContext.t) =
   let* sandbox = Sandbox.of_settings_or_detect () in
   let is_fallback = Option.is_empty sandbox in
   let sandbox = Option.value sandbox ~default:Sandbox.Global in
-  Extension_instance.make sandbox
-  |> Promise.Result.iter
-       ~ok:(fun instance ->
-         (* register things with vscode, making sure to register their
-            disposables *)
-         ExtensionContext.subscribe extension
-           ~disposable:(Extension_instance.disposable instance);
-         Extension_commands.register_all_commands extension instance;
-         Dune_formatter.register extension instance;
-         Dune_task_provider.register extension instance;
-         if
-           is_fallback
-           (* if the sandbox we just set up is a fallback sandbox, we create a
-              pop-up message to offer the user to pick a sandbox they want;
-              note: if the user picks another sandbox in the pop-up, we redo
-              part of work we have just done; this is the case because we can't
-              wait or rely on user to pick a sandbox: they may ignore the pop-up
-              leaving the extension hanging, so we use fallback; w/ a proper
-              detection mechanism, we would redo work in rare cases *)
-         then
-           let (_ : unit Promise.t) = suggest_to_pick_sandbox instance in
-           ())
-       ~error:(fun e -> show_message `Error "%s" e)
-  |> Promise.catch ~rejected:(fun e ->
-         let error_message = Node.JsError.message e in
-         show_message `Error "Error: %s" error_message;
-         Promise.return ())
+  let+ instance = Extension_instance.make sandbox in
+  (* register things with vscode, making sure to register their disposables *)
+  ExtensionContext.subscribe extension
+    ~disposable:(Extension_instance.disposable instance);
+  Extension_commands.register_all_commands extension instance;
+  Dune_formatter.register extension instance;
+  Dune_task_provider.register extension instance;
+  if
+    is_fallback
+    (* if the sandbox we just set up is a fallback sandbox, we create a pop-up
+       message to offer the user to pick a sandbox they want; note: if the user
+       picks another sandbox in the pop-up, we redo part of work we have just
+       done; this is the case because we can't wait or rely on user to pick a
+       sandbox: they may ignore the pop-up leaving the extension hanging, so we
+       use fallback; w/ a proper detection mechanism, we would redo work in rare
+       cases *)
+  then
+    let (_ : unit Promise.t) = suggest_to_pick_sandbox instance in
+    ()
 
 let () =
   let open Js_of_ocaml.Js in
