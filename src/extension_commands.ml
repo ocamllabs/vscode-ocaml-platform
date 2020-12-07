@@ -19,23 +19,14 @@ let command id handler =
 let select_sandbox =
   let handler (instance : Extension_instance.t) () =
     let open Promise.Syntax in
-    let current_sandbox = Extension_instance.sandbox instance in
     let (_ : unit Promise.t) =
       let* sandbox = Sandbox.select_sandbox () in
       match sandbox with
       | None (* sandbox selection cancelled *) -> Promise.return ()
       | Some new_sandbox ->
-        if Sandbox.equal current_sandbox new_sandbox then
-          (* TODO: or should we relaunch so that user wishes to "restart" their
-             sandbox *)
-          Promise.return ()
-        else
-          let* () =
-            Extension_instance.update_on_new_sandbox instance new_sandbox
-            |> Promise.Result.iter ~error:(fun e ->
-                   show_message `Error "Error: %s" e)
-          in
-          Sandbox.save_to_settings new_sandbox
+        Extension_instance.set_sandbox instance new_sandbox;
+        let (_ : unit Promise.t) = Sandbox.save_to_settings new_sandbox in
+        Extension_instance.start_language_server instance
     in
     ()
   in
@@ -44,8 +35,7 @@ let select_sandbox =
 let restart_language_server =
   let handler (instance : Extension_instance.t) () =
     let (_ : unit Promise.t) =
-      Extension_instance.restart_language_server instance
-      |> Promise.Result.iter ~error:(show_message `Error "%s")
+      Extension_instance.start_language_server instance
     in
     ()
   in
@@ -74,20 +64,20 @@ let switch_impl_intf =
       let open Option.O in
       let+ editor = Window.activeTextEditor () in
       let document = TextEditor.document editor in
-      let client = Extension_instance.language_client instance in
-      (* extension needs to be activated; otherwise, just ignore the switch try *)
-      let ocaml_lsp = Extension_instance.ocaml_lsp instance in
-      (* same as for instance.client; ignore the try if it's None *)
-      if Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp then
-        Switch_impl_intf.request_switch client document
-      else
-        (* if, however, ocamllsp doesn't have the capability, recommend updating
-           ocamllsp*)
-        Promise.return
-        @@ show_message `Warn
-             "The installed version of ocamllsp does not support switching \
-              between implementation and interface files. Consider updating \
-              ocamllsp."
+      match Extension_instance.lsp_client instance with
+      | None -> Promise.return (show_message `Warn "ocamllsp is not running.")
+      | Some (client, ocaml_lsp) ->
+        (* same as for instance.client; ignore the try if it's None *)
+        if Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp then
+          Switch_impl_intf.request_switch client document
+        else
+          (* if, however, ocamllsp doesn't have the capability, recommend
+             updating ocamllsp*)
+          Promise.return
+          @@ show_message `Warn
+               "The installed version of ocamllsp does not support switching \
+                between implementation and interface files. Consider updating \
+                ocamllsp."
     in
     let (_ : unit Promise.t option) = try_switching () in
     ()

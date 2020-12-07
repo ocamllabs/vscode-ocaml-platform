@@ -2,16 +2,17 @@ open Import
 
 type t =
   { mutable sandbox : Sandbox.t
-  ; mutable client : LanguageClient.t
-  ; mutable ocaml_lsp : Ocaml_lsp.t
+  ; mutable lsp_client : (LanguageClient.t * Ocaml_lsp.t) option
   ; sandbox_info : StatusBarItem.t
   }
 
 let sandbox t = t.sandbox
 
-let language_client t = t.client
+let language_client t = Option.map ~f:fst t.lsp_client
 
-let ocaml_lsp t = t.ocaml_lsp
+let ocaml_lsp t = Option.map ~f:snd t.lsp_client
+
+let lsp_client t = t.lsp_client
 
 let client_options () =
   let documentSelector =
@@ -40,43 +41,50 @@ let server_options sandbox =
     let options = LanguageClient.ExecutableOptions.create ~shell:false () in
     LanguageClient.Executable.create ~command ~args ~options ()
 
-let start_language_server sandbox =
-  let open Promise.Result.Syntax in
-  let* () = Sandbox.run_setup sandbox in
+let stop_server t =
+  Option.iter t.lsp_client ~f:(fun (client, _) ->
+      t.lsp_client <- None;
+      LanguageClient.stop client)
 
-  let serverOptions = server_options sandbox in
-  let clientOptions = client_options () in
-  let client =
-    LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
-      ~serverOptions ~clientOptions ()
+let start_language_server t =
+  stop_server t;
+  let res =
+    let open Promise.Result.Syntax in
+    let* () = Sandbox.run_setup t.sandbox in
+
+    let serverOptions = server_options t.sandbox in
+    let clientOptions = client_options () in
+    let client =
+      LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
+        ~serverOptions ~clientOptions ()
+    in
+    LanguageClient.start client;
+
+    let open Promise.Syntax in
+    let+ initialize_result = LanguageClient.readyInitializeResult client in
+    let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
+    t.lsp_client <- Some (client, ocaml_lsp);
+    if
+      (not (Ocaml_lsp.has_interface_specific_lang_id ocaml_lsp))
+      || (not (Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp))
+      || not (Ocaml_lsp.can_handle_infer_intf ocaml_lsp)
+      (* TODO: switch to ocaml-lsp version based approach Using
+         [initializeResult] of [LanguageClient] we can get ocaml-lsp's version.
+         We can use versions instead of capabilities to suggest the user to
+         update their ocaml-lsp. *)
+    then
+      show_message `Warn
+        "The installed version of ocamllsp is out of date. Some features may \
+         be unavailable or degraded in functionality: switching between \
+         implementation and interface files, functionality in mli sources. \
+         Consider updating ocamllsp.";
+    Ok ()
   in
-  LanguageClient.start client;
-
   let open Promise.Syntax in
-  let+ initialize_result = LanguageClient.readyInitializeResult client in
-  let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
-  if
-    (not (Ocaml_lsp.has_interface_specific_lang_id ocaml_lsp))
-    || (not (Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp))
-    || not (Ocaml_lsp.can_handle_infer_intf ocaml_lsp)
-    (* TODO: switch to ocaml-lsp version based approach Using [initializeResult]
-       of [LanguageClient] we can get ocaml-lsp's version. We can use versions
-       instead of capabilities to suggest the user to update their ocaml-lsp. *)
-  then
-    show_message `Warn
-      "The installed version of ocamllsp is out of date. Some features may be \
-       unavailable or degraded in functionality: switching between \
-       implementation and interface files, functionality in mli sources. \
-       Consider updating ocamllsp.";
-
-  Ok (client, ocaml_lsp)
-
-let restart_language_server t =
-  let open Promise.Result.Syntax in
-  LanguageClient.stop t.client;
-  let+ language_client, ocaml_lsp = start_language_server t.sandbox in
-  t.client <- language_client;
-  t.ocaml_lsp <- ocaml_lsp
+  let+ res = res in
+  match res with
+  | Ok () -> ()
+  | Error s -> show_message `Error "Error starting server: %s" s
 
 module Sandbox_info : sig
   val make : Sandbox.t -> StatusBarItem.t
@@ -103,21 +111,14 @@ end = struct
     StatusBarItem.set_text sandbox_info status_bar_item_text
 end
 
-let make sandbox =
+let make () =
+  let sandbox = Sandbox.Global in
   let sandbox_info = Sandbox_info.make sandbox in
-  let open Promise.Result.Syntax in
-  let+ client, ocaml_lsp = start_language_server sandbox in
-  { sandbox; client; ocaml_lsp; sandbox_info }
+  { sandbox; lsp_client = None; sandbox_info }
 
-let update_on_new_sandbox t new_sandbox =
+let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
-  LanguageClient.stop t.client;
-  let open Promise.Result.Syntax in
-  let+ client, ocaml_lsp = start_language_server new_sandbox in
-  t.sandbox <- new_sandbox;
-  t.client <- client;
-  t.ocaml_lsp <- ocaml_lsp;
-  ()
+  t.sandbox <- new_sandbox
 
 let open_terminal sandbox =
   match Terminal_sandbox.create sandbox with
@@ -130,4 +131,4 @@ let open_terminal sandbox =
 let disposable t =
   Disposable.make ~dispose:(fun () ->
       StatusBarItem.dispose t.sandbox_info;
-      LanguageClient.stop t.client)
+      stop_server t)
