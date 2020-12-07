@@ -3,7 +3,8 @@
 ## Unreleased
 
 - Improve highlighting of type parameters and `module type of` (#461)
-- Detect Opam and Esy sandboxes (#445)
+- Detection of local Opam and Esy sandboxes (#445)
+  The detection will prioritize Opam local switches, then Esy sandboxes (that are detected with the directory `_esy`), and will fallback to the global environment sandbox if none of these are found.
 
 ## 1.5.0
 
