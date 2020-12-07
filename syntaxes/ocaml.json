@@ -158,7 +158,8 @@
         {
           "comment": "string literal",
           "begin": "\"",
-          "end": "\""
+          "end": "\"",
+          "patterns": [{ "match": "\\\\\\\\" }, { "match": "\\\\\"" }]
         },
         {
           "comment": "quoted string literal",
@@ -239,37 +240,37 @@
       "patterns": [
         {
           "comment": "character literal from escaped backslash",
-          "name": "string.quoted.other.ocaml constant.character.ocaml",
+          "name": "string.quoted.single.ocaml",
           "match": "'(\\\\\\\\)'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
           "comment": "character literal from escaped quote or whitespace",
-          "name": "string.quoted.other.ocaml constant.character.ocaml",
+          "name": "string.quoted.single.ocaml",
           "match": "'(\\\\[\"'ntbr ])'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
           "comment": "character literal from decimal ASCII code",
-          "name": "string.quoted.other.ocaml constant.character.ocaml",
+          "name": "string.quoted.single.ocaml",
           "match": "'(\\\\[[:digit:]]{3})'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
           "comment": "character literal from hexadecimal ASCII code",
-          "name": "string.quoted.other.ocaml constant.character.ocaml",
+          "name": "string.quoted.single.ocaml",
           "match": "'(\\\\x[[:xdigit:]]{2})'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
           "comment": "character literal from octal ASCII code",
-          "name": "string.quoted.other.ocaml constant.character.ocaml",
+          "name": "string.quoted.single.ocaml",
           "match": "'(\\\\o[0-3][0-7]{2})'",
           "captures": { "1": { "name": "constant.character.escape.ocaml" } }
         },
         {
           "comment": "character literal from unknown escape sequence",
-          "name": "string.quoted.other.ocaml constant.character.ocaml",
+          "name": "string.quoted.single.ocaml",
           "match": "'(\\\\.)'",
           "captures": {
             "1": { "name": "invalid.illegal.unknown-escape.ocaml" }

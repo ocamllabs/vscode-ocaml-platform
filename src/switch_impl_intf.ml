@@ -33,8 +33,8 @@ let insert_inferred_intf source_uri client editor =
   else
     Promise.return ()
 
-(* given a file uri, opens the file if it exists;
-     otherwise, creates the file but doesn't write it to disk *)
+(* given a file uri, opens the file if it exists; otherwise, creates the file
+   but doesn't write it to disk *)
 let show_file target_uri =
   let open Promise.Syntax in
   let uri = Uri.parse target_uri () in

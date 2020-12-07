@@ -39,8 +39,8 @@ let folder_relative_path folders file =
         | Some without_prefix -> Some (folder, without_prefix) ))
     ~init:None folders
 
-let get_shell_execution toolchain options =
-  let command = Toolchain.get_dune_command toolchain [ "build" ] in
+let get_shell_execution sandbox options =
+  let command = Sandbox.get_dune_command sandbox [ "build" ] in
   Cmd.log command;
   match command with
   | Shell commandLine -> ShellExecution.makeCommandLine ~commandLine ~options ()
@@ -49,7 +49,7 @@ let get_shell_execution toolchain options =
     let args = List.map ~f:(fun a -> `String a) args in
     ShellExecution.makeCommandArgs ~command ~args ~options ()
 
-let compute_tasks token toolchain =
+let compute_tasks token sandbox =
   let open Promise.Syntax in
   let folders = Workspace.workspaceFolders () in
   let excludes =
@@ -70,7 +70,7 @@ let compute_tasks token toolchain =
         let execution =
           let cwd = Filename.dirname (Uri.fsPath dune) in
           let options = ShellExecutionOptions.create ~env ~cwd () in
-          get_shell_execution toolchain options
+          get_shell_execution sandbox options
         in
         let task =
           Task.make ~definition ~scope ~source ~name ~problemMatchers
@@ -87,8 +87,8 @@ let provide_tasks instance ~token =
   | Some false ->
     `Promise (Promise.return None)
   | Some true ->
-    let toolchain = Extension_instance.toolchain instance in
-    `Promise (compute_tasks token toolchain)
+    let sandbox = Extension_instance.sandbox instance in
+    `Promise (compute_tasks token sandbox)
 
 let resolve_tasks ~task ~token:_ = `Promise (Promise.Option.return task)
 

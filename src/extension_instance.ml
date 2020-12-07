@@ -1,17 +1,18 @@
 open Import
 
 type t =
-  { mutable toolchain : Toolchain.t
-  ; mutable client : LanguageClient.t
-  ; mutable ocaml_lsp : Ocaml_lsp.t
+  { mutable sandbox : Sandbox.t
+  ; mutable lsp_client : (LanguageClient.t * Ocaml_lsp.t) option
   ; sandbox_info : StatusBarItem.t
   }
 
-let toolchain t = t.toolchain
+let sandbox t = t.sandbox
 
-let language_client t = t.client
+let language_client t = Option.map ~f:fst t.lsp_client
 
-let ocaml_lsp t = t.ocaml_lsp
+let ocaml_lsp t = Option.map ~f:snd t.lsp_client
+
+let lsp_client t = t.lsp_client
 
 let client_options () =
   let documentSelector =
@@ -28,8 +29,8 @@ let client_options () =
   LanguageClient.ClientOptions.create ~outputChannel ~revealOutputChannelOn
     ~documentSelector ()
 
-let server_options toolchain =
-  let command = Toolchain.get_lsp_command toolchain in
+let server_options sandbox =
+  let command = Sandbox.get_lsp_command sandbox in
   Cmd.log command;
   match command with
   | Shell command ->
@@ -40,95 +41,94 @@ let server_options toolchain =
     let options = LanguageClient.ExecutableOptions.create ~shell:false () in
     LanguageClient.Executable.create ~command ~args ~options ()
 
-let start_language_server toolchain =
-  let open Promise.Result.Syntax in
-  let* () = Toolchain.run_setup toolchain in
+let stop_server t =
+  Option.iter t.lsp_client ~f:(fun (client, _) ->
+      t.lsp_client <- None;
+      LanguageClient.stop client)
 
-  let serverOptions = server_options toolchain in
-  let clientOptions = client_options () in
-  let client =
-    LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
-      ~serverOptions ~clientOptions ()
+let start_language_server t =
+  stop_server t;
+  let res =
+    let open Promise.Result.Syntax in
+    let* () = Sandbox.run_setup t.sandbox in
+
+    let serverOptions = server_options t.sandbox in
+    let clientOptions = client_options () in
+    let client =
+      LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
+        ~serverOptions ~clientOptions ()
+    in
+    LanguageClient.start client;
+
+    let open Promise.Syntax in
+    let+ initialize_result = LanguageClient.readyInitializeResult client in
+    let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
+    t.lsp_client <- Some (client, ocaml_lsp);
+    if
+      (not (Ocaml_lsp.has_interface_specific_lang_id ocaml_lsp))
+      || (not (Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp))
+      || not (Ocaml_lsp.can_handle_infer_intf ocaml_lsp)
+      (* TODO: switch to ocaml-lsp version based approach Using
+         [initializeResult] of [LanguageClient] we can get ocaml-lsp's version.
+         We can use versions instead of capabilities to suggest the user to
+         update their ocaml-lsp. *)
+    then
+      show_message `Warn
+        "The installed version of ocamllsp is out of date. Some features may \
+         be unavailable or degraded in functionality: switching between \
+         implementation and interface files, functionality in mli sources. \
+         Consider updating ocamllsp.";
+    Ok ()
   in
-  LanguageClient.start client;
-
   let open Promise.Syntax in
-  let+ initialize_result = LanguageClient.readyInitializeResult client in
-  let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
-  if
-    (not (Ocaml_lsp.has_interface_specific_lang_id ocaml_lsp))
-    || (not (Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp))
-    || not (Ocaml_lsp.can_handle_infer_intf ocaml_lsp)
-    (* TODO: switch to ocaml-lsp version based approach
-       Using [initializeResult] of [LanguageClient] we can get ocaml-lsp's version.
-       We can use versions instead of capabilities to suggest the user to update their
-       ocaml-lsp. *)
-  then
-    show_message `Warn
-      "The installed version of ocamllsp is out of date. Some features may be \
-       unavailable or degraded in functionality: switching between \
-       implementation and interface files, functionality in mli sources. \
-       Consider updating ocamllsp.";
-
-  Ok (client, ocaml_lsp)
-
-let restart_language_server t =
-  let open Promise.Result.Syntax in
-  LanguageClient.stop t.client;
-  let+ language_client, ocaml_lsp = start_language_server t.toolchain in
-  t.client <- language_client;
-  t.ocaml_lsp <- ocaml_lsp
+  let+ res = res in
+  match res with
+  | Ok () -> ()
+  | Error s -> show_message `Error "Error starting server: %s" s
 
 module Sandbox_info : sig
-  val make : Toolchain.t -> StatusBarItem.t
+  val make : Sandbox.t -> StatusBarItem.t
 
-  val update : StatusBarItem.t -> new_toolchain:Toolchain.t -> unit
+  val update : StatusBarItem.t -> new_sandbox:Sandbox.t -> unit
 end = struct
-  let make_status_bar_item_text toolchain =
+  let make_status_bar_item_text sandbox =
     Printf.sprintf "%s %s" LabelIcons.package
-    @@ Toolchain.to_pretty_string toolchain
+    @@ Sandbox.to_pretty_string sandbox
 
-  let make toolchain =
+  let make sandbox =
     let status_bar_item =
       Window.createStatusBarItem ~alignment:StatusBarAlignment.Left ()
     in
-    let status_bar_item_text = make_status_bar_item_text toolchain in
+    let status_bar_item_text = make_status_bar_item_text sandbox in
     StatusBarItem.set_text status_bar_item status_bar_item_text;
     StatusBarItem.set_command status_bar_item
       (`String Extension_consts.Commands.select_sandbox);
     StatusBarItem.show status_bar_item;
     status_bar_item
 
-  let update sandbox_info ~new_toolchain =
-    let status_bar_item_text = make_status_bar_item_text new_toolchain in
+  let update sandbox_info ~new_sandbox =
+    let status_bar_item_text = make_status_bar_item_text new_sandbox in
     StatusBarItem.set_text sandbox_info status_bar_item_text
 end
 
-let make toolchain =
-  let sandbox_info = Sandbox_info.make toolchain in
-  let open Promise.Result.Syntax in
-  let+ client, ocaml_lsp = start_language_server toolchain in
-  { toolchain; client; ocaml_lsp; sandbox_info }
+let make () =
+  let sandbox = Sandbox.Global in
+  let sandbox_info = Sandbox_info.make sandbox in
+  { sandbox; lsp_client = None; sandbox_info }
 
-let update_on_new_toolchain t new_toolchain =
-  Sandbox_info.update t.sandbox_info ~new_toolchain;
-  LanguageClient.stop t.client;
-  let open Promise.Result.Syntax in
-  let+ client, ocaml_lsp = start_language_server new_toolchain in
-  t.toolchain <- new_toolchain;
-  t.client <- client;
-  t.ocaml_lsp <- ocaml_lsp;
-  ()
+let set_sandbox t new_sandbox =
+  Sandbox_info.update t.sandbox_info ~new_sandbox;
+  t.sandbox <- new_sandbox
 
-let open_terminal toolchain =
-  match Terminal_sandbox.create toolchain with
+let open_terminal sandbox =
+  match Terminal_sandbox.create sandbox with
   | Some terminal -> Terminal_sandbox.show terminal
   | None ->
     show_message `Error
-      "Could not open a terminal in the current sandbox. The toolchain may not \
+      "Could not open a terminal in the current sandbox. The sandbox may not \
        have loaded yet."
 
 let disposable t =
   Disposable.make ~dispose:(fun () ->
       StatusBarItem.dispose t.sandbox_info;
-      LanguageClient.stop t.client)
+      stop_server t)

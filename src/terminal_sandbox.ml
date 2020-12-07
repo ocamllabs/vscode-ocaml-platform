@@ -63,12 +63,12 @@ let get_shell_args () =
 
 type t = Terminal.t
 
-let create toolchain =
+let create sandbox =
   let open Option.O in
   let* shell_path = get_shell_path () in
   let+ shell_args = get_shell_args () in
   let ({ Cmd.bin; args } as command) =
-    match Toolchain.get_command toolchain shell_path shell_args with
+    match Sandbox.get_command sandbox shell_path shell_args with
     | Spawn spawn -> spawn
     | Shell command_line -> (
       match Platform.shell with
@@ -76,7 +76,7 @@ let create toolchain =
       | PowerShell bin -> { bin; args = [ "-c"; "& " ^ command_line ] } )
   in
   Cmd.log (Spawn command);
-  let name = Toolchain.to_pretty_string toolchain in
+  let name = Sandbox.to_pretty_string sandbox in
   let shellPath = Path.to_string bin in
   let shellArgs = `Strings args in
   Window.createTerminal ~name ~shellPath ~shellArgs ()

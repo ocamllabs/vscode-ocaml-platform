@@ -12,8 +12,8 @@ let get_formatter instance ~document ~options:_ ~token:_ =
   (* text of entire document *)
   let document_text = TextDocument.getText document ~range () in
   let command =
-    let toolchain = Extension_instance.toolchain instance in
-    Toolchain.get_dune_command toolchain [ "format-dune-file" ]
+    let sandbox = Extension_instance.sandbox instance in
+    Sandbox.get_dune_command sandbox [ "format-dune-file" ]
   in
   let output =
     let open Promise.Result.Syntax in
