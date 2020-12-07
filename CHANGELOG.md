@@ -6,6 +6,8 @@
 - Fix highlighting of escaped character literals (#467)
 - Fix highlighting of comments that contain strings with escaped quotes (#469)
 - Initialize extension even if language server fails to start (#471)
+- Detection of local Opam and Esy sandboxes (#445)
+  The detection will prioritize Opam local switches, then Esy sandboxes (that are detected with the directory `_esy`), and will fallback to the global environment sandbox if none of these are found.
 
 ## 1.5.0
 
