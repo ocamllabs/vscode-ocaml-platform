@@ -70,6 +70,8 @@
           "patterns": [
             { "include": "#token-name" },
             { "include": "#production-name" },
+            { "include": "source.ocaml#strings" },
+            { "include": "source.ocaml#attributes" },
             { "include": "#comments" }
           ]
         },
@@ -81,6 +83,8 @@
           "patterns": [
             { "include": "#type-annotation" },
             { "include": "#production-name" },
+            { "include": "source.ocaml#strings" },
+            { "include": "source.ocaml#attributes" },
             { "include": "#comments" }
           ]
         },
