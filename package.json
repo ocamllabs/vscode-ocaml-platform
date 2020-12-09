@@ -601,7 +601,7 @@
     "fs-extra": "9.0.1",
     "mocha": "7.2.0",
     "npm-run-all": "4.1.5",
-    "ovsx": "0.1.0-next.980e5cf",
+    "ovsx": "0.1.0-next.9321255",
     "prettier": "2.2.1",
     "vsce": "1.81.1",
     "vscode-test": "1.4.1"
