@@ -35,9 +35,9 @@
   (core_kernel
    (>= v0.14.0))
   (promise_jsoo
-   (>= 0.3.0))
+   (>= 0.3.1))
   (jsonoo
-   (>= 0.2.0))))
+   (>= 0.2.1))))
 
 (package
  (name vscode)
@@ -50,6 +50,6 @@
   (gen_js_api
    (>= 1.0.6))
   (promise_jsoo
-   (>= 0.3.0))
+   (>= 0.3.1))
   (jsonoo
-   (>= 0.2.0))))
+   (>= 0.2.1))))

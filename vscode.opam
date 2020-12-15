@@ -20,8 +20,8 @@ depends: [
   "ocaml" {>= "4.11"}
   "js_of_ocaml" {>= "3.7.0"}
   "gen_js_api" {>= "1.0.6"}
-  "promise_jsoo" {>= "0.3.0"}
-  "jsonoo" {>= "0.2.0"}
+  "promise_jsoo" {>= "0.3.1"}
+  "jsonoo" {>= "0.2.1"}
   "odoc" {with-doc}
 ]
 build: [
