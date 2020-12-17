@@ -133,7 +133,7 @@
         "ocaml.useOcamlEnv": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to use ocaml-env for opam commands from OCaml for Windows."
+          "description": "Controls whether to use ocaml-env for opam commands from OCaml for Windows."
         },
         "ocaml.terminal.shell.linux": {
           "description": "The path of the shell that the sandbox terminal uses on Linux",
