@@ -25,13 +25,25 @@ module Switch = struct
     | _, _ -> false
 end
 
-let binary = Path.of_string "opam"
-
 type t = Cmd.spawn
 
+let opam_binary = Path.of_string "opam"
+
+let ocaml_env_binary = Path.of_string "ocaml-env"
+
+let ocaml_env_setting =
+  Settings.create ~scope:Global ~key:"ocaml.useOcamlEnv"
+    ~of_json:Jsonoo.Decode.bool ~to_json:Jsonoo.Encode.bool
+
 let make () =
+  let spawn =
+    match (Platform.t, Settings.get ocaml_env_setting) with
+    | Win32, Some true ->
+      { Cmd.bin = ocaml_env_binary; args = [ "exec"; "--"; "opam" ] }
+    | _ -> { Cmd.bin = opam_binary; args = [] }
+  in
   let open Promise.Syntax in
-  let+ spawn = Cmd.check_spawn { bin = binary; args = [] } in
+  let+ spawn = Cmd.check_spawn spawn in
   match spawn with
   | Error _ -> None
   | Ok cmd -> Some cmd

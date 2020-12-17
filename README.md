@@ -20,23 +20,9 @@ _Please report any bugs you encounter._
 
 ### Windows
 
-If you are on Windows, there are two ways to use this extension:
-
-1. Launch VSCode from Cygwin. This will let you choose a global or opam sandbox.
-
-2. Use a custom sandbox with
-   [ocaml-env](https://fdopen.github.io/opam-repository-mingw/ocaml-env/). If it
-   is on your PATH you can input `ocaml-env exec -- $prog $args` for the custom
-   command template, or manually edit the `ocaml.sandbox` setting so it is
-
-```json
-"ocaml.sandbox": {
-  "kind": "custom",
-  "template": "ocaml-env exec -- $prog $args"
-}
-```
-
-We find the first option more reliable.
+Install [OCaml for Windows](https://fdopen.github.io/opam-repository-mingw/) and
+make sure the `ocaml-env` program is accessible on the PATH (`ocaml-env` is in
+the `usr/local/bin` folder relative to the installation directory).
 
 ### BuckleScript
 
@@ -103,6 +89,7 @@ the settings under `File > Preferences > Settings`.
 | `ocaml.sandbox`                    | Determines where to find the sandbox for a given project                                                | `null`  |
 | `ocaml.dune.autoDetect`            | Controls whether dune tasks should be automatically detected.                                           | `true`  |
 | `ocaml.trace.server`               | Controls the logging output of the language server. Valid settings are `off`, `messages`, or `verbose`. | `off`   |
+| `ocaml.useOcamlEnv`                | Controls whether to use ocaml-env for opam commands from OCaml for Windows.                             | `true`  |
 | `ocaml.terminal.shell.linux`       | The path of the shell that the sandbox terminal uses on Linux                                           | `null`  |
 | `ocaml.terminal.shell.osx`         | The path of the shell that the sandbox terminal uses on macOS                                           | `null`  |
 | `ocaml.terminal.shell.windows`     | The path of the shell that the sandbox terminal uses on Windows                                         | `null`  |
