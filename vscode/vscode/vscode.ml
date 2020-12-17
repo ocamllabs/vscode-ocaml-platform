@@ -1849,16 +1849,35 @@ end
 module TreeItem = struct
   type t = private (* class *) Ojs.t [@@js]
 
-  type lightDarkIcon =
-    { light : ([ `String of string | `Uri of Uri.t ][@js.union])
-    ; dark : ([ `String of string | `Uri of Uri.t ][@js.union])
-    }
-  [@@js]
+  module LightDarkIcon = struct
+    type t =
+      { light : ([ `String of string | `Uri of Uri.t ][@js.union])
+      ; dark : ([ `String of string | `Uri of Uri.t ][@js.union])
+      }
+    [@@js]
+
+    let t_of_js js_val =
+      let light_js = Ojs.get js_val "light" in
+      let dark_js = Ojs.get js_val "dark" in
+      let light =
+        if Ojs.has_property light_js "parse" then
+          `Uri (Uri.t_of_js light_js)
+        else
+          `String ([%js.to: string] light_js)
+      in
+      let dark =
+        if Ojs.has_property dark_js "parse" then
+          `Uri (Uri.t_of_js dark_js)
+        else
+          `String ([%js.to: string] dark_js)
+      in
+      { light; dark }
+  end
 
   type iconPath =
     ([ `String of string
      | `Uri of Uri.t
-     | `LightDark of lightDarkIcon
+     | `LightDark of LightDarkIcon.t
      | `ThemeIcon of ThemeIcon.t
      ]
     [@js.union])
@@ -1871,6 +1890,8 @@ module TreeItem = struct
       `ThemeIcon ([%js.to: ThemeIcon.t] js_val)
     else if Ojs.type_of js_val = "string" then
       `String ([%js.to: string] js_val)
+    else if Ojs.has_property js_val "light" then
+      `LightDark ([%js.to: LightDarkIcon.t] js_val)
     else
       assert false
 
@@ -2030,13 +2051,13 @@ module Window = struct
   val activeTextEditor : unit -> TextEditor.t or_undefined
     [@@js.get "vscode.window.activeTextEditor"]
 
-  val visibleTextEditors : unit -> TextEditor.t array
+  val visibleTextEditors : unit -> TextEditor.t list
     [@@js.get "vscode.window.visibleTextEditors"]
 
   val onDidChangeActiveTextEditor : unit -> TextEditor.t Event.t
     [@@js.get "vscode.window.onDidChangeActiveTextEditor"]
 
-  val onDidChangeVisibleTextEditors : unit -> TextEditor.t array Event.t
+  val onDidChangeVisibleTextEditors : unit -> TextEditor.t list Event.t
     [@@js.get "vscode.window.onDidChangeVisibleTextEditors"]
 
   val terminals : unit -> Terminal.t list [@@js.get "vscode.window.terminals"]
