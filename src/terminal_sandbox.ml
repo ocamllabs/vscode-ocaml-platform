@@ -1,18 +1,15 @@
 open Import
 
 module ShellPath = struct
-  type t = string
+  type t = string option
 
   let of_json json =
     let open Jsonoo.Decode in
-    match string json with
-    | exception Jsonoo.Decode_error _ -> Env.shell ()
-    | "" -> Env.shell ()
-    | shell -> shell
+    nullable string json
 
   let to_json (t : t) =
     let open Jsonoo.Encode in
-    string t
+    nullable string t
 
   let key =
     let linux = "shell.linux" in
@@ -33,7 +30,7 @@ module ShellArgs = struct
 
   let of_json json =
     let open Jsonoo.Decode in
-    try_optional (list string) json
+    nullable (list string) json
 
   let to_json (t : t) =
     let open Jsonoo.Encode in
@@ -53,20 +50,28 @@ module ShellArgs = struct
   let t = Settings.create ~scope:Global ~key ~of_json ~to_json
 end
 
-let get_shell_path () = Settings.get ~section:"ocaml.terminal" ShellPath.t
+let get_shell_path () =
+  let shell_path =
+    Option.join (Settings.get ~section:"ocaml.terminal" ShellPath.t)
+  in
+  match shell_path with
+  | Some path -> path
+  | None -> Env.shell ()
 
 let get_shell_args () =
-  let args section = Option.join (Settings.get ~section ShellArgs.t) in
-  match args "ocaml.terminal" with
-  | Some _ as s -> s
-  | None -> args "terminal.integrated"
+  let get_args section = Option.join (Settings.get ~section ShellArgs.t) in
+  match get_args "ocaml.terminal" with
+  | Some args -> args
+  | None -> (
+    match get_args "terminal.integrated" with
+    | Some args -> args
+    | None -> [] )
 
 type t = Terminal.t
 
 let create sandbox =
-  let open Option.O in
-  let* shell_path = get_shell_path () in
-  let+ shell_args = get_shell_args () in
+  let shell_path = get_shell_path () in
+  let shell_args = get_shell_args () in
   let ({ Cmd.bin; args } as command) =
     match Sandbox.get_command sandbox shell_path shell_args with
     | Spawn spawn -> spawn

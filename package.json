@@ -148,7 +148,8 @@
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "default": null
         },
         "ocaml.terminal.shell.windows": {
           "description": "The path of the shell that the sandbox terminal uses on Windows",
