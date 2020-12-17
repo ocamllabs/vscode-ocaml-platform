@@ -1843,7 +1843,7 @@ module ThemeIcon = struct
 
   val id : t -> string [@@js.get]
 
-  val color : t -> ThemeColor.t option [@@js.get]
+  val color : t -> ThemeColor.t or_undefined [@@js.get]
 end
 
 module TreeItem = struct
