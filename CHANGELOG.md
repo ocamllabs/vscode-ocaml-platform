@@ -3,6 +3,7 @@
 # Unreleased
 
 - Highlight token aliases in Menhir associativity declarations (#473)
+- The extension is not activated when an OCaml project is detected (#482)
 
 ## 1.5.1
 
