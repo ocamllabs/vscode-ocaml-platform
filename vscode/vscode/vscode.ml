@@ -1861,13 +1861,13 @@ module TreeItem = struct
       let dark_js = Ojs.get js_val "dark" in
       let light =
         if Ojs.has_property light_js "parse" then
-          `Uri (Uri.t_of_js light_js)
+          `Uri ([%js.to: Uri.t] light_js)
         else
           `String ([%js.to: string] light_js)
       in
       let dark =
         if Ojs.has_property dark_js "parse" then
-          `Uri (Uri.t_of_js dark_js)
+          `Uri ([%js.to: Uri.t] dark_js)
         else
           `String ([%js.to: string] dark_js)
       in
