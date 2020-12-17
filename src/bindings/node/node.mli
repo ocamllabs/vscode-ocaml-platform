@@ -17,29 +17,37 @@ end
 module Buffer : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
   val toString : t -> string
 
   val from : string -> t
 
   val concat : t array -> t
+
+  (** {4 Converters} *)
+
+  (** Get a [Buffer.t] from a JavaScript object. *)
+  val t_of_js : Ojs.t -> t
+
+  (** Get a JavaScript object from a [Buffer.t]. *)
+  val t_to_js : t -> Ojs.t
 end
 
 module Stream : sig
   type t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
 
   val on : t -> string -> (Buffer.t -> unit) -> unit
 
   val write : t -> string -> unit
 
   val end_ : t -> unit
+
+  (** {4 Converters} *)
+
+  (** Get a [Stream.t] from a JavaScript object. *)
+  val t_of_js : Ojs.t -> t
+
+  (** Get a JavaScript object from a [Stream.t]. *)
+  val t_to_js : t -> Ojs.t
 end
 
 module Path : sig

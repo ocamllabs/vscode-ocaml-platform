@@ -20,6 +20,7 @@
   "categories": [
     "Programming Languages"
   ],
+  "enableProposedApi": true,
   "activationEvents": [
     "onLanguage:ocaml",
     "onLanguage:ocaml.interface",

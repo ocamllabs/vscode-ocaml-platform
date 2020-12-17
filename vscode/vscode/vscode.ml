@@ -1,5 +1,7 @@
 open Interop
 
+val version : string [@@js.global "vscode.version"]
+
 module Disposable = struct
   type t = private (* class *) Ojs.t [@@js]
 
@@ -1810,39 +1812,254 @@ module Workspace = struct
     [@@js.global "vscode.workspace.openTextDocument"]
 end
 
+module TreeItemCollapsibleState = struct
+  type t =
+    | None [@js 0]
+    | Collapsed [@js 1]
+    | Expanded [@js 2]
+  [@@js.enum] [@@js]
+end
+
+module TreeItemLabel = struct
+  type t = private (* interface *) Ojs.t [@@js]
+
+  val label : t -> string [@@js.get]
+
+  val highlights : t -> (int * int) list or_undefined [@@js.get]
+
+  val create : label:string -> ?highlights:(int * int) list -> unit -> t
+    [@@js.builder]
+end
+
+module ThemeIcon = struct
+  type t = private (* class *) Ojs.t [@@js]
+
+  val make : id:string -> ?color:ThemeColor.t -> unit -> t
+    [@@js.new "vscode.ThemeIcon"]
+
+  val file : t [@@js.global "vscode.ThemeIcon.File"]
+
+  val folder : t [@@js.global "vscode.ThemeIcon.Folder"]
+
+  val id : t -> string [@@js.get]
+
+  val color : t -> ThemeColor.t option [@@js.get]
+end
+
+module TreeItem = struct
+  type t = private (* class *) Ojs.t [@@js]
+
+  type lightDarkIcon =
+    { light : ([ `String of string | `Uri of Uri.t ][@js.union])
+    ; dark : ([ `String of string | `Uri of Uri.t ][@js.union])
+    }
+  [@@js]
+
+  type iconPath =
+    ([ `String of string
+     | `Uri of Uri.t
+     | `LightDark of lightDarkIcon
+     | `ThemeIcon of ThemeIcon.t
+     ]
+    [@js.union])
+  [@@js]
+
+  let iconPath_of_js js_val =
+    if Ojs.has_property js_val "path" then
+      `Uri ([%js.to: Uri.t] js_val)
+    else if Ojs.has_property js_val "id" then
+      `ThemeIcon ([%js.to: ThemeIcon.t] js_val)
+    else if Ojs.type_of js_val = "string" then
+      `String ([%js.to: string] js_val)
+    else
+      assert false
+
+  type description =
+    ([ `String of string
+     | `Bool of bool
+     ]
+    [@js.union])
+  [@@js]
+
+  let description_of_js js_val =
+    match Ojs.type_of js_val with
+    | "boolean" -> `Bool ([%js.to: bool] js_val)
+    | "string" -> `String ([%js.to: string] js_val)
+    | _ -> assert false
+
+  type tooltip =
+    ([ `String of string
+     | `MarkdownString of MarkdownString.t
+     | `Undefined
+     ]
+    [@js.union])
+  [@@js]
+
+  let tooltip_of_js js_val =
+    if Ojs.type_of js_val = "string" then
+      `String ([%js.to: string] js_val)
+    else if Ojs.type_of js_val = "undefined" then
+      `Undefined
+    else if Ojs.has_property js_val "value" then
+      `MarkdownString ([%js.to: MarkdownString.t] js_val)
+    else
+      assert false
+
+  val make :
+       label:TreeItemLabel.t
+    -> ?collapsibleState:TreeItemCollapsibleState.t
+    -> unit
+    -> t
+    [@@js.new "vscode.TreeItem"]
+
+  val of_uri :
+       resourceUri:Uri.t
+    -> ?collapsibleState:TreeItemCollapsibleState.t
+    -> unit
+    -> t
+    [@@js.new "vscode.TreeItem"]
+
+  val label : t -> TreeItemLabel.t or_undefined [@@js.get]
+
+  val set_label : t -> TreeItemLabel.t -> unit [@@js.set]
+
+  val id : t -> string or_undefined [@@js.get]
+
+  val set_id : t -> string -> unit [@@js.set]
+
+  val iconPath : t -> iconPath or_undefined [@@js.get]
+
+  val set_iconPath : t -> iconPath -> unit [@@js.set]
+
+  val description : t -> description or_undefined [@@js.get]
+
+  val set_description : t -> description -> unit [@@js.set]
+
+  val resourceUri : t -> Uri.t or_undefined [@@js.get]
+
+  val set_resourceUri : t -> Uri.t -> unit [@@js.set]
+
+  val tooltip : t -> tooltip or_undefined [@@js.get]
+
+  val set_tooltip : t -> tooltip -> unit [@@js.set]
+
+  val collapsibleState : t -> TreeItemCollapsibleState.t or_undefined [@@js.get]
+
+  val set_collapsibleState : t -> TreeItemCollapsibleState.t -> unit [@@js.set]
+
+  val command : t -> Command.t or_undefined [@@js.get]
+
+  val set_command : t -> Command.t -> unit [@@js.set]
+
+  val contextValue : t -> string or_undefined [@@js.get]
+
+  val set_contextValue : t -> string -> unit [@@js.set]
+
+  val accessibilityInformation : t -> AccessibilityInformation.t or_undefined
+    [@@js.get]
+
+  val set_accessibilityInformation : t -> AccessibilityInformation.t -> unit
+    [@@js.set]
+end
+
+module TreeDataProvider = struct
+  type t = private (* interface *) Ojs.t [@@js]
+
+  val onDidChangeTreeData : t -> TreeItem.t or_undefined Event.t or_undefined
+    [@@js.get]
+
+  val getTreeItem : t -> element:TreeItem.t -> TreeItem.t Promise.t [@@js.call]
+
+  val getChildren :
+    t -> element:TreeItem.t or_undefined -> TreeItem.t list ProviderResult.t
+    [@@js.call]
+
+  val getParent :
+    t -> (element:TreeItem.t -> TreeItem.t ProviderResult.t) or_undefined
+    [@@js.call]
+
+  val resolveTreeItem :
+       t
+    -> (item:TreeItem.t -> element:TreeItem.t -> TreeItem.t ProviderResult.t)
+       or_undefined
+    [@@js.call]
+
+  val create :
+       getTreeItem:(element:TreeItem.t -> TreeItem.t Promise.t)
+    -> getChildren:
+         (element:TreeItem.t or_undefined -> TreeItem.t list ProviderResult.t)
+    -> ?getParent:(element:TreeItem.t -> TreeItem.t ProviderResult.t)
+    -> ?onDidChangeTreeData:TreeItem.t or_undefined Event.t
+    -> ?resolveTreeItem:
+         (item:TreeItem.t -> element:TreeItem.t -> TreeItem.t ProviderResult.t)
+    -> unit
+    -> t
+    [@@js.builder]
+end
+
+module TreeViewOptions = struct
+  type t = private (* class *) Ojs.t [@@js]
+
+  val treeDataProvider : t -> TreeDataProvider.t [@@js.get]
+
+  val showCollapseAll : t -> bool or_undefined [@@js.get]
+
+  val canSelectMany : t -> bool or_undefined [@@js.get]
+end
+
+module TreeView = struct
+  type t = private (* class *) Ojs.t [@@js]
+
+  val visible : t -> bool [@@js.get]
+
+  val message : t -> string or_undefined [@@js.get]
+
+  val title : t -> string or_undefined [@@js.get]
+
+  val description : t -> string or_undefined [@@js.get]
+
+  type revealOptions =
+    { select : bool or_undefined
+    ; focus : bool or_undefined
+    ; expand : bool or_undefined
+    }
+  [@@js]
+end
+
 module Window = struct
   val activeTextEditor : unit -> TextEditor.t or_undefined
     [@@js.get "vscode.window.activeTextEditor"]
 
-  val showQuickPick :
-       choices:QuickPickItem.t list
-    -> ?options:QuickPickOptions.t
-    -> ?token:CancellationToken.t
-    -> unit
-    -> QuickPickItem.t or_undefined Promise.t
-    [@@js.global "vscode.window.showQuickPick"]
+  val visibleTextEditors : unit -> TextEditor.t array
+    [@@js.get "vscode.window.visibleTextEditors"]
 
-  let showQuickPickItems ~choices ?options ?token () =
-    let open Promise.Option.Syntax in
-    let+ item =
-      showQuickPick ~choices:(List.map fst choices) ?options ?token ()
-    in
-    List.assoc item choices
+  val onDidChangeActiveTextEditor : unit -> TextEditor.t Event.t
+    [@@js.get "vscode.window.onDidChangeActiveTextEditor"]
 
-  val showQuickPick :
-       items:string list
-    -> ?options:QuickPickOptions.t
-    -> ?token:CancellationToken.t
-    -> unit
-    -> string or_undefined Promise.t
-    [@@js.global "vscode.window.showQuickPick"]
+  val onDidChangeVisibleTextEditors : unit -> TextEditor.t array Event.t
+    [@@js.get "vscode.window.onDidChangeVisibleTextEditors"]
 
-  val showInputBox :
-       ?options:InputBoxOptions.t
-    -> ?token:CancellationToken.t
+  val terminals : unit -> Terminal.t list [@@js.get "vscode.window.terminals"]
+
+  val activeTerminal : unit -> Terminal.t or_undefined
+    [@@js.get "vscode.window.activeTerminal"]
+
+  val onDidChangeActiveTerminal : unit -> Terminal.t or_undefined Event.t
+    [@@js.get "vscode.window.onDidChangeActiveTerminal"]
+
+  val onDidOpenTerminal : unit -> Terminal.t Event.t
+    [@@js.get "vscode.window.onDidOpenTerminal"]
+
+  val onDidCloseTerminal : unit -> Terminal.t Event.t
+    [@@js.get "vscode.window.onDidCloseTerminal"]
+
+  val showTextDocument :
+       document:([ `TextDocument of TextDocument.t | `Uri of Uri.t ][@js.union])
+    -> ?column:ViewColumn.t
+    -> ?preserveFocus:bool
     -> unit
-    -> string or_undefined Promise.t
-    [@@js.global "vscode.window.showInputBox"]
+    -> TextEditor.t Promise.t
+    [@@js.global "vscode.window.showTextDocument"]
 
   let getChoices choices =
     choices
@@ -1896,6 +2113,46 @@ module Window = struct
     in
     List.assoc item choices
 
+  val showQuickPick :
+       choices:QuickPickItem.t list
+    -> ?options:QuickPickOptions.t
+    -> ?token:CancellationToken.t
+    -> unit
+    -> QuickPickItem.t or_undefined Promise.t
+    [@@js.global "vscode.window.showQuickPick"]
+
+  let showQuickPickItems ~choices ?options ?token () =
+    let open Promise.Option.Syntax in
+    let+ item =
+      showQuickPick ~choices:(List.map fst choices) ?options ?token ()
+    in
+    List.assoc item choices
+
+  val showQuickPick :
+       items:string list
+    -> ?options:QuickPickOptions.t
+    -> ?token:CancellationToken.t
+    -> unit
+    -> string or_undefined Promise.t
+    [@@js.global "vscode.window.showQuickPick"]
+
+  val showInputBox :
+       ?options:InputBoxOptions.t
+    -> ?token:CancellationToken.t
+    -> unit
+    -> string or_undefined Promise.t
+    [@@js.global "vscode.window.showInputBox"]
+
+  val createOutputChannel : name:string -> OutputChannel.t
+    [@@js.global "vscode.window.createOutputChannel"]
+
+  val setStatusBarMessage :
+       text:string
+    -> ?hide:([ `AfterTimeout of int ][@js.union])
+    -> unit
+    -> Disposable.t
+    [@@js.global "vscode.window.setStatusBarMessage"]
+
   val withProgress :
        options:ProgressOptions.t
     -> task:
@@ -1910,14 +2167,6 @@ module Window = struct
   val createStatusBarItem :
     ?alignment:StatusBarAlignment.t -> ?priority:int -> unit -> StatusBarItem.t
     [@@js.global "vscode.window.createStatusBarItem"]
-
-  val showTextDocument :
-       document:([ `TextDocument of TextDocument.t | `Uri of Uri.t ][@js.union])
-    -> ?column:ViewColumn.t
-    -> ?preserveFocus:bool
-    -> unit
-    -> TextEditor.t Promise.t
-    [@@js.global "vscode.window.showTextDocument"]
 
   val createTerminal :
        ?name:string
@@ -1935,8 +2184,12 @@ module Window = struct
     -> Terminal.t
     [@@js.global "vscode.window.createTerminal"]
 
-  val createOutputChannel : name:string -> OutputChannel.t
-    [@@js.global "vscode.window.createOutputChannel"]
+  val registerTreeDataProvider :
+    viewId:string -> treeDataProvider:TreeDataProvider.t -> Disposable.t
+    [@@js.global "vscode.window.registerTreeDataProvider"]
+
+  val createTreeView : viewId:string -> options:TreeViewOptions.t -> TreeView.t
+    [@@js.global "vscode.window.createTreeView"]
 end
 
 module Commands = struct
