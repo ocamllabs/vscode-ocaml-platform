@@ -5,6 +5,8 @@
 - Highlight token aliases in Menhir associativity declarations (#473)
 - Activate the extension when workspace contains OCaml, Reason sources or
   project marker files. (#482)
+- Add `ocaml.useOcamlEnv` setting to determine whether to use `ocaml-env` for
+  opam commands from OCaml for Windows (#481)
 
 ## 1.5.1
 
