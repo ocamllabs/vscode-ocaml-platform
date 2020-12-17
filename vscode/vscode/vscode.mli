@@ -182,8 +182,9 @@ end
     ({{!Range.end_} [end_]})
 
     Range objects are {b immutable}. Use the {{!Range.with_} [with_]},
-    {{!Range.start} [start]} [intersection](#Range.intersection), or
-    [union](#Range.union) methods to derive new ranges from an existing range. *)
+    {{!Range.start} {{!Range.intersection} [start]} [intersection]}, or
+    {{!Range.union} [union]} methods to derive new ranges from an existing
+    range. *)
 module Range : sig
   type t
 
@@ -2126,11 +2127,10 @@ end
     A workspace is the representation of the folder that has been opened. There
     is no workspace when just a file but not a folder has been opened.
 
-    The workspace offers support for
-    [listening](#workspace.createFileSystemWatcher) to fs events and for
-    [finding](#workspace.findFiles) files. Both perform well and run _outside_
-    the editor-process so that they should be always used instead of
-    nodejs-equivalents. *)
+    The workspace offers support for {{!workspace.createFileSystemWatcher}
+    [listening]} to fs events and for {{!workspace.findFiles} [finding]} files.
+    Both perform well and run _outside_ the editor-process so that they should
+    be always used instead of nodejs-equivalents. *)
 module Workspace : sig
   (** List of workspace folders or `undefined` when no folder is open. *Note*
       that the first entry corresponds to the value of `rootPath`. *)
@@ -2170,7 +2170,7 @@ module Workspace : sig
   (** An event that is emitted when a workspace folder is added or removed. *)
   val onDidChangeWorkspaceFolders : WorkspaceFolder.t Event.t
 
-  (** Returns the [workspace folder](#WorkspaceFolder) that contains a given
+  (** Returns the {{!WorkspaceFolder} [workspace folder]} that contains a given
       uri.
 
       - returns `undefined` when the given uri doesn't match any workspace
@@ -2181,15 +2181,15 @@ module Workspace : sig
       @return A workspace folder or `undefined` *)
   val getWorkspaceFolder : uri:Uri.t -> WorkspaceFolder.t option
 
-  (** Find files across all [workspace folders](#workspace.workspaceFolders) in
-      the workspace.
+  (** Find files across all {{!workspace.workspaceFolders} [workspace folders]}
+      in the workspace.
 
-      @param include A [glob pattern](#GlobPattern) that defines the files to
+      @param include A {{!GlobPattern} [glob pattern]} that defines the files to
       search for. The glob pattern will be matched against the file paths of
-      resulting matches relative to their workspace. Use a
-      [relative pattern](#RelativePattern) to restrict the search results to a
-      [workspace folder](#WorkspaceFolder).
-      @param exclude A [glob pattern](#GlobPattern) that defines files and
+      resulting matches relative to their workspace. Use a {{!RelativePattern}
+      [relative pattern]} to restrict the search results to a
+      {{!WorkspaceFolder} [workspace folder]}.
+      @param exclude A {{!GlobPattern} [glob pattern]} that defines files and
       folders to exclude. The glob pattern will be matched against the file
       paths of resulting matches relative to their workspace. When `undefined`
       only default excludes will apply, when `null` no excludes will apply.
@@ -2197,8 +2197,8 @@ module Workspace : sig
       @param token A token that can be used to signal cancellation to the
       underlying search engine.
       @return A thenable that resolves to an array of resource identifiers. Will
-      return no results if no [workspace folders](#workspace.workspaceFolders)
-      are opened. *)
+      return no results if no {{!workspace.workspaceFolders}
+      [workspace folders]} are opened. *)
   val findFiles :
        includes:GlobPattern.t
     -> ?excludes:GlobPattern.t
@@ -2217,26 +2217,26 @@ module Workspace : sig
 
   (** Opens a document. Will return early if this document is already open.
       Otherwise the document is loaded and the
-      [didOpen](#workspace.onDidOpenTextDocument)-event fires.
+      {{!workspace.onDidOpenTextDocument} [didOpen]}-event fires.
 
-      The document is denoted by an [uri](#Uri). Depending on the
-      [scheme](#Uri.scheme) the following rules apply:
+      The document is denoted by an {{!Uri} [uri]}. Depending on the
+      {{!Uri.scheme} [scheme]} the following rules apply:
 
       - `file`-scheme: Open a file on disk, will be rejected if the file does
         not exist or cannot be loaded.
       - `untitled`-scheme: A new file that should be saved on disk, e.g.
         `untitled:c:\frodo\new.js`. The language will be derived from the file
         name. * For all other schemes contributed
-        [text document content providers](#TextDocumentContentProvider) and
-        [file system providers](#FileSystemProvider) are consulted.
+        {{!TextDocumentContentProvider} [text document content providers]} and
+        {{!FileSystemProvider} [file system providers]} are consulted.
 
       *Note* that the lifecycle of the returned document is owned by the editor
       and not by the extension. That means an
-      [`onDidClose`](#workspace.onDidCloseTextDocument)-event can occur at any
+      {{!workspace.onDidCloseTextDocument} [onDidClose]}-event can occur at any
       time after opening it.
 
       @param uri Identifies the resource to open.
-      @return A promise that resolves to a [document](#TextDocument). *)
+      @return A promise that resolves to a {{!TextDocument} [document]}. *)
   val openTextDocument :
        [ `Uri of Uri.t
        | `Filename of string
@@ -2244,29 +2244,28 @@ module Workspace : sig
        ]
     -> TextDocument.t Promise.t
 
-  (** An event that is emitted when a [text document](#TextDocument) is opened
-      or when the language id of a text document
-      [has been changed](#languages.setTextDocumentLanguage).
+  (** An event that is emitted when a {{!TextDocument} [text document]} is
+      opened or when the language id of a text document
+      {{!languages.setTextDocumentLanguage} [has been changed]}.
 
       To add an event listener when a visible text document is opened, use the
-      [TextEditor](#TextEditor) events in the [window](#window) namespace. Note
-      that:
+      {{!window} [TextEditor](#TextEditor) events in the [window]} namespace.
+      Note that:
 
-      - The event is emitted before the [document](#TextDocument) is updated in
-        the [active text editor](#window.activeTextEditor)
-      - When a [text document](#TextDocument) is already open (e.g.: open in
-        another [visible text editor](#window.visibleTextEditors)) this event is
-        not emitted *)
+      - The event is emitted before the {{!TextDocument} [document]} is updated
+        in the {{!window.activeTextEditor} [active text editor]}
+      - When a {{!TextDocument} [text document]} is already open (e.g.: open in
+        another {{!window.visibleTextEditors)} [visible text editor]} this event
+        is not emitted *)
   val onDidOpenTextDocument : TextDocument.t Event.t
 
-  (** An event that is emitted when a [text document](#TextDocument) is disposed
-      or when the language id of a text document
-      [has been changed](#languages.setTextDocumentLanguage).
+  (** An event that is emitted when a {{!TextDocument} [text document]} is
+      disposed or when the language id of a text document
+      {{!languages.setTextDocumentLanguage} [has been changed]}.
 
       *Note 1:* There is no guarantee that this event fires when an editor tab
-      is closed, use the
-      [`onDidChangeVisibleTextEditors`](#window.onDidChangeVisibleTextEditors)-event
-      to know when editors change.
+      is closed, use the {{!window.onDidChangeVisibleTextEditors}
+      [onDidChangeVisibleTextEditors]}-event to know when editors change.
 
       *Note 2:* A document can be open but not shown in an editor which means
       this event can fire for a document that has not been shown in an editor. *)
@@ -2305,13 +2304,13 @@ module TreeItemCollapsibleState : sig
     | Expanded  (** Determines an item is expanded *)
 end
 
-(** Label describing the [Tree item](#TreeItem) *)
+(** Label describing the {{!TreeItem} [Tree item]} *)
 module TreeItemLabel : sig
   type t
 
   val create : label:string -> ?highlights:(int * int) list -> unit -> t
 
-  (** Label describing the [Tree item](#TreeItem) *)
+  (** Label describing the {{!TreeItem} [Tree item]} *)
   val label : t -> string
 
   (** Ranges in the label to highlight.
@@ -2331,7 +2330,7 @@ end
 
 (** A reference to a named icon.
 
-    Currently, [File](#ThemeIcon.File), [Folder](#ThemeIcon.Folder), and
+    Currently, {{!ThemeIcon.Folder} [File](#ThemeIcon.File), [Folder]}, and
     [ThemeIcon ids](https://code.visualstudio.com/api/references/icons-in-labels#icon-listing)
     are supported. Using a theme icon is preferred over a custom icon as it
     gives product theme authors the possibility to change the icons.
@@ -2349,7 +2348,7 @@ module ThemeIcon : sig
       @param id id of the icon. The available icons are listed in
       https://code.visualstudio.com/api/references/icons-in-labels#icon-listing.
       @param color optional `ThemeColor` for the icon. The color is currently
-      only used in [TreeItem](#TreeItem). *)
+      only used in {{!TreeItem} [TreeItem]}. *)
   val make : id:string -> ?color:ThemeColor.t -> unit -> t
 
   (** {4 Properties} *)
@@ -2367,7 +2366,7 @@ module ThemeIcon : sig
   val id : t -> string
 
   (** The optional ThemeColor of the icon. The color is currently only used in
-      [TreeItem](#TreeItem). *)
+      {{!TreeItem} [TreeItem]}. *)
   val color : t -> ThemeColor.t option
 
   (** {4 Converters} *)
@@ -2447,33 +2446,33 @@ module TreeItem : sig
 
   val set_id : t -> string -> unit
 
-  (** The [ThemeIcon](#ThemeIcon) for the tree item.
+  (** The {{!ThemeIcon} [ThemeIcon]} for the tree item.
 
-      When [falsy], [Folder Theme Icon](#ThemeIcon.Folder) is assigned, if item
-      is collapsible otherwise [File Theme Icon](#ThemeIcon.File).
+      When {{!ThemeIcon.Folder} [falsy], [Folder Theme Icon]} is assigned, if
+      item is collapsible otherwise {{!ThemeIcon.File} [File Theme Icon]}.
 
-      When a file or folder [ThemeIcon](#ThemeIcon) is specified, icon is
+      When a file or folder {{!ThemeIcon} [ThemeIcon]} is specified, icon is
       derived from the current file icon theme for the specified theme icon
-      using [resourceUri](#TreeItem.resourceUri) (if provided). *)
+      using {{!TreeItem.resourceUri} [resourceUri]} (if provided). *)
   val iconPath : t -> iconPath option
 
   val set_iconPath : t -> iconPath -> unit
 
   (** A human-readable string which is rendered less prominent.
 
-      When [true], it is derived from [resourceUri](#TreeItem.resourceUri) and
-      when [falsy], it is not shown. *)
+      When {{!TreeItem.resourceUri} [true], it is derived from [resourceUri]}
+      and when [falsy], it is not shown. *)
   val description : t -> description option
 
   val set_description : t -> description -> unit
 
-  (** The [uri](#Uri) of the resource representing this item.
+  (** The {{!Uri} [uri]} of the resource representing this item.
 
-      Will be used to derive the [label](#TreeItem.label), when it is not
+      Will be used to derive the {{!TreeItem.label} [label]}, when it is not
       provided.
 
       Will be used to derive the icon from current file icon theme, when
-      [iconPath](#TreeItem.iconPath) has [ThemeIcon](#ThemeIcon) value. *)
+      {{!ThemeIcon} [iconPath](#TreeItem.iconPath) has [ThemeIcon]} value. *)
   val resourceUri : t -> Uri.t option
 
   val set_resourceUri : t -> Uri.t -> unit
@@ -2585,10 +2584,11 @@ module TreeDataProvider : sig
   val getParent :
     t -> (element:TreeItem.t -> TreeItem.t ProviderResult.t) option
 
-  (** Called only on hover to resolve the [TreeItem](#TreeItem.tooltip) property
-      if it is undefined. Only properties that were undefined can be resolved in
-      `resolveTreeItem`. Functionality may be expanded later to include being
-      called to resolve other missing properties on selection and/or on open.
+  (** Called only on hover to resolve the {{!TreeItem.tooltip} [TreeItem]}
+      property if it is undefined. Only properties that were undefined can be
+      resolved in `resolveTreeItem`. Functionality may be expanded later to
+      include being called to resolve other missing properties on selection
+      and/or on open.
 
       Will only ever be called once per TreeItem.
 
@@ -2610,7 +2610,7 @@ module TreeDataProvider : sig
        option
 end
 
-(** Options for creating a [TreeView](#TreeView) *)
+(** Options for creating a {{!TreeView} [TreeView]} *)
 module TreeViewOptions : sig
   type t
 
@@ -2629,28 +2629,6 @@ module TreeViewOptions : sig
   val canSelectMany : t -> bool option
 end
 
-(** The event that is fired when an element in the [TreeView](#TreeView) is
-    expanded or collapsed *)
-
-(* module TreeViewExpansionEvent : sig type t
-
-   (** Element that is expanded or collapsed. *) val element : t -> 'a end *)
-
-(** The event that is fired when there is a change in
-    [tree view's selection](#TreeView.selection) *)
-
-(* module TreeViewSelectionChangeEvent : sig type t
-
-   (** Selected elements. *) val selection : t -> 'a list end *)
-
-(** The event that is fired when there is a change in
-    [tree view's visibility](#TreeView.visible) *)
-
-(* module TreeViewVisibilityChangeEvent : sig type t
-
-   (** `true` if the [tree view](#TreeView) is visible otherwise `false`. *) val
-   visible : t -> bool end *)
-
 (** Represents a Tree view *)
 module TreeView : sig
   type t
@@ -2667,14 +2645,15 @@ module TreeView : sig
 
   (* val selection : t -> 'a list *)
 
-  (** Event that is fired when the [selection](#TreeView.selection) has changed *)
+  (** Event that is fired when the {{!TreeView.selection} [selection]} has
+      changed *)
 
   (* val onDidChangeSelection : t -> TreeViewSelectionChangeEvent.t Event.t *)
 
-  (** `true` if the [tree view](#TreeView) is visible otherwise `false`. *)
+  (** `true` if the {{!TreeView} [tree view]} is visible otherwise `false`. *)
   val visible : t -> bool
 
-  (** Event that is fired when [visibility](#TreeView.visible) has changed *)
+  (** Event that is fired when {{!TreeView.visible} [visibility]} has changed *)
 
   (* val onDidChangeVisibility : t -> TreeViewVisibilityChangeEvent.t Event.t *)
 
@@ -2702,9 +2681,9 @@ module TreeView : sig
       `expand` to `true`. To expand recursively set `expand` to the number of
       levels to expand. **NOTE:** You can expand only to 3 levels maximum.
 
-      **NOTE:** The [TreeDataProvider](#TreeDataProvider) that the `TreeView`
-      [is registered with](#window.createTreeView) with must implement
-      [getParent](#TreeDataProvider.getParent) method to access this API. *)
+      **NOTE:** The {{!TreeDataProvider} [TreeDataProvider]} that the `TreeView`
+      {{!window.createTreeView} [is registered with]} with must implement
+      {{!TreeDataProvider.getParent} [getParent]} method to access this API. *)
 
   (* val reveal : element:'a -> ?select:bool -> ?focus:bool -> ?expand:bool ->
      unit -> unit Promise.t *)
@@ -2732,13 +2711,13 @@ module Window : sig
   (** The currently visible editors or an empty array. *)
   val visibleTextEditors : unit -> TextEditor.t Array.t
 
-  (** An [event](#Event) which fires when the
-      [active editor](#window.activeTextEditor) has changed. *Note* that the
-      event also fires when the active editor changes to `undefined`. *)
+  (** An {{!Event} [event]} which fires when the {{!window.activeTextEditor}
+      [active editor]} has changed. *Note* that the event also fires when the
+      active editor changes to `undefined`. *)
   val onDidChangeActiveTextEditor : unit -> TextEditor.t Event.t
 
-  (** An [event](#Event) which fires when the array of
-      [visible editors](#window.visibleTextEditors) has changed. *)
+  (** An {{!Event} [event]} which fires when the array of
+      {{!window.visibleTextEditors} [visible editors]} has changed. *)
   val onDidChangeVisibleTextEditors : unit -> TextEditor.t Array.t Event.t
 
   (** The currently opened terminals or an empty array. *)
@@ -2748,31 +2727,31 @@ module Window : sig
       one that currently has focus or most recently had focus. *)
   val activeTerminal : unit -> Terminal.t option
 
-  (** An [event](#Event) which fires when the
-      [active terminal](#window.activeTerminal) has changed. *Note* that the
-      event also fires when the active terminal changes to `undefined`. *)
+  (** An {{!Event} [event]} which fires when the {{!window.activeTerminal}
+      [active terminal]} has changed. *Note* that the event also fires when the
+      active terminal changes to `undefined`. *)
   val onDidChangeActiveTerminal : unit -> Terminal.t option Event.t
 
-  (** An [event](#Event) which fires when a terminal has been created, either
-      through the [createTerminal](#window.createTerminal) API or commands. *)
+  (** An {{!Event} [event]} which fires when a terminal has been created, either
+      through the {{!window.createTerminal} [createTerminal]} API or commands. *)
   val onDidOpenTerminal : unit -> Terminal.t Event.t
 
-  (** An [event](#Event) which fires when a terminal is disposed. *)
+  (** An {{!Event} [event]} which fires when a terminal is disposed. *)
   val onDidCloseTerminal : unit -> Terminal.t Event.t
 
-  (** Show the given document in a text editor. A [column](#ViewColumn) can be
-      provided to control where the editor is being shown. Might change the
-      [active editor](#window.activeTextEditor).
+  (** Show the given document in a text editor. A {{!ViewColumn} [column]} can
+      be provided to control where the editor is being shown. Might change the
+      {{!window.activeTextEditor} [active editor]}.
 
       @param document A text document to be shown.
-      @param column A view column in which the [editor](#TextEditor) should be
-      shown. The default is the [active](#ViewColumn.Active), other values are
-      adjusted to be `Min(column, columnCount + 1)`, the
-      [active](#ViewColumn.Active)-column is not adjusted. Use
-      [`ViewColumn.Beside`](#ViewColumn.Beside) to open the editor to the side
+      @param column A view column in which the {{!TextEditor} [editor]} should
+      be shown. The default is the {{!ViewColumn.Active} [active]}, other values
+      are adjusted to be `Min(column, columnCount + 1)`, the
+      {{!ViewColumn.Active} [active]}-column is not adjusted. Use
+      {{!ViewColumn.Beside} [ViewColumn.Beside]} to open the editor to the side
       of the currently active one.
       @param preserveFocus When `true` the editor will not take focus.
-      @return A promise that resolves to an [editor](#TextEditor). *)
+      @return A promise that resolves to an {{!TextEditor} [editor]}. *)
   val showTextDocument :
        document:[ `TextDocument of TextDocument.t | `Uri of Uri.t ]
     -> ?column:ViewColumn.t
@@ -2798,7 +2777,7 @@ module Window : sig
 
   (** Show a warning message.
 
-      See [showInformationMessage](#window.showInformationMessage)
+      See {{!window.showInformationMessage} [showInformationMessage]}
 
       @param message The message to show.
       @param options Configures the behaviour of the message.
@@ -2815,7 +2794,7 @@ module Window : sig
 
   (** Show an error message.
 
-      See [showInformationMessage](#window.showInformationMessage)
+      See {{!window.showInformationMessage} [showInformationMessage]}
 
       @param message The message to show.
       @param options Configures the behaviour of the message.
@@ -2874,17 +2853,17 @@ module Window : sig
     -> unit
     -> string option Promise.t
 
-  (** Creates a new [output channel](#OutputChannel) with the given name.
+  (** Creates a new {{!OutputChannel} [output channel]} with the given name.
 
       @param name Human-readable string which will be used to represent the
       channel in the UI. *)
   val createOutputChannel : name:string -> OutputChannel.t
 
   (** Set a message to the status bar. This is a short hand for the more
-      powerful status bar [items](#window.createStatusBarItem).
+      powerful status bar {{!window.createStatusBarItem} [items]}.
 
       @param text The message to show, supports icon substitution as in status
-      bar [items](#StatusBarItem.text).
+      bar {{!StatusBarItem.text} [items]}.
       @param hide Timeout in milliseconds after which the message will be
       disposed or Promise on which completion (resolve or reject) the message
       will be disposed.
@@ -2895,10 +2874,10 @@ module Window : sig
   (** Show progress in the editor. Progress is shown while running the given
       callback and while the promise it returned isn't resolved nor rejected.
       The location at which progress should show (and other details) is defined
-      via the passed [`ProgressOptions`](#ProgressOptions).
+      via the passed {{!ProgressOptions} [ProgressOptions]}.
 
       @param task A callback returning a promise. Progress state can be reported
-      with the provided [progress](#Progress)-object.
+      with the provided {{!Progress} [progress]}-object.
 
       To report discrete progress, use `increment` to indicate how much work has
       been completed. Each call with a `increment` value will be summed up and
@@ -2908,7 +2887,7 @@ module Window : sig
       progress.
 
       To monitor if the operation has been cancelled by the user, use the
-      provided [`CancellationToken`](#CancellationToken). Note that currently
+      provided {{!CancellationToken} [CancellationToken]}. Note that currently
       only `ProgressLocation.Notification` is supporting to show a cancel button
       to cancel the long running operation.
       @return The promise the task-callback returned. *)
@@ -2917,7 +2896,7 @@ module Window : sig
     -> task:(progress:Progress.t -> token:CancellationToken.t -> 'a Promise.t)
     -> 'a Promise.t
 
-  (** Creates a status bar [item](#StatusBarItem).
+  (** Creates a status bar {{!StatusBarItem} [item]}.
 
       @param alignment The alignment of the item.
       @param priority The priority of the item. Higher values mean the item
@@ -2926,8 +2905,8 @@ module Window : sig
   val createStatusBarItem :
     ?alignment:StatusBarAlignment.t -> ?priority:int -> unit -> StatusBarItem.t
 
-  (** Creates a [Terminal](#Terminal) with a backing shell process. The cwd of
-      the terminal will be the workspace directory if it exists.
+  (** Creates a {{!Terminal} [Terminal]} with a backing shell process. The cwd
+      of the terminal will be the workspace directory if it exists.
 
       @param name Optional human-readable string which will be used to represent
       the terminal in the UI.
@@ -2946,7 +2925,7 @@ module Window : sig
     -> unit
     -> Terminal.t
 
-  (** Creates a [Terminal](#Terminal) with a backing shell process.
+  (** Creates a {{!Terminal} [Terminal]} with a backing shell process.
 
       @param options A TerminalOptions object describing the characteristics of
       the new terminal.
@@ -2960,27 +2939,28 @@ module Window : sig
          ]
     -> Terminal.t
 
-  (** Register a [TreeDataProvider](#TreeDataProvider) for the view contributed
-      using the extension point `views`. This will allow you to contribute data
-      to the [TreeView](#TreeView) and update if the data changes.
+  (** Register a {{!TreeDataProvider} [TreeDataProvider]} for the view
+      contributed using the extension point `views`. This will allow you to
+      contribute data to the {{!TreeView} [TreeView]} and update if the data
+      changes.
 
-      **Note:** To get access to the [TreeView](#TreeView) and perform
-      operations on it, use [createTreeView](#window.createTreeView).
+      **Note:** To get access to the {{!TreeView} [TreeView]} and perform
+      operations on it, use {{!window.createTreeView} [createTreeView]}.
 
       @param viewId Id of the view contributed using the extension point
       `views`.
-      @param treeDataProvider A [TreeDataProvider](#TreeDataProvider) that
+      @param treeDataProvider A {{!TreeDataProvider} [TreeDataProvider]} that
       provides tree data for the view *)
   val registerTreeDataProvider :
     viewId:string -> treeDataProvider:TreeDataProvider.t -> Disposable.t
 
-  (** Create a [TreeView](#TreeView) for the view contributed using the
+  (** Create a {{!TreeView} [TreeView]} for the view contributed using the
       extension point `views`.
 
       @param viewId Id of the view contributed using the extension point
       `views`.
-      @param options Options for creating the [TreeView](#TreeView)
-      @return a [TreeView](#TreeView). *)
+      @param options Options for creating the {{!TreeView} [TreeView]}
+      @return a {{!TreeView} [TreeView]}. *)
   val createTreeView : viewId:string -> options:TreeViewOptions.t -> TreeView.t
 end
 
