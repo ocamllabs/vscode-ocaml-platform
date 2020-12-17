@@ -3,7 +3,8 @@
 # Unreleased
 
 - Highlight token aliases in Menhir associativity declarations (#473)
-- Activate the extension when workspace contains OCaml, Reason sources or project marker files. (#482)
+- Activate the extension when workspace contains OCaml, Reason sources or
+  project marker files. (#482)
 
 ## 1.5.1
 
