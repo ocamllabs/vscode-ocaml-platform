@@ -8,6 +8,11 @@
 - Add `ocaml.useOcamlEnv` setting to determine whether to use `ocaml-env` for
   opam commands from OCaml for Windows (#481)
 
+- Add an OCaml activity tab.
+
+  The activity tab provides three views: the available switches, the build
+  commands and an Help and Feedback section with links to community channels.
+
 ## 1.5.1
 
 - Improve highlighting of type parameters and `module type of` (#461)

@@ -43,6 +43,31 @@
   ],
   "icon": "assets/logo.png",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ocaml-explorer",
+          "title": "OCaml",
+          "icon": "assets/logo.svg"
+        }
+      ]
+    },
+    "views": {
+      "ocaml-explorer": [
+        {
+          "id": "ocaml-packages",
+          "name": "Packages"
+        },
+        {
+          "id": "ocaml-commands",
+          "name": "Commands"
+        },
+        {
+          "id": "ocaml-help",
+          "name": "Help and feedback"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "ocaml.select-sandbox",
@@ -98,6 +123,28 @@
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "ocaml.select-sandbox",
+          "when": "ocaml-platform:enabled"
+        },
+        {
+          "command": "ocaml.server.restart",
+          "when": "ocaml-platform:enabled"
+        },
+        {
+          "command": "ocaml.open-terminal",
+          "when": "ocaml-platform:enabled"
+        },
+        {
+          "command": "ocaml.open-terminal-select",
+          "when": "ocaml-platform:enabled"
+        },
+        {
+          "command": "ocaml.switch-impl-intf",
+          "when": "ocaml-platform:enabled"
+        }
+      ],
       "editor/title": [
         {
           "command": "ocaml.switch-impl-intf",

@@ -10,6 +10,12 @@ module Switch : sig
   val equal : t -> t -> bool
 end
 
+module Package : sig
+  type t
+
+  val name : t -> string
+end
+
 type t
 
 val make : unit -> t option Promise.t
@@ -23,3 +29,5 @@ val exec : t -> switch:Switch.t -> args:string list -> Cmd.t
 val exists : t -> switch:Switch.t -> bool Promise.t
 
 val equal : t -> t -> bool
+
+val get_switch_packages : Switch.t -> (Package.t list, string) result Promise.t

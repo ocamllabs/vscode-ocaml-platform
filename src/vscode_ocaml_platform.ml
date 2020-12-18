@@ -26,6 +26,9 @@ let activate (extension : ExtensionContext.t) =
   Dune_formatter.register extension instance;
   Dune_task_provider.register extension instance;
   let sandbox = Sandbox.of_settings_or_detect () in
+  let (_ : unit Promise.t) = Treeview_packages.register extension in
+  let (_ : unit Promise.t) = Treeview_commands.register extension in
+  let (_ : unit Promise.t) = Treeview_help.register extension in
   let (_ : unit Promise.t) =
     let* sandbox = sandbox in
     let is_fallback = Option.is_empty sandbox in

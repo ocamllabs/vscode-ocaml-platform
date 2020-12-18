@@ -25,6 +25,25 @@ module Switch = struct
     | _, _ -> false
 end
 
+module Package : sig
+  type t
+
+  val name : t -> string
+
+  val of_path : Path.t -> t
+end = struct
+  type t =
+    { name : string
+    ; path : Path.t
+    }
+
+  let name t = t.name
+
+  let of_path path =
+    let name = Path.basename path in
+    { name; path }
+end
+
 type t = Cmd.spawn
 
 let opam_binary = Path.of_string "opam"
@@ -85,3 +104,18 @@ let exists t ~switch =
   List.exists switches ~f:(Switch.equal switch)
 
 let equal o1 o2 = Cmd.equal_spawn o1 o2
+
+let get_switch_packages switch =
+  let ( / ) = Path.( / ) in
+  let home = Node.Process.Env.get "HOME" |> Stdlib.Option.get in
+  let path =
+    match switch with
+    | Switch.Local path -> path / "_opam"
+    | Switch.Named name ->
+      (* TODO: probably only works on Unix *)
+      Path.of_string home / (".opam/" ^ name)
+  in
+  let packages_path = path / ".opam-switch/" / "packages" in
+  let open Promise.Result.Syntax in
+  let+ l = Node.Fs.readDir (Path.to_string packages_path) in
+  List.map l ~f:(fun fpath -> Path.of_string fpath |> Package.of_path)
