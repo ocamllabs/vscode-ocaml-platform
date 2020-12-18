@@ -7,6 +7,7 @@
   project marker files. (#482)
 - Add `ocaml.useOcamlEnv` setting to determine whether to use `ocaml-env` for
   opam commands from OCaml for Windows (#481)
+- Fix terminal creation when using default shell and arguments (#484)
 
 ## 1.5.1
 

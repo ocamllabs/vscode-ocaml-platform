@@ -121,12 +121,8 @@ let set_sandbox t new_sandbox =
   t.sandbox <- new_sandbox
 
 let open_terminal sandbox =
-  match Terminal_sandbox.create sandbox with
-  | Some terminal -> Terminal_sandbox.show terminal
-  | None ->
-    show_message `Error
-      "Could not open a terminal in the current sandbox. The sandbox may not \
-       have loaded yet."
+  let terminal = Terminal_sandbox.create sandbox in
+  Terminal_sandbox.show terminal
 
 let disposable t =
   Disposable.make ~dispose:(fun () ->

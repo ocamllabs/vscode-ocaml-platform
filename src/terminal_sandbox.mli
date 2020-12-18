@@ -1,6 +1,6 @@
 type t
 
-val create : Sandbox.t -> t option
+val create : Sandbox.t -> t
 
 val dispose : t -> unit
 
