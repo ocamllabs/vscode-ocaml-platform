@@ -1,23 +1,29 @@
+val version : string
+
 module Disposable : sig
   type t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
 
   val from : t list -> t
 
   val make : dispose:(unit -> unit) -> t
 
   val dispose : t -> unit
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module Command : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
+  val create :
+       title:string
+    -> command:string
+    -> ?tooltip:string
+    -> ?arguments:Ojs.t list
+    -> unit
+    -> t
 
   val title : t -> string
 
@@ -27,27 +33,19 @@ module Command : sig
 
   val arguments : t -> Ojs.t list
 
-  val create :
-       title:string
-    -> command:string
-    -> ?tooltip:string
-    -> ?arguments:Ojs.t list
-    -> unit
-    -> t
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module Position : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
+  val make : line:int -> character:int -> t
 
   val line : t -> int
 
   val character : t -> int
-
-  val make : line:int -> character:int -> t
 
   val isBefore : t -> other:t -> bool
 
@@ -64,14 +62,14 @@ module Position : sig
   val translate : t -> ?lineDelta:int -> ?characterDelta:int -> unit -> t
 
   val with_ : t -> ?line:int -> ?character:int -> unit -> t
-end
-
-module Range : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module Range : sig
+  type t
 
   val start : t -> Position.t
 
@@ -96,14 +94,14 @@ module Range : sig
   val union : t -> other:t -> t
 
   val with_ : t -> ?start:Position.t -> ?end_:Position.t -> unit -> t
-end
-
-module TextLine : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module TextLine : sig
+  type t
 
   val lineNumber : t -> int
 
@@ -125,6 +123,10 @@ module TextLine : sig
     -> firstNonWhitespaceCharacterIndex:int
     -> isEmptyOrWhitespace:bool
     -> t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module EndOfLine : sig
@@ -139,10 +141,6 @@ end
 
 module TextEdit : sig
   type t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
 
   val replace : range:Range.t -> newText:string -> t
 
@@ -159,14 +157,14 @@ module TextEdit : sig
   val newEol : t -> EndOfLine.t option
 
   val make : range:Range.t -> newText:string -> t
-end
-
-module Uri : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module Uri : sig
+  type t
 
   val parse : string -> ?strict:bool -> unit -> t
 
@@ -199,14 +197,14 @@ module Uri : sig
   val toString : t -> ?skipEncoding:bool -> unit -> string
 
   val toJson : t -> Jsonoo.t
-end
-
-module TextDocument : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module TextDocument : sig
+  type t
 
   val uri : t -> Uri.t
 
@@ -248,14 +246,14 @@ module TextDocument : sig
   val validateRange : t -> range:Range.t -> Range.t
 
   val validatePosition : t -> position:Position.t -> Position.t
-end
-
-module WorkspaceFolder : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module WorkspaceFolder : sig
+  type t
 
   val uri : t -> Uri.t
 
@@ -264,6 +262,10 @@ module WorkspaceFolder : sig
   val index : t -> int
 
   val create : uri:Uri.t -> name:string -> index:int -> t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module ViewColumn : sig
@@ -311,10 +313,6 @@ end
 module TextEditorEdit : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
   type replaceLocation =
     [ `Position of Position.t
     | `Range of Range.t
@@ -340,6 +338,10 @@ module TextEditorEdit : sig
     -> delete:(location:deleteLocation -> unit)
     -> setEndOfLine:(endOfLine:EndOfLine.t -> t)
     -> t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module TextEditorCursorStyle : sig
@@ -382,10 +384,6 @@ end
 module TextEditorOptions : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
   type tabSize =
     [ `Int of int
     | `String of string
@@ -411,14 +409,14 @@ module TextEditorOptions : sig
     -> ?lineNumbers:TextEditorLineNumbersStyle.t
     -> unit
     -> t
-end
-
-module TextEditorDecorationType : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module TextEditorDecorationType : sig
+  type t
 
   val key : t -> string
 
@@ -427,14 +425,14 @@ module TextEditorDecorationType : sig
   val disposable : t -> Disposable.t
 
   val create : key:string -> dispose:(unit -> unit) -> t
-end
-
-module MarkdownString : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module MarkdownString : sig
+  type t
 
   val value : t -> string
 
@@ -449,24 +447,24 @@ module MarkdownString : sig
   val appendMarkdown : t -> value:string -> t
 
   val appendCodeblock : t -> value:string -> ?language:string -> unit -> t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module ThemeColor : sig
   type t
 
+  val make : id:string -> t
+
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
-
-  val make : id:string -> t
 end
 
 module ThemableDecorationAttachmentRenderOptions : sig
   type t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
 
   type contentIconPath =
     [ `String of string
@@ -517,14 +515,14 @@ module ThemableDecorationAttachmentRenderOptions : sig
     -> ?height:string
     -> unit
     -> t
-end
-
-module ThemableDecorationInstanceRenderOptions : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module ThemableDecorationInstanceRenderOptions : sig
+  type t
 
   val before : t -> ThemableDecorationAttachmentRenderOptions.t option
 
@@ -535,14 +533,14 @@ module ThemableDecorationInstanceRenderOptions : sig
     -> ?after:ThemableDecorationAttachmentRenderOptions.t
     -> unit
     -> t
-end
-
-module DecorationInstanceRenderOptions : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module DecorationInstanceRenderOptions : sig
+  type t
 
   val light : t -> ThemableDecorationInstanceRenderOptions.t option
 
@@ -553,14 +551,14 @@ module DecorationInstanceRenderOptions : sig
     -> ?dark:ThemableDecorationInstanceRenderOptions.t
     -> unit
     -> t
-end
-
-module DecorationOptions : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module DecorationOptions : sig
+  type t
 
   type hoverMessage =
     [ `MarkdownString of MarkdownString.t
@@ -579,14 +577,14 @@ module DecorationOptions : sig
     -> ?renderOptions:DecorationInstanceRenderOptions.t option
     -> unit
     -> t
-end
-
-module SnippetString : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module SnippetString : sig
+  type t
 
   val value : t -> string
 
@@ -610,14 +608,14 @@ module SnippetString : sig
     -> name:string
     -> defaultValue:[ `String of string | `Function of t -> unit ]
     -> t
-end
-
-module TextEditor : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module TextEditor : sig
+  type t
 
   type insertSnippetLocation =
     [ `Position of Position.t
@@ -664,6 +662,10 @@ module TextEditor : sig
 
   val revealRange :
     t -> range:Range.t -> ?revealType:TextEditorRevealType.t -> unit -> unit
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module ConfigurationTarget : sig
@@ -679,10 +681,6 @@ end
 
 module WorkspaceConfiguration : sig
   type t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
 
   type configurationTarget =
     [ `ConfigurationTarget of ConfigurationTarget.t
@@ -716,6 +714,10 @@ module WorkspaceConfiguration : sig
     -> ?overrideInLanguage:bool
     -> unit
     -> Promise.void
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module StatusBarAlignment : sig
@@ -731,23 +733,19 @@ end
 module AccessibilityInformation : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
   val label : t -> string
 
   val role : t -> string option
 
   val create : label:string -> ?role:string -> unit -> t
-end
-
-module StatusBarItem : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module StatusBarItem : sig
+  type t
 
   type color =
     [ `String of string
@@ -794,14 +792,14 @@ module StatusBarItem : sig
   val dispose : t -> unit
 
   val disposable : t -> Disposable.t
-end
-
-module WorkspaceFoldersChangeEvent : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module WorkspaceFoldersChangeEvent : sig
+  type t
 
   val added : t -> WorkspaceFolder.t list
 
@@ -809,20 +807,24 @@ module WorkspaceFoldersChangeEvent : sig
 
   val create :
     added:WorkspaceFolder.t list -> removed:WorkspaceFolder.t list -> t
-end
-
-module FormattingOptions : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module FormattingOptions : sig
+  type t
 
   val tabSize : t -> int
 
   val insertSpaces : t -> bool
 
   val create : tabSize:int -> insertSpaces:bool -> t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module Event : sig
@@ -836,24 +838,20 @@ end
 module CancellationToken : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
   val isCancellationRequested : t -> bool
 
   val onCancellationRequested : t -> Ojs.t Event.t
 
   val create :
     isCancellationRequested:bool -> onCancellationRequested:Ojs.t Event.t -> t
-end
-
-module QuickPickItem : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module QuickPickItem : sig
+  type t
 
   val label : t -> string
 
@@ -873,14 +871,14 @@ module QuickPickItem : sig
     -> ?alwaysShow:bool
     -> unit
     -> t
-end
-
-module QuickPickOptions : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module QuickPickOptions : sig
+  type t
 
   type onDidSelectItemArgs =
     [ `QuickPickItem of QuickPickItem.t
@@ -908,6 +906,10 @@ module QuickPickOptions : sig
     -> ?onDidSelectItem:(item:onDidSelectItemArgs -> unit)
     -> unit
     -> t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module ProviderResult : sig
@@ -923,10 +925,6 @@ end
 
 module InputBoxOptions : sig
   type t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
 
   val value : t -> string option
 
@@ -952,28 +950,28 @@ module InputBoxOptions : sig
     -> ?validateInput:(value:string -> string option Promise.t)
     -> unit
     -> t
-end
-
-module MessageItem : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module MessageItem : sig
+  type t
 
   val title : t -> string
 
   val isCloseAffordance : t -> bool option
 
   val create : title:string -> ?isCloseAffordance:bool -> unit -> t
-end
-
-module Location : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module Location : sig
+  type t
 
   val uri : t -> Uri.t
 
@@ -983,6 +981,10 @@ module Location : sig
        uri:Uri.t
     -> rangeOrPosition:[ `Range of Range.t | `Position of Position.t ]
     -> t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module ProgressLocation : sig
@@ -999,10 +1001,6 @@ end
 module ProgressOptions : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
   type location =
     [ `ProgressLocation of ProgressLocation.t
     | `ViewIdLocation of viewIdLocation
@@ -1018,14 +1016,14 @@ module ProgressOptions : sig
 
   val create :
     location:location -> ?title:string -> ?cancellable:bool -> unit -> t
-end
-
-module TextDocumentShowOptions : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module TextDocumentShowOptions : sig
+  type t
 
   val viewColumn : t -> ViewColumn.t option
 
@@ -1042,14 +1040,14 @@ module TextDocumentShowOptions : sig
     -> ?selection:Range.t
     -> unit
     -> t
-end
-
-module TerminalOptions : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module TerminalOptions : sig
+  type t
 
   type shellArgs =
     [ `Arg of string
@@ -1074,28 +1072,28 @@ module TerminalOptions : sig
   val strictEnv : t -> bool
 
   val hideFromUser : t -> bool
-end
-
-module TerminalDimensions : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module TerminalDimensions : sig
+  type t
 
   val columns : t -> int
 
   val rows : t -> int
 
   val create : columns:int -> rows:int -> t
-end
-
-module Pseudoterminal : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module Pseudoterminal : sig
+  type t
 
   val onDidWrite : t -> string Event.t
 
@@ -1121,40 +1119,40 @@ module Pseudoterminal : sig
     -> ?setDimensions:(dimensions:TerminalDimensions.t -> unit)
     -> unit
     -> t
-end
-
-module ExtensionTerminalOptions : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module ExtensionTerminalOptions : sig
+  type t
 
   val name : t -> string
 
   val pty : t -> Pseudoterminal.t
 
   val create : name:string -> pty:Pseudoterminal.t -> t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module TerminalExitStatus : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
   val code : t -> int
 
   val create : code:int -> t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module Terminal : sig
   type t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
 
   type creationOptions =
     [ `TerminalOptions of TerminalOptions.t
@@ -1178,14 +1176,14 @@ module Terminal : sig
   val dispose : t -> unit
 
   val disposable : t -> Disposable.t
-end
-
-module OutputChannel : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module OutputChannel : sig
+  type t
 
   val name : t -> string
 
@@ -1202,18 +1200,22 @@ module OutputChannel : sig
   val dispose : t -> unit
 
   val disposable : t -> Disposable.t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module Memento : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
   val get : t -> key:string -> Jsonoo.t option
 
   val update : t -> key:string -> value:Jsonoo.t -> Promise.void
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module EnvironmentVariableMutatorType : sig
@@ -1230,21 +1232,17 @@ end
 module EnvironmentVariableMutator : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
   val type_ : t -> EnvironmentVariableMutatorType.t
 
   val value : t -> string
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module EnvironmentVariableCollection : sig
   type t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
 
   val persistent : t -> bool
 
@@ -1268,6 +1266,10 @@ module EnvironmentVariableCollection : sig
   val delete : t -> variable:string -> unit
 
   val clear : t -> unit
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module ExtensionMode : sig
@@ -1283,10 +1285,6 @@ end
 
 module ExtensionContext : sig
   type t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
 
   val subscriptions : t -> Disposable.t list
 
@@ -1311,14 +1309,14 @@ module ExtensionContext : sig
   val extensionMode : t -> ExtensionMode.t
 
   val subscribe : t -> disposable:Disposable.t -> unit
-end
-
-module ShellQuotingOptions : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module ShellQuotingOptions : sig
+  type t
 
   type escapeLiteral =
     { escapeChar : string
@@ -1337,14 +1335,14 @@ module ShellQuotingOptions : sig
   val weak : t -> string option
 
   val create : ?escape:escape -> ?strong:string -> ?weak:string -> unit -> t
-end
-
-module ShellExecutionOptions : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module ShellExecutionOptions : sig
+  type t
 
   val executable : t -> string option
 
@@ -1364,6 +1362,10 @@ module ShellExecutionOptions : sig
     -> ?env:string Interop.Dict.t
     -> unit
     -> t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module ShellQuoting : sig
@@ -1380,23 +1382,19 @@ end
 module ShellQuotedString : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
   val value : t -> string
 
   val quoting : t -> ShellQuoting.t
 
   val create : value:string -> quoting:ShellQuoting.t -> t
-end
-
-module ShellExecution : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module ShellExecution : sig
+  type t
 
   type shellString =
     [ `String of string
@@ -1420,28 +1418,28 @@ module ShellExecution : sig
   val args : t -> shellString list
 
   val options : t -> ShellExecutionOptions.t option
-end
-
-module ProcessExecutionOptions : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module ProcessExecutionOptions : sig
+  type t
 
   val cwd : t -> string option
 
   val env : t -> string Interop.Dict.t option
 
   val create : ?cwd:string -> ?env:string Interop.Dict.t -> unit -> t
-end
-
-module ProcessExecution : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module ProcessExecution : sig
+  type t
 
   val makeProcess :
     process:string -> ?options:ProcessExecutionOptions.t -> unit -> t
@@ -1458,14 +1456,14 @@ module ProcessExecution : sig
   val args : t -> string list
 
   val options : t -> ProcessExecutionOptions.t option
-end
-
-module TaskDefinition : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module TaskDefinition : sig
+  type t
 
   val type_ : t -> string
 
@@ -1474,27 +1472,27 @@ module TaskDefinition : sig
   val set_attribute : t -> string -> Ojs.t -> unit
 
   val create : type_:string -> ?attributes:(string * Ojs.t) list -> unit -> t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module CustomExecution : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
   val make :
        callback:
          (resolvedDefinition:TaskDefinition.t -> Pseudoterminal.t Promise.t)
     -> t
-end
-
-module RelativePattern : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module RelativePattern : sig
+  type t
 
   val base : t -> string
 
@@ -1504,6 +1502,10 @@ module RelativePattern : sig
        base:[ `String of string | `WorkspaceFolder of WorkspaceFolder.t ]
     -> pattern:string
     -> t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module GlobPattern : sig
@@ -1520,10 +1522,6 @@ end
 module DocumentFilter : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
   val language : t -> string option
 
   val scheme : t -> string option
@@ -1532,6 +1530,10 @@ module DocumentFilter : sig
 
   val create :
     ?language:string -> ?scheme:string -> ?pattern:GlobPattern.t -> unit -> t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module DocumentSelector : sig
@@ -1553,10 +1555,6 @@ end
 module DocumentFormattingEditProvider : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
   val provideDocumentFormattingEdits :
        t
     -> document:TextDocument.t
@@ -1571,14 +1569,14 @@ module DocumentFormattingEditProvider : sig
           -> token:CancellationToken.t
           -> TextEdit.t list ProviderResult.t)
     -> t
-end
-
-module TaskGroup : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module TaskGroup : sig
+  type t
 
   val clean : t
 
@@ -1587,6 +1585,10 @@ module TaskGroup : sig
   val rebuild : t
 
   val test : t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module TaskScope : sig
@@ -1603,13 +1605,13 @@ end
 module RunOptions : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
   val reevaluateOnRerun : t -> bool option
 
   val create : ?reevaluateOnRerun:bool -> unit -> t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module TaskRevealKind : sig
@@ -1637,10 +1639,6 @@ end
 module TaskPresentationOptions : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
   val reveal : t -> TaskRevealKind.t option
 
   val echo : t -> bool option
@@ -1662,14 +1660,14 @@ module TaskPresentationOptions : sig
     -> ?clear:bool
     -> unit
     -> t
-end
-
-module Task : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module Task : sig
+  type t
 
   type execution =
     [ `ProcessExecution of ProcessExecution.t
@@ -1708,14 +1706,14 @@ module Task : sig
   val runOptions : t -> RunOptions.t
 
   val set_group : t -> TaskGroup.t -> unit
-end
-
-module TaskProvider : sig
-  type t
 
   val t_of_js : Ojs.t -> t
 
   val t_to_js : t -> Ojs.t
+end
+
+module TaskProvider : sig
+  type t
 
   val provideTasks :
     t -> token:CancellationToken.t -> Task.t list ProviderResult.t
@@ -1728,6 +1726,10 @@ module TaskProvider : sig
     -> resolveTasks:
          (task:Task.t -> token:CancellationToken.t -> Task.t ProviderResult.t)
     -> t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module ConfigurationScope : sig
@@ -1743,13 +1745,13 @@ end
 module MessageOptions : sig
   type t
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
-
   val modal : t -> bool option
 
   val create : ?modal:bool -> unit -> t
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module Progress : sig
@@ -1774,21 +1776,9 @@ module Workspace : sig
 
   val workspaceFile : unit -> Uri.t option
 
-  val textDocuments : unit -> TextDocument.t list
-
   val onDidChangeWorkspaceFolders : WorkspaceFolder.t Event.t
 
   val getWorkspaceFolder : uri:Uri.t -> WorkspaceFolder.t option
-
-  val onDidOpenTextDocument : TextDocument.t Event.t
-
-  val onDidCloseTextDocument : TextDocument.t Event.t
-
-  val getConfiguration :
-       ?section:string
-    -> ?scope:ConfigurationScope.t
-    -> unit
-    -> WorkspaceConfiguration.t
 
   val findFiles :
        includes:GlobPattern.t
@@ -1797,6 +1787,8 @@ module Workspace : sig
     -> ?token:CancellationToken.t
     -> unit
     -> Uri.t list Promise.t
+
+  val textDocuments : unit -> TextDocument.t list
 
   type textDocumentOptions =
     { language : string
@@ -1809,32 +1801,237 @@ module Workspace : sig
        | `Interactive of textDocumentOptions option
        ]
     -> TextDocument.t Promise.t
+
+  val onDidOpenTextDocument : TextDocument.t Event.t
+
+  val onDidCloseTextDocument : TextDocument.t Event.t
+
+  val getConfiguration :
+       ?section:string
+    -> ?scope:ConfigurationScope.t
+    -> unit
+    -> WorkspaceConfiguration.t
+end
+
+module TreeItemCollapsibleState : sig
+  type t =
+    | None
+    | Collapsed
+    | Expanded
+end
+
+module TreeItemLabel : sig
+  type t
+
+  val create : label:string -> ?highlights:(int * int) list -> unit -> t
+
+  val label : t -> string
+
+  val highlights : t -> (int * int) list option
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
+end
+
+module ThemeIcon : sig
+  type t
+
+  val make : id:string -> ?color:ThemeColor.t -> unit -> t
+
+  val file : t
+
+  val folder : t
+
+  val id : t -> string
+
+  val color : t -> ThemeColor.t option
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
+end
+
+module TreeItem : sig
+  type t
+
+  module LightDarkIcon : sig
+    type t =
+      { light : [ `String of string | `Uri of Ojs.t ]
+      ; dark : [ `String of string | `Uri of Ojs.t ]
+      }
+
+    val t_to_js : t -> Ojs.t
+
+    val t_of_js : Ojs.t -> t
+  end
+
+  type iconPath =
+    [ `String of string
+    | `Uri of Uri.t
+    | `LightDark of LightDarkIcon.t
+    | `ThemeIcon of ThemeIcon.t
+    ]
+
+  type description =
+    [ `String of string
+    | `Bool of bool
+    ]
+
+  type tooltip =
+    [ `String of string
+    | `MarkdownString of MarkdownString.t
+    | `Undefined
+    ]
+
+  val make :
+       label:TreeItemLabel.t
+    -> ?collapsibleState:TreeItemCollapsibleState.t
+    -> unit
+    -> t
+
+  val of_uri :
+       resourceUri:Uri.t
+    -> ?collapsibleState:TreeItemCollapsibleState.t
+    -> unit
+    -> t
+
+  val label : t -> TreeItemLabel.t option
+
+  val set_label : t -> TreeItemLabel.t -> unit
+
+  val id : t -> string option
+
+  val set_id : t -> string -> unit
+
+  val iconPath : t -> iconPath option
+
+  val set_iconPath : t -> iconPath -> unit
+
+  val description : t -> description option
+
+  val set_description : t -> description -> unit
+
+  val resourceUri : t -> Uri.t option
+
+  val set_resourceUri : t -> Uri.t -> unit
+
+  val tooltip : t -> tooltip option
+
+  val set_tooltip : t -> tooltip -> unit
+
+  val collapsibleState : t -> TreeItemCollapsibleState.t option
+
+  val set_collapsibleState : t -> TreeItemCollapsibleState.t -> unit
+
+  val command : t -> Command.t option
+
+  val set_command : t -> Command.t -> unit
+
+  val contextValue : t -> string option
+
+  val set_contextValue : t -> string -> unit
+
+  val accessibilityInformation : t -> AccessibilityInformation.t option
+
+  val set_accessibilityInformation : t -> AccessibilityInformation.t -> unit
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
+end
+
+module TreeDataProvider : sig
+  type t
+
+  val create :
+       getTreeItem:(element:TreeItem.t -> TreeItem.t Promise.t)
+    -> getChildren:
+         (element:TreeItem.t option -> TreeItem.t list ProviderResult.t)
+    -> ?getParent:(element:TreeItem.t -> TreeItem.t ProviderResult.t)
+    -> ?onDidChangeTreeData:Ojs.t option Event.t
+    -> ?resolveTreeItem:
+         (item:TreeItem.t -> element:TreeItem.t -> TreeItem.t ProviderResult.t)
+    -> unit
+    -> t
+
+  val onDidChangeTreeData : t -> Ojs.t option Event.t option
+
+  val getTreeItem : t -> element:TreeItem.t -> TreeItem.t Promise.t
+
+  val getChildren :
+    t -> element:TreeItem.t option -> TreeItem.t list ProviderResult.t
+
+  val getParent :
+    t -> (element:TreeItem.t -> TreeItem.t ProviderResult.t) option
+
+  val resolveTreeItem :
+       t
+    -> (item:TreeItem.t -> element:TreeItem.t -> TreeItem.t ProviderResult.t)
+       option
+end
+
+module TreeViewOptions : sig
+  type t
+
+  val treeDataProvider : t -> TreeDataProvider.t
+
+  val showCollapseAll : t -> bool option
+
+  val canSelectMany : t -> bool option
+end
+
+module TreeView : sig
+  type t
+
+  (* val onDidExpandElement : t -> TreeViewExpansionEvent.t Event.t *)
+
+  (* val onDidCollapseElement : t -> TreeViewExpansionEvent.t Event.t *)
+
+  (* val selection : t -> 'a list *)
+
+  (* val onDidChangeSelection : t -> TreeViewSelectionChangeEvent.t Event.t *)
+
+  val visible : t -> bool
+
+  (* val onDidChangeVisibility : t -> TreeViewVisibilityChangeEvent.t Event.t *)
+
+  val message : t -> string option
+
+  val title : t -> string option
+
+  val description : t -> string option
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
 end
 
 module Window : sig
   val activeTextEditor : unit -> TextEditor.t option
 
-  val showQuickPickItems :
-       choices:(QuickPickItem.t * 'a) list
-    -> ?options:QuickPickOptions.t
-    -> ?token:CancellationToken.t
-    -> unit
-    -> 'a option Promise.t
+  val visibleTextEditors : unit -> TextEditor.t list
 
-  val showQuickPick :
-       items:string list
-    -> ?options:QuickPickOptions.t
-    -> ?token:CancellationToken.t
-    -> unit
-    -> string option Promise.t
+  val onDidChangeActiveTextEditor : unit -> TextEditor.t Event.t
 
-  val showInputBox :
-       ?options:InputBoxOptions.t
-    -> ?token:CancellationToken.t
-    -> unit
-    -> string option Promise.t
+  val onDidChangeVisibleTextEditors : unit -> TextEditor.t list Event.t
 
-  val getChoices : (string * 'a) list -> (MessageItem.t * 'a) list
+  val terminals : unit -> Terminal.t List.t
+
+  val activeTerminal : unit -> Terminal.t option
+
+  val onDidChangeActiveTerminal : unit -> Terminal.t option Event.t
+
+  val onDidOpenTerminal : unit -> Terminal.t Event.t
+
+  val onDidCloseTerminal : unit -> Terminal.t Event.t
+
+  val showTextDocument :
+       document:[ `TextDocument of TextDocument.t | `Uri of Uri.t ]
+    -> ?column:ViewColumn.t
+    -> ?preserveFocus:bool
+    -> unit
+    -> TextEditor.t Promise.t
 
   val showInformationMessage :
        message:string
@@ -1857,20 +2054,38 @@ module Window : sig
     -> unit
     -> 'a option Promise.t
 
+  val showQuickPickItems :
+       choices:(QuickPickItem.t * 'a) list
+    -> ?options:QuickPickOptions.t
+    -> ?token:CancellationToken.t
+    -> unit
+    -> 'a option Promise.t
+
+  val showQuickPick :
+       items:string list
+    -> ?options:QuickPickOptions.t
+    -> ?token:CancellationToken.t
+    -> unit
+    -> string option Promise.t
+
+  val showInputBox :
+       ?options:InputBoxOptions.t
+    -> ?token:CancellationToken.t
+    -> unit
+    -> string option Promise.t
+
+  val createOutputChannel : name:string -> OutputChannel.t
+
+  val setStatusBarMessage :
+    text:string -> ?hide:[ `AfterTimeout of int ] -> unit -> Disposable.t
+
   val withProgress :
        options:ProgressOptions.t
-    -> task:(progress:Progress.t -> token:CancellationToken.t -> 'a)
-    -> 'b
+    -> task:(progress:Progress.t -> token:CancellationToken.t -> 'a Promise.t)
+    -> 'a Promise.t
 
   val createStatusBarItem :
     ?alignment:StatusBarAlignment.t -> ?priority:int -> unit -> StatusBarItem.t
-
-  val showTextDocument :
-       document:[ `TextDocument of TextDocument.t | `Uri of Uri.t ]
-    -> ?column:ViewColumn.t
-    -> ?preserveFocus:bool
-    -> unit
-    -> TextEditor.t Promise.t
 
   val createTerminal :
        ?name:string
@@ -1886,7 +2101,10 @@ module Window : sig
          ]
     -> Terminal.t
 
-  val createOutputChannel : name:string -> OutputChannel.t
+  val registerTreeDataProvider :
+    viewId:string -> treeDataProvider:TreeDataProvider.t -> Disposable.t
+
+  val createTreeView : viewId:string -> options:TreeViewOptions.t -> TreeView.t
 end
 
 module Commands : sig
