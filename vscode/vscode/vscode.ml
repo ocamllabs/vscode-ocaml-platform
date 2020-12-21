@@ -851,6 +851,18 @@ module Event = struct
     [%js.of: Disposable.t] disposable
 end
 
+module EventEmitter = struct
+  type t = private (* interface *) Ojs.t [@@js]
+
+  val make : unit -> t [@@js.new "vscode.EventEmitter"]
+
+  val event : t -> Ojs.t Event.t [@@js.get]
+
+  val fire : t -> unit -> unit [@@js.call]
+
+  val dispose : t -> unit -> unit [@@js.call]
+end
+
 module CancellationToken = struct
   type t = private (* interface *) Ojs.t [@@js]
 
@@ -1986,8 +1998,7 @@ end
 module TreeDataProvider = struct
   type t = private (* interface *) Ojs.t [@@js]
 
-  val onDidChangeTreeData : t -> TreeItem.t or_undefined Event.t or_undefined
-    [@@js.get]
+  val onDidChangeTreeData : t -> Ojs.t Event.t or_undefined [@@js.get]
 
   val getTreeItem : t -> element:TreeItem.t -> TreeItem.t Promise.t [@@js.call]
 
@@ -2010,7 +2021,7 @@ module TreeDataProvider = struct
     -> getChildren:
          (element:TreeItem.t or_undefined -> TreeItem.t list ProviderResult.t)
     -> ?getParent:(element:TreeItem.t -> TreeItem.t ProviderResult.t)
-    -> ?onDidChangeTreeData:TreeItem.t or_undefined Event.t
+    -> ?onDidChangeTreeData:Ojs.t Event.t
     -> ?resolveTreeItem:
          (item:TreeItem.t -> element:TreeItem.t -> TreeItem.t ProviderResult.t)
     -> unit

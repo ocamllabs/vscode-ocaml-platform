@@ -10,6 +10,10 @@ module Commands = struct
   let open_terminal = ocaml_prefixed "open-terminal"
 
   let switch_impl_intf = ocaml_prefixed "switch-impl-intf"
+
+  let remove_switch = ocaml_prefixed "remove-switch"
+
+  let refresh_switches = ocaml_prefixed "refresh-switches"
 end
 
 (* TODO: Refactor the code so that we don't need any "constants" module *)

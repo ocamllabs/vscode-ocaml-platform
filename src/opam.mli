@@ -14,6 +14,18 @@ module Package : sig
   type t
 
   val name : t -> string
+
+  val version : t -> string
+
+  val documentation : t -> string option
+
+  val synopsis : t -> string option
+
+  val of_path : Path.t -> t option Promise.t
+
+  val sexp_of_t : t -> Sexplib.Sexp.t
+
+  val t_of_sexp : Sexplib.Sexp.t -> t
 end
 
 type t
@@ -31,3 +43,7 @@ val exists : t -> switch:Switch.t -> bool Promise.t
 val equal : t -> t -> bool
 
 val get_switch_packages : Switch.t -> (Package.t list, string) result Promise.t
+
+val remove_switch : t -> Switch.t -> Cmd.t
+
+val uninstall_package : t -> switch:Switch.t -> package:Package.t -> Cmd.t

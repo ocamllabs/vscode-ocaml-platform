@@ -1,27 +1,3 @@
-let tutorial_item ~extension_path =
-  let icon =
-    `LightDark
-      Vscode.TreeItem.LightDarkIcon.
-        { light = `String (extension_path ^ "/assets/book-open-light.svg")
-        ; dark = `String (extension_path ^ "/assets/book-open-dark.svg")
-        }
-  in
-  let label =
-    Vscode.TreeItemLabel.create ~label:"Get Started with OCaml Tutorials" ()
-  in
-  let item = Vscode.TreeItem.make ~label () in
-  let command =
-    Vscode.Command.create ~title:"Open" ~command:"vscode.open"
-      ~arguments:
-        [ Vscode.Uri.parse "https://ocaml.org/learn/tutorials/" ()
-          |> Vscode.Uri.t_to_js
-        ]
-      ()
-  in
-  Vscode.TreeItem.set_iconPath item icon;
-  Vscode.TreeItem.set_command item command;
-  item
-
 let discord_item ~extension_path =
   let icon =
     `LightDark
@@ -90,8 +66,7 @@ let github_item ~extension_path =
   item
 
 let items ~extension_path =
-  [ tutorial_item ~extension_path
-  ; discord_item ~extension_path
+  [ discord_item ~extension_path
   ; discuss_item ~extension_path
   ; github_item ~extension_path
   ]

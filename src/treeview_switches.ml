@@ -3,47 +3,65 @@ open Import
 module Dependency = struct
   type t =
     | Switch of Opam.Switch.t
-    | Dependency of (string * t option)
+    | Dependency of (Opam.Package.t * t option)
 
-  let rec sexp_of_t' =
-    let open Sexp in
-    function
+  let rec sexp_of_t : t -> Sexp.t = function
     | Switch (Named name) ->
       List [ Atom "switch"; List [ Atom "named"; Atom name ] ]
     | Switch (Local path) ->
       let name = Path.to_string path in
       List [ Atom "switch"; List [ Atom "local"; Atom name ] ]
-    | Dependency (dep, None) -> List [ Atom "dependency"; Atom dep ]
-    | Dependency (dep, Some t) ->
-      List [ Atom "dependency"; Atom dep; List [ Atom "parent"; sexp_of_t' t ] ]
+    | Dependency (package, None) ->
+      List
+        [ Atom "dependency"
+        ; List [ Atom "package"; Opam.Package.sexp_of_t package ]
+        ]
+    | Dependency (package, Some t) ->
+      List
+        [ Atom "dependency"
+        ; List [ Atom "package"; Opam.Package.sexp_of_t package ]
+        ; List [ Atom "parent"; sexp_of_t t ]
+        ]
 
-  let sexp_of_t = sexp_of_t'
-
-  let rec t_of_sexp' =
-    let open Sexp in
-    function
+  let rec t_of_sexp : Sexp.t -> t = function
     | List [ Atom "switch"; List [ Atom "named"; Atom name ] ] ->
       Switch (Named name)
     | List [ Atom "switch"; List [ Atom "local"; Atom name ] ] ->
       let path = Path.of_string name in
       Switch (Local path)
-    | List [ Atom "dependency"; Atom dep ] -> Dependency (dep, None)
-    | List [ Atom "dependency"; Atom dep; Atom "parent"; sexp ] ->
-      Dependency (dep, Some (t_of_sexp' sexp))
+    | List [ Atom "dependency"; List [ Atom "package"; package ] ] ->
+      Dependency (Opam.Package.t_of_sexp package, None)
+    | List
+        [ Atom "dependency"
+        ; List [ Atom "package"; package; Atom "parent"; sexp ]
+        ] ->
+      Dependency (Opam.Package.t_of_sexp package, Some (t_of_sexp sexp))
     | _ -> assert false
-
-  let t_of_sexp = t_of_sexp'
 
   let to_string t = t |> sexp_of_t |> Sexp.to_string
 
   let of_string s = s |> Sexp.of_string |> t_of_sexp
+
+  let to_treeitem t = t |> sexp_of_t |> Sexp.to_string
+
+  let of_treeitem s = s |> Sexp.of_string |> t_of_sexp
 
   let label = function
     | Switch (Named name) -> name
     | Switch (Local path) ->
       let name = Path.to_string path in
       name
-    | Dependency (dep, _) -> dep
+    | Dependency (dep, _) -> Opam.Package.name dep
+
+  let description = function
+    | Dependency (dep, _) -> Some (Opam.Package.version dep)
+    | Switch (Named _) -> None
+    | Switch (Local _) -> None
+
+  let tooltip = function
+    | Dependency (dep, _) -> Opam.Package.synopsis dep
+    | Switch (Named _) -> None
+    | Switch (Local _) -> None
 end
 
 let make_switch_item ~extension_path switch =
@@ -64,6 +82,11 @@ let make_switch_item ~extension_path switch =
   in
   TreeItem.set_id item (Dependency.to_string dependency);
   TreeItem.set_iconPath item icon;
+  TreeItem.set_contextValue item "switch";
+  Option.iter (Dependency.description dependency) ~f:(fun desc ->
+      TreeItem.set_description item (`String desc));
+  Option.iter (Dependency.tooltip dependency) ~f:(fun desc ->
+      TreeItem.set_tooltip item (`String desc));
   item
 
 let make_dependency_item ~extension_path dependency =
@@ -80,6 +103,11 @@ let make_dependency_item ~extension_path dependency =
   let item = Vscode.TreeItem.make ~label () in
   TreeItem.set_id item (Dependency.to_string dependency);
   TreeItem.set_iconPath item icon;
+  TreeItem.set_contextValue item "package";
+  Option.iter (Dependency.description dependency) ~f:(fun desc ->
+      TreeItem.set_description item (`String desc));
+  Option.iter (Dependency.tooltip dependency) ~f:(fun desc ->
+      TreeItem.set_tooltip item (`String desc));
   item
 
 let get_dependency_dependencies _dependency = Promise.return (Some [])
@@ -90,7 +118,7 @@ let get_switch_dependencies switch =
   match packages with
   | Ok packages ->
     let names =
-      List.map packages ~f:Opam.Package.name
+      packages
       |> List.map ~f:(fun n ->
              Dependency.Dependency (n, Some (Dependency.Switch switch)))
     in
@@ -109,23 +137,28 @@ let get_dependencies ~extension_path element =
   let open Promise.Syntax in
   let dependency =
     match Vscode.TreeItem.id element with
-    | None -> assert false
+    | None ->
+      (* This should never happen, the elements are always created with an ID. *)
+      assert false
     | Some dep -> Dependency.of_string dep
+  in
+  let dependencies_opt_to_tree_items =
+    Option.map ~f:(List.map ~f:(make_dependency_item ~extension_path))
   in
   match dependency with
   | Dependency.Switch switch ->
     let+ deps = get_switch_dependencies switch in
-    deps |> Option.map ~f:(List.map ~f:(make_dependency_item ~extension_path))
+    dependencies_opt_to_tree_items deps
   | Dependency.Dependency dependency ->
     let+ deps = get_dependency_dependencies dependency in
-    deps |> Option.map ~f:(List.map ~f:(make_dependency_item ~extension_path))
+    dependencies_opt_to_tree_items deps
 
 let register extension =
   let open Promise.Syntax in
   let extension_path = Vscode.ExtensionContext.extensionPath extension in
   let* opam = Opam.make () in
   match opam with
-  | None -> Promise.return ()
+  | None -> Promise.return None
   | Some opam ->
     let+ switches = Opam.switch_list opam in
     let items =
@@ -141,11 +174,14 @@ let register extension =
       | Some element -> `Promise (get_dependencies ~extension_path element)
     in
     let getTreeItem ~element = Promise.return element in
+    let event_emitter = Vscode.EventEmitter.make () in
+    let event = Vscode.EventEmitter.event event_emitter in
     let treeDataProvider =
-      Vscode.TreeDataProvider.create ~getTreeItem ~getChildren ()
+      Vscode.TreeDataProvider.create ~getTreeItem ~getChildren
+        ~onDidChangeTreeData:event ()
     in
     let _ =
-      Vscode.Window.registerTreeDataProvider ~viewId:"ocaml-packages"
+      Vscode.Window.registerTreeDataProvider ~viewId:"ocaml-switches"
         ~treeDataProvider
     in
-    ()
+    Some event_emitter

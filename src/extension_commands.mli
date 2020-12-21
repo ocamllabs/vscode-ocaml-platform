@@ -1,7 +1,10 @@
 type command = private
   { id : string
-  ; handler : Extension_instance.t -> unit -> unit
+  ; handler : Extension_instance.t -> args:Ojs.t list -> unit
   }
+
+val make_command :
+  string -> (Extension_instance.t -> args:Ojs.t list -> unit) -> command
 
 (** Module to manage commands[1] across the extension.
 
@@ -24,8 +27,13 @@ val open_terminal : command
 
 val switch_impl_intf : command
 
+val remove_switch : command
+
 (** Registers commands with vscode. Should be called in
     [Vscode_ocaml_platform.activate]. It subscribes the disposables to the
     extension context provided. *)
 val register_all_commands :
   Vscode.ExtensionContext.t -> Extension_instance.t -> unit
+
+val register :
+  Vscode.ExtensionContext.t -> Extension_instance.t -> command -> unit

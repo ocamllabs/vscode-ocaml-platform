@@ -16,24 +16,6 @@ let select_sandbox_item ~extension_path =
   Vscode.TreeItem.set_command item command;
   item
 
-let restart_server_item ~extension_path =
-  let icon =
-    `LightDark
-      Vscode.TreeItem.LightDarkIcon.
-        { light = `String (extension_path ^ "/assets/refresh-light.svg")
-        ; dark = `String (extension_path ^ "/assets/refresh-dark.svg")
-        }
-  in
-  let label = Vscode.TreeItemLabel.create ~label:"Restart Language Server" () in
-  let item = Vscode.TreeItem.make ~label () in
-  let command =
-    Vscode.Command.create ~title:"Restart Language Server"
-      ~command:"ocaml.server.restart" ()
-  in
-  Vscode.TreeItem.set_iconPath item icon;
-  Vscode.TreeItem.set_command item command;
-  item
-
 let terminal_item ~extension_path =
   let icon =
     `LightDark
@@ -55,10 +37,7 @@ let terminal_item ~extension_path =
   item
 
 let items ~extension_path =
-  [ select_sandbox_item ~extension_path
-  ; restart_server_item ~extension_path
-  ; terminal_item ~extension_path
-  ]
+  [ select_sandbox_item ~extension_path; terminal_item ~extension_path ]
 
 let getTreeItem ~extension_path:_ ~element = Promise.return element
 

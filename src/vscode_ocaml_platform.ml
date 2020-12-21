@@ -12,7 +12,8 @@ let suggest_to_pick_sandbox instance =
       ~choices:[ (select_pm_button_text, ()) ]
       ()
   in
-  Option.iter selection ~f:(Extension_commands.select_sandbox.handler instance)
+  Option.iter selection ~f:(fun () ->
+      Extension_commands.select_sandbox.handler instance ~args:[])
 
 let activate (extension : ExtensionContext.t) =
   (* this env var update disables ocaml-lsp's logging to a file because we use
@@ -26,7 +27,17 @@ let activate (extension : ExtensionContext.t) =
   Dune_formatter.register extension instance;
   Dune_task_provider.register extension instance;
   let sandbox = Sandbox.of_settings_or_detect () in
-  let (_ : unit Promise.t) = Treeview_packages.register extension in
+  let* refresh_switches = Treeview_switches.register extension in
+  let () =
+    let handler (_ : Extension_instance.t) ~args:_ =
+      match refresh_switches with
+      | Some t -> EventEmitter.fire t ()
+      | None -> ()
+    in
+    Extension_commands.make_command Extension_consts.Commands.refresh_switches
+      handler
+    |> Extension_commands.register extension instance
+  in
   let (_ : unit Promise.t) = Treeview_commands.register extension in
   let (_ : unit Promise.t) = Treeview_help.register extension in
   let (_ : unit Promise.t) =

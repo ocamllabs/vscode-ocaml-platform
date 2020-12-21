@@ -55,8 +55,8 @@
     "views": {
       "ocaml-explorer": [
         {
-          "id": "ocaml-packages",
-          "name": "Packages"
+          "id": "ocaml-switches",
+          "name": "Switches"
         },
         {
           "id": "ocaml-commands",
@@ -96,6 +96,22 @@
         "icon": {
           "light": "assets/switch-impl-intf.light.svg",
           "dark": "assets/switch-impl-intf.dark.svg"
+        }
+      },
+      {
+        "command": "ocaml.refresh-switches",
+        "title": "Refresh",
+        "icon": {
+          "light": "assets/refresh-light.svg",
+          "dark": "assets/refresh-dark.svg"
+        }
+      },
+      {
+        "command": "ocaml.remove-switch",
+        "title": "Remove",
+        "icon": {
+          "light": "assets/x-light.svg",
+          "dark": "assets/x-dark.svg"
         }
       }
     ],
@@ -151,6 +167,20 @@
           "key": "Alt+O",
           "when": "editorLangId  == ocaml || editorLangId  == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir",
           "group": "navigation"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "ocaml.refresh-switches",
+          "when": "view == ocaml-switches",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "ocaml.remove-switch",
+          "when": "view == ocaml-switches && viewItem == switch",
+          "group": "inline"
         }
       ]
     },
