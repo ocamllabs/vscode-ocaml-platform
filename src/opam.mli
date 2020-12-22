@@ -8,10 +8,6 @@ module Switch : sig
   val name : t -> string
 
   val equal : t -> t -> bool
-
-  val path : t -> Path.t
-
-  val compiler : t -> string option Promise.t
 end
 
 module Package : sig
@@ -46,7 +42,10 @@ val exists : t -> switch:Switch.t -> bool Promise.t
 
 val equal : t -> t -> bool
 
-val get_switch_packages : Switch.t -> (Package.t list, string) result Promise.t
+val get_switch_packages :
+  t -> Switch.t -> (Package.t list, string) result Promise.t
+
+val get_switch_compiler : t -> Switch.t -> string option Promise.t
 
 val remove_switch : t -> Switch.t -> Cmd.t
 

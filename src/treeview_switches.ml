@@ -43,10 +43,6 @@ module Dependency = struct
 
   let of_string s = s |> Sexp.of_string |> t_of_sexp
 
-  let to_treeitem t = t |> sexp_of_t |> Sexp.to_string
-
-  let of_treeitem s = s |> Sexp.of_string |> t_of_sexp
-
   let label = function
     | Switch (Named name) -> name
     | Switch (Local path) ->
@@ -54,9 +50,9 @@ module Dependency = struct
       name
     | Dependency (dep, _) -> Opam.Package.name dep
 
-  let description = function
+  let description ~opam = function
     | Dependency (dep, _) -> Promise.return (Some (Opam.Package.version dep))
-    | Switch switch -> Opam.Switch.compiler switch
+    | Switch switch -> Opam.get_switch_compiler opam switch
 
   let tooltip = function
     | Dependency (dep, _) -> Opam.Package.synopsis dep
@@ -87,7 +83,7 @@ module Dependency = struct
     | Switch _ -> Vscode.TreeItemCollapsibleState.Collapsed
 end
 
-let make_item ~extension_path dependency =
+let make_item ~extension_path ~opam dependency =
   let open Promise.Syntax in
   let icon = `LightDark (Dependency.icon ~extension_path dependency) in
   let collapsibleState = Dependency.collapsible_state dependency in
@@ -101,7 +97,7 @@ let make_item ~extension_path dependency =
   let+ _ =
     Promise.Option.iter
       (fun desc -> TreeItem.set_description item (`String desc))
-      (Dependency.description dependency)
+      (Dependency.description ~opam dependency)
   in
   Option.iter (Dependency.tooltip dependency) ~f:(fun desc ->
       TreeItem.set_tooltip item (`String desc));
@@ -109,9 +105,9 @@ let make_item ~extension_path dependency =
 
 let get_dependency_dependencies _dependency = Promise.return (Some [])
 
-let get_switch_dependencies switch =
+let get_switch_dependencies opam switch =
   let open Promise.Syntax in
-  let* packages = Opam.get_switch_packages switch in
+  let* packages = Opam.get_switch_packages opam switch in
   match packages with
   | Ok packages ->
     let names =
@@ -130,7 +126,7 @@ let get_switch_dependencies switch =
     in
     Promise.return None
 
-let get_dependencies ~extension_path element =
+let get_dependencies ~opam ~extension_path element =
   let open Promise.Syntax in
   let dependency =
     match Vscode.TreeItem.id element with
@@ -139,24 +135,20 @@ let get_dependencies ~extension_path element =
       assert false
     | Some dep -> Dependency.of_string dep
   in
-  let dependencies_opt_to_tree_items deps_opt =
+  let dependencies_opt_to_tree_items
+      (deps_opt : Dependency.t list option Promise.t) =
     let* deps_opt = deps_opt in
     match deps_opt with
     | None -> Promise.return None
     | Some deps ->
       let* items =
-        List.fold_left ~init:(Promise.return [])
-          ~f:(fun acc el ->
-            let* acc = acc in
-            let+ item = make_item ~extension_path el in
-            item :: acc)
-          deps
+        List.map deps ~f:(make_item ~opam ~extension_path) |> Promise.return
       in
       Promise.return (Some items)
   in
   match dependency with
   | Dependency.Switch switch ->
-    let deps = get_switch_dependencies switch in
+    let deps = get_switch_dependencies opam switch in
     dependencies_opt_to_tree_items deps
   | Dependency.Dependency dependency ->
     let deps = get_dependency_dependencies dependency in
@@ -167,30 +159,27 @@ let register extension =
   let extension_path = Vscode.ExtensionContext.extensionPath extension in
   let+ opam = Opam.make () in
   let getChildren ~element =
-    match element with
-    | None ->
-      let items =
-        match opam with
-        | None -> Promise.return None
-        | Some opam ->
+    match opam with
+    | None -> `Promise (Promise.return None)
+    | Some opam -> (
+      match element with
+      | Some element ->
+        `Promise (get_dependencies ~opam ~extension_path element)
+      | None ->
+        let items =
           let* switches = Opam.switch_list opam in
           let+ items =
             Promise.List.filter_map
-              (function
-                | Opam.Switch.Named name
-                  when String.is_prefix name ~prefix:"vscode-ocaml-toolchain" ->
-                  Promise.return None
-                | switch ->
-                  let+ deps =
-                    make_item ~extension_path (Dependency.Switch switch)
-                  in
-                  Some deps)
+              (fun switch ->
+                let+ deps =
+                  make_item ~opam ~extension_path (Dependency.Switch switch)
+                in
+                Some deps)
               switches
           in
           Some items
-      in
-      `Promise items
-    | Some element -> `Promise (get_dependencies ~extension_path element)
+        in
+        `Promise items )
   in
   let getTreeItem ~element = Promise.return element in
   let event_emitter = Vscode.EventEmitter.make () in
