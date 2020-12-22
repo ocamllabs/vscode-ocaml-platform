@@ -135,14 +135,13 @@ let get_dependencies ~opam ~extension_path element =
       assert false
     | Some dep -> Dependency.of_string dep
   in
-  let dependencies_opt_to_tree_items
-      (deps_opt : Dependency.t list option Promise.t) =
+  let dependencies_opt_to_tree_items deps_opt =
     let* deps_opt = deps_opt in
     match deps_opt with
     | None -> Promise.return None
     | Some deps ->
       let* items =
-        List.map deps ~f:(make_item ~opam ~extension_path) |> Promise.return
+        List.map deps ~f:(make_item ~opam ~extension_path) |> Promise.all_list
       in
       Promise.return (Some items)
   in
@@ -158,7 +157,10 @@ let register extension =
   let open Promise.Syntax in
   let extension_path = Vscode.ExtensionContext.extensionPath extension in
   let+ opam = Opam.make () in
-  let getChildren ~element =
+  let getChildren ~element :
+      [ `Promise of TreeItem.t list option Promise.t
+      | `Value of TreeItem.t list option
+      ] =
     match opam with
     | None -> `Promise (Promise.return None)
     | Some opam -> (
