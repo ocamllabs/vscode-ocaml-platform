@@ -842,7 +842,7 @@ module EventEmitter : sig
 
   val event : t -> Ojs.t Event.t
 
-  val fire : t -> unit -> unit
+  val fire : t -> Ojs.t -> unit
 
   val dispose : t -> unit -> unit
 

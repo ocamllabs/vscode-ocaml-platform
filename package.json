@@ -113,6 +113,14 @@
           "light": "assets/x-light.svg",
           "dark": "assets/x-dark.svg"
         }
+      },
+      {
+        "command": "ocaml.open-documentation",
+        "title": "Open Documentation",
+        "icon": {
+          "light": "assets/document-search-light.svg",
+          "dark": "assets/document-search-dark.svg"
+        }
       }
     ],
     "keybindings": [
@@ -180,6 +188,11 @@
         {
           "command": "ocaml.remove-switch",
           "when": "view == ocaml-switches && viewItem == switch",
+          "group": "inline"
+        },
+        {
+          "command": "ocaml.open-documentation",
+          "when": "view == ocaml-switches && viewItem == package-with-doc",
           "group": "inline"
         }
       ]

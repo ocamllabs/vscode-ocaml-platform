@@ -33,9 +33,10 @@ module Dependency = struct
       Dependency (Opam.Package.t_of_sexp package, None)
     | List
         [ Atom "dependency"
-        ; List [ Atom "package"; package; Atom "parent"; sexp ]
+        ; List [ Atom "package"; package ]
+        ; List [ Atom "parent"; parent ]
         ] ->
-      Dependency (Opam.Package.t_of_sexp package, Some (t_of_sexp sexp))
+      Dependency (Opam.Package.t_of_sexp package, Some (t_of_sexp parent))
     | _ -> assert false
 
   let to_string t = t |> sexp_of_t |> Sexp.to_string
@@ -54,58 +55,54 @@ module Dependency = struct
     | Dependency (dep, _) -> Opam.Package.name dep
 
   let description = function
-    | Dependency (dep, _) -> Some (Opam.Package.version dep)
-    | Switch (Named _) -> None
-    | Switch (Local _) -> None
+    | Dependency (dep, _) -> Promise.return (Some (Opam.Package.version dep))
+    | Switch switch -> Opam.Switch.compiler switch
 
   let tooltip = function
     | Dependency (dep, _) -> Opam.Package.synopsis dep
     | Switch (Named _) -> None
     | Switch (Local _) -> None
-end
 
-let make_switch_item ~extension_path switch =
-  let icon =
-    `LightDark
-      TreeItem.LightDarkIcon.
-        { light = `String (extension_path ^ "/assets/dependency-light.svg")
-        ; dark = `String (extension_path ^ "/assets/dependency-dark.svg")
-        }
-  in
-  let dependency = Dependency.Switch switch in
-  let label =
-    Vscode.TreeItemLabel.create ~label:(Dependency.label dependency) ()
-  in
-  let item =
-    Vscode.TreeItem.make ~label
-      ~collapsibleState:Vscode.TreeItemCollapsibleState.Collapsed ()
-  in
-  TreeItem.set_id item (Dependency.to_string dependency);
-  TreeItem.set_iconPath item icon;
-  TreeItem.set_contextValue item "switch";
-  Option.iter (Dependency.description dependency) ~f:(fun desc ->
-      TreeItem.set_description item (`String desc));
-  Option.iter (Dependency.tooltip dependency) ~f:(fun desc ->
-      TreeItem.set_tooltip item (`String desc));
-  item
+  let context_value = function
+    | Dependency (dep, _) -> (
+      match Opam.Package.documentation dep with
+      | Some _ -> "package-with-doc"
+      | None -> "package" )
+    | Switch _ -> "switch"
 
-let make_dependency_item ~extension_path dependency =
-  let icon =
-    `LightDark
+  let icon ~extension_path = function
+    | Dependency _ ->
       TreeItem.LightDarkIcon.
         { light = `String (extension_path ^ "/assets/number-light.svg")
         ; dark = `String (extension_path ^ "/assets/number-dark.svg")
         }
-  in
+    | Switch _ ->
+      TreeItem.LightDarkIcon.
+        { light = `String (extension_path ^ "/assets/dependency-light.svg")
+        ; dark = `String (extension_path ^ "/assets/dependency-dark.svg")
+        }
+
+  let collapsible_state = function
+    | Dependency _ -> Vscode.TreeItemCollapsibleState.None
+    | Switch _ -> Vscode.TreeItemCollapsibleState.Collapsed
+end
+
+let make_item ~extension_path dependency =
+  let open Promise.Syntax in
+  let icon = `LightDark (Dependency.icon ~extension_path dependency) in
+  let collapsibleState = Dependency.collapsible_state dependency in
   let label =
     Vscode.TreeItemLabel.create ~label:(Dependency.label dependency) ()
   in
-  let item = Vscode.TreeItem.make ~label () in
+  let item = Vscode.TreeItem.make ~label ~collapsibleState () in
   TreeItem.set_id item (Dependency.to_string dependency);
   TreeItem.set_iconPath item icon;
-  TreeItem.set_contextValue item "package";
-  Option.iter (Dependency.description dependency) ~f:(fun desc ->
-      TreeItem.set_description item (`String desc));
+  TreeItem.set_contextValue item (Dependency.context_value dependency);
+  let+ _ =
+    Promise.Option.iter
+      (fun desc -> TreeItem.set_description item (`String desc))
+      (Dependency.description dependency)
+  in
   Option.iter (Dependency.tooltip dependency) ~f:(fun desc ->
       TreeItem.set_tooltip item (`String desc));
   item
@@ -142,46 +139,69 @@ let get_dependencies ~extension_path element =
       assert false
     | Some dep -> Dependency.of_string dep
   in
-  let dependencies_opt_to_tree_items =
-    Option.map ~f:(List.map ~f:(make_dependency_item ~extension_path))
+  let dependencies_opt_to_tree_items deps_opt =
+    let* deps_opt = deps_opt in
+    match deps_opt with
+    | None -> Promise.return None
+    | Some deps ->
+      let* items =
+        List.fold_left ~init:(Promise.return [])
+          ~f:(fun acc el ->
+            let* acc = acc in
+            let+ item = make_item ~extension_path el in
+            item :: acc)
+          deps
+      in
+      Promise.return (Some items)
   in
   match dependency with
   | Dependency.Switch switch ->
-    let+ deps = get_switch_dependencies switch in
+    let deps = get_switch_dependencies switch in
     dependencies_opt_to_tree_items deps
   | Dependency.Dependency dependency ->
-    let+ deps = get_dependency_dependencies dependency in
+    let deps = get_dependency_dependencies dependency in
     dependencies_opt_to_tree_items deps
 
 let register extension =
   let open Promise.Syntax in
   let extension_path = Vscode.ExtensionContext.extensionPath extension in
-  let* opam = Opam.make () in
-  match opam with
-  | None -> Promise.return None
-  | Some opam ->
-    let+ switches = Opam.switch_list opam in
-    let items =
-      List.filter_map switches ~f:(function
-        | Opam.Switch.Named name
-          when String.is_prefix name ~prefix:"vscode-ocaml-toolchain" ->
-          None
-        | switch -> Some (make_switch_item ~extension_path switch))
-    in
-    let getChildren ~element =
-      match element with
-      | None -> `Promise (Promise.return (Some items))
-      | Some element -> `Promise (get_dependencies ~extension_path element)
-    in
-    let getTreeItem ~element = Promise.return element in
-    let event_emitter = Vscode.EventEmitter.make () in
-    let event = Vscode.EventEmitter.event event_emitter in
-    let treeDataProvider =
-      Vscode.TreeDataProvider.create ~getTreeItem ~getChildren
-        ~onDidChangeTreeData:event ()
-    in
-    let _ =
-      Vscode.Window.registerTreeDataProvider ~viewId:"ocaml-switches"
-        ~treeDataProvider
-    in
-    Some event_emitter
+  let+ opam = Opam.make () in
+  let getChildren ~element =
+    match element with
+    | None ->
+      let items =
+        match opam with
+        | None -> Promise.return None
+        | Some opam ->
+          let* switches = Opam.switch_list opam in
+          let+ items =
+            Promise.List.filter_map
+              (function
+                | Opam.Switch.Named name
+                  when String.is_prefix name ~prefix:"vscode-ocaml-toolchain" ->
+                  Promise.return None
+                | switch ->
+                  let+ deps =
+                    make_item ~extension_path (Dependency.Switch switch)
+                  in
+                  Some deps)
+              switches
+          in
+          Some items
+      in
+      `Promise items
+    | Some element -> `Promise (get_dependencies ~extension_path element)
+  in
+  let getTreeItem ~element = Promise.return element in
+  let event_emitter = Vscode.EventEmitter.make () in
+  let event = Vscode.EventEmitter.event event_emitter in
+  let treeDataProvider =
+    Vscode.TreeDataProvider.create ~getTreeItem ~getChildren
+      ~onDidChangeTreeData:event ()
+  in
+  let refresh () = EventEmitter.fire event_emitter Ojs.null in
+  let disposable =
+    Vscode.Window.registerTreeDataProvider ~viewId:"ocaml-switches"
+      ~treeDataProvider
+  in
+  (disposable, refresh)

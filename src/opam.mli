@@ -8,6 +8,10 @@ module Switch : sig
   val name : t -> string
 
   val equal : t -> t -> bool
+
+  val path : t -> Path.t
+
+  val compiler : t -> string option Promise.t
 end
 
 module Package : sig

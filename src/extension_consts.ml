@@ -14,6 +14,8 @@ module Commands = struct
   let remove_switch = ocaml_prefixed "remove-switch"
 
   let refresh_switches = ocaml_prefixed "refresh-switches"
+
+  let open_documentation = ocaml_prefixed "open-documentation"
 end
 
 (* TODO: Refactor the code so that we don't need any "constants" module *)

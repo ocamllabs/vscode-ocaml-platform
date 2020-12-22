@@ -23,6 +23,35 @@ module Switch = struct
     | Local x, Local y -> Path.equal x y
     | Named x, Named y -> String.equal x y
     | _, _ -> false
+
+  let path =
+    let home = Node.Process.Env.get "HOME" |> Stdlib.Option.get in
+    function
+    | Named s -> Path.(of_string home / ".opam" / s)
+    | Local p -> Path.(p / "_opam")
+
+  let compiler t =
+    let open Promise.Syntax in
+    let rec compiler_of_fields = function
+      | [] ->
+        show_message `Info "Read None";
+        None
+      | OpamParserTypes.Variable (_, "compiler", String (_, v)) :: _
+      | OpamParserTypes.Variable (_, "compiler", List (_, String (_, v) :: _))
+        :: _ ->
+        show_message `Info "Read %s" v;
+        Some v
+      | _ :: rest -> compiler_of_fields rest
+    in
+    let path = path t in
+    let switch_state_filepath =
+      Path.(path / ".opam-switch" / "switch-state") |> Path.to_string
+    in
+    let+ file_content = Fs.readFile switch_state_filepath in
+    let OpamParserTypes.{ file_contents; _ } =
+      OpamParser.string file_content switch_state_filepath
+    in
+    compiler_of_fields file_contents
 end
 
 module Package = struct
@@ -44,7 +73,7 @@ module Package = struct
 
   let rec documentation_of_fields = function
     | [] -> None
-    | OpamParserTypes.Variable (_, "synopsis", String (_, v)) :: _ -> Some v
+    | OpamParserTypes.Variable (_, "doc", String (_, v)) :: _ -> Some v
     | _ :: rest -> documentation_of_fields rest
 
   let rec synopsis_of_fields = function
@@ -171,16 +200,9 @@ let exists t ~switch =
 let equal o1 o2 = Cmd.equal_spawn o1 o2
 
 let get_switch_packages switch =
-  let ( / ) = Path.( / ) in
-  let home = Node.Process.Env.get "HOME" |> Stdlib.Option.get in
-  let path =
-    match switch with
-    | Switch.Local path -> path / "_opam"
-    | Switch.Named name ->
-      (* TODO: probably only works on Unix *)
-      Path.of_string home / (".opam/" ^ name)
+  let packages_path =
+    Path.(Switch.path switch / ".opam-switch/" / "packages")
   in
-  let packages_path = path / ".opam-switch/" / "packages" in
   let open Promise.Result.Syntax in
   let* l = Node.Fs.readDir (Path.to_string packages_path) in
   Promise.List.filter_map

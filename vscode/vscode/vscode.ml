@@ -858,7 +858,7 @@ module EventEmitter = struct
 
   val event : t -> Ojs.t Event.t [@@js.get]
 
-  val fire : t -> unit -> unit [@@js.call]
+  val fire : t -> Ojs.t -> unit [@@js.call]
 
   val dispose : t -> unit -> unit [@@js.call]
 end

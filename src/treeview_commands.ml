@@ -43,8 +43,8 @@ let getTreeItem ~extension_path:_ ~element = Promise.return element
 
 let getChildren ~extension_path ~element =
   match element with
-  | None -> `Promise (Promise.return (Some (items ~extension_path)))
-  | Some _ -> `Promise (Promise.return (Some []))
+  | None -> `Value (Some (items ~extension_path))
+  | Some _ -> `Value (Some [])
 
 let register extension =
   let extension_path = Vscode.ExtensionContext.extensionPath extension in
@@ -54,8 +54,8 @@ let register extension =
       ~getChildren:(getChildren ~extension_path)
       ()
   in
-  let _ =
+  let disposable =
     Vscode.Window.registerTreeDataProvider ~viewId:"ocaml-commands"
       ~treeDataProvider
   in
-  Promise.return ()
+  Promise.return disposable

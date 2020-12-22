@@ -125,6 +125,35 @@ let remove_switch =
   in
   command Extension_consts.Commands.remove_switch handler
 
+let open_documentation =
+  let handler (_ : Extension_instance.t) ~args =
+    let (_ : unit Promise.t) =
+      let arg = List.hd_exn args in
+      let tree_item = TreeItem.t_of_js arg in
+      let dependency =
+        tree_item |> TreeItem.id |> Stdlib.Option.get
+        |> Treeview_switches.Dependency.of_string
+      in
+      match dependency with
+      | Switch _ ->
+        Promise.return
+        @@ show_message `Warn "Cannot open documentation of a switch."
+      | Dependency (pkg, _) -> (
+        let open Promise.Syntax in
+        let doc = Opam.Package.documentation pkg in
+        match doc with
+        | None -> Promise.return ()
+        | Some doc ->
+          let+ _ =
+            Vscode.Commands.executeCommand ~command:"vscode.open"
+              ~args:[ Vscode.Uri.parse doc () |> Vscode.Uri.t_to_js ]
+          in
+          () )
+    in
+    ()
+  in
+  command Extension_consts.Commands.open_documentation handler
+
 let register extension instance { id; handler } =
   let callback = handler instance in
   let disposable = Commands.registerCommand ~command:id ~callback in

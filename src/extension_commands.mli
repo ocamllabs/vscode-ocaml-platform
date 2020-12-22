@@ -29,6 +29,8 @@ val switch_impl_intf : command
 
 val remove_switch : command
 
+val open_documentation : command
+
 (** Registers commands with vscode. Should be called in
     [Vscode_ocaml_platform.activate]. It subscribes the disposables to the
     extension context provided. *)
