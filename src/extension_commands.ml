@@ -88,7 +88,7 @@ let switch_impl_intf =
 
 let remove_switch =
   let handler (_ : Extension_instance.t) ~args =
-    let try_removing () =
+    let (_ : unit Promise.t) =
       let arg = List.hd_exn args in
       let tree_item = TreeItem.t_of_js arg in
       let dependency =
@@ -108,19 +108,16 @@ let remove_switch =
           Promise.return
           @@ show_message `Warn "Opam could not be found on your system."
         | Some opam -> (
-          let* result = Opam.remove_switch opam switch |> Cmd.output in
+          let+ result = Opam.remove_switch opam switch |> Cmd.output in
           match result with
-          | Error err -> Promise.return @@ show_message `Error "%s" err
+          | Error err -> show_message `Error "%s" err
           | Ok _ ->
             let (_ : Ojs.t option Promise.t) =
               Vscode.Commands.executeCommand
                 ~command:Extension_consts.Commands.refresh_switches ~args:[]
             in
-            Promise.return
-            @@ show_message `Info "The switch has been removed successfully." )
-        )
+            show_message `Info "The switch has been removed successfully." ) )
     in
-    let (_ : unit Promise.t) = try_removing () in
     ()
   in
   command Extension_consts.Commands.remove_switch handler
