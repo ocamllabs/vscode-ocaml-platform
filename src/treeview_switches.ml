@@ -157,10 +157,7 @@ let register extension =
   let open Promise.Syntax in
   let extension_path = Vscode.ExtensionContext.extensionPath extension in
   let+ opam = Opam.make () in
-  let getChildren ~element :
-      [ `Promise of TreeItem.t list option Promise.t
-      | `Value of TreeItem.t list option
-      ] =
+  let getChildren ~element =
     match opam with
     | None -> `Promise (Promise.return None)
     | Some opam -> (
