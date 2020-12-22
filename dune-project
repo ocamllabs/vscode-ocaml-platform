@@ -37,7 +37,8 @@
   (promise_jsoo
    (>= 0.3.1))
   (jsonoo
-   (>= 0.2.1))))
+   (>= 0.2.1))
+   opam-file-format))
 
 (package
  (name vscode)

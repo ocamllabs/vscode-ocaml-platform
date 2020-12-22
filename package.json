@@ -43,6 +43,31 @@
   ],
   "icon": "assets/logo.png",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ocaml-explorer",
+          "title": "OCaml",
+          "icon": "assets/logo.svg"
+        }
+      ]
+    },
+    "views": {
+      "ocaml-explorer": [
+        {
+          "id": "ocaml-switches",
+          "name": "Switches"
+        },
+        {
+          "id": "ocaml-commands",
+          "name": "Commands"
+        },
+        {
+          "id": "ocaml-help",
+          "name": "Help and feedback"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "ocaml.select-sandbox",
@@ -72,6 +97,30 @@
           "light": "assets/switch-impl-intf.light.svg",
           "dark": "assets/switch-impl-intf.dark.svg"
         }
+      },
+      {
+        "command": "ocaml.refresh-switches",
+        "title": "Refresh",
+        "icon": {
+          "light": "assets/refresh-light.svg",
+          "dark": "assets/refresh-dark.svg"
+        }
+      },
+      {
+        "command": "ocaml.remove-switch",
+        "title": "Remove",
+        "icon": {
+          "light": "assets/x-light.svg",
+          "dark": "assets/x-dark.svg"
+        }
+      },
+      {
+        "command": "ocaml.open-documentation",
+        "title": "Open Documentation",
+        "icon": {
+          "light": "assets/document-search-light.svg",
+          "dark": "assets/document-search-dark.svg"
+        }
       }
     ],
     "keybindings": [
@@ -98,12 +147,53 @@
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "ocaml.select-sandbox",
+          "when": "ocaml-platform:enabled"
+        },
+        {
+          "command": "ocaml.server.restart",
+          "when": "ocaml-platform:enabled"
+        },
+        {
+          "command": "ocaml.open-terminal",
+          "when": "ocaml-platform:enabled"
+        },
+        {
+          "command": "ocaml.open-terminal-select",
+          "when": "ocaml-platform:enabled"
+        },
+        {
+          "command": "ocaml.switch-impl-intf",
+          "when": "ocaml-platform:enabled"
+        }
+      ],
       "editor/title": [
         {
           "command": "ocaml.switch-impl-intf",
           "key": "Alt+O",
           "when": "editorLangId  == ocaml || editorLangId  == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir",
           "group": "navigation"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "ocaml.refresh-switches",
+          "when": "view == ocaml-switches",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "ocaml.remove-switch",
+          "when": "view == ocaml-switches && viewItem == switch",
+          "group": "inline"
+        },
+        {
+          "command": "ocaml.open-documentation",
+          "when": "view == ocaml-switches && viewItem == package-with-doc",
+          "group": "inline"
         }
       ]
     },

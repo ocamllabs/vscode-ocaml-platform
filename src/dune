@@ -1,5 +1,5 @@
 (executable
  (name vscode_ocaml_platform)
  (libraries vscode vscode_languageclient node core_kernel promise_jsoo jsonoo
-   js_of_ocaml gen_js_api)
+   js_of_ocaml gen_js_api opam-file-format)
  (modes js))

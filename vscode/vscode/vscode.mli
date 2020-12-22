@@ -835,6 +835,22 @@ module Event : sig
   val t_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
 end
 
+module EventEmitter : sig
+  type t
+
+  val make : unit -> t
+
+  val event : t -> Ojs.t Event.t
+
+  val fire : t -> Ojs.t -> unit
+
+  val dispose : t -> unit -> unit
+
+  val t_of_js : Ojs.t -> t
+
+  val t_to_js : t -> Ojs.t
+end
+
 module CancellationToken : sig
   type t
 
@@ -1949,13 +1965,13 @@ module TreeDataProvider : sig
     -> getChildren:
          (element:TreeItem.t option -> TreeItem.t list ProviderResult.t)
     -> ?getParent:(element:TreeItem.t -> TreeItem.t ProviderResult.t)
-    -> ?onDidChangeTreeData:Ojs.t option Event.t
+    -> ?onDidChangeTreeData:Ojs.t Event.t
     -> ?resolveTreeItem:
          (item:TreeItem.t -> element:TreeItem.t -> TreeItem.t ProviderResult.t)
     -> unit
     -> t
 
-  val onDidChangeTreeData : t -> Ojs.t option Event.t option
+  val onDidChangeTreeData : t -> Ojs.t Event.t option
 
   val getTreeItem : t -> element:TreeItem.t -> TreeItem.t Promise.t
 
