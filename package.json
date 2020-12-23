@@ -383,6 +383,7 @@
         ],
         "extensions": [
           ".ml",
+          ".eliom",
           ".ocamlinit"
         ],
         "configuration": "./languages/ocaml.json"
@@ -394,7 +395,8 @@
           "ocaml interface"
         ],
         "extensions": [
-          ".mli"
+          ".mli",
+          ".eliomi"
         ],
         "configuration": "./languages/ocaml.json"
       },

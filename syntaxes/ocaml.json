@@ -1,7 +1,7 @@
 {
   "name": "OCaml",
   "scopeName": "source.ocaml",
-  "fileTypes": ["ml"],
+  "fileTypes": ["ml", "eliom", ".ocamlinit"],
   "patterns": [
     { "include": "#directives" },
     { "include": "#comments" },
