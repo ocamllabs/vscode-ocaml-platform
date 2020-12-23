@@ -24,7 +24,5 @@ module Dependency : sig
   val collapsible_state : t -> Vscode.TreeItemCollapsibleState.t
 end
 
-(** Register the ocaml-switches tree view and returns the provider as a
-    disposable, with a callback to refresh the view. *)
-val register :
-  Vscode.ExtensionContext.t -> (Vscode.Disposable.t * (unit -> unit)) Promise.t
+(** Register the ocaml-switches tree view *)
+val register : Vscode.ExtensionContext.t -> Extension_instance.t -> unit

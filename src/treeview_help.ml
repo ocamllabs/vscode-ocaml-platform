@@ -78,16 +78,21 @@ let getChildren ~extension_path ~element =
   | None -> `Value (Some (items ~extension_path))
   | Some _ -> `Value (Some [])
 
-let register extension =
-  let extension_path = Vscode.ExtensionContext.extensionPath extension in
-  let treeDataProvider =
-    Vscode.TreeDataProvider.create
-      ~getTreeItem:(getTreeItem ~extension_path)
-      ~getChildren:(getChildren ~extension_path)
-      ()
+let register extension (_ : Extension_instance.t) =
+  let (_ : unit Promise.t) =
+    Promise.make @@ fun ~resolve ~reject:_ ->
+    let extension_path = Vscode.ExtensionContext.extensionPath extension in
+    let treeDataProvider =
+      Vscode.TreeDataProvider.create
+        ~getTreeItem:(getTreeItem ~extension_path)
+        ~getChildren:(getChildren ~extension_path)
+        ()
+    in
+    let disposable =
+      Vscode.Window.registerTreeDataProvider ~viewId:"ocaml-help"
+        ~treeDataProvider
+    in
+    Vscode.ExtensionContext.subscribe extension ~disposable;
+    resolve ()
   in
-  let disposable =
-    Vscode.Window.registerTreeDataProvider ~viewId:"ocaml-help"
-      ~treeDataProvider
-  in
-  Promise.return disposable
+  ()

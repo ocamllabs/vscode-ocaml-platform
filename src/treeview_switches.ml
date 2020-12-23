@@ -83,6 +83,65 @@ module Dependency = struct
     | Switch _ -> Vscode.TreeItemCollapsibleState.Collapsed
 end
 
+module Command = struct
+  let remove_switch ~args =
+    let (_ : unit Promise.t) =
+      let arg = List.hd_exn args in
+      let tree_item = TreeItem.t_of_js arg in
+      let dependency =
+        tree_item |> TreeItem.id |> Stdlib.Option.get |> Dependency.of_string
+      in
+      match dependency with
+      | Dependency _ ->
+        Promise.return
+        @@ show_message `Warn
+             "Cannot delete a switch from a package dependency."
+      | Switch switch -> (
+        let open Promise.Syntax in
+        let* opam_opt = Opam.make () in
+        match opam_opt with
+        | None ->
+          Promise.return
+          @@ show_message `Warn "Opam could not be found on your system."
+        | Some opam -> (
+          let+ result = Opam.remove_switch opam switch |> Cmd.output in
+          match result with
+          | Error err -> show_message `Error "%s" err
+          | Ok _ ->
+            let (_ : Ojs.t option Promise.t) =
+              Vscode.Commands.executeCommand
+                ~command:Extension_consts.Commands.refresh_switches ~args:[]
+            in
+            show_message `Info "The switch has been removed successfully." ) )
+    in
+    ()
+
+  let open_documentation ~args =
+    let (_ : unit Promise.t) =
+      let arg = List.hd_exn args in
+      let tree_item = TreeItem.t_of_js arg in
+      let dependency =
+        tree_item |> TreeItem.id |> Stdlib.Option.get |> Dependency.of_string
+      in
+      match dependency with
+      | Switch _ ->
+        Promise.return
+        @@ show_message `Warn "Cannot open documentation of a switch."
+      | Dependency (pkg, _) -> (
+        let open Promise.Syntax in
+        let doc = Opam.Package.documentation pkg in
+        match doc with
+        | None -> Promise.return ()
+        | Some doc ->
+          let+ _ =
+            Vscode.Commands.executeCommand ~command:"vscode.open"
+              ~args:[ Vscode.Uri.parse doc () |> Vscode.Uri.t_to_js ]
+          in
+          () )
+    in
+    ()
+end
+
 let make_item ~extension_path ~opam dependency =
   let open Promise.Syntax in
   let icon = `LightDark (Dependency.icon ~extension_path dependency) in
@@ -153,43 +212,66 @@ let get_dependencies ~opam ~extension_path element =
     let deps = get_dependency_dependencies dependency in
     dependencies_opt_to_tree_items deps
 
-let register extension =
-  let open Promise.Syntax in
-  let extension_path = Vscode.ExtensionContext.extensionPath extension in
-  let+ opam = Opam.make () in
-  let getChildren ~element =
-    match opam with
-    | None -> `Promise (Promise.return None)
-    | Some opam -> (
-      match element with
-      | Some element ->
-        `Promise (get_dependencies ~opam ~extension_path element)
-      | None ->
-        let items =
-          let* switches = Opam.switch_list opam in
-          let+ items =
-            Promise.List.filter_map
-              (fun switch ->
-                let+ deps =
-                  make_item ~opam ~extension_path (Dependency.Switch switch)
-                in
-                Some deps)
-              switches
+let register extension (_ : Extension_instance.t) =
+  let (_ : unit Promise.t) =
+    let open Promise.Syntax in
+    let extension_path = Vscode.ExtensionContext.extensionPath extension in
+    let+ opam = Opam.make () in
+    let getChildren ~element =
+      match opam with
+      | None -> `Promise (Promise.return None)
+      | Some opam -> (
+        match element with
+        | Some element ->
+          `Promise (get_dependencies ~opam ~extension_path element)
+        | None ->
+          let items =
+            let* switches = Opam.switch_list opam in
+            let+ items =
+              Promise.List.filter_map
+                (fun switch ->
+                  let+ deps =
+                    make_item ~opam ~extension_path (Dependency.Switch switch)
+                  in
+                  Some deps)
+                switches
+            in
+            Some items
           in
-          Some items
-        in
-        `Promise items )
+          `Promise items )
+    in
+    let getTreeItem ~element = Promise.return element in
+    let event_emitter = Vscode.EventEmitter.make () in
+    let event = Vscode.EventEmitter.event event_emitter in
+    let treeDataProvider =
+      Vscode.TreeDataProvider.create ~getTreeItem ~getChildren
+        ~onDidChangeTreeData:event ()
+    in
+
+    let disposable =
+      Vscode.Window.registerTreeDataProvider ~viewId:"ocaml-switches"
+        ~treeDataProvider
+    in
+    ExtensionContext.subscribe extension ~disposable;
+
+    let disposable =
+      Commands.registerCommand
+        ~command:Extension_consts.Commands.open_documentation
+        ~callback:Command.open_documentation
+    in
+    ExtensionContext.subscribe extension ~disposable;
+
+    let disposable =
+      Commands.registerCommand ~command:Extension_consts.Commands.remove_switch
+        ~callback:Command.remove_switch
+    in
+    ExtensionContext.subscribe extension ~disposable;
+
+    let disposable =
+      Commands.registerCommand
+        ~command:Extension_consts.Commands.refresh_switches
+        ~callback:(fun ~args:_ -> EventEmitter.fire event_emitter Ojs.null)
+    in
+    ExtensionContext.subscribe extension ~disposable
   in
-  let getTreeItem ~element = Promise.return element in
-  let event_emitter = Vscode.EventEmitter.make () in
-  let event = Vscode.EventEmitter.event event_emitter in
-  let treeDataProvider =
-    Vscode.TreeDataProvider.create ~getTreeItem ~getChildren
-      ~onDidChangeTreeData:event ()
-  in
-  let refresh () = EventEmitter.fire event_emitter Ojs.null in
-  let disposable =
-    Vscode.Window.registerTreeDataProvider ~viewId:"ocaml-switches"
-      ~treeDataProvider
-  in
-  (disposable, refresh)
+  ()
