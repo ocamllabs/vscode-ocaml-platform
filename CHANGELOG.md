@@ -14,6 +14,8 @@
   The activity tab provides three views: the available switches, the build
   commands and an Help and Feedback section with links to community channels.
 
+- Support `eliom` and `eliomi` file extensions (#487)
+
 ## 1.5.1
 
 - Improve highlighting of type parameters and `module type of` (#461)

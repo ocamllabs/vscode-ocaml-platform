@@ -71,6 +71,7 @@ esy
   - OCamllex
   - opam
   - ReasonML
+  - Eliom
 - Indentation rules
 - Snippets
   - Dune
