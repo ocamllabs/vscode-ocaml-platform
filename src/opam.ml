@@ -220,7 +220,7 @@ let get_switch_compiler t switch =
 
 let remove_switch t switch =
   let name = Switch.name switch in
-  Cmd.Spawn (Cmd.append t [ "-y"; "switch"; "remove"; name ])
+  Cmd.Spawn (Cmd.append t [ "switch"; "remove"; name; "-y";  ])
 
 let uninstall_package t ~switch ~package =
   exec t ~switch ~args:[ "uninstall"; Package.name package ]
