@@ -18,7 +18,10 @@ let send_infer_intf_request client uri : string Promise.t =
 
 let insert_inferred_intf source_uri client editor =
   let open Promise.Syntax in
-  if String.is_suffix source_uri ~suffix:".ml" then
+  if
+    String.is_suffix source_uri ~suffix:".ml"
+    || String.is_suffix source_uri ~suffix:".eliom"
+  then
     (* If the source file was a .ml, infer the interface *)
     let+ inferred_intf = send_infer_intf_request client source_uri in
     let (_ : bool Promise.t) =

@@ -24,6 +24,7 @@
     "onLanguage:ocaml",
     "onLanguage:ocaml.interface",
     "onLanguage:reason",
+    "onLanguage:ocaml.eliom",
     "onLanguage:ocaml.ocamllex",
     "onLanguage:ocaml.menhir",
     "onLanguage:dune",
@@ -36,6 +37,8 @@
     "workspaceContains:**/*.opam",
     "workspaceContains:**/*.ml",
     "workspaceContains:**/*.mli",
+    "workspaceContains:**/*.eliom",
+    "workspaceContains:**/*.eliomi",
     "workspaceContains:**/*.mll",
     "workspaceContains:**/*.mly",
     "workspaceContains:**/*.re",
@@ -127,7 +130,7 @@
       {
         "command": "ocaml.switch-impl-intf",
         "key": "Alt+O",
-        "when": "editorLangId  == ocaml || editorLangId  == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir"
+        "when": "editorLangId  == ocaml || editorLangId  == ocaml.interface || editorLangId  == ocaml.eliom || editorLangId  == ocaml.eliom.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir"
       },
       {
         "command": "editor.action.codeAction",
@@ -135,7 +138,7 @@
         "args": {
           "kind": "destruct"
         },
-        "when": "editorLangId  == ocaml || editorLangId == reason"
+        "when": "editorLangId  == ocaml || editorLangId  == ocaml.eliom || editorLangId == reason"
       },
       {
         "command": "editor.action.codeAction",
@@ -143,7 +146,7 @@
         "args": {
           "kind": "inferred_intf"
         },
-        "when": "editorLangId  == ocaml.interface || editorLangId == reason"
+        "when": "editorLangId  == ocaml.interface || editorLangId  == ocaml.eliom.interface || editorLangId == reason"
       }
     ],
     "menus": {
@@ -173,7 +176,7 @@
         {
           "command": "ocaml.switch-impl-intf",
           "key": "Alt+O",
-          "when": "editorLangId  == ocaml || editorLangId  == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir",
+          "when": "editorLangId  == ocaml || editorLangId  == ocaml.interface || editorLangId == ocaml.eliom || editorLangId == ocaml.eliom.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir",
           "group": "navigation"
         }
       ],
@@ -383,7 +386,6 @@
         ],
         "extensions": [
           ".ml",
-          ".eliom",
           ".ocamlinit"
         ],
         "configuration": "./languages/ocaml.json"
@@ -395,7 +397,28 @@
           "ocaml interface"
         ],
         "extensions": [
-          ".mli",
+          ".mli"
+        ],
+        "configuration": "./languages/ocaml.json"
+      },
+      {
+        "id": "ocaml.eliom",
+        "aliases": [
+          "Eliom",
+          "eliom"
+        ],
+        "extensions": [
+          ".eliom"
+        ],
+        "configuration": "./languages/ocaml.json"
+      },
+      {
+        "id": "ocaml.eliom.interface",
+        "aliases": [
+          "Eliom Interface",
+          "eliom interface"
+        ],
+        "extensions": [
           ".eliomi"
         ],
         "configuration": "./languages/ocaml.json"
@@ -579,6 +602,16 @@
       },
       {
         "language": "ocaml.interface",
+        "scopeName": "source.ocaml.interface",
+        "path": "./syntaxes/ocaml.interface.json"
+      },
+      {
+        "language": "ocaml.eliom",
+        "scopeName": "source.ocaml",
+        "path": "./syntaxes/ocaml.json"
+      },
+      {
+        "language": "ocaml.eliom.interface",
         "scopeName": "source.ocaml.interface",
         "path": "./syntaxes/ocaml.interface.json"
       },
