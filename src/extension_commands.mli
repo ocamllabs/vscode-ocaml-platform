@@ -1,11 +1,3 @@
-type command = private
-  { id : string
-  ; handler : Extension_instance.t -> args:Ojs.t list -> unit
-  }
-
-val make_command :
-  string -> (Extension_instance.t -> args:Ojs.t list -> unit) -> command
-
 (** Module to manage commands[1] across the extension.
 
     Module does not have public API for command creation on purpose. One should
@@ -17,6 +9,11 @@ val make_command :
 
     [1] https://code.visualstudio.com/api/references/vscode-api#commands *)
 
+type command = private
+  { id : string
+  ; handler : Extension_instance.t -> args:Ojs.t list -> unit
+  }
+
 val select_sandbox : command
 
 val restart_language_server : command
@@ -26,10 +23,6 @@ val select_sandbox_and_open_terminal : command
 val open_terminal : command
 
 val switch_impl_intf : command
-
-val remove_switch : command
-
-val open_documentation : command
 
 (** Registers commands with vscode. Should be called in
     [Vscode_ocaml_platform.activate]. It subscribes the disposables to the

@@ -23,29 +23,13 @@ let activate (extension : ExtensionContext.t) =
   let instance = Extension_instance.make () in
   ExtensionContext.subscribe extension
     ~disposable:(Extension_instance.disposable instance);
-  Extension_commands.register_all_commands extension instance;
   Dune_formatter.register extension instance;
   Dune_task_provider.register extension instance;
+  Extension_commands.register_all_commands extension instance;
+  Treeview_switches.register extension;
+  Treeview_commands.register extension;
+  Treeview_help.register extension;
   let sandbox = Sandbox.of_settings_or_detect () in
-  let* refresh =
-    let+ disposable, command = Treeview_switches.register extension in
-    ExtensionContext.subscribe extension ~disposable;
-    command
-  in
-  let () =
-    let handler (_ : Extension_instance.t) ~args:_ = refresh () in
-    Extension_commands.make_command Extension_consts.Commands.refresh_switches
-      handler
-    |> Extension_commands.register extension instance
-  in
-  let (_ : unit Promise.t) =
-    let+ disposable = Treeview_commands.register extension in
-    ExtensionContext.subscribe extension ~disposable
-  in
-  let (_ : unit Promise.t) =
-    let+ disposable = Treeview_help.register extension in
-    ExtensionContext.subscribe extension ~disposable
-  in
   let (_ : unit Promise.t) =
     let* sandbox = sandbox in
     let is_fallback = Option.is_empty sandbox in

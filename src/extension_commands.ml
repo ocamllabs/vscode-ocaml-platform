@@ -8,8 +8,6 @@ type command =
            [Commands.registerCommand] *)
   }
 
-let make_command id handler = { id; handler }
-
 let commands = ref []
 
 (** creates a new command and stores in a mutable [commands] list *)
@@ -85,71 +83,6 @@ let switch_impl_intf =
     ()
   in
   command Extension_consts.Commands.switch_impl_intf handler
-
-let remove_switch =
-  let handler (_ : Extension_instance.t) ~args =
-    let (_ : unit Promise.t) =
-      let arg = List.hd_exn args in
-      let tree_item = TreeItem.t_of_js arg in
-      let dependency =
-        tree_item |> TreeItem.id |> Stdlib.Option.get
-        |> Treeview_switches.Dependency.of_string
-      in
-      match dependency with
-      | Dependency _ ->
-        Promise.return
-        @@ show_message `Warn
-             "Cannot delete a switch from a package dependency."
-      | Switch switch -> (
-        let open Promise.Syntax in
-        let* opam_opt = Opam.make () in
-        match opam_opt with
-        | None ->
-          Promise.return
-          @@ show_message `Warn "Opam could not be found on your system."
-        | Some opam -> (
-          let+ result = Opam.remove_switch opam switch |> Cmd.output in
-          match result with
-          | Error err -> show_message `Error "%s" err
-          | Ok _ ->
-            let (_ : Ojs.t option Promise.t) =
-              Vscode.Commands.executeCommand
-                ~command:Extension_consts.Commands.refresh_switches ~args:[]
-            in
-            show_message `Info "The switch has been removed successfully." ) )
-    in
-    ()
-  in
-  command Extension_consts.Commands.remove_switch handler
-
-let open_documentation =
-  let handler (_ : Extension_instance.t) ~args =
-    let (_ : unit Promise.t) =
-      let arg = List.hd_exn args in
-      let tree_item = TreeItem.t_of_js arg in
-      let dependency =
-        tree_item |> TreeItem.id |> Stdlib.Option.get
-        |> Treeview_switches.Dependency.of_string
-      in
-      match dependency with
-      | Switch _ ->
-        Promise.return
-        @@ show_message `Warn "Cannot open documentation of a switch."
-      | Dependency (pkg, _) -> (
-        let open Promise.Syntax in
-        let doc = Opam.Package.documentation pkg in
-        match doc with
-        | None -> Promise.return ()
-        | Some doc ->
-          let+ _ =
-            Vscode.Commands.executeCommand ~command:"vscode.open"
-              ~args:[ Vscode.Uri.parse doc () |> Vscode.Uri.t_to_js ]
-          in
-          () )
-    in
-    ()
-  in
-  command Extension_consts.Commands.open_documentation handler
 
 let register extension instance { id; handler } =
   let callback = handler instance in

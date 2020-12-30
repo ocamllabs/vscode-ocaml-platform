@@ -100,7 +100,8 @@
       },
       {
         "command": "ocaml.refresh-switches",
-        "title": "Refresh",
+        "category": "OCaml",
+        "title": "Refresh Switches",
         "icon": {
           "light": "assets/refresh-light.svg",
           "dark": "assets/refresh-dark.svg"
@@ -108,7 +109,8 @@
       },
       {
         "command": "ocaml.remove-switch",
-        "title": "Remove",
+        "category": "OCaml",
+        "title": "Remove Switch",
         "icon": {
           "light": "assets/x-light.svg",
           "dark": "assets/x-dark.svg"
@@ -116,6 +118,7 @@
       },
       {
         "command": "ocaml.open-documentation",
+        "category": "OCaml",
         "title": "Open Documentation",
         "icon": {
           "light": "assets/document-search-light.svg",
@@ -149,24 +152,31 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "ocaml.select-sandbox",
-          "when": "ocaml-platform:enabled"
+          "command": "ocaml.select-sandbox"
         },
         {
-          "command": "ocaml.server.restart",
-          "when": "ocaml-platform:enabled"
+          "command": "ocaml.server.restart"
         },
         {
-          "command": "ocaml.open-terminal",
-          "when": "ocaml-platform:enabled"
+          "command": "ocaml.open-terminal"
         },
         {
-          "command": "ocaml.open-terminal-select",
-          "when": "ocaml-platform:enabled"
+          "command": "ocaml.open-terminal-select"
         },
         {
-          "command": "ocaml.switch-impl-intf",
-          "when": "ocaml-platform:enabled"
+          "command": "ocaml.switch-impl-intf"
+        },
+        {
+          "command": "ocaml.refresh-switches",
+          "when": "false"
+        },
+        {
+          "command": "ocaml.remove-switch",
+          "when": "false"
+        },
+        {
+          "command": "ocaml.open-documentation",
+          "when": "false"
         }
       ],
       "editor/title": [

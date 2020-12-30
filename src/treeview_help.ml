@@ -90,4 +90,4 @@ let register extension =
     Vscode.Window.registerTreeDataProvider ~viewId:"ocaml-help"
       ~treeDataProvider
   in
-  Promise.return disposable
+  Vscode.ExtensionContext.subscribe extension ~disposable

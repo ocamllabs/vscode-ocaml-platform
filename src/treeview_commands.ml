@@ -58,4 +58,4 @@ let register extension =
     Vscode.Window.registerTreeDataProvider ~viewId:"ocaml-commands"
       ~treeDataProvider
   in
-  Promise.return disposable
+  Vscode.ExtensionContext.subscribe extension ~disposable
