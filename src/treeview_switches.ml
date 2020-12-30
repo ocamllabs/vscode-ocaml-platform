@@ -212,7 +212,7 @@ let get_dependencies ~opam ~extension_path element =
     let deps = get_dependency_dependencies dependency in
     dependencies_opt_to_tree_items deps
 
-let register extension (_ : Extension_instance.t) =
+let register extension =
   let (_ : unit Promise.t) =
     let open Promise.Syntax in
     let extension_path = Vscode.ExtensionContext.extensionPath extension in

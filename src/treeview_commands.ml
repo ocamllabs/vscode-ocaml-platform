@@ -46,7 +46,7 @@ let getChildren ~extension_path ~element =
   | None -> `Value (Some (items ~extension_path))
   | Some _ -> `Value (Some [])
 
-let register extension (_ : Extension_instance.t) =
+let register extension =
   let extension_path = Vscode.ExtensionContext.extensionPath extension in
   let treeDataProvider =
     Vscode.TreeDataProvider.create
