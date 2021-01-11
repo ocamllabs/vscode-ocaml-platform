@@ -59,7 +59,8 @@ module Package = struct
       let opam_filepath = Path.(path / "opam") |> Path.to_string in
       let+ file_content = Fs.readFile opam_filepath in
       let OpamParserTypes.{ file_contents; _ } =
-        OpamParser.string file_content opam_filepath
+        OpamParser.FullPos.string file_content opam_filepath
+        |> OpamParser.FullPos.to_opamfile
       in
       let version = String.concat version_parts ~sep:"." in
       let documentation = documentation_of_fields file_contents in
@@ -214,13 +215,14 @@ let get_switch_compiler t switch =
     in
     let+ file_content = Fs.readFile switch_state_filepath in
     let OpamParserTypes.{ file_contents; _ } =
-      OpamParser.string file_content switch_state_filepath
+      OpamParser.FullPos.string file_content switch_state_filepath
+      |> OpamParser.FullPos.to_opamfile
     in
     compiler_of_fields file_contents
 
 let remove_switch t switch =
   let name = Switch.name switch in
-  Cmd.Spawn (Cmd.append t [ "switch"; "remove"; name; "-y";  ])
+  Cmd.Spawn (Cmd.append t [ "switch"; "remove"; name; "-y" ])
 
 let uninstall_package t ~switch ~package =
   exec t ~switch ~args:[ "uninstall"; Package.name package ]

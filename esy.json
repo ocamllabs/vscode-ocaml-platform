@@ -5,7 +5,8 @@
     "@opam/gen_js_api": "1.0.6",
     "@opam/core_kernel": "v0.14.0",
     "@opam/promise_jsoo": "0.3.1",
-    "@opam/jsonoo": "0.2.1"
+    "@opam/jsonoo": "0.2.1",
+    "@opam/opam-file-format": "2.1.2"
   },
   "devDependencies": {
     "@opam/dune": "2.7.1",
