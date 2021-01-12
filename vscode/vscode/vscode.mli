@@ -1871,6 +1871,11 @@ end
 module TreeItem : sig
   type t
 
+  type label =
+    [ `String of string
+    | `TreeItemLabel of TreeItemLabel.t
+    ]
+
   module LightDarkIcon : sig
     type t =
       { light : [ `String of string | `Uri of Ojs.t ]
@@ -1901,10 +1906,7 @@ module TreeItem : sig
     ]
 
   val make :
-       label:TreeItemLabel.t
-    -> ?collapsibleState:TreeItemCollapsibleState.t
-    -> unit
-    -> t
+    label:label -> ?collapsibleState:TreeItemCollapsibleState.t -> unit -> t
 
   val of_uri :
        resourceUri:Uri.t
@@ -1912,9 +1914,9 @@ module TreeItem : sig
     -> unit
     -> t
 
-  val label : t -> TreeItemLabel.t option
+  val label : t -> label option
 
-  val set_label : t -> TreeItemLabel.t -> unit
+  val set_label : t -> label -> unit
 
   val id : t -> string option
 

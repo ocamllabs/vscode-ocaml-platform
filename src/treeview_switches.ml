@@ -147,7 +147,8 @@ let make_item ~extension_path ~opam dependency =
   let icon = `LightDark (Dependency.icon ~extension_path dependency) in
   let collapsibleState = Dependency.collapsible_state dependency in
   let label =
-    Vscode.TreeItemLabel.create ~label:(Dependency.label dependency) ()
+    `TreeItemLabel
+      (Vscode.TreeItemLabel.create ~label:(Dependency.label dependency) ())
   in
   let item = Vscode.TreeItem.make ~label ~collapsibleState () in
   TreeItem.set_id item (Dependency.to_string dependency);

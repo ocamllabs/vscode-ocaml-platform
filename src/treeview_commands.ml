@@ -6,7 +6,9 @@ let select_sandbox_item ~extension_path =
         ; dark = `String (extension_path ^ "/assets/collection-dark.svg")
         }
   in
-  let label = Vscode.TreeItemLabel.create ~label:"Select a Sandbox" () in
+  let label =
+    `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Select a Sandbox" ())
+  in
   let item = Vscode.TreeItem.make ~label () in
   let command =
     Vscode.Command.create ~title:"Select a Sandbox"
@@ -25,7 +27,8 @@ let terminal_item ~extension_path =
         }
   in
   let label =
-    Vscode.TreeItemLabel.create ~label:"Open a sandboxed terminal" ()
+    `TreeItemLabel
+      (Vscode.TreeItemLabel.create ~label:"Open a sandboxed terminal" ())
   in
   let item = Vscode.TreeItem.make ~label () in
   let command =

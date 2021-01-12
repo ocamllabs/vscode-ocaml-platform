@@ -6,7 +6,9 @@ let discord_item ~extension_path =
         ; dark = `String (extension_path ^ "/assets/discord-dark.svg")
         }
   in
-  let label = Vscode.TreeItemLabel.create ~label:"Chat on Discord" () in
+  let label =
+    `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Chat on Discord" ())
+  in
   let item = Vscode.TreeItem.make ~label () in
   let command =
     Vscode.Command.create ~title:"Open" ~command:"vscode.open"
@@ -28,7 +30,8 @@ let discuss_item ~extension_path =
         }
   in
   let label =
-    Vscode.TreeItemLabel.create ~label:"Ask a question on Discuss" ()
+    `TreeItemLabel
+      (Vscode.TreeItemLabel.create ~label:"Ask a question on Discuss" ())
   in
   let item = Vscode.TreeItem.make ~label () in
   let command =
@@ -50,7 +53,10 @@ let github_item ~extension_path =
         ; dark = `String (extension_path ^ "/assets/github-dark.svg")
         }
   in
-  let label = Vscode.TreeItemLabel.create ~label:"Open an issue on Github" () in
+  let label =
+    `TreeItemLabel
+      (Vscode.TreeItemLabel.create ~label:"Open an issue on Github" ())
+  in
   let item = Vscode.TreeItem.make ~label () in
   let command =
     Vscode.Command.create ~title:"Open" ~command:"vscode.open"

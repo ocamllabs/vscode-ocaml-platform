@@ -1861,6 +1861,21 @@ end
 module TreeItem = struct
   type t = private (* class *) Ojs.t [@@js]
 
+  type label =
+    ([ `String of string
+     | `TreeItemLabel of TreeItemLabel.t
+     ]
+    [@js.union])
+  [@@js]
+
+  let label_of_js js_val =
+    if Ojs.type_of js_val = "string" then
+      `String ([%js.to: string] js_val)
+    else if Ojs.has_property js_val "label" then
+      `TreeItemLabel ([%js.to: TreeItemLabel.t] js_val)
+    else
+      assert false
+
   module LightDarkIcon = struct
     type t =
       { light : ([ `String of string | `Uri of Uri.t ][@js.union])
@@ -1939,10 +1954,7 @@ module TreeItem = struct
       assert false
 
   val make :
-       label:TreeItemLabel.t
-    -> ?collapsibleState:TreeItemCollapsibleState.t
-    -> unit
-    -> t
+    label:label -> ?collapsibleState:TreeItemCollapsibleState.t -> unit -> t
     [@@js.new "vscode.TreeItem"]
 
   val of_uri :
@@ -1952,9 +1964,9 @@ module TreeItem = struct
     -> t
     [@@js.new "vscode.TreeItem"]
 
-  val label : t -> TreeItemLabel.t or_undefined [@@js.get]
+  val label : t -> label or_undefined [@@js.get]
 
-  val set_label : t -> TreeItemLabel.t -> unit [@@js.set]
+  val set_label : t -> label -> unit [@@js.set]
 
   val id : t -> string or_undefined [@@js.get]
 
