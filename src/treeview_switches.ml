@@ -242,16 +242,19 @@ let register extension =
           `Promise items )
     in
     let getTreeItem ~element = Promise.return element in
-    let event_emitter = Vscode.EventEmitter.make () in
-    let event = Vscode.EventEmitter.event event_emitter in
+    let module EventEmitter = Vscode.EventEmitter.Make (Ojs) in
+    let event_emitter = EventEmitter.make () in
+    let event = EventEmitter.event event_emitter in
+    let module TreeDataProvider = Vscode.TreeDataProvider.Make (Vscode.TreeItem) in
     let treeDataProvider =
-      Vscode.TreeDataProvider.create ~getTreeItem ~getChildren
+      TreeDataProvider.create ~getTreeItem ~getChildren
         ~onDidChangeTreeData:event ()
     in
 
     let disposable =
-      Vscode.Window.registerTreeDataProvider ~viewId:"ocaml-switches"
-        ~treeDataProvider
+      Vscode.Window.registerTreeDataProvider
+        (module Vscode.TreeItem)
+        ~viewId:"ocaml-switches" ~treeDataProvider
     in
     ExtensionContext.subscribe extension ~disposable;
 

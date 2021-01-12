@@ -86,14 +86,16 @@ let getChildren ~extension_path ~element =
 
 let register extension =
   let extension_path = Vscode.ExtensionContext.extensionPath extension in
+  let module TreeDataProvider = Vscode.TreeDataProvider.Make (Vscode.TreeItem) in
   let treeDataProvider =
-    Vscode.TreeDataProvider.create
+    TreeDataProvider.create
       ~getTreeItem:(getTreeItem ~extension_path)
       ~getChildren:(getChildren ~extension_path)
       ()
   in
   let disposable =
-    Vscode.Window.registerTreeDataProvider ~viewId:"ocaml-help"
-      ~treeDataProvider
+    Vscode.Window.registerTreeDataProvider
+      (module Vscode.TreeItem)
+      ~viewId:"ocaml-help" ~treeDataProvider
   in
   Vscode.ExtensionContext.subscribe extension ~disposable

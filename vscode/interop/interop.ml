@@ -31,9 +31,9 @@ let maybe_list_to_js ml_to_js = function
 module Regexp = struct
   type t = Js_of_ocaml.Regexp.regexp
 
-  let t_to_js : Js_of_ocaml.Regexp.regexp -> Ojs.t = Obj.magic
-
   let t_of_js : Ojs.t -> Js_of_ocaml.Regexp.regexp = Obj.magic
+
+  let t_to_js : Js_of_ocaml.Regexp.regexp -> Ojs.t = Obj.magic
 
   val replace :
        string
@@ -68,10 +68,6 @@ end
 module Dict = struct
   module StringMap = Map.Make (String)
 
-  let t_to_js value_to_js ml_map =
-    let to_js (k, v) = (k, value_to_js v) in
-    StringMap.to_seq ml_map |> Seq.map to_js |> Array.of_seq |> Ojs.obj
-
   let t_of_js value_of_js js_obj =
     let ml_map = ref StringMap.empty in
     let iter key =
@@ -80,6 +76,10 @@ module Dict = struct
     in
     Ojs.iter_properties js_obj iter;
     !ml_map
+
+  let t_to_js value_to_js ml_map =
+    let to_js (k, v) = (k, value_to_js v) in
+    StringMap.to_seq ml_map |> Seq.map to_js |> Array.of_seq |> Ojs.obj
 
   let of_alist alist = StringMap.of_seq (List.to_seq alist)
 
@@ -94,15 +94,57 @@ module Js = struct
 
     val t_to_js : t -> Ojs.t
   end
-end
 
-module Interface = struct
-  module Make () = struct
-    type t = private Ojs.t [@@js]
+  module Int = struct
+    type t = int
+
+    let t_of_js = Ojs.int_of_js
+
+    let t_to_js = Ojs.int_to_js
+  end
+
+  module String = struct
+    type t = string
+
+    let t_of_js = Ojs.string_of_js
+
+    let t_to_js = Ojs.string_to_js
+  end
+
+  module Option (T : T) = struct
+    type t = T.t option
+
+    let t_of_js = Ojs.option_of_js T.t_of_js
+
+    let t_to_js = Ojs.option_to_js T.t_to_js
+  end
+
+  module Or_undefined (T : T) = struct
+    type t = T.t or_undefined
+
+    let t_of_js = or_undefined_of_js T.t_of_js
+
+    let t_to_js = or_undefined_to_js T.t_to_js
+  end
+
+  module List (T : T) = struct
+    type t = T.t list
+
+    let t_of_js = Ojs.list_of_js T.t_of_js
+
+    let t_to_js = Ojs.list_to_js T.t_to_js
+  end
+
+  module Dict (T : T) = struct
+    type t = T.t Dict.t
+
+    let t_of_js = Dict.t_of_js T.t_of_js
+
+    let t_to_js = Dict.t_to_js T.t_to_js
   end
 end
 
-module Class = struct
+module Interface = struct
   module Make () = struct
     type t = private Ojs.t [@@js]
   end
@@ -110,4 +152,16 @@ module Class = struct
   module Extend (Super : Js.T) () = struct
     type t = private Super.t [@@js]
   end
+
+  module Generic (Super : Js.T) () = struct
+    type 'a t = Super.t
+
+    type 'a generic = 'a t
+
+    let generic_of_js _ = Super.t_of_js
+
+    let generic_to_js _ = Super.t_to_js
+  end
 end
+
+module Class = Interface

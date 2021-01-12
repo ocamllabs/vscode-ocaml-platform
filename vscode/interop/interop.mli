@@ -15,9 +15,9 @@ val maybe_list_to_js : ('a -> Ojs.t) -> 'a list -> Ojs.t
 module Regexp : sig
   type t = Js_of_ocaml.Regexp.regexp
 
-  val t_to_js : Js_of_ocaml.Regexp.regexp -> Ojs.t
-
   val t_of_js : Ojs.t -> Js_of_ocaml.Regexp.regexp
+
+  val t_to_js : Js_of_ocaml.Regexp.regexp -> Ojs.t
 
   type replacer =
        matched:string
@@ -32,9 +32,9 @@ end
 module Dict : sig
   include Map.S with type key = string
 
-  val t_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
-
   val t_of_js : (Ojs.t -> 'a) -> Ojs.t -> 'a t
+
+  val t_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
 
   val of_alist : (string * 'a) list -> 'a t
 end
@@ -47,14 +47,34 @@ module Js : sig
 
     val t_to_js : t -> Ojs.t
   end
+
+  module String : T with type t = string
+
+  module Int : T with type t = int
+
+  module Option (T : T) : T with type t = T.t option
+
+  module Or_undefined (T : T) : T with type t = T.t or_undefined
+
+  module List (T : T) : T with type t = T.t list
+
+  module Dict (T : T) : T with type t = T.t Dict.t
 end
 
 module Interface : sig
   module Make () : Js.T with type t = private Ojs.t
-end
-
-module Class : sig
-  module Make () : Js.T with type t = private Ojs.t
 
   module Extend (Super : Js.T) () : Js.T with type t = private Super.t
+
+  module Generic (Super : Js.T) () : sig
+    type 'a t = private Super.t
+
+    type 'a generic = 'a t
+
+    val generic_of_js : (Ojs.t -> 'a) -> Ojs.t -> 'a t
+
+    val generic_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
+  end
 end
+
+module Class = Interface

@@ -714,21 +714,23 @@ end
 module Event : sig
   type 'a t = listener:('a -> unit) -> Disposable.t
 
-  val t_of_js : (Ojs.t -> 'a) -> Ojs.t -> 'a t
-
-  val t_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
+  module Make (T : Js.T) : Js.T with type t = T.t t
 end
 
 module EventEmitter : sig
-  include Js.T
+  type 'a t
 
-  val make : unit -> t
+  module Make (T : Js.T) : sig
+    include Js.T with type t = T.t t
 
-  val event : t -> Ojs.t Event.t
+    val make : unit -> t
 
-  val fire : t -> Ojs.t -> unit
+    val event : t -> T.t Event.t
 
-  val dispose : t -> unit -> unit
+    val fire : t -> T.t -> unit
+
+    val dispose : t -> unit -> unit
+  end
 end
 
 module CancellationToken : sig
@@ -1666,65 +1668,79 @@ module TreeItem : sig
 end
 
 module TreeDataProvider : sig
-  include Js.T
+  type 'a t
 
-  val create :
-       getTreeItem:(element:TreeItem.t -> TreeItem.t Promise.t)
-    -> getChildren:
-         (element:TreeItem.t option -> TreeItem.t list ProviderResult.t)
-    -> ?getParent:(element:TreeItem.t -> TreeItem.t ProviderResult.t)
-    -> ?onDidChangeTreeData:Ojs.t Event.t
-    -> ?resolveTreeItem:
-         (item:TreeItem.t -> element:TreeItem.t -> TreeItem.t ProviderResult.t)
-    -> unit
-    -> t
+  module Make (T : Js.T) : sig
+    type nonrec t = T.t t
 
-  val onDidChangeTreeData : t -> Ojs.t Event.t option
+    val create :
+         getTreeItem:(element:TreeItem.t -> TreeItem.t Promise.t)
+      -> getChildren:
+           (element:TreeItem.t option -> TreeItem.t list ProviderResult.t)
+      -> ?getParent:(element:TreeItem.t -> TreeItem.t ProviderResult.t)
+      -> ?onDidChangeTreeData:Ojs.t Event.t
+      -> ?resolveTreeItem:
+           (   item:TreeItem.t
+            -> element:TreeItem.t
+            -> TreeItem.t ProviderResult.t)
+      -> unit
+      -> t
 
-  val getTreeItem : t -> element:TreeItem.t -> TreeItem.t Promise.t
+    val onDidChangeTreeData : t -> Ojs.t Event.t option
 
-  val getChildren :
-    t -> element:TreeItem.t option -> TreeItem.t list ProviderResult.t
+    val getTreeItem : t -> element:TreeItem.t -> TreeItem.t Promise.t
 
-  val getParent :
-    t -> (element:TreeItem.t -> TreeItem.t ProviderResult.t) option
+    val getChildren :
+      t -> element:TreeItem.t option -> TreeItem.t list ProviderResult.t
 
-  val resolveTreeItem :
-       t
-    -> (item:TreeItem.t -> element:TreeItem.t -> TreeItem.t ProviderResult.t)
-       option
+    val getParent :
+      t -> (element:TreeItem.t -> TreeItem.t ProviderResult.t) option
+
+    val resolveTreeItem :
+         t
+      -> (item:TreeItem.t -> element:TreeItem.t -> TreeItem.t ProviderResult.t)
+         option
+  end
 end
 
 module TreeViewOptions : sig
-  include Js.T
+  type 'a t
 
-  val treeDataProvider : t -> TreeDataProvider.t
+  module Make (T : Js.T) : sig
+    type nonrec t = T.t t
 
-  val showCollapseAll : t -> bool option
+    val treeDataProvider : t -> T.t TreeDataProvider.t
 
-  val canSelectMany : t -> bool option
+    val showCollapseAll : t -> bool option
+
+    val canSelectMany : t -> bool option
+  end
 end
 
 module TreeView : sig
-  include Js.T
+  type 'a t
 
-  (* val onDidExpandElement : t -> TreeViewExpansionEvent.t Event.t *)
+  module Make (T : Js.T) : sig
+    type nonrec t = T.t t
 
-  (* val onDidCollapseElement : t -> TreeViewExpansionEvent.t Event.t *)
+    (* val onDidExpandElement : t -> TreeViewExpansionEvent.t Event.t *)
 
-  (* val selection : t -> 'a list *)
+    (* val onDidCollapseElement : t -> TreeViewExpansionEvent.t Event.t *)
 
-  (* val onDidChangeSelection : t -> TreeViewSelectionChangeEvent.t Event.t *)
+    (* val selection : t -> 'a list *)
 
-  val visible : t -> bool
+    (* val onDidChangeSelection : t -> TreeViewSelectionChangeEvent.t Event.t *)
 
-  (* val onDidChangeVisibility : t -> TreeViewVisibilityChangeEvent.t Event.t *)
+    val visible : t -> bool
 
-  val message : t -> string option
+    (* val onDidChangeVisibility : t -> TreeViewVisibilityChangeEvent.t Event.t *)
 
-  val title : t -> string option
+    val message : t -> string option
 
-  val description : t -> string option
+    val title : t -> string option
+
+    val description : t -> string option
+  end
 end
 
 module Window : sig
@@ -1822,9 +1838,16 @@ module Window : sig
     -> Terminal.t
 
   val registerTreeDataProvider :
-    viewId:string -> treeDataProvider:TreeDataProvider.t -> Disposable.t
+       (module Js.T with type t = 'a)
+    -> viewId:string
+    -> treeDataProvider:'a TreeDataProvider.t
+    -> Disposable.t
 
-  val createTreeView : viewId:string -> options:TreeViewOptions.t -> TreeView.t
+  val createTreeView :
+       (module Js.T with type t = 'a)
+    -> viewId:string
+    -> options:'a TreeViewOptions.t
+    -> 'a TreeView.t
 end
 
 module Commands : sig
