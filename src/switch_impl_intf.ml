@@ -61,8 +61,8 @@ let request_switch client document =
   | [] ->
     (* 'ocamllsp/switchImplIntf' command's response array cannot be empty *)
     assert false
-  | [ filepath ] -> (
-    let* result = show_file filepath in
+  | [ file_uri ] -> (
+    let* result = show_file file_uri in
     match result with
     | editor, true -> insert_inferred_intf source_uri client editor
     | _ -> Promise.return () )
