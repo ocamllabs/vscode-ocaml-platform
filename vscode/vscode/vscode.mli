@@ -1515,7 +1515,11 @@ module RelativePattern : sig
   val pattern : t -> string
 
   val make :
-       base:[ `String of string | `WorkspaceFolder of WorkspaceFolder.t ]
+       base:
+         [ `String of string
+         | `Uri of Uri.t
+         | `WorkspaceFolder of WorkspaceFolder.t
+         ]
     -> pattern:string
     -> t
 

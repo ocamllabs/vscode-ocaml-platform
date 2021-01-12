@@ -1499,8 +1499,11 @@ module RelativePattern = struct
   val pattern : t -> string [@@js.get]
 
   val make :
-       base:([ `WorkspaceFolder of WorkspaceFolder.t | `String of string ]
-         [@js.union])
+       base:
+         ([ `WorkspaceFolder of WorkspaceFolder.t
+          | `Uri of Uri.t
+          | `String of string
+          ][@js.union])
     -> pattern:string
     -> t
     [@@js.new "vscode.RelativePattern"]
