@@ -110,6 +110,7 @@ module Command = struct
           | Ok _ ->
             let (_ : Ojs.t option Promise.t) =
               Vscode.Commands.executeCommand
+                (module Ojs)
                 ~command:Extension_consts.Commands.refresh_switches ~args:[]
             in
             show_message `Info "The switch has been removed successfully." ) )
@@ -134,7 +135,9 @@ module Command = struct
         | None -> Promise.return ()
         | Some doc ->
           let+ _ =
-            Vscode.Commands.executeCommand ~command:"vscode.open"
+            Vscode.Commands.executeCommand
+              (module Ojs)
+              ~command:"vscode.open"
               ~args:[ Vscode.Uri.parse doc () |> Vscode.Uri.t_to_js ]
           in
           () )
@@ -150,7 +153,7 @@ let make_item ~extension_path ~opam dependency =
     `TreeItemLabel
       (Vscode.TreeItemLabel.create ~label:(Dependency.label dependency) ())
   in
-  let item = Vscode.TreeItem.make ~label ~collapsibleState () in
+  let item = Vscode.TreeItem.make_label ~label ~collapsibleState () in
   TreeItem.set_id item (Dependency.to_string dependency);
   TreeItem.set_iconPath item icon;
   TreeItem.set_contextValue item (Dependency.context_value dependency);
@@ -218,9 +221,9 @@ let register extension =
     let open Promise.Syntax in
     let extension_path = Vscode.ExtensionContext.extensionPath extension in
     let+ opam = Opam.make () in
-    let getChildren ~element =
+    let getChildren ?element () =
       match opam with
-      | None -> `Promise (Promise.return None)
+      | None -> `Value None
       | Some opam -> (
         match element with
         | Some element ->
@@ -241,8 +244,9 @@ let register extension =
           in
           `Promise items )
     in
-    let getTreeItem ~element = Promise.return element in
-    let module EventEmitter = Vscode.EventEmitter.Make (Ojs) in
+    let getTreeItem ~element = `Value element in
+    let module EventEmitter =
+      Vscode.EventEmitter.Make (Interop.Js.Or_undefined (TreeItem)) in
     let event_emitter = EventEmitter.make () in
     let event = EventEmitter.event event_emitter in
     let module TreeDataProvider = Vscode.TreeDataProvider.Make (Vscode.TreeItem) in
@@ -274,7 +278,7 @@ let register extension =
     let disposable =
       Commands.registerCommand
         ~command:Extension_consts.Commands.refresh_switches
-        ~callback:(fun ~args:_ -> EventEmitter.fire event_emitter Ojs.null)
+        ~callback:(fun ~args:_ -> EventEmitter.fire event_emitter None)
     in
     ExtensionContext.subscribe extension ~disposable
   in

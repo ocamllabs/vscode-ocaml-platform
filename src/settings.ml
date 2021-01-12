@@ -11,7 +11,7 @@ let create ~scope ~key ~of_json ~to_json = { scope; key; to_json; of_json }
 
 let get ?section t =
   let section = Workspace.getConfiguration ?section () in
-  match WorkspaceConfiguration.get section ~section:t.key () with
+  match WorkspaceConfiguration.get (module Jsonoo) section ~section:t.key with
   | None -> None
   | Some v -> (
     match t.of_json v with
@@ -25,7 +25,8 @@ let set ?section t v =
   match Workspace.name () with
   | None -> Promise.return ()
   | Some _ ->
-    WorkspaceConfiguration.update section ~section:t.key ~value:(t.to_json v)
+    let value = Jsonoo.t_to_js (t.to_json v) in
+    WorkspaceConfiguration.update section ~section:t.key ~value
       ~configurationTarget:(`ConfigurationTarget t.scope) ()
 
 let string =

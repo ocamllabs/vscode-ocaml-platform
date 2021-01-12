@@ -686,38 +686,65 @@ end
 module WorkspaceConfiguration = struct
   include Interface.Make ()
 
-  type configurationTarget =
-    ([ `ConfigurationTarget of ConfigurationTarget.t
-     | `Bool of bool
-     ]
-    [@js.union])
-  [@@js]
-
-  type inspectResult =
+  type 'a inspectResult =
     { key : string
-    ; defaultValue : Jsonoo.t or_undefined
-    ; globalValue : Jsonoo.t or_undefined
-    ; workspaceValue : Jsonoo.t or_undefined
-    ; workspaceFolderValue : Jsonoo.t or_undefined
-    ; defaultLanguageValue : Jsonoo.t or_undefined
-    ; globalLanguageValue : Jsonoo.t or_undefined
-    ; workspaceLanguageValue : Jsonoo.t or_undefined
-    ; workspaceFolderLanguageValue : Jsonoo.t or_undefined
-    ; languageIds : string or_undefined
+    ; defaultValue : 'a or_undefined
+    ; globalValue : 'a or_undefined
+    ; workspaceValue : 'a or_undefined
+    ; workspaceFolderValue : 'a or_undefined
+    ; defaultLanguageValue : 'a or_undefined
+    ; globalLanguageValue : 'a or_undefined
+    ; workspaceLanguageValue : 'a or_undefined
+    ; workspaceFolderLanguageValue : 'a or_undefined
+    ; languageIds : string list or_undefined
     }
-  [@@js]
 
-  val get : t -> section:string -> unit -> Jsonoo.t or_undefined [@@js.call]
+  let inspectResult_of_js (type t) t_of_js js_val : t inspectResult =
+    let field = Ojs.get js_val in
+    { key = [%js.to: string] (field "key")
+    ; defaultValue = [%js.to: t or_undefined] (field "defaultValue")
+    ; globalValue = [%js.to: t or_undefined] (field "globalValue")
+    ; workspaceValue = [%js.to: t or_undefined] (field "workspaceValue")
+    ; workspaceFolderValue =
+        [%js.to: t or_undefined] (field "workspaceFolderValue")
+    ; defaultLanguageValue =
+        [%js.to: t or_undefined] (field "defaultLanguageValue")
+    ; globalLanguageValue =
+        [%js.to: t or_undefined] (field "globalLanguageValue")
+    ; workspaceLanguageValue =
+        [%js.to: t or_undefined] (field "workspaceLanguageValue")
+    ; workspaceFolderLanguageValue =
+        [%js.to: t or_undefined] (field "workspaceFolderLanguageValue")
+    ; languageIds = [%js.to: string list or_undefined] (field "languageIds")
+    }
+
+  val get : t -> section:string -> ?defaultValue:Ojs.t -> unit -> Ojs.t
+    [@@js.call]
+
+  let get_default (type a) (module T : Js.T with type t = a) this ~section
+      ~(defaultValue : a) : a =
+    let defaultValue = [%js.of: T.t] defaultValue in
+    [%js.to: T.t] (get this ~section ~defaultValue ())
+
+  let get (type a) (module T : Js.T with type t = a) this ~section :
+      a or_undefined =
+    [%js.to: T.t or_undefined] (get this ~section ())
 
   val has : t -> section:string -> bool [@@js.call]
 
-  val inspect : t -> section:string -> inspectResult [@@js.call]
+  val inspect : t -> section:string -> Ojs.t [@@js.call]
+
+  let inspect (type a) (module T : Js.T with type t = a) this ~section :
+      a inspectResult or_undefined =
+    [%js.to: T.t inspectResult or_undefined] (inspect this ~section)
 
   val update :
        t
     -> section:string
-    -> value:Jsonoo.t
-    -> ?configurationTarget:configurationTarget
+    -> value:Ojs.t
+    -> ?configurationTarget:
+         ([ `ConfigurationTarget of ConfigurationTarget.t | `Bool of bool ]
+         [@js.union])
     -> ?overrideInLanguage:bool
     -> unit
     -> Promise.void
@@ -1236,9 +1263,18 @@ end
 module Memento = struct
   include Interface.Make ()
 
-  val get : t -> key:string -> Jsonoo.t or_undefined [@@js.call]
+  val get : t -> key:string -> ?defaultValue:Ojs.t -> unit -> Ojs.t [@@js.call]
 
-  val update : t -> key:string -> value:Jsonoo.t -> Promise.void [@@js.call]
+  let get_default (type a) (module T : Js.T with type t = a) this ~key
+      ~(defaultValue : a) : a =
+    let defaultValue = [%js.of: T.t] defaultValue in
+    [%js.to: T.t] (get this ~key ~defaultValue ())
+
+  let get (type a) (module T : Js.T with type t = a) this ~key : a or_undefined
+      =
+    [%js.to: T.t or_undefined] (get this ~key ())
+
+  val update : t -> key:string -> value:Ojs.t -> Promise.void [@@js.call]
 end
 
 module EnvironmentVariableMutatorType = struct
@@ -1727,22 +1763,28 @@ module Task = struct
 end
 
 module TaskProvider = struct
-  include Interface.Make ()
+  include Interface.Generic (Ojs) ()
 
-  val provideTasks :
-    t -> token:CancellationToken.t -> Task.t list ProviderResult.t
-    [@@js.call]
+  module Make (T : Js.T) = struct
+    type t = T.t generic [@@js]
 
-  val resolveTasks :
-    t -> task:Task.t -> token:CancellationToken.t -> Task.t ProviderResult.t
-    [@@js.call]
+    val provideTasks :
+      t -> token:CancellationToken.t -> T.t list ProviderResult.t
+      [@@js.call]
 
-  val create :
-       provideTasks:(token:CancellationToken.t -> Task.t list ProviderResult.t)
-    -> resolveTasks:
-         (task:Task.t -> token:CancellationToken.t -> Task.t ProviderResult.t)
-    -> t
-    [@@js.builder]
+    val resolveTask :
+      t -> task:T.t -> token:CancellationToken.t -> T.t ProviderResult.t
+      [@@js.call]
+
+    val create :
+         provideTasks:(token:CancellationToken.t -> T.t list ProviderResult.t)
+      -> resolveTask:
+           (task:T.t -> token:CancellationToken.t -> T.t ProviderResult.t)
+      -> t
+      [@@js.builder]
+  end
+
+  module Default = Make (Task)
 end
 
 module ConfigurationScope = struct
@@ -1974,8 +2016,15 @@ module TreeItem = struct
     else
       assert false
 
-  val make :
+  val make_label :
     label:label -> ?collapsibleState:TreeItemCollapsibleState.t -> unit -> t
+    [@@js.new "vscode.TreeItem"]
+
+  val make_resource :
+       resourceUri:Uri.t
+    -> ?collapsibleState:TreeItemCollapsibleState.t
+    -> unit
+    -> t
     [@@js.new "vscode.TreeItem"]
 
   val of_uri :
@@ -2034,37 +2083,46 @@ module TreeDataProvider = struct
   module Make (T : Js.T) = struct
     type t = T.t generic [@@js]
 
-    module OnDidChangeTreeData = Event.Make (Ojs)
+    module OnDidChangeTreeData = Event.Make (struct
+      type t = T.t or_undefined [@@js]
+    end)
 
     val onDidChangeTreeData : t -> OnDidChangeTreeData.t or_undefined [@@js.get]
 
-    val getTreeItem : t -> element:TreeItem.t -> TreeItem.t Promise.t
+    type getTreeItemResult =
+      ([ `Value of TreeItem.t
+       | `Promise of TreeItem.t Promise.t
+       ]
+      [@js.union])
+    [@@js]
+
+    let getTreeItemResult_of_js js_val =
+      if Ojs.has_property js_val "then" then
+        `Promise ([%js.to: TreeItem.t Promise.t] js_val)
+      else
+        `Value ([%js.to: TreeItem.t] js_val)
+
+    val getTreeItem : t -> element:T.t -> getTreeItemResult [@@js.call]
+
+    val getChildren : t -> ?element:T.t -> unit -> T.t list ProviderResult.t
       [@@js.call]
 
-    val getChildren :
-      t -> element:TreeItem.t or_undefined -> TreeItem.t list ProviderResult.t
-      [@@js.call]
-
-    val getParent :
-      t -> (element:TreeItem.t -> TreeItem.t ProviderResult.t) or_undefined
+    val getParent : t -> (element:T.t -> T.t ProviderResult.t) or_undefined
       [@@js.call]
 
     val resolveTreeItem :
          t
-      -> (item:TreeItem.t -> element:TreeItem.t -> TreeItem.t ProviderResult.t)
+      -> (item:TreeItem.t -> element:T.t -> TreeItem.t ProviderResult.t)
          or_undefined
       [@@js.call]
 
     val create :
-         getTreeItem:(element:TreeItem.t -> TreeItem.t Promise.t)
-      -> getChildren:
-           (element:TreeItem.t or_undefined -> TreeItem.t list ProviderResult.t)
-      -> ?getParent:(element:TreeItem.t -> TreeItem.t ProviderResult.t)
-      -> ?onDidChangeTreeData:OnDidChangeTreeData.t
+         ?onDidChangeTreeData:OnDidChangeTreeData.t
+      -> getTreeItem:(element:T.t -> getTreeItemResult)
+      -> getChildren:(?element:T.t -> unit -> T.t list ProviderResult.t)
+      -> ?getParent:(element:T.t -> T.t ProviderResult.t)
       -> ?resolveTreeItem:
-           (   item:TreeItem.t
-            -> element:TreeItem.t
-            -> TreeItem.t ProviderResult.t)
+           (item:TreeItem.t -> element:T.t -> TreeItem.t ProviderResult.t)
       -> unit
       -> t
       [@@js.builder]
@@ -2087,13 +2145,64 @@ module TreeViewOptions = struct
   end
 end
 
+module TreeViewExpansionEvent = struct
+  include Interface.Generic (Ojs) ()
+
+  module Make (T : Js.T) = struct
+    type t = T.t generic [@@js]
+
+    val element : t -> T.t [@@js.get]
+
+    val create : element:T.t -> t [@@js.builder]
+  end
+end
+
+module TreeViewSelectionChangeEvent = struct
+  include Interface.Generic (Ojs) ()
+
+  module Make (T : Js.T) = struct
+    type t = T.t generic [@@js]
+
+    val selection : t -> T.t list [@@js.get]
+
+    val create : selection:T.t list -> t [@@js.builder]
+  end
+end
+
+module TreeViewVisibilityChangeEvent = struct
+  include Interface.Make ()
+
+  val visible : t -> bool [@@js.get]
+
+  val create : visible:bool -> t [@@js.builder]
+end
+
 module TreeView = struct
   include Class.Generic (Disposable) ()
 
   module Make (T : Js.T) = struct
     type t = T.t generic [@@js]
 
+    module OnDidExpandElement = Event.Make (TreeViewExpansionEvent.Make (T))
+
+    val onDidExpandElement : t -> OnDidExpandElement.t [@@js.get]
+
+    module OnDidCollapseElement = Event.Make (TreeViewExpansionEvent.Make (T))
+
+    val onDidCollapseElement : t -> OnDidCollapseElement.t [@@js.get]
+
+    val selection : t -> T.t list [@@js]
+
+    module OnDidChangeSelection =
+      Event.Make (TreeViewSelectionChangeEvent.Make (T))
+
+    val onDidChangeSelection : t -> OnDidChangeSelection.t [@@js.get]
+
     val visible : t -> bool [@@js.get]
+
+    module OnDidChangeVisibility = Event.Make (TreeViewVisibilityChangeEvent)
+
+    val onDidChangeVisibility : t -> OnDidChangeVisibility.t [@@js.get]
 
     val message : t -> string or_undefined [@@js.get]
 
@@ -2101,12 +2210,15 @@ module TreeView = struct
 
     val description : t -> string or_undefined [@@js.get]
 
-    type revealOptions =
-      { select : bool or_undefined
-      ; focus : bool or_undefined
-      ; expand : bool or_undefined
-      }
-    [@@js]
+    val reveal : t -> element:T.t -> Ojs.t -> Promise.void [@@js.call]
+
+    let reveal this ~element ?select ?focus ?expand () =
+      let options = Ojs.obj [||] in
+      iter_set options "select" [%js.of: bool] select;
+      iter_set options "focus" [%js.of: bool] focus;
+      iter_set options "expand"
+        [%js.of: ([ `Bool of bool | `Int of int ][@js.union])] expand;
+      reveal this ~element options
   end
 end
 
@@ -2247,16 +2359,16 @@ module Window = struct
     -> Disposable.t
     [@@js.global "vscode.window.setStatusBarMessage"]
 
-  val withProgress :
-       options:ProgressOptions.t
-    -> task:
-         (progress:Progress.t -> token:CancellationToken.t -> Ojs.t Promise.t)
-    -> Ojs.t Promise.t
+  val withProgress : options:ProgressOptions.t -> task:Ojs.t -> Ojs.t
     [@@js.global "vscode.window.withProgress"]
 
-  let withProgress ~options ~task =
-    let task ~progress ~token = Obj.magic (task ~progress ~token) in
-    Obj.magic (withProgress ~options ~task)
+  let withProgress (type a) (module T : Js.T with type t = a) ~options ~task :
+      a Promise.t =
+    let task =
+      [%js.of:
+        progress:Progress.t -> token:CancellationToken.t -> T.t Promise.t] task
+    in
+    [%js.to: T.t Promise.t] (withProgress ~options ~task)
 
   val createStatusBarItem :
     ?alignment:StatusBarAlignment.t -> ?priority:int -> unit -> StatusBarItem.t
@@ -2318,10 +2430,12 @@ module Commands = struct
     [@@js.global "vscode.commands.registerTextEditorCommand"]
 
   val executeCommand :
-       command:string
-    -> args:(Ojs.t list[@js.variadic])
-    -> Ojs.t or_undefined Promise.t
+    command:string -> args:(Ojs.t list[@js.variadic]) -> Ojs.t
     [@@js.global "vscode.commands.executeCommand"]
+
+  let executeCommand (type a) (module T : Js.T with type t = a) ~command ~args :
+      a or_undefined Promise.t =
+    [%js.to: T.t or_undefined Promise.t] (executeCommand ~command ~args)
 
   val getCommands : ?filterInternal:bool -> unit -> string list Promise.t
     [@@js.global "vscode.commands.getCommands"]
@@ -2337,7 +2451,7 @@ end
 
 module Tasks = struct
   val registerTaskProvider :
-    type_:string -> provider:TaskProvider.t -> Disposable.t
+    type_:string -> provider:TaskProvider.Default.t -> Disposable.t
     [@@js.global "vscode.tasks.registerTaskProvider"]
 end
 

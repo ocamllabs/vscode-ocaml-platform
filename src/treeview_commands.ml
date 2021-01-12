@@ -9,7 +9,7 @@ let select_sandbox_item ~extension_path =
   let label =
     `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Select a Sandbox" ())
   in
-  let item = Vscode.TreeItem.make ~label () in
+  let item = Vscode.TreeItem.make_label ~label () in
   let command =
     Vscode.Command.create ~title:"Select a Sandbox"
       ~command:"ocaml.select-sandbox" ()
@@ -30,7 +30,7 @@ let terminal_item ~extension_path =
     `TreeItemLabel
       (Vscode.TreeItemLabel.create ~label:"Open a sandboxed terminal" ())
   in
-  let item = Vscode.TreeItem.make ~label () in
+  let item = Vscode.TreeItem.make_label ~label () in
   let command =
     Vscode.Command.create ~title:"Open a sandboxed terminal"
       ~command:"ocaml.open-terminal" ()
@@ -42,9 +42,9 @@ let terminal_item ~extension_path =
 let items ~extension_path =
   [ select_sandbox_item ~extension_path; terminal_item ~extension_path ]
 
-let getTreeItem ~extension_path:_ ~element = Promise.return element
+let getTreeItem ~extension_path:_ ~element = `Value element
 
-let getChildren ~extension_path ~element =
+let getChildren ~extension_path ?element () =
   match element with
   | None -> `Value (Some (items ~extension_path))
   | Some _ -> `Value (Some [])

@@ -15,14 +15,6 @@ end
 module Command : sig
   include Js.T
 
-  val create :
-       title:string
-    -> command:string
-    -> ?tooltip:string
-    -> ?arguments:Ojs.t list
-    -> unit
-    -> t
-
   val title : t -> string
 
   val command : t -> string
@@ -30,6 +22,14 @@ module Command : sig
   val tooltip : t -> string option
 
   val arguments : t -> Ojs.t list
+
+  val create :
+       title:string
+    -> command:string
+    -> ?tooltip:string
+    -> ?arguments:Ojs.t list
+    -> unit
+    -> t
 end
 
 module Position : sig
@@ -588,35 +588,42 @@ end
 module WorkspaceConfiguration : sig
   include Js.T
 
-  type configurationTarget =
-    [ `ConfigurationTarget of ConfigurationTarget.t
-    | `Bool of bool
-    ]
-
-  type inspectResult =
+  type 'a inspectResult =
     { key : string
-    ; defaultValue : Jsonoo.t option
-    ; globalValue : Jsonoo.t option
-    ; workspaceValue : Jsonoo.t option
-    ; workspaceFolderValue : Jsonoo.t option
-    ; defaultLanguageValue : Jsonoo.t option
-    ; globalLanguageValue : Jsonoo.t option
-    ; workspaceLanguageValue : Jsonoo.t option
-    ; workspaceFolderLanguageValue : Jsonoo.t option
-    ; languageIds : string option
+    ; defaultValue : 'a option
+    ; globalValue : 'a option
+    ; workspaceValue : 'a option
+    ; workspaceFolderValue : 'a option
+    ; defaultLanguageValue : 'a option
+    ; globalLanguageValue : 'a option
+    ; workspaceLanguageValue : 'a option
+    ; workspaceFolderLanguageValue : 'a option
+    ; languageIds : string list option
     }
 
-  val get : t -> section:string -> unit -> Jsonoo.t option
+  val get : (module Js.T with type t = 'a) -> t -> section:string -> 'a option
+
+  val get_default :
+       (module Js.T with type t = 'a)
+    -> t
+    -> section:string
+    -> defaultValue:'a
+    -> 'a
 
   val has : t -> section:string -> bool
 
-  val inspect : t -> section:string -> inspectResult
+  val inspect :
+       (module Js.T with type t = 'a)
+    -> t
+    -> section:string
+    -> 'a inspectResult option
 
   val update :
        t
     -> section:string
-    -> value:Jsonoo.t
-    -> ?configurationTarget:configurationTarget
+    -> value:Ojs.t
+    -> ?configurationTarget:
+         [ `ConfigurationTarget of ConfigurationTarget.t | `Bool of bool ]
     -> ?overrideInLanguage:bool
     -> unit
     -> Promise.void
@@ -1045,9 +1052,12 @@ end
 module Memento : sig
   include Js.T
 
-  val get : t -> key:string -> Jsonoo.t option
+  val get : (module Js.T with type t = 'a) -> t -> key:string -> 'a option
 
-  val update : t -> key:string -> value:Jsonoo.t -> Promise.void
+  val get_default :
+    (module Js.T with type t = 'a) -> t -> key:string -> defaultValue:'a -> 'a
+
+  val update : t -> key:string -> value:Ojs.t -> Promise.void
 end
 
 module EnvironmentVariableMutatorType : sig
@@ -1461,19 +1471,25 @@ module Task : sig
 end
 
 module TaskProvider : sig
-  include Js.T
+  type 'a t
 
-  val provideTasks :
-    t -> token:CancellationToken.t -> Task.t list ProviderResult.t
+  module Make (T : Js.T) : sig
+    type nonrec t = T.t t
 
-  val resolveTasks :
-    t -> task:Task.t -> token:CancellationToken.t -> Task.t ProviderResult.t
+    val provideTasks :
+      t -> token:CancellationToken.t -> T.t list ProviderResult.t
 
-  val create :
-       provideTasks:(token:CancellationToken.t -> Task.t list ProviderResult.t)
-    -> resolveTasks:
-         (task:Task.t -> token:CancellationToken.t -> Task.t ProviderResult.t)
-    -> t
+    val resolveTask :
+      t -> task:T.t -> token:CancellationToken.t -> T.t ProviderResult.t
+
+    val create :
+         provideTasks:(token:CancellationToken.t -> T.t list ProviderResult.t)
+      -> resolveTask:
+           (task:T.t -> token:CancellationToken.t -> T.t ProviderResult.t)
+      -> t
+  end
+
+  module Default : module type of Make (Task)
 end
 
 module ConfigurationScope : sig
@@ -1617,8 +1633,14 @@ module TreeItem : sig
     | `Undefined
     ]
 
-  val make :
+  val make_label :
     label:label -> ?collapsibleState:TreeItemCollapsibleState.t -> unit -> t
+
+  val make_resource :
+       resourceUri:Uri.t
+    -> ?collapsibleState:TreeItemCollapsibleState.t
+    -> unit
+    -> t
 
   val of_uri :
        resourceUri:Uri.t
@@ -1673,33 +1695,32 @@ module TreeDataProvider : sig
   module Make (T : Js.T) : sig
     type nonrec t = T.t t
 
-    val create :
-         getTreeItem:(element:TreeItem.t -> TreeItem.t Promise.t)
-      -> getChildren:
-           (element:TreeItem.t option -> TreeItem.t list ProviderResult.t)
-      -> ?getParent:(element:TreeItem.t -> TreeItem.t ProviderResult.t)
-      -> ?onDidChangeTreeData:Ojs.t Event.t
-      -> ?resolveTreeItem:
-           (   item:TreeItem.t
-            -> element:TreeItem.t
-            -> TreeItem.t ProviderResult.t)
-      -> unit
-      -> t
+    val onDidChangeTreeData : t -> T.t option Event.t option
 
-    val onDidChangeTreeData : t -> Ojs.t Event.t option
+    val getTreeItem :
+         t
+      -> element:T.t
+      -> [ `Value of TreeItem.t | `Promise of TreeItem.t Promise.t ]
 
-    val getTreeItem : t -> element:TreeItem.t -> TreeItem.t Promise.t
+    val getChildren : t -> ?element:T.t -> unit -> T.t list ProviderResult.t
 
-    val getChildren :
-      t -> element:TreeItem.t option -> TreeItem.t list ProviderResult.t
-
-    val getParent :
-      t -> (element:TreeItem.t -> TreeItem.t ProviderResult.t) option
+    val getParent : t -> (element:T.t -> T.t ProviderResult.t) option
 
     val resolveTreeItem :
          t
-      -> (item:TreeItem.t -> element:TreeItem.t -> TreeItem.t ProviderResult.t)
-         option
+      -> (item:TreeItem.t -> element:T.t -> TreeItem.t ProviderResult.t) option
+
+    val create :
+         ?onDidChangeTreeData:T.t option Event.t
+      -> getTreeItem:
+           (   element:T.t
+            -> [ `Value of TreeItem.t | `Promise of TreeItem.t Promise.t ])
+      -> getChildren:(?element:T.t -> unit -> T.t list ProviderResult.t)
+      -> ?getParent:(element:T.t -> T.t ProviderResult.t)
+      -> ?resolveTreeItem:
+           (item:TreeItem.t -> element:T.t -> TreeItem.t ProviderResult.t)
+      -> unit
+      -> t
   end
 end
 
@@ -1717,29 +1738,71 @@ module TreeViewOptions : sig
   end
 end
 
-module TreeView : sig
+module TreeViewExpansionEvent : sig
   type 'a t
 
   module Make (T : Js.T) : sig
     type nonrec t = T.t t
 
-    (* val onDidExpandElement : t -> TreeViewExpansionEvent.t Event.t *)
+    val element : t -> T.t
 
-    (* val onDidCollapseElement : t -> TreeViewExpansionEvent.t Event.t *)
+    val create : element:T.t -> t
+  end
+end
 
-    (* val selection : t -> 'a list *)
+module TreeViewSelectionChangeEvent : sig
+  type 'a t
 
-    (* val onDidChangeSelection : t -> TreeViewSelectionChangeEvent.t Event.t *)
+  module Make (T : Js.T) : sig
+    type nonrec t = T.t t
+
+    val selection : t -> T.t list
+
+    val create : selection:T.t list -> t
+  end
+end
+
+module TreeViewVisibilityChangeEvent : sig
+  include Js.T
+
+  val visible : t -> bool
+
+  val create : visible:bool -> t
+end
+
+module TreeView : sig
+  type 'a t = private Disposable.t
+
+  module Make (T : Js.T) : sig
+    type nonrec t = T.t t
+
+    val onDidExpandElement : t -> T.t TreeViewExpansionEvent.t Event.t
+
+    val onDidCollapseElement : t -> T.t TreeViewExpansionEvent.t Event.t
+
+    val selection : t -> T.t list
+
+    val onDidChangeSelection : t -> T.t TreeViewSelectionChangeEvent.t Event.t
 
     val visible : t -> bool
 
-    (* val onDidChangeVisibility : t -> TreeViewVisibilityChangeEvent.t Event.t *)
+    val onDidChangeVisibility : t -> TreeViewVisibilityChangeEvent.t Event.t
 
     val message : t -> string option
 
     val title : t -> string option
 
     val description : t -> string option
+
+    val reveal :
+         t
+      -> element:T.t
+      -> ?select:bool
+      -> ?focus:bool
+      -> ?expand:[ `Bool of bool | `Int of int ]
+      -> unit
+      -> Promise.void
+      [@@js.call]
   end
 end
 
@@ -1816,7 +1879,8 @@ module Window : sig
     text:string -> ?hide:[ `AfterTimeout of int ] -> unit -> Disposable.t
 
   val withProgress :
-       options:ProgressOptions.t
+       (module Js.T with type t = 'a)
+    -> options:ProgressOptions.t
     -> task:(progress:Progress.t -> token:CancellationToken.t -> 'a Promise.t)
     -> 'a Promise.t
 
@@ -1864,7 +1928,10 @@ module Commands : sig
     -> Disposable.t
 
   val executeCommand :
-    command:string -> args:Ojs.t list -> Ojs.t option Promise.t
+       (module Interop.Js.T with type t = 'a)
+    -> command:string
+    -> args:Ojs.t list
+    -> 'a option Promise.t
 
   val getCommands : ?filterInternal:bool -> unit -> string list Promise.t
 end
@@ -1878,7 +1945,7 @@ end
 
 module Tasks : sig
   val registerTaskProvider :
-    type_:string -> provider:TaskProvider.t -> Disposable.t
+    type_:string -> provider:Task.t TaskProvider.t -> Disposable.t
 end
 
 module Env : sig
