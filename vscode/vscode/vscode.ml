@@ -21,13 +21,13 @@ module Command = struct
 
   val tooltip : t -> string or_undefined [@@js.get]
 
-  val arguments : t -> Ojs.t maybe_list [@@js.get]
+  val arguments : t -> Js.Any.t maybe_list [@@js.get]
 
   val create :
        title:string
     -> command:string
     -> ?tooltip:string
-    -> ?arguments:Ojs.t list
+    -> ?arguments:Js.Any.t list
     -> unit
     -> t
     [@@js.builder]
@@ -741,7 +741,7 @@ module WorkspaceConfiguration = struct
   val update :
        t
     -> section:string
-    -> value:Ojs.t
+    -> value:Js.Any.t
     -> ?configurationTarget:
          ([ `ConfigurationTarget of ConfigurationTarget.t | `Bool of bool ]
          [@js.union])
@@ -887,7 +887,7 @@ module CancellationToken = struct
 
   val isCancellationRequested : t -> bool [@@js.get]
 
-  module OnCancellationRequested = Event.Make (Ojs)
+  module OnCancellationRequested = Event.Make (Js.Any)
 
   val onCancellationRequested : t -> OnCancellationRequested.t [@@js.get]
 
@@ -1274,7 +1274,7 @@ module Memento = struct
       =
     [%js.to: T.t or_undefined] (get this ~key ())
 
-  val update : t -> key:string -> value:Ojs.t -> Promise.void [@@js.call]
+  val update : t -> key:string -> value:Js.Any.t -> Promise.void [@@js.call]
 end
 
 module EnvironmentVariableMutatorType = struct
@@ -2415,7 +2415,7 @@ end
 module Commands = struct
   val registerCommand :
        command:string
-    -> callback:(args:(Ojs.t list[@js.variadic]) -> unit)
+    -> callback:(args:(Js.Any.t list[@js.variadic]) -> unit)
     -> Disposable.t
     [@@js.global "vscode.commands.registerCommand"]
 
@@ -2424,13 +2424,13 @@ module Commands = struct
     -> callback:
          (   textEditor:TextEditor.t
           -> edit:TextEditorEdit.t
-          -> args:(Ojs.t list[@js.variadic])
+          -> args:(Js.Any.t list[@js.variadic])
           -> unit)
     -> Disposable.t
     [@@js.global "vscode.commands.registerTextEditorCommand"]
 
   val executeCommand :
-    command:string -> args:(Ojs.t list[@js.variadic]) -> Ojs.t
+    command:string -> args:(Js.Any.t list[@js.variadic]) -> Ojs.t
     [@@js.global "vscode.commands.executeCommand"]
 
   let executeCommand (type a) (module T : Js.T with type t = a) ~command ~args :

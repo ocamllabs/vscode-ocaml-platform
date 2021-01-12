@@ -21,13 +21,13 @@ module Command : sig
 
   val tooltip : t -> string option
 
-  val arguments : t -> Ojs.t list
+  val arguments : t -> Js.Any.t list
 
   val create :
        title:string
     -> command:string
     -> ?tooltip:string
-    -> ?arguments:Ojs.t list
+    -> ?arguments:Js.Any.t list
     -> unit
     -> t
 end
@@ -621,7 +621,7 @@ module WorkspaceConfiguration : sig
   val update :
        t
     -> section:string
-    -> value:Ojs.t
+    -> value:Js.Any.t
     -> ?configurationTarget:
          [ `ConfigurationTarget of ConfigurationTarget.t | `Bool of bool ]
     -> ?overrideInLanguage:bool
@@ -745,10 +745,12 @@ module CancellationToken : sig
 
   val isCancellationRequested : t -> bool
 
-  val onCancellationRequested : t -> Ojs.t Event.t
+  val onCancellationRequested : t -> Js.Any.t Event.t
 
   val create :
-    isCancellationRequested:bool -> onCancellationRequested:Ojs.t Event.t -> t
+       isCancellationRequested:bool
+    -> onCancellationRequested:Js.Any.t Event.t
+    -> t
 end
 
 module QuickPickItem : sig
@@ -1057,7 +1059,7 @@ module Memento : sig
   val get_default :
     (module Js.T with type t = 'a) -> t -> key:string -> defaultValue:'a -> 'a
 
-  val update : t -> key:string -> value:Ojs.t -> Promise.void
+  val update : t -> key:string -> value:Js.Any.t -> Promise.void
 end
 
 module EnvironmentVariableMutatorType : sig
@@ -1267,11 +1269,11 @@ module TaskDefinition : sig
 
   val type_ : t -> string
 
-  val get_attribute : t -> string -> Ojs.t
+  val get_attribute : t -> string -> Js.Any.t
 
-  val set_attribute : t -> string -> Ojs.t -> unit
+  val set_attribute : t -> string -> Js.Any.t -> unit
 
-  val create : type_:string -> ?attributes:(string * Ojs.t) list -> unit -> t
+  val create : type_:string -> ?attributes:(string * Js.Any.t) list -> unit -> t
 end
 
 module CustomExecution : sig
@@ -1916,21 +1918,21 @@ end
 
 module Commands : sig
   val registerCommand :
-    command:string -> callback:(args:Ojs.t list -> unit) -> Disposable.t
+    command:string -> callback:(args:Js.Any.t list -> unit) -> Disposable.t
 
   val registerTextEditorCommand :
        command:string
     -> callback:
          (   textEditor:TextEditor.t
           -> edit:TextEditorEdit.t
-          -> args:Ojs.t list
+          -> args:Js.Any.t list
           -> unit)
     -> Disposable.t
 
   val executeCommand :
        (module Interop.Js.T with type t = 'a)
     -> command:string
-    -> args:Ojs.t list
+    -> args:Js.Any.t list
     -> 'a option Promise.t
 
   val getCommands : ?filterInternal:bool -> unit -> string list Promise.t

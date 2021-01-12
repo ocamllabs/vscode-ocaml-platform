@@ -48,9 +48,13 @@ module Js : sig
     val t_to_js : t -> Ojs.t
   end
 
-  module String : T with type t = string
+  module Any : T with type t = Ojs.t
+
+  module Bool : T with type t = bool
 
   module Int : T with type t = int
+
+  module String : T with type t = string
 
   module Option (T : T) : T with type t = T.t option
 

@@ -95,52 +95,36 @@ module Js = struct
     val t_to_js : t -> Ojs.t
   end
 
+  module Any = struct
+    type t = Ojs.t [@@js]
+  end
+
+  module Bool = struct
+    type t = bool [@@js]
+  end
+
   module Int = struct
-    type t = int
-
-    let t_of_js = Ojs.int_of_js
-
-    let t_to_js = Ojs.int_to_js
+    type t = int [@@js]
   end
 
   module String = struct
-    type t = string
-
-    let t_of_js = Ojs.string_of_js
-
-    let t_to_js = Ojs.string_to_js
+    type t = string [@@js]
   end
 
   module Option (T : T) = struct
-    type t = T.t option
-
-    let t_of_js = Ojs.option_of_js T.t_of_js
-
-    let t_to_js = Ojs.option_to_js T.t_to_js
+    type t = T.t option [@@js]
   end
 
   module Or_undefined (T : T) = struct
-    type t = T.t or_undefined
-
-    let t_of_js = or_undefined_of_js T.t_of_js
-
-    let t_to_js = or_undefined_to_js T.t_to_js
+    type t = T.t or_undefined [@@js]
   end
 
   module List (T : T) = struct
-    type t = T.t list
-
-    let t_of_js = Ojs.list_of_js T.t_of_js
-
-    let t_to_js = Ojs.list_to_js T.t_to_js
+    type t = T.t list [@@js]
   end
 
   module Dict (T : T) = struct
-    type t = T.t Dict.t
-
-    let t_of_js = Dict.t_of_js T.t_of_js
-
-    let t_to_js = Dict.t_to_js T.t_to_js
+    type t = T.t Dict.t [@@js]
   end
 end
 
