@@ -207,21 +207,6 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "ocaml.select-sandbox"
-        },
-        {
-          "command": "ocaml.server.restart"
-        },
-        {
-          "command": "ocaml.open-terminal"
-        },
-        {
-          "command": "ocaml.open-terminal-select"
-        },
-        {
-          "command": "ocaml.switch-impl-intf"
-        },
-        {
           "command": "ocaml.refresh-switches",
           "when": "false"
         },
