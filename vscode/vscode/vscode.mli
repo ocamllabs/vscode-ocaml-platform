@@ -1,3 +1,5 @@
+val version : string
+
 module Disposable : sig
   type t
 
