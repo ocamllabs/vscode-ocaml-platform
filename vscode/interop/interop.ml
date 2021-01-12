@@ -85,3 +85,29 @@ module Dict = struct
 
   include StringMap
 end
+
+module Js = struct
+  module type T = sig
+    type t
+
+    val t_of_js : Ojs.t -> t
+
+    val t_to_js : t -> Ojs.t
+  end
+end
+
+module Interface = struct
+  module Make () = struct
+    type t = private Ojs.t [@@js]
+  end
+end
+
+module Class = struct
+  module Make () = struct
+    type t = private Ojs.t [@@js]
+  end
+
+  module Extend (Super : Js.T) () = struct
+    type t = private Super.t [@@js]
+  end
+end

@@ -38,3 +38,23 @@ module Dict : sig
 
   val of_alist : (string * 'a) list -> 'a t
 end
+
+module Js : sig
+  module type T = sig
+    type t
+
+    val t_of_js : Ojs.t -> t
+
+    val t_to_js : t -> Ojs.t
+  end
+end
+
+module Interface : sig
+  module Make () : Js.T with type t = private Ojs.t
+end
+
+module Class : sig
+  module Make () : Js.T with type t = private Ojs.t
+
+  module Extend (Super : Js.T) () : Js.T with type t = private Super.t
+end

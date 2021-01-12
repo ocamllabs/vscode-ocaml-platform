@@ -1,3 +1,5 @@
+open Interop
+
 module Process : sig
   val cwd : unit -> string
 
@@ -15,31 +17,23 @@ module JsError : sig
 end
 
 module Buffer : sig
-  type t
+  include Js.T
 
   val toString : t -> string
 
   val from : string -> t
 
   val concat : t array -> t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
 end
 
 module Stream : sig
-  type t
+  include Js.T
 
   val on : t -> string -> (Buffer.t -> unit) -> unit
 
   val write : t -> string -> unit
 
   val end_ : t -> unit
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
 end
 
 module Path : sig

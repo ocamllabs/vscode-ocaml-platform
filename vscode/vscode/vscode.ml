@@ -3,7 +3,7 @@ open Interop
 val version : string [@@js.global "vscode.version"]
 
 module Disposable = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val from : (t list[@js.variadic]) -> t [@@js.global "vscode.Disposable.from"]
 
@@ -13,7 +13,7 @@ module Disposable = struct
 end
 
 module Command = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val title : t -> string [@@js.get]
 
@@ -34,7 +34,7 @@ module Command = struct
 end
 
 module Position = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val line : t -> int [@@js.get]
 
@@ -61,7 +61,7 @@ module Position = struct
 end
 
 module Range = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val start : t -> Position.t [@@js.get]
 
@@ -95,7 +95,7 @@ module Range = struct
 end
 
 module TextLine = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val lineNumber : t -> int [@@js.get]
 
@@ -128,7 +128,7 @@ module EndOfLine = struct
 end
 
 module TextEdit = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val replace : range:Range.t -> newText:string -> t
     [@@js.global "vscode.TextEdit.replace"]
@@ -151,7 +151,7 @@ module TextEdit = struct
 end
 
 module Uri = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val parse : string -> ?strict:bool -> unit -> t
     [@@js.global "vscode.Uri.parse"]
@@ -190,7 +190,7 @@ module Uri = struct
 end
 
 module TextDocument = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val uri : t -> Uri.t [@@js.get]
 
@@ -233,7 +233,7 @@ module TextDocument = struct
 end
 
 module WorkspaceFolder = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val uri : t -> Uri.t [@@js.get]
 
@@ -261,7 +261,7 @@ module ViewColumn = struct
 end
 
 module Selection = struct
-  type t = private (* class extends *) Range.t [@@js]
+  include Class.Extend (Range) ()
 
   val anchor : t -> Position.t [@@js.get]
 
@@ -282,7 +282,7 @@ module Selection = struct
 end
 
 module TextEditorEdit = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   type replaceLocation =
     ([ `Position of Position.t
@@ -360,7 +360,7 @@ module TextEditorRevealType = struct
 end
 
 module TextEditorOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   type tabSize =
     ([ `Int of int
@@ -407,7 +407,7 @@ module TextEditorOptions = struct
 end
 
 module TextEditorDecorationType = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val key : t -> string [@@js.get]
 
@@ -419,7 +419,7 @@ module TextEditorDecorationType = struct
 end
 
 module MarkdownString = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val value : t -> string [@@js.get]
 
@@ -439,13 +439,13 @@ module MarkdownString = struct
 end
 
 module ThemeColor = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val make : id:string -> t [@@js.new "vscode.ThemeColor"]
 end
 
 module ThemableDecorationAttachmentRenderOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   type contentIconPath =
     ([ `String of string
@@ -514,7 +514,7 @@ module ThemableDecorationAttachmentRenderOptions = struct
 end
 
 module ThemableDecorationInstanceRenderOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val before : t -> ThemableDecorationAttachmentRenderOptions.t or_undefined
     [@@js.get]
@@ -531,7 +531,7 @@ module ThemableDecorationInstanceRenderOptions = struct
 end
 
 module DecorationInstanceRenderOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val light : t -> ThemableDecorationInstanceRenderOptions.t or_undefined
     [@@js.get]
@@ -548,7 +548,7 @@ module DecorationInstanceRenderOptions = struct
 end
 
 module DecorationOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   type hoverMessage =
     ([ `MarkdownString of MarkdownString.t
@@ -580,7 +580,7 @@ module DecorationOptions = struct
 end
 
 module SnippetString = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val value : t -> string [@@js.get]
 
@@ -610,7 +610,7 @@ module SnippetString = struct
 end
 
 module TextEditor = struct
-  type t = private (* interface*) Ojs.t [@@js]
+  include Interface.Make ()
 
   type insertSnippetLocation =
     ([ `Position of Position.t
@@ -684,7 +684,7 @@ module ConfigurationTarget = struct
 end
 
 module WorkspaceConfiguration = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   type configurationTarget =
     ([ `ConfigurationTarget of ConfigurationTarget.t
@@ -732,7 +732,7 @@ module StatusBarAlignment = struct
 end
 
 module AccessibilityInformation = struct
-  type t = private (* interface*) Ojs.t [@@js]
+  include Interface.Make ()
 
   val label : t -> string [@@js.get]
 
@@ -742,7 +742,7 @@ module AccessibilityInformation = struct
 end
 
 module StatusBarItem = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   type color =
     ([ `String of string
@@ -808,7 +808,7 @@ module StatusBarItem = struct
 end
 
 module WorkspaceFoldersChangeEvent = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val added : t -> WorkspaceFolder.t list [@@js.get]
 
@@ -820,7 +820,7 @@ module WorkspaceFoldersChangeEvent = struct
 end
 
 module FormattingOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val tabSize : t -> int [@@js.get]
 
@@ -852,7 +852,7 @@ module Event = struct
 end
 
 module EventEmitter = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val make : unit -> t [@@js.new "vscode.EventEmitter"]
 
@@ -864,7 +864,7 @@ module EventEmitter = struct
 end
 
 module CancellationToken = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val isCancellationRequested : t -> bool [@@js.get]
 
@@ -876,7 +876,7 @@ module CancellationToken = struct
 end
 
 module QuickPickItem = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val label : t -> string [@@js.get]
 
@@ -900,7 +900,7 @@ module QuickPickItem = struct
 end
 
 module QuickPickOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   type onDidSelectItemArgs =
     ([ `QuickPickItem of QuickPickItem.t
@@ -957,7 +957,7 @@ module ProviderResult = struct
 end
 
 module InputBoxOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val value : t -> string or_undefined [@@js.get]
 
@@ -988,7 +988,7 @@ module InputBoxOptions = struct
 end
 
 module MessageItem = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val title : t -> string [@@js.get]
 
@@ -999,7 +999,7 @@ module MessageItem = struct
 end
 
 module Location = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val uri : t -> Uri.t [@@js.get]
 
@@ -1022,7 +1022,7 @@ module ProgressLocation = struct
 end
 
 module ProgressOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   type viewIdLocation = { viewId : string } [@@js]
 
@@ -1050,7 +1050,7 @@ module ProgressOptions = struct
 end
 
 module TextDocumentShowOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val viewColumn : t -> ViewColumn.t or_undefined [@@js.get]
 
@@ -1071,7 +1071,7 @@ module TextDocumentShowOptions = struct
 end
 
 module TerminalOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   type shellArgs =
     ([ `Arg of string
@@ -1113,7 +1113,7 @@ module TerminalOptions = struct
 end
 
 module TerminalDimensions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val columns : t -> int [@@js.get]
 
@@ -1123,7 +1123,7 @@ module TerminalDimensions = struct
 end
 
 module Pseudoterminal = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val onDidWrite : t -> string Event.t [@@js.get]
 
@@ -1158,7 +1158,7 @@ module Pseudoterminal = struct
 end
 
 module ExtensionTerminalOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val name : t -> string [@@js.get]
 
@@ -1168,7 +1168,7 @@ module ExtensionTerminalOptions = struct
 end
 
 module TerminalExitStatus = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val code : t -> int [@@js.get]
 
@@ -1176,7 +1176,7 @@ module TerminalExitStatus = struct
 end
 
 module Terminal = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   type creationOptions =
     ([ `TerminalOptions of TerminalOptions.t
@@ -1212,7 +1212,7 @@ module Terminal = struct
 end
 
 module OutputChannel = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val name : t -> string [@@js.get]
 
@@ -1232,7 +1232,7 @@ module OutputChannel = struct
 end
 
 module Memento = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val get : t -> key:string -> Jsonoo.t or_undefined [@@js.call]
 
@@ -1248,7 +1248,7 @@ module EnvironmentVariableMutatorType = struct
 end
 
 module EnvironmentVariableMutator = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val type_ : t -> EnvironmentVariableMutatorType.t [@@js.get "type"]
 
@@ -1256,7 +1256,7 @@ module EnvironmentVariableMutator = struct
 end
 
 module EnvironmentVariableCollection = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val persistent : t -> bool [@@js.get]
 
@@ -1293,7 +1293,7 @@ module ExtensionMode = struct
 end
 
 module ExtensionContext = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val subscriptions : t -> Disposable.t list [@@js.get]
 
@@ -1319,13 +1319,15 @@ module ExtensionContext = struct
   val extensionMode : t -> ExtensionMode.t [@@js.get]
 
   let subscribe this ~disposable =
-    let subscriptions = Ojs.get this "subscriptions" in
-    let (_ : Ojs.t) = Ojs.call subscriptions "push" [| disposable |] in
+    let subscriptions = Ojs.get ([%js.of: t] this) "subscriptions" in
+    let (_ : Ojs.t) =
+      Ojs.call subscriptions "push" [| [%js.of: Disposable.t] disposable |]
+    in
     ()
 end
 
 module ShellQuotingOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   type escapeLiteral =
     { escapeChar : string
@@ -1356,7 +1358,7 @@ module ShellQuotingOptions = struct
 end
 
 module ShellExecutionOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val executable : t -> string or_undefined [@@js.get]
 
@@ -1388,7 +1390,7 @@ module ShellQuoting = struct
 end
 
 module ShellQuotedString = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val value : t -> string [@@js.get]
 
@@ -1398,7 +1400,7 @@ module ShellQuotedString = struct
 end
 
 module ShellExecution = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   type shellString =
     ([ `String of string
@@ -1434,7 +1436,7 @@ module ShellExecution = struct
 end
 
 module ProcessExecutionOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val cwd : t -> string or_undefined [@@js.get]
 
@@ -1444,7 +1446,7 @@ module ProcessExecutionOptions = struct
 end
 
 module ProcessExecution = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val makeProcess :
     process:string -> ?options:ProcessExecutionOptions.t -> unit -> t
@@ -1466,23 +1468,23 @@ module ProcessExecution = struct
 end
 
 module TaskDefinition = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val type_ : t -> string [@@js.get]
 
-  let get_attribute = Ojs.get
+  let get_attribute t = Ojs.get ([%js.of: t] t)
 
-  let set_attribute = Ojs.set
+  let set_attribute t = Ojs.set ([%js.of: t] t)
 
   let create ~type_ ?(attributes = []) () =
     let obj = Ojs.obj [| ("type", [%js.of: string] type_) |] in
     let set (key, value) = Ojs.set obj key value in
     List.iter set attributes;
-    obj
+    [%js.to: t] obj
 end
 
 module CustomExecution = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val make :
        callback:
@@ -1492,7 +1494,7 @@ module CustomExecution = struct
 end
 
 module RelativePattern = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val base : t -> string [@@js.get]
 
@@ -1524,7 +1526,7 @@ module GlobPattern = struct
 end
 
 module DocumentFilter = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val language : t -> string or_undefined [@@js.get]
 
@@ -1568,7 +1570,7 @@ module DocumentSelector = struct
 end
 
 module DocumentFormattingEditProvider = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val provideDocumentFormattingEdits :
        t
@@ -1589,7 +1591,7 @@ module DocumentFormattingEditProvider = struct
 end
 
 module TaskGroup = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val clean : t [@@js.global "vscode.TaskGroup.Clean"]
 
@@ -1619,7 +1621,7 @@ module TaskScope = struct
 end
 
 module RunOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val reevaluateOnRerun : t -> bool or_undefined [@@js.get]
 
@@ -1643,7 +1645,7 @@ module TaskPanelKind = struct
 end
 
 module TaskPresentationOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val reveal : t -> TaskRevealKind.t or_undefined [@@js.get]
 
@@ -1670,7 +1672,7 @@ module TaskPresentationOptions = struct
 end
 
 module Task = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   type execution =
     ([ `ProcessExecution of ProcessExecution.t
@@ -1723,7 +1725,7 @@ module Task = struct
 end
 
 module TaskProvider = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val provideTasks :
     t -> token:CancellationToken.t -> Task.t list ProviderResult.t
@@ -1749,10 +1751,18 @@ module ConfigurationScope = struct
      ]
     [@js.union])
   [@@js]
+
+  let t_of_js js_val =
+    if Ojs.has_property js_val "path" then
+      `Uri ([%js.to: Uri.t] js_val)
+    else if Ojs.has_property js_val "index" then
+      `WorkspaceFolder ([%js.to: WorkspaceFolder.t] js_val)
+    else
+      `TextDocument ([%js.to: TextDocument.t] js_val)
 end
 
 module MessageOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val modal : t -> bool or_undefined [@@js.get]
 
@@ -1760,13 +1770,13 @@ module MessageOptions = struct
 end
 
 module Progress = struct
+  include Interface.Make ()
+
   type value =
     { message : string or_undefined
     ; increment : int or_undefined
     }
   [@@js]
-
-  type t = private Ojs.t [@@js]
 
   val report : t -> value:value -> unit [@@js.call]
 end
@@ -1836,7 +1846,7 @@ module TreeItemCollapsibleState = struct
 end
 
 module TreeItemLabel = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val label : t -> string [@@js.get]
 
@@ -1847,7 +1857,7 @@ module TreeItemLabel = struct
 end
 
 module ThemeIcon = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val make : id:string -> ?color:ThemeColor.t -> unit -> t
     [@@js.new "vscode.ThemeIcon"]
@@ -1862,7 +1872,7 @@ module ThemeIcon = struct
 end
 
 module TreeItem = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   type label =
     ([ `String of string
@@ -2011,7 +2021,7 @@ module TreeItem = struct
 end
 
 module TreeDataProvider = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val onDidChangeTreeData : t -> Ojs.t Event.t or_undefined [@@js.get]
 
@@ -2045,7 +2055,7 @@ module TreeDataProvider = struct
 end
 
 module TreeViewOptions = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val treeDataProvider : t -> TreeDataProvider.t [@@js.get]
 
@@ -2055,7 +2065,7 @@ module TreeViewOptions = struct
 end
 
 module TreeView = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val visible : t -> bool [@@js.get]
 
