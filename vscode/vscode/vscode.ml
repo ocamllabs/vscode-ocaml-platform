@@ -857,10 +857,21 @@ module FormattingOptions = struct
 end
 
 module Event = struct
-  type 'a t = listener:('a -> unit) -> Disposable.t
+  type 'a t =
+       listener:('a -> unit)
+    -> ?thisArgs:Js.Any.t
+    -> ?disposables:Disposable.t list
+    -> unit
+    -> Disposable.t
 
   module Make (T : Js.T) = struct
-    type t = listener:(T.t -> unit) -> Disposable.t [@@js]
+    type t =
+         listener:(T.t -> unit)
+      -> ?thisArgs:Js.Any.t
+      -> ?disposables:Disposable.t list
+      -> unit
+      -> Disposable.t
+    [@@js]
   end
 end
 

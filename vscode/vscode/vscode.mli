@@ -719,7 +719,12 @@ module FormattingOptions : sig
 end
 
 module Event : sig
-  type 'a t = listener:('a -> unit) -> Disposable.t
+  type 'a t =
+       listener:('a -> unit)
+    -> ?thisArgs:Js.Any.t
+    -> ?disposables:Disposable.t list
+    -> unit
+    -> Disposable.t
 
   module Make (T : Js.T) : Js.T with type t = T.t t
 end
