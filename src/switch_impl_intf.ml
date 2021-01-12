@@ -44,7 +44,7 @@ let show_file target_uri =
          ~fulfilled:(fun doc -> Promise.return (doc, false))
          ~rejected:(fun (_ : Promise.error) ->
            (* if file does not exist *)
-           let create_file_uri = Uri.with_ uri ~scheme:"untitled" () in
+           let create_file_uri = Uri.with_ uri ~scheme:`Untitled () in
            let+ doc = Workspace.openTextDocument (`Uri create_file_uri) in
            (doc, true))
   in

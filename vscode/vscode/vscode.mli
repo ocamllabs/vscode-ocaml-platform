@@ -194,7 +194,7 @@ module Uri : sig
 
   val with_ :
        t
-    -> ?scheme:string
+    -> ?scheme:Scheme.t
     -> ?authority:string
     -> ?path:string
     -> ?query:string

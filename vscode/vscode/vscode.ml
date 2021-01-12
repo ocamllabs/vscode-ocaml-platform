@@ -189,7 +189,8 @@ module Uri = struct
 
   let with_ this ?scheme ?authority ?path ?query ?fragment () =
     let change = Ojs.obj [||] in
-    iter_set change "scheme" [%js.of: string] scheme;
+    iter_set change "scheme" [%js.of: string]
+      (Option.map Scheme.to_string scheme);
     iter_set change "authority" [%js.of: string] authority;
     iter_set change "path" [%js.of: string] path;
     iter_set change "query" [%js.of: string] query;
