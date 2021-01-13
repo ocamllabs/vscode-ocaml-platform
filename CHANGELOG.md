@@ -1,12 +1,15 @@
 # Change Log
 
-# Unreleased
+## Unreleased
 
 - Highlight token aliases in Menhir associativity declarations (#473)
+
 - Activate the extension when workspace contains OCaml, Reason sources or
   project marker files. (#482)
+
 - Add `ocaml.useOcamlEnv` setting to determine whether to use `ocaml-env` for
   opam commands from OCaml for Windows (#481)
+
 - Fix terminal creation when using default shell and arguments (#484)
 
 - Add an OCaml activity tab.
@@ -15,6 +18,11 @@
   commands and an Help and Feedback section with links to community channels.
 
 - Support `eliom` and `eliomi` file extensions (#487)
+
+- Fix ocaml/ocaml-lsp#358: automatic insertion of an inferred interface was
+  inserting code incorrectly on the second switch to the newly created (unsaved)
+  `mli` file. If the new `mli` file isn't empty, we don't insert inferred
+  interface (#498)
 
 ## 1.5.1
 
