@@ -24,6 +24,11 @@
   `mli` file. If the new `mli` file isn't empty, we don't insert inferred
   interface (#498)
 
+- Add a new command "Dune: open current dune file", which is available in the command
+  palette if an ocaml-related (ocaml, reason, etc.) file is currently open. The command
+  opens the dune file that is located in the same folder as the open file or creates the
+  dune file in a draft mode (not yet saved on the disk). (#499)
+
 ## 1.5.1
 
 - Improve highlighting of type parameters and `module type of` (#461)
