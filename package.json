@@ -179,6 +179,11 @@
           "light": "assets/document-search-light.svg",
           "dark": "assets/document-search-dark.svg"
         }
+      },
+      {
+        "command": "dune.current-dune-file",
+        "category": "Dune",
+        "title": "Open current dune file"
       }
     ],
     "keybindings": [
@@ -206,6 +211,10 @@
     ],
     "menus": {
       "commandPalette": [
+        {
+          "command": "dune.current-dune-file",
+          "when": "editorLangId  == ocaml || editorLangId  == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir"
+        },
         {
           "command": "ocaml.refresh-switches",
           "when": "false"

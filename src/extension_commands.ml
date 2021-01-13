@@ -84,6 +84,27 @@ let switch_impl_intf =
   in
   command Extension_consts.Commands.switch_impl_intf handler
 
+module Dune_commands = struct
+  let open_current_dune_file =
+    let handler (_instance : Extension_instance.t) ~args:_ =
+      match Vscode.Window.activeTextEditor () with
+      | None ->
+        assert false
+        (* this command is available in the command palette only when a
+           ocaml/reason/mehnir/ocamllex files are open *)
+      | Some text_editor ->
+        let doc = TextEditor.document text_editor in
+        let uri = TextDocument.uri doc in
+        let dune_file_uri =
+          Uri.fsPath uri |> Path.of_string |> fun path ->
+          Path.relative path "../dune" |> Path.to_string |> Uri.file
+          |> fun uri -> Uri.toString uri ()
+        in
+        open_file_in_text_editor dune_file_uri |> ignore
+    in
+    command Extension_consts.Commands.Dune.open_current_dune_file handler
+end
+
 let register extension instance { id; handler } =
   let callback = handler instance in
   let disposable = Commands.registerCommand ~command:id ~callback in
