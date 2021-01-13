@@ -50,3 +50,21 @@ let log_json msg (fields : (string * Jsonoo.t) list) =
   let json = Jsonoo.Encode.object_ fields |> Jsonoo.stringify ~spaces:2 in
   let (lazy output_channel) = Output.extension_output_channel in
   OutputChannel.appendLine output_channel ~value:(msg ^ " " ^ json ^ "\n")
+
+(** given a file uri, opens the file if it exists; otherwise, creates the file
+    in "draft" mode (doesn't save it on disk)
+
+    @return TextEditor.t in which the document was opened *)
+let open_file_in_text_editor target_uri =
+  let open Promise.Syntax in
+  let uri = Uri.parse target_uri () in
+  let* doc =
+    Workspace.openTextDocument (`Uri uri)
+    |> Promise.catch ~rejected:(fun (_ : Promise.error) ->
+           (* if file does not exist *)
+           let create_file_uri = Uri.with_ uri ~scheme:`Untitled () in
+           let+ doc = Workspace.openTextDocument (`Uri create_file_uri) in
+           doc)
+  in
+  let+ text_editor = Window.showTextDocument ~document:(`TextDocument doc) () in
+  text_editor
