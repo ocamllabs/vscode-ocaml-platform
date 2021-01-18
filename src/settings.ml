@@ -11,7 +11,7 @@ let create ~scope ~key ~of_json ~to_json = { scope; key; to_json; of_json }
 
 let get ?section t =
   let section = Workspace.getConfiguration ?section () in
-  match WorkspaceConfiguration.get (module Jsonoo) section ~section:t.key with
+  match WorkspaceConfiguration.get_json section ~section:t.key with
   | None -> None
   | Some v -> (
     match t.of_json v with

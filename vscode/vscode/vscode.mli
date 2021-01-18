@@ -603,6 +603,8 @@ module WorkspaceConfiguration : sig
 
   val get : (module Js.T with type t = 'a) -> t -> section:string -> 'a option
 
+  val get_json : t -> section:string -> Jsonoo.t option
+
   val get_default :
        (module Js.T with type t = 'a)
     -> t
@@ -617,6 +619,8 @@ module WorkspaceConfiguration : sig
     -> t
     -> section:string
     -> 'a inspectResult option
+
+  val inspect_json : t -> section:string -> Jsonoo.t inspectResult option
 
   val update :
        t

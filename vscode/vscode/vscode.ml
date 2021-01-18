@@ -730,6 +730,8 @@ module WorkspaceConfiguration = struct
       a or_undefined =
     [%js.to: T.t or_undefined] (get this ~section ())
 
+  let get_json = get (module Jsonoo)
+
   val has : t -> section:string -> bool [@@js.call]
 
   val inspect : t -> section:string -> Ojs.t [@@js.call]
@@ -737,6 +739,8 @@ module WorkspaceConfiguration = struct
   let inspect (type a) (module T : Js.T with type t = a) this ~section :
       a inspectResult or_undefined =
     [%js.to: T.t inspectResult or_undefined] (inspect this ~section)
+
+  let inspect_json = inspect (module Jsonoo)
 
   val update :
        t
