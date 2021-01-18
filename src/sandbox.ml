@@ -1,15 +1,5 @@
 open Import
 
-(* Terminology: - Sandbox: represents supported sandboxes with Global as the
-   fallback - project_root is different from Package_manager root (Eg. Opam
-   (Path.of_string "/foo/bar")). Project root is the directory where manifest
-   file (opam/esy.json/package.json) was found. Package_manager root is the
-   directory that contains the manifest file responsible for setting up the
-   sandbox - the two are same for Esy and Opam project but different for
-   bucklescript. Bucklescript projects have this manifest file abstracted away
-   from the user (at least at the moment) - Manifest: abstracts functions
-   handling manifest files of the supported package managers *)
-
 type t =
   | Opam of Opam.t * Opam.Switch.t
   | Esy of Esy.t * Path.t

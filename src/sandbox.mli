@@ -47,23 +47,7 @@ val select_sandbox_and_save : unit -> t option Promise.t
 val select_sandbox : unit -> t option Promise.t
 
 (** [run_setup] is an effectful function that triggers setup instructions
-    automatically for the user. At present, this functionality resides in the
-    plugin itself for bucklescript users - to reliably use ocamllsp for
-    bucklescript users, a sandboxed environment provides a reliable way to setup
-    the OCaml sandbox.
-    {{:https://github.com/prometheansacrifice/esy-mode#npm-and-bucklescript-build-system-managed-projects}
-    More details} We use Esy to provide
-
-    1. A scrubbed environment with just OCaml tools in it - this is necessary
-    since OCaml tools are closely tied to compiler versions and look into the
-    global environments to find plugins (Eg. Merlin and Reason) 2. Relocatable
-    assets so that users can download the sandbox artifacts and compile it from
-    source in the same workflow.
-
-    [run_setup] is capable of setting up the sandbox for bucklescript project
-    using both Opam and Esy users. It provides and abstracted way to setup the
-    sandbox, so that we (developers) have the flexibility to iterate and improve
-    how the sandbox it provided.
+    automatically for the user.
 
     A hard requirement for [run_setup] is to not get in the way to existing
     setups. If users already have working sandboxes installed via some other
