@@ -151,6 +151,18 @@ module TextEdit = struct
 end
 
 module Uri = struct
+  module Scheme = struct
+    type t =
+      [ `File
+      | `Untitled
+        (** URI scheme used by vscode for new draft (not-saved) files *)
+      ]
+
+    let to_string = function
+      | `File -> "file"
+      | `Untitled -> "untitled"
+  end
+
   type t = private (* class *) Ojs.t [@@js]
 
   val parse : string -> ?strict:bool -> unit -> t
@@ -177,7 +189,8 @@ module Uri = struct
 
   let with_ this ?scheme ?authority ?path ?query ?fragment () =
     let change = Ojs.obj [||] in
-    iter_set change "scheme" [%js.of: string] scheme;
+    iter_set change "scheme" [%js.of: string]
+      (Option.map Scheme.to_string scheme);
     iter_set change "authority" [%js.of: string] authority;
     iter_set change "path" [%js.of: string] path;
     iter_set change "query" [%js.of: string] query;

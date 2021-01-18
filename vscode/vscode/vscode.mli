@@ -164,6 +164,16 @@ module TextEdit : sig
 end
 
 module Uri : sig
+  module Scheme : sig
+    type t =
+      [ `File
+      | `Untitled
+        (** URI scheme used by vscode for new draft (not-saved) files *)
+      ]
+
+    val to_string : t -> string
+  end
+
   type t
 
   val parse : string -> ?strict:bool -> unit -> t
@@ -186,7 +196,7 @@ module Uri : sig
 
   val with_ :
        t
-    -> ?scheme:string
+    -> ?scheme:Scheme.t
     -> ?authority:string
     -> ?path:string
     -> ?query:string
