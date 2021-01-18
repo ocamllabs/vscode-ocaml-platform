@@ -96,11 +96,14 @@ module Dune_commands = struct
         let doc = TextEditor.document text_editor in
         let uri = TextDocument.uri doc in
         let dune_file_uri =
-          Uri.fsPath uri |> Path.of_string |> fun path ->
-          Path.relative path "../dune" |> Path.to_string |> Uri.file
-          |> fun uri -> Uri.toString uri ()
+          let path = Uri.fsPath uri |> Path.of_string in
+          let uri =
+            Path.relative path "../dune" |> Path.to_string |> Uri.file
+          in
+          Uri.toString uri ()
         in
-        open_file_in_text_editor dune_file_uri |> ignore
+        (open_file_in_text_editor dune_file_uri : TextEditor.t Promise.t)
+        |> ignore
     in
     command Extension_consts.Commands.Dune.open_current_dune_file handler
 end
