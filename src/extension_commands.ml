@@ -91,3 +91,5 @@ let register extension instance { id; handler } =
 
 let register_all_commands extension instance =
   List.iter ~f:(register extension instance) !commands
+
+let register id handler = command id handler |> ignore

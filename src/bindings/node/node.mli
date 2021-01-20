@@ -1,5 +1,9 @@
 open Interop
 
+val __filename : unit -> string
+
+val __dirname : unit -> string
+
 module Process : sig
   val cwd : unit -> string
 

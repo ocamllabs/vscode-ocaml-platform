@@ -31,4 +31,4 @@ val register_all_commands :
   Vscode.ExtensionContext.t -> Extension_instance.t -> unit
 
 val register :
-  Vscode.ExtensionContext.t -> Extension_instance.t -> command -> unit
+  string -> (Extension_instance.t -> args:Ojs.t list -> unit) -> unit

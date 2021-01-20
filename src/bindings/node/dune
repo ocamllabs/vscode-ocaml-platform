@@ -4,5 +4,5 @@
   (pps gen_js_api.ppx))
  (js_of_ocaml
   (javascript_files node_stub.js))
- (libraries interop promise_jsoo jsonoo gen_js_api)
+ (libraries interop promise_jsoo jsonoo gen_js_api js_of_ocaml)
  (modes byte))

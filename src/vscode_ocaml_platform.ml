@@ -27,12 +27,13 @@ let activate (extension : ExtensionContext.t) =
   Dune_task_provider.register extension instance;
   Extension_commands.register_all_commands extension instance;
   Treeview_switches.register extension;
+  Treeview_sandbox.register extension instance;
   Treeview_commands.register extension;
   Treeview_help.register extension;
-  let sandbox = Sandbox.of_settings_or_detect () in
+  let sandbox_opt = Sandbox.of_settings_or_detect () in
   let (_ : unit Promise.t) =
-    let* sandbox = sandbox in
-    let is_fallback = Option.is_empty sandbox in
+    let* sandbox_opt = sandbox_opt in
+    let is_fallback = Option.is_empty sandbox_opt in
     if
       is_fallback
       (* if the sandbox we just set up is a fallback sandbox, we create a pop-up
@@ -48,8 +49,8 @@ let activate (extension : ExtensionContext.t) =
       Promise.return ()
   in
   let (_ : unit Promise.t) =
-    let* sandbox = sandbox in
-    let sandbox = Option.value sandbox ~default:Sandbox.Global in
+    let* sandbox_opt = sandbox_opt in
+    let sandbox = Option.value sandbox_opt ~default:Sandbox.Global in
     Extension_instance.set_sandbox instance sandbox;
     let+ () = Extension_instance.start_language_server instance in
     ()
