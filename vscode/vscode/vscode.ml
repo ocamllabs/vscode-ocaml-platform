@@ -718,19 +718,15 @@ module WorkspaceConfiguration = struct
     ; languageIds = [%js.to: string list or_undefined] (field "languageIds")
     }
 
-  val get : t -> section:string -> ?defaultValue:Ojs.t -> unit -> Ojs.t
+  val get : t -> section:string -> Js.Any.t or_undefined [@@js.call]
+
+  val get_default : t -> section:string -> defaultValue:Ojs.t -> unit -> Ojs.t
     [@@js.call]
 
   let get_default (type a) (module T : Js.T with type t = a) this ~section
       ~(defaultValue : a) : a =
     let defaultValue = [%js.of: T.t] defaultValue in
-    [%js.to: T.t] (get this ~section ~defaultValue ())
-
-  let get (type a) (module T : Js.T with type t = a) this ~section :
-      a or_undefined =
-    [%js.to: T.t or_undefined] (get this ~section ())
-
-  let get_json = get (module Jsonoo)
+    [%js.to: T.t] (get_default this ~section ~defaultValue ())
 
   val has : t -> section:string -> bool [@@js.call]
 
@@ -739,8 +735,6 @@ module WorkspaceConfiguration = struct
   let inspect (type a) (module T : Js.T with type t = a) this ~section :
       a inspectResult or_undefined =
     [%js.to: T.t inspectResult or_undefined] (inspect this ~section)
-
-  let inspect_json = inspect (module Jsonoo)
 
   val update :
        t
