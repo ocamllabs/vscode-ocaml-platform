@@ -1050,7 +1050,7 @@ end
 module Memento : sig
   include Js.T
 
-  val get : 'a Js.t -> t -> key:string -> 'a option
+  val get : t -> key:string -> Js.Any.t option
 
   val get_default : 'a Js.t -> t -> key:string -> defaultValue:'a -> 'a
 

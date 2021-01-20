@@ -720,13 +720,13 @@ module WorkspaceConfiguration = struct
 
   val get : t -> section:string -> Js.Any.t or_undefined [@@js.call]
 
-  val get_default : t -> section:string -> defaultValue:Ojs.t -> unit -> Ojs.t
+  val get_default : t -> section:string -> defaultValue:Ojs.t -> Ojs.t
     [@@js.call]
 
   let get_default (type a) (module T : Js.T with type t = a) this ~section
       ~(defaultValue : a) : a =
     let defaultValue = [%js.of: T.t] defaultValue in
-    [%js.to: T.t] (get_default this ~section ~defaultValue ())
+    [%js.to: T.t] (get_default this ~section ~defaultValue)
 
   val has : t -> section:string -> bool [@@js.call]
 
@@ -1272,16 +1272,14 @@ end
 module Memento = struct
   include Interface.Make ()
 
-  val get : t -> key:string -> ?defaultValue:Ojs.t -> unit -> Ojs.t [@@js.call]
+  val get : t -> key:string -> Js.Any.t or_undefined [@@js.call]
+
+  val get_default : t -> key:string -> defaultValue:Ojs.t -> Ojs.t [@@js.call]
 
   let get_default (type a) (module T : Js.T with type t = a) this ~key
       ~(defaultValue : a) : a =
     let defaultValue = [%js.of: T.t] defaultValue in
-    [%js.to: T.t] (get this ~key ~defaultValue ())
-
-  let get (type a) (module T : Js.T with type t = a) this ~key : a or_undefined
-      =
-    [%js.to: T.t or_undefined] (get this ~key ())
+    [%js.to: T.t] (get_default this ~key ~defaultValue)
 
   val update : t -> key:string -> value:Js.Any.t -> Promise.void [@@js.call]
 end
