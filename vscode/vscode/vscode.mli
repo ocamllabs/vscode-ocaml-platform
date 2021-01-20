@@ -142,6 +142,16 @@ end
 module Uri : sig
   include Js.T
 
+  module Scheme : sig
+    type t =
+      [ `File
+      | `Untitled
+        (** URI scheme used by vscode for new draft (not-saved) files *)
+      ]
+
+    val to_string : t -> string
+  end
+
   val parse : string -> ?strict:bool -> unit -> t
 
   val file : string -> t
@@ -162,7 +172,7 @@ module Uri : sig
 
   val with_ :
        t
-    -> ?scheme:string
+    -> ?scheme:Scheme.t
     -> ?authority:string
     -> ?path:string
     -> ?query:string

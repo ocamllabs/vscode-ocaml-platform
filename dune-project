@@ -29,16 +29,17 @@
   (ocaml
    (>= 4.11))
   (js_of_ocaml
-   (>= 3.7.0))
+   (>= 3.8.0))
   (gen_js_api
    (>= 1.0.6))
   (core_kernel
-   (>= v0.14.0))
+   (>= v0.14.1))
   (promise_jsoo
    (>= 0.3.1))
   (jsonoo
    (>= 0.2.1))
-   opam-file-format))
+  (opam-file-format
+   (>= 2.1.2))))
 
 (package
  (name vscode)
@@ -47,7 +48,7 @@
   (ocaml
    (>= 4.11))
   (js_of_ocaml
-   (>= 3.7.0))
+   (>= 3.8.0))
   (gen_js_api
    (>= 1.0.6))
   (promise_jsoo
