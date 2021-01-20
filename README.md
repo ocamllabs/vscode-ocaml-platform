@@ -24,11 +24,17 @@ Install [OCaml for Windows](https://fdopen.github.io/opam-repository-mingw/) and
 make sure the `ocaml-env` program is accessible on the PATH (`ocaml-env` is in
 the `usr/local/bin` folder relative to the installation directory).
 
-### BuckleScript
+### ReScript / BuckleScript
 
-There is currently no way of installing
-[OCaml-LSP](https://github.com/ocaml/ocaml-lsp) _natively_ for BuckleScript
-projects. As a fast workaround, you can use [esy](https://github.com/esy/esy):
+The new ReScript syntax (`res` and `resi` files) is not supported, you should
+use [rescript-vscode](https://github.com/rescript-lang/rescript-vscode) instead.
+
+ReasonML, as an alternative syntax for OCaml, is supported out-of-the-box, as
+long as `reason` is installed in your environment.
+
+If you're looking for a way to use OCaml or ReasonML syntax in a ReScript
+project, you'll need to install `ocaml-lsp` in your environment. We recommend
+using Esy for this:
 
 1. Install esy
 
@@ -41,7 +47,7 @@ npm install esy --global
 ```json
 {
   "dependencies": {
-    "@opam/ocaml-lsp-server": "1.1.0",
+    "@opam/ocaml-lsp-server": "*",
     "@opam/ocamlfind-secondary": "*",
     "@opam/reason": "*",
     "ocaml": "4.6.x"
