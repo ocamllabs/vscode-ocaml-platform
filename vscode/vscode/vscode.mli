@@ -603,20 +603,11 @@ module WorkspaceConfiguration : sig
 
   val get : t -> section:string -> Js.Any.t option
 
-  val get_default :
-       (module Js.T with type t = 'a)
-    -> t
-    -> section:string
-    -> defaultValue:'a
-    -> 'a
+  val get_default : 'a Js.t -> t -> section:string -> defaultValue:'a -> 'a
 
   val has : t -> section:string -> bool
 
-  val inspect :
-       (module Js.T with type t = 'a)
-    -> t
-    -> section:string
-    -> 'a inspectResult option
+  val inspect : 'a Js.t -> t -> section:string -> 'a inspectResult option
 
   val update :
        t
@@ -1059,10 +1050,9 @@ end
 module Memento : sig
   include Js.T
 
-  val get : (module Js.T with type t = 'a) -> t -> key:string -> 'a option
+  val get : 'a Js.t -> t -> key:string -> 'a option
 
-  val get_default :
-    (module Js.T with type t = 'a) -> t -> key:string -> defaultValue:'a -> 'a
+  val get_default : 'a Js.t -> t -> key:string -> defaultValue:'a -> 'a
 
   val update : t -> key:string -> value:Js.Any.t -> Promise.void
 end
@@ -1886,7 +1876,7 @@ module Window : sig
     text:string -> ?hide:[ `AfterTimeout of int ] -> unit -> Disposable.t
 
   val withProgress :
-       (module Js.T with type t = 'a)
+       'a Js.t
     -> options:ProgressOptions.t
     -> task:(progress:Progress.t -> token:CancellationToken.t -> 'a Promise.t)
     -> 'a Promise.t
@@ -1909,16 +1899,13 @@ module Window : sig
     -> Terminal.t
 
   val registerTreeDataProvider :
-       (module Js.T with type t = 'a)
+       'a Js.t
     -> viewId:string
     -> treeDataProvider:'a TreeDataProvider.t
     -> Disposable.t
 
   val createTreeView :
-       (module Js.T with type t = 'a)
-    -> viewId:string
-    -> options:'a TreeViewOptions.t
-    -> 'a TreeView.t
+    'a Js.t -> viewId:string -> options:'a TreeViewOptions.t -> 'a TreeView.t
 end
 
 module Commands : sig

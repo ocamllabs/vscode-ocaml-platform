@@ -48,6 +48,8 @@ module Js : sig
     val t_to_js : t -> Ojs.t
   end
 
+  type 'a t = (module T with type t = 'a)
+
   module Any : T with type t = Ojs.t
 
   module Bool : T with type t = bool

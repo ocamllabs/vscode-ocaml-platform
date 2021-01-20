@@ -95,6 +95,8 @@ module Js = struct
     val t_to_js : t -> Ojs.t
   end
 
+  type 'a t = (module T with type t = 'a)
+
   module Any = struct
     type t = Ojs.t [@@js]
   end
