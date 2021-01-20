@@ -2439,12 +2439,10 @@ module Commands = struct
     [@@js.global "vscode.commands.registerTextEditorCommand"]
 
   val executeCommand :
-    command:string -> args:(Js.Any.t list[@js.variadic]) -> Ojs.t
+       command:string
+    -> args:(Js.Any.t list[@js.variadic])
+    -> Js.Any.t or_undefined Promise.t
     [@@js.global "vscode.commands.executeCommand"]
-
-  let executeCommand (type a) (module T : Js.T with type t = a) ~command ~args :
-      a or_undefined Promise.t =
-    [%js.to: T.t or_undefined Promise.t] (executeCommand ~command ~args)
 
   val getCommands : ?filterInternal:bool -> unit -> string list Promise.t
     [@@js.global "vscode.commands.getCommands"]

@@ -110,7 +110,6 @@ module Command = struct
           | Ok _ ->
             let (_ : Ojs.t option Promise.t) =
               Vscode.Commands.executeCommand
-                (module Ojs)
                 ~command:Extension_consts.Commands.refresh_switches ~args:[]
             in
             show_message `Info "The switch has been removed successfully." ) )
@@ -135,9 +134,7 @@ module Command = struct
         | None -> Promise.return ()
         | Some doc ->
           let+ _ =
-            Vscode.Commands.executeCommand
-              (module Ojs)
-              ~command:"vscode.open"
+            Vscode.Commands.executeCommand ~command:"vscode.open"
               ~args:[ Vscode.Uri.parse doc () |> Vscode.Uri.t_to_js ]
           in
           () )

@@ -1935,10 +1935,7 @@ module Commands : sig
     -> Disposable.t
 
   val executeCommand :
-       (module Interop.Js.T with type t = 'a)
-    -> command:string
-    -> args:Js.Any.t list
-    -> 'a option Promise.t
+    command:string -> args:Js.Any.t list -> Js.Any.t option Promise.t
 
   val getCommands : ?filterInternal:bool -> unit -> string list Promise.t
 end
