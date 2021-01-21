@@ -90,11 +90,11 @@ let provide_tasks instance ~token =
     let sandbox = Extension_instance.sandbox instance in
     `Promise (compute_tasks token sandbox)
 
-let resolve_tasks ~task ~token:_ = `Promise (Promise.Option.return task)
+let resolve_task ~task ~token:_ = `Value (Some task)
 
 let register extension instance =
   let provideTasks = provide_tasks instance in
-  let resolveTasks = resolve_tasks in
-  let provider = TaskProvider.create ~provideTasks ~resolveTasks in
+  let resolveTask = resolve_task in
+  let provider = TaskProvider.Default.create ~provideTasks ~resolveTask in
   let disposable = Tasks.registerTaskProvider ~type_:task_type ~provider in
   ExtensionContext.subscribe extension ~disposable

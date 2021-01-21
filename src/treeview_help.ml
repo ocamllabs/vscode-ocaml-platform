@@ -6,8 +6,10 @@ let discord_item ~extension_path =
         ; dark = `String (extension_path ^ "/assets/discord-dark.svg")
         }
   in
-  let label = Vscode.TreeItemLabel.create ~label:"Chat on Discord" () in
-  let item = Vscode.TreeItem.make ~label () in
+  let label =
+    `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Chat on Discord" ())
+  in
+  let item = Vscode.TreeItem.make_label ~label () in
   let command =
     Vscode.Command.create ~title:"Open" ~command:"vscode.open"
       ~arguments:
@@ -28,9 +30,10 @@ let discuss_item ~extension_path =
         }
   in
   let label =
-    Vscode.TreeItemLabel.create ~label:"Ask a question on Discuss" ()
+    `TreeItemLabel
+      (Vscode.TreeItemLabel.create ~label:"Ask a question on Discuss" ())
   in
-  let item = Vscode.TreeItem.make ~label () in
+  let item = Vscode.TreeItem.make_label ~label () in
   let command =
     Vscode.Command.create ~title:"Open" ~command:"vscode.open"
       ~arguments:
@@ -50,8 +53,11 @@ let github_item ~extension_path =
         ; dark = `String (extension_path ^ "/assets/github-dark.svg")
         }
   in
-  let label = Vscode.TreeItemLabel.create ~label:"Open an issue on Github" () in
-  let item = Vscode.TreeItem.make ~label () in
+  let label =
+    `TreeItemLabel
+      (Vscode.TreeItemLabel.create ~label:"Open an issue on Github" ())
+  in
+  let item = Vscode.TreeItem.make_label ~label () in
   let command =
     Vscode.Command.create ~title:"Open" ~command:"vscode.open"
       ~arguments:
@@ -71,23 +77,25 @@ let items ~extension_path =
   ; github_item ~extension_path
   ]
 
-let getTreeItem ~extension_path:_ ~element = Promise.return element
+let getTreeItem ~extension_path:_ ~element = `Value element
 
-let getChildren ~extension_path ~element =
+let getChildren ~extension_path ?element () =
   match element with
   | None -> `Value (Some (items ~extension_path))
   | Some _ -> `Value (Some [])
 
 let register extension =
   let extension_path = Vscode.ExtensionContext.extensionPath extension in
+  let module TreeDataProvider = Vscode.TreeDataProvider.Make (Vscode.TreeItem) in
   let treeDataProvider =
-    Vscode.TreeDataProvider.create
+    TreeDataProvider.create
       ~getTreeItem:(getTreeItem ~extension_path)
       ~getChildren:(getChildren ~extension_path)
       ()
   in
   let disposable =
-    Vscode.Window.registerTreeDataProvider ~viewId:"ocaml-help"
-      ~treeDataProvider
+    Vscode.Window.registerTreeDataProvider
+      (module Vscode.TreeItem)
+      ~viewId:"ocaml-help" ~treeDataProvider
   in
   Vscode.ExtensionContext.subscribe extension ~disposable

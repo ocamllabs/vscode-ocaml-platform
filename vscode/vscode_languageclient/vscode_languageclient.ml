@@ -10,7 +10,7 @@ module RevealOutputChannelOn = struct
 end
 
 module ServerCapabilities = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val experimental : t -> Jsonoo.t or_undefined [@@js.get]
 
@@ -18,13 +18,13 @@ module ServerCapabilities = struct
 end
 
 module InitializeResult = struct
+  include Interface.Make ()
+
   type serverInfo =
     { name : string
     ; version : string or_undefined
     }
   [@@js]
-
-  type t = private (* interface *) Ojs.t [@@js]
 
   val capabilities : t -> ServerCapabilities.t [@@js.get]
 
@@ -32,7 +32,7 @@ module InitializeResult = struct
 end
 
 module DocumentFilter = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val language : t -> string or_undefined [@@js.get]
 
@@ -73,7 +73,7 @@ module DocumentSelector = struct
 end
 
 module ClientOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val documentSelector : t -> DocumentSelector.t or_undefined [@@js.get]
 
@@ -91,7 +91,7 @@ module ClientOptions = struct
 end
 
 module ExecutableOptions = struct
-  type t = private (* interface *) Ojs.t [@@js]
+  include Interface.Make ()
 
   val cwd : t -> string or_undefined [@@js.get]
 
@@ -111,8 +111,8 @@ module ExecutableOptions = struct
     [@@js.builder]
 end
 
-module Executable = (* interface *) struct
-  type t = private Ojs.t [@@js]
+module Executable = struct
+  include Interface.Make ()
 
   val command : t -> string [@@js.get]
 
@@ -132,7 +132,7 @@ end
 module ServerOptions = Executable
 
 module LanguageClient = struct
-  type t = private (* class *) Ojs.t [@@js]
+  include Class.Make ()
 
   val make :
        id:string

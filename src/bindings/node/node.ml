@@ -24,7 +24,7 @@ module JsError = struct
 end
 
 module Buffer = struct
-  type t = private Ojs.t [@@js]
+  include Class.Make ()
 
   val toString : t -> string [@@js.call]
 
@@ -34,7 +34,7 @@ module Buffer = struct
 end
 
 module Stream = struct
-  type t = private Ojs.t [@@js]
+  include Class.Make ()
 
   val on : t -> string -> (Buffer.t -> unit) -> unit [@@js.call]
 

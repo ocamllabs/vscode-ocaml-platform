@@ -1,3 +1,5 @@
+open Interop
+
 module RevealOutputChannelOn : sig
   type t =
     | Info
@@ -5,17 +7,11 @@ module RevealOutputChannelOn : sig
     | Error
     | Never
 
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
+  include Js.T with type t := t
 end
 
 module ServerCapabilities : sig
-  type t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
+  include Js.T
 
   val experimental : t -> Jsonoo.t option
 
@@ -23,11 +19,7 @@ module ServerCapabilities : sig
 end
 
 module InitializeResult : sig
-  type t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
+  include Js.T
 
   val capabilities : t -> ServerCapabilities.t
 
@@ -40,11 +32,7 @@ module InitializeResult : sig
 end
 
 module DocumentFilter : sig
-  type t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
+  include Js.T
 
   val language : t -> string option
 
@@ -63,26 +51,20 @@ module DocumentFilter : sig
 end
 
 module DocumentSelector : sig
-  type t = selector array
-
-  and selector =
+  type selector =
     [ `Filter of DocumentFilter.t
     | `String of string
     ]
 
-  val t_of_js : Ojs.t -> t
+  type t = selector array
 
-  val t_to_js : t -> Ojs.t
+  include Js.T with type t := t
 
   val language : ?scheme:string -> ?pattern:string -> string -> selector
 end
 
 module ClientOptions : sig
-  type t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
+  include Js.T
 
   val documentSelector : t -> DocumentSelector.t option
 
@@ -99,11 +81,7 @@ module ClientOptions : sig
 end
 
 module ExecutableOptions : sig
-  type t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
+  include Js.T
 
   val cwd : t -> string option
 
@@ -123,11 +101,7 @@ module ExecutableOptions : sig
 end
 
 module Executable : sig
-  type t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
+  include Js.T
 
   val command : t -> string
 
@@ -146,11 +120,7 @@ end
 module ServerOptions = Executable
 
 module LanguageClient : sig
-  type t
-
-  val t_of_js : Ojs.t -> t
-
-  val t_to_js : t -> Ojs.t
+  include Js.T
 
   val make :
        id:string

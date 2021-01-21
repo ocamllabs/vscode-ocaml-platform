@@ -147,9 +147,10 @@ let make_item ~extension_path ~opam dependency =
   let icon = `LightDark (Dependency.icon ~extension_path dependency) in
   let collapsibleState = Dependency.collapsible_state dependency in
   let label =
-    Vscode.TreeItemLabel.create ~label:(Dependency.label dependency) ()
+    `TreeItemLabel
+      (Vscode.TreeItemLabel.create ~label:(Dependency.label dependency) ())
   in
-  let item = Vscode.TreeItem.make ~label ~collapsibleState () in
+  let item = Vscode.TreeItem.make_label ~label ~collapsibleState () in
   TreeItem.set_id item (Dependency.to_string dependency);
   TreeItem.set_iconPath item icon;
   TreeItem.set_contextValue item (Dependency.context_value dependency);
@@ -217,9 +218,9 @@ let register extension =
     let open Promise.Syntax in
     let extension_path = Vscode.ExtensionContext.extensionPath extension in
     let+ opam = Opam.make () in
-    let getChildren ~element =
+    let getChildren ?element () =
       match opam with
-      | None -> `Promise (Promise.return None)
+      | None -> `Value None
       | Some opam -> (
         match element with
         | Some element ->
@@ -240,17 +241,21 @@ let register extension =
           in
           `Promise items )
     in
-    let getTreeItem ~element = Promise.return element in
-    let event_emitter = Vscode.EventEmitter.make () in
-    let event = Vscode.EventEmitter.event event_emitter in
+    let getTreeItem ~element = `Value element in
+    let module EventEmitter =
+      Vscode.EventEmitter.Make (Interop.Js.Or_undefined (TreeItem)) in
+    let event_emitter = EventEmitter.make () in
+    let event = EventEmitter.event event_emitter in
+    let module TreeDataProvider = Vscode.TreeDataProvider.Make (Vscode.TreeItem) in
     let treeDataProvider =
-      Vscode.TreeDataProvider.create ~getTreeItem ~getChildren
+      TreeDataProvider.create ~getTreeItem ~getChildren
         ~onDidChangeTreeData:event ()
     in
 
     let disposable =
-      Vscode.Window.registerTreeDataProvider ~viewId:"ocaml-switches"
-        ~treeDataProvider
+      Vscode.Window.registerTreeDataProvider
+        (module Vscode.TreeItem)
+        ~viewId:"ocaml-switches" ~treeDataProvider
     in
     ExtensionContext.subscribe extension ~disposable;
 
@@ -270,7 +275,7 @@ let register extension =
     let disposable =
       Commands.registerCommand
         ~command:Extension_consts.Commands.refresh_switches
-        ~callback:(fun ~args:_ -> EventEmitter.fire event_emitter Ojs.null)
+        ~callback:(fun ~args:_ -> EventEmitter.fire event_emitter None)
     in
     ExtensionContext.subscribe extension ~disposable
   in
