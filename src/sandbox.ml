@@ -1,6 +1,11 @@
 open Import
 
 module Package = struct
+  (* TODO: this should be refactored. A list of package should be homogeneous,
+     so a variant is not a good type.
+
+     This is not too bad for now, as the type is not exposed in the interface,
+     and the constructions only happens in [packages] and [root_packages]. *)
   type t =
     | Opam of Opam.Package.t
     | Esy of Esy.Package.t
