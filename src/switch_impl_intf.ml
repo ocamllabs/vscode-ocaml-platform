@@ -21,6 +21,10 @@ let insert_inferred_intf ~source_uri client text_editor =
   if String.is_suffix source_uri ~suffix:".ml" then
     (* If the source file was a .ml, infer the interface *)
     let+ inferred_intf = send_infer_intf_request client source_uri in
+    let inferred_intf =
+      "(* This interface has been automatically generated with the inferred \
+       interface of the module *)\n\n" ^ inferred_intf
+    in
     let (_ : bool Promise.t) =
       TextEditor.edit text_editor
         ~callback:(fun ~editBuilder ->
