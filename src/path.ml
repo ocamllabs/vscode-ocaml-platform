@@ -39,3 +39,5 @@ let parent x =
     None
   else
     Some (dirname x)
+
+let asset name = of_string (Node.__filename () ^ "/../../assets/" ^ name)

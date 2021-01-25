@@ -1649,12 +1649,6 @@ module TreeItem : sig
     -> unit
     -> t
 
-  val of_uri :
-       resourceUri:Uri.t
-    -> ?collapsibleState:TreeItemCollapsibleState.t
-    -> unit
-    -> t
-
   val label : t -> label option
 
   val set_label : t -> label -> unit

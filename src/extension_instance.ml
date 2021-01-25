@@ -118,7 +118,12 @@ let make () =
 
 let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
-  t.sandbox <- new_sandbox
+  t.sandbox <- new_sandbox;
+  let (_ : Ojs.t option Promise.t) =
+    Vscode.Commands.executeCommand
+      ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
+  in
+  ()
 
 let open_terminal sandbox =
   let terminal = Terminal_sandbox.create sandbox in

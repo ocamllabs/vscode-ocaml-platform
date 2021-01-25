@@ -1,9 +1,9 @@
-let discord_item ~extension_path =
+let discord_item =
   let icon =
     `LightDark
       Vscode.TreeItem.LightDarkIcon.
-        { light = `String (extension_path ^ "/assets/discord-light.svg")
-        ; dark = `String (extension_path ^ "/assets/discord-dark.svg")
+        { light = `String (Path.asset "discord-light.svg" |> Path.to_string)
+        ; dark = `String (Path.asset "discord-dark.svg" |> Path.to_string)
         }
   in
   let label =
@@ -21,12 +21,12 @@ let discord_item ~extension_path =
   Vscode.TreeItem.set_command item command;
   item
 
-let discuss_item ~extension_path =
+let discuss_item =
   let icon =
     `LightDark
       Vscode.TreeItem.LightDarkIcon.
-        { light = `String (extension_path ^ "/assets/chat-light.svg")
-        ; dark = `String (extension_path ^ "/assets/chat-dark.svg")
+        { light = `String (Path.asset "chat-light.svg" |> Path.to_string)
+        ; dark = `String (Path.asset "chat-dark.svg" |> Path.to_string)
         }
   in
   let label =
@@ -45,12 +45,12 @@ let discuss_item ~extension_path =
   Vscode.TreeItem.set_command item command;
   item
 
-let github_item ~extension_path =
+let github_item =
   let icon =
     `LightDark
       Vscode.TreeItem.LightDarkIcon.
-        { light = `String (extension_path ^ "/assets/github-light.svg")
-        ; dark = `String (extension_path ^ "/assets/github-dark.svg")
+        { light = `String (Path.asset "github-light.svg" |> Path.to_string)
+        ; dark = `String (Path.asset "github-dark.svg" |> Path.to_string)
         }
   in
   let label =
@@ -71,28 +71,18 @@ let github_item ~extension_path =
   Vscode.TreeItem.set_command item command;
   item
 
-let items ~extension_path =
-  [ discord_item ~extension_path
-  ; discuss_item ~extension_path
-  ; github_item ~extension_path
-  ]
+let items = [ discord_item; discuss_item; github_item ]
 
-let getTreeItem ~extension_path:_ ~element = `Value element
+let getTreeItem ~element = `Value element
 
-let getChildren ~extension_path ?element () =
+let getChildren ?element () =
   match element with
-  | None -> `Value (Some (items ~extension_path))
+  | None -> `Value (Some items)
   | Some _ -> `Value (Some [])
 
 let register extension =
-  let extension_path = Vscode.ExtensionContext.extensionPath extension in
   let module TreeDataProvider = Vscode.TreeDataProvider.Make (Vscode.TreeItem) in
-  let treeDataProvider =
-    TreeDataProvider.create
-      ~getTreeItem:(getTreeItem ~extension_path)
-      ~getChildren:(getChildren ~extension_path)
-      ()
-  in
+  let treeDataProvider = TreeDataProvider.create ~getTreeItem ~getChildren () in
   let disposable =
     Vscode.Window.registerTreeDataProvider
       (module Vscode.TreeItem)

@@ -43,6 +43,12 @@
   ],
   "icon": "assets/logo.png",
   "contributes": {
+    "viewsWelcome": [
+      {
+        "view": "ocaml-sandbox",
+        "contents": "In order to manage your sandbox, you can open a folder containing an Opam switch, or select an Opam switch as a sandbox.\n[Open Folder](command:vscode.openFolder)\n[Select Sandbox](command:ocaml.select-sandbox)"
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {
@@ -55,8 +61,12 @@
     "views": {
       "ocaml-explorer": [
         {
+          "id": "ocaml-sandbox",
+          "name": "Sandbox"
+        },
+        {
           "id": "ocaml-switches",
-          "name": "Switches"
+          "name": "Opam Switches"
         },
         {
           "id": "ocaml-commands",
@@ -108,6 +118,33 @@
         }
       },
       {
+        "command": "ocaml.refresh-sandbox",
+        "category": "OCaml",
+        "title": "Refresh Sandbox",
+        "icon": {
+          "light": "assets/refresh-light.svg",
+          "dark": "assets/refresh-dark.svg"
+        }
+      },
+      {
+        "command": "ocaml.install-sandbox",
+        "category": "OCaml",
+        "title": "Install Packages",
+        "icon": {
+          "light": "assets/plus-light.svg",
+          "dark": "assets/plus-dark.svg"
+        }
+      },
+      {
+        "command": "ocaml.upgrade-sandbox",
+        "category": "OCaml",
+        "title": "Upgrade Packages",
+        "icon": {
+          "light": "assets/arrow-circle-up-light.svg",
+          "dark": "assets/arrow-circle-up-dark.svg"
+        }
+      },
+      {
         "command": "ocaml.remove-switch",
         "category": "OCaml",
         "title": "Remove Switch",
@@ -117,7 +154,25 @@
         }
       },
       {
-        "command": "ocaml.open-documentation",
+        "command": "ocaml.uninstall-sandbox-package",
+        "category": "OCaml",
+        "title": "Uninstall Package",
+        "icon": {
+          "light": "assets/x-light.svg",
+          "dark": "assets/x-dark.svg"
+        }
+      },
+      {
+        "command": "ocaml.open-switches-documentation",
+        "category": "OCaml",
+        "title": "Open Documentation",
+        "icon": {
+          "light": "assets/document-search-light.svg",
+          "dark": "assets/document-search-dark.svg"
+        }
+      },
+      {
+        "command": "ocaml.open-sandbox-documentation",
         "category": "OCaml",
         "title": "Open Documentation",
         "icon": {
@@ -171,11 +226,31 @@
           "when": "false"
         },
         {
+          "command": "ocaml.refresh-sandbox",
+          "when": "false"
+        },
+        {
+          "command": "ocaml.install-sandbox",
+          "when": "false"
+        },
+        {
+          "command": "ocaml.uninstall-sandbox-package",
+          "when": "false"
+        },
+        {
+          "command": "ocaml.upgrade-sandbox",
+          "when": "false"
+        },
+        {
           "command": "ocaml.remove-switch",
           "when": "false"
         },
         {
-          "command": "ocaml.open-documentation",
+          "command": "ocaml.open-switches-documentation",
+          "when": "false"
+        },
+        {
+          "command": "ocaml.open-sandbox-documentation",
           "when": "false"
         }
       ],
@@ -192,17 +267,42 @@
           "command": "ocaml.refresh-switches",
           "when": "view == ocaml-switches",
           "group": "navigation"
+        },
+        {
+          "command": "ocaml.refresh-sandbox",
+          "when": "view == ocaml-sandbox",
+          "group": "navigation"
+        },
+        {
+          "command": "ocaml.install-sandbox",
+          "when": "view == ocaml-sandbox",
+          "group": "navigation"
+        },
+        {
+          "command": "ocaml.upgrade-sandbox",
+          "when": "view == ocaml-sandbox",
+          "group": "navigation"
         }
       ],
       "view/item/context": [
         {
           "command": "ocaml.remove-switch",
-          "when": "view == ocaml-switches && viewItem == switch",
+          "when": "view == ocaml-switches && viewItem == opam-switch",
           "group": "inline"
         },
         {
-          "command": "ocaml.open-documentation",
+          "command": "ocaml.uninstall-sandbox-package",
+          "when": "view == ocaml-sandbox",
+          "group": "inline"
+        },
+        {
+          "command": "ocaml.open-switches-documentation",
           "when": "view == ocaml-switches && viewItem == package-with-doc",
+          "group": "inline"
+        },
+        {
+          "command": "ocaml.open-sandbox-documentation",
+          "when": "view == ocaml-sandbox && viewItem == package-with-doc",
           "group": "inline"
         }
       ]

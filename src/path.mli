@@ -33,3 +33,5 @@ val with_ext : t -> ext:string -> t
 val parent : t -> t option
 
 val is_root : t -> bool
+
+val asset : string -> t

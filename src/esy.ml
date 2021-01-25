@@ -1,11 +1,38 @@
 open Import
 
+module Manifest = struct
+  include Path
+
+  let path t = t
+
+  let of_path t = t
+end
+
+module Package = struct
+  (* TODO: Implement Esy sandbox inspection *)
+
+  type t = unit
+
+  let name _t = failwith "Esy sandbox inspection is not supported yet."
+
+  let version _t = failwith "Esy sandbox inspection is not supported yet."
+
+  let documentation _t = failwith "Esy sandbox inspection is not supported yet."
+
+  let synopsis _t = failwith "Esy sandbox inspection is not supported yet."
+
+  let has_dependencies _t =
+    failwith "Esy sandbox inspection is not supported yet."
+
+  let dependencies _t = failwith "Esy sandbox inspection is not supported yet."
+end
+
 type t = Cmd.spawn
 
 let binary = Path.of_string "esy"
 
 type discover =
-  { file : Path.t
+  { manifest : Manifest.t
   ; status : (unit, string) result
   }
 
@@ -17,20 +44,20 @@ let make () =
   | Ok cmd -> Some cmd
 
 module Discover = struct
-  let valid file = Some { file; status = Ok () }
+  let valid manifest = Some { manifest; status = Ok () }
 
   let compare l r =
     let compare_file = Path.compare in
     let compare_status = Result.compare Unit.compare String.compare in
-    match compare_file l.file r.file with
+    match compare_file l.manifest r.manifest with
     | 0 -> compare_status l.status r.status
     | n -> n
 
-  let invalid_json file json_file =
+  let invalid_json manifest json_file =
     let message =
       Printf.sprintf "Esy manifest file '%s' is not a valid json file" json_file
     in
-    Some { file; status = Error message }
+    Some { manifest; status = Error message }
 
   let is_esy_compatible filename json =
     String.equal filename "esy.json"
@@ -83,7 +110,7 @@ end
 
 let discover = Discover.run
 
-let exec t ~manifest ~args =
+let exec t manifest ~args =
   Cmd.Spawn (Cmd.append t ("-P" :: Path.to_string manifest :: args))
 
 module State = struct
@@ -101,8 +128,8 @@ let find_manifest_in_dir dir =
          let+ file_exists = path |> Path.to_string |> Fs.exists in
          Option.some_if file_exists path)
 
-let state t ~manifest =
-  let root_str = Path.to_string manifest in
+let state t manifest =
+  let root_str = Manifest.to_string manifest in
   let command = Cmd.append t [ "status"; "-P"; root_str ] in
   let open Promise.Result.Syntax in
   let+ is_project_ready_for_dev =
@@ -123,9 +150,9 @@ let state t ~manifest =
   else
     Pending
 
-let setup_sandbox t ~manifest =
+let setup_sandbox t manifest =
   let open Promise.Result.Syntax in
-  let+ sandbox_state = state t ~manifest in
+  let+ sandbox_state = state t manifest in
   match sandbox_state with
   | State.Ready -> ()
   | Pending ->
@@ -134,3 +161,11 @@ let setup_sandbox t ~manifest =
       root_dir
 
 let equal e1 e2 = Cmd.equal_spawn e1 e2
+
+let packages _t _manifest =
+  (* TODO: Implement Esy sandbox inspection *)
+  Promise.return (Error "Esy sandbox inspection is not supported yet.")
+
+let root_packages _t _manifest =
+  (* TODO: Implement Esy sandbox inspection *)
+  Promise.return (Error "Esy sandbox inspection is not supported yet.")

@@ -1062,7 +1062,7 @@ module ProgressLocation = struct
   type t =
     | SourceControl [@js 1]
     | Window [@js 10]
-    | Notification [@js 25]
+    | Notification [@js 15]
   [@@js.enum] [@@js]
 end
 
@@ -2041,13 +2041,6 @@ module TreeItem = struct
     [@@js.new "vscode.TreeItem"]
 
   val make_resource :
-       resourceUri:Uri.t
-    -> ?collapsibleState:TreeItemCollapsibleState.t
-    -> unit
-    -> t
-    [@@js.new "vscode.TreeItem"]
-
-  val of_uri :
        resourceUri:Uri.t
     -> ?collapsibleState:TreeItemCollapsibleState.t
     -> unit

@@ -1,7 +1,5 @@
-(** Sandbox.ml exposes functions that let us
-
-    1. Run initial checks in the environment looking for a reliable sandbox
-    ([Sandbox.init])
+(** Sandbox.ml exposes functions that let us 1. Run initial checks in the
+    environment looking for a reliable sandbox ([Sandbox.init])
 
     2. Run a setup that would setup the sandbox provided that basic requirements
     are met ([Sandbox.run_setup])
@@ -16,9 +14,25 @@
     performance, direct user to install missing tools etc). Having a single
     [Sandbox.make()], for instance, would not make it this flexible. *)
 
+module Package : sig
+  type t
+
+  val name : t -> string
+
+  val version : t -> string
+
+  val synopsis : t -> string option
+
+  val documentation : t -> string option
+
+  val has_dependencies : t -> bool
+
+  val dependencies : t -> (t list, string) result Promise.t
+end
+
 type t =
   | Opam of Opam.t * Opam.Switch.t
-  | Esy of Esy.t * Path.t
+  | Esy of Esy.t * Esy.Manifest.t
   | Global
   | Custom of string
 
@@ -65,3 +79,18 @@ val get_lsp_command : ?args:string list -> t -> Cmd.t
 
 (** Extract a dune command *)
 val get_dune_command : t -> string list -> Cmd.t
+
+(** The packages installed in the sandbox *)
+val packages : t -> (Package.t list, string) result Promise.t
+
+(** The packages that have been installed manually by the user in the sandbox *)
+val root_packages : t -> (Package.t list, string) result Promise.t
+
+(** Uninstall existing packages from the sandbox *)
+val uninstall_packages : t -> Package.t list -> unit Promise.t
+
+(** Install new packages in the sandbox *)
+val install_packages : t -> string list -> unit Promise.t
+
+(** Upgrade packages in the sandbox *)
+val upgrade_packages : t -> unit Promise.t

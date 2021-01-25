@@ -1,21 +1,73 @@
 open Import
 
+module Package = struct
+  (* TODO: this should be refactored. A list of package should be homogeneous,
+     so a variant is not a good type.
+
+     This is not too bad for now, as the type is not exposed in the interface,
+     and the constructions only happens in [packages] and [root_packages]. *)
+  type t =
+    | Opam of Opam.Package.t
+    | Esy of Esy.Package.t
+
+  let of_opam opam_pkg = Opam opam_pkg
+
+  let of_esy opam_pkg = Esy opam_pkg
+
+  let name t =
+    match t with
+    | Opam pkg -> Opam.Package.name pkg
+    | Esy pkg -> Esy.Package.name pkg
+
+  let version t =
+    match t with
+    | Opam pkg -> Opam.Package.version pkg
+    | Esy pkg -> Esy.Package.version pkg
+
+  let synopsis t =
+    match t with
+    | Opam pkg -> Opam.Package.synopsis pkg
+    | Esy pkg -> Esy.Package.synopsis pkg
+
+  let documentation t =
+    match t with
+    | Opam pkg -> Opam.Package.documentation pkg
+    | Esy pkg -> Esy.Package.documentation pkg
+
+  let dependencies t =
+    match t with
+    | Opam pkg ->
+      let open Promise.Result.Syntax in
+      let+ deps = Opam.Package.dependencies pkg in
+      List.map deps ~f:of_opam
+    | Esy pkg ->
+      let open Promise.Result.Syntax in
+      let+ deps = Esy.Package.dependencies pkg in
+      List.map deps ~f:of_esy
+
+  let has_dependencies t =
+    match t with
+    | Opam pkg -> Opam.Package.has_dependencies pkg
+    | Esy pkg -> Esy.Package.has_dependencies pkg
+end
+
 type t =
   | Opam of Opam.t * Opam.Switch.t
-  | Esy of Esy.t * Path.t
+  | Esy of Esy.t * Esy.Manifest.t
   | Global
   | Custom of string
 
 let equal t1 t2 =
   match (t1, t2) with
   | Global, Global -> true
-  | Esy (e1, p1), Esy (e2, p2) -> Path.equal p1 p2 && Esy.equal e1 e2
+  | Esy (e1, p1), Esy (e2, p2) -> Esy.Manifest.equal p1 p2 && Esy.equal e1 e2
   | Opam (o1, s1), Opam (o2, s2) -> Opam.Switch.equal s1 s2 && Opam.equal o1 o2
   | Custom s1, Custom s2 -> String.equal s1 s2
   | _, _ -> false
 
 let to_string = function
-  | Esy (_, root) -> Printf.sprintf "esy(%s)" (Path.to_string root)
+  | Esy (_, root) ->
+    Printf.sprintf "esy(%s)" (Esy.Manifest.path root |> Path.to_string)
   | Opam (_, switch) -> Printf.sprintf "opam(%s)" (Opam.Switch.name switch)
   | Global -> "global"
   | Custom _ -> "custom"
@@ -25,7 +77,7 @@ let to_pretty_string t =
   let print_esy = Printf.sprintf "esy(%s)" in
   match t with
   | Esy (_, root) ->
-    let project_name = Path.basename root in
+    let project_name = Esy.Manifest.path root |> Path.basename in
     print_esy project_name
   | Opam (_, Named name) -> print_opam name
   | Opam (_, Local path) ->
@@ -78,7 +130,7 @@ end
 module Setting = struct
   type t =
     | Opam of Opam.Switch.t
-    | Esy of Path.t
+    | Esy of Esy.Manifest.t
     | Global
     | Custom of string
 
@@ -96,7 +148,9 @@ module Setting = struct
     | Global -> Global
     | Esy ->
       let manifest =
-        field "root" (fun js -> Path.of_string (decode_vars js)) json
+        field "root"
+          (fun js -> Path.of_string (decode_vars js) |> Esy.Manifest.of_path)
+          json
       in
       Esy manifest
     | Opam ->
@@ -117,7 +171,11 @@ module Setting = struct
     match t with
     | Global -> Jsonoo.Encode.object_ [ kind ]
     | Esy manifest ->
-      object_ [ kind; ("root", encode_vars @@ Path.to_string manifest) ]
+      object_
+        [ kind
+        ; ( "root"
+          , encode_vars @@ (manifest |> Esy.Manifest.path |> Path.to_string) )
+        ]
     | Opam switch ->
       object_ [ kind; ("switch", encode_vars @@ Opam.Switch.name switch) ]
     | Custom template -> object_ [ kind; ("template", string template) ]
@@ -159,7 +217,7 @@ let of_settings () : t option Promise.t =
       not_available `Opam;
       Promise.return None
     | Some opam ->
-      let+ exists = Opam.exists opam ~switch in
+      let+ exists = Opam.switch_exists opam switch in
       if exists then
         Some (Opam (opam, switch))
       else (
@@ -182,16 +240,15 @@ let detect_esy_sandbox ~project_root esy () =
       , Esy.find_manifest_in_dir project_root )
   in
   match (esy_build_dir_exists, manifest) with
-  | true, _
-  | _, Some _ ->
+  | true, Some manifest ->
     (* Esy can be used with [esy.json], [package.json], or without any of those.
        So we check if we find an [_esy] directory, which means the user created
        an Esy sandbox.
 
        If we don't, but there is an [esy.json] file, we can assume the user
        wants to use Esy. *)
-    Some (Esy (esy, project_root))
-  | false, None -> None
+    Some (Esy (esy, manifest))
+  | _ -> None
 
 let detect_opam_local_switch ~project_root opam () =
   let open Promise.Option.Syntax in
@@ -265,7 +322,8 @@ module Candidate = struct
       let project_name = Path.basename path in
       let project_path = Path.to_string path in
       create ~label:project_name ~detail:project_path ?description ()
-    | Esy (_, p) ->
+    | Esy (_, manifest) ->
+      let p = Esy.Manifest.path manifest in
       let project_name = Path.basename p in
       let project_path = Path.to_string p in
       create ~detail:project_path ~label:project_name ?description ()
@@ -311,10 +369,8 @@ let sandbox_candidates ~workspace_folders =
         |> Promise.all_list
       in
       List.concat esys
-      |> List.map ~f:(fun (manifest : Esy.discover) ->
-             { Candidate.sandbox = Esy (esy, manifest.file)
-             ; status = manifest.status
-             })
+      |> List.map ~f:(fun ({ manifest; status } : Esy.discover) ->
+             { Candidate.sandbox = Esy (esy, manifest); status })
   in
   let opam =
     let* opam = available.opam in
@@ -338,7 +394,7 @@ let sandbox_candidates ~workspace_folders =
 
 let setup_sandbox (kind : t) =
   match kind with
-  | Esy (esy, manifest) -> Esy.setup_sandbox esy ~manifest
+  | Esy (esy, manifest) -> Esy.setup_sandbox esy manifest
   | Opam _
   | Global
   | Custom _ ->
@@ -384,8 +440,8 @@ let select_sandbox_and_save () =
 
 let get_command sandbox bin args : Cmd.t =
   match sandbox with
-  | Opam (opam, switch) -> Opam.exec opam ~switch ~args:(bin :: args)
-  | Esy (esy, manifest) -> Esy.exec esy ~manifest ~args:(bin :: args)
+  | Opam (opam, switch) -> Opam.exec opam switch ~args:(bin :: args)
+  | Esy (esy, manifest) -> Esy.exec esy manifest ~args:(bin :: args)
   | Global -> Spawn { bin = Path.of_string bin; args }
   | Custom template ->
     let bin =
@@ -424,3 +480,148 @@ let run_setup sandbox =
        consider checking and suggesting installation for other tools: formatter,
        etc. *)
     Error (Printf.sprintf "Sandbox initialisation failed: %s" msg)
+
+let packages t =
+  let open Promise.Result.Syntax in
+  match t with
+  | Global -> Promise.Result.return []
+  | Custom _ -> Promise.Result.return []
+  | Esy (esy, manifest) ->
+    let+ r = Esy.packages esy manifest in
+    List.map r ~f:Package.of_esy
+  | Opam (opam, switch) ->
+    let+ r = Opam.packages opam switch in
+    List.map r ~f:Package.of_opam
+
+let root_packages t =
+  let open Promise.Result.Syntax in
+  match t with
+  | Global -> Promise.Result.return []
+  | Custom _ -> Promise.Result.return []
+  | Esy (esy, manifest) ->
+    let+ r = Esy.root_packages esy manifest in
+    List.map r ~f:Package.of_esy
+  | Opam (opam, switch) ->
+    let+ r = Opam.root_packages opam switch in
+    List.map r ~f:Package.of_opam
+
+let uninstall_packages t packages =
+  let options =
+    ProgressOptions.create ~location:(`ProgressLocation Notification)
+      ~title:"Uninstalling sandbox packages" ~cancellable:false ()
+  in
+  match t with
+  | Global ->
+    show_message `Error
+      "Uninstalling packages is not supported for Global sandboxes";
+    Promise.return ()
+  | Custom _ ->
+    show_message `Error
+      "Uninstalling packages is not supported for Custom sandboxes";
+    Promise.return ()
+  | Esy (_esy, _manifest) ->
+    (* TODO: Implement Esy sandbox inspection *)
+    show_message `Error
+      "Uninstalling packages is not supported for Esy sandboxes";
+    Promise.return ()
+  | Opam (opam, switch) ->
+    let opam_packages =
+      List.filter_map
+        ~f:(function
+          | Package.Esy _ -> None
+          | Opam pkg -> Some pkg)
+        packages
+    in
+    let task ~progress:_ ~token:_ =
+      let open Promise.Syntax in
+      let+ result =
+        let open Promise.Result.Syntax in
+        let+ _ = Opam.package_remove opam switch opam_packages |> Cmd.output in
+        ()
+      in
+      match result with
+      | Ok () -> Ojs.null
+      | Error err ->
+        show_message `Error
+          "An error occured while uninstalling the packages: %s" err;
+        Ojs.null
+    in
+    let open Promise.Syntax in
+    let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    ()
+
+let install_packages t packages =
+  let options =
+    ProgressOptions.create ~location:(`ProgressLocation Notification)
+      ~title:"Installing sandbox packages" ~cancellable:false ()
+  in
+  match t with
+  | Global ->
+    show_message `Error
+      "Installing packages is not supported for Global sandboxes";
+    Promise.return ()
+  | Custom _ ->
+    show_message `Error
+      "Installing packages is not supported for Custom sandboxes";
+    Promise.return ()
+  | Esy (_esy, _manifest) ->
+    (* TODO: Implement Esy sandbox inspection *)
+    show_message `Error "Installing packages is not supported for Esy sandboxes";
+    Promise.return ()
+  | Opam (opam, switch) ->
+    let task ~progress:_ ~token:_ =
+      let open Promise.Syntax in
+      let+ result =
+        let open Promise.Result.Syntax in
+        let* _ = Opam.update opam |> Cmd.output in
+        let+ _ = Opam.install opam switch packages |> Cmd.output in
+        ()
+      in
+      match result with
+      | Ok () -> Ojs.null
+      | Error err ->
+        show_message `Error "An error occured while installing the packages: %s"
+          err;
+        Ojs.null
+    in
+    let open Promise.Syntax in
+    let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    ()
+
+let upgrade_packages t =
+  let options =
+    ProgressOptions.create ~location:(`ProgressLocation Notification)
+      ~title:"Upgrading sandbox packages" ~cancellable:false ()
+  in
+  match t with
+  | Global ->
+    show_message `Error
+      "Upgrading packages is not supported for Global sandboxes";
+    Promise.return ()
+  | Custom _ ->
+    show_message `Error
+      "Upgrading packages is not supported for Custom sandboxes";
+    Promise.return ()
+  | Esy (_esy, _manifest) ->
+    (* TODO: Implement Esy sandbox inspection *)
+    show_message `Error "Upgrading packages is not supported for Esy sandboxes";
+    Promise.return ()
+  | Opam (opam, switch) ->
+    let task ~progress:_ ~token:_ =
+      let open Promise.Syntax in
+      let+ result =
+        let open Promise.Result.Syntax in
+        let* _ = Opam.update opam |> Cmd.output in
+        let+ _ = Opam.upgrade opam switch |> Cmd.output in
+        ()
+      in
+      match result with
+      | Ok () -> Ojs.null
+      | Error err ->
+        show_message `Error "An error occured while upgrading the packages: %s"
+          err;
+        Ojs.null
+    in
+    let open Promise.Syntax in
+    let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    ()
