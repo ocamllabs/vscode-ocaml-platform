@@ -90,8 +90,8 @@ module Dune_commands = struct
       match Vscode.Window.activeTextEditor () with
       | None ->
         assert false
-        (* this command is available in the command palette only when a
-           ocaml/reason/mehnir/ocamllex files are open *)
+        (* this command is available (in the command) palette only when a file
+           is open *)
       | Some text_editor ->
         let doc = TextEditor.document text_editor in
         let uri = TextDocument.uri doc in

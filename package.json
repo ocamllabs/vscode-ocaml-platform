@@ -183,7 +183,7 @@
       {
         "command": "dune.current-dune-file",
         "category": "Dune",
-        "title": "Open current dune file"
+        "title": "Open Dune File (located in the same folder)"
       }
     ],
     "keybindings": [
@@ -213,7 +213,7 @@
       "commandPalette": [
         {
           "command": "dune.current-dune-file",
-          "when": "editorLangId  == ocaml || editorLangId  == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir"
+          "when": "editorIsOpen"
         },
         {
           "command": "ocaml.refresh-switches",
