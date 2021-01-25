@@ -20,8 +20,8 @@ module Dependency = struct
 
   let icon _ =
     TreeItem.LightDarkIcon.
-      { light = `String (Node.__filename () ^ "/../../assets/number-light.svg")
-      ; dark = `String (Node.__filename () ^ "/../../assets/number-dark.svg")
+      { light = `String (Path.asset "number-light.svg" |> Path.to_string)
+      ; dark = `String (Path.asset "number-dark.svg" |> Path.to_string)
       }
 
   let collapsible_state t =
@@ -77,7 +77,7 @@ module Command = struct
       ()
     in
     Extension_commands.register
-      Extension_consts.Commands.open_sandbox_documentation handler
+      ~id:Extension_consts.Commands.open_sandbox_documentation handler
 
   let _uninstall =
     let handler (instance : Extension_instance.t) ~args =
@@ -100,7 +100,7 @@ module Command = struct
       ()
     in
     Extension_commands.register
-      Extension_consts.Commands.uninstall_sandbox_package handler
+      ~id:Extension_consts.Commands.uninstall_sandbox_package handler
 
   let _upgrade =
     let handler (instance : Extension_instance.t) ~args:_ =
@@ -120,7 +120,7 @@ module Command = struct
       in
       ()
     in
-    Extension_commands.register Extension_consts.Commands.upgrade_sandbox
+    Extension_commands.register ~id:Extension_consts.Commands.upgrade_sandbox
       handler
 
   let ask_packages () =
@@ -153,7 +153,7 @@ module Command = struct
       in
       ()
     in
-    Extension_commands.register Extension_consts.Commands.install_sandbox
+    Extension_commands.register ~id:Extension_consts.Commands.install_sandbox
       handler
 end
 

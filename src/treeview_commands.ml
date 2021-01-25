@@ -1,9 +1,9 @@
-let select_sandbox_item ~extension_path =
+let select_sandbox_item =
   let icon =
     `LightDark
       Vscode.TreeItem.LightDarkIcon.
-        { light = `String (extension_path ^ "/assets/collection-light.svg")
-        ; dark = `String (extension_path ^ "/assets/collection-dark.svg")
+        { light = `String (Path.asset "collection-light.svg" |> Path.to_string)
+        ; dark = `String (Path.asset "collection-dark.svg" |> Path.to_string)
         }
   in
   let label =
@@ -18,12 +18,12 @@ let select_sandbox_item ~extension_path =
   Vscode.TreeItem.set_command item command;
   item
 
-let terminal_item ~extension_path =
+let terminal_item =
   let icon =
     `LightDark
       Vscode.TreeItem.LightDarkIcon.
-        { light = `String (extension_path ^ "/assets/terminal-light.svg")
-        ; dark = `String (extension_path ^ "/assets/terminal-dark.svg")
+        { light = `String (Path.asset "terminal-light.svg" |> Path.to_string)
+        ; dark = `String (Path.asset "terminal-dark.svg" |> Path.to_string)
         }
   in
   let label =
@@ -39,25 +39,18 @@ let terminal_item ~extension_path =
   Vscode.TreeItem.set_command item command;
   item
 
-let items ~extension_path =
-  [ select_sandbox_item ~extension_path; terminal_item ~extension_path ]
+let items = [ select_sandbox_item; terminal_item ]
 
-let getTreeItem ~extension_path:_ ~element = `Value element
+let getTreeItem ~element = `Value element
 
-let getChildren ~extension_path ?element () =
+let getChildren ?element () =
   match element with
-  | None -> `Value (Some (items ~extension_path))
+  | None -> `Value (Some items)
   | Some _ -> `Value (Some [])
 
 let register extension =
-  let extension_path = Vscode.ExtensionContext.extensionPath extension in
   let module TreeDataProvider = Vscode.TreeDataProvider.Make (Vscode.TreeItem) in
-  let treeDataProvider =
-    TreeDataProvider.create
-      ~getTreeItem:(getTreeItem ~extension_path)
-      ~getChildren:(getChildren ~extension_path)
-      ()
-  in
+  let treeDataProvider = TreeDataProvider.create ~getTreeItem ~getChildren () in
   let disposable =
     Vscode.Window.registerTreeDataProvider
       (module Vscode.TreeItem)

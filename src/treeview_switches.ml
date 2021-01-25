@@ -121,7 +121,8 @@ module Command = struct
       in
       ()
     in
-    Extension_commands.register Extension_consts.Commands.remove_switch handler
+    Extension_commands.register ~id:Extension_consts.Commands.remove_switch
+      handler
 
   let _open_documentation =
     let handler (_ : Extension_instance.t) ~args =
@@ -147,7 +148,7 @@ module Command = struct
       ()
     in
     Extension_commands.register
-      Extension_consts.Commands.open_switches_documentation handler
+      ~id:Extension_consts.Commands.open_switches_documentation handler
 end
 
 let getTreeItem ~element = `Promise (Dependency.to_treeitem element)

@@ -203,7 +203,7 @@ module Package = struct
           let package_path =
             (* The package path is never the root, so it's safe to use
                [value_exn] *)
-            Path.parent (path package) |> fun x -> Option.value_exn x
+            Option.value_exn (Path.parent (path package))
           in
           get_switch_package pkg ~package_path)
         l
@@ -269,7 +269,9 @@ let switch_compiler t switch =
   let open Promise.Syntax in
   let+ switch_state = Switch_state.of_switch t switch in
   match switch_state with
-  | Error _ -> None
+  | Error err ->
+    log "Failed to detect compiler version for %s: %s" (Switch.name switch) err;
+    None
   | Ok switch_state ->
     let compilers = Switch_state.compilers switch_state in
     Option.bind compilers ~f:List.hd
@@ -278,6 +280,8 @@ let packages_from_switch_state_field t switch callback =
   let open Promise.Result.Syntax in
   let* switch_state = Switch_state.of_switch t switch in
   match callback switch_state with
+  | None ->
+    Promise.return (Error "Could not get the packages from the switch state")
   | Some l ->
     let* path = Switch.path t switch in
     Promise.List.filter_map
@@ -286,8 +290,6 @@ let packages_from_switch_state_field t switch callback =
         Package.of_path package_path)
       l
     |> Promise.map Result.return
-  | None ->
-    Promise.return (Error "Could not get the packages from the switch state")
 
 let packages t switch =
   packages_from_switch_state_field t switch Switch_state.installed
