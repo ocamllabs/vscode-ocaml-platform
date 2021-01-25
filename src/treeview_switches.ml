@@ -35,15 +35,13 @@ module Dependency = struct
   let icon = function
     | Switch _ ->
       TreeItem.LightDarkIcon.
-        { light =
-            `String (Node.__filename () ^ "/../../assets/dependency-light.svg")
-        ; dark =
-            `String (Node.__filename () ^ "/../../assets/dependency-dark.svg")
+        { light = `String (Path.asset "dependency-light.svg" |> Path.to_string)
+        ; dark = `String (Path.asset "dependency-dark.svg" |> Path.to_string)
         }
     | Package _ ->
       TreeItem.LightDarkIcon.
-        { light = `String (Node.__filename () ^ "/../../assets/number-light.svg")
-        ; dark = `String (Node.__filename () ^ "/../../assets/number-dark.svg")
+        { light = `String (Path.asset "number-light.svg" |> Path.to_string)
+        ; dark = `String (Path.asset "number-dark.svg" |> Path.to_string)
         }
 
   let collapsible_state = function
