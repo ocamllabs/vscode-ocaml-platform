@@ -181,8 +181,8 @@
         }
       },
       {
-        "command": "dune.current-dune-file",
-        "category": "Dune",
+        "command": "ocaml.current-dune-file",
+        "category": "OCaml",
         "title": "Open Dune File (located in the same folder)"
       }
     ],
@@ -212,7 +212,7 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "dune.current-dune-file",
+          "command": "ocaml.current-dune-file",
           "when": "editorIsOpen"
         },
         {

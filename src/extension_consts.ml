@@ -1,7 +1,5 @@
 let ocaml_prefixed key = "ocaml." ^ key
 
-let dune_prefixed key = "dune." ^ key
-
 module Commands = struct
   let select_sandbox = ocaml_prefixed "select-sandbox"
 
@@ -30,7 +28,7 @@ module Commands = struct
   let open_sandbox_documentation = ocaml_prefixed "open-sandbox-documentation"
 
   module Dune = struct
-    let open_current_dune_file = dune_prefixed "current-dune-file"
+    let open_current_dune_file = ocaml_prefixed "current-dune-file"
   end
 end
 
