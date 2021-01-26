@@ -820,6 +820,6 @@
     "ovsx": "0.1.0-next.9321255",
     "prettier": "2.2.1",
     "vsce": "1.84.0",
-    "vscode-test": "1.4.1"
+    "vscode-test": "1.5.0"
   }
 }
