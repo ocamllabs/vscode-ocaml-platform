@@ -19,6 +19,7 @@ let client_options () =
     LanguageClient.DocumentSelector.
       [| language "ocaml"
        ; language "ocaml.interface"
+       ; language "ocaml.eliom"
        ; language "ocaml.ocamllex"
        ; language "ocaml.menhir"
        ; language "reason"
