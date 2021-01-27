@@ -14,7 +14,7 @@ jobs:
           - ubuntu-latest
           - windows-latest
         ocaml-version:
-          - 4.11.1
+          - 4.11.x
         node-version:
           - 14.x
 
@@ -25,21 +25,25 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Use OCaml ${{ matrix.ocaml-version }}
-        uses: avsm/setup-ocaml@v1
+        uses: actions-ml/setup-ocaml@master
         with:
           ocaml-version: ${{ matrix.ocaml-version }}
+          dune-cache: ${{ matrix.os != 'windows-latest' }}
+          opam-depext: false
+          opam-pin: false
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Install opam packages
+        run: |
+          opam pin ocaml-lsp-server https://github.com/ocaml/ocaml-lsp.git --no-action
+          opam install ocaml-lsp-server ocamlformat . --deps-only --with-test
+
       - name: Use latest esy
         run: npm install --global esy
-
-      - name: Get opam root directory path
-        id: opam-root-dir-path
-        run: echo "::set-output name=dir::$(opam config var root)"
 
       # This step is required because esy's home directory doesn't exist at this point
       - name: Install esy packages
@@ -49,29 +53,12 @@ jobs:
         id: esy-cache-dir-path
         run: node .github/workflows/print_esy_cache.js
 
-      # - name: Restore opam cache
-      #   id: cache-opam
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: ${{ steps.opam-root-dir-path.outputs.dir }}
-      #     # opam cache is coupled to esy lock files, so both caches will be wiped whenever esy deps change
-      #     key: opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-${{ hashFiles('esy.lock/index.json') }}
-      #     restore-keys: |
-      #       opam-${{ matrix.os }}-${{ matrix.ocaml-version }}-
-
       - name: Restore esy cache
         uses: actions/cache@v2
         with:
           path: ${{ steps.esy-cache-dir-path.outputs.dir }}
           key: esy-${{ matrix.os }}-${{ hashFiles('esy.lock/index.json') }}
           restore-keys: esy-${{ matrix.os }}-
-
-      - name: Install opam packages
-        if: steps.cache-opam.outputs.cache-hit != 'true'
-        run: |
-          opam pin ocaml-lsp-server https://github.com/ocaml/ocaml-lsp.git --no-action
-          opam install ocaml-lsp-server ocamlformat --yes
-          opam install --deps-only .
 
       - name: Build esy packages
         # Cleanup build cache in case dependencies have changed
@@ -80,7 +67,7 @@ jobs:
           esy cleanup .
 
       - name: Build extension
-        run: opam exec -- dune build @vscode
+        run: opam exec -- make build
 
       - name: Install npm packages
         run: yarn --frozen-lockfile
@@ -123,4 +110,4 @@ jobs:
           release_name: ${{ github.ref }}
           draft: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
