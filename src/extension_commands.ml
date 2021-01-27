@@ -88,9 +88,12 @@ let open_current_dune_file =
   let handler (_instance : Extension_instance.t) ~args:_ =
     match Vscode.Window.activeTextEditor () with
     | None ->
-      assert false
       (* this command is available (in the command palette) only when a file is
          open *)
+      show_message `Error
+        "The command \"OCaml: Open Dune File\" should be run only with a file \
+         open in the editor, so the command can look for a dune file in the \
+         same folder as the open file."
     | Some text_editor ->
       let doc = TextEditor.document text_editor in
       let uri = TextDocument.uri doc in
