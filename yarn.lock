@@ -423,6 +423,11 @@ flat@^4.1.0:
   dependencies:
     is-buffer "~2.0.3"
 
+follow-redirects@^1.13.0:
+  version "1.13.2"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.13.2.tgz#dd73c8effc12728ba5cf4259d760ea5fb83e3147"
+  integrity sha512-6mPTgLxYm3r6Bkkg0vNM0HTjfGrOEtsfbhagQvbxDEsEkpNhw582upBaoRZylzen6krEmxXJgt9Ju6HiI4O7BA==
+
 fs-extra@9.1.0:
   version "9.1.0"
   resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-9.1.0.tgz#5954460c764a8da2094ba3554bf839e6b9a7c86d"
@@ -928,12 +933,14 @@ osenv@^0.1.3:
     os-homedir "^1.0.0"
     os-tmpdir "^1.0.0"
 
-ovsx@0.1.0-next.9321255:
-  version "0.1.0-next.9321255"
-  resolved "https://registry.yarnpkg.com/ovsx/-/ovsx-0.1.0-next.9321255.tgz#dbb679e2eacf28017cfd474487a94008426d024d"
-  integrity sha512-gGQRzQWHBT6VdjZZgGxQUN1oaRxBuKcTkhtkL9AMstLqIu+tVmbTjJIE/j/RQeSumsn+HPoXysjnR0fzKsHkdQ==
+ovsx@0.1.0-next.97d460c:
+  version "0.1.0-next.97d460c"
+  resolved "https://registry.yarnpkg.com/ovsx/-/ovsx-0.1.0-next.97d460c.tgz#d325c039671219f820eb27b5a1cade650c297d56"
+  integrity sha512-mj4pHJDSeMDWgWeFxLobf0t/CT0frhxnrVTvVnRBDzZhhHCiH+7Tl66g1fYenYFhmxINGehAy96ibyrzV+MaYQ==
   dependencies:
-    vsce "^1.73.0"
+    commander "^6.1.0"
+    follow-redirects "^1.13.0"
+    vsce "~1.81.1"
 
 p-limit@^2.0.0:
   version "2.3.0"
@@ -1299,10 +1306,36 @@ validate-npm-package-license@^3.0.1:
     spdx-correct "^3.0.0"
     spdx-expression-parse "^3.0.0"
 
-vsce@1.84.0, vsce@^1.73.0:
+vsce@1.84.0:
   version "1.84.0"
   resolved "https://registry.yarnpkg.com/vsce/-/vsce-1.84.0.tgz#1c489212bfde2f37e20dbeb17954e56903f38bee"
   integrity sha512-mRJDTMC/1GO7byz6dleY28CZo97cM1p0nU3EEMT5bGMpi5Yga3dKdgTvmwgSQF5BYWozNSNSqN1zih5SYzMZjA==
+  dependencies:
+    azure-devops-node-api "^7.2.0"
+    chalk "^2.4.2"
+    cheerio "^1.0.0-rc.1"
+    commander "^6.1.0"
+    denodeify "^1.2.1"
+    glob "^7.0.6"
+    leven "^3.1.0"
+    lodash "^4.17.15"
+    markdown-it "^10.0.0"
+    mime "^1.3.4"
+    minimatch "^3.0.3"
+    osenv "^0.1.3"
+    parse-semver "^1.1.1"
+    read "^1.0.7"
+    semver "^5.1.0"
+    tmp "0.0.29"
+    typed-rest-client "1.2.0"
+    url-join "^1.1.0"
+    yauzl "^2.3.1"
+    yazl "^2.2.2"
+
+vsce@~1.81.1:
+  version "1.81.1"
+  resolved "https://registry.yarnpkg.com/vsce/-/vsce-1.81.1.tgz#c741e9830cc750925e5f37b1e048341b98125262"
+  integrity sha512-1yWAYRxTx/PKSFZnuELe7GPyIo70H/XKJqf6wGikofUK3f3TCNGI6F9xkTQFvXKNe0AygUuxN7kITyPIQGMP+w==
   dependencies:
     azure-devops-node-api "^7.2.0"
     chalk "^2.4.2"
