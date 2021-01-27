@@ -20,8 +20,8 @@ let insert_inferred_intf ~source_uri client text_editor =
   let open Promise.Syntax in
   if String.is_suffix source_uri ~suffix:".ml" then
     (* If the source file was a .ml, infer the interface *)
-    let+ inferred_intf = send_infer_intf_request client source_uri in
-    let (_ : bool Promise.t) =
+    let* inferred_intf = send_infer_intf_request client source_uri in
+    let+ (_edit_applied : bool) =
       TextEditor.edit text_editor
         ~callback:(fun ~editBuilder ->
           TextEditorEdit.insert editBuilder
