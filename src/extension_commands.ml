@@ -102,8 +102,10 @@ module Dune_commands = struct
           in
           Uri.toString uri ()
         in
-        (open_file_in_text_editor dune_file_uri : TextEditor.t Promise.t)
-        |> ignore
+        let (_ : TextEditor.t Promise.t) =
+          open_file_in_text_editor dune_file_uri
+        in
+        ()
     in
     command Extension_consts.Commands.Dune.open_current_dune_file handler
 end
