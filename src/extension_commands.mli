@@ -24,9 +24,7 @@ val open_terminal : command
 
 val switch_impl_intf : command
 
-module Dune_commands : sig
-  val open_current_dune_file : command
-end
+val open_current_dune_file : command
 
 (** Registers commands with vscode. Should be called in
     [Vscode_ocaml_platform.activate]. It subscribes the disposables to the

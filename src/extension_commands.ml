@@ -84,31 +84,27 @@ let switch_impl_intf =
   in
   command Extension_consts.Commands.switch_impl_intf handler
 
-module Dune_commands = struct
-  let open_current_dune_file =
-    let handler (_instance : Extension_instance.t) ~args:_ =
-      match Vscode.Window.activeTextEditor () with
-      | None ->
-        assert false
-        (* this command is available (in the command) palette only when a file
-           is open *)
-      | Some text_editor ->
-        let doc = TextEditor.document text_editor in
-        let uri = TextDocument.uri doc in
-        let dune_file_uri =
-          let path = Uri.fsPath uri |> Path.of_string in
-          let uri =
-            Path.relative path "../dune" |> Path.to_string |> Uri.file
-          in
-          Uri.toString uri ()
-        in
-        let (_ : TextEditor.t Promise.t) =
-          open_file_in_text_editor dune_file_uri
-        in
-        ()
-    in
-    command Extension_consts.Commands.Dune.open_current_dune_file handler
-end
+let open_current_dune_file =
+  let handler (_instance : Extension_instance.t) ~args:_ =
+    match Vscode.Window.activeTextEditor () with
+    | None ->
+      assert false
+      (* this command is available (in the command palette) only when a file is
+         open *)
+    | Some text_editor ->
+      let doc = TextEditor.document text_editor in
+      let uri = TextDocument.uri doc in
+      let dune_file_uri =
+        let path = Uri.fsPath uri |> Path.of_string in
+        let uri = Path.relative path "../dune" |> Path.to_string |> Uri.file in
+        Uri.toString uri ()
+      in
+      let (_ : TextEditor.t Promise.t) =
+        open_file_in_text_editor dune_file_uri
+      in
+      ()
+  in
+  command Extension_consts.Commands.open_current_dune_file handler
 
 let register extension instance { id; handler } =
   let callback = handler instance in
