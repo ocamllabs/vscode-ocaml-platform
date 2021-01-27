@@ -179,6 +179,11 @@
           "light": "assets/document-search-light.svg",
           "dark": "assets/document-search-dark.svg"
         }
+      },
+      {
+        "command": "ocaml.current-dune-file",
+        "category": "OCaml",
+        "title": "Open Dune File (located in the same folder)"
       }
     ],
     "keybindings": [
@@ -207,19 +212,8 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "ocaml.select-sandbox"
-        },
-        {
-          "command": "ocaml.server.restart"
-        },
-        {
-          "command": "ocaml.open-terminal"
-        },
-        {
-          "command": "ocaml.open-terminal-select"
-        },
-        {
-          "command": "ocaml.switch-impl-intf"
+          "command": "ocaml.current-dune-file",
+          "when": "editorIsOpen"
         },
         {
           "command": "ocaml.refresh-switches",

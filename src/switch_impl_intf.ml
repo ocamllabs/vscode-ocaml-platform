@@ -33,24 +33,6 @@ let insert_inferred_intf ~source_uri client text_editor =
   else
     Promise.return ()
 
-(** given a file uri, opens the file if it exists; otherwise, creates the file
-    in "draft" mode (doesn't save it on disk)
-
-    @return TextEditor.t in which the document was opened *)
-let open_file_in_text_editor target_uri =
-  let open Promise.Syntax in
-  let uri = Uri.parse target_uri () in
-  let* doc =
-    Workspace.openTextDocument (`Uri uri)
-    |> Promise.catch ~rejected:(fun (_ : Promise.error) ->
-           (* if file does not exist *)
-           let create_file_uri = Uri.with_ uri ~scheme:`Untitled () in
-           let+ doc = Workspace.openTextDocument (`Uri create_file_uri) in
-           doc)
-  in
-  let+ text_editor = Window.showTextDocument ~document:(`TextDocument doc) () in
-  text_editor
-
 let request_switch client document =
   let open Promise.Syntax in
   let source_uri =

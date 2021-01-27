@@ -26,6 +26,8 @@ module Commands = struct
   let open_switches_documentation = ocaml_prefixed "open-switches-documentation"
 
   let open_sandbox_documentation = ocaml_prefixed "open-sandbox-documentation"
+
+  let open_current_dune_file = ocaml_prefixed "current-dune-file"
 end
 
 (* TODO: Refactor the code so that we don't need any "constants" module *)

@@ -84,6 +84,31 @@ let switch_impl_intf =
   in
   command Extension_consts.Commands.switch_impl_intf handler
 
+let open_current_dune_file =
+  let handler (_instance : Extension_instance.t) ~args:_ =
+    match Vscode.Window.activeTextEditor () with
+    | None ->
+      (* this command is available (in the command palette) only when a file is
+         open *)
+      show_message `Error
+        "The command \"OCaml: Open Dune File\" should be run only with a file \
+         open in the editor, so the command can look for a dune file in the \
+         same folder as the open file."
+    | Some text_editor ->
+      let doc = TextEditor.document text_editor in
+      let uri = TextDocument.uri doc in
+      let dune_file_uri =
+        let path = Uri.fsPath uri |> Path.of_string in
+        let uri = Path.relative path "../dune" |> Path.to_string |> Uri.file in
+        Uri.toString uri ()
+      in
+      let (_ : TextEditor.t Promise.t) =
+        open_file_in_text_editor dune_file_uri
+      in
+      ()
+  in
+  command Extension_consts.Commands.open_current_dune_file handler
+
 let register extension instance { id; handler } =
   let callback = handler instance in
   let disposable = Commands.registerCommand ~command:id ~callback in

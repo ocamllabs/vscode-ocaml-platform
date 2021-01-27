@@ -113,12 +113,13 @@ You can execute it by entering the following command at the command palette
 <kbd>Ctrl</kbd>+<kbd>P</kbd> (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> on
 MacOS).
 
-| Name                         | Description                        | Keyboard Shortcuts | Menu Contents |
-| ---------------------------- | ---------------------------------- | ------------------ | ------------- |
-| `ocaml.select-sandbox`       | Select sandbox for this workspace  |                    |               |
-| `ocaml.server.restart`       | Restart language server            |                    |               |
-| `ocaml.open-terminal`        | Open a terminal (current sandbox)  |                    |               |
-| `ocaml.open-terminal-select` | Open a terminal (select a sandbox) |                    |               |
+| Name                         | Description                                 | Keyboard Shortcuts | Menu Contents |
+| ---------------------------- | ------------------------------------------- | ------------------ | ------------- |
+| `ocaml.select-sandbox`       | Select sandbox for this workspace           |                    |               |
+| `ocaml.server.restart`       | Restart language server                     |                    |               |
+| `ocaml.open-terminal`        | Open a terminal (current sandbox)           |                    |               |
+| `ocaml.open-terminal-select` | Open a terminal (select a sandbox)          |                    |               |
+| `ocaml.current-dune-file`    | Open Dune File (located in the same folder) |                    |               |
 
 ## Requirements
 
