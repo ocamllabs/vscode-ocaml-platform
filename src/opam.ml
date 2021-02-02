@@ -135,15 +135,18 @@ module Package = struct
     | [] -> Promise.return None
     | name :: version_parts ->
       let open Promise.Syntax in
-      (* TODO: check if file path exists *)
       let opam_filepath = Path.(path / "opam") |> Path.to_string in
-      let+ file_content = Fs.readFile opam_filepath in
-      let { OpamParserTypes.file_contents; _ } =
-        OpamParser.FullPos.string file_content opam_filepath
-        |> OpamParser.FullPos.to_opamfile
-      in
-      let version = String.concat version_parts ~sep:"." in
-      Some { path; name; version; items = file_contents }
+      let* file_exists = Fs.exists opam_filepath in
+      if not file_exists then
+        Promise.return None
+      else
+        let+ file_content = Fs.readFile opam_filepath in
+        let { OpamParserTypes.file_contents; _ } =
+          OpamParser.FullPos.string file_content opam_filepath
+          |> OpamParser.FullPos.to_opamfile
+        in
+        let version = String.concat version_parts ~sep:"." in
+        Some { path; name; version; items = file_contents }
 
   let path t = t.path
 
