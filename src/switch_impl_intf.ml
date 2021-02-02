@@ -18,10 +18,13 @@ let send_infer_intf_request client uri : string Promise.t =
 
 let insert_inferred_intf ~source_uri client text_editor =
   let open Promise.Syntax in
-  if String.is_suffix source_uri ~suffix:".ml" then
+  (* XXX this seems sketchy. shouldn't it work for reason as well? *)
+  match String.is_suffix source_uri ~suffix:".ml" with
+  | false -> Promise.return ()
+  | true ->
     (* If the source file was a .ml, infer the interface *)
-    let+ inferred_intf = send_infer_intf_request client source_uri in
-    let (_ : bool Promise.t) =
+    let* inferred_intf = send_infer_intf_request client source_uri in
+    let+ edit_applied =
       TextEditor.edit text_editor
         ~callback:(fun ~editBuilder ->
           TextEditorEdit.insert editBuilder
@@ -29,9 +32,8 @@ let insert_inferred_intf ~source_uri client text_editor =
             ~value:inferred_intf)
         ()
     in
-    ()
-  else
-    Promise.return ()
+    if not edit_applied then
+      show_message `Error "Unable to insert inferred interface"
 
 let request_switch client document =
   let open Promise.Syntax in
