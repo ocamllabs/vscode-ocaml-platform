@@ -262,6 +262,8 @@ end
 module Selection : sig
   include Js.T with type t = private Range.t
 
+  include module type of Range with type t := t
+
   val anchor : t -> Position.t
 
   val active : t -> Position.t

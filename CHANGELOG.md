@@ -9,6 +9,11 @@
 
 - `vscode-ocaml-platform` now depends on `ocaml-lsp-server.1.3.0`
 
+- Add a command to open a Utop REPL in the current sandbox (#504)
+
+- Add a code evaluation command that sends selected expressions to the REPL
+  (#504)
+
 ## 1.6.0
 
 - Highlight token aliases in Menhir associativity declarations (#473)

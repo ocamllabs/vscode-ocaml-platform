@@ -6,6 +6,22 @@ let __filename () =
 let __dirname () =
   Js_of_ocaml.Js.Unsafe.eval_string "__dirname" |> Js_of_ocaml.Js.to_string
 
+module Timeout = struct
+  type t = private Ojs.t [@@js]
+
+  val hasRef : t -> bool [@@js.get]
+
+  val ref : t -> t [@@js.get]
+
+  val refresh : t -> t [@@js.get]
+
+  val unref : t -> t [@@js.get]
+end
+
+val setInterval : (unit -> unit) -> int -> Timeout.t [@@js.global]
+
+val setTimeout : (unit -> unit) -> int -> Timeout.t [@@js.global]
+
 module Process = struct
   val cwd : unit -> string [@@js.global "process.cwd"]
 

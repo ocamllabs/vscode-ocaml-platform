@@ -69,19 +69,22 @@ let get_shell_args () =
 
 type t = Terminal.t
 
-let create sandbox =
+let create ?name ?command sandbox =
   let shell_path = get_shell_path () in
   let shell_args = get_shell_args () in
   let ({ Cmd.bin; args } as command) =
-    match Sandbox.get_command sandbox shell_path shell_args with
-    | Spawn spawn -> spawn
-    | Shell command_line -> (
-      match Platform.shell with
-      | Sh bin -> { bin; args = [ "-c"; command_line ] }
-      | PowerShell bin -> { bin; args = [ "-c"; "& " ^ command_line ] } )
+    match command with
+    | Some command -> command
+    | None -> (
+      match Sandbox.get_command sandbox shell_path shell_args with
+      | Spawn spawn -> spawn
+      | Shell command_line -> (
+        match Platform.shell with
+        | Sh bin -> { bin; args = [ "-c"; command_line ] }
+        | PowerShell bin -> { bin; args = [ "-c"; "& " ^ command_line ] } ) )
   in
   Cmd.log (Spawn command);
-  let name = Sandbox.to_pretty_string sandbox in
+  let name = Option.value name ~default:(Sandbox.to_pretty_string sandbox) in
   let shellPath = Path.to_string bin in
   let shellArgs = `Strings args in
   Window.createTerminal ~name ~shellPath ~shellArgs ()
@@ -89,3 +92,7 @@ let create sandbox =
 let dispose = Terminal.dispose
 
 let show t = Terminal.show t ()
+
+let send t text =
+  let addNewLine = not (String.is_suffix text ~suffix:"\n") in
+  Terminal.sendText t ~text ~addNewLine ()

@@ -28,6 +28,10 @@ module Commands = struct
   let open_sandbox_documentation = ocaml_prefixed "open-sandbox-documentation"
 
   let open_current_dune_file = ocaml_prefixed "current-dune-file"
+
+  let evaluate_selection = ocaml_prefixed "evaluate-selection"
+
+  let open_repl = ocaml_prefixed "open-repl"
 end
 
 (* TODO: Refactor the code so that we don't need any "constants" module *)

@@ -4,6 +4,22 @@ val __filename : unit -> string
 
 val __dirname : unit -> string
 
+module Timeout : sig
+  include Js.T
+
+  val hasRef : t -> bool
+
+  val ref : t -> t
+
+  val refresh : t -> t
+
+  val unref : t -> t
+end
+
+val setInterval : (unit -> unit) -> int -> Timeout.t
+
+val setTimeout : (unit -> unit) -> int -> Timeout.t
+
 module Process : sig
   val cwd : unit -> string
 
