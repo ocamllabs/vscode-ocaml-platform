@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-- Fixed an issue when uninstalled Opam packages still appear in the `roots` field of Opam's `switch-state` file (#517)
+- Fixed an issue when uninstalled Opam packages still appear in the `roots`
+  field of Opam's `switch-state` file (#517)
+
 - Fixed detection of local Opam switch on Windows (#518)
 
 ## 1.6.0
