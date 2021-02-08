@@ -6,3 +6,6 @@ updates:
       interval: daily
     ignore:
       - dependency-name: ovsx
+    labels:
+      - "no changelog needed"
+      - dependencies
