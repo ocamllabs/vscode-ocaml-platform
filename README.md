@@ -109,13 +109,19 @@ the settings under `File > Preferences > Settings`.
 If `ocaml.terminal.shell.*` or `ocaml.terminal.shellArgs.*` is `null`, the
 configured VSCode shell and shell arguments will be used instead.
 
-If `ocaml.repl.path` or `ocaml.repl.args` is `null`, the default REPL is used instead. The default REPL used depends on the packages installed in your current sandbox:
+If `ocaml.repl.path` or `ocaml.repl.args` is `null`, the default REPL is used
+instead. The default REPL used depends on the packages installed in your current
+sandbox:
 
-- If `dune build` passes and the current sandbox has `utop` installed, the REPL will be `dune utop`
-- If `dune build` fails and the current sandbox has `utop` installed, the REPL will be `utop`
+- If `dune build` passes and the current sandbox has `utop` installed, the REPL
+  will be `dune utop`
+- If `dune build` fails and the current sandbox has `utop` installed, the REPL
+  will be `utop`
 - Else, the REPL will be `ocaml`
 
-If a REPL already exists, it will be used instead, so if you installed `utop` after openning a REPL, or if you fixed your project compilation, you will need to re-open the REPL to change it.
+If a REPL already exists, it will be used instead, so if you installed `utop`
+after openning a REPL, or if you fixed your project compilation, you will need
+to re-open the REPL to change it.
 
 ## Commands
 
