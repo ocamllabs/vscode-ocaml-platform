@@ -1,11 +1,13 @@
 # Change Log
 
-## 1.6.0
+## Unreleased
 
 - Fixed an issue when uninstalled Opam packages still appear in the `roots`
   field of Opam's `switch-state` file (#517)
 
 - Fixed detection of local Opam switch on Windows (#518)
+
+- `vscode-ocaml-platform` now depends on `ocaml-lsp-server.1.3.0`
 
 ## 1.6.0
 
