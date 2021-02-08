@@ -1,6 +1,6 @@
 open Import
 
-module ReplPath = struct
+module Repl_path = struct
   type t = string option
 
   let of_json json =
@@ -16,7 +16,7 @@ module ReplPath = struct
   let t = Settings.create ~scope:Global ~key ~of_json ~to_json
 end
 
-module ReplArgs = struct
+module Repl_args = struct
   type t = string list option
 
   let of_json json =
@@ -33,10 +33,10 @@ module ReplArgs = struct
 end
 
 let get_repl_path () =
-  Option.join (Settings.get ~section:"ocaml.repl" ReplPath.t)
+  Option.join (Settings.get ~section:"ocaml.repl" Repl_path.t)
 
 let get_repl_args () =
-  Option.join (Settings.get ~section:"ocaml.repl" ReplArgs.t)
+  Option.join (Settings.get ~section:"ocaml.repl" Repl_args.t)
 
 let name = "REPL"
 
