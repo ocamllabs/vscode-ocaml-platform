@@ -7,7 +7,7 @@ let __dirname () =
   Js_of_ocaml.Js.Unsafe.eval_string "__dirname" |> Js_of_ocaml.Js.to_string
 
 module Timeout = struct
-  type t = private Ojs.t [@@js]
+  include Class.Make ()
 
   val hasRef : t -> bool [@@js.get]
 
@@ -27,12 +27,16 @@ module Process = struct
 
   val platform : string [@@js.global "process.platform"]
 
+  val arch : string [@@js.global "process.arch"]
+
   module Env = struct
     val env : Ojs.t [@@js.global "process.env"]
 
     let get k = [%js.to: string or_undefined] (Ojs.get env k)
 
     let set k v = Ojs.set env k ([%js.of: string] v)
+
+    val env : string Interop.Dict.t [@@js.global "process.env"]
   end
 end
 

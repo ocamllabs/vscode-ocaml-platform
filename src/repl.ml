@@ -128,12 +128,11 @@ let get_code text_editor =
     Vscode.Selection.start selection |> Vscode.Position.character
   in
   let end_char = Vscode.Selection.end_ selection |> Vscode.Position.character in
+  let document = Vscode.TextEditor.document text_editor in
   if start_line = end_line && start_char = end_char then
-    let document = Vscode.TextEditor.document text_editor in
     let line = Vscode.TextDocument.lineAt document ~line:start_line in
     Vscode.TextLine.text line
   else
-    let document = Vscode.TextEditor.document text_editor in
     Vscode.TextDocument.getText document ~range:(selection :> Vscode.Range.t) ()
 
 let prepare_code code =

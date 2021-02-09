@@ -39,11 +39,16 @@ let which path_env_var bin =
                 else
                   None))
 
-let check_spawn { bin; args } =
+let check_spawn ?env { bin; args } =
   if Path.is_absolute bin then
     Promise.Result.return { bin; args }
   else
-    match Process.Env.get "PATH" with
+    let path =
+      match env with
+      | Some env -> Interop.Dict.find_opt "PATH" env
+      | None -> Process.Env.get "PATH"
+    in
+    match path with
     | None -> Error path_missing_from_env |> Promise.resolve
     | Some path -> (
       let open Promise.Syntax in
@@ -53,22 +58,23 @@ let check_spawn { bin; args } =
         Error (Printf.sprintf "Command %s not found" (Path.to_string bin))
       | Some bin -> Ok { bin; args } )
 
-let check t =
+let check ?env t =
   match t with
   | Shell _ -> Promise.Result.return t
   | Spawn spawn ->
     let open Promise.Result.Syntax in
-    let+ s = check_spawn spawn in
+    let+ s = check_spawn ?env spawn in
     Spawn s
 
-let run ?cwd ?stdin =
+let run ?cwd ?env ?stdin =
   let cwd = Option.map cwd ~f:Path.to_string in
   function
   | Spawn { bin; args } ->
     ChildProcess.spawn (Path.to_string bin) (Array.of_list args) ?stdin
-      (ChildProcess.Options.create ?cwd ())
+      (ChildProcess.Options.create ?cwd ?env ())
   | Shell command_line ->
-    ChildProcess.exec command_line ?stdin (ChildProcess.Options.create ?cwd ())
+    ChildProcess.exec command_line ?stdin
+      (ChildProcess.Options.create ?cwd ?env ())
 
 let log ?(result : ChildProcess.return option) (t : t) =
   let open Jsonoo.Encode in
@@ -94,9 +100,9 @@ let log ?(result : ChildProcess.return option) (t : t) =
   in
   log_json "external command" message
 
-let output ?cwd ?stdin (t : t) =
+let output ?cwd ?env ?stdin (t : t) =
   let open Promise.Syntax in
-  let+ (result : ChildProcess.return) = run ?stdin ?cwd t in
+  let+ (result : ChildProcess.return) = run ?stdin ?cwd ?env t in
   log ~result t;
   if result.exitCode = 0 then
     Ok result.stdout

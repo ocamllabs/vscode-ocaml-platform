@@ -29,6 +29,35 @@ module Map = struct
     | Other -> other
 end
 
+type arch =
+  | Arm
+  | Arm64
+  | Ia32
+  | Mips
+  | Mipsel
+  | Ppc
+  | Ppc64
+  | S390
+  | S390x
+  | X32
+  | X64
+
+let arch_of_string = function
+  | "arm" -> Arm
+  | "arm64" -> Arm64
+  | "ia32" -> Ia32
+  | "mips" -> Mips
+  | "mipsel" -> Mipsel
+  | "ppc" -> Ppc
+  | "ppc64" -> Ppc64
+  | "s390" -> S390
+  | "s390x" -> S390x
+  | "x32" -> X32
+  | "x64" -> X64
+  | _ -> assert false
+
+let arch = Node.Process.arch |> arch_of_string
+
 type shell =
   | Sh of Path.t
   | PowerShell of Path.t

@@ -25,10 +25,14 @@ module Process : sig
 
   val platform : string
 
+  val arch : string
+
   module Env : sig
     val get : string -> string option
 
     val set : string -> string -> unit
+
+    val env : string Interop.Dict.t
   end
 end
 

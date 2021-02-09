@@ -278,8 +278,6 @@ module Selection = struct
 
   include Range
 
-  type t = private (* class extends *) Range.t [@@js]
-
   val anchor : t -> Position.t [@@js.get]
 
   val active : t -> Position.t [@@js.get]
