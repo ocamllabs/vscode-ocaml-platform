@@ -28,8 +28,6 @@ jobs:
         uses: actions-ml/setup-ocaml@master
         with:
           ocaml-version: ${{ matrix.ocaml-version }}
-          opam-depext: false
-          opam-pin: false
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
@@ -39,7 +37,7 @@ jobs:
       - name: Install opam packages
         run: |
           opam pin ocaml-lsp-server https://github.com/ocaml/ocaml-lsp.git --no-action
-          opam install ocaml-lsp-server ocamlformat . --deps-only --with-test
+          opam install ocaml-lsp-server . --deps-only --with-test
 
       - name: Use latest esy
         run: npm install --global esy
@@ -110,3 +108,45 @@ jobs:
           draft: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
+
+  lint-fmt:
+    strategy:
+      matrix:
+        ocaml-version:
+          - 4.11.x
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: actions-ml/setup-ocaml@master
+        with:
+          ocaml-version: ${{ matrix.ocaml-version }}
+          lint-fmt: true
+
+  lint-opam:
+    strategy:
+      matrix:
+        ocaml-version:
+          - 4.11.x
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: actions-ml/setup-ocaml@master
+        with:
+          ocaml-version: ${{ matrix.ocaml-version }}
+          lint-opam: true
+
+      - name: Install opam packages
+        run: opam install  . --deps-only
+
+      - name: Build extension
+        run: opam exec -- make build
