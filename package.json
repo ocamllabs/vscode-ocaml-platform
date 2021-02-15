@@ -184,13 +184,23 @@
         "command": "ocaml.current-dune-file",
         "category": "OCaml",
         "title": "Open Dune File (located in the same folder)"
+      },
+      {
+        "command": "ocaml.open-repl",
+        "category": "OCaml",
+        "title": "Open REPL"
+      },
+      {
+        "command": "ocaml.evaluate-selection",
+        "category": "OCaml",
+        "title": "Evaluate Selection"
       }
     ],
     "keybindings": [
       {
         "command": "ocaml.switch-impl-intf",
         "key": "Alt+O",
-        "when": "editorLangId  == ocaml || editorLangId  == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir"
+        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir"
       },
       {
         "command": "editor.action.codeAction",
@@ -198,7 +208,7 @@
         "args": {
           "kind": "destruct"
         },
-        "when": "editorLangId  == ocaml || editorLangId == reason"
+        "when": "editorLangId == ocaml || editorLangId == reason"
       },
       {
         "command": "editor.action.codeAction",
@@ -206,10 +216,22 @@
         "args": {
           "kind": "inferred_intf"
         },
-        "when": "editorLangId  == ocaml.interface || editorLangId == reason"
+        "when": "editorLangId == ocaml.interface || editorLangId == reason"
+      },
+      {
+        "command": "ocaml.evaluate-selection",
+        "key": "Shift+Enter",
+        "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir"
       }
     ],
     "menus": {
+      "editor/context": [
+        {
+          "command": "ocaml.evaluate-selection",
+          "group": "OCaml",
+          "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir"
+        }
+      ],
       "commandPalette": [
         {
           "command": "ocaml.current-dune-file",
@@ -252,7 +274,7 @@
         {
           "command": "ocaml.switch-impl-intf",
           "key": "Alt+O",
-          "when": "editorLangId  == ocaml || editorLangId  == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir",
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir",
           "group": "navigation"
         }
       ],
@@ -373,6 +395,23 @@
         },
         "ocaml.terminal.shellArgs.windows": {
           "description": "The command line arguments that the sandbox terminal uses on Window",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": "string",
+          "default": null
+        },
+        "ocaml.repl.path": {
+          "description": "The path of the REPL that the extension uses",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "ocaml.repl.args": {
+          "description": "The REPL arguments that the extension uses",
           "type": [
             "array",
             "null"

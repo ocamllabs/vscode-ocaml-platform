@@ -276,6 +276,8 @@ end
 module Selection = struct
   include Class.Extend (Range) ()
 
+  include Range
+
   val anchor : t -> Position.t [@@js.get]
 
   val active : t -> Position.t [@@js.get]

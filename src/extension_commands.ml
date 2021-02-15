@@ -8,15 +8,37 @@ type command =
            [Commands.registerCommand] *)
   }
 
+type text_editor_command =
+  { id : string
+  ; handler :
+         Extension_instance.t
+      -> textEditor:TextEditor.t
+      -> edit:TextEditorEdit.t
+      -> args:Ojs.t list
+      -> unit
+        (* [handler] is intended to be used partially applied; [handler
+           extension_instance] is passed as a callback to
+           [Commands.registerCommand] *)
+  }
+
+type t =
+  | Command of command
+  | Text_editor_command of text_editor_command
+
 let commands = ref []
 
 (** creates a new command and stores in a mutable [commands] list *)
 let command id handler =
-  let command = { id; handler } in
+  let command = Command { id; handler } in
   commands := command :: !commands;
   command
 
-let select_sandbox =
+let text_editor_command id handler =
+  let command = Text_editor_command { id; handler } in
+  commands := command :: !commands;
+  command
+
+let _select_sandbox =
   let handler (instance : Extension_instance.t) ~args:_ =
     let open Promise.Syntax in
     let (_ : unit Promise.t) =
@@ -32,7 +54,7 @@ let select_sandbox =
   in
   command Extension_consts.Commands.select_sandbox handler
 
-let restart_language_server =
+let _restart_language_server =
   let handler (instance : Extension_instance.t) ~args:_ =
     let (_ : unit Promise.t) =
       Extension_instance.start_language_server instance
@@ -41,7 +63,7 @@ let restart_language_server =
   in
   command Extension_consts.Commands.restart_language_server handler
 
-let select_sandbox_and_open_terminal =
+let _select_sandbox_and_open_terminal =
   let handler _instance ~args:_ =
     let (_ : unit option Promise.t) =
       let open Promise.Option.Syntax in
@@ -52,13 +74,13 @@ let select_sandbox_and_open_terminal =
   in
   command Extension_consts.Commands.select_sandbox_and_open_terminal handler
 
-let open_terminal =
+let _open_terminal =
   let handler (instance : Extension_instance.t) ~args:_ =
     Extension_instance.sandbox instance |> Extension_instance.open_terminal
   in
   command Extension_consts.Commands.open_terminal handler
 
-let switch_impl_intf =
+let _switch_impl_intf =
   let handler (instance : Extension_instance.t) ~args:_ =
     let try_switching () =
       let open Option.O in
@@ -84,7 +106,7 @@ let switch_impl_intf =
   in
   command Extension_consts.Commands.switch_impl_intf handler
 
-let open_current_dune_file =
+let _open_current_dune_file =
   let handler (_instance : Extension_instance.t) ~args:_ =
     match Vscode.Window.activeTextEditor () with
     | None ->
@@ -109,14 +131,23 @@ let open_current_dune_file =
   in
   command Extension_consts.Commands.open_current_dune_file handler
 
-let register extension instance { id; handler } =
-  let callback = handler instance in
-  let disposable = Commands.registerCommand ~command:id ~callback in
-  ExtensionContext.subscribe extension ~disposable
+let register extension instance = function
+  | Command { id; handler } ->
+    let callback = handler instance in
+    let disposable = Commands.registerCommand ~command:id ~callback in
+    ExtensionContext.subscribe extension ~disposable
+  | Text_editor_command { id; handler } ->
+    let callback = handler instance in
+    let disposable = Commands.registerTextEditorCommand ~command:id ~callback in
+    ExtensionContext.subscribe extension ~disposable
 
 let register_all_commands extension instance =
   List.iter ~f:(register extension instance) !commands
 
 let register ~id handler =
-  let (_ : command) = command id handler in
+  let (_ : t) = command id handler in
+  ()
+
+let register_text_editor ~id handler =
+  let (_ : t) = text_editor_command id handler in
   ()

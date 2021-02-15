@@ -19,3 +19,9 @@ val start_language_server : t -> unit Promise.t
 val open_terminal : Sandbox.t -> unit
 
 val disposable : t -> Disposable.t
+
+val repl : t -> Terminal_sandbox.t option
+
+val set_repl : t -> Terminal.t -> unit
+
+val close_repl : t -> unit

@@ -9,23 +9,6 @@
 
     [1] https://code.visualstudio.com/api/references/vscode-api#commands *)
 
-type command = private
-  { id : string
-  ; handler : Extension_instance.t -> args:Ojs.t list -> unit
-  }
-
-val select_sandbox : command
-
-val restart_language_server : command
-
-val select_sandbox_and_open_terminal : command
-
-val open_terminal : command
-
-val switch_impl_intf : command
-
-val open_current_dune_file : command
-
 (** Registers commands with vscode. Should be called in
     [Vscode_ocaml_platform.activate]. It subscribes the disposables to the
     extension context provided. *)
@@ -34,3 +17,12 @@ val register_all_commands :
 
 val register :
   id:string -> (Extension_instance.t -> args:Ojs.t list -> unit) -> unit
+
+val register_text_editor :
+     id:string
+  -> (   Extension_instance.t
+      -> textEditor:Vscode.TextEditor.t
+      -> edit:Vscode.TextEditorEdit.t
+      -> args:Ojs.t list
+      -> unit)
+  -> unit

@@ -6,10 +6,28 @@ let __filename () =
 let __dirname () =
   Js_of_ocaml.Js.Unsafe.eval_string "__dirname" |> Js_of_ocaml.Js.to_string
 
+module Timeout = struct
+  include Class.Make ()
+
+  val hasRef : t -> bool [@@js.get]
+
+  val ref : t -> t [@@js.get]
+
+  val refresh : t -> t [@@js.get]
+
+  val unref : t -> t [@@js.get]
+end
+
+val setInterval : (unit -> unit) -> int -> Timeout.t [@@js.global]
+
+val setTimeout : (unit -> unit) -> int -> Timeout.t [@@js.global]
+
 module Process = struct
   val cwd : unit -> string [@@js.global "process.cwd"]
 
   val platform : string [@@js.global "process.platform"]
+
+  val arch : string [@@js.global "process.arch"]
 
   module Env = struct
     val env : Ojs.t [@@js.global "process.env"]
@@ -17,6 +35,8 @@ module Process = struct
     let get k = [%js.to: string or_undefined] (Ojs.get env k)
 
     let set k v = Ojs.set env k ([%js.of: string] v)
+
+    val env : string Interop.Dict.t [@@js.global "process.env"]
   end
 end
 

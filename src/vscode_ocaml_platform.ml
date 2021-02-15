@@ -1,6 +1,6 @@
 open Import
 
-let suggest_to_pick_sandbox instance =
+let suggest_to_pick_sandbox () =
   let open Promise.Syntax in
   let select_pm_button_text = "Select package manager and sandbox" in
   let+ selection =
@@ -13,7 +13,11 @@ let suggest_to_pick_sandbox instance =
       ()
   in
   Option.iter selection ~f:(fun () ->
-      Extension_commands.select_sandbox.handler instance ~args:[])
+      let (_ : Ojs.t option Promise.t) =
+        Vscode.Commands.executeCommand
+          ~command:Extension_consts.Commands.select_sandbox ~args:[]
+      in
+      ())
 
 let activate (extension : ExtensionContext.t) =
   (* this env var update disables ocaml-lsp's logging to a file because we use
@@ -30,6 +34,7 @@ let activate (extension : ExtensionContext.t) =
   Treeview_sandbox.register extension instance;
   Treeview_commands.register extension;
   Treeview_help.register extension;
+  Repl.register extension instance;
   let sandbox_opt = Sandbox.of_settings_or_detect () in
   let (_ : unit Promise.t) =
     let* sandbox_opt = sandbox_opt in
@@ -44,7 +49,7 @@ let activate (extension : ExtensionContext.t) =
          hanging, so we use fallback; w/ a proper detection mechanism, we would
          redo work in rare cases *)
     then
-      suggest_to_pick_sandbox instance
+      suggest_to_pick_sandbox ()
     else
       Promise.return ()
   in

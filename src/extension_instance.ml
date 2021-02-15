@@ -2,6 +2,7 @@ open Import
 
 type t =
   { mutable sandbox : Sandbox.t
+  ; mutable repl : Terminal_sandbox.t option
   ; mutable lsp_client : (LanguageClient.t * Ocaml_lsp.t) option
   ; sandbox_info : StatusBarItem.t
   }
@@ -114,7 +115,7 @@ end
 let make () =
   let sandbox = Sandbox.Global in
   let sandbox_info = Sandbox_info.make sandbox in
-  { sandbox; lsp_client = None; sandbox_info }
+  { sandbox; lsp_client = None; sandbox_info; repl = None }
 
 let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
@@ -124,6 +125,12 @@ let set_sandbox t new_sandbox =
       ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
   in
   ()
+
+let repl t = t.repl
+
+let set_repl t repl = t.repl <- Some repl
+
+let close_repl t = t.repl <- None
 
 let open_terminal sandbox =
   let terminal = Terminal_sandbox.create sandbox in
