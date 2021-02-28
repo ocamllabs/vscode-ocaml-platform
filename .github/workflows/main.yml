@@ -110,3 +110,11 @@ jobs:
           draft: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Add VSIX file to release
+        if: runner.os == 'Linux' && contains(github.ref, 'refs/tags')
+        uses: alexellis/upload-assets@0.2.3
+        with:
+          asset_paths: '["./ocaml-platform-*.vsix"]'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
