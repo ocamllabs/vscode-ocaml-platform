@@ -82,7 +82,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ocaml-platform-${{ github.sha }}
-          path: ocaml-platform-*.vsix
+          path: ocaml-platform.vsix
 
       - name: Test extension
         uses: GabrielBB/xvfb-action@v1
@@ -97,12 +97,13 @@ jobs:
 
       - name: Publish extension to Open VSX
         if: success() && runner.os == 'Linux' && contains(github.ref, 'refs/tags')
-        run: yarn deploy:ovsx ocaml-platform-*.vsix --pat "$OVSX_PAT"
+        run: yarn deploy:ovsx --pat "$OVSX_PAT"
         env:
           OVSX_PAT: ${{ secrets.OPEN_VSX_TOKEN }}
 
-      - name: Create Release
+      - name: Create release
         if: runner.os == 'Linux' && contains(github.ref, 'refs/tags')
+        id: create_release
         uses: actions/create-release@v1
         with:
           tag_name: ${{ github.ref }}
@@ -111,10 +112,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-      - name: Add VSIX file to release
+      - name: Upload release asset
         if: runner.os == 'Linux' && contains(github.ref, 'refs/tags')
-        uses: alexellis/upload-assets@0.2.3
+        uses: actions/upload-release-asset@v1
         with:
-          asset_paths: '["./ocaml-platform-*.vsix"]'
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ocaml-platform.vsix
+          asset_name: ocaml-platform.vsix
+          asset_content_type: application/zip
         env:
           GITHUB_TOKEN: ${{ github.token }}
