@@ -101,6 +101,14 @@ module Js = struct
     type t = Ojs.t [@@js]
   end
 
+  module Unit = struct
+    type t = unit
+
+    let t_of_js _ = ()
+
+    let t_to_js _ = undefined
+  end
+
   module Bool = struct
     type t = bool [@@js]
   end
@@ -115,6 +123,31 @@ module Js = struct
 
   module Option (T : T) = struct
     type t = T.t option [@@js]
+  end
+
+  module Result (Ok : T) (Error : T) = struct
+    type t = (Ok.t, Error.t) result
+
+    type js_result =
+      { case : string
+      ; ok : Ojs.t
+      ; error : Ojs.t
+      }
+    [@@js]
+
+    let t_of_js js_val =
+      match js_result_of_js js_val with
+      | { case = "ok"; ok; _ } -> Ok ([%js.to: Ok.t] ok)
+      | { case = "error"; error; _ } -> Error ([%js.to: Error.t] error)
+      | _ -> assert false
+
+    let t_to_js = function
+      | Ok ok ->
+        let ok = [%js.of: Ok.t] ok in
+        js_result_to_js { case = "ok"; ok; error = undefined }
+      | Error error ->
+        let error = [%js.of: Error.t] error in
+        js_result_to_js { case = "error"; error; ok = undefined }
   end
 
   module Or_undefined (T : T) = struct

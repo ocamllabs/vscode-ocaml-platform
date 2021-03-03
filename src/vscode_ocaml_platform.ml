@@ -36,6 +36,10 @@ let activate (extension : ExtensionContext.t) =
   Treeview_help.register extension;
   Repl.register extension instance;
   let sandbox_opt = Sandbox.of_settings_or_detect () in
+  let toolchain =
+    let* sandbox = sandbox_opt in
+    Toolchain.setup ?project_sandbox:sandbox ()
+  in
   let (_ : unit Promise.t) =
     let* sandbox_opt = sandbox_opt in
     let is_fallback = Option.is_empty sandbox_opt in
@@ -55,10 +59,22 @@ let activate (extension : ExtensionContext.t) =
   in
   let (_ : unit Promise.t) =
     let* sandbox_opt = sandbox_opt in
+    (* Very important to run this after the sandbox. If there is no toolchain
+       available yet, we want to check if the tools are in the user switch so we
+       don't force them to wait for 10min before they can use the extension. *)
+    let* toolchain = toolchain in
     let sandbox = Option.value sandbox_opt ~default:Sandbox.Global in
     Extension_instance.set_sandbox instance sandbox;
-    let+ () = Extension_instance.start_language_server instance in
-    ()
+    match toolchain with
+    | Ok toolchain ->
+      Extension_instance.set_toolchain instance toolchain;
+      let+ () = Extension_instance.start_language_server instance in
+      let (_ : (unit, string) result Promise.t) = Toolchain.upgrade toolchain in
+      ()
+    | Error _ ->
+      (* User is notified of errors when setting up the toolchain already. *)
+      let+ () = Extension_instance.start_language_server instance in
+      ()
   in
   Promise.return ()
 

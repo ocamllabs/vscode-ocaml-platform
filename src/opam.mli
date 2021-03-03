@@ -43,13 +43,13 @@ end
 
 type t
 
-val make : unit -> t option Promise.t
+val make : ?root:Path.t -> unit -> t option Promise.t
 
 (** Install new packages in a switch *)
-val install : t -> Switch.t -> string list -> Cmd.t
+val install : t -> Switch.t -> packages:string list -> Cmd.t
 
 (** Update the opam repository *)
-val update : t -> Cmd.t
+val update : t -> Switch.t -> Cmd.t
 
 (** Upgrade packages in a switch *)
 val upgrade : t -> Switch.t -> Cmd.t
@@ -57,13 +57,19 @@ val upgrade : t -> Switch.t -> Cmd.t
 (* Remove a list of packages from a switch *)
 val remove : t -> Switch.t -> string list -> Cmd.t
 
+(* Initialize a new Opam environment. *)
+val init : t -> Cmd.t
+
 (** {4 Working with switches} *)
 
 (** Path of the switch on the filesystem.
 
     If the switch is a local switch, the path is [switch_path ^ _opam],
     otherwise it is the result of [opam var root]. *)
-val switch_path : t -> Switch.t -> (Path.t, string) result Promise.t
+val switch_path : t -> Switch.t -> Path.t
+
+(** Create a new switch. *)
+val switch_create : t -> name:string -> args:string list -> Cmd.t
 
 (** List the opam switches available on the system. *)
 val switch_list : t -> Switch.t list Promise.t

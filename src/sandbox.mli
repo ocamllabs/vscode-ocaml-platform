@@ -60,16 +60,9 @@ val select_sandbox_and_save : unit -> t option Promise.t
     the sandbox configuration *)
 val select_sandbox : unit -> t option Promise.t
 
-(** [run_setup] is an effectful function that triggers setup instructions
-    automatically for the user.
-
-    A hard requirement for [run_setup] is to not get in the way to existing
-    setups. If users already have working sandboxes installed via some other
-    sandbox/package manager (Nix, system wide managers like yum/apt/brew or
-    Duniverse), [run_setup] must co-operate and detect such installations. *)
-val run_setup : t -> (unit, string) result Promise.t
-
 (* Helper utils *)
+
+val has_command : t -> string -> bool Promise.t
 
 (** Extract command to run with the sandbox *)
 val get_command : t -> string -> string list -> Cmd.t
@@ -79,6 +72,12 @@ val get_lsp_command : ?args:string list -> t -> Cmd.t
 
 (** Extract a dune command *)
 val get_dune_command : t -> string list -> Cmd.t
+
+(** Command to install dependencies in the sandbox *)
+val get_install_command : t -> string list -> Cmd.t option
+
+(** Command to exec a process in the sandbox *)
+val get_exec_command : t -> string list -> Cmd.t option
 
 (** The packages installed in the sandbox *)
 val packages : t -> (Package.t list, string) result Promise.t
@@ -94,3 +93,7 @@ val install_packages : t -> string list -> unit Promise.t
 
 (** Upgrade packages in the sandbox *)
 val upgrade_packages : t -> unit Promise.t
+
+(** [ocaml_version] returns the version of the ocaml compiler installed in given
+    sandbox. *)
+val ocaml_version : t -> (string, string) result Promise.t

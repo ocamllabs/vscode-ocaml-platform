@@ -43,6 +43,11 @@
   is located in the same folder as the open file or creates the dune file in a
   draft mode (not yet saved on the disk). (#499)
 
+- Install OCaml Platform tools automatically (#463)
+
+  The platform tools (a.k.a toolchain) are installed in a private opam switch
+  that should only be used by `vscode-ocaml-platform`.
+
 ## 1.5.1
 
 - Improve highlighting of type parameters and `module type of` (#461)
