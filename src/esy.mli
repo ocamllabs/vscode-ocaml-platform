@@ -60,6 +60,9 @@ val packages : t -> Manifest.t -> (Package.t list, string) result Promise.t
     to packages that have been installed as a dependency of another package. *)
 val root_packages : t -> Manifest.t -> (Package.t list, string) result Promise.t
 
+(** Install a package in the Esy sandbox. *)
+val install : t -> Manifest.t -> packages:string list -> Cmd.t
+
 (** {4 General utilities} *)
 
 (** Execute an esy sub-command with in the given sandbox. *)

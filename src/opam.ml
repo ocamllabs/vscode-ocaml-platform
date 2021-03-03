@@ -1,27 +1,41 @@
 open Import
 
-type t = Cmd.spawn
+type t =
+  { bin : Cmd.spawn
+  ; root : Path.t
+  }
 
 let opam_binary = Path.of_string "opam"
 
-let ocaml_env_binary = Path.of_string "ocaml-env"
-
-let ocaml_env_setting =
-  Settings.create ~scope:Global ~key:"ocaml.useOcamlEnv"
-    ~of_json:Jsonoo.Decode.bool ~to_json:Jsonoo.Encode.bool
-
-let make () =
+let make ?root () =
   let spawn =
-    match (Platform.t, Settings.get ocaml_env_setting) with
-    | Win32, Some true ->
-      { Cmd.bin = ocaml_env_binary; args = [ "exec"; "--"; "opam" ] }
-    | _ -> { Cmd.bin = opam_binary; args = [] }
+    if Ocaml_windows.use_ocaml_env () then
+      Ocaml_windows.spawn_ocaml_env [ "opam" ]
+    else
+      { Cmd.bin = opam_binary; args = [] }
   in
   let open Promise.Syntax in
-  let+ spawn = Cmd.check_spawn spawn in
-  match spawn with
-  | Error _ -> None
-  | Ok cmd -> Some cmd
+  let* spawn = Cmd.check_spawn spawn in
+  match (spawn, root) with
+  | Error _, _ -> Promise.return None
+  | Ok bin, Some root -> Promise.return (Some { bin; root })
+  | Ok bin, None -> (
+    let var_root_cmd = Cmd.Spawn (Cmd.append bin [ "var"; "root" ]) in
+    let+ var_root_output = Cmd.output var_root_cmd in
+    match var_root_output with
+    | Error _ -> None
+    | Ok output ->
+      let root = String.strip output |> Path.of_string in
+      Some { bin; root } )
+
+let spawn t args =
+  let rec insert_root_flag opamroot = function
+    | [] -> [ "--root"; Path.to_string opamroot ]
+    | "--" :: args -> "--root" :: Path.to_string opamroot :: "--" :: args
+    | arg :: args -> arg :: insert_root_flag opamroot args
+  in
+  let args = insert_root_flag t.root args in
+  Cmd.Spawn (Cmd.append t.bin args)
 
 module Opam_parser = struct
   let rec string name = function
@@ -69,14 +83,9 @@ module Switch = struct
     | Local p -> Path.to_string p
 
   let path opam t =
-    let open Promise.Result.Syntax in
     match t with
-    | Local p -> Promise.return (Ok Path.(p / "_opam"))
-    | Named n ->
-      let cmd = Cmd.Spawn (Cmd.append opam [ "var"; "root" ]) in
-      let+ output = Cmd.output cmd in
-      let root = String.strip output |> Path.of_string in
-      Path.(root / n)
+    | Local p -> Path.(p / "_opam")
+    | Named n -> Path.(opam.root / n)
 
   let equal x y =
     match (x, y) with
@@ -86,11 +95,11 @@ module Switch = struct
 end
 
 module Switch_state : sig
-  type opam = t
+  type opam := t
 
   type t
 
-  val of_switch : opam -> Switch.t -> (t, string) result Promise.t
+  val of_switch : opam -> Switch.t -> t Promise.t
 
   val compilers : t -> string list option
 
@@ -98,17 +107,13 @@ module Switch_state : sig
 
   val installed : t -> string list option
 end = struct
-  type opam = t
-
   type t = OpamParserTypes.opamfile_item list
 
   let of_switch opam switch =
-    let open Promise.Result.Syntax in
-    let* path = Switch.path opam switch in
+    let open Promise.Syntax in
+    let path = Switch.path opam switch in
     let switch_state_filepath = Opam_path.switch_state path |> Path.to_string in
-    let+ file_content =
-      Fs.readFile switch_state_filepath |> Promise.map Result.return
-    in
+    let+ file_content = Fs.readFile switch_state_filepath in
     let { OpamParserTypes.file_contents; _ } =
       OpamParser.FullPos.string file_content switch_state_filepath
       |> OpamParser.FullPos.to_opamfile
@@ -215,19 +220,21 @@ end
 
 let switch_arg switch = "--switch=" ^ Switch.name switch
 
-let exec t switch ~args =
-  Cmd.Spawn (Cmd.append t ("exec" :: switch_arg switch :: "--" :: args))
+let exec t switch ~args = spawn t ("exec" :: switch_arg switch :: "--" :: args)
+
+let init t = spawn t [ "init"; "-y" ]
 
 let parse_switch_list out =
   let lines = String.split_on_chars ~on:[ '\n' ] out in
   let result = lines |> List.filter_map ~f:Switch.of_string in
-  log "%d switches" (List.length result);
   result
 
+let switch_create t ~name ~args = spawn t ("switch" :: "create" :: name :: args)
+
 let switch_list t =
-  let command = Cmd.append t [ "switch"; "list"; "-s" ] in
+  let command = spawn t [ "switch"; "list"; "-s" ] in
   let open Promise.Syntax in
-  let+ output = Cmd.output (Spawn command) in
+  let+ output = Cmd.output command in
   match output with
   | Error _ ->
     show_message `Warn "Unable to read the list of switches.";
@@ -241,12 +248,12 @@ let switch_exists t switch =
 
 let switch_path t switch = Switch.path t switch
 
-let equal o1 o2 = Cmd.equal_spawn o1 o2
+let equal o1 o2 = Cmd.equal_spawn o1.bin o2.bin && Path.equal o1.root o2.root
 
 let switch_show ?cwd t =
-  let command = Cmd.append t [ "switch"; "show" ] in
+  let command = spawn t [ "switch"; "show" ] in
   let open Promise.Syntax in
-  let+ output = Cmd.output ?cwd (Spawn command) in
+  let+ output = Cmd.output ?cwd command in
   match output with
   | Ok out -> Switch.of_string out
   | Error _ ->
@@ -255,38 +262,32 @@ let switch_show ?cwd t =
 
 let switch_remove t switch =
   let name = Switch.name switch in
-  Cmd.Spawn (Cmd.append t [ "switch"; "remove"; name; "-y" ])
+  spawn t [ "switch"; "remove"; name; "-y" ]
 
-let install t switch packages =
-  Cmd.Spawn (Cmd.append t ("install" :: switch_arg switch :: packages))
+let install t switch ~packages =
+  spawn t ("install" :: switch_arg switch :: "-y" :: packages)
 
-let update t = Cmd.Spawn (Cmd.append t [ "update" ])
+let update t switch = spawn t [ "update"; switch_arg switch ]
 
-let upgrade t switch =
-  Cmd.Spawn (Cmd.append t [ "upgrade"; switch_arg switch; "-y" ])
+let upgrade t switch = spawn t [ "upgrade"; switch_arg switch; "-y" ]
 
 let remove t switch packages =
-  Cmd.Spawn (Cmd.append t ("remove" :: switch_arg switch :: "-y" :: packages))
+  spawn t ("remove" :: switch_arg switch :: "-y" :: packages)
 
 let switch_compiler t switch =
   let open Promise.Syntax in
   let+ switch_state = Switch_state.of_switch t switch in
-  match switch_state with
-  | Error err ->
-    log "Failed to detect compiler version for %s: %s" (Switch.name switch) err;
-    None
-  | Ok switch_state ->
-    let compilers = Switch_state.compilers switch_state in
-    Option.bind compilers ~f:List.hd
+  let compilers = Switch_state.compilers switch_state in
+  Option.bind compilers ~f:List.hd
 
 let packages_from_switch_state_field t switch callback =
-  let open Promise.Result.Syntax in
+  let open Promise.Syntax in
   let* switch_state = Switch_state.of_switch t switch in
   match callback switch_state with
   | None ->
     Promise.return (Error "Could not get the packages from the switch state")
   | Some l ->
-    let* path = Switch.path t switch in
+    let path = Switch.path t switch in
     Promise.List.filter_map
       (fun name ->
         let package_path = Opam_path.package_dir path name in

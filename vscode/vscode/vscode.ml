@@ -2471,8 +2471,3 @@ end
 module Env = struct
   val shell : unit -> string [@@js.get "vscode.env.shell"]
 end
-
-(* see https://code.visualstudio.com/api/references/icons-in-labels *)
-module LabelIcons = struct
-  let package = "$(package)"
-end

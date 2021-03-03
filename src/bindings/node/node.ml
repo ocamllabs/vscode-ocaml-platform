@@ -40,6 +40,10 @@ module Process = struct
   end
 end
 
+module Os = struct
+  val homedir : unit -> string [@@js.global "os.homedir"]
+end
+
 module JsError = struct
   let message (error : Promise.error) =
     let js_error = [%js.of: Promise.error] error in

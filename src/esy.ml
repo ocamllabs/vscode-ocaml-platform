@@ -113,6 +113,10 @@ let discover = Discover.run
 let exec t manifest ~args =
   Cmd.Spawn (Cmd.append t ("-P" :: Path.to_string manifest :: args))
 
+let install t manifest ~packages =
+  Cmd.Spawn
+    (Cmd.append t ("-P" :: Path.to_string manifest :: "add" :: packages))
+
 module State = struct
   type t =
     | Ready

@@ -4,7 +4,11 @@ type t
 
 val make : unit -> t
 
+val toolchain : t -> Toolchain.t option
+
 val sandbox : t -> Sandbox.t
+
+val set_toolchain : t -> Toolchain.t -> unit
 
 val set_sandbox : t -> Sandbox.t -> unit
 

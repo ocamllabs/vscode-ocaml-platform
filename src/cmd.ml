@@ -98,10 +98,13 @@ let log ?(result : ChildProcess.return option) (t : t) =
       :: message
     | Shell command_line -> ("shell", string command_line) :: message
   in
-  log_json "external command" message
+  match result with
+  | None -> log_json "external command" message
+  | Some _ -> log_json "external command (finished)" message
 
 let output ?cwd ?env ?stdin (t : t) =
   let open Promise.Syntax in
+  log t;
   let+ (result : ChildProcess.return) = run ?stdin ?cwd ?env t in
   log ~result t;
   if result.exitCode = 0 then

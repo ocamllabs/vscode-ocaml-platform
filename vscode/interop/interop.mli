@@ -52,6 +52,8 @@ module Js : sig
 
   module Any : T with type t = Ojs.t
 
+  module Unit : T with type t = unit
+
   module Bool : T with type t = bool
 
   module Int : T with type t = int
@@ -59,6 +61,8 @@ module Js : sig
   module String : T with type t = string
 
   module Option (T : T) : T with type t = T.t option
+
+  module Result (Ok : T) (Error : T) : T with type t = (Ok.t, Error.t) result
 
   module Or_undefined (T : T) : T with type t = T.t or_undefined
 

@@ -74,6 +74,10 @@ module Path : sig
   val join : string list -> string
 end
 
+module Os : sig
+  val homedir : unit -> string
+end
+
 module Fs : sig
   val readDir : string -> (string list, string) result Promise.t
 
