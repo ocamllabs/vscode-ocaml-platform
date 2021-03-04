@@ -818,6 +818,8 @@ module StatusBarItem = struct
 
   val color : t -> color or_undefined [@@js.get]
 
+  val backgroundColor : t -> ThemeColor.t or_undefined [@@js.get]
+
   val command : t -> command or_undefined [@@js.get]
 
   val accessibilityInformation : t -> AccessibilityInformation.t or_undefined
@@ -832,6 +834,8 @@ module StatusBarItem = struct
   val set_tooltip : t -> string -> unit [@@js.set]
 
   val set_color : t -> color -> unit [@@js.set]
+
+  val set_backgroundColor : t -> ThemeColor.t -> unit [@@js.set]
 
   val set_command : t -> command -> unit [@@js.set]
 
@@ -1352,6 +1356,26 @@ module ExtensionMode = struct
   [@@js.enum] [@@js]
 end
 
+module SecretStorageChangeEvent = struct
+  include Interface.Make ()
+
+  val key : t -> string [@@js.get]
+end
+
+module SecretStorage = struct
+  include Interface.Make ()
+
+  val get : t -> key:string -> string or_undefined Promise.t [@@js.call]
+
+  val store : t -> key:string -> value:string -> Promise.void [@@js.call]
+
+  val delete : t -> key:string -> Promise.void [@@js.call]
+
+  module OnDidChange = Event.Make (SecretStorageChangeEvent)
+
+  val onDidChange : t -> OnDidChange.t [@@js.get]
+end
+
 module ExtensionContext = struct
   include Interface.Make ()
 
@@ -1360,6 +1384,8 @@ module ExtensionContext = struct
   val workspaceState : t -> Memento.t [@@js.get]
 
   val globalState : t -> Memento.t [@@js.get]
+
+  val secrets : t -> SecretStorage.t [@@js.get]
 
   val extensionUri : t -> Uri.t [@@js.get]
 
@@ -2127,7 +2153,10 @@ module TreeDataProvider = struct
 
     val resolveTreeItem :
          t
-      -> (item:TreeItem.t -> element:T.t -> TreeItem.t ProviderResult.t)
+      -> (   item:TreeItem.t
+          -> element:T.t
+          -> token:CancellationToken.t
+          -> TreeItem.t ProviderResult.t)
          or_undefined
       [@@js.call]
 
@@ -2137,7 +2166,10 @@ module TreeDataProvider = struct
       -> getChildren:(?element:T.t -> unit -> T.t list ProviderResult.t)
       -> ?getParent:(element:T.t -> T.t ProviderResult.t)
       -> ?resolveTreeItem:
-           (item:TreeItem.t -> element:T.t -> TreeItem.t ProviderResult.t)
+           (   item:TreeItem.t
+            -> element:T.t
+            -> token:CancellationToken.t
+            -> TreeItem.t ProviderResult.t)
       -> unit
       -> t
       [@@js.builder]

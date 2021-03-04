@@ -671,6 +671,8 @@ module StatusBarItem : sig
 
   val color : t -> color option
 
+  val backgroundColor : t -> ThemeColor.t option
+
   val command : t -> command option
 
   val accessibilityInformation : t -> AccessibilityInformation.t option
@@ -684,6 +686,8 @@ module StatusBarItem : sig
   val set_tooltip : t -> string -> unit
 
   val set_color : t -> color -> unit
+
+  val set_backgroundColor : t -> ThemeColor.t -> unit
 
   val set_command : t -> command -> unit
 
@@ -1120,6 +1124,24 @@ module ExtensionMode : sig
   include Js.T with type t := t
 end
 
+module SecretStorageChangeEvent : sig
+  include Js.T
+
+  val key : t -> string
+end
+
+module SecretStorage : sig
+  include Js.T
+
+  val get : t -> key:string -> string or_undefined Promise.t
+
+  val store : t -> key:string -> value:string -> Promise.void
+
+  val delete : t -> key:string -> Promise.void
+
+  val onDidChange : t -> SecretStorageChangeEvent.t Event.t
+end
+
 module ExtensionContext : sig
   include Js.T
 
@@ -1128,6 +1150,8 @@ module ExtensionContext : sig
   val workspaceState : t -> Memento.t
 
   val globalState : t -> Memento.t
+
+  val secrets : t -> SecretStorage.t
 
   val extensionUri : t -> Uri.t
 
@@ -1709,7 +1733,11 @@ module TreeDataProvider : sig
 
     val resolveTreeItem :
          t
-      -> (item:TreeItem.t -> element:T.t -> TreeItem.t ProviderResult.t) option
+      -> (   item:TreeItem.t
+          -> element:T.t
+          -> token:CancellationToken.t
+          -> TreeItem.t ProviderResult.t)
+         option
 
     val create :
          ?onDidChangeTreeData:T.t option Event.t
@@ -1719,7 +1747,10 @@ module TreeDataProvider : sig
       -> getChildren:(?element:T.t -> unit -> T.t list ProviderResult.t)
       -> ?getParent:(element:T.t -> T.t ProviderResult.t)
       -> ?resolveTreeItem:
-           (item:TreeItem.t -> element:T.t -> TreeItem.t ProviderResult.t)
+           (   item:TreeItem.t
+            -> element:T.t
+            -> token:CancellationToken.t
+            -> TreeItem.t ProviderResult.t)
       -> unit
       -> t
   end
