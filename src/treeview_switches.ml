@@ -103,6 +103,7 @@ module Command = struct
           @@ show_message `Warn "The selected item is not an opam switch."
         | Switch (opam, switch) -> (
           let open Promise.Syntax in
+          Sandbox.focus_on_package_command ();
           let+ result = Opam.switch_remove opam switch |> Cmd.output in
           match result with
           | Error err -> show_message `Error "%s" err

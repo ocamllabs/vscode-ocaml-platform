@@ -627,3 +627,11 @@ let upgrade_packages t =
     let open Promise.Syntax in
     let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
     ()
+
+let focus_on_package_command ?sandbox () =
+  match sandbox with
+  | None
+  | Some (Opam _) ->
+    let (lazy output) = Output.command_output_channel in
+    Vscode.OutputChannel.show output ()
+  | _ -> ()

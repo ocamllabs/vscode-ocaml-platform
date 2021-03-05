@@ -79,8 +79,9 @@ let check ?env t =
 
 let run ?cwd ?env ?stdin cmd =
   let cwd = Option.map cwd ~f:Path.to_string in
-  let (lazy output) = Output.command_output_channel in
-  let logger = function
+  let logger event =
+    let (lazy output) = Output.command_output_channel in
+    match event with
     | ChildProcess.Spawned ->
       Vscode.OutputChannel.appendLine output ~value:("$ " ^ to_string cmd)
     | Stdout data
