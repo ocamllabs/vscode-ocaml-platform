@@ -438,15 +438,9 @@ let get_command sandbox bin args : Cmd.t =
   | Esy (esy, manifest) -> Esy.exec esy manifest ~args:(bin :: args)
   | Global -> Spawn { bin = Path.of_string bin; args }
   | Custom template ->
-    let bin =
-      if String.contains bin ' ' then
-        "\"" ^ bin ^ "\""
-      else
-        bin
-    in
     let command =
       template
-      |> String.substr_replace_all ~pattern:"$prog" ~with_:bin
+      |> String.substr_replace_all ~pattern:"$prog" ~with_:(Cmd.quote bin)
       |> String.substr_replace_all ~pattern:"$args"
            ~with_:(String.concat ~sep:" " args)
       |> String.strip
