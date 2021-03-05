@@ -14,6 +14,11 @@
 - Add a code evaluation command that sends selected expressions to the REPL
   (#504)
 
+- Install OCaml Platform tools automatically (#463)
+
+  The platform tools (a.k.a toolchain) are installed in a private opam switch
+  that should only be used by `vscode-ocaml-platform`.
+
 ## 1.6.0
 
 - Highlight token aliases in Menhir associativity declarations (#473)
@@ -42,11 +47,6 @@
   command palette if there is an open file. The command opens the dune file that
   is located in the same folder as the open file or creates the dune file in a
   draft mode (not yet saved on the disk). (#499)
-
-- Install OCaml Platform tools automatically (#463)
-
-  The platform tools (a.k.a toolchain) are installed in a private opam switch
-  that should only be used by `vscode-ocaml-platform`.
 
 ## 1.5.1
 
