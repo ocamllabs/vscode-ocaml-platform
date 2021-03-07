@@ -68,3 +68,12 @@ let open_file_in_text_editor target_uri =
   in
   let+ text_editor = Window.showTextDocument ~document:(`TextDocument doc) () in
   text_editor
+
+let ask_confirmation message =
+  let open Promise.Syntax in
+  let+ choice =
+    Vscode.Window.showInformationMessage ~message
+      ~choices:[ ("Yes", true); ("No", false) ]
+      ()
+  in
+  Option.value choice ~default:false

@@ -101,22 +101,31 @@ module Command = struct
         | Package _ ->
           Promise.return
           @@ show_message `Warn "The selected item is not an opam switch."
-        | Switch (opam, switch) -> (
+        | Switch (opam, switch) ->
           let open Promise.Syntax in
-          Sandbox.focus_on_package_command ();
-          let+ result = Opam.switch_remove opam switch |> Cmd.output in
-          match result with
-          | Error err -> show_message `Error "%s" err
-          | Ok _ ->
-            let (_ : Ojs.t option Promise.t) =
-              Vscode.Commands.executeCommand
-                ~command:Extension_consts.Commands.refresh_switches ~args:[]
-            in
-            let (_ : Ojs.t option Promise.t) =
-              Vscode.Commands.executeCommand
-                ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
-            in
-            show_message `Info "The switch has been removed successfully." )
+          let* confirmed =
+            ask_confirmation
+            @@ Printf.sprintf "Are you sure you want to remove switch %s?"
+                 (Dependency.label dep)
+          in
+          if not confirmed then
+            Promise.return ()
+          else (
+            Sandbox.focus_on_package_command ();
+            let+ result = Opam.switch_remove opam switch |> Cmd.output in
+            match result with
+            | Error err -> show_message `Error "%s" err
+            | Ok _ ->
+              let (_ : Ojs.t option Promise.t) =
+                Vscode.Commands.executeCommand
+                  ~command:Extension_consts.Commands.refresh_switches ~args:[]
+              in
+              let (_ : Ojs.t option Promise.t) =
+                Vscode.Commands.executeCommand
+                  ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
+              in
+              show_message `Info "The switch has been removed successfully."
+          )
       in
       ()
     in

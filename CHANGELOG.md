@@ -10,6 +10,8 @@
 
 - Fix highlighting of float literals with a trailing decimal point (#548)
 
+- Ask for confirmation when removing opam packages or switches (#551)
+
 ## 1.7.0
 
 - Fixed an issue when uninstalled Opam packages still appear in the `roots`

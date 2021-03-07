@@ -85,18 +85,26 @@ module Command = struct
         let arg = List.hd_exn args in
         let dep = Dependency.t_of_js arg in
         let open Promise.Syntax in
-        let sandbox = Extension_instance.sandbox instance in
-        Sandbox.focus_on_package_command ~sandbox ();
-        let+ () = Sandbox.uninstall_packages sandbox [ dep ] in
-        let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_switches ~args:[]
+        let* confirmed =
+          ask_confirmation
+          @@ Printf.sprintf "Are you sure you want to uninstall package %s?"
+               (Dependency.label dep)
         in
-        let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
-        in
-        ()
+        if not confirmed then
+          Promise.return ()
+        else
+          let sandbox = Extension_instance.sandbox instance in
+          Sandbox.focus_on_package_command ~sandbox ();
+          let+ () = Sandbox.uninstall_packages sandbox [ dep ] in
+          let (_ : Ojs.t option Promise.t) =
+            Vscode.Commands.executeCommand
+              ~command:Extension_consts.Commands.refresh_switches ~args:[]
+          in
+          let (_ : Ojs.t option Promise.t) =
+            Vscode.Commands.executeCommand
+              ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
+          in
+          ()
       in
       ()
     in
