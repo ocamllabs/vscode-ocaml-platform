@@ -7,7 +7,6 @@ _opam/
 esy.lock/
 fixtures/
 lib/
-node_modules/
 src/
 test/
 
@@ -17,9 +16,3 @@ test/
 azure-pipelines.yaml
 esy.json
 Makefile
-
-!node_modules/semver/**
-!node_modules/vscode-jsonrpc/**
-!node_modules/vscode-languageclient/**
-!node_modules/vscode-languageserver-protocol/**
-!node_modules/vscode-languageserver-types/**
