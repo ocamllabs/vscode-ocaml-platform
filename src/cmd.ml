@@ -15,6 +15,17 @@ type stdout = string
 
 type stderr = string
 
+let quote str =
+  if String.contains str ' ' then
+    "\"" ^ str ^ "\""
+  else
+    str
+
+let to_string = function
+  | Shell cmd -> cmd
+  | Spawn { bin; args } ->
+    Path.to_string bin :: args |> List.map ~f:quote |> String.concat ~sep:" "
+
 let path_missing_from_env = "'PATH' variable not found in the environment"
 
 let append { bin; args = args1 } args2 = { bin; args = args1 @ args2 }
@@ -66,15 +77,24 @@ let check ?env t =
     let+ s = check_spawn ?env spawn in
     Spawn s
 
-let run ?cwd ?env ?stdin =
+let run ?cwd ?env ?stdin cmd =
   let cwd = Option.map cwd ~f:Path.to_string in
-  function
+  let logger event =
+    let (lazy output) = Output.command_output_channel in
+    match event with
+    | ChildProcess.Spawned ->
+      Vscode.OutputChannel.appendLine output ~value:("$ " ^ to_string cmd)
+    | Stdout data
+    | Stderr data ->
+      Vscode.OutputChannel.append output ~value:data
+    | Closed -> Vscode.OutputChannel.appendLine output ~value:""
+  in
+  let options = ChildProcess.Options.create ?cwd ?env () in
+  match cmd with
   | Spawn { bin; args } ->
-    ChildProcess.spawn (Path.to_string bin) (Array.of_list args) ?stdin
-      (ChildProcess.Options.create ?cwd ?env ())
-  | Shell command_line ->
-    ChildProcess.exec command_line ?stdin
-      (ChildProcess.Options.create ?cwd ?env ())
+    ChildProcess.spawn (Path.to_string bin) (Array.of_list args) ~logger ?stdin
+      ~options
+  | Shell command_line -> ChildProcess.exec command_line ~logger ?stdin ~options
 
 let log ?(result : ChildProcess.return option) (t : t) =
   let open Jsonoo.Encode in

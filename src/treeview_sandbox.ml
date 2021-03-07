@@ -86,6 +86,7 @@ module Command = struct
         let dep = Dependency.t_of_js arg in
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
+        Sandbox.focus_on_package_command ~sandbox ();
         let+ () = Sandbox.uninstall_packages sandbox [ dep ] in
         let (_ : Ojs.t option Promise.t) =
           Vscode.Commands.executeCommand
@@ -107,6 +108,7 @@ module Command = struct
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
+        Sandbox.focus_on_package_command ~sandbox ();
         let+ () = Sandbox.upgrade_packages sandbox in
         let (_ : Ojs.t option Promise.t) =
           Vscode.Commands.executeCommand
@@ -140,6 +142,7 @@ module Command = struct
         | Some package_str ->
           let sandbox = Extension_instance.sandbox instance in
           let packages = String.split package_str ~on:' ' in
+          Sandbox.focus_on_package_command ~sandbox ();
           let+ () = Sandbox.install_packages sandbox packages in
           let (_ : Ojs.t option Promise.t) =
             Vscode.Commands.executeCommand

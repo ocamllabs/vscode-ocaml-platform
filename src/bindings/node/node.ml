@@ -45,8 +45,10 @@ module Os = struct
 end
 
 module JsError = struct
-  let message (error : Promise.error) =
-    let js_error = [%js.of: Promise.error] error in
+  type t = Promise.error [@@js]
+
+  let message (error : t) =
+    let js_error = [%js.of: t] error in
     if Ojs.has_property js_error "message" then
       [%js.to: string] (Ojs.get js_error "message")
     else
@@ -60,17 +62,66 @@ module Buffer = struct
 
   val from : string -> t [@@js.global "Buffer.from"]
 
-  val concat : t array -> t [@@js.global "Buffer.concat"]
+  val concat : t list -> t [@@js.global "Buffer.concat"]
+
+  let append buf other = buf := concat [ !buf; other ]
+
+  val write :
+       t
+    -> string:string
+    -> ?offset:int
+    -> ?length:int
+    -> ?encoding:string
+    -> unit
+    -> unit
+    [@@js.call]
 end
 
 module Stream = struct
-  include Class.Make ()
+  module Writable = struct
+    include Class.Make ()
 
-  val on : t -> string -> (Buffer.t -> unit) -> unit [@@js.call]
+    val on : t -> string -> Ojs.t -> unit [@@js.call]
 
-  val write : t -> string -> unit [@@js.call]
+    let on t = function
+      | `Close f -> on t "close" @@ [%js.of: unit -> unit] f
+      | `Drain f -> on t "drain" @@ [%js.of: unit -> unit] f
+      | `Error f -> on t "error" @@ [%js.of: err:JsError.t -> unit] f
+      | `Finish f -> on t "finish" @@ [%js.of: unit -> unit] f
+      | `Pipe f -> on t "pipe" @@ [%js.of: src:t -> unit] f
+      | `Unpipe f -> on t "unpipe" @@ [%js.of: src:t -> unit] f
 
-  val end_ : t -> unit [@@js.call]
+    val write : t -> string -> unit [@@js.call]
+
+    val end_ : t -> unit [@@js.call]
+  end
+
+  module Readable = struct
+    include Class.Make ()
+
+    val on : t -> string -> Ojs.t -> unit [@@js.call]
+
+    type chunk =
+      ([ `String of string
+       | `Buffer of Buffer.t
+       ]
+      [@js.union])
+    [@@js]
+
+    let chunk_of_js js_val =
+      match Ojs.type_of js_val with
+      | "string" -> `String ([%js.to: string] js_val)
+      | _ -> `Buffer ([%js.to: Buffer.t] js_val)
+
+    let on t = function
+      | `Close f -> on t "close" @@ [%js.of: unit -> unit] f
+      | `Data f -> on t "data" @@ [%js.of: chunk:chunk -> unit] f
+      | `End f -> on t "end" @@ [%js.of: unit -> unit] f
+      | `Error f -> on t "error" @@ [%js.of: err:JsError.t -> unit] f
+      | `Pause f -> on t "pause" @@ [%js.of: unit -> unit] f
+      | `Readable f -> on t "readable" @@ [%js.of: unit -> unit] f
+      | `Resume f -> on t "resume" @@ [%js.of: unit -> unit] f
+  end
 end
 
 module Path = struct
@@ -108,34 +159,42 @@ module Fs = struct
 end
 
 module ChildProcess = struct
-  type t = private Ojs.t [@@js]
+  include Class.Make ()
 
-  val get_stdout : t -> Stream.t [@@js.get "stdout"]
+  val get_stdout : t -> Stream.Readable.t [@@js.get "stdout"]
 
-  val get_stderr : t -> Stream.t [@@js.get "stderr"]
+  val get_stderr : t -> Stream.Readable.t [@@js.get "stderr"]
 
-  val get_stdin : t -> Stream.t [@@js.get "stdin"]
+  val get_stdin : t -> Stream.Writable.t [@@js.get "stdin"]
 
-  val on : t -> string -> (int -> unit) -> unit [@@js.call]
+  val on : t -> string -> Ojs.t -> unit [@@js.call]
 
-  let on_close t close = on t "close" close
+  let on t = function
+    | `Close f -> on t "close" @@ [%js.of: code:int -> signal:string -> unit] f
+    | `Disconnect f -> on t "disconnect" @@ [%js.of: unit -> unit] f
+    | `Error f -> on t "error" @@ [%js.of: err:JsError.t -> unit] f
+    | `Exit f -> on t "exit" @@ [%js.of: code:int -> signal:string -> unit] f
+    | `Message f ->
+      on t "message" @@ [%js.of: message:Ojs.t -> sendHandle:Ojs.t -> unit] f
 
   module Options = struct
-    type t = private Ojs.t [@@js]
+    include Interface.Make ()
 
     val create : ?cwd:string -> ?env:string Dict.t -> unit -> t [@@js.builder]
   end
 
   type exec_result = private Ojs.t [@@js]
 
-  val code : exec_result -> int [@@js.get]
-
   val exec :
        string
-    -> Options.t
-    -> (exec_result or_undefined -> string -> string -> unit)
+    -> ?options:Options.t
+    -> ?callback:(exec_result or_undefined -> string -> string -> unit)
+    -> unit
     -> t
     [@@js.global "child_process.exec"]
+
+  val spawn : string -> string array -> ?options:Options.t -> unit -> t
+    [@@js.global "child_process.spawn"]
 
   type return =
     { exitCode : int
@@ -143,48 +202,64 @@ module ChildProcess = struct
     ; stderr : string
     }
 
-  let exec cmd ?stdin options =
-    Promise.make @@ fun ~resolve ~reject:_ ->
-    let cp =
-      exec cmd options (fun err stdout stderr ->
-          let exitCode =
-            match err with
-            | None -> 0
-            | Some err -> code err
-          in
-          resolve { exitCode; stdout; stderr })
-    in
-    match stdin with
-    | Some text ->
-      Stream.write (get_stdin cp) text;
-      Stream.end_ (get_stdin cp)
-    | None -> ()
+  type event =
+    | Spawned
+    | Stdout of string
+    | Stderr of string
+    | Closed
 
-  val spawn : string -> string array -> Options.t -> t
-    [@@js.global "child_process.spawn"]
+  let handle_child_process ?logger ?stdin cp resolve =
+    let log = Option.value logger ~default:ignore in
 
-  let spawn cmd args ?stdin options =
-    Promise.make @@ fun ~resolve ~reject:_ ->
-    let cp = spawn cmd args options in
+    log Spawned;
 
     let stdout = ref (Buffer.from "") in
-    Stream.on (get_stdout cp) "data" (fun data ->
-        stdout := Buffer.concat [| !stdout; data |]);
+    let on_stdout ~chunk =
+      match chunk with
+      | `String s ->
+        Buffer.append stdout (Buffer.from s);
+        log @@ Stdout s
+      | `Buffer b ->
+        Buffer.append stdout b;
+        log @@ Stdout (Buffer.toString b)
+    in
+    Stream.Readable.on (get_stdout cp) (`Data on_stdout);
 
     let stderr = ref (Buffer.from "") in
-    Stream.on (get_stderr cp) "data" (fun data ->
-        stderr := Buffer.concat [| !stderr; data |]);
+    let on_stderr ~chunk =
+      match chunk with
+      | `String s ->
+        Buffer.append stderr (Buffer.from s);
+        log @@ Stderr s
+      | `Buffer b ->
+        Buffer.append stderr b;
+        log @@ Stderr (Buffer.toString b)
+    in
+    Stream.Readable.on (get_stderr cp) (`Data on_stderr);
 
-    ( on_close cp @@ fun code ->
+    let close ~code ~signal:_ =
+      log Closed;
       resolve
         { exitCode = code
         ; stdout = Buffer.toString !stdout
         ; stderr = Buffer.toString !stderr
-        } );
+        }
+    in
+    on cp (`Close close);
 
     match stdin with
     | Some text ->
-      Stream.write (get_stdin cp) text;
-      Stream.end_ (get_stdin cp)
+      Stream.Writable.write (get_stdin cp) text;
+      Stream.Writable.end_ (get_stdin cp)
     | None -> ()
+
+  let exec ?logger ?stdin ?options cmd =
+    Promise.make @@ fun ~resolve ~reject:_ ->
+    let cp = exec cmd ?options () in
+    handle_child_process cp ?logger ?stdin resolve
+
+  let spawn ?logger ?stdin ?options cmd args =
+    Promise.make @@ fun ~resolve ~reject:_ ->
+    let cp = spawn cmd args ?options () in
+    handle_child_process cp ?logger ?stdin resolve
 end

@@ -37,7 +37,9 @@ module Process : sig
 end
 
 module JsError : sig
-  val message : Promise.error -> string
+  include Js.T with type t = Promise.error
+
+  val message : t -> string
 end
 
 module Buffer : sig
@@ -47,17 +49,60 @@ module Buffer : sig
 
   val from : string -> t
 
-  val concat : t array -> t
+  val concat : t list -> t
+
+  val append : t ref -> t -> unit
+
+  val write :
+       t
+    -> string:string
+    -> ?offset:int
+    -> ?length:int
+    -> ?encoding:string
+    -> unit
+    -> unit
 end
 
 module Stream : sig
-  include Js.T
+  module Readable : sig
+    include Js.T
 
-  val on : t -> string -> (Buffer.t -> unit) -> unit
+    type chunk =
+      [ `String of string
+      | `Buffer of Buffer.t
+      ]
 
-  val write : t -> string -> unit
+    val on :
+         t
+      -> [ `Close of unit -> unit
+         | `Data of chunk:chunk -> unit
+         | `End of unit -> 'c
+         | `Error of err:JsError.t -> unit
+         | `Pause of unit -> unit
+         | `Readable of unit -> unit
+         | `Resume of unit -> unit
+         ]
+      -> unit
+  end
 
-  val end_ : t -> unit
+  module Writable : sig
+    include Js.T
+
+    val on :
+         t
+      -> [ `Close of unit -> unit
+         | `Drain of unit -> unit
+         | `Error of err:JsError.t -> unit
+         | `Finish of unit -> unit
+         | `Pipe of src:t -> unit
+         | `Unpipe of src:t -> unit
+         ]
+      -> unit
+
+    val write : t -> string -> unit
+
+    val end_ : t -> unit
+  end
 end
 
 module Path : sig
@@ -99,8 +144,24 @@ module ChildProcess : sig
     ; stderr : string
     }
 
-  val exec : string -> ?stdin:string -> Options.t -> return Promise.t
+  type event =
+    | Spawned
+    | Stdout of string
+    | Stderr of string
+    | Closed
+
+  val exec :
+       ?logger:(event -> unit)
+    -> ?stdin:string
+    -> ?options:Options.t
+    -> string
+    -> return Promise.t
 
   val spawn :
-    string -> string array -> ?stdin:string -> Options.t -> return Promise.t
+       ?logger:(event -> unit)
+    -> ?stdin:string
+    -> ?options:Options.t
+    -> string
+    -> string array
+    -> return Promise.t
 end
