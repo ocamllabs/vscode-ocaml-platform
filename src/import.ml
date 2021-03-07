@@ -69,11 +69,13 @@ let open_file_in_text_editor target_uri =
   let+ text_editor = Window.showTextDocument ~document:(`TextDocument doc) () in
   text_editor
 
-let ask_confirmation message =
+let with_confirmation message ~yes ?(no = "Cancel") f =
   let open Promise.Syntax in
-  let+ choice =
+  let* choice =
     Vscode.Window.showInformationMessage ~message
-      ~choices:[ ("Yes", true); ("No", false) ]
+      ~choices:[ (yes, true); (no, false) ]
       ()
   in
-  Option.value choice ~default:false
+  match choice with
+  | Some true -> f ()
+  | _ -> Promise.return ()
