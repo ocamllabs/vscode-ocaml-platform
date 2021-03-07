@@ -522,7 +522,7 @@
         {
           "comment": "floating point decimal literal",
           "name": "constant.numeric.decimal.float.ocaml",
-          "match": "\\b([[:digit:]][[:digit:]_]*\\.[[:digit:]_]*[g-zG-Z]?)\\b"
+          "match": "\\b([[:digit:]][[:digit:]_]*)(\\.[[:digit:]_]*[g-zG-Z]?\\b|\\.)"
         },
         {
           "comment": "floating point hexadecimal literal with exponent part",
@@ -532,7 +532,7 @@
         {
           "comment": "floating point hexadecimal literal",
           "name": "constant.numeric.hexadecimal.float.ocaml",
-          "match": "\\b((0x|0X)[[:xdigit:]][[:xdigit:]_]*\\.[[:xdigit:]_]*[g-zG-Z]?)\\b"
+          "match": "\\b((0x|0X)[[:xdigit:]][[:xdigit:]_]*)(\\.[[:xdigit:]_]*[g-zG-Z]?\\b|\\.)"
         },
 
         {
