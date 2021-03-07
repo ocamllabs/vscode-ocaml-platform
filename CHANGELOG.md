@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Highlight OCaml source code inside Cinaps comments (#547)
+
 ## 1.7.0
 
 - Fixed an issue when uninstalled Opam packages still appear in the `roots`
