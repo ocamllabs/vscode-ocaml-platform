@@ -8,6 +8,8 @@
   automatically focused when running a package management command from the OCaml
   activity tab (#541)
 
+- Fix highlighting of float literals with a trailing decimal point (#548)
+
 ## 1.7.0
 
 - Fixed an issue when uninstalled Opam packages still appear in the `roots`
