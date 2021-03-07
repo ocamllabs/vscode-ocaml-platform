@@ -137,6 +137,14 @@
           ]
         },
         {
+          "comment": "Cinaps comment",
+          "begin": "\\(\\*\\$",
+          "end": "\\*\\)",
+          "beginCaptures": [{ "name": "comment.cinaps.ocaml" }],
+          "endCaptures": [{ "name": "comment.cinaps.ocaml" }],
+          "patterns": [{ "include": "$self" }]
+        },
+        {
           "comment": "block comment",
           "name": "comment.block.ocaml",
           "begin": "\\(\\*",
