@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.8.0
 
 - Highlight OCaml source code inside Cinaps comments (#547)
 
