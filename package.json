@@ -3,7 +3,7 @@
   "displayName": "OCaml Platform",
   "description": "Official OCaml Support from OCamlLabs",
   "license": "MIT",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "publisher": "ocamllabs",
   "repository": {
     "type": "git",

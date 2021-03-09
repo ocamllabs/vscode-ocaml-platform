@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.8.1
 
 - Revert automatic installation of platform tools
 
