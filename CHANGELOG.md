@@ -5,7 +5,7 @@
 - Revert automatic installation of platform tools
 
   The feature is not flexible enough and caused issues with multiple users. We
-  will work on making it more flexible and fit more workflow before releasing
+  will work on making it more flexible and fit more workflows before releasing
   it.
 
 ## 1.8.0
