@@ -3,15 +3,11 @@ open Import
 type t =
   { mutable sandbox : Sandbox.t
   ; mutable repl : Terminal_sandbox.t option
-  ; mutable toolchain : Toolchain.t option
   ; mutable lsp_client : (LanguageClient.t * Ocaml_lsp.t) option
   ; sandbox_info : StatusBarItem.t
-  ; toolchain_info : StatusBarItem.t
   }
 
 let sandbox t = t.sandbox
-
-let toolchain t = t.toolchain
 
 let language_client t = Option.map ~f:fst t.lsp_client
 
@@ -34,9 +30,8 @@ let client_options () =
   LanguageClient.ClientOptions.create ~outputChannel ~revealOutputChannelOn
     ~documentSelector ()
 
-let server_options toolchain =
-  let open Promise.Syntax in
-  let+ command = Toolchain.get_lsp_command toolchain in
+let server_options sandbox =
+  let command = Sandbox.get_lsp_command sandbox in
   Cmd.log command;
   match command with
   | Shell command ->
@@ -56,12 +51,16 @@ let start_language_server t =
   stop_server t;
   let res =
     let open Promise.Result.Syntax in
-    let* serverOptions =
-      match t.toolchain with
-      | None ->
-        Promise.return (Error "No toolchain available to start the server.")
-      | Some toolchain -> server_options toolchain |> Promise.map Result.return
+    let* _ =
+      let+ has_command =
+        Sandbox.has_command t.sandbox "ocamllsp" |> Promise.map Result.return
+      in
+      if has_command then
+        Ok ()
+      else
+        Error "Sandbox initialisation failed: ocaml-lsp-server is not installed"
     in
+    let serverOptions = server_options t.sandbox in
     let clientOptions = client_options () in
     let client =
       LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
@@ -119,48 +118,10 @@ end = struct
     StatusBarItem.set_text sandbox_info status_bar_item_text
 end
 
-module Toolchain_info : sig
-  val make : Toolchain.t option -> StatusBarItem.t
-
-  val update : StatusBarItem.t -> new_toolchain:Toolchain.t -> unit
-end = struct
-  let make_status_bar_item_text toolchain =
-    Printf.sprintf "$(tools) %s" @@ Toolchain.to_pretty_string toolchain
-
-  let make toolchain =
-    let status_bar_item =
-      Window.createStatusBarItem ~alignment:StatusBarAlignment.Left ()
-    in
-    let status_bar_item_text =
-      match toolchain with
-      | None -> "No toolchain"
-      | Some toolchain -> make_status_bar_item_text toolchain
-    in
-    StatusBarItem.set_text status_bar_item status_bar_item_text;
-    StatusBarItem.show status_bar_item;
-    status_bar_item
-
-  let update toolchain_info ~new_toolchain =
-    let status_bar_item_text = make_status_bar_item_text new_toolchain in
-    StatusBarItem.set_text toolchain_info status_bar_item_text
-end
-
 let make () =
   let sandbox = Sandbox.Global in
-  let toolchain_info = Toolchain_info.make None in
   let sandbox_info = Sandbox_info.make sandbox in
-  let toolchain = None in
-  { sandbox
-  ; lsp_client = None
-  ; sandbox_info
-  ; toolchain_info
-  ; toolchain
-  ; repl = None
-  }
-
-let set_toolchain t new_toolchain =
-  Toolchain_info.update t.toolchain_info ~new_toolchain;
-  t.toolchain <- Some new_toolchain
+  { sandbox; lsp_client = None; sandbox_info; repl = None }
 
 let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
