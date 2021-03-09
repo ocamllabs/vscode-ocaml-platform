@@ -11,26 +11,25 @@ let get_formatter instance ~document ~options:_ ~token:_ =
   in
   (* text of entire document *)
   let document_text = TextDocument.getText document ~range () in
-  match Extension_instance.toolchain instance with
-  | None -> `Value None
-  | Some toolchain ->
-    let promise =
-      let open Promise.Syntax in
-      let* command =
-        Toolchain.get_dune_command toolchain ~args:[ "format-dune-file" ]
-      in
-      let+ output =
-        let open Promise.Result.Syntax in
-        let* command = Cmd.check command in
-        Cmd.output ~stdin:document_text command
-      in
-      match output with
-      | Ok newText -> Some [ TextEdit.replace ~range ~newText ]
-      | Error msg ->
-        show_message `Error "Dune formatting failed: %s" msg;
-        Some []
-    in
-    `Promise promise
+  let command =
+    let sandbox = Extension_instance.sandbox instance in
+    Sandbox.get_dune_command sandbox [ "format-dune-file" ]
+  in
+  let output =
+    let open Promise.Result.Syntax in
+    let* command = Cmd.check command in
+    Cmd.output ~stdin:document_text command
+  in
+  let promise =
+    let open Promise.Syntax in
+    let+ output = output in
+    match output with
+    | Ok newText -> Some [ TextEdit.replace ~range ~newText ]
+    | Error msg ->
+      show_message `Error "Dune formatting failed: %s" msg;
+      Some []
+  in
+  `Promise promise
 
 let register extension instance =
   [ "dune"; "dune-project"; "dune-workspace" ]
