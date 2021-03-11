@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Fix switching between implementation/interface (#561)
+
 ## 1.8.1
 
 - Revert automatic installation of platform tools
