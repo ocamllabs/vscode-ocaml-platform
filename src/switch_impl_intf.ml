@@ -1,7 +1,7 @@
 open Import
 
 let send_switch_impl_intf_request client uri : string array Promise.t =
-  let data = Jsonoo.Encode.list Jsonoo.Encode.string [ uri ] in
+  let data = Jsonoo.Encode.string uri in
   let open Promise.Syntax in
   let+ response =
     LanguageClient.sendRequest client ~meth:"ocamllsp/switchImplIntf" ~data ()
@@ -9,7 +9,7 @@ let send_switch_impl_intf_request client uri : string array Promise.t =
   Jsonoo.Decode.(array string) response
 
 let send_infer_intf_request client uri : string Promise.t =
-  let data = Jsonoo.Encode.list Jsonoo.Encode.string [ uri ] in
+  let data = Jsonoo.Encode.string uri in
   let open Promise.Syntax in
   let+ response =
     LanguageClient.sendRequest client ~meth:"ocamllsp/inferIntf" ~data ()
