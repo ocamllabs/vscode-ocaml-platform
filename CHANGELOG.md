@@ -4,6 +4,8 @@
 
 - Fix switching between implementation/interface (#561)
 
+- Stop automatically highlighting suffixed META files (#565)
+
 ## 1.8.1
 
 - Revert automatic installation of platform tools
