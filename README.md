@@ -8,58 +8,14 @@ _Please report any bugs you encounter._
 
 ## Quick start
 
-1. Install this extension from
-   [the VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=ocamllabs.ocaml-platform)
-   (or by entering `ext install ocamllabs.ocaml-platform` at the command palette
-   <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>
-   (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> on MacOS)
-2. Open a OCaml/ReasonML project (`File > Add Folder to Workspace...`)
-3. Install [OCaml-LSP](https://github.com/ocaml/ocaml-lsp) with
-   [opam](https://github.com/ocaml/opam) or [esy](https://github.com/esy/esy).
-   E.g. `opam install ocaml-lsp-server`
-
-### Windows
-
-Install [OCaml for Windows](https://fdopen.github.io/opam-repository-mingw/) and
-make sure the `ocaml-env` program is accessible on the PATH (`ocaml-env` is in
-the `usr/local/bin` folder relative to the installation directory).
-
-### ReScript / BuckleScript
-
-The new ReScript syntax (`res` and `resi` files) is not supported, you should
-use [rescript-vscode](https://github.com/rescript-lang/rescript-vscode) instead.
-
-ReasonML, as an alternative syntax for OCaml, is supported out-of-the-box, as
-long as `reason` is installed in your environment.
-
-If you're looking for a way to use OCaml or ReasonML syntax in a ReScript
-project, you'll need to install `ocaml-lsp` in your environment. We recommend
-using Esy for this:
-
-1. Install esy
-
-```bash
-npm install esy --global
-```
-
-2. Add `esy.json` to the project root with following content:
-
-```json
-{
-  "dependencies": {
-    "@opam/ocaml-lsp-server": "*",
-    "@opam/ocamlfind-secondary": "*",
-    "@opam/reason": "*",
-    "ocaml": "4.6.x"
-  }
-}
-```
-
-3. Install and build packages
-
-```bash
-esy
-```
+- Installation
+  - [opam](docs/quick-start/opam.md)
+  - [esy / BuckleScript](docs/quick-start/esy-bucklescript.md)
+    - The new ReScript syntax (`res` and `resi` files) is not supported, you
+      should use
+      [rescript-vscode](https://github.com/rescript-lang/rescript-vscode)
+      instead.
+- [Important Notes for Windows Users](docs/quick-start/windows.md)
 
 ## Features
 
