@@ -577,9 +577,6 @@
         "filenames": [
           "META"
         ],
-        "filenamePatterns": [
-          "META.*"
-        ],
         "configuration": "./languages/META.json"
       },
       {
