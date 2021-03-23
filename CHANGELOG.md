@@ -1,6 +1,6 @@
 # Change Log
 
-## 1.8.2
+## Unreleased
 
 - Fix switching between implementation/interface (#561)
 
