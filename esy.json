@@ -9,7 +9,7 @@
     "@opam/opam-file-format": "2.1.2"
   },
   "devDependencies": {
-    "@opam/dune": "2.7.1",
+    "@opam/dune": "*",
     "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam"
   }
 }
