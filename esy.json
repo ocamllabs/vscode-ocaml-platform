@@ -1,16 +1,15 @@
 {
   "dependencies": {
-    "ocaml": "4.11.x",
-    "@opam/js_of_ocaml": "3.7.1",
+    "ocaml": "4.12.x",
+    "@opam/js_of_ocaml": "3.8.0",
     "@opam/gen_js_api": "1.0.6",
-    "@opam/core_kernel": "v0.14.0",
+    "@opam/core_kernel": "v0.14.1",
     "@opam/promise_jsoo": "0.3.1",
     "@opam/jsonoo": "0.2.1",
     "@opam/opam-file-format": "2.1.2"
   },
   "devDependencies": {
-    "@opam/dune": "2.7.1",
-    "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam",
-    "@opam/ocamlformat": "0.15.0"
+    "@opam/dune": "*",
+    "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam"
   }
 }
