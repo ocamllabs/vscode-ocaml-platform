@@ -7,6 +7,6 @@ description: "Description"
 synopsis: "Synopsis"
 bug-reports: "https//foo.bar"
 depends: [
-  "ocaml"             {>= "4.04.2" & < "4.12.0"}
+  "ocaml"             {>= "4.04.2" & < "4.13.0"}
   "base"              {>= "v0.12" }
 ]
