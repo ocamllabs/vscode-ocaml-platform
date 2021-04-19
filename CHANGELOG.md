@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Fix showing error message if ocaml-lsp is missing (#586)
+
 ## 1.8.2
 
 - Fix switching between implementation/interface (#561)
