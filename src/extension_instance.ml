@@ -51,10 +51,9 @@ let start_language_server t =
   stop_server t;
   let res =
     let open Promise.Result.Syntax in
-    let* _ =
-      let+ has_command =
-        Sandbox.has_command t.sandbox "ocamllsp" |> Promise.map Result.return
-      in
+    let* () =
+      let open Promise.Syntax in
+      let+ has_command = Sandbox.has_command t.sandbox "ocamllsp" in
       if has_command then
         Ok ()
       else
