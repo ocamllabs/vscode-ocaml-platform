@@ -131,6 +131,20 @@ let _open_current_dune_file =
   in
   command Extension_consts.Commands.open_current_dune_file handler
 
+let _dump_trace =
+    let handler (instance : Extension_instance.t) ~args:_ =
+      let (_ : _ Promise.t) =
+        match Extension_instance.lsp_client instance with
+        | None -> log "ocaml dump-trace incorrect" |> Promise.return
+        | Some (client, _) ->
+          let open Promise.Syntax in
+          let+ resp = LanguageClient.sendRequest client ~meth:"ocamllsp/dumpTrace" ~data:(Jsonoo.Encode.null) () in
+          log_json "dump-trace" ["response", resp]
+      in
+      ()
+    in
+    command Extension_consts.Commands.dump_trace handler
+
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in
