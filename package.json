@@ -194,6 +194,11 @@
         "command": "ocaml.evaluate-selection",
         "category": "OCaml",
         "title": "Evaluate Selection"
+      },
+      {
+        "command": "ocaml.dump-trace",
+        "category": "OCaml",
+        "title": "Dump trace (for debugging)"
       }
     ],
     "keybindings": [

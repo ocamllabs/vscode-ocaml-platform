@@ -32,6 +32,8 @@ module Commands = struct
   let evaluate_selection = ocaml_prefixed "evaluate-selection"
 
   let open_repl = ocaml_prefixed "open-repl"
+
+  let dump_trace = ocaml_prefixed "dump-trace"
 end
 
 (* TODO: Refactor the code so that we don't need any "constants" module *)
