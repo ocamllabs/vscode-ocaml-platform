@@ -76,7 +76,7 @@ module Stream : sig
          t
       -> [ `Close of unit -> unit
          | `Data of chunk:chunk -> unit
-         | `End of unit -> 'c
+         | `End of unit -> unit
          | `Error of err:JsError.t -> unit
          | `Pause of unit -> unit
          | `Readable of unit -> unit
