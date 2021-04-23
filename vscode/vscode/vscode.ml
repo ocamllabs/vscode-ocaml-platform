@@ -765,7 +765,7 @@ module WorkspaceConfiguration = struct
     }
 
   let inspectResult_of_js (type t) t_of_js js_val : t inspectResult =
-    let field = Ojs.get js_val in
+    let field = Ojs.get_prop_ascii js_val in
     { key = [%js.to: string] (field "key")
     ; defaultValue = [%js.to: t or_undefined] (field "defaultValue")
     ; globalValue = [%js.to: t or_undefined] (field "globalValue")
@@ -1505,7 +1505,7 @@ module ExtensionContext = struct
     val extensionMode : t -> ExtensionMode.t [@@js.get]]
 
   let subscribe this ~disposable =
-    let subscriptions = Ojs.get ([%js.of: t] this) "subscriptions" in
+    let subscriptions = Ojs.get_prop_ascii ([%js.of: t] this) "subscriptions" in
     let (_ : Ojs.t) =
       Ojs.call subscriptions "push" [| [%js.of: Disposable.t] disposable |]
     in
@@ -1670,13 +1670,13 @@ module TaskDefinition = struct
 
   include [%js: val type_ : t -> string [@@js.get]]
 
-  let get_attribute t = Ojs.get ([%js.of: t] t)
+  let get_attribute t = Ojs.get_prop_ascii ([%js.of: t] t)
 
-  let set_attribute t = Ojs.set ([%js.of: t] t)
+  let set_attribute t = Ojs.set_prop_ascii ([%js.of: t] t)
 
   let create ~type_ ?(attributes = []) () =
     let obj = Ojs.obj [| ("type", [%js.of: string] type_) |] in
-    let set (key, value) = Ojs.set obj key value in
+    let set (key, value) = Ojs.set_prop_ascii obj key value in
     List.iter set attributes;
     [%js.to: t] obj
 end
@@ -2132,8 +2132,8 @@ module TreeItem = struct
     [@@js]
 
     let t_of_js js_val =
-      let light_js = Ojs.get js_val "light" in
-      let dark_js = Ojs.get js_val "dark" in
+      let light_js = Ojs.get_prop_ascii js_val "light" in
+      let dark_js = Ojs.get_prop_ascii js_val "dark" in
       let light =
         if Ojs.has_property light_js "parse" then
           `Uri ([%js.to: Uri.t] light_js)
@@ -2394,7 +2394,7 @@ module TreeView = struct
 
       val onDidCollapseElement : t -> OnDidCollapseElement.t [@@js.get]
 
-      val selection : t -> T.t list [@@js]
+      val selection : t -> T.t list [@@js.get]
 
       val onDidChangeSelection : t -> OnDidChangeSelection.t [@@js.get]
 

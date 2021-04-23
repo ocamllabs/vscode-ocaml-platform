@@ -73,7 +73,7 @@ module Dict = struct
   let t_of_js value_of_js js_obj =
     let ml_map = ref StringMap.empty in
     let iter key =
-      let value = value_of_js (Ojs.get js_obj key) in
+      let value = value_of_js (Ojs.get_prop_ascii js_obj key) in
       ml_map := StringMap.add key value !ml_map
     in
     Ojs.iter_properties js_obj iter;

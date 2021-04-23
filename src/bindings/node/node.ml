@@ -38,7 +38,7 @@ module Process = struct
   module Env = struct
     include [%js: val env : Ojs.t [@@js.global "process.env"]]
 
-    let get k = [%js.to: string or_undefined] (Ojs.get env k)
+    let get k = [%js.to: string or_undefined] (Ojs.get_prop_ascii env k)
 
     let set k v = Ojs.set_prop_ascii env k ([%js.of: string] v)
 
@@ -54,7 +54,7 @@ module JsError = struct
   let message (error : t) =
     let js_error = [%js.of: Promise.error] error in
     if Ojs.has_property js_error "message" then
-      [%js.to: string] (Ojs.get js_error "message")
+      [%js.to: string] (Ojs.get_prop_ascii js_error "message")
     else
       "Unknown error"
 end
