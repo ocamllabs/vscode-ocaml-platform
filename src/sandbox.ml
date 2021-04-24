@@ -303,7 +303,7 @@ let save_to_settings sandbox =
 module Candidate = struct
   type nonrec t =
     { sandbox : t
-    ; status : (unit, string) Result.t
+    ; status : (unit, string) result
     }
 
   let to_quick_pick { sandbox; status } =

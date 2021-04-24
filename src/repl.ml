@@ -147,10 +147,10 @@ module Command = struct
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
-        let+ (result : (Terminal.t, string) Result.t) =
+        let+ (result : (Terminal.t, string) result) =
           create_terminal instance sandbox
         in
-        let (_ : (Terminal.t, unit) Result.t) =
+        let (_ : (Terminal.t, unit) result) =
           Result.map_error result ~f:(fun err -> log "%s" err)
         in
         ()

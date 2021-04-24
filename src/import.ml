@@ -14,6 +14,8 @@ let property_exists json property =
 
 include Base
 
+type ('a, 'b) result = ('a, 'b) Result.t
+
 module Option = struct
   include Option
 
@@ -25,7 +27,7 @@ module Option = struct
 end
 
 module Or_error = struct
-  type 'a t = ('a, string) Result.t
+  type 'a t = ('a, string) result
 end
 
 let show_message kind fmt =

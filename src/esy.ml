@@ -33,7 +33,7 @@ let binary = Path.of_string "esy"
 
 type discover =
   { manifest : Manifest.t
-  ; status : (unit, string) Result.t
+  ; status : (unit, string) result
   }
 
 let make () =
