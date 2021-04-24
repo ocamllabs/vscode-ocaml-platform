@@ -30,7 +30,7 @@ module Dependency = struct
     | Package dep -> (
       match Opam.Package.documentation dep with
       | Some _ -> "package-with-doc"
-      | None -> "package" )
+      | None -> "package")
 
   let icon = function
     | Switch _ ->
@@ -83,12 +83,12 @@ module Dependency = struct
       | Error err ->
         show_message `Info
           "An error occured while reading the switch dependencies: %s" err;
-        Promise.return None )
+        Promise.return None)
     | Package pkg -> (
       let+ deps = Opam.Package.dependencies pkg in
       match deps with
       | Error _ -> None
-      | Ok packages -> Some (List.map ~f:(fun x -> Package x) packages) )
+      | Ok packages -> Some (List.map ~f:(fun x -> Package x) packages))
 end
 
 module Command = struct
@@ -121,7 +121,7 @@ module Command = struct
               Vscode.Commands.executeCommand
                 ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
             in
-            show_message `Info "The switch has been removed successfully." )
+            show_message `Info "The switch has been removed successfully.")
       in
       ()
     in
@@ -147,7 +147,7 @@ module Command = struct
               Vscode.Commands.executeCommand ~command:"vscode.open"
                 ~args:[ Vscode.Uri.parse doc () |> Vscode.Uri.t_to_js ]
             in
-            () )
+            ())
       in
       ()
     in

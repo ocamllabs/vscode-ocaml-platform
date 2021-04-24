@@ -208,7 +208,7 @@ let of_settings () : t option Promise.t =
     | None ->
       not_available `Esy;
       None
-    | Some esy -> Some (Esy (esy, manifest)) )
+    | Some esy -> Some (Esy (esy, manifest)))
   | Some (Opam switch) -> (
     let open Promise.Syntax in
     let* opam = available.opam in
@@ -226,7 +226,7 @@ let of_settings () : t option Promise.t =
            exist."
           (Opam.Switch.name switch);
         None
-      ) )
+      ))
   | Some Global -> Promise.return (Some Global)
   | Some (Custom template) -> Promise.return (Some (Custom template))
 
@@ -316,7 +316,7 @@ module Candidate = struct
         | Opam (_, Local _) -> Some "Local switch"
         | Opam (_, Named _) -> Some "Global switch"
         | Esy _ -> Some "Esy"
-        | _ -> None )
+        | _ -> None)
     in
     match sandbox with
     | Opam (_, Named name) -> create ~label:name ?description ()
@@ -392,7 +392,7 @@ let sandbox_candidates ~workspace_folders =
   in
 
   let+ esy, opam = Promise.all2 (esy, opam) in
-  (global :: custom :: esy) @ opam
+  global :: custom :: esy @ opam
 
 let select_sandbox () =
   let open Promise.Syntax in
@@ -423,7 +423,7 @@ let select_sandbox () =
     | Error s ->
       show_message `Warn "This sandbox is invalid. Error: %s" s;
       Promise.return None
-    | Ok () -> Promise.Option.return sandbox )
+    | Ok () -> Promise.Option.return sandbox)
 
 let select_sandbox_and_save () =
   let open Promise.Option.Syntax in

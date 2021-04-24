@@ -68,7 +68,7 @@ let can_build sandbox =
     let+ result = Cmd.output ~cwd cmd in
     match result with
     | Error _ -> false
-    | Ok _ -> true )
+    | Ok _ -> true)
 
 let default_repl sandbox =
   let open Promise.Syntax in
@@ -118,7 +118,7 @@ let create_terminal instance sandbox =
       | Some _ -> Error "The REPL terminal could not be open"
       | None ->
         Extension_instance.set_repl instance term;
-        Ok term ) )
+        Ok term))
 
 let get_code text_editor =
   let selection = Vscode.TextEditor.selection text_editor in

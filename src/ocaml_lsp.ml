@@ -31,7 +31,8 @@ let of_json (json : Jsonoo.t) =
       default_field "handleInferIntf" bool default.handleInferIntf json
     in
     { interfaceSpecificLangId; handleSwitchImplIntf; handleInferIntf }
-  with Jsonoo.Decode_error _ ->
+  with
+  | Jsonoo.Decode_error _ ->
     show_message `Warn
       "unexpected experimental capabilities from lsp server. Some features \
        might be missing";
@@ -44,7 +45,7 @@ let of_initialize_result (t : LanguageClient.InitializeResult.t) =
   | Some json -> (
     match Jsonoo.Decode.field "ocamllsp" of_json json with
     | s -> s
-    | exception Jsonoo.Decode_error _ -> default )
+    | exception Jsonoo.Decode_error _ -> default)
 
 let has_interface_specific_lang_id t = t.interfaceSpecificLangId
 

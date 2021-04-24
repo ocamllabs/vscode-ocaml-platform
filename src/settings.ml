@@ -18,7 +18,7 @@ let get ?section t =
     | s -> Some s
     | exception Jsonoo.Decode_error msg ->
       show_message `Error "Setting %s is invalid: %s" t.key msg;
-      None )
+      None)
 
 let set ?section t v =
   let section = Workspace.getConfiguration ?section () in
@@ -50,7 +50,7 @@ let resolve_workspace_vars setting =
     | [ name ] -> (
       match find_folder name with
       | Some folder -> workspace_folder_path folder
-      | None -> matched )
+      | None -> matched)
     | _ -> assert false
     (* name will always be captured *)
   in
