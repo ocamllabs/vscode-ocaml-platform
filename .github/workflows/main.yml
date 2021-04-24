@@ -69,14 +69,14 @@ jobs:
           esy build
           esy cleanup .
 
-      - name: Build extension
-        run: opam exec -- make build
-
       - name: Install npm packages
         run: yarn --frozen-lockfile
 
       - name: Check formatting
         run: yarn fmt:check
+
+      - name: Build extension
+        run: opam exec -- make build
 
       - name: Package extension
         run: yarn package
