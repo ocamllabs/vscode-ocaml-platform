@@ -47,26 +47,10 @@ jobs:
       - name: Use latest esy
         run: npm install --global esy
 
-      # This step is required because esy's home directory doesn't exist at this point
       - name: Install esy packages
-        run: esy install
-
-      - name: Get esy cache directory path
-        id: esy-cache-dir-path
-        run: node .github/workflows/print_esy_cache.js
-
-      - name: Restore esy cache
-        uses: actions/cache@v2
+        uses: esy/github-action@v1
         with:
-          path: ${{ steps.esy-cache-dir-path.outputs.dir }}
-          key: esy-${{ matrix.os }}-${{ hashFiles('esy.lock/index.json') }}
-          restore-keys: esy-${{ matrix.os }}-
-
-      - name: Build esy packages
-        # Cleanup build cache in case dependencies have changed
-        run: |
-          esy build
-          esy cleanup .
+          cache-key: ${{ hashFiles('esy.lock/index.json') }}
 
       - name: Install npm packages
         run: yarn --frozen-lockfile
