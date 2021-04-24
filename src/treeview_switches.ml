@@ -5,9 +5,9 @@ module Dependency = struct
     | Package : Opam.Package.t -> t
     | Switch : Opam.t * Opam.Switch.t -> t
 
-  let t_of_js : Ojs.t -> t = Obj.magic
+  let t_of_js : Ojs.t -> t = Stdlib.Obj.magic
 
-  let t_to_js : t -> Ojs.t = Obj.magic
+  let t_to_js : t -> Ojs.t = Stdlib.Obj.magic
 
   let label = function
     | Switch (_, Named name) -> name

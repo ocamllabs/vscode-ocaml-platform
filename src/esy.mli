@@ -31,7 +31,7 @@ module Package : sig
 
   val has_dependencies : t -> bool
 
-  val dependencies : t -> (t list, string) result Promise.t
+  val dependencies : t -> (t list, string) Result.t Promise.t
 end
 
 type t
@@ -40,7 +40,7 @@ val make : unit -> t option Promise.t
 
 type discover =
   { manifest : Manifest.t
-  ; status : (unit, string) result
+  ; status : (unit, string) Result.t
   }
 
 val discover : dir:Path.t -> discover list Promise.t
@@ -52,13 +52,14 @@ val setup_sandbox : t -> Manifest.t -> unit Or_error.t Promise.t
 (** {4 Working with packages} *)
 
 (** Return the list of installed packages in the given opam switch. *)
-val packages : t -> Manifest.t -> (Package.t list, string) result Promise.t
+val packages : t -> Manifest.t -> (Package.t list, string) Result.t Promise.t
 
 (** Return the list of root packages in the given opam switch.
 
     Root packages are packages that have been installed by the user, as opposed
     to packages that have been installed as a dependency of another package. *)
-val root_packages : t -> Manifest.t -> (Package.t list, string) result Promise.t
+val root_packages :
+  t -> Manifest.t -> (Package.t list, string) Result.t Promise.t
 
 (** Install a package in the Esy sandbox. *)
 val install : t -> Manifest.t -> packages:string list -> Cmd.t

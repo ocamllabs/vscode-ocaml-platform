@@ -63,7 +63,7 @@ let can_build sandbox =
        build it. *)
     Promise.return false
   | el :: _ -> (
-    let cwd = Filename.dirname (Uri.fsPath el) |> Path.of_string in
+    let cwd = Stdlib.Filename.dirname (Uri.fsPath el) |> Path.of_string in
     let cmd = Sandbox.get_command sandbox "dune" [ "build" ] in
     let+ result = Cmd.output ~cwd cmd in
     match result with
@@ -147,10 +147,10 @@ module Command = struct
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
-        let+ (result : (Terminal.t, string) result) =
+        let+ (result : (Terminal.t, string) Result.t) =
           create_terminal instance sandbox
         in
-        let (_ : (Terminal.t, unit) result) =
+        let (_ : (Terminal.t, unit) Result.t) =
           Result.map_error result ~f:(fun err -> log "%s" err)
         in
         ()

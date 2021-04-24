@@ -31,9 +31,9 @@ let maybe_list_to_js ml_to_js = function
 module Regexp = struct
   type t = Js_of_ocaml.Regexp.regexp
 
-  let t_of_js : Ojs.t -> Js_of_ocaml.Regexp.regexp = Obj.magic
+  let t_of_js : Ojs.t -> Js_of_ocaml.Regexp.regexp = Stdlib.Obj.magic
 
-  let t_to_js : Js_of_ocaml.Regexp.regexp -> Ojs.t = Obj.magic
+  let t_to_js : Js_of_ocaml.Regexp.regexp -> Ojs.t = Stdlib.Obj.magic
 
   include
     [%js:

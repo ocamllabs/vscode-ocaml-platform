@@ -12,7 +12,7 @@ module Fs = Node.Fs
 let property_exists json property =
   Ojs.has_property (Jsonoo.t_to_js json) property
 
-include Core_kernel
+include Base
 
 module Option = struct
   include Option
@@ -25,7 +25,7 @@ module Option = struct
 end
 
 module Or_error = struct
-  type 'a t = ('a, string) result
+  type 'a t = ('a, string) Result.t
 end
 
 let show_message kind fmt =

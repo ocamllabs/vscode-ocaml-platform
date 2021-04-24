@@ -34,7 +34,7 @@ val output :
   -> ?env:string Interop.Dict.t
   -> ?stdin:string
   -> t
-  -> (stdout, stderr) result Promise.t
+  -> (stdout, stderr) Result.t Promise.t
 
 val equal_spawn : spawn -> spawn -> bool
 
