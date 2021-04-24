@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: git diff
         if: ${{ !contains(github.event.pull_request.labels.*.name, 'no changelog needed') }}
