@@ -1,6 +1,14 @@
 build:
 	dune build @all --profile=release
-	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js --bundle --external:vscode --outdir=dist --platform=node --target=es6 --minify-whitespace --minify-syntax
+	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
+		--bundle \
+		--external:vscode \
+		--outdir=dist \
+		--platform=node \
+		--target=es6 \
+		--minify-whitespace \
+		--minify-syntax \
+		--sourcemap=external
 .PHONY: build
 
 watch:
