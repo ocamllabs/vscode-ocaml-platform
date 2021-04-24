@@ -3,9 +3,9 @@ open Import
 module Dependency = struct
   type t = Sandbox.Package.t
 
-  let t_of_js : Ojs.t -> t = Obj.magic
+  let t_of_js : Ojs.t -> t = Stdlib.Obj.magic
 
-  let t_to_js : t -> Ojs.t = Obj.magic
+  let t_to_js : t -> Ojs.t = Stdlib.Obj.magic
 
   let label t = Sandbox.Package.name t
 

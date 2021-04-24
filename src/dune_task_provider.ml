@@ -68,7 +68,7 @@ let compute_tasks token sandbox =
         in
         let name = Printf.sprintf "build %s" relative_path in
         let execution =
-          let cwd = Filename.dirname (Uri.fsPath dune) in
+          let cwd = Stdlib.Filename.dirname (Uri.fsPath dune) in
           let options = ShellExecutionOptions.create ~env ~cwd () in
           get_shell_execution sandbox options
         in

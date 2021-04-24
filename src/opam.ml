@@ -193,7 +193,7 @@ module Package = struct
     | Ok l ->
       Promise.List.find_map
         (fun fpath ->
-          let basename = Filename.basename fpath in
+          let basename = Stdlib.Filename.basename fpath in
           if String.is_prefix basename ~prefix:name then
             of_path Path.(package_path / fpath)
           else

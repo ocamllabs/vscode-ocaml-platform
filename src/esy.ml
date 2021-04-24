@@ -67,7 +67,7 @@ module Discover = struct
 
   let parse_file project_root = function
     | "opam" -> Promise.return (valid project_root)
-    | s when String.equal (Caml.Filename.extension s) ".opam" ->
+    | s when String.equal (Stdlib.Filename.extension s) ".opam" ->
       Promise.return (valid project_root)
     | ("esy.json" | "package.json") as fname -> (
       let manifest_file = Path.(project_root / fname) |> Path.to_string in

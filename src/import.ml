@@ -12,7 +12,9 @@ module Fs = Node.Fs
 let property_exists json property =
   Ojs.has_property (Jsonoo.t_to_js json) property
 
-include Core_kernel
+include Base
+
+type ('a, 'b) result = ('a, 'b) Result.t
 
 module Option = struct
   include Option

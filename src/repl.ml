@@ -63,7 +63,7 @@ let can_build sandbox =
        build it. *)
     Promise.return false
   | el :: _ -> (
-    let cwd = Filename.dirname (Uri.fsPath el) |> Path.of_string in
+    let cwd = Stdlib.Filename.dirname (Uri.fsPath el) |> Path.of_string in
     let cmd = Sandbox.get_command sandbox "dune" [ "build" ] in
     let+ result = Cmd.output ~cwd cmd in
     match result with
