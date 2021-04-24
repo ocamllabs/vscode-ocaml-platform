@@ -126,3 +126,51 @@ jobs:
           asset_content_type: application/zip
         env:
           GITHUB_TOKEN: ${{ github.token }}
+
+  lint-opam:
+    strategy:
+      matrix:
+        ocaml-compiler:
+          - 4.12.x
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: avsm/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          dune-cache: true
+
+      - run: opam depext opam-dune-lint --install
+
+      - run: opam install . --deps-only
+
+      - run: opam exec -- make build
+
+      - run: opam exec -- opam-dune-lint
+
+  lint-fmt:
+    strategy:
+      matrix:
+        ocaml-compiler:
+          - 4.12.x
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: avsm/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          dune-cache: true
+
+      - run: opam depext ocamlformat=$(cat .ocamlformat | grep version | cut -d '=' -f 2) --install
+
+      - run: opam exec -- dune build @fmt
