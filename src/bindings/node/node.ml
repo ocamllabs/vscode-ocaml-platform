@@ -9,48 +9,52 @@ let __dirname () =
 module Timeout = struct
   include Class.Make ()
 
-  val hasRef : t -> bool [@@js.get]
+  include
+    [%js:
+    val hasRef : t -> bool [@@js.get]
 
-  val ref : t -> t [@@js.get]
+    val ref : t -> t [@@js.get]
 
-  val refresh : t -> t [@@js.get]
+    val refresh : t -> t [@@js.get]
 
-  val unref : t -> t [@@js.get]
+    val unref : t -> t [@@js.get]]
 end
 
-val setInterval : (unit -> unit) -> int -> Timeout.t [@@js.global]
+include
+  [%js:
+  val setInterval : (unit -> unit) -> int -> Timeout.t [@@js.global]
 
-val setTimeout : (unit -> unit) -> int -> Timeout.t [@@js.global]
+  val setTimeout : (unit -> unit) -> int -> Timeout.t [@@js.global]]
 
 module Process = struct
-  val cwd : unit -> string [@@js.global "process.cwd"]
+  include
+    [%js:
+    val cwd : unit -> string [@@js.global "process.cwd"]
 
-  val platform : string [@@js.global "process.platform"]
+    val platform : string [@@js.global "process.platform"]
 
-  val arch : string [@@js.global "process.arch"]
+    val arch : string [@@js.global "process.arch"]]
 
   module Env = struct
-    val env : Ojs.t [@@js.global "process.env"]
+    include [%js: val env : Ojs.t [@@js.global "process.env"]]
 
-    let get k = [%js.to: string or_undefined] (Ojs.get env k)
+    let get k = [%js.to: string or_undefined] (Ojs.get_prop_ascii env k)
 
-    let set k v = Ojs.set env k ([%js.of: string] v)
+    let set k v = Ojs.set_prop_ascii env k ([%js.of: string] v)
 
-    val env : string Interop.Dict.t [@@js.global "process.env"]
+    include [%js: val env : string Interop.Dict.t [@@js.global "process.env"]]
   end
 end
 
-module Os = struct
-  val homedir : unit -> string [@@js.global "os.homedir"]
-end
+module Os = [%js: val homedir : unit -> string [@@js.global "os.homedir"]]
 
 module JsError = struct
   type t = Promise.error [@@js]
 
   let message (error : t) =
-    let js_error = [%js.of: t] error in
+    let js_error = [%js.of: Promise.error] error in
     if Ojs.has_property js_error "message" then
-      [%js.to: string] (Ojs.get js_error "message")
+      [%js.to: string] (Ojs.get_prop_ascii js_error "message")
     else
       "Unknown error"
 end
@@ -58,30 +62,38 @@ end
 module Buffer = struct
   include Class.Make ()
 
-  val toString : t -> string [@@js.call]
+  include
+    [%js:
+    val toString : t -> string [@@js.call]
 
-  val from : string -> t [@@js.global "Buffer.from"]
+    val from : string -> t [@@js.global "Buffer.from"]
 
-  val concat : t list -> t [@@js.global "Buffer.concat"]
+    val concat : t list -> t [@@js.global "Buffer.concat"]
+
+    val write :
+         t
+      -> string:string
+      -> ?offset:int
+      -> ?length:int
+      -> ?encoding:string
+      -> unit
+      -> unit
+      [@@js.call]]
 
   let append buf other = buf := concat [ !buf; other ]
-
-  val write :
-       t
-    -> string:string
-    -> ?offset:int
-    -> ?length:int
-    -> ?encoding:string
-    -> unit
-    -> unit
-    [@@js.call]
 end
 
 module Stream = struct
   module Writable = struct
     include Class.Make ()
 
-    val on : t -> string -> Ojs.t -> unit [@@js.call]
+    include
+      [%js:
+      val on : t -> string -> Ojs.t -> unit [@@js.call]
+
+      val write : t -> string -> unit [@@js.call]
+
+      val end_ : t -> unit [@@js.call]]
 
     let on t = function
       | `Close f -> on t "close" @@ [%js.of: unit -> unit] f
@@ -90,16 +102,10 @@ module Stream = struct
       | `Finish f -> on t "finish" @@ [%js.of: unit -> unit] f
       | `Pipe f -> on t "pipe" @@ [%js.of: src:t -> unit] f
       | `Unpipe f -> on t "unpipe" @@ [%js.of: src:t -> unit] f
-
-    val write : t -> string -> unit [@@js.call]
-
-    val end_ : t -> unit [@@js.call]
   end
 
   module Readable = struct
     include Class.Make ()
-
-    val on : t -> string -> Ojs.t -> unit [@@js.call]
 
     type chunk =
       ([ `String of string
@@ -113,6 +119,8 @@ module Stream = struct
       | "string" -> `String ([%js.to: string] js_val)
       | _ -> `Buffer ([%js.to: Buffer.t] js_val)
 
+    include [%js: val on : t -> string -> Ojs.t -> unit [@@js.call]]
+
     let on t = function
       | `Close f -> on t "close" @@ [%js.of: unit -> unit] f
       | `Data f -> on t "data" @@ [%js.of: chunk:chunk -> unit] f
@@ -125,49 +133,76 @@ module Stream = struct
 end
 
 module Path = struct
-  val delimiter : string [@@js.global "path.delimiter"]
+  include
+    [%js:
+    val delimiter : string [@@js.global "path.delimiter"]
+
+    val basename : string -> string [@@js.global "path.basename"]
+
+    val dirname : string -> string [@@js.global "path.dirname"]
+
+    val extname : string -> string [@@js.global "path.extname"]
+
+    val isAbsolute : string -> bool [@@js.global "path.isAbsolute"]
+
+    val join : (string list[@js.variadic]) -> string [@@js.global "path.join"]]
 
   let delimiter =
     assert (String.length delimiter = 1);
     delimiter.[0]
-
-  val basename : string -> string [@@js.global "path.basename"]
-
-  val dirname : string -> string [@@js.global "path.dirname"]
-
-  val extname : string -> string [@@js.global "path.extname"]
-
-  val isAbsolute : string -> bool [@@js.global "path.isAbsolute"]
-
-  val join : (string list[@js.variadic]) -> string [@@js.global "path.join"]
 end
 
 module Fs = struct
-  val readDir : string -> string list Promise.t [@@js.global "fs.readDir"]
+  include
+    [%js:
+    val readDir : string -> string list Promise.t [@@js.global "fs.readDir"]
+
+    val readFile : string -> encoding:string -> string Promise.t
+      [@@js.global "fs.readFile"]
+
+    val exists : string -> bool Promise.t [@@js.global "fs.exists"]]
 
   let readDir path =
     readDir path
     |> Promise.then_ ~fulfilled:Promise.Result.return ~rejected:(fun error ->
            Promise.return (Error (JsError.message error)))
 
-  val readFile : string -> encoding:string -> string Promise.t
-    [@@js.global "fs.readFile"]
-
   let readFile = readFile ~encoding:"utf8"
-
-  val exists : string -> bool Promise.t [@@js.global "fs.exists"]
 end
 
 module ChildProcess = struct
   include Class.Make ()
 
-  val get_stdout : t -> Stream.Readable.t [@@js.get "stdout"]
+  module Options = struct
+    include Interface.Make ()
 
-  val get_stderr : t -> Stream.Readable.t [@@js.get "stderr"]
+    include
+      [%js:
+      val create : ?cwd:string -> ?env:string Dict.t -> unit -> t [@@js.builder]]
+  end
 
-  val get_stdin : t -> Stream.Writable.t [@@js.get "stdin"]
+  include
+    [%js:
+    type exec_result = private Ojs.t [@@js]
 
-  val on : t -> string -> Ojs.t -> unit [@@js.call]
+    val exec :
+         string
+      -> ?options:Options.t
+      -> ?callback:(exec_result or_undefined -> string -> string -> unit)
+      -> unit
+      -> t
+      [@@js.global "child_process.exec"]
+
+    val spawn : string -> string array -> ?options:Options.t -> unit -> t
+      [@@js.global "child_process.spawn"]
+
+    val get_stdout : t -> Stream.Readable.t [@@js.get "stdout"]
+
+    val get_stderr : t -> Stream.Readable.t [@@js.get "stderr"]
+
+    val get_stdin : t -> Stream.Writable.t [@@js.get "stdin"]
+
+    val on : t -> string -> Ojs.t -> unit [@@js.call]]
 
   let on t = function
     | `Close f -> on t "close" @@ [%js.of: code:int -> signal:string -> unit] f
@@ -176,25 +211,6 @@ module ChildProcess = struct
     | `Exit f -> on t "exit" @@ [%js.of: code:int -> signal:string -> unit] f
     | `Message f ->
       on t "message" @@ [%js.of: message:Ojs.t -> sendHandle:Ojs.t -> unit] f
-
-  module Options = struct
-    include Interface.Make ()
-
-    val create : ?cwd:string -> ?env:string Dict.t -> unit -> t [@@js.builder]
-  end
-
-  type exec_result = private Ojs.t [@@js]
-
-  val exec :
-       string
-    -> ?options:Options.t
-    -> ?callback:(exec_result or_undefined -> string -> string -> unit)
-    -> unit
-    -> t
-    [@@js.global "child_process.exec"]
-
-  val spawn : string -> string array -> ?options:Options.t -> unit -> t
-    [@@js.global "child_process.spawn"]
 
   type return =
     { exitCode : int

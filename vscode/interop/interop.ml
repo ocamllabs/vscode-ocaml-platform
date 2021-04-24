@@ -1,5 +1,5 @@
 let iter_set obj field f = function
-  | Some value -> Ojs.set obj field (f value)
+  | Some value -> Ojs.set_prop_ascii obj field (f value)
   | None -> ()
 
 let undefined = Ojs.variable "undefined"
@@ -35,12 +35,14 @@ module Regexp = struct
 
   let t_to_js : Js_of_ocaml.Regexp.regexp -> Ojs.t = Obj.magic
 
-  val replace :
-       string
-    -> regexp:t
-    -> replacer:(string -> (Ojs.t list[@js.variadic]) -> string)
-    -> string
-    [@@js.call]
+  include
+    [%js:
+    val replace :
+         string
+      -> regexp:t
+      -> replacer:(string -> (Ojs.t list[@js.variadic]) -> string)
+      -> string
+      [@@js.call]]
 
   type replacer =
        matched:string
@@ -71,7 +73,7 @@ module Dict = struct
   let t_of_js value_of_js js_obj =
     let ml_map = ref StringMap.empty in
     let iter key =
-      let value = value_of_js (Ojs.get js_obj key) in
+      let value = value_of_js (Ojs.get_prop_ascii js_obj key) in
       ml_map := StringMap.add key value !ml_map
     in
     Ojs.iter_properties js_obj iter;
@@ -165,11 +167,11 @@ end
 
 module Interface = struct
   module Make () = struct
-    type t = private Ojs.t [@@js]
+    type t = Ojs.t [@@js]
   end
 
   module Extend (Super : Js.T) () = struct
-    type t = private Super.t [@@js]
+    type t = Super.t [@@js]
   end
 
   module Generic (Super : Js.T) () = struct

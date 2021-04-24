@@ -29,9 +29,9 @@
   (ocaml
    (>= 4.11))
   (js_of_ocaml
-   (>= 3.8.0))
+   (>= 3.9.0))
   (gen_js_api
-   (= 1.0.6))
+   (= 1.0.8))
   (core_kernel
    (>= v0.14.1))
   (promise_jsoo
@@ -48,9 +48,9 @@
   (ocaml
    (>= 4.11))
   (js_of_ocaml
-   (>= 3.8.0))
+   (>= 3.9.0))
   (gen_js_api
-   (= 1.0.6))
+   (= 1.0.8))
   (promise_jsoo
    (>= 0.3.1))
   (jsonoo

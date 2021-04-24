@@ -12,9 +12,11 @@ end
 module ServerCapabilities = struct
   include Interface.Make ()
 
-  val experimental : t -> Jsonoo.t or_undefined [@@js.get]
+  include
+    [%js:
+    val experimental : t -> Jsonoo.t or_undefined [@@js.get]
 
-  val create : ?experimental:Jsonoo.t -> unit -> t [@@js.builder]
+    val create : ?experimental:Jsonoo.t -> unit -> t [@@js.builder]]
 end
 
 module InitializeResult = struct
@@ -26,31 +28,35 @@ module InitializeResult = struct
     }
   [@@js]
 
-  val capabilities : t -> ServerCapabilities.t [@@js.get]
+  include
+    [%js:
+    val capabilities : t -> ServerCapabilities.t [@@js.get]
 
-  val serverInfo : t -> serverInfo or_undefined [@@js.get]
+    val serverInfo : t -> serverInfo or_undefined [@@js.get]]
 end
 
 module DocumentFilter = struct
   include Interface.Make ()
 
-  val language : t -> string or_undefined [@@js.get]
+  include
+    [%js:
+    val language : t -> string or_undefined [@@js.get]
 
-  val scheme : t -> string or_undefined [@@js.get]
+    val scheme : t -> string or_undefined [@@js.get]
 
-  val pattern : t -> string or_undefined [@@js.get]
+    val pattern : t -> string or_undefined [@@js.get]
 
-  val createLanguage :
-    language:string -> ?scheme:string -> ?pattern:string -> unit -> t
-    [@@js.builder]
+    val createLanguage :
+      language:string -> ?scheme:string -> ?pattern:string -> unit -> t
+      [@@js.builder]
 
-  val createScheme :
-    ?language:string -> scheme:string -> ?pattern:string -> unit -> t
-    [@@js.builder]
+    val createScheme :
+      ?language:string -> scheme:string -> ?pattern:string -> unit -> t
+      [@@js.builder]
 
-  val createPattern :
-    ?language:string -> ?scheme:string -> pattern:string -> unit -> t
-    [@@js.builder]
+    val createPattern :
+      ?language:string -> ?scheme:string -> pattern:string -> unit -> t
+      [@@js.builder]]
 end
 
 module DocumentSelector = struct
@@ -75,58 +81,64 @@ end
 module ClientOptions = struct
   include Interface.Make ()
 
-  val documentSelector : t -> DocumentSelector.t or_undefined [@@js.get]
+  include
+    [%js:
+    val documentSelector : t -> DocumentSelector.t or_undefined [@@js.get]
 
-  val outputChannel : t -> Vscode.OutputChannel.t or_undefined [@@js.get]
+    val outputChannel : t -> Vscode.OutputChannel.t or_undefined [@@js.get]
 
-  val revealOutputChannelOn : t -> RevealOutputChannelOn.t [@@js.get]
+    val revealOutputChannelOn : t -> RevealOutputChannelOn.t [@@js.get]
 
-  val create :
-       ?documentSelector:DocumentSelector.t
-    -> ?outputChannel:Vscode.OutputChannel.t
-    -> ?revealOutputChannelOn:RevealOutputChannelOn.t
-    -> unit
-    -> t
-    [@@js.builder]
+    val create :
+         ?documentSelector:DocumentSelector.t
+      -> ?outputChannel:Vscode.OutputChannel.t
+      -> ?revealOutputChannelOn:RevealOutputChannelOn.t
+      -> unit
+      -> t
+      [@@js.builder]]
 end
 
 module ExecutableOptions = struct
   include Interface.Make ()
 
-  val cwd : t -> string or_undefined [@@js.get]
+  include
+    [%js:
+    val cwd : t -> string or_undefined [@@js.get]
 
-  val env : t -> string Dict.t or_undefined [@@js.get]
+    val env : t -> string Dict.t or_undefined [@@js.get]
 
-  val detached : t -> bool or_undefined [@@js.get]
+    val detached : t -> bool or_undefined [@@js.get]
 
-  val shell : t -> bool or_undefined [@@js.get]
+    val shell : t -> bool or_undefined [@@js.get]
 
-  val create :
-       ?cwd:string
-    -> ?env:string Dict.t
-    -> ?detached:bool
-    -> ?shell:bool
-    -> unit
-    -> t
-    [@@js.builder]
+    val create :
+         ?cwd:string
+      -> ?env:string Dict.t
+      -> ?detached:bool
+      -> ?shell:bool
+      -> unit
+      -> t
+      [@@js.builder]]
 end
 
 module Executable = struct
   include Interface.Make ()
 
-  val command : t -> string [@@js.get]
+  include
+    [%js:
+    val command : t -> string [@@js.get]
 
-  val args : t -> string list or_undefined [@@js.get]
+    val args : t -> string list or_undefined [@@js.get]
 
-  val options : t -> ExecutableOptions.t or_undefined [@@js.get]
+    val options : t -> ExecutableOptions.t or_undefined [@@js.get]
 
-  val create :
-       command:string
-    -> ?args:string list
-    -> ?options:ExecutableOptions.t
-    -> unit
-    -> t
-    [@@js.builder]
+    val create :
+         command:string
+      -> ?args:string list
+      -> ?options:ExecutableOptions.t
+      -> unit
+      -> t
+      [@@js.builder]]
 end
 
 module ServerOptions = Executable
@@ -134,35 +146,37 @@ module ServerOptions = Executable
 module LanguageClient = struct
   include Class.Make ()
 
-  val make :
-       id:string
-    -> name:string
-    -> serverOptions:ServerOptions.t
-    -> clientOptions:ClientOptions.t
-    -> ?forceDebug:bool
-    -> unit
-    -> t
-    [@@js.new "vscode_languageclient.LanguageClient"]
+  include
+    [%js:
+    val make :
+         id:string
+      -> name:string
+      -> serverOptions:ServerOptions.t
+      -> clientOptions:ClientOptions.t
+      -> ?forceDebug:bool
+      -> unit
+      -> t
+      [@@js.new "vscode_languageclient.LanguageClient"]
 
-  val start : t -> unit [@@js.call]
+    val start : t -> unit [@@js.call]
 
-  val stop : t -> unit [@@js.call]
+    val stop : t -> unit [@@js.call]
 
-  val onReady : t -> Promise.void [@@js.call]
+    val onReady : t -> Promise.void [@@js.call]
 
-  val initializeResult : t -> InitializeResult.t [@@js.get]
+    val initializeResult : t -> InitializeResult.t [@@js.get]
+
+    val sendRequest :
+         t
+      -> meth:string
+      -> data:Jsonoo.t
+      -> ?token:Vscode.CancellationToken.t
+      -> unit
+      -> Jsonoo.t Promise.t
+      [@@js.call]]
 
   let readyInitializeResult t =
     let open Promise.Syntax in
     let+ () = onReady t in
     initializeResult t
-
-  val sendRequest :
-       t
-    -> meth:string
-    -> data:Jsonoo.t
-    -> ?token:Vscode.CancellationToken.t
-    -> unit
-    -> Jsonoo.t Promise.t
-    [@@js.call]
 end
