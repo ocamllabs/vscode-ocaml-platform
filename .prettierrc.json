@@ -1,5 +1,6 @@
 {
   "proseWrap": "always",
+  "endOfLine": "auto",
   "overrides": [
     {
       "files": "*.yml",
