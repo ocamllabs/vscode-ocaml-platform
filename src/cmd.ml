@@ -67,7 +67,7 @@ let check_spawn ?env { bin; args } =
       match which_path with
       | None ->
         Error (Printf.sprintf "Command %s not found" (Path.to_string bin))
-      | Some bin -> Ok { bin; args } )
+      | Some bin -> Ok { bin; args })
 
 let check ?env t =
   match t with
@@ -114,8 +114,7 @@ let log ?(result : ChildProcess.return option) (t : t) =
     match t with
     | Spawn { bin; args } ->
       ("bin", string (Path.to_string bin))
-      :: ("args", list string args)
-      :: message
+      :: ("args", list string args) :: message
     | Shell command_line -> ("shell", string command_line) :: message
   in
   match result with

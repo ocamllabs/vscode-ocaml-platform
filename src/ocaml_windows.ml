@@ -28,4 +28,4 @@ let cygwin_home () =
       let msg =
         Printf.sprintf "Unexpected output for Cygin home directory: %s" output
       in
-      Error msg )
+      Error msg)

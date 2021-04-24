@@ -87,4 +87,4 @@ let request_switch client document =
     | None -> Promise.return ()
     | Some file_uri ->
       let* text_editor = open_file_in_text_editor file_uri in
-      fill_intf_if_empty_untitled text_editor )
+      fill_intf_if_empty_untitled text_editor)
