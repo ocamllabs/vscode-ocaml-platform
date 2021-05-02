@@ -1,5 +1,5 @@
 build:
-	dune build @all --profile=release
+	dune build src/vscode_ocaml_platform.bc.js --profile=release
 	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
 		--external:vscode \
@@ -8,7 +8,8 @@ build:
 		--target=es6 \
 		--minify-whitespace \
 		--minify-syntax \
-		--sourcemap=external
+		--sourcemap \
+		--sources-content=false
 .PHONY: build
 
 watch:
@@ -17,6 +18,7 @@ watch:
 
 clean:
 	dune clean
+	rm -r dist
 .PHONY: clean
 
 test:
