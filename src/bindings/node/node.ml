@@ -205,7 +205,8 @@ module ChildProcess = struct
     val on : t -> string -> Ojs.t -> unit [@@js.call]]
 
   let on t = function
-    | `Close f -> on t "close" @@ [%js.of: code:int -> signal:string -> unit] f
+    | `Close f ->
+      on t "close" @@ [%js.of: code:int -> ?signal:string -> unit -> unit] f
     | `Disconnect f -> on t "disconnect" @@ [%js.of: unit -> unit] f
     | `Error f -> on t "error" @@ [%js.of: err:JsError.t -> unit] f
     | `Exit f -> on t "exit" @@ [%js.of: code:int -> signal:string -> unit] f
@@ -223,6 +224,7 @@ module ChildProcess = struct
     | Stdout of string
     | Stderr of string
     | Closed
+    | ProcessError of JsError.t
 
   let handle_child_process ?logger ?stdin cp resolve =
     let log = Option.value logger ~default:ignore in
@@ -253,7 +255,10 @@ module ChildProcess = struct
     in
     Stream.Readable.on (get_stderr cp) (`Data on_stderr);
 
-    let close ~code ~signal:_ =
+    let error ~err = log (ProcessError err) in
+    on cp (`Error error);
+
+    let close ~code ?signal:_ () =
       log Closed;
       resolve
         { exitCode = code

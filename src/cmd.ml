@@ -88,6 +88,7 @@ let run ?cwd ?env ?stdin cmd =
     | Stderr data ->
       Vscode.OutputChannel.append output ~value:data
     | Closed -> Vscode.OutputChannel.appendLine output ~value:""
+    | ProcessError err -> log_value "process error" (Node.JsError.t_to_js err)
   in
   let options = ChildProcess.Options.create ?cwd ?env () in
   match cmd with
@@ -98,7 +99,7 @@ let run ?cwd ?env ?stdin cmd =
 
 let log ?(result : ChildProcess.return option) (t : t) =
   let open Jsonoo.Encode in
-  let message =
+  let fields =
     match result with
     | None -> []
     | Some result ->
@@ -110,16 +111,16 @@ let log ?(result : ChildProcess.return option) (t : t) =
             ] )
       ]
   in
-  let message =
+  let fields =
     match t with
     | Spawn { bin; args } ->
       ("bin", string (Path.to_string bin))
-      :: ("args", list string args) :: message
-    | Shell command_line -> ("shell", string command_line) :: message
+      :: ("args", list string args) :: fields
+    | Shell command_line -> ("shell", string command_line) :: fields
   in
   match result with
-  | None -> log_json "external command" message
-  | Some _ -> log_json "external command (finished)" message
+  | None -> log_fields "external command" fields
+  | Some _ -> log_fields "external command (finished)" fields
 
 let output ?cwd ?env ?stdin (t : t) =
   let open Promise.Syntax in
