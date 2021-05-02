@@ -48,10 +48,15 @@ let log fmt =
   let write line = OutputChannel.appendLine output_channel ~value:line in
   Printf.ksprintf write fmt
 
-let log_json msg (fields : (string * Jsonoo.t) list) =
-  let json = Jsonoo.Encode.object_ fields |> Jsonoo.stringify ~spaces:2 in
+let log_json msg (json : Jsonoo.t) =
+  let json_str = Jsonoo.stringify ~spaces:2 json in
   let (lazy output_channel) = Output.extension_output_channel in
-  OutputChannel.appendLine output_channel ~value:(msg ^ " " ^ json ^ "\n")
+  OutputChannel.appendLine output_channel ~value:(msg ^ " " ^ json_str ^ "\n")
+
+let log_fields msg (fields : (string * Jsonoo.t) list) =
+  log_json msg (Jsonoo.Encode.object_ fields)
+
+let log_value msg (js_val : Ojs.t) = log_json msg (Jsonoo.t_of_js js_val)
 
 (** given a file uri, opens the file if it exists; otherwise, creates the file
     in "draft" mode (doesn't save it on disk)

@@ -149,6 +149,7 @@ module ChildProcess : sig
     | Stdout of string
     | Stderr of string
     | Closed
+    | ProcessError of JsError.t
 
   val exec :
        ?logger:(event -> unit)
