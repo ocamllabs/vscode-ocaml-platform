@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.8.4
 
 - Fix inclusion of files in extension package
 
