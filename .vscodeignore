@@ -4,3 +4,7 @@
 !languages/
 !snippets/
 !syntaxes/
+!README.md
+!CHANGELOG.md
+!LICENSE
+!package.json
