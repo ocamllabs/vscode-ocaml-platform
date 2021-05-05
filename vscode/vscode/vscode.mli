@@ -794,6 +794,8 @@ module QuickPickOptions : sig
     | `String of string
     ]
 
+  val title : t -> string option
+
   val matchOnDescription : t -> bool option
 
   val matchOnDetail : t -> bool option
@@ -807,7 +809,8 @@ module QuickPickOptions : sig
   val onDidSelectItem : t -> (onDidSelectItemArgs -> unit) option
 
   val create :
-       ?matchOnDescription:bool
+       ?title:string
+    -> ?matchOnDescription:bool
     -> ?matchOnDetail:bool
     -> ?placeHolder:string
     -> ?ignoreFocusOut:bool
@@ -831,6 +834,8 @@ end
 module InputBoxOptions : sig
   include Js.T
 
+  val title : t -> string option
+
   val value : t -> string option
 
   val valueSelection : t -> (int * int) option
@@ -846,7 +851,8 @@ module InputBoxOptions : sig
   val validateInput : t -> (string -> string ProviderResult.t) option
 
   val create :
-       ?value:string
+       ?title:string
+    -> ?value:string
     -> ?valueSelection:int * int
     -> ?prompt:string
     -> ?placeHolder:string

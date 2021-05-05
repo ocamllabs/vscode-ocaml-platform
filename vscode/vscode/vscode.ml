@@ -1033,6 +1033,8 @@ module QuickPickOptions = struct
 
   include
     [%js:
+    val title : t -> string or_undefined [@@js.get]
+
     val matchOnDescription : t -> bool or_undefined [@@js.get]
 
     val matchOnDetail : t -> bool or_undefined [@@js.get]
@@ -1047,7 +1049,8 @@ module QuickPickOptions = struct
       [@@js.get]
 
     val create :
-         ?matchOnDescription:bool
+         ?title:string
+      -> ?matchOnDescription:bool
       -> ?matchOnDetail:bool
       -> ?placeHolder:string
       -> ?ignoreFocusOut:bool
@@ -1080,6 +1083,8 @@ module InputBoxOptions = struct
 
   include
     [%js:
+    val title : t -> string or_undefined [@@js.get]
+
     val value : t -> string or_undefined [@@js.get]
 
     val valueSelection : t -> (int * int) or_undefined [@@js.get]
@@ -1096,7 +1101,8 @@ module InputBoxOptions = struct
       [@@js.get]
 
     val create :
-         ?value:string
+         ?title:string
+      -> ?value:string
       -> ?valueSelection:int * int
       -> ?prompt:string
       -> ?placeHolder:string
