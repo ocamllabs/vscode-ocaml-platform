@@ -843,7 +843,7 @@
     "vscode-languageclient": "7.0.0"
   },
   "devDependencies": {
-    "@types/vscode": "1.55.0",
+    "@types/vscode": "1.56.0",
     "esbuild": "0.11.19",
     "fs-extra": "10.0.0",
     "mocha": "7.2.0",
