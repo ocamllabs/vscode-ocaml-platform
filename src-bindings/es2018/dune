@@ -1,0 +1,45 @@
+(library
+ (name es2018)
+ (libraries js_of_ocaml ojs es2017)
+ (flags
+  (:standard
+   ; 58: Hide "no cmx file was found in path for module Ojs, and its interface was not compiled with -opaque"
+   ; 60: We hide some anonymous interfaces
+   -w
+   -58-60)))
+
+(rule
+ (targets es2018_asyncgenerator.ml)
+ (deps es2018_asyncgenerator.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2018_asynciterable.ml)
+ (deps es2018_asynciterable.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2018.ml)
+ (deps es2018.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2018_intl.ml)
+ (deps es2018_intl.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2018_promise.ml)
+ (deps es2018_promise.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2018_regexp.ml)
+ (deps es2018_regexp.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))

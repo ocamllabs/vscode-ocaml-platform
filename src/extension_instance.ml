@@ -3,8 +3,8 @@ open Import
 type t =
   { mutable sandbox : Sandbox.t
   ; mutable repl : Terminal_sandbox.t option
-  ; mutable lsp_client : (LanguageClient.t * Ocaml_lsp.t) option
-  ; sandbox_info : StatusBarItem.t
+  ; mutable lsp_client : (Language_client.t * Ocaml_lsp.t) option
+  ; sandbox_info : Status_bar_item.t
   }
 
 let sandbox t = t.sandbox
@@ -16,8 +16,8 @@ let ocaml_lsp t = Option.map ~f:snd t.lsp_client
 let lsp_client t = t.lsp_client
 
 let client_options () =
-  let documentSelector =
-    LanguageClient.DocumentSelector.
+  let document_selector =
+    Language_client.Document_selector.
       [| language "ocaml"
        ; language "ocaml.interface"
        ; language "ocaml.ocamllex"
@@ -25,27 +25,29 @@ let client_options () =
        ; language "reason"
       |]
   in
-  let (lazy outputChannel) = Output.language_server_output_channel in
-  let revealOutputChannelOn = LanguageClient.RevealOutputChannelOn.Never in
-  LanguageClient.ClientOptions.create ~outputChannel ~revealOutputChannelOn
-    ~documentSelector ()
+  let (lazy output_channel) = Output.language_server_output_channel in
+  let reveal_output_channel_on =
+    Language_client.Reveal_output_channel_on.Never
+  in
+  Language_client.Client_options.create ~output_channel
+    ~reveal_output_channel_on ~document_selector ()
 
 let server_options sandbox =
   let command = Sandbox.get_lsp_command sandbox in
   Cmd.log command;
   match command with
   | Shell command ->
-    let options = LanguageClient.ExecutableOptions.create ~shell:true () in
-    LanguageClient.Executable.create ~command ~options ()
+    let options = Language_client.Executable_options.create ~shell:true () in
+    Language_client.Executable.create ~command ~options ()
   | Spawn { bin; args } ->
     let command = Path.to_string bin in
-    let options = LanguageClient.ExecutableOptions.create ~shell:false () in
-    LanguageClient.Executable.create ~command ~args ~options ()
+    let options = Language_client.Executable_options.create ~shell:false () in
+    Language_client.Executable.create ~command ~args ~options ()
 
 let stop_server t =
   Option.iter t.lsp_client ~f:(fun (client, _) ->
       t.lsp_client <- None;
-      LanguageClient.stop client)
+      Language_client.stop client)
 
 let start_language_server t =
   stop_server t;
@@ -59,16 +61,16 @@ let start_language_server t =
       else
         Error "Sandbox initialisation failed: ocaml-lsp-server is not installed"
     in
-    let serverOptions = server_options t.sandbox in
-    let clientOptions = client_options () in
+    let server_options = server_options t.sandbox in
+    let client_options = client_options () in
     let client =
-      LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
-        ~serverOptions ~clientOptions ()
+      Language_client.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
+        ~server_options ~client_options ()
     in
-    LanguageClient.start client;
+    Language_client.start client;
 
     let open Promise.Syntax in
-    let+ initialize_result = LanguageClient.readyInitializeResult client in
+    let+ initialize_result = Language_client.ready_initialize_result client in
     let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
     t.lsp_client <- Some (client, ocaml_lsp);
     if
@@ -94,27 +96,25 @@ let start_language_server t =
   | Error s -> show_message `Error "Error starting server: %s" s
 
 module Sandbox_info : sig
-  val make : Sandbox.t -> StatusBarItem.t
+  val make : Sandbox.t -> Status_bar_item.t
 
-  val update : StatusBarItem.t -> new_sandbox:Sandbox.t -> unit
+  val update : Status_bar_item.t -> new_sandbox:Sandbox.t -> unit
 end = struct
   let make_status_bar_item_text sandbox =
     Printf.sprintf "$(package) %s" @@ Sandbox.to_pretty_string sandbox
 
   let make sandbox =
-    let status_bar_item =
-      Window.createStatusBarItem ~alignment:StatusBarAlignment.Left ()
-    in
+    let status_bar_item = Window.create_status_bar_item ~alignment:`Left () in
     let status_bar_item_text = make_status_bar_item_text sandbox in
-    StatusBarItem.set_text status_bar_item status_bar_item_text;
-    StatusBarItem.set_command status_bar_item
+    Status_bar_item.set_text status_bar_item status_bar_item_text;
+    Status_bar_item.set_command status_bar_item
       (`String Extension_consts.Commands.select_sandbox);
-    StatusBarItem.show status_bar_item;
+    Status_bar_item.show status_bar_item;
     status_bar_item
 
   let update sandbox_info ~new_sandbox =
     let status_bar_item_text = make_status_bar_item_text new_sandbox in
-    StatusBarItem.set_text sandbox_info status_bar_item_text
+    Status_bar_item.set_text sandbox_info status_bar_item_text
 end
 
 let make () =
@@ -126,8 +126,7 @@ let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
   t.sandbox <- new_sandbox;
   let (_ : Ojs.t option Promise.t) =
-    Vscode.Commands.executeCommand
-      ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
+    Commands.execute_command Extension_consts.Commands.refresh_sandbox []
   in
   ()
 
@@ -142,6 +141,6 @@ let open_terminal sandbox =
   Terminal_sandbox.show terminal
 
 let disposable t =
-  Disposable.make ~dispose:(fun () ->
-      StatusBarItem.dispose t.sandbox_info;
+  Disposable.create (fun () ->
+      Status_bar_item.dispose t.sandbox_info;
       stop_server t)

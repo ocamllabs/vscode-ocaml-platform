@@ -1,3 +1,3 @@
 open Import
 
-val request_switch : LanguageClient.t -> Vscode.TextDocument.t -> unit Promise.t
+val request_switch : Language_client.t -> Text_document.t -> unit Promise.t

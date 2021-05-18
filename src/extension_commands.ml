@@ -2,23 +2,23 @@ open Import
 
 type command =
   { id : string
-  ; handler : Extension_instance.t -> args:Ojs.t list -> unit
+  ; handler : Extension_instance.t -> Ojs.t list -> unit
         (* [handler] is intended to be used partially applied; [handler
            extension_instance] is passed as a callback to
-           [Commands.registerCommand] *)
+           [Commands.register_command] *)
   }
 
 type text_editor_command =
   { id : string
   ; handler :
          Extension_instance.t
-      -> textEditor:TextEditor.t
-      -> edit:TextEditorEdit.t
+      -> text_editor:Text_editor.t
+      -> edit:Text_editor_edit.t
       -> args:Ojs.t list
       -> unit
         (* [handler] is intended to be used partially applied; [handler
            extension_instance] is passed as a callback to
-           [Commands.registerCommand] *)
+           [Commands.register_command] *)
   }
 
 type t =
@@ -39,7 +39,7 @@ let text_editor_command id handler =
   command
 
 let _select_sandbox =
-  let handler (instance : Extension_instance.t) ~args:_ =
+  let handler (instance : Extension_instance.t) _args =
     let open Promise.Syntax in
     let (_ : unit Promise.t) =
       let* sandbox = Sandbox.select_sandbox () in
@@ -55,7 +55,7 @@ let _select_sandbox =
   command Extension_consts.Commands.select_sandbox handler
 
 let _restart_language_server =
-  let handler (instance : Extension_instance.t) ~args:_ =
+  let handler (instance : Extension_instance.t) _args =
     let (_ : unit Promise.t) =
       Extension_instance.start_language_server instance
     in
@@ -64,7 +64,7 @@ let _restart_language_server =
   command Extension_consts.Commands.restart_language_server handler
 
 let _select_sandbox_and_open_terminal =
-  let handler _instance ~args:_ =
+  let handler _instance _args =
     let (_ : unit option Promise.t) =
       let open Promise.Option.Syntax in
       let+ sandbox = Sandbox.select_sandbox () in
@@ -75,17 +75,17 @@ let _select_sandbox_and_open_terminal =
   command Extension_consts.Commands.select_sandbox_and_open_terminal handler
 
 let _open_terminal =
-  let handler (instance : Extension_instance.t) ~args:_ =
+  let handler (instance : Extension_instance.t) _args =
     Extension_instance.sandbox instance |> Extension_instance.open_terminal
   in
   command Extension_consts.Commands.open_terminal handler
 
 let _switch_impl_intf =
-  let handler (instance : Extension_instance.t) ~args:_ =
+  let handler (instance : Extension_instance.t) _args =
     let try_switching () =
       let open Option.O in
-      let+ editor = Window.activeTextEditor () in
-      let document = TextEditor.document editor in
+      let+ editor = Window.active_text_editor () in
+      let document = Text_editor.document editor in
       match Extension_instance.lsp_client instance with
       | None -> Promise.return (show_message `Warn "ocamllsp is not running.")
       | Some (client, ocaml_lsp) ->
@@ -107,8 +107,8 @@ let _switch_impl_intf =
   command Extension_consts.Commands.switch_impl_intf handler
 
 let _open_current_dune_file =
-  let handler (_instance : Extension_instance.t) ~args:_ =
-    match Vscode.Window.activeTextEditor () with
+  let handler (_instance : Extension_instance.t) _args =
+    match Window.active_text_editor () with
     | None ->
       (* this command is available (in the command palette) only when a file is
          open *)
@@ -117,14 +117,14 @@ let _open_current_dune_file =
          open in the editor, so the command can look for a dune file in the \
          same folder as the open file."
     | Some text_editor ->
-      let doc = TextEditor.document text_editor in
-      let uri = TextDocument.uri doc in
+      let doc = Text_editor.document text_editor in
+      let uri = Text_document.uri doc in
       let dune_file_uri =
-        let path = Uri.fsPath uri |> Path.of_string in
+        let path = Uri.fs_path uri |> Path.of_string in
         let uri = Path.relative path "../dune" |> Path.to_string |> Uri.file in
-        Uri.toString uri ()
+        Uri.to_string uri ()
       in
-      let (_ : TextEditor.t Promise.t) =
+      let (_ : Text_editor.t Promise.t) =
         open_file_in_text_editor dune_file_uri
       in
       ()
@@ -134,12 +134,12 @@ let _open_current_dune_file =
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in
-    let disposable = Commands.registerCommand ~command:id ~callback in
-    ExtensionContext.subscribe extension ~disposable
+    let disposable = Commands.register_command id callback in
+    Extension_context.subscribe extension disposable
   | Text_editor_command { id; handler } ->
     let callback = handler instance in
-    let disposable = Commands.registerTextEditorCommand ~command:id ~callback in
-    ExtensionContext.subscribe extension ~disposable
+    let disposable = Commands.register_text_editor_command id callback in
+    Extension_context.subscribe extension disposable
 
 let register_all_commands extension instance =
   List.iter ~f:(register extension instance) !commands

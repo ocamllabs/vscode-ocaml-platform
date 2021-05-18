@@ -113,7 +113,7 @@ end = struct
     let open Promise.Syntax in
     let path = Switch.path opam switch in
     let switch_state_filepath = Opam_path.switch_state path |> Path.to_string in
-    let+ file_content = Fs.readFile switch_state_filepath in
+    let+ file_content = Fs.read_file switch_state_filepath () in
     let { OpamParserTypes.file_contents; _ } =
       OpamParser.FullPos.string file_content switch_state_filepath
       |> OpamParser.FullPos.to_opamfile
@@ -145,7 +145,7 @@ module Package = struct
       if not file_exists then
         Promise.return None
       else
-        let+ file_content = Fs.readFile opam_filepath in
+        let+ file_content = Fs.read_file opam_filepath () in
         let { OpamParserTypes.file_contents; _ } =
           OpamParser.FullPos.string file_content opam_filepath
           |> OpamParser.FullPos.to_opamfile
@@ -187,10 +187,8 @@ module Package = struct
 
   let get_switch_package name ~package_path =
     let open Promise.Syntax in
-    let* l = Node.Fs.readDir (Path.to_string package_path) in
-    match l with
-    | Error _ -> Promise.return None
-    | Ok l ->
+    try
+      let* l = Fs.readdir (Path.to_string package_path) in
       Promise.List.find_map
         (fun fpath ->
           let basename = Stdlib.Filename.basename fpath in
@@ -199,6 +197,8 @@ module Package = struct
           else
             Promise.return None)
         l
+    with
+    | _ -> Promise.return None
 
   let dependencies package =
     match depends package with

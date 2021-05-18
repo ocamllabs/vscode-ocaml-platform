@@ -1,0 +1,40 @@
+(library
+ (name vscode_test)
+ (libraries js_of_ocaml ojs es5 node)
+ (modes byte))
+
+(rule
+ (targets vscode_test_del.ml)
+ (deps vscode_test_del.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets vscode_test_download.ml)
+ (deps vscode_test_download.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets vscode_test.ml)
+ (deps vscode_test.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets vscode_test_request.ml)
+ (deps vscode_test_request.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets vscode_test_run_test.ml)
+ (deps vscode_test_run_test.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets vscode_test_util.ml)
+ (deps vscode_test_util.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))

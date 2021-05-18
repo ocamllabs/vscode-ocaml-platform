@@ -13,16 +13,15 @@
     [Vscode_ocaml_platform.activate]. It subscribes the disposables to the
     extension context provided. *)
 val register_all_commands :
-  Vscode.ExtensionContext.t -> Extension_instance.t -> unit
+  Vscode.Extension_context.t -> Extension_instance.t -> unit
 
-val register :
-  id:string -> (Extension_instance.t -> args:Ojs.t list -> unit) -> unit
+val register : id:string -> (Extension_instance.t -> Ojs.t list -> unit) -> unit
 
 val register_text_editor :
      id:string
   -> (   Extension_instance.t
-      -> textEditor:Vscode.TextEditor.t
-      -> edit:Vscode.TextEditorEdit.t
+      -> text_editor:Vscode.Text_editor.t
+      -> edit:Vscode.Text_editor_edit.t
       -> args:Ojs.t list
       -> unit)
   -> unit

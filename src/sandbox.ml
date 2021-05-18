@@ -110,12 +110,12 @@ module Kind = struct
     | _ -> None
 
   let of_json json =
-    let open Jsonoo.Decode in
+    let open Json.Decode in
     match of_string (string json) with
     | Some s -> s
     | None ->
       raise
-        (Jsonoo.Decode_error
+        (Json.Decode_error
            "opam | esy | global | custom are the only valid values")
 
   let to_string = function
@@ -124,7 +124,7 @@ module Kind = struct
     | Global -> "global"
     | Custom -> "custom"
 
-  let to_json s = Jsonoo.Encode.string (to_string s)
+  let to_json s = Json.Encode.string (to_string s)
 end
 
 module Setting = struct
@@ -141,7 +141,7 @@ module Setting = struct
     | Custom _ -> Custom
 
   let of_json json =
-    let open Jsonoo.Decode in
+    let open Json.Decode in
     let decode_vars json = Settings.resolve_workspace_vars (string json) in
     let kind = field "kind" Kind.of_json json in
     match (kind : Kind.t) with
@@ -165,11 +165,11 @@ module Setting = struct
       Custom template
 
   let to_json (t : t) =
-    let open Jsonoo.Encode in
+    let open Json.Encode in
     let encode_vars str = string (Settings.substitute_workspace_vars str) in
     let kind = ("kind", Kind.to_json (kind t)) in
     match t with
-    | Global -> Jsonoo.Encode.object_ [ kind ]
+    | Global -> Json.Encode.object_ [ kind ]
     | Esy manifest ->
       object_
         [ kind
@@ -180,7 +180,7 @@ module Setting = struct
       object_ [ kind; ("switch", encode_vars @@ Opam.Switch.name switch) ]
     | Custom template -> object_ [ kind; ("template", string template) ]
 
-  let t = Settings.create ~scope:Workspace ~key:"sandbox" ~of_json ~to_json
+  let t = Settings.create ~scope:`Workspace ~key:"sandbox" ~of_json ~to_json
 end
 
 let available_sandboxes () =
@@ -231,10 +231,10 @@ let of_settings () : t option Promise.t =
   | Some (Custom template) -> Promise.return (Some (Custom template))
 
 let workspace_root () =
-  match Workspace.workspaceFolders () with
+  match Workspace.workspace_folders () with
   | [] -> None
   | [ workspace_folder ] ->
-    Some (workspace_folder |> WorkspaceFolder.uri |> Uri.path |> Path.of_string)
+    Some (workspace_folder |> Workspace_folder.uri |> Uri.path |> Path.of_string)
   | _ ->
     (* We don't support multiple workspace roots at the moment *)
     None
@@ -307,7 +307,7 @@ module Candidate = struct
     }
 
   let to_quick_pick { sandbox; status } =
-    let create = QuickPickItem.create in
+    let create = Quick_pick_item.create in
     let description =
       match status with
       | Error s -> Some (Printf.sprintf "Invalid sandbox: %s" s)
@@ -340,7 +340,7 @@ module Candidate = struct
 end
 
 let select_sandbox (choices : Candidate.t list) =
-  let placeHolder =
+  let place_holder =
     "Which package manager would you like to manage the sandbox?"
   in
   let choices =
@@ -350,8 +350,10 @@ let select_sandbox (choices : Candidate.t list) =
         (quick_pick, sandbox))
       choices
   in
-  let options = QuickPickOptions.create ~canPickMany:false ~placeHolder () in
-  Window.showQuickPickItems ~choices ~options ()
+  let options =
+    Quick_pick_options.create ~can_pick_many:false ~place_holder ()
+  in
+  show_quick_pick_items choices ~options ()
 
 let sandbox_candidates ~workspace_folders =
   let open Promise.Syntax in
@@ -363,9 +365,9 @@ let sandbox_candidates ~workspace_folders =
     | Some esy ->
       let+ esys =
         workspace_folders
-        |> List.map ~f:(fun (folder : WorkspaceFolder.t) ->
+        |> List.map ~f:(fun (folder : Workspace_folder.t) ->
                let dir =
-                 folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string
+                 folder |> Workspace_folder.uri |> Uri.fs_path |> Path.of_string
                in
                Esy.discover ~dir)
         |> Promise.all_list
@@ -396,13 +398,13 @@ let sandbox_candidates ~workspace_folders =
 
 let select_sandbox () =
   let open Promise.Syntax in
-  let workspace_folders = Workspace.workspaceFolders () in
+  let workspace_folders = Workspace.workspace_folders () in
   let* candidates = sandbox_candidates ~workspace_folders in
   let open Promise.Option.Syntax in
   let* candidate = select_sandbox candidates in
   match candidate with
   | { status = Ok (); sandbox = Custom _ } ->
-    let validateInput ~value =
+    let validate_input value =
       if
         String.is_substring value ~substring:"$prog"
         && String.is_substring value ~substring:"$args"
@@ -412,10 +414,10 @@ let select_sandbox () =
         Promise.Option.return "Command template must include $prog and $args"
     in
     let options =
-      InputBoxOptions.create ~prompt:"Input a custom command template"
-        ~value:"$prog $args" ~validateInput ()
+      Input_box_options.create ~prompt:"Input a custom command template"
+        ~value:"$prog $args" ~validate_input ()
     in
-    let* input = Window.showInputBox ~options () in
+    let* input = Window.show_input_box ~options () in
     let template = String.strip input in
     Promise.Option.return @@ Custom template
   | { status; sandbox } -> (
@@ -509,7 +511,8 @@ let root_packages t =
 
 let uninstall_packages t packages =
   let options =
-    ProgressOptions.create ~location:(`ProgressLocation Notification)
+    Progress_options.create
+      ~location:(`ProgressLocation `Notification)
       ~title:"Uninstalling sandbox packages" ~cancellable:false ()
   in
   match t with
@@ -549,12 +552,13 @@ let uninstall_packages t packages =
         Ojs.null
     in
     let open Promise.Syntax in
-    let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    let+ _ = Window.with_progress ~options ~task in
     ()
 
 let install_packages t packages =
   let options =
-    ProgressOptions.create ~location:(`ProgressLocation Notification)
+    Progress_options.create
+      ~location:(`ProgressLocation `Notification)
       ~title:"Installing sandbox packages" ~cancellable:false ()
   in
   match t with
@@ -587,12 +591,13 @@ let install_packages t packages =
         Ojs.null
     in
     let open Promise.Syntax in
-    let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    let+ _ = Window.with_progress ~options ~task in
     ()
 
 let upgrade_packages t =
   let options =
-    ProgressOptions.create ~location:(`ProgressLocation Notification)
+    Progress_options.create
+      ~location:(`ProgressLocation `Notification)
       ~title:"Upgrading sandbox packages" ~cancellable:false ()
   in
   match t with
@@ -625,7 +630,7 @@ let upgrade_packages t =
         Ojs.null
     in
     let open Promise.Syntax in
-    let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    let+ _ = Window.with_progress ~options ~task in
     ()
 
 let focus_on_package_command ?sandbox () =
@@ -633,5 +638,5 @@ let focus_on_package_command ?sandbox () =
   | None
   | Some (Opam _) ->
     let (lazy output) = Output.command_output_channel in
-    Vscode.OutputChannel.show output ()
+    Output_channel.show output ()
   | _ -> ()

@@ -72,8 +72,8 @@ module Discover = struct
     | ("esy.json" | "package.json") as fname -> (
       let manifest_file = Path.(project_root / fname) |> Path.to_string in
       let open Promise.Syntax in
-      let+ manifest = Fs.readFile manifest_file in
-      match Jsonoo.try_parse_opt manifest with
+      let+ manifest = Fs.read_file manifest_file () in
+      match Json.try_parse_opt manifest with
       | None -> invalid_json project_root fname
       | Some json when is_esy_compatible fname json -> valid project_root
       | _ -> None)
@@ -81,14 +81,14 @@ module Discover = struct
 
   let parse_dir dir =
     let open Promise.Syntax in
-    let* dirs = Path.to_string dir |> Fs.readDir in
-    match dirs with
-    | Ok res ->
-      let+ dirs = Promise.List.filter_map (parse_file dir) res in
+    try
+      let* dirs = Fs.readdir (Path.to_string dir) in
+      let+ dirs = Promise.List.filter_map (parse_file dir) dirs in
       List.dedup_and_sort dirs ~compare
-    | Error err ->
+    with
+    | _ ->
       let dir = Path.to_string dir in
-      log "unable to read dir %s. error %s" dir err;
+      log "unable to read dir %s" dir;
       show_message `Warn
         "Unable to read %s. No esy projects will be inferred from here" dir;
       Promise.return []
@@ -142,11 +142,11 @@ let state t manifest =
     match output with
     | Error _ -> Ok false
     | Ok esy_output -> (
-      match Jsonoo.try_parse_opt esy_output with
+      match Json.try_parse_opt esy_output with
       | None -> Ok false
       | Some esy_response ->
         esy_response
-        |> Jsonoo.Decode.field "isProjectReadyForDev" Jsonoo.Decode.bool
+        |> Json.Decode.field "isProjectReadyForDev" Json.Decode.bool
         |> Result.return)
   in
   if is_project_ready_for_dev then

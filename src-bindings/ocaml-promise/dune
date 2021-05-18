@@ -1,0 +1,13 @@
+(library
+ (name promise)
+ (libraries js_of_ocaml ojs es5)
+ (flags
+  (:standard
+   ; 58: Hide "no cmx file was found in path for module Ojs, and its interface was not compiled with -opaque"
+   -w
+   -58))
+ (js_of_ocaml
+  (javascript_files indirect_promise.js))
+ (preprocess
+  (pps js_of_ocaml-ppx))
+ (modes byte))

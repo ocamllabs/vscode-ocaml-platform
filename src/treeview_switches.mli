@@ -1,2 +1,4 @@
+open Import
+
 (** Register the ocaml-switches tree view *)
-val register : Vscode.ExtensionContext.t -> unit
+val register : Vscode.Extension_context.t -> unit

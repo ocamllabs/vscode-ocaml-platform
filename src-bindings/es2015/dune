@@ -1,0 +1,62 @@
+(library
+ (name es2015)
+ (libraries js_of_ocaml ojs es5)
+ (flags
+  (:standard
+   -w
+   ; Hide "no cmx file was found in path for module Ojs, and its interface was not compiled with -opaque"
+   -58)))
+
+(rule
+ (targets es2015.ml)
+ (deps es2015.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2015_collection.ml)
+ (deps es2015_collection.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2015_core.ml)
+ (deps es2015_core.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2015_generator.ml)
+ (deps es2015_generator.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2015_iterable.ml)
+ (deps es2015_iterable.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2015_promise.ml)
+ (deps es2015_promise.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2015_proxy.ml)
+ (deps es2015_proxy.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2015_reflect.ml)
+ (deps es2015_reflect.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2015_symbol.ml)
+ (deps es2015_symbol.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))

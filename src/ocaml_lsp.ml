@@ -13,11 +13,11 @@ let default =
   }
 
 let default_field key decode default json =
-  let open Jsonoo.Decode in
+  let open Json.Decode in
   try_default default (field key decode) json
 
-let of_json (json : Jsonoo.t) =
-  let open Jsonoo.Decode in
+let of_json (json : Json.t) =
+  let open Json.Decode in
   try
     let interfaceSpecificLangId =
       default_field "interfaceSpecificLangId" bool
@@ -32,20 +32,20 @@ let of_json (json : Jsonoo.t) =
     in
     { interfaceSpecificLangId; handleSwitchImplIntf; handleInferIntf }
   with
-  | Jsonoo.Decode_error _ ->
+  | Json.Decode_error _ ->
     show_message `Warn
       "unexpected experimental capabilities from lsp server. Some features \
        might be missing";
     default
 
-let of_initialize_result (t : LanguageClient.InitializeResult.t) =
-  let open LanguageClient in
-  match ServerCapabilities.experimental (InitializeResult.capabilities t) with
+let of_initialize_result (t : Language_client.Initialize_result.t) =
+  let open Language_client in
+  match Server_capabilities.experimental (Initialize_result.capabilities t) with
   | None -> default
   | Some json -> (
-    match Jsonoo.Decode.field "ocamllsp" of_json json with
+    match Json.Decode.field "ocamllsp" of_json json with
     | s -> s
-    | exception Jsonoo.Decode_error _ -> default)
+    | exception Json.Decode_error _ -> default)
 
 let has_interface_specific_lang_id t = t.interfaceSpecificLangId
 

@@ -5,8 +5,6 @@ module Dependency = struct
 
   let t_of_js : Ojs.t -> t = Stdlib.Obj.magic
 
-  let t_to_js : t -> Ojs.t = Stdlib.Obj.magic
-
   let label t = Sandbox.Package.name t
 
   let description t = Promise.return (Some (Sandbox.Package.version t))
@@ -19,34 +17,34 @@ module Dependency = struct
     | None -> "package"
 
   let icon _ =
-    TreeItem.LightDarkIcon.
-      { light = `String (Path.asset "number-light.svg" |> Path.to_string)
-      ; dark = `String (Path.asset "number-dark.svg" |> Path.to_string)
+    Icon_path.
+      { light = `String (asset "number-light.svg" |> Path.to_string)
+      ; dark = `String (asset "number-dark.svg" |> Path.to_string)
       }
 
   let collapsible_state t =
     if Sandbox.Package.has_dependencies t then
-      TreeItemCollapsibleState.Collapsed
+      `Collapsed
     else
-      TreeItemCollapsibleState.None
+      `None
 
   let to_treeitem dependency =
     let open Promise.Syntax in
-    let icon = `LightDark (icon dependency) in
-    let collapsibleState = collapsible_state dependency in
+    let icon = `IconPath (icon dependency) in
+    let collapsible_state = collapsible_state dependency in
     let label =
-      `TreeItemLabel (Vscode.TreeItemLabel.create ~label:(label dependency) ())
+      `TreeItemLabel (Tree_item_label.create ~label:(label dependency) ())
     in
-    let item = Vscode.TreeItem.make_label ~label ~collapsibleState () in
-    Vscode.TreeItem.set_iconPath item icon;
-    TreeItem.set_contextValue item (context_value dependency);
+    let item = Tree_item.create ~label ~collapsible_state () in
+    Tree_item.set_icon_path item icon;
+    Tree_item.set_context_value item (context_value dependency);
     let+ _ =
       Promise.Option.iter
-        (fun desc -> TreeItem.set_description item (`String desc))
+        (fun desc -> Tree_item.set_description item (`String desc))
         (description dependency)
     in
     Option.iter (tooltip dependency) ~f:(fun desc ->
-        TreeItem.set_tooltip item (`String desc));
+        Tree_item.set_tooltip item (`String desc));
     item
 
   let get_dependencies t =
@@ -59,7 +57,7 @@ end
 
 module Command = struct
   let _open_documentation =
-    let handler (_ : Extension_instance.t) ~args =
+    let handler (_ : Extension_instance.t) args =
       let (_ : unit Promise.t) =
         let arg = List.hd_exn args in
         let dep = Dependency.t_of_js arg in
@@ -69,8 +67,8 @@ module Command = struct
         | None -> Promise.return ()
         | Some doc ->
           let+ _ =
-            Vscode.Commands.executeCommand ~command:"vscode.open"
-              ~args:[ Vscode.Uri.parse doc () |> Vscode.Uri.t_to_js ]
+            Commands.execute_command "vscode.open"
+              [ Uri.parse doc () |> Uri.t_to_js ]
           in
           ()
       in
@@ -80,7 +78,7 @@ module Command = struct
       ~id:Extension_consts.Commands.open_sandbox_documentation handler
 
   let _uninstall =
-    let handler (instance : Extension_instance.t) ~args =
+    let handler (instance : Extension_instance.t) args =
       let (_ : unit Promise.t) =
         let arg = List.hd_exn args in
         let dep = Dependency.t_of_js arg in
@@ -94,12 +92,10 @@ module Command = struct
         Sandbox.focus_on_package_command ~sandbox ();
         let+ () = Sandbox.uninstall_packages sandbox [ dep ] in
         let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_switches ~args:[]
+          Commands.execute_command Extension_consts.Commands.refresh_switches []
         in
         let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
+          Commands.execute_command Extension_consts.Commands.refresh_sandbox []
         in
         ()
       in
@@ -109,19 +105,17 @@ module Command = struct
       ~id:Extension_consts.Commands.uninstall_sandbox_package handler
 
   let _upgrade =
-    let handler (instance : Extension_instance.t) ~args:_ =
+    let handler (instance : Extension_instance.t) _args =
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
         Sandbox.focus_on_package_command ~sandbox ();
         let+ () = Sandbox.upgrade_packages sandbox in
         let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_switches ~args:[]
+          Commands.execute_command Extension_consts.Commands.refresh_switches []
         in
         let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
+          Commands.execute_command Extension_consts.Commands.refresh_sandbox []
         in
         ()
       in
@@ -132,13 +126,13 @@ module Command = struct
 
   let ask_packages () =
     let options =
-      InputBoxOptions.create ~prompt:"Install Packages"
-        ~placeHolder:"Type the packages names, separated with a space" ()
+      Input_box_options.create ~prompt:"Install Packages"
+        ~place_holder:"Type the packages names, separated with a space" ()
     in
-    Window.showInputBox ~options ()
+    Window.show_input_box ~options ()
 
   let _install =
-    let handler (instance : Extension_instance.t) ~args:_ =
+    let handler (instance : Extension_instance.t) _args =
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let* package_str_opt = ask_packages () in
@@ -150,12 +144,12 @@ module Command = struct
           Sandbox.focus_on_package_command ~sandbox ();
           let+ () = Sandbox.install_packages sandbox packages in
           let (_ : Ojs.t option Promise.t) =
-            Vscode.Commands.executeCommand
-              ~command:Extension_consts.Commands.refresh_switches ~args:[]
+            Commands.execute_command Extension_consts.Commands.refresh_switches
+              []
           in
           let (_ : Ojs.t option Promise.t) =
-            Vscode.Commands.executeCommand
-              ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
+            Commands.execute_command Extension_consts.Commands.refresh_sandbox
+              []
           in
           ()
       in
@@ -165,9 +159,9 @@ module Command = struct
       handler
 end
 
-let getTreeItem ~element = `Promise (Dependency.to_treeitem element)
+let get_tree_item element = `Promise (Dependency.to_treeitem element)
 
-let getChildren ~instance ?element () =
+let get_children ~instance ?element () =
   let sandbox = Extension_instance.sandbox instance in
   match element with
   | Some element -> `Promise (Dependency.get_dependencies element)
@@ -182,25 +176,22 @@ let getChildren ~instance ?element () =
     `Promise items
 
 let register extension instance =
-  let getChildren = getChildren ~instance in
-  let module EventEmitter =
-    Vscode.EventEmitter.Make (Interop.Js.Or_undefined (Dependency)) in
-  let event_emitter = EventEmitter.make () in
-  let event = EventEmitter.event event_emitter in
-  let module TreeDataProvider = Vscode.TreeDataProvider.Make (Dependency) in
-  let treeDataProvider =
-    TreeDataProvider.create ~getTreeItem ~getChildren ~onDidChangeTreeData:event
-      ()
+  let get_children = get_children ~instance in
+  let (event_emitter : Dependency.t option Event_emitter.t) =
+    Event_emitter.create ()
+  in
+  let event = Event_emitter.event event_emitter in
+  let tree_data_provider =
+    Tree_data_provider.create ~get_tree_item ~get_children
+      ~on_did_change_tree_data:event ()
   in
   let disposable =
-    Vscode.Window.registerTreeDataProvider
-      (module Dependency)
-      ~viewId:"ocaml-sandbox" ~treeDataProvider
+    Window.register_tree_data_provider "ocaml-sandbox" tree_data_provider
   in
-  ExtensionContext.subscribe extension ~disposable;
+  Extension_context.subscribe extension disposable;
 
   let disposable =
-    Commands.registerCommand ~command:Extension_consts.Commands.refresh_sandbox
-      ~callback:(fun ~args:_ -> EventEmitter.fire event_emitter None)
+    Commands.register_command Extension_consts.Commands.refresh_sandbox
+      (fun _ -> Event_emitter.fire event_emitter None)
   in
-  ExtensionContext.subscribe extension ~disposable
+  Extension_context.subscribe extension disposable

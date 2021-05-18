@@ -1,5 +1,3 @@
-open Import
-
 type t = string
 
 let equal = String.equal
@@ -8,9 +6,11 @@ let of_string s = s
 
 let to_string s = s
 
-let delimiter = Node.Path.delimiter
+let delimiter = 
+  (* String.get Node.Path.delimiter 0 *)
+  ';'
 
-let is_absolute t = Node.Path.isAbsolute t
+let is_absolute = Node.Path.is_absolute
 
 let compare = String.compare
 
@@ -18,7 +18,7 @@ let dirname = Node.Path.dirname
 
 let extname = Node.Path.extname
 
-let basename = Node.Path.basename
+let basename x = Node.Path.basename x ()
 
 let join x y = Node.Path.join [ x; y ]
 
@@ -26,7 +26,7 @@ let ( / ) = join
 
 let relative = join
 
-let relative_all p xs = List.fold_left xs ~f:join ~init:p
+let relative_all p xs = Base.List.fold_left xs ~f:join ~init:p
 
 let with_ext x ~ext = x ^ ext
 
@@ -39,5 +39,3 @@ let parent x =
     None
   else
     Some (dirname x)
-
-let asset name = of_string (Node.__filename () ^ "/../../assets/" ^ name)

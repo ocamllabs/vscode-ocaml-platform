@@ -1,0 +1,6 @@
+(library
+ (name json)
+ (libraries ojs js_of_ocaml es5)
+ (preprocess
+  (pps js_of_ocaml-ppx))
+ (modes byte))

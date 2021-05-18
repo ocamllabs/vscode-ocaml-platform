@@ -56,8 +56,8 @@ let check_spawn ?env { bin; args } =
   else
     let path =
       match env with
-      | Some env -> Interop.Dict.find_opt "PATH" env
-      | None -> Process.Env.get "PATH"
+      | Some env -> Dict.find_opt "PATH" env
+      | None -> Node.Dict.get Process.env "PATH"
     in
     match path with
     | None -> Error path_missing_from_env |> Promise.resolve
@@ -82,30 +82,35 @@ let run ?cwd ?env ?stdin cmd =
   let logger event =
     let (lazy output) = Output.command_output_channel in
     match event with
-    | ChildProcess.Spawned ->
-      Vscode.OutputChannel.appendLine output ~value:("$ " ^ to_string cmd)
+    | Child_process.Spawned ->
+      Output_channel.append_line output ~value:("$ " ^ to_string cmd)
     | Stdout data
     | Stderr data ->
-      Vscode.OutputChannel.append output ~value:data
-    | Closed -> Vscode.OutputChannel.appendLine output ~value:""
-    | ProcessError err -> log_value "process error" (Node.JsError.t_to_js err)
+      Vscode.Output_channel.append output ~value:data
+    | Closed -> Vscode.Output_channel.append_line output ~value:""
+    | ProcessError err -> log_value "process error" (Es5.Error.t_to_js err)
   in
-  let options = ChildProcess.Options.create ?cwd ?env () in
+  let env =
+    Option.map env ~f:(fun env ->
+        Dict.t_to_js Ojs.string_to_js env |> Process.Process_env.t_of_js)
+  in
   match cmd with
   | Spawn { bin; args } ->
-    ChildProcess.spawn (Path.to_string bin) (Array.of_list args) ~logger ?stdin
-      ~options
-  | Shell command_line -> ChildProcess.exec command_line ~logger ?stdin ~options
+    let options = Child_process.Exec_options.create ?cwd ?env () in
+    Child_process.spawn (Path.to_string bin) args ~logger ?stdin ~options
+  | Shell command_line ->
+    let options = Child_process.Spawn_options.create ?cwd ?env () in
+    Child_process.exec command_line ~logger ?stdin ~options
 
-let log ?(result : ChildProcess.return option) (t : t) =
-  let open Jsonoo.Encode in
+let log ?(result : Child_process.return option) (t : t) =
+  let open Json.Encode in
   let fields =
     match result with
     | None -> []
     | Some result ->
       [ ( "result"
         , object_
-            [ ("exitCode", int result.exitCode)
+            [ ("exit_code", int result.exit_code)
             ; ("stdout", string result.stdout)
             ; ("stderr", string result.stderr)
             ] )
@@ -125,9 +130,9 @@ let log ?(result : ChildProcess.return option) (t : t) =
 let output ?cwd ?env ?stdin (t : t) =
   let open Promise.Syntax in
   log t;
-  let+ (result : ChildProcess.return) = run ?stdin ?cwd ?env t in
+  let+ (result : Child_process.return) = run ?stdin ?cwd ?env t in
   log ~result t;
-  if result.exitCode = 0 then
+  if result.exit_code = 0 then
     Ok result.stdout
   else
     Error

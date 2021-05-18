@@ -1,0 +1,39 @@
+(library
+ (name es2019)
+ (libraries js_of_ocaml ojs es2018)
+ (flags
+  (:standard
+   ; 58: Hide "no cmx file was found in path for module Ojs, and its interface was not compiled with -opaque"
+   ; 60: We hide some anonymous interfaces
+   -w
+   -58-60)))
+
+(rule
+ (targets es2019.ml)
+ (deps es2019.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2019_array.ml)
+ (deps es2019_array.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2019_object.ml)
+ (deps es2019_object.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2019_string.ml)
+ (deps es2019_string.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2019_symbol.ml)
+ (deps es2019_symbol.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))

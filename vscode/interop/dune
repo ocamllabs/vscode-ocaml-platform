@@ -1,7 +1,0 @@
-(library
- (public_name vscode.interop)
- (name interop)
- (libraries js_of_ocaml gen_js_api)
- (preprocess
-  (pps gen_js_api.ppx))
- (modes byte))

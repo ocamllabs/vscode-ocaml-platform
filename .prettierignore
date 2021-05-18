@@ -7,3 +7,4 @@ esy.lock/
 .vscode-test/
 _opam
 _build
+**/_spec/
