@@ -4,27 +4,27 @@ const vscode = require("vscode");
 const os = require("os");
 const { Uri } = vscode;
 
-let projectPath = path.join(os.tmpdir(), "sample-esy");
-let projectUri = Uri.file(projectPath);
+const projectPath = path.join(os.tmpdir(), "sample-esy");
+const projectUri = Uri.file(projectPath);
 
 suite("Basic tests", () => {
   test("Esy", async () => {
     await vscode.commands.executeCommand("vscode.openFolder", projectUri);
-    let ocamlDocument1 = await vscode.workspace.openTextDocument(
+    const ocamlDocument1 = await vscode.workspace.openTextDocument(
       Uri.file(path.join(projectPath, "bin", "SampleEsyApp.ml"))
     );
 
-    let ocamlDocument2 = await vscode.workspace.openTextDocument(
+    const ocamlDocument2 = await vscode.workspace.openTextDocument(
       Uri.file(path.join(projectPath, "bin", "CamlUtil.ml"))
     );
 
-    assert.equal(
+    assert.strictEqual(
       ocamlDocument1.languageId,
       "ocaml",
       "Must be identified as an OCaml document"
     );
 
-    assert.equal(
+    assert.strictEqual(
       ocamlDocument2.languageId,
       "ocaml",
       "Must be identified as an OCaml document"

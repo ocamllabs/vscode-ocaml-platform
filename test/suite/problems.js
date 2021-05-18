@@ -8,12 +8,12 @@ function run() {
     ui: "tdd",
   });
   // Use any mocha API
-  mocha.useColors(true);
+  mocha.color(true);
 
   const testsRoot = path.resolve(__dirname, "..");
 
   return new Promise((c, e) => {
-    let files = ["problems.test.js"].map((f) =>
+    const files = ["problems.test.js"].map((f) =>
       path.resolve(testsRoot, "suite", f)
     );
 
