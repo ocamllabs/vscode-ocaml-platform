@@ -8,11 +8,11 @@ val sandbox : t -> Sandbox.t
 
 val set_sandbox : t -> Sandbox.t -> unit
 
-val language_client : t -> LanguageClient.t option
+val language_client : t -> Language_client.t option
 
 val ocaml_lsp : t -> Ocaml_lsp.t option
 
-val lsp_client : t -> (LanguageClient.t * Ocaml_lsp.t) option
+val lsp_client : t -> (Language_client.t * Ocaml_lsp.t) option
 
 val start_language_server : t -> unit Promise.t
 

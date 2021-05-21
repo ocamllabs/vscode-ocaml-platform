@@ -1,0 +1,45 @@
+(library
+ (name es2017)
+ (libraries js_of_ocaml ojs es2016)
+ (flags
+  (:standard
+   ; 58: Hide "no cmx file was found in path for module Ojs, and its interface was not compiled with -opaque"
+   ; 60: We hide some anonymous interfaces
+   -w
+   -58-60)))
+
+(rule
+ (targets es2017.ml)
+ (deps es2017.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2017_intl.ml)
+ (deps es2017_intl.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2017_object.ml)
+ (deps es2017_object.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2017_sharedmemory.ml)
+ (deps es2017_sharedmemory.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2017_string.ml)
+ (deps es2017_string.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2017_typedarrays.ml)
+ (deps es2017_typedarrays.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))

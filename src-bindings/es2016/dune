@@ -1,0 +1,20 @@
+(library
+ (name es2016)
+ (libraries js_of_ocaml ojs es2015)
+ (flags
+  (:standard
+   -w
+   ; Hide "no cmx file was found in path for module Ojs, and its interface was not compiled with -opaque"
+   -58)))
+
+(rule
+ (targets es2016.ml)
+ (deps es2016.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2016_array_include.ml)
+ (deps es2016_array_include.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))

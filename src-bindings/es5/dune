@@ -1,0 +1,10 @@
+(library
+ (name es5)
+ (libraries js_of_ocaml ojs)
+ (modes byte))
+
+(rule
+ (targets es5.ml)
+ (deps es5.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))

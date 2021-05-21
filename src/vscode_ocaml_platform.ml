@@ -4,29 +4,26 @@ let suggest_to_pick_sandbox () =
   let open Promise.Syntax in
   let select_pm_button_text = "Select package manager and sandbox" in
   let+ selection =
-    Window.showInformationMessage
-      ~message:
-        "OCaml Platform is using the package manager and sandbox available in \
-         the environment. Pick a particular package manager and sandbox by \
-         clicking the button below"
+    Window.show_information_message
+      "OCaml Platform is using the package manager and sandbox available in \
+       the environment. Pick a particular package manager and sandbox by \
+       clicking the button below"
       ~choices:[ (select_pm_button_text, ()) ]
       ()
   in
   Option.iter selection ~f:(fun () ->
       let (_ : Ojs.t option Promise.t) =
-        Vscode.Commands.executeCommand
-          ~command:Extension_consts.Commands.select_sandbox ~args:[]
+        Commands.execute_command Extension_consts.Commands.select_sandbox []
       in
       ())
 
-let activate (extension : ExtensionContext.t) =
+let activate (extension : Extension_context.t) =
   (* this env var update disables ocaml-lsp's logging to a file because we use
      vscode [output] pane for logs *)
-  Process.Env.set "OCAML_LSP_SERVER_LOG" "-";
+  Node.Dict.set Process.env "OCAML_LSP_SERVER_LOG" (Some "-");
   let open Promise.Syntax in
   let instance = Extension_instance.make () in
-  ExtensionContext.subscribe extension
-    ~disposable:(Extension_instance.disposable instance);
+  Extension_context.subscribe extension (Extension_instance.disposable instance);
   Dune_formatter.register extension instance;
   Dune_task_provider.register extension instance;
   Extension_commands.register_all_commands extension instance;

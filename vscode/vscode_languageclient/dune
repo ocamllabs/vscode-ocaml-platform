@@ -1,9 +1,0 @@
-(library
- (name vscode_languageclient)
- (public_name vscode.languageclient)
- (preprocess
-  (pps gen_js_api.ppx))
- (js_of_ocaml
-  (javascript_files vscode_languageclient_stub.js))
- (libraries vscode interop promise_jsoo jsonoo js_of_ocaml gen_js_api)
- (modes byte))

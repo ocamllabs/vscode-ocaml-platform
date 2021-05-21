@@ -1,0 +1,272 @@
+(library
+ (name node)
+ (libraries js_of_ocaml ojs es2020)
+ (modules
+  (:standard \ node_trace_events))
+ (modes byte)
+ (js_of_ocaml
+  (javascript_files stub.js)))
+
+(rule
+ (targets node.ml)
+ (deps node.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_assert.ml)
+ (deps node_assert.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_async_hooks.ml)
+ (deps node_async_hooks.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_buffer.ml)
+ (deps node_buffer.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_child_process.ml)
+ (deps node_child_process.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_cluster.ml)
+ (deps node_cluster.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_console.ml)
+ (deps node_console.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_constants.ml)
+ (deps node_constants.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_crypto.ml)
+ (deps node_crypto.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_dgram.ml)
+ (deps node_dgram.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_dns.ml)
+ (deps node_dns.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_domain.ml)
+ (deps node_domain.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_events.ml)
+ (deps node_events.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_fs.ml)
+ (deps node_fs.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_fs_promises.ml)
+ (deps node_fs_promises.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_globals.ml)
+ (deps node_globals.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_http.ml)
+ (deps node_http.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_http2.ml)
+ (deps node_http2.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_https.ml)
+ (deps node_https.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets import.ml)
+ (deps import.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_inspector.ml)
+ (deps node_inspector.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_module.ml)
+ (deps node_module.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_net.ml)
+ (deps node_net.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_os.ml)
+ (deps node_os.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_path.ml)
+ (deps node_path.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_perf_hooks.ml)
+ (deps node_perf_hooks.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_process.ml)
+ (deps node_process.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_punycode.ml)
+ (deps node_punycode.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_querystring.ml)
+ (deps node_querystring.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_readline.ml)
+ (deps node_readline.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_repl.ml)
+ (deps node_repl.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_stream.ml)
+ (deps node_stream.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_string_decoder.ml)
+ (deps node_string_decoder.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_timers.ml)
+ (deps node_timers.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_tls.ml)
+ (deps node_tls.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_trace_events.ml)
+ (deps node_trace_events.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_tty.ml)
+ (deps node_tty.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_url.ml)
+ (deps node_url.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_util.ml)
+ (deps node_util.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_v8.ml)
+ (deps node_v8.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_vm.ml)
+ (deps node_vm.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_wasi.ml)
+ (deps node_wasi.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_worker_threads.ml)
+ (deps node_worker_threads.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets node_zlib.ml)
+ (deps node_zlib.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))

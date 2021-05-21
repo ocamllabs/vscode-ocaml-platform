@@ -1,0 +1,13 @@
+(library
+ (name vscode_languageclient)
+ (modules vscode_languageclient)
+ (libraries js_of_ocaml ojs es2015 vscode)
+ (modes byte)
+ (js_of_ocaml
+  (javascript_files stub.js)))
+
+(rule
+ (targets vscode_languageclient.ml)
+ (deps vscode_languageclient.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))

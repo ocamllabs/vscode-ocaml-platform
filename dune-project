@@ -35,24 +35,5 @@
    (= 1.0.8))
   (base
    (>= v0.14.1))
-  (promise_jsoo
-   (>= 0.3.1))
-  (jsonoo
-   (>= 0.2.1))
   (opam-file-format
    (>= 2.1.2))))
-
-(package
- (name vscode)
- (synopsis "Visual Studio Code Bindings")
- (depends
-  (ocaml
-   (>= 4.11))
-  (js_of_ocaml
-   (>= 3.9.0))
-  (gen_js_api
-   (= 1.0.8))
-  (promise_jsoo
-   (>= 0.3.1))
-  (jsonoo
-   (>= 0.2.1))))

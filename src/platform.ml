@@ -7,12 +7,12 @@ type t =
   | Other
 
 let of_string = function
-  | "win32" -> Win32
-  | "darwin" -> Darwin
-  | "linux" -> Linux
+  | `win32 -> Win32
+  | `darwin -> Darwin
+  | `linux -> Linux
   | _ -> Other
 
-let t = of_string Process.platform
+let t = of_string Node.Process.platform
 
 module Map = struct
   type 'a t =

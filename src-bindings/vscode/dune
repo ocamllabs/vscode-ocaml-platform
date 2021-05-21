@@ -1,0 +1,27 @@
+(library
+ (name vscode)
+ (modules vscode)
+ (libraries js_of_ocaml ojs es2015)
+ (modes byte)
+ (js_of_ocaml
+  (javascript_files stub.js)))
+
+(library
+ (name vscode_proposed)
+ (modules vscode_proposed)
+ (libraries vscode js_of_ocaml ojs es2015)
+ (modes byte)
+ (js_of_ocaml
+  (javascript_files stub.js)))
+
+(rule
+ (targets vscode.ml)
+ (deps vscode.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets vscode_proposed.ml)
+ (deps vscode_proposed.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))

@@ -4,32 +4,32 @@ module Repl_path = struct
   type t = string option
 
   let of_json json =
-    let open Jsonoo.Decode in
+    let open Json.Decode in
     nullable string json
 
   let to_json (t : t) =
-    let open Jsonoo.Encode in
+    let open Json.Encode in
     nullable string t
 
   let key = "path"
 
-  let t = Settings.create ~scope:Global ~key ~of_json ~to_json
+  let t = Settings.create ~scope:`Global ~key ~of_json ~to_json
 end
 
 module Repl_args = struct
   type t = string list option
 
   let of_json json =
-    let open Jsonoo.Decode in
+    let open Json.Decode in
     nullable (list string) json
 
   let to_json (t : t) =
-    let open Jsonoo.Encode in
+    let open Json.Encode in
     nullable (list string) t
 
   let key = "args"
 
-  let t = Settings.create ~scope:Global ~key ~of_json ~to_json
+  let t = Settings.create ~scope:`Global ~key ~of_json ~to_json
 end
 
 let get_repl_path () =
@@ -50,12 +50,12 @@ let has_utop sandbox =
 
 let can_build sandbox =
   let open Promise.Syntax in
-  let excludes =
+  let exclude =
     (* ignoring dune files from _build, _opam, _esy *)
     `String "{**/_*}"
   in
   let includes = `String "**/{dune-project}" in
-  let* dunes = Workspace.findFiles ~includes ~excludes () in
+  let* dunes = Workspace.find_files includes ~exclude () in
   match dunes with
   | [] -> Promise.return false
   | _ :: _ :: _ ->
@@ -63,7 +63,7 @@ let can_build sandbox =
        build it. *)
     Promise.return false
   | el :: _ -> (
-    let cwd = Stdlib.Filename.dirname (Uri.fsPath el) |> Path.of_string in
+    let cwd = Stdlib.Filename.dirname (Uri.fs_path el) |> Path.of_string in
     let cmd = Sandbox.get_command sandbox "dune" [ "build" ] in
     let+ result = Cmd.output ~cwd cmd in
     match result with
@@ -105,35 +105,33 @@ let create_terminal instance sandbox =
       (* Wait for UTop or OCaml REPL to be initialized before sending text to
          the terminal.
 
-         That's hacky, buy hey, if vscode-python does it, so can we...
-         https://github.com/microsoft/vscode-python/blob/main/src/client/terminals/codeExecution/terminalCodeExecution.ts#L54 *)
+         That's hacky, buy hey, if vscode-python does it, so can we..
+         https://github.com/microsoft/vscode-python/blob/main/src/client/terminals/codeExecution/terminal_code_execution.ts#L54 *)
       let+ _ =
         Promise.make (fun ~resolve ~reject:_ ->
             let (_ : Node.Timeout.t) =
-              Node.setTimeout (fun () -> resolve true) 2500
+              Node.set_timeout (fun _ -> resolve true) ~ms:2500 ()
             in
             ())
       in
-      match Terminal.exitStatus term with
+      match Terminal.exit_status term with
       | Some _ -> Error "The REPL terminal could not be open"
       | None ->
         Extension_instance.set_repl instance term;
         Ok term))
 
 let get_code text_editor =
-  let selection = Vscode.TextEditor.selection text_editor in
-  let start_line = Vscode.Selection.start selection |> Vscode.Position.line in
-  let end_line = Vscode.Selection.end_ selection |> Vscode.Position.line in
-  let start_char =
-    Vscode.Selection.start selection |> Vscode.Position.character
-  in
-  let end_char = Vscode.Selection.end_ selection |> Vscode.Position.character in
-  let document = Vscode.TextEditor.document text_editor in
+  let selection = Text_editor.selection text_editor in
+  let start_line = Selection.start selection |> Position.line in
+  let end_line = Selection.end_ selection |> Position.line in
+  let start_char = Selection.start selection |> Position.character in
+  let end_char = Selection.end_ selection |> Position.character in
+  let document = Text_editor.document text_editor in
   if start_line = end_line && start_char = end_char then
-    let line = Vscode.TextDocument.lineAt document ~line:start_line in
-    Vscode.TextLine.text line
+    let line = Text_document.line_at document start_line in
+    Text_line.text line
   else
-    Vscode.TextDocument.getText document ~range:(selection :> Vscode.Range.t) ()
+    Text_document.get_text document ~range:(selection :> Range.t) ()
 
 let prepare_code code =
   if String.is_suffix code ~suffix:";;" then
@@ -143,7 +141,7 @@ let prepare_code code =
 
 module Command = struct
   let _open_repl =
-    let handler (instance : Extension_instance.t) ~args:_ =
+    let handler (instance : Extension_instance.t) _args =
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
@@ -160,7 +158,7 @@ module Command = struct
     Extension_commands.register ~id:Extension_consts.Commands.open_repl handler
 
   let _evaluate_selection =
-    let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
+    let handler (instance : Extension_instance.t) ~text_editor ~edit:_ ~args:_ =
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
@@ -168,7 +166,7 @@ module Command = struct
         match term with
         | Error err -> show_message `Error "Could not start the REPL: %s" err
         | Ok term ->
-          let code = get_code textEditor in
+          let code = get_code text_editor in
           if String.length code > 0 then
             let code = prepare_code code in
             Terminal_sandbox.send term code
@@ -181,10 +179,10 @@ end
 
 let register extension instance =
   let disposable =
-    Vscode.Window.onDidCloseTerminal ()
-      ~listener:(fun terminal ->
-        if String.equal (Vscode.Terminal.name terminal) name then
+    Window.on_did_close_terminal ()
+      (fun terminal ->
+        if String.equal (Terminal.name terminal) name then
           Extension_instance.close_repl instance)
       ()
   in
-  Vscode.ExtensionContext.subscribe extension ~disposable
+  Extension_context.subscribe extension disposable

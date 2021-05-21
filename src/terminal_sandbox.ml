@@ -4,11 +4,11 @@ module ShellPath = struct
   type t = string option
 
   let of_json json =
-    let open Jsonoo.Decode in
+    let open Json.Decode in
     nullable string json
 
   let to_json (t : t) =
-    let open Jsonoo.Encode in
+    let open Json.Encode in
     nullable string t
 
   let key =
@@ -22,18 +22,18 @@ module ShellPath = struct
     in
     Platform.Map.find map Platform.t
 
-  let t = Settings.create ~scope:Global ~key ~of_json ~to_json
+  let t = Settings.create ~scope:`Global ~key ~of_json ~to_json
 end
 
 module ShellArgs = struct
   type t = string list option
 
   let of_json json =
-    let open Jsonoo.Decode in
+    let open Json.Decode in
     nullable (list string) json
 
   let to_json (t : t) =
-    let open Jsonoo.Encode in
+    let open Json.Encode in
     nullable (list string) t
 
   let key =
@@ -47,7 +47,7 @@ module ShellArgs = struct
     in
     Platform.Map.find map Platform.t
 
-  let t = Settings.create ~scope:Global ~key ~of_json ~to_json
+  let t = Settings.create ~scope:`Global ~key ~of_json ~to_json
 end
 
 let get_shell_path () =
@@ -56,7 +56,7 @@ let get_shell_path () =
   in
   match shell_path with
   | Some path -> path
-  | None -> Env.shell ()
+  | None -> Env.shell
 
 let get_shell_args () =
   let get_args section = Option.join (Settings.get ~section ShellArgs.t) in
@@ -85,14 +85,14 @@ let create ?name ?command sandbox =
   in
   Cmd.log (Spawn command);
   let name = Option.value name ~default:(Sandbox.to_pretty_string sandbox) in
-  let shellPath = Path.to_string bin in
-  let shellArgs = `Strings args in
-  Window.createTerminal ~name ~shellPath ~shellArgs ()
+  let shell_path = Path.to_string bin in
+  let shell_args = args in
+  Window.create_terminal ~name ~shell_path ~shell_args ()
 
 let dispose = Terminal.dispose
 
 let show t = Terminal.show t ()
 
 let send t text =
-  let addNewLine = not (String.is_suffix text ~suffix:"\n") in
-  Terminal.sendText t ~text ~addNewLine ()
+  let add_new_line = not (String.is_suffix text ~suffix:"\n") in
+  Terminal.send_text t ~text ~add_new_line ()

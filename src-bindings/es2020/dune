@@ -1,0 +1,51 @@
+(library
+ (name es2020)
+ (libraries js_of_ocaml ojs es2019)
+ (flags
+  (:standard
+   ; 58: Hide "no cmx file was found in path for module Ojs, and its interface was not compiled with -opaque"
+   ; 60: We hide some anonymous interfaces
+   -w
+   -58-60)))
+
+(rule
+ (targets es2020_bigint.ml)
+ (deps es2020_bigint.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2020.ml)
+ (deps es2020.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2020_intl.ml)
+ (deps es2020_intl.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2020_promise.ml)
+ (deps es2020_promise.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2020_sharedmemory.ml)
+ (deps es2020_sharedmemory.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2020_string.ml)
+ (deps es2020_string.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))
+
+(rule
+ (targets es2020_symbol_wellknown.ml)
+ (deps es2020_symbol_wellknown.mli)
+ (action
+  (run %{bin:gen_js_api} %{deps} -o %{targets})))

@@ -1,59 +1,59 @@
+open Import
+
 let select_sandbox_item =
   let icon =
-    `LightDark
-      Vscode.TreeItem.LightDarkIcon.
-        { light = `String (Path.asset "collection-light.svg" |> Path.to_string)
-        ; dark = `String (Path.asset "collection-dark.svg" |> Path.to_string)
+    `IconPath
+      Icon_path.
+        { light = `String (asset "collection-light.svg" |> Path.to_string)
+        ; dark = `String (asset "collection-dark.svg" |> Path.to_string)
         }
   in
   let label =
-    `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Select a Sandbox" ())
+    `TreeItemLabel (Tree_item_label.create ~label:"Select a Sandbox" ())
   in
-  let item = Vscode.TreeItem.make_label ~label () in
+  let item = Tree_item.create ~label () in
   let command =
-    Vscode.Command.create ~title:"Select a Sandbox"
-      ~command:"ocaml.select-sandbox" ()
+    Command.create ~title:"Select a Sandbox" ~command:"ocaml.select-sandbox" ()
   in
-  Vscode.TreeItem.set_iconPath item icon;
-  Vscode.TreeItem.set_command item command;
+  Tree_item.set_icon_path item icon;
+  Tree_item.set_command item command;
   item
 
 let terminal_item =
   let icon =
-    `LightDark
-      Vscode.TreeItem.LightDarkIcon.
-        { light = `String (Path.asset "terminal-light.svg" |> Path.to_string)
-        ; dark = `String (Path.asset "terminal-dark.svg" |> Path.to_string)
+    `IconPath
+      Icon_path.
+        { light = `String (asset "terminal-light.svg" |> Path.to_string)
+        ; dark = `String (asset "terminal-dark.svg" |> Path.to_string)
         }
   in
   let label =
     `TreeItemLabel
-      (Vscode.TreeItemLabel.create ~label:"Open a sandboxed terminal" ())
+      (Tree_item_label.create ~label:"Open a sandboxed terminal" ())
   in
-  let item = Vscode.TreeItem.make_label ~label () in
+  let item = Tree_item.create ~label () in
   let command =
-    Vscode.Command.create ~title:"Open a sandboxed terminal"
+    Command.create ~title:"Open a sandboxed terminal"
       ~command:"ocaml.open-terminal" ()
   in
-  Vscode.TreeItem.set_iconPath item icon;
-  Vscode.TreeItem.set_command item command;
+  Tree_item.set_icon_path item icon;
+  Tree_item.set_command item command;
   item
 
 let items = [ select_sandbox_item; terminal_item ]
 
-let getTreeItem ~element = `Value element
+let get_tree_item element = `Value element
 
-let getChildren ?element () =
+let get_children ?element () =
   match element with
   | None -> `Value (Some items)
   | Some _ -> `Value (Some [])
 
 let register extension =
-  let module TreeDataProvider = Vscode.TreeDataProvider.Make (Vscode.TreeItem) in
-  let treeDataProvider = TreeDataProvider.create ~getTreeItem ~getChildren () in
-  let disposable =
-    Vscode.Window.registerTreeDataProvider
-      (module Vscode.TreeItem)
-      ~viewId:"ocaml-commands" ~treeDataProvider
+  let tree_data_provider =
+    Tree_data_provider.create ~get_tree_item ~get_children ()
   in
-  Vscode.ExtensionContext.subscribe extension ~disposable
+  let disposable =
+    Window.register_tree_data_provider "ocaml-commands" tree_data_provider
+  in
+  Extension_context.subscribe extension disposable
