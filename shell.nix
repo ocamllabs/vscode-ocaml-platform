@@ -1,5 +1,6 @@
 let
-  pkgs = (import <nixpkgs> { });
+  pkgs = import
+    (fetchTarball "https://github.com/NixOS/nixpkgs/archive/master.tar.gz") { };
   local = (import ./default.nix { });
   strings = pkgs.lib.strings;
   inherit (pkgs) stdenv lib;
