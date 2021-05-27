@@ -38,3 +38,7 @@ pkg: build
 # builds, packages, and installs the extension to your VS Code
 install: pkg
 	code --force --install-extension test_extension.vsix
+
+.PHONY: nix/opam-selection.nix
+nix/opam-selection.nix:
+	nix-shell -A resolve default.nix
