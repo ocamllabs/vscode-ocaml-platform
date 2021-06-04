@@ -1,6 +1,6 @@
 const assert = require("assert");
 
-let problemLocations = {
+const problemLocations = {
   'File "file.ml", line 4, characters 6-7:': [
     "file.ml",
     "4",
@@ -26,7 +26,7 @@ let problemLocations = {
   ],
 };
 
-let problemMessages = {
+const problemMessages = {
   "Error: This expression has type int": [
     "Error",
     undefined,
@@ -50,16 +50,16 @@ let problemMessages = {
 
 suite("Basic tests", () => {
   test("Problem Matcher tests", async () => {
-    let locationRegex = new RegExp(
+    const locationRegex = new RegExp(
       '^\\s*\\bFile\\b\\s*"(.*)",\\s*\\blines?\\b\\s*(\\d+)(?:-(\\d+))?(?:,\\s*\\bcharacters\\b\\s*(\\d+)-(\\d+)\\s*)?:\\s*$'
     );
 
-    let messageRegex = new RegExp(
+    const messageRegex = new RegExp(
       "^(?:\\s*\\bParse\\b\\s*)?\\s*\\b([Ee]rror|Warning)\\b\\s*(?:(?:\\(\\s*\\bwarning\\b\\s*)?(\\d+)\\)?)?\\s*:\\s*(.*)$"
     );
 
     for (const [problem, expected] of Object.entries(problemLocations)) {
-      let captures = problem.match(locationRegex);
+      const captures = problem.match(locationRegex);
       assert.notStrictEqual(
         captures,
         null,
@@ -69,7 +69,7 @@ suite("Basic tests", () => {
     }
 
     for (const [problem, expected] of Object.entries(problemMessages)) {
-      let captures = problem.match(messageRegex);
+      const captures = problem.match(messageRegex);
       assert.notStrictEqual(
         captures,
         null,

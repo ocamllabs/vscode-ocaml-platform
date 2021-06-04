@@ -13,7 +13,7 @@ jobs:
           - macos-latest
           - ubuntu-latest
           - windows-latest
-        ocaml-version:
+        ocaml-compiler:
           - 4.12.x
         node-version:
           - 14.x
@@ -24,12 +24,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Use OCaml ${{ matrix.ocaml-version }}
-        uses: actions-ml/setup-ocaml@master
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v2
         with:
-          ocaml-version: ${{ matrix.ocaml-version }}
-          opam-depext: false
-          opam-pin: false
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          opam-depext-flags: --with-test
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
@@ -75,6 +74,8 @@ jobs:
         uses: GabrielBB/xvfb-action@v1
         with:
           run: yarn test
+        env:
+          OPAMSWITCH: ${{ github.workspace }}
 
       - name: Publish extension to VSCode Marketplace
         if: success() && runner.os == 'Linux' && contains(github.ref, 'refs/tags')
@@ -125,7 +126,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Use OCaml ${{ matrix.ocaml-compiler }}
-        uses: avsm/setup-ocaml@v2
+        uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
           dune-cache: true
@@ -159,7 +160,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Use OCaml ${{ matrix.ocaml-compiler }}
-        uses: avsm/setup-ocaml@v2
+        uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
           dune-cache: true
