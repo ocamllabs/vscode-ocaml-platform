@@ -74,6 +74,8 @@ jobs:
         uses: GabrielBB/xvfb-action@v1
         with:
           run: yarn test
+        env:
+          OPAMSWITCH: ${{ github.workspace }}
 
       - name: Publish extension to VSCode Marketplace
         if: success() && runner.os == 'Linux' && contains(github.ref, 'refs/tags')
