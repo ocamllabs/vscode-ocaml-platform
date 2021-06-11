@@ -131,6 +131,69 @@ let _open_current_dune_file =
   in
   command Extension_consts.Commands.open_current_dune_file handler
 
+let _next_hole =
+  let handler (instance : Extension_instance.t) ~args:_ =
+    (* this command is available (in the command palette) only when a file is
+       open *)
+    match Window.activeTextEditor () with
+    | None ->
+      show_message `Error
+        "The command \"OCaml: Next Hole\" should be run only with a file open \
+         in the editor, so the command can look for a dune file in the same \
+         folder as the open file."
+    | Some text_editor -> (
+      match Extension_instance.lsp_client instance with
+      | None -> show_message `Error "No client found"
+      | Some (client, (_ : Ocaml_lsp.t)) ->
+        let doc = TextEditor.document text_editor in
+        let uri = Uri.toString (TextDocument.uri doc) () in
+        let open Promise.Syntax in
+        let pos =
+          let selection = TextEditor.selection text_editor in
+          Selection.start selection
+        in
+        let (_ : unit Promise.t) =
+          let* range =
+            Promise.catch
+              ~rejected:(fun _err -> None |> Promise.return)
+              (let+ res =
+                 LanguageClient.sendRequest client ~meth:"ocamllsp/nextHole"
+                   ~data:
+                     Jsonoo.Encode.(
+                       object_
+                         [ ("uri", string uri)
+                         ; ("position", Jsonoo.t_of_js @@ Position.t_to_js pos)
+                         ])
+                   ()
+               in
+               Some res)
+          in
+          Promise.catch
+            (match range with
+            | None ->
+              show_message `Warn "No hole was found";
+              Promise.return ()
+            | Some range ->
+              let decode_pos : Position.t Jsonoo.Decode.decoder =
+               fun json ->
+                let line = Jsonoo.Decode.(field "line" int) json in
+                let character = Jsonoo.Decode.(field "character" int) json in
+                Position.make ~line ~character
+              in
+              let anchor = Jsonoo.Decode.(field "start" decode_pos) range in
+              let active = Jsonoo.Decode.(field "end" decode_pos) range in
+              let new_selection = Selection.makePositions ~anchor ~active in
+              TextEditor.set_selection text_editor new_selection;
+              Promise.return ())
+            ~rejected:(fun err ->
+              let s = Promise.error_to_js err |> Ojs.string_of_js in
+              show_message `Error "%s" s;
+              Promise.return ())
+        in
+        ())
+  in
+  command Extension_consts.Commands.next_hole handler
+
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in

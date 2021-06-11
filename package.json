@@ -181,6 +181,11 @@
         }
       },
       {
+        "command": "ocaml.next-hole",
+        "category": "OCaml",
+        "title": "Next Hole"
+      },
+      {
         "command": "ocaml.current-dune-file",
         "category": "OCaml",
         "title": "Open Dune File (located in the same folder)"
@@ -235,6 +240,10 @@
       "commandPalette": [
         {
           "command": "ocaml.current-dune-file",
+          "when": "editorIsOpen"
+        },
+        {
+          "command": "ocaml.next-hole",
           "when": "editorIsOpen"
         },
         {
