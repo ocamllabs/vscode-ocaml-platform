@@ -43,6 +43,12 @@ let show_message kind fmt =
       ())
     fmt
 
+let show_err fmt = show_message `Error fmt
+
+let show_warn fmt = show_message `Warn fmt
+
+let show_info fmt = show_message `Info fmt
+
 let log fmt =
   let (lazy output_channel) = Output.extension_output_channel in
   let write line = OutputChannel.appendLine output_channel ~value:line in
