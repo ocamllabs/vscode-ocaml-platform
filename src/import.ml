@@ -92,3 +92,27 @@ let with_confirmation message ~yes ?(no = "Cancel") f =
   match choice with
   | Some true -> f ()
   | _ -> Promise.return ()
+
+(** Builds application-specific functionality around [Vscode.Position] *)
+module Position = struct
+  include Vscode.Position
+
+  let t_of_jsonoo json =
+    let line = Jsonoo.Decode.(field "line" int) json in
+    let character = Jsonoo.Decode.(field "character" int) json in
+    Position.make ~line ~character
+
+  let t_to_jsonoo t = t |> Position.t_to_js |> Jsonoo.t_of_js
+end
+
+(** Build application-specific functionality aroudn [Vscode.Range] *)
+module Range = struct
+  include Vscode.Range
+
+  (* Note that we can't do [json |> Jsonoo.t_to_js |> Vscode.Range.t_of_js]
+     since the inner fields have specific type [Position.t] *)
+  let t_of_jsonoo json =
+    let start = Jsonoo.Decode.field "start" Position.t_of_jsonoo json in
+    let end_ = Jsonoo.Decode.field "end" Position.t_of_jsonoo json in
+    Range.makePositions ~start ~end_
+end
