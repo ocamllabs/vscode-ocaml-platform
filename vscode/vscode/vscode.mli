@@ -550,6 +550,8 @@ module TextEditor : sig
 
   val selection : t -> Selection.t
 
+  val set_selection : t -> Selection.t -> unit
+
   val selections : t -> Selection.t list
 
   val visibleRanges : t -> Range.t list
