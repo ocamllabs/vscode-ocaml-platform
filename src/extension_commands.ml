@@ -136,59 +136,49 @@ let _next_hole =
   let handler (instance : Extension_instance.t) ~args:_ =
     (* this command is available (in the command palette) only when a file is
        open *)
+    let src = "OCaml: Next Hole: " in
     match Window.activeTextEditor () with
     | None ->
-      show_message `Error "%s"
+      show_err "%s"
       @@ Extension_consts.Command_errors.avail_when_editor_open "Next Hole"
            ~expl:"The command looks for holes in an open file."
     | Some text_editor -> (
       match Extension_instance.lsp_client instance with
-      | None -> show_message `Error "No client found"
+      | None -> show_err "%s%s" src "Lsp client not found"
       | Some (client, (_ : Ocaml_lsp.t)) ->
         let doc = TextEditor.document text_editor in
         let uri = Uri.toString (TextDocument.uri doc) () in
-        let open Promise.Syntax in
-        let pos =
+        let current_pos =
           let selection = TextEditor.selection text_editor in
           Selection.start selection
         in
         let (_ : unit Promise.t) =
-          let* range =
+          let open Promise.Syntax in
+          let uri_pos_obj uri pos =
+            Jsonoo.Encode.(
+              object_
+                [ ("uri", string uri); ("position", Position.t_to_jsonoo pos) ])
+          in
+          let+ range =
             Promise.catch
-              ~rejected:(fun _err -> None |> Promise.return)
               (let+ res =
-                 LanguageClient.sendRequest client ~meth:"ocamllsp/nextHole"
-                   ~data:
-                     Jsonoo.Encode.(
-                       object_
-                         [ ("uri", string uri)
-                         ; ("position", Jsonoo.t_of_js @@ Position.t_to_js pos)
-                         ])
+                 LanguageClient.sendRequest client
+                   ~meth:Extension_consts.Custom_requests.next_hole_meth
+                   ~data:(uri_pos_obj uri current_pos)
                    ()
                in
                Some res)
+              ~rejected:(fun _err -> None |> Promise.return)
           in
-          Promise.catch
-            (match range with
-            | None ->
-              show_message `Warn "No hole was found";
-              Promise.return ()
-            | Some range ->
-              let decode_pos : Position.t Jsonoo.Decode.decoder =
-               fun json ->
-                let line = Jsonoo.Decode.(field "line" int) json in
-                let character = Jsonoo.Decode.(field "character" int) json in
-                Position.make ~line ~character
-              in
-              let anchor = Jsonoo.Decode.(field "start" decode_pos) range in
-              let active = Jsonoo.Decode.(field "end" decode_pos) range in
-              let new_selection = Selection.makePositions ~anchor ~active in
-              TextEditor.set_selection text_editor new_selection;
-              Promise.return ())
-            ~rejected:(fun err ->
-              let s = Promise.error_to_js err |> Ojs.string_of_js in
-              show_message `Error "%s" s;
-              Promise.return ())
+          match range with
+          | None -> show_info "%s%s" src "No hole was found"
+          | Some range_json ->
+            let range = Range.t_of_jsonoo range_json in
+            let new_selection =
+              Selection.makePositions ~anchor:(Range.start range)
+                ~active:(Range.end_ range)
+            in
+            TextEditor.set_selection text_editor new_selection
         in
         ())
   in

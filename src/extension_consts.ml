@@ -44,4 +44,8 @@ module Command_errors = struct
       cmd_name expl
 end
 
+module Custom_requests = struct
+  let next_hole_meth = "ocamllsp/nextHole"
+end
+
 (* TODO: Refactor the code so that we don't need any "constants" module *)
