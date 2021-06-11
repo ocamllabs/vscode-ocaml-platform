@@ -36,4 +36,12 @@ module Commands = struct
   let next_hole = ocaml_prefixed "next-hole"
 end
 
+module Command_errors = struct
+  let avail_when_editor_open ~expl cmd_name =
+    Printf.sprintf
+      "The command \"OCaml: %s\" should be run only with a file open in the \
+       editor. %s"
+      cmd_name expl
+end
+
 (* TODO: Refactor the code so that we don't need any "constants" module *)
