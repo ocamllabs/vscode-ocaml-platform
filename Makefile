@@ -1,5 +1,5 @@
 build:
-	dune build src/vscode_ocaml_platform.bc.js --profile=release
+	dune build src/vscode_ocaml_platform.bc.js
 	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
 		--external:vscode \

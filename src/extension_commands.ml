@@ -136,7 +136,7 @@ let _next_hole =
   let handler (instance : Extension_instance.t) ~args:_ =
     (* this command is available (in the command palette) only when a file is
        open *)
-    let src = "OCaml: Next Hole: " in
+    let src = "[OCaml | Next Hole]" in
     match Window.activeTextEditor () with
     | None ->
       show_err "%s"
@@ -167,18 +167,27 @@ let _next_hole =
                    ~data:(uri_pos_obj uri current_pos)
                    ()
                in
-               Some res)
-              ~rejected:(fun _err -> None |> Promise.return)
+               Ok res)
+              ~rejected:(fun err ->
+                Error (Promise.error_to_js err |> Ojs.string_of_js)
+                |> Promise.return)
           in
           match range with
-          | None -> show_info "%s%s" src "No hole was found"
-          | Some range_json ->
-            let range = Range.t_of_jsonoo range_json in
-            let new_selection =
-              Selection.makePositions ~anchor:(Range.start range)
-                ~active:(Range.end_ range)
+          | Error err ->
+            show_info "%s%s because of\n%s" src "No hole was found because of"
+              err
+          | Ok range_json -> (
+            let range =
+              Jsonoo.Decode.try_optional Range.t_of_jsonoo range_json
             in
-            TextEditor.set_selection text_editor new_selection
+            match range with
+            | None -> show_info "%s No holes found in this file" src
+            | Some range ->
+              let new_selection =
+                Selection.makePositions ~anchor:(Range.start range)
+                  ~active:(Range.end_ range)
+              in
+              TextEditor.set_selection text_editor new_selection)
         in
         ())
   in
