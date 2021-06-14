@@ -136,7 +136,17 @@ let _next_hole =
   let handler (instance : Extension_instance.t) ~args:_ =
     (* this command is available (in the command palette) only when a file is
        open *)
-    let src = "[OCaml | Next Hole]" in
+    let show_cmd_message ?expl f msg =
+      let nice_err =
+        Printf.sprintf "%s    [ Jump to Next Hole ]. %s" msg
+          (match expl with
+          | None -> ""
+          | Some r -> "Reason: " ^ r)
+      in
+      show_message f "%s" nice_err
+    in
+    let show_cmd_err ?(expl = "") err = show_cmd_message `Error err ~expl in
+    let hole_not_found_msg = "No typed hole was found in this file" in
     match Window.activeTextEditor () with
     | None ->
       show_err "%s"
@@ -144,7 +154,9 @@ let _next_hole =
            ~expl:"The command looks for holes in an open file."
     | Some text_editor -> (
       match Extension_instance.lsp_client instance with
-      | None -> show_err "%s%s" src "Lsp client not found"
+      | None ->
+        show_cmd_err "Lsp client not found"
+          ~expl:"The extension may not have yet launched properly."
       | Some (_, ls) when not (Ocaml_lsp.can_handle_next_hole_cmd ls) ->
         (* if, however, ocamllsp doesn't have the capability, recommend updating
            ocamllsp*)
@@ -180,14 +192,13 @@ let _next_hole =
           in
           match range with
           | Error err ->
-            show_info "%s%s because of\n%s" src "No hole was found because of"
-              err
+            show_cmd_err hole_not_found_msg ~expl:("The cause is " ^ err)
           | Ok range_json -> (
             let range =
               Jsonoo.Decode.try_optional Range.t_of_jsonoo range_json
             in
             match range with
-            | None -> show_info "%s No holes found in this file" src
+            | None -> show_cmd_message `Info hole_not_found_msg
             | Some range ->
               let new_selection =
                 Selection.makePositions ~anchor:(Range.start range)
