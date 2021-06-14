@@ -227,6 +227,10 @@
         "command": "ocaml.evaluate-selection",
         "key": "Shift+Enter",
         "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir"
+      },
+      {
+        "command": "ocaml.next-hole",
+        "key": "Alt+L"
       }
     ],
     "menus": {
