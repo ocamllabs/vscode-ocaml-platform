@@ -183,7 +183,7 @@
       {
         "command": "ocaml.next-hole",
         "category": "OCaml",
-        "title": "Next Hole"
+        "title": "Jump to Next Typed Hole"
       },
       {
         "command": "ocaml.current-dune-file",
