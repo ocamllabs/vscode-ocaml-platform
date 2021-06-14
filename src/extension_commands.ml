@@ -145,7 +145,13 @@ let _next_hole =
     | Some text_editor -> (
       match Extension_instance.lsp_client instance with
       | None -> show_err "%s%s" src "Lsp client not found"
-      | Some (client, (_ : Ocaml_lsp.t)) ->
+      | Some (_, ls) when not (Ocaml_lsp.can_handle_next_hole_cmd ls) ->
+        (* if, however, ocamllsp doesn't have the capability, recommend updating
+           ocamllsp*)
+        show_message `Warn
+          "The installed version of ocamllsp does not support jumping to next \
+           hole. Consider updating ocamllsp."
+      | Some (client, _) ->
         let doc = TextEditor.document text_editor in
         let uri = Uri.toString (TextDocument.uri doc) () in
         let current_pos =
