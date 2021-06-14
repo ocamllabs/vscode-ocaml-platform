@@ -204,7 +204,9 @@ let _next_hole =
                 Selection.makePositions ~anchor:(Range.start range)
                   ~active:(Range.end_ range)
               in
-              TextEditor.set_selection text_editor new_selection)
+              TextEditor.set_selection text_editor new_selection;
+              TextEditor.revealRange text_editor ~range
+                ~revealType:TextEditorRevealType.InCenterIfOutsideViewport ())
         in
         ())
   in
