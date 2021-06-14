@@ -62,8 +62,6 @@ val select_sandbox : unit -> t option Promise.t
 
 (* Helper utils *)
 
-val has_command : t -> string -> bool Promise.t
-
 (** Extract command to run with the sandbox *)
 val get_command : t -> string -> string list -> Cmd.t
 
