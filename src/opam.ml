@@ -246,8 +246,6 @@ let switch_exists t switch =
   let+ switches = switch_list t in
   List.exists switches ~f:(Switch.equal switch)
 
-let switch_path t switch = Switch.path t switch
-
 let equal o1 o2 = Cmd.equal_spawn o1.bin o2.bin && Path.equal o1.root o2.root
 
 let switch_show ?cwd t =

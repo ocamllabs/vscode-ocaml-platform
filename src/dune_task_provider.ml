@@ -28,8 +28,7 @@ module Setting = struct
 end
 
 let folder_relative_path folders file =
-  List.fold_left
-    ~f:(fun acc (folder : WorkspaceFolder.t) ->
+  List.fold_left ~init:None folders ~f:(fun acc (folder : WorkspaceFolder.t) ->
       match acc with
       | Some _ -> acc
       | None -> (
@@ -37,10 +36,9 @@ let folder_relative_path folders file =
         match String.chop_prefix file ~prefix with
         | None -> acc
         | Some without_prefix -> Some (folder, without_prefix)))
-    ~init:None folders
 
 let get_shell_execution sandbox options =
-  let command = Sandbox.get_dune_command sandbox [ "build" ] in
+  let command = Sandbox.get_command sandbox "dune" [ "build" ] in
   Cmd.log command;
   match command with
   | Shell commandLine -> ShellExecution.makeCommandLine ~commandLine ~options ()

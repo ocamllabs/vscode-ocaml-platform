@@ -62,12 +62,6 @@ val init : t -> Cmd.t
 
 (** {4 Working with switches} *)
 
-(** Path of the switch on the filesystem.
-
-    If the switch is a local switch, the path is [switch_path ^ _opam],
-    otherwise it is the result of [opam var root]. *)
-val switch_path : t -> Switch.t -> Path.t
-
 (** Create a new switch. *)
 val switch_create : t -> name:string -> args:string list -> Cmd.t
 

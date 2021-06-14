@@ -62,16 +62,8 @@ val select_sandbox : unit -> t option Promise.t
 
 (* Helper utils *)
 
-val has_command : t -> string -> bool Promise.t
-
 (** Extract command to run with the sandbox *)
 val get_command : t -> string -> string list -> Cmd.t
-
-(** Extract lsp command and arguments *)
-val get_lsp_command : ?args:string list -> t -> Cmd.t
-
-(** Extract a dune command *)
-val get_dune_command : t -> string list -> Cmd.t
 
 (** Command to install dependencies in the sandbox *)
 val get_install_command : t -> string list -> Cmd.t option

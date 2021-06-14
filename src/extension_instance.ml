@@ -31,7 +31,7 @@ let client_options () =
     ~documentSelector ()
 
 let server_options sandbox =
-  let command = Sandbox.get_lsp_command sandbox in
+  let command = Sandbox.get_command sandbox "ocamllsp" [] in
   Cmd.log command;
   match command with
   | Shell command ->
@@ -52,9 +52,10 @@ let start_language_server t =
   let res =
     let open Promise.Result.Syntax in
     let* () =
+      let cmd = Sandbox.get_command t.sandbox "ocamllsp" [ "--version" ] in
       let open Promise.Syntax in
-      let+ has_command = Sandbox.has_command t.sandbox "ocamllsp" in
-      if has_command then
+      let+ (res : Node.ChildProcess.return) = Cmd.run cmd in
+      if res.exitCode = 0 then
         Ok ()
       else
         Error "Sandbox initialisation failed: ocaml-lsp-server is not installed"

@@ -447,23 +447,6 @@ let get_command sandbox bin args : Cmd.t =
     in
     Shell command
 
-let has_command sandbox bin =
-  let open Promise.Syntax in
-  let cmd =
-    match Platform.t with
-    | Win32 -> get_command sandbox "cmd" [ "/c"; "where"; bin ]
-    | _ -> get_command sandbox "which" [ bin ]
-  in
-  let+ result = Cmd.output cmd in
-  match result with
-  | Ok _ -> true
-  | Error _ -> false
-
-let get_lsp_command ?(args = []) sandbox : Cmd.t =
-  get_command sandbox "ocamllsp" args
-
-let get_dune_command sandbox args : Cmd.t = get_command sandbox "dune" args
-
 let get_install_command sandbox tools =
   match sandbox with
   | Opam (opam, switch) -> Some (Opam.install opam switch ~packages:tools)
