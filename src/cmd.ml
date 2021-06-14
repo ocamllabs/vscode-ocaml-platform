@@ -1,14 +1,12 @@
 open Import
 
-type shell = string
-
 type spawn =
   { bin : Path.t
   ; args : string list
   }
 
 type t =
-  | Shell of shell
+  | Shell of string
   | Spawn of spawn
 
 type stdout = string
