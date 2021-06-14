@@ -459,11 +459,6 @@ let has_command sandbox bin =
   | Ok _ -> true
   | Error _ -> false
 
-let get_lsp_command ?(args = []) sandbox : Cmd.t =
-  get_command sandbox "ocamllsp" args
-
-let get_dune_command sandbox args : Cmd.t = get_command sandbox "dune" args
-
 let get_install_command sandbox tools =
   match sandbox with
   | Opam (opam, switch) -> Some (Opam.install opam switch ~packages:tools)

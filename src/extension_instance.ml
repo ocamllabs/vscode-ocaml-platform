@@ -31,7 +31,7 @@ let client_options () =
     ~documentSelector ()
 
 let server_options sandbox =
-  let command = Sandbox.get_lsp_command sandbox in
+  let command = Sandbox.get_command sandbox "ocamllsp" [] in
   Cmd.log command;
   match command with
   | Shell command ->
