@@ -86,3 +86,27 @@ let with_confirmation message ~yes ?(no = "Cancel") f =
   match choice with
   | Some true -> f ()
   | _ -> Promise.return ()
+
+(** Builds application-specific functionality around [Vscode.Position] *)
+module Position = struct
+  let compare p1 p2 =
+    let r = Position.compareTo p1 ~other:p2 in
+    if r < 0 then
+      Ordering.Less
+    else if r = 0 then
+      Equal
+    else
+      Greater
+
+  include Vscode.Position
+end
+
+(** Build application-specific functionality around [Vscode.Range] *)
+module Range = struct
+  let compare r1 r2 =
+    match Position.compare (Range.start r1) (Range.start r2) with
+    | (Ordering.Less | Greater) as r -> r
+    | Equal -> Position.compare (Range.end_ r1) (Range.end_ r2)
+
+  include Vscode.Range
+end
