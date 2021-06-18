@@ -107,6 +107,60 @@ module Range = struct
       [@@js.call]]
 end
 
+module DiagnosticSeverity = struct
+  type t =
+    | Error [@js 0]
+    | Hint [@js 1]
+    | Information [@js 2]
+    | Warning [@js 3]
+  [@@js.enum] [@@js]
+end
+
+module Diagnostic = struct
+  include Interface.Make ()
+
+  type code =
+    ([ `String of string
+     | `Int of int
+     ]
+    [@js.union])
+  [@@js]
+
+  let code_of_js js_val =
+    (* [code?: string | number | {target: Uri, value: string | number}]
+
+       The latter is not supported at the moment *)
+    match Ojs.type_of js_val with
+    | "string" -> `String ([%js.to: string] js_val)
+    | "number" -> `Int ([%js.to: int] js_val)
+    | type_s ->
+      failwith
+      @@ "Diagnostic.code is supported only of types [string] and [number] but \
+          not " ^ type_s
+
+  include
+    [%js:
+    val message : t -> string [@@js.get]
+
+    val range : t -> Range.t [@@js.get]
+
+    val severity : t -> DiagnosticSeverity.t [@@js.get]
+
+    val source : t -> string or_undefined [@@js.get]
+
+    val code : t -> code or_undefined [@@js.get]
+
+    val make :
+         range:Range.t
+      -> message:string
+      -> ?severity:DiagnosticSeverity.t
+      -> unit
+      -> t
+      [@@js.new "vscode.Diagnostic"]]
+
+  let make ?severity ~message range = make ~range ~message ?severity ()
+end
+
 module TextLine = struct
   include Interface.Make ()
 
@@ -2655,7 +2709,13 @@ module Languages = struct
          selector:DocumentSelector.t
       -> provider:DocumentFormattingEditProvider.t
       -> Disposable.t
-      [@@js.global "vscode.languages.registerDocumentFormattingEditProvider"]]
+      [@@js.global "vscode.languages.registerDocumentFormattingEditProvider"]
+
+    val getDiagnostics : Uri.t -> Diagnostic.t list
+      [@@js.global "vscode.languages.getDiagnostics"]
+
+    val get_diagnostics_all : unit -> (Uri.t * Diagnostic.t list) list
+      [@@js.global "vscode.languages.getDiagnostics"]]
 end
 
 module Tasks = struct
