@@ -690,6 +690,8 @@ module TextEditor = struct
 
     val selection : t -> Selection.t [@@js.get]
 
+    val set_selection : t -> Selection.t -> unit [@@js.set "selection"]
+
     val selections : t -> Selection.t list [@@js.get]
 
     val visibleRanges : t -> Range.t list [@@js.get]
