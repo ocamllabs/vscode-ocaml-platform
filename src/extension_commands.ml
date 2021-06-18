@@ -133,6 +133,81 @@ let _open_current_dune_file =
   in
   command Extension_consts.Commands.open_current_dune_file handler
 
+let _jump_to_next_hole =
+  let pick_next_hole current_pos srtd_hole_diags =
+    (* we want to find such a range that starts after the current position *)
+    List.find srtd_hole_diags ~f:(fun diag ->
+        let range = Diagnostic.range diag in
+        match Position.compare current_pos (Range.start range) with
+        | Ordering.Less -> true
+        | Greater -> false
+        | Equal ->
+          (* we don't want the same range that we're in now; we need the next
+             one *)
+          not (Range.contains range ~positionOrRange:(`Position current_pos)))
+    |> (function
+         (* if the current position is larger than all other ranges, we cycle
+            back to first hole in the file *)
+         | None -> List.hd srtd_hole_diags
+         | Some _ as o -> o)
+    |> Option.map ~f:Diagnostic.range
+  in
+
+  let jump_to_hole
+      (pick_hole : Position.t -> Diagnostic.t list -> Range.t option)
+      (_instance : Extension_instance.t) ~args:_ =
+    (* this command is available (in the command palette) only when a file is
+       open *)
+    let hole_not_found_msg = "No typed hole was found in this file" in
+    match Window.activeTextEditor () with
+    | None ->
+      Extension_consts.Command_errors.text_editor_must_be_active "Next Hole"
+        ~expl:"The command looks for holes in an open file."
+      |> show_message `Error "%s"
+    | Some text_editor -> (
+      let doc = TextEditor.document text_editor in
+      let uri = TextDocument.uri doc in
+      let all_diagnostics = Languages.getDiagnostics uri in
+      let hole_diagnostics =
+        List.filter all_diagnostics ~f:(fun diag ->
+            match Diagnostic.code diag with
+            | Some (`String s) -> String.equal s "hole"
+            | Some (`Int _)
+            | None ->
+              false)
+      in
+
+      let hole_diagnostics_sorted =
+        List.sort hole_diagnostics ~compare:(fun diag1 diag2 ->
+            let range1 = Diagnostic.range diag1 in
+            let range2 = Diagnostic.range diag2 in
+            Range.compare range1 range2 |> Ordering.to_int)
+      in
+
+      let current_pos =
+        let selection = TextEditor.selection text_editor in
+        Selection.active selection
+      in
+
+      match pick_hole current_pos hole_diagnostics_sorted with
+      | None -> show_message `Info "%s" hole_not_found_msg
+      | Some range ->
+        let new_selection =
+          let anchor = Range.start range in
+          let active = Range.end_ range in
+          Selection.makePositions ~anchor ~active
+        in
+        TextEditor.set_selection text_editor new_selection;
+        TextEditor.revealRange text_editor ~range
+          ~revealType:TextEditorRevealType.InCenterIfOutsideViewport ())
+  in
+
+  let jump_to_next_hole =
+    command Extension_consts.Commands.next_hole (jump_to_hole pick_next_hole)
+  in
+
+  jump_to_next_hole
+
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in
