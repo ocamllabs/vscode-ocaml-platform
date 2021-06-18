@@ -86,6 +86,35 @@ module Range : sig
   val with_ : t -> ?start:Position.t -> ?end_:Position.t -> unit -> t
 end
 
+module DiagnosticSeverity : sig
+  type t =
+    | Error
+    | Hint
+    | Information
+    | Warning
+end
+
+module Diagnostic : sig
+  include Js.T
+
+  type code =
+    [ `String of string
+    | `Int of int
+    ]
+
+  val message : t -> string
+
+  val range : t -> Range.t
+
+  val severity : t -> DiagnosticSeverity.t
+
+  val source : t -> string or_undefined
+
+  val code : t -> code or_undefined
+
+  val make : ?severity:DiagnosticSeverity.t -> message:string -> Range.t -> t
+end
+
 module TextLine : sig
   include Js.T
 
@@ -1975,6 +2004,10 @@ module Languages : sig
        selector:DocumentSelector.t
     -> provider:DocumentFormattingEditProvider.t
     -> Disposable.t
+
+  val getDiagnostics : Uri.t -> Diagnostic.t list
+
+  val get_diagnostics_all : unit -> (Uri.t * Diagnostic.t list) list
 end
 
 module Tasks : sig
