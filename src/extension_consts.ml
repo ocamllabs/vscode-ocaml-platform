@@ -32,6 +32,13 @@ module Commands = struct
   let evaluate_selection = ocaml_prefixed "evaluate-selection"
 
   let open_repl = ocaml_prefixed "open-repl"
+
+module Command_errors = struct
+  let text_editor_must_be_active ~expl cmd_name =
+    Printf.sprintf
+      "The command \"OCaml: %s\" should be run only with a file open in the \
+       editor. %s"
+      cmd_name expl
 end
 
 (* TODO: Refactor the code so that we don't need any "constants" module *)
