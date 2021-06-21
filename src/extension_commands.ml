@@ -133,7 +133,7 @@ let _open_current_dune_file =
   in
   command Extension_consts.Commands.open_current_dune_file handler
 
-let _jump_to_next_hole =
+let _jump_to_prev_hole, _jump_to_next_hole =
   let pick_next_hole current_pos srtd_hole_diags =
     (* we want to find such a range that starts after the current position *)
     List.find srtd_hole_diags ~f:(fun diag ->
@@ -149,6 +149,30 @@ let _jump_to_next_hole =
          (* if the current position is larger than all other ranges, we cycle
             back to first hole in the file *)
          | None -> List.hd srtd_hole_diags
+         | Some _ as o -> o)
+    |> Option.map ~f:Diagnostic.range
+  in
+
+  let pick_prev_hole current_pos (srtd_hole_diags : Diagnostic.t list) =
+    let rec loop prev_diag = function
+      | [] -> prev_diag
+      | diag :: rest -> (
+        let range = Diagnostic.range diag in
+        let start = Diagnostic.range diag |> Range.start in
+        if Range.contains range ~positionOrRange:(`Position current_pos) then
+          prev_diag
+        else
+          match Position.compare current_pos start with
+          | Ordering.Less -> prev_diag
+          | Greater -> loop (Some diag) rest
+          | Equal ->
+            (* assert false because we check whether the current pos is in this
+               range in the if-expr above *)
+            assert false)
+    in
+    loop None srtd_hole_diags
+    |> (function
+         | None -> List.last srtd_hole_diags
          | Some _ as o -> o)
     |> Option.map ~f:Diagnostic.range
   in
@@ -206,7 +230,11 @@ let _jump_to_next_hole =
     command Extension_consts.Commands.next_hole (jump_to_hole pick_next_hole)
   in
 
-  jump_to_next_hole
+  let jump_to_prev_hole =
+    command Extension_consts.Commands.prev_hole (jump_to_hole pick_prev_hole)
+  in
+
+  (jump_to_prev_hole, jump_to_next_hole)
 
 let register extension instance = function
   | Command { id; handler } ->
