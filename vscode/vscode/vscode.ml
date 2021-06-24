@@ -1212,7 +1212,7 @@ module DiagnosticTag = struct
 end
 
 module Diagnostic = struct
-  include Interface.Make ()
+  include Class.Make ()
 
   type string_or_int =
     ([ `String of string
