@@ -1191,6 +1191,26 @@ module DiagnosticSeverity = struct
   [@@js.enum] [@@js]
 end
 
+module DiagnosticRelatedInformation = struct
+  include Class.Make ()
+
+  include
+    [%js:
+    val location : t -> Location.t [@@js.get]
+
+    val message : t -> string [@@js.get]
+
+    val make : location:Location.t -> message:string -> t
+      [@@js.new "vscode.DiagnosticRelatedInformation"]]
+end
+
+module DiagnosticTag = struct
+  type t =
+    | Unnecessary [@js 1]
+    | Deprecated [@js 2]
+  [@@js.enum] [@@js]
+end
+
 module Diagnostic = struct
   include Interface.Make ()
 
@@ -1237,6 +1257,12 @@ module Diagnostic = struct
     val source : t -> string or_undefined [@@js.get]
 
     val code : t -> code or_undefined [@@js.get]
+
+    val relatedInformation :
+      t -> DiagnosticRelatedInformation.t list or_undefined
+      [@@js.get]
+
+    val tags : t -> DiagnosticTag.t list or_undefined [@@js.get]
 
     val make :
          range:Range.t

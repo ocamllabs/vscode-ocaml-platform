@@ -923,6 +923,22 @@ module DiagnosticSeverity : sig
     | Warning
 end
 
+module DiagnosticRelatedInformation : sig
+  include Js.T
+
+  val location : t -> Location.t
+
+  val message : t -> string
+
+  val make : location:Location.t -> message:string -> t
+end
+
+module DiagnosticTag : sig
+  type t =
+    | Unnecessary
+    | Deprecated
+end
+
 module Diagnostic : sig
   include Js.T
 
@@ -946,6 +962,10 @@ module Diagnostic : sig
   val source : t -> string option
 
   val code : t -> code option
+
+  val relatedInformation : t -> DiagnosticRelatedInformation.t list option
+
+  val tags : t -> DiagnosticTag.t list option
 
   val make : ?severity:DiagnosticSeverity.t -> message:string -> Range.t -> t
 end
