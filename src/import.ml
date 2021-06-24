@@ -98,6 +98,16 @@ module Position = struct
     else
       Greater
 
+  let t_of_json json =
+    let line = Jsonoo.Decode.(field "line" int) json in
+    let character = Jsonoo.Decode.(field "character" int) json in
+    Position.make ~line ~character
+
+  let json_of_t t =
+    let line = Position.line t in
+    let character = Position.character t in
+    Jsonoo.Encode.(object_ [ ("line", int line); ("character", int character) ])
+
   include Vscode.Position
 end
 
@@ -107,6 +117,16 @@ module Range = struct
     match Position.compare (Range.start r1) (Range.start r2) with
     | (Ordering.Less | Greater) as r -> r
     | Equal -> Position.compare (Range.end_ r1) (Range.end_ r2)
+
+  let t_of_json json =
+    let start = Jsonoo.Decode.field "start" Position.t_of_json json in
+    let end_ = Jsonoo.Decode.field "end" Position.t_of_json json in
+    Range.makePositions ~start ~end_
+
+  let json_of_t t =
+    let start = Range.start t |> Position.json_of_t in
+    let end_ = Range.end_ t |> Position.json_of_t in
+    Jsonoo.Encode.(object_ [ ("start", start); ("end", end_) ])
 
   include Vscode.Range
 end
