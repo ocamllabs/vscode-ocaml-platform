@@ -58,7 +58,7 @@ jobs:
         run: yarn fmt:check
 
       - name: Build extension
-        run: opam exec -- make build
+        run: opam exec -- make release-build
 
       - name: Package extension
         run: yarn package
@@ -143,7 +143,7 @@ jobs:
 
       - run: opam install . --deps-only
 
-      - run: opam exec -- make build
+      - run: opam exec -- make release-build
 
       - run: opam exec -- opam-dune-lint
 
