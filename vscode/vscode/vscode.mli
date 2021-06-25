@@ -2031,7 +2031,7 @@ module Languages : sig
 
   val getDiagnostics : Uri.t -> Diagnostic.t list
 
-  val get_diagnostics_all : unit -> (Uri.t * Diagnostic.t list) list
+  val getDiagnostics_all : unit -> (Uri.t * Diagnostic.t list) list
 end
 
 module Tasks : sig

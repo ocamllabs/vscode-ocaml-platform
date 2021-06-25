@@ -2753,7 +2753,7 @@ module Languages = struct
     val getDiagnostics : Uri.t -> Diagnostic.t list
       [@@js.global "vscode.languages.getDiagnostics"]
 
-    val get_diagnostics_all : unit -> (Uri.t * Diagnostic.t list) list
+    val getDiagnostics_all : unit -> (Uri.t * Diagnostic.t list) list
       [@@js.global "vscode.languages.getDiagnostics"]]
 end
 
