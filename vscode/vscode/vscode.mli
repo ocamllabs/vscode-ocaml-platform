@@ -915,6 +915,61 @@ module ProgressOptions : sig
     location:location -> ?title:string -> ?cancellable:bool -> unit -> t
 end
 
+module DiagnosticSeverity : sig
+  type t =
+    | Error
+    | Hint
+    | Information
+    | Warning
+end
+
+module DiagnosticRelatedInformation : sig
+  include Js.T
+
+  val location : t -> Location.t
+
+  val message : t -> string
+
+  val make : location:Location.t -> message:string -> t
+end
+
+module DiagnosticTag : sig
+  type t =
+    | Unnecessary
+    | Deprecated
+end
+
+module Diagnostic : sig
+  include Js.T
+
+  type code_target =
+    { value : [ `String of string | `Int of int ]
+    ; target : Uri.t
+    }
+
+  type code =
+    [ `String of string
+    | `Int of int
+    | `Targeted of code_target
+    ]
+
+  val message : t -> string
+
+  val range : t -> Range.t
+
+  val severity : t -> DiagnosticSeverity.t
+
+  val source : t -> string option
+
+  val code : t -> code option
+
+  val relatedInformation : t -> DiagnosticRelatedInformation.t list option
+
+  val tags : t -> DiagnosticTag.t list option
+
+  val make : ?severity:DiagnosticSeverity.t -> message:string -> Range.t -> t
+end
+
 module TextDocumentShowOptions : sig
   include Js.T
 
@@ -1139,7 +1194,7 @@ end
 module SecretStorage : sig
   include Js.T
 
-  val get : t -> key:string -> string or_undefined Promise.t
+  val get : t -> key:string -> string option Promise.t
 
   val store : t -> key:string -> value:string -> Promise.void
 
@@ -1973,6 +2028,10 @@ module Languages : sig
        selector:DocumentSelector.t
     -> provider:DocumentFormattingEditProvider.t
     -> Disposable.t
+
+  val getDiagnostics : Uri.t -> Diagnostic.t list
+
+  val getDiagnostics_all : unit -> (Uri.t * Diagnostic.t list) list
 end
 
 module Tasks : sig

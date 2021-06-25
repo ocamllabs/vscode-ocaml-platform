@@ -38,7 +38,7 @@ let activate (extension : ExtensionContext.t) =
   let sandbox_opt = Sandbox.of_settings_or_detect () in
   let (_ : unit Promise.t) =
     let* sandbox_opt = sandbox_opt in
-    let is_fallback = Option.is_empty sandbox_opt in
+    let is_fallback = Option.is_none sandbox_opt in
     if
       is_fallback
       (* if the sandbox we just set up is a fallback sandbox, we create a pop-up
