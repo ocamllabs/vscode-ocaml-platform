@@ -1,4 +1,15 @@
 build:
+	dune build src/vscode_ocaml_platform.bc.js
+	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
+		--bundle \
+		--external:vscode \
+		--outdir=dist \
+		--platform=node \
+		--target=es6 \
+		--sourcemap
+.PHONY: build
+
+release-build:
 	dune build src/vscode_ocaml_platform.bc.js --profile=release
 	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
@@ -10,10 +21,10 @@ build:
 		--minify-syntax \
 		--sourcemap \
 		--sources-content=false
-.PHONY: build
+.PHONY: release-build
 
 watch:
-	dune build @all -w
+	dune build @all -w --terminal-persistence=clear-on-rebuild
 .PHONY: watch
 
 clean:
