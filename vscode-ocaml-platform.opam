@@ -25,6 +25,8 @@ depends: [
   "promise_jsoo" {>= "0.3.1"}
   "jsonoo" {>= "0.2.1"}
   "opam-file-format" {>= "2.1.2"}
+  "parsexp" {>= "0.14.0"}
+  "iter" {>= "1.2.1"}
   "odoc" {with-doc}
 ]
 build: [

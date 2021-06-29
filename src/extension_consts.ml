@@ -32,6 +32,8 @@ module Commands = struct
   let evaluate_selection = ocaml_prefixed "evaluate-selection"
 
   let open_repl = ocaml_prefixed "open-repl"
+
+  let debug_dune_executable = ocaml_prefixed "debug-dune-executable"
 end
 
 (* TODO: Refactor the code so that we don't need any "constants" module *)

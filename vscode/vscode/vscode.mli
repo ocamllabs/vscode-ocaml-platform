@@ -2004,6 +2004,86 @@ module Window : sig
     'a Js.t -> viewId:string -> options:'a TreeViewOptions.t -> 'a TreeView.t
 end
 
+module CodeLens : sig
+  include Js.T
+
+  val command : t -> Command.t
+
+  val isResolved : t -> bool
+
+  val range : t -> Range.t
+
+  val make : range:Range.t -> ?command:Command.t -> unit -> t
+end
+
+module CodeLensProvider : sig
+  type 'a t
+
+  module Make (T : Js.T) : sig
+    include Js.T with type t = T.t t
+
+    val onDidChangeCodeLenses : t -> Js.Unit.t Event.t option
+
+    val provideCodeLenses :
+         t
+      -> document:TextDocument.t
+      -> token:CancellationToken.t
+      -> T.t list ProviderResult.t
+
+    val resolveCodeLens :
+      t -> codeLens:T.t -> token:CancellationToken.t -> T.t ProviderResult.t
+
+    val create :
+         onDidChangeCodeLenses:Js.Unit.t Event.t option
+      -> provideCodeLenses:
+           (   document:TextDocument.t
+            -> token:CancellationToken.t
+            -> T.t list ProviderResult.t)
+      -> resolveCodeLens:
+           (codeLens:T.t -> token:CancellationToken.t -> T.t ProviderResult.t)
+      -> t
+  end
+end
+
+module DebugAdapterDescriptor : sig
+  include Js.T
+end
+
+module DebugAdapterExecutableOptions : sig
+  include Js.T
+
+  val cwd : t -> string option
+
+  val env : t -> string Dict.t option
+
+  val create : ?cwd:string -> ?env:string Dict.t -> unit -> t
+end
+
+module DebugAdapterExecutable : sig
+  include Js.T
+
+  val make :
+       command:string
+    -> ?args:string list
+    -> ?options:DebugAdapterExecutableOptions.t
+    -> unit
+    -> t
+end
+
+module DebugSession : sig
+  include Js.T
+end
+
+module DebugAdapterDescriptorFactory : sig
+  include Js.T
+
+  val createDebugAdapterDescriptor :
+       t
+    -> session:DebugSession.t
+    -> executable:DebugAdapterExecutable.t or_undefined
+    -> DebugAdapterDescriptor.t ProviderResult.t
+end
+
 module Commands : sig
   val registerCommand :
     command:string -> callback:(args:Js.Any.t list -> unit) -> Disposable.t
@@ -2032,6 +2112,12 @@ module Languages : sig
   val getDiagnostics : Uri.t -> Diagnostic.t list
 
   val getDiagnostics_all : unit -> (Uri.t * Diagnostic.t list) list
+
+  val registerCodeLensProvider :
+       'a Js.t
+    -> selector:DocumentSelector.t
+    -> provider:'a CodeLensProvider.t
+    -> Disposable.t
 end
 
 module Tasks : sig
@@ -2041,4 +2127,9 @@ end
 
 module Env : sig
   val shell : unit -> string
+end
+
+module Debug : sig
+  val registerDebugAdapterDescriptorFactory :
+    debugType:string -> factory:DebugAdapterDescriptorFactory.t -> Disposable.t
 end
