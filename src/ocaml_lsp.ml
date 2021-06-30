@@ -4,12 +4,14 @@ type t =
   { interfaceSpecificLangId : bool
   ; handleSwitchImplIntf : bool
   ; handleInferIntf : bool
+  ; handleTypedHoles : bool
   }
 
 let default =
   { interfaceSpecificLangId = false
   ; handleSwitchImplIntf = false
   ; handleInferIntf = false
+  ; handleTypedHoles = false
   }
 
 let default_field key decode default json =
@@ -30,7 +32,14 @@ let of_json (json : Jsonoo.t) =
     let handleInferIntf =
       default_field "handleInferIntf" bool default.handleInferIntf json
     in
-    { interfaceSpecificLangId; handleSwitchImplIntf; handleInferIntf }
+    let handleTypedHoles =
+      default_field "handleTypedHoles" bool default.handleTypedHoles json
+    in
+    { interfaceSpecificLangId
+    ; handleSwitchImplIntf
+    ; handleInferIntf
+    ; handleTypedHoles
+    }
   with
   | Jsonoo.Decode_error _ ->
     show_message `Warn
@@ -52,3 +61,5 @@ let has_interface_specific_lang_id t = t.interfaceSpecificLangId
 let can_handle_switch_impl_intf t = t.handleSwitchImplIntf
 
 let can_handle_infer_intf t = t.handleSwitchImplIntf
+
+let can_handle_typed_holes t = t.handleTypedHoles
