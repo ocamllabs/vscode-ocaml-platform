@@ -133,6 +133,141 @@ let _open_current_dune_file =
   in
   command Extension_consts.Commands.open_current_dune_file handler
 
+let _jump_to_prev_hole, _jump_to_next_hole =
+  let pick_next_hole current_pos ~sorted_non_empty_holes_list:holes =
+    (* we want to find such a range that starts after the current position *)
+    match holes with
+    | [] -> assert false
+    | [ r ] -> r
+    | default :: _ ->
+      let next_hole =
+        List.find holes ~f:(fun range ->
+            match Position.compare current_pos (Range.start range) with
+            | Ordering.Less -> true
+            | Greater -> false
+            | Equal ->
+              (* we don't want the same range that we're in now; we need the
+                 next one *)
+              not
+                (Range.contains range ~positionOrRange:(`Position current_pos)))
+      in
+      (* if the current position is larger than all other ranges, we cycle back
+         to first hole in the file *)
+      Option.value next_hole ~default
+  in
+
+  let pick_prev_hole current_pos ~sorted_non_empty_holes_list:holes =
+    (* iterate through all hole ranges and pick the one that has start position
+       after the current cursor position *)
+    match holes with
+    | [] -> assert false
+    | [ r ] -> r
+    | fst_range :: rest ->
+      let start = Range.start fst_range in
+      if
+        Ordering.is_less (Position.compare current_pos start)
+        || Range.contains fst_range ~positionOrRange:(`Position current_pos)
+      then
+        (* [holes] is sorted from ranges in the beginning of the file to the
+           end; if the current position comes before or inside the first range,
+           then pick the last hole in file *)
+        List.last_exn rest
+      else
+        let rec find_prev_hole prev_range = function
+          | [] -> prev_range
+          | range :: rest -> (
+            if Range.contains range ~positionOrRange:(`Position current_pos)
+            then
+              prev_range
+            else
+              let start = Range.start range in
+              match Position.compare current_pos start with
+              | Ordering.Less -> prev_range
+              | Greater -> find_prev_hole range rest
+              | Equal ->
+                (* assert false because we check whether the current pos is in
+                   this range in the if-expr above *)
+                assert false)
+        in
+        find_prev_hole fst_range rest
+  in
+
+  (* We need to be able to specify the position from which we want to look for
+     the next typed hole.
+
+     If the args is empty, use the current position in the active text editor;
+     if given a specific position, use that position.
+
+     args := [] | [ { "position" : { "line": <int>; "character": <int> } } ] *)
+  let jump_to_hole pick_hole (instance : Extension_instance.t) ~args =
+    (* this command is available (in the command palette) only when a file is
+       open *)
+    let hole_not_found_msg = "No typed hole was found in this file" in
+    match Window.activeTextEditor () with
+    | None ->
+      Extension_consts.Command_errors.text_editor_must_be_active
+        "Jump to Previous/Next Typed Hole"
+        ~expl:"The command looks for holes in an open file."
+      |> show_message `Error "%s"
+    | Some text_editor -> (
+      let open Promise.Syntax in
+      match Extension_instance.lsp_client instance with
+      | None -> show_message `Warn "ocamllsp is not running."
+      | Some (_, ocaml_lsp)
+        when not (Ocaml_lsp.can_handle_typed_holes ocaml_lsp) ->
+        show_message `Warn
+          "The installed version of ocamllsp does not fully support typed \
+           holes. Consider updating ocamllsp."
+      | Some (client, _ocaml_lsp) ->
+        let doc = TextEditor.document text_editor in
+        let uri = TextDocument.uri doc in
+
+        let (_ : unit Promise.t) =
+          let+ holes =
+            Custom_requests.Typed_holes.send_request client ~for_doc:uri
+          in
+          match holes with
+          | [] -> show_message `Info "%s" hole_not_found_msg
+          | holes ->
+            let current_pos =
+              match args with
+              | [] ->
+                let selection = TextEditor.selection text_editor in
+                Selection.active selection
+              | [ pos_obj ] ->
+                let json = Jsonoo.t_of_js pos_obj in
+                let pos =
+                  Jsonoo.Decode.field "position" Position.t_of_json json
+                in
+                pos
+              | _ -> assert false
+            in
+            let sorted_non_empty_holes_list =
+              List.sort holes ~compare:Range.compare
+            in
+            let range = pick_hole current_pos ~sorted_non_empty_holes_list in
+            let new_selection =
+              let anchor = Range.start range in
+              let active = Range.end_ range in
+              Selection.makePositions ~anchor ~active
+            in
+            TextEditor.set_selection text_editor new_selection;
+            TextEditor.revealRange text_editor ~range
+              ~revealType:TextEditorRevealType.InCenterIfOutsideViewport ()
+        in
+        ())
+  in
+
+  let jump_to_next_hole =
+    command Extension_consts.Commands.next_hole (jump_to_hole pick_next_hole)
+  in
+
+  let jump_to_prev_hole =
+    command Extension_consts.Commands.prev_hole (jump_to_hole pick_prev_hole)
+  in
+
+  (jump_to_prev_hole, jump_to_next_hole)
+
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in
