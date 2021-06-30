@@ -14,6 +14,13 @@ let property_exists json property =
 
 include Base
 
+module List = struct
+  include List
+
+  let sort lst ~compare =
+    List.sort lst ~compare:(fun a b -> compare a b |> Ordering.to_int)
+end
+
 type ('a, 'b) result = ('a, 'b) Result.t
 
 module Option = struct
