@@ -181,6 +181,16 @@
         }
       },
       {
+        "command": "ocaml.next-hole",
+        "category": "OCaml",
+        "title": "Jump to Next Typed Hole"
+      },
+      {
+        "command": "ocaml.prev-hole",
+        "category": "OCaml",
+        "title": "Jump to Previous Typed Hole"
+      },
+      {
         "command": "ocaml.current-dune-file",
         "category": "OCaml",
         "title": "Open Dune File (located in the same folder)"
@@ -222,6 +232,16 @@
         "command": "ocaml.evaluate-selection",
         "key": "Shift+Enter",
         "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir"
+      },
+      {
+        "command": "ocaml.next-hole",
+        "key": "Alt+L",
+        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+      },
+      {
+        "command": "ocaml.prev-hole",
+        "key": "Shift+Alt+L",
+        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
       }
     ],
     "menus": {
@@ -236,6 +256,14 @@
         {
           "command": "ocaml.current-dune-file",
           "when": "editorIsOpen"
+        },
+        {
+          "command": "ocaml.next-hole",
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+        },
+        {
+          "command": "ocaml.prev-hole",
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
         },
         {
           "command": "ocaml.refresh-switches",

@@ -33,6 +33,11 @@ module Commands = struct
 
   let open_repl = ocaml_prefixed "open-repl"
 
+  let next_hole = ocaml_prefixed "next-hole"
+
+  let prev_hole = ocaml_prefixed "prev-hole"
+end
+
 module Command_errors = struct
   let text_editor_must_be_active ~expl cmd_name =
     Printf.sprintf
