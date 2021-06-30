@@ -1,5 +1,21 @@
 # Change Log
 
+## Unreleased
+
+- Add commands `Jump to Next Typed Hole` (shortcut: `Alt + L`) and
+  `Jump to Previous Typed Hole` (shortcut: `Alt + Shift + L`)
+
+  _What typed holes are_
+
+  Merlin has a concept of "typed holes" that are syntactically represented as
+  `_`. Files that incorporate typed holes are not considered valid OCaml, but
+  Merlin and OCaml-LSP support them. One example when such typed holes can occur
+  is when one "destructs" a value, e.g., destructing `(Some 1)` will generate
+  code `match Some 1 with Some _ -> _ | None -> _`. While the first underscore
+  is a valid "match-all"/wildcard pattern, the rest of underscores are typed
+  holes that one needs to replace with valid OCaml code. These new commands help
+  to navigate easily from one hole to another.
+
 ## 1.8.4
 
 - Fix inclusion of files in extension package
