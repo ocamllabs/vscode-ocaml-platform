@@ -26,6 +26,28 @@ module Option = struct
   end
 end
 
+module Ordering = struct
+  let is_less = function
+    | Ordering.Less -> true
+    | Greater
+    | Equal ->
+      false
+
+  let is_greater = function
+    | Ordering.Greater -> true
+    | Less
+    | Equal ->
+      false
+
+  let is_equal = function
+    | Ordering.Equal -> true
+    | Less
+    | Greater ->
+      false
+
+  include Ordering
+end
+
 module Or_error = struct
   type 'a t = ('a, string) result
 end
