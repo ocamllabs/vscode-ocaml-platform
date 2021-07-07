@@ -133,7 +133,11 @@ let _open_current_dune_file =
   in
   command Extension_consts.Commands.open_current_dune_file handler
 
-let _jump_to_prev_hole, _jump_to_next_hole =
+module Holes_commands : sig
+  val _jump_to_prev_hole : t
+
+  val _jump_to_next_hole : t
+end = struct
   let pick_next_hole current_pos ~sorted_non_empty_holes_list:holes =
     (* we want to find such a range that starts after the current position *)
     match holes with
@@ -154,7 +158,6 @@ let _jump_to_prev_hole, _jump_to_next_hole =
       (* if the current position is larger than all other ranges, we cycle back
          to first hole in the file *)
       Option.value next_hole ~default
-  in
 
   let pick_prev_hole current_pos ~sorted_non_empty_holes_list:holes =
     (* iterate through all hole ranges and pick the one that has start position
@@ -190,7 +193,6 @@ let _jump_to_prev_hole, _jump_to_next_hole =
                 assert false)
         in
         find_prev_hole fst_range rest
-  in
 
   (* We need to be able to specify the position from which we want to look for
      the next typed hole.
@@ -256,17 +258,13 @@ let _jump_to_prev_hole, _jump_to_next_hole =
               ~revealType:TextEditorRevealType.InCenterIfOutsideViewport ()
         in
         ())
-  in
 
-  let jump_to_next_hole =
+  let _jump_to_next_hole =
     command Extension_consts.Commands.next_hole (jump_to_hole pick_next_hole)
-  in
 
-  let jump_to_prev_hole =
+  let _jump_to_prev_hole =
     command Extension_consts.Commands.prev_hole (jump_to_hole pick_prev_hole)
-  in
-
-  (jump_to_prev_hole, jump_to_next_hole)
+end
 
 let register extension instance = function
   | Command { id; handler } ->
