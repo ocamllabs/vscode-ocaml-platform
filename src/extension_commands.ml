@@ -194,13 +194,49 @@ end = struct
         in
         find_prev_hole fst_range rest
 
-  (* We need to be able to specify the position from which we want to look for
-     the next typed hole.
+  (** We need to be able to specify the position from which we want to look for
+      the next typed hole. If the [position] field of the argument object is not
+      set, then we use the current position in the active text editor.
 
-     If the args is empty, use the current position in the active text editor;
-     if given a specific position, use that position.
+      We reuse "jump to hole" commands in other contexts (e.g., jump to next
+      hole in the destructed code), so we add an argument where if there is no
+      hole to jump to, user doesn't get notified because they didn't request
+      this jump themselves.
 
-     args := [] | [ { "position" : { "line": <int>; "character": <int> } } ] *)
+      Note that we put all the configuration values in an object that is passed
+      as the {i first} argument to the command because we want explicit names
+      for those configurations, so object keys are useful here.
+
+      {[
+        args := [] |
+              [ {
+                "position" : { "line": <int>; "character": <int> },
+                "notify-if-no-hole": <bool> (default = true)
+              } ]
+      ]} *)
+  type arguments =
+    { current_position : Position.t option
+          (** [position]: <Position> in the arg obj *)
+    ; notify_if_no_hole : bool
+          (** [notify-if-no-hole]: <bool> (default = true) *)
+    }
+
+  let parse_arguments args =
+    match args with
+    | [] -> { current_position = None; notify_if_no_hole = true }
+    | [ params_obj ] ->
+      let json = Jsonoo.t_of_js params_obj in
+      let current_position =
+        Jsonoo.Decode.(try_optional (field "position" Position.t_of_json) json)
+      in
+      let notify_if_no_hole =
+        Jsonoo.Decode.(try_default true (field "notify-if-no-hole" bool) json)
+      in
+      { current_position; notify_if_no_hole }
+    | _ ->
+      failwith
+        "Jump to Previous/Next Hole: incorrect params passed to the command"
+
   let jump_to_hole pick_hole (instance : Extension_instance.t) ~args =
     (* this command is available (in the command palette) only when a file is
        open *)
@@ -223,26 +259,19 @@ end = struct
       | Some (client, _ocaml_lsp) ->
         let doc = TextEditor.document text_editor in
         let uri = TextDocument.uri doc in
-
         let (_ : unit Promise.t) =
           let+ holes =
             Custom_requests.Typed_holes.send_request client ~for_doc:uri
           in
+          let { current_position; notify_if_no_hole } = parse_arguments args in
           match holes with
-          | [] -> show_message `Info "%s" hole_not_found_msg
+          | [] ->
+            if notify_if_no_hole then show_message `Info "%s" hole_not_found_msg
           | holes ->
             let current_pos =
-              match args with
-              | [] ->
-                let selection = TextEditor.selection text_editor in
-                Selection.active selection
-              | [ pos_obj ] ->
-                let json = Jsonoo.t_of_js pos_obj in
-                let pos =
-                  Jsonoo.Decode.field "position" Position.t_of_json json
-                in
-                pos
-              | _ -> assert false
+              Option.value_lazy current_position ~default:(fun () ->
+                  let selection = TextEditor.selection text_editor in
+                  Selection.active selection)
             in
             let sorted_non_empty_holes_list =
               List.sort holes ~compare:Range.compare
