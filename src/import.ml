@@ -24,6 +24,11 @@ end
 type ('a, 'b) result = ('a, 'b) Result.t
 
 module Option = struct
+  let value_lazy t ~default =
+    match t with
+    | Some v -> v
+    | None -> default ()
+
   include Option
 
   module O = struct
