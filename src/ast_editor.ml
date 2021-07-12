@@ -4,10 +4,25 @@ let read_html_file () =
   let filename = Node.__dirname () ^ "/../astexplorer/dist/index.html" in
   Fs.readFile filename
 
+let send_msg t value ~(webview : WebView.t) =
+  let msg = Ojs.empty_obj () in
+  Ojs.set_prop_ascii msg "type" (Ojs.string_to_js t);
+  Ojs.set_prop_ascii msg "value" value;
+  let _ = WebView.postMessage webview msg in
+  ()
+
+let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
+  let open Jsonoo.Encode in
+  let ast_js =
+    object_ [ ("ast", TextDocument.getText document () |> Dumpast.transform) ]
+  in
+  send_msg "parse" (Jsonoo.t_to_js ast_js) ~webview
+
 let resolveCustomTextEditor ~(document : TextDocument.t) ~webviewPanel ~token:_
     : CustomTextEditorProvider.ResolvedEditor.t =
   let _ = document in
   let webview = WebviewPanel.webview webviewPanel in
+  transform_to_ast ~document ~webview;
   let options = WebView.options webview in
   WebviewOptions.set_enableScripts options true;
   WebView.set_options webview options;
