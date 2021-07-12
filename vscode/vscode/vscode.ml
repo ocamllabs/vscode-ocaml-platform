@@ -1898,6 +1898,48 @@ module DocumentFormattingEditProvider = struct
       [@@js.builder]]
 end
 
+module Hover = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val contents : t -> MarkdownString.t [@@js.get]
+
+    val range : t -> Range.t [@@js.get]
+
+    val make :
+         contents:
+           ([ `MarkdownString of MarkdownString.t
+            | `MarkdownStringArray of MarkdownString.t list
+            ]
+           [@js.union])
+      -> t
+      [@@js.new "vscode.Hover"]]
+end
+
+module HoverProvider = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val provideHover :
+         t
+      -> document:TextDocument.t
+      -> position:Position.t
+      -> token:CancellationToken.t
+      -> Hover.t list ProviderResult.t
+      [@@js.call]
+
+    val create :
+         provideHover:
+           (   document:TextDocument.t
+            -> position:Position.t
+            -> token:CancellationToken.t
+            -> Hover.t list ProviderResult.t)
+      -> t
+      [@@js.builder]]
+end
+
 module TaskGroup = struct
   include Class.Make ()
 
@@ -3064,6 +3106,10 @@ module Languages = struct
       -> provider:DocumentFormattingEditProvider.t
       -> Disposable.t
       [@@js.global "vscode.languages.registerDocumentFormattingEditProvider"]
+
+    val registerHoverProvider :
+      selector:DocumentSelector.t -> provider:HoverProvider.t -> Disposable.t
+      [@@js.global "vscode.languages.registerHoverProvider"]
 
     val getDiagnostics : Uri.t -> Diagnostic.t list
       [@@js.global "vscode.languages.getDiagnostics"]

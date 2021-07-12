@@ -1449,6 +1449,40 @@ module DocumentFormattingEditProvider : sig
     -> t
 end
 
+module Hover : sig
+  include Js.T
+
+  val contents : t -> MarkdownString.t
+
+  val range : t -> Range.t
+
+  val make :
+       contents:
+         [ `MarkdownString of MarkdownString.t
+         | `MarkdownStringArray of MarkdownString.t list
+         ]
+    -> t
+end
+
+module HoverProvider : sig
+  include Js.T
+
+  val provideHover :
+       t
+    -> document:TextDocument.t
+    -> position:Position.t
+    -> token:CancellationToken.t
+    -> Hover.t list ProviderResult.t
+
+  val create :
+       provideHover:
+         (   document:TextDocument.t
+          -> position:Position.t
+          -> token:CancellationToken.t
+          -> Hover.t list ProviderResult.t)
+    -> t
+end
+
 module TaskGroup : sig
   include Js.T
 
@@ -2228,6 +2262,9 @@ module Languages : sig
        selector:DocumentSelector.t
     -> provider:DocumentFormattingEditProvider.t
     -> Disposable.t
+
+  val registerHoverProvider :
+    selector:DocumentSelector.t -> provider:HoverProvider.t -> Disposable.t
 
   val getDiagnostics : Uri.t -> Diagnostic.t list
 
