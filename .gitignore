@@ -13,4 +13,3 @@ node_modules/
 *.vsix
 
 test_extension.vsix
-!astexplorer/dist/
