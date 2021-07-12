@@ -32,6 +32,7 @@
     "onCommand:ocaml.select-sandbox",
     "onCommand:ocaml.open-terminal",
     "onCommand:ocaml.open-terminal-select",
+    "onCustomEditor:ast-editor",
     "workspaceContains:**/dune-project",
     "workspaceContains:**/*.opam",
     "workspaceContains:**/*.ml",
@@ -853,6 +854,28 @@
       {
         "fileMatch": "esy.json",
         "url": "https://raw.githubusercontent.com/esy/esy-schema/master/esySchema.json"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "ast-editor",
+        "displayName": "OCaml AST preview",
+        "priority": "option",
+        "selector": [
+          {
+            "filenamePattern": "*.ml"
+          }
+        ]
+      },
+      {
+        "viewType": "pp-editor",
+        "displayName": "Preprocessed AST preview",
+        "priority": "option",
+        "selector": [
+          {
+            "filenamePattern": "*.ml"
+          }
+        ]
       }
     ]
   },
