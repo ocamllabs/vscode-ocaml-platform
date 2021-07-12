@@ -1901,6 +1901,167 @@ module TreeView : sig
   end
 end
 
+module WebviewPanelOptions : sig
+  include Js.T
+
+  val enableFindWidget : t -> bool
+
+  val retainContextWhenHidden : t -> bool
+end
+
+module WebviewPortMapping : sig
+  include Js.T
+
+  val extensionHostPort : t -> int
+
+  val webviewPort : t -> int
+end
+
+module WebviewOptions : sig
+  include Js.T
+
+  val enableCommandUris : t -> bool
+
+  val enableScripts : t -> bool
+
+  val set_enableScripts : t -> bool -> unit
+
+  val localResourceRoots : t -> Uri.t list
+
+  val portMapping : t -> WebviewPortMapping.t list
+
+  val create :
+       enableCommandUris:bool
+    -> enableScripts:bool
+    -> localResourceRoots:Uri.t list
+    -> portMapping:WebviewPortMapping.t list
+    -> t
+end
+
+module WebView : sig
+  include Js.T
+
+  val onDidReceiveMessage : t -> Js.Any.t Event.t
+
+  val cspSource : t -> string
+
+  val html : t -> string
+
+  val set_html : t -> string -> unit
+
+  val options : t -> WebviewOptions.t
+
+  val set_options : t -> WebviewOptions.t -> unit
+
+  val asWebviewUri : t -> localResource:Uri.t -> Uri.t
+
+  val postMessage : t -> Js.Any.t -> bool Promise.t
+
+  val create :
+       onDidReceiveMessage:Js.Any.t Event.t
+    -> cspSource:string
+    -> html:string
+    -> options:WebviewOptions.t
+    -> close:(unit -> unit)
+    -> asWebviewUri:(Uri.t -> Uri.t)
+    -> postMessage:(Js.Any.t -> bool Promise.t)
+    -> t
+end
+
+module rec WebviewPanel : sig
+  include Js.T
+
+  module LightDarkIcon : sig
+    type t =
+      { light : [ `Uri of Uri.t ]
+      ; dark : [ `Uri of Uri.t ]
+      }
+
+    include Js.T with type t := t
+  end
+
+  val onDidChangeViewState :
+    t -> WebviewPanelOnDidChangeViewStateEvent.t Event.t
+
+  val onDidDispose : t -> unit Event.t
+
+  val active : t -> bool
+
+  type iconPath =
+    [ `Uri of Uri.t
+    | `LightDark of LightDarkIcon.t
+    ]
+
+  val options : t -> WebviewPanelOptions.t
+
+  val title : t -> string
+
+  val viewColumn : t -> ViewColumn.t
+
+  val viewType : t -> string
+
+  val visible : t -> bool
+
+  val webview : t -> WebView.t
+
+  val set_webview : t -> WebView.t -> unit
+
+  val dispose : t -> Js.Any.t
+
+  val reveal :
+    t -> ?preserveFocus:bool -> ?viewColumn:ViewColumn.t -> unit -> unit
+
+  val create :
+       onDidChangeViewState:WebviewPanelOnDidChangeViewStateEvent.t Event.t
+    -> onDidDispose:Js.Unit.t Event.t
+    -> active:bool
+    -> options:WebviewPanelOptions.t
+    -> title:string
+    -> viewColumn:ViewColumn.t
+    -> viewType:string
+    -> visible:bool
+    -> webview:WebView.t
+    -> dispose:Js.Any.t
+    -> reveal:(?preserveFocus:bool -> ?viewColumn:ViewColumn.t -> unit -> unit)
+    -> t
+end
+
+and WebviewPanelOnDidChangeViewStateEvent : sig
+  include Js.T
+
+  val webviewPanel : t -> WebviewPanel.t
+end
+
+module CustomTextEditorProvider : sig
+  include Js.T
+
+  module ResolvedEditor : sig
+    type t =
+      [ `Promise of Promise.void
+      | `Unit of Js.Unit.t
+      ]
+
+    val t_to_js : t -> Ojs.t
+
+    val t_of_js : Ojs.t -> t
+  end
+
+  val resolveCustomTextEditor :
+       t
+    -> document:TextDocument.t
+    -> webviewPanel:WebviewPanel.t
+    -> token:CancellationToken.t
+    -> ResolvedEditor.t
+
+  val create :
+       resolveCustomTextEditor:
+         (   document:TextDocument.t
+          -> webviewPanel:WebviewPanel.t
+          -> token:CancellationToken.t
+          -> ResolvedEditor.t)
+    -> t
+end
+
 module Window : sig
   val activeTextEditor : unit -> TextEditor.t option
 
@@ -2004,6 +2165,21 @@ module Window : sig
 
   val createTreeView :
     'a Js.t -> viewId:string -> options:'a TreeViewOptions.t -> 'a TreeView.t
+
+  val createWebviewPanel :
+       viewType:string
+    -> title:string
+    -> showOptions:ViewColumn.t
+    -> WebviewPanel.t
+
+  val registerCustomEditorProvider :
+       viewType:string
+    -> provider:
+         [ `CustomTextEditorProvider of CustomTextEditorProvider.t
+         | `CustomReadonlyEditorProvider of CustomTextEditorProvider.t (*TODO*)
+         | `CustomEditorProvider of CustomTextEditorProvider.t (*TODO*)
+         ]
+    -> Disposable.t
 end
 
 module Commands : sig

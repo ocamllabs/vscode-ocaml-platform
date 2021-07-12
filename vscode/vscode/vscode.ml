@@ -2521,6 +2521,271 @@ module TreeView = struct
   end
 end
 
+module WebviewPanelOptions = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val enableFindWidget : t -> bool [@@js.get]
+
+    val retainContextWhenHidden : t -> bool [@@js.get]]
+end
+
+module WebviewPortMapping = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val extensionHostPort : t -> int [@@js.get]
+
+    val webviewPort : t -> int [@@js.get]]
+end
+
+module WebviewOptions = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val enableCommandUris : t -> bool [@@js.get]
+
+    val enableScripts : t -> bool [@@js.get]
+
+    val set_enableScripts : t -> bool -> unit [@@js.set]
+
+    val localResourceRoots : t -> Uri.t list [@@js.get]
+
+    val portMapping : t -> WebviewPortMapping.t list [@@js.get]
+
+    val create :
+         enableCommandUris:bool
+      -> enableScripts:bool
+      -> localResourceRoots:Uri.t list
+      -> portMapping:WebviewPortMapping.t list
+      -> t
+      [@@js.builder]]
+end
+
+module WebView = struct
+  include Interface.Make ()
+
+  module OnDidReceiveMessage = Event.Make (Js.Any)
+
+  include
+    [%js:
+    val onDidReceiveMessage : t -> OnDidReceiveMessage.t [@@js.get]
+
+    val cspSource : t -> string [@@js.get]
+
+    val html : t -> string [@@js.get]
+
+    val set_html : t -> string -> unit [@@js.set]
+
+    val options : t -> WebviewOptions.t [@@js.get]
+
+    val set_options : t -> WebviewOptions.t -> unit [@@js.set]
+
+    val asWebviewUri : t -> localResource:Uri.t -> Uri.t [@@js.call]
+
+    val postMessage : t -> Js.Any.t -> bool Promise.t [@@js.call]
+
+    val create :
+         onDidReceiveMessage:OnDidReceiveMessage.t
+      -> cspSource:string
+      -> html:string
+      -> options:WebviewOptions.t
+      -> close:(unit -> unit)
+      -> asWebviewUri:(Uri.t -> Uri.t)
+      -> postMessage:(Js.Any.t -> bool Promise.t)
+      -> t
+      [@@js.builder]]
+end
+
+module rec WebviewPanel : sig
+  include Js.T
+
+  module LightDarkIcon : sig
+    type t =
+      { light : [ `Uri of Uri.t ]
+      ; dark : [ `Uri of Uri.t ]
+      }
+
+    include Js.T with type t := t
+  end
+
+  val onDidChangeViewState :
+    t -> WebviewPanelOnDidChangeViewStateEvent.t Event.t
+
+  val onDidDispose : t -> unit Event.t
+
+  val active : t -> bool
+
+  type iconPath =
+    [ `Uri of Uri.t
+    | `LightDark of LightDarkIcon.t
+    ]
+
+  val options : t -> WebviewPanelOptions.t
+
+  val title : t -> string
+
+  val viewColumn : t -> ViewColumn.t
+
+  val viewType : t -> string
+
+  val visible : t -> bool
+
+  val webview : t -> WebView.t
+
+  val set_webview : t -> WebView.t -> unit
+
+  val dispose : t -> Js.Any.t
+
+  val reveal :
+    t -> ?preserveFocus:bool -> ?viewColumn:ViewColumn.t -> unit -> unit
+
+  val create :
+       onDidChangeViewState:WebviewPanelOnDidChangeViewStateEvent.t Event.t
+    -> onDidDispose:unit Event.t
+    -> active:bool
+    -> options:WebviewPanelOptions.t
+    -> title:string
+    -> viewColumn:ViewColumn.t
+    -> viewType:string
+    -> visible:bool
+    -> webview:WebView.t
+    -> dispose:Js.Any.t
+    -> reveal:(?preserveFocus:bool -> ?viewColumn:ViewColumn.t -> unit -> unit)
+    -> t
+end = struct
+  include Interface.Make ()
+
+  module LightDarkIcon = struct
+    type t =
+      { light : ([ `Uri of Uri.t ][@js.union])
+      ; dark : ([ `Uri of Uri.t ][@js.union])
+      }
+    [@@js]
+
+    let t_of_js js_val =
+      let light_js = Ojs.get_prop_ascii js_val "light" in
+      let dark_js = Ojs.get_prop_ascii js_val "dark" in
+      let light = `Uri ([%js.to: Uri.t] light_js) in
+      let dark = `Uri ([%js.to: Uri.t] dark_js) in
+      { light; dark }
+  end
+
+  type iconPath =
+    ([ `Uri of Uri.t
+     | `LightDark of LightDarkIcon.t
+     ]
+    [@js.union])
+  [@@js]
+
+  module OnDidChangeViewState =
+    Event.Make (WebviewPanelOnDidChangeViewStateEvent)
+  module OnDidDispose = Event.Make (Js.Unit)
+
+  include
+    [%js:
+    val onDidChangeViewState : t -> OnDidChangeViewState.t [@@js.get]
+
+    val onDidDispose : t -> OnDidDispose.t [@@js.get]
+
+    (*let iconPath_of_js js_val = if Ojs.has_property js_val "path" then `Uri
+      ([%js.to: Uri.t] js_val) else if Ojs.has_property js_val "light" then
+      `LightDark ([%js.to: LightDarkIcon.t] js_val) else assert false*)
+
+    val active : t -> bool [@@js.get]
+
+    val options : t -> WebviewPanelOptions.t [@@js.get]
+
+    val title : t -> string [@@js.get]
+
+    val viewColumn : t -> ViewColumn.t [@@js.get]
+
+    val viewType : t -> string [@@js.get]
+
+    val visible : t -> bool [@@js.get]
+
+    val webview : t -> WebView.t [@@js.get]
+
+    val set_webview : t -> WebView.t -> unit [@@js.set]
+
+    val dispose : t -> Js.Any.t [@@js.call]
+
+    val reveal :
+      t -> ?preserveFocus:bool -> ?viewColumn:ViewColumn.t -> unit -> unit
+      [@@js.call]
+
+    val create :
+         onDidChangeViewState:OnDidChangeViewState.t
+      -> onDidDispose:OnDidDispose.t
+      -> active:bool
+      -> options:WebviewPanelOptions.t
+      -> title:string
+      -> viewColumn:ViewColumn.t
+      -> viewType:string
+      -> visible:bool
+      -> webview:WebView.t
+      -> dispose:Js.Any.t
+      -> reveal:
+           (?preserveFocus:bool -> ?viewColumn:ViewColumn.t -> unit -> unit)
+      -> t
+      [@@js.builder]]
+end
+
+and WebviewPanelOnDidChangeViewStateEvent : sig
+  include Js.T
+
+  val webviewPanel : t -> WebviewPanel.t
+end = struct
+  include Interface.Make ()
+
+  include [%js: val webviewPanel : t -> WebviewPanel.t [@@js.get]]
+end
+
+module CustomTextEditorProvider = struct
+  include Interface.Make ()
+
+  module ResolvedEditor = struct
+    type t =
+      ([ `Promise of Promise.void
+       | `Unit of Js.Unit.t
+       ]
+      [@js.union])
+    [@@js]
+
+    let t_of_js js_val =
+      if Ojs.is_null js_val then
+        `Unit ([%js.to: Js.Unit.t] js_val)
+      else
+        `Promise ([%js.to: Promise.void] js_val)
+
+    let t_to_js = function
+      | `Unit v -> Js.Unit.t_to_js v
+      | `Promise p -> Promise.void_to_js p
+  end
+
+  include
+    [%js:
+    val resolveCustomTextEditor :
+         t
+      -> document:TextDocument.t
+      -> webviewPanel:WebviewPanel.t
+      -> token:CancellationToken.t
+      -> ResolvedEditor.t
+      [@@js.call]
+
+    val create :
+         resolveCustomTextEditor:
+           (   document:TextDocument.t
+            -> webviewPanel:WebviewPanel.t
+            -> token:CancellationToken.t
+            -> ResolvedEditor.t)
+      -> t
+      [@@js.builder]]
+end
+
 module Window = struct
   module OnDidChangeActiveTextEditor = Event.Make (TextEditor)
   module OnDidChangeVisibleTextEditors = Event.Make (Js.List (TextEditor))
@@ -2654,7 +2919,27 @@ module Window = struct
       [@@js.global "vscode.window.registerTreeDataProvider"]
 
     val createTreeView : viewId:string -> options:Ojs.t -> Ojs.t
-      [@@js.global "vscode.window.createTreeView"]]
+      [@@js.global "vscode.window.createTreeView"]
+
+    val createWebviewPanel :
+         viewType:string
+      -> title:string
+      -> showOptions:ViewColumn.t
+      -> WebviewPanel.t
+      [@@js.global "vscode.window.createWebviewPanel"]
+
+    val registerCustomEditorProvider :
+         viewType:string
+      -> provider:
+           ([ `CustomTextEditorProvider of CustomTextEditorProvider.t
+            | `CustomReadonlyEditorProvider of
+              CustomTextEditorProvider.t
+              (*TODO*)
+            | `CustomEditorProvider of CustomTextEditorProvider.t (*TODO*)
+            ]
+           [@js.union])
+      -> Disposable.t
+      [@@js.global "vscode.window.registerCustomEditorProvider"]]
 
   let getChoices choices =
     choices
