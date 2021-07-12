@@ -32,6 +32,7 @@
     "onCommand:ocaml.select-sandbox",
     "onCommand:ocaml.open-terminal",
     "onCommand:ocaml.open-terminal-select",
+    "onCommand:ocaml.open-ast-explorer-to-the-side",
     "onCustomEditor:ast-editor",
     "workspaceContains:**/dune-project",
     "workspaceContains:**/*.opam",
@@ -205,6 +206,11 @@
         "command": "ocaml.evaluate-selection",
         "category": "OCaml",
         "title": "Evaluate Selection"
+      },
+      {
+        "command": "ocaml.open-ast-explorer-to-the-side",
+        "category": "OCaml",
+        "title": "AST preview"
       }
     ],
     "keybindings": [

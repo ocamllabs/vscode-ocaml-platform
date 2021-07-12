@@ -36,6 +36,9 @@ module Commands = struct
   let next_hole = ocaml_prefixed "next-hole"
 
   let prev_hole = ocaml_prefixed "prev-hole"
+
+  let open_ast_explorer_to_the_side =
+    ocaml_prefixed "open-ast-explorer-to-the-side"
 end
 
 module Command_errors = struct
