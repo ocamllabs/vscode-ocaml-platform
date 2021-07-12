@@ -41,6 +41,8 @@ module Commands = struct
     ocaml_prefixed "open-ast-explorer-to-the-side"
 
   let reveal_ast_node = ocaml_prefixed "reveal-ast-node"
+
+  let switch_hover_mode = ocaml_prefixed "switch-hover-mode"
 end
 
 module Command_errors = struct

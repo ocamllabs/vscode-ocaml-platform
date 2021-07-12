@@ -2,11 +2,13 @@ open Import
 
 let webview_map = ref (Map.empty (module String))
 
+let hover_disposable_ref = ref None
+
+let doc_string_uri ~document = Uri.toString (TextDocument.uri document) ()
+
 let read_html_file () =
   let filename = Node.__dirname () ^ "/../astexplorer/dist/index.html" in
   Fs.readFile filename
-
-let doc_string_uri ~document = Uri.toString (TextDocument.uri document) ()
 
 let document_eq a b =
   String.equal
@@ -64,6 +66,30 @@ let onDidReceiveMessage_listener msg ~(document : TextDocument.t) =
     List.iter ~f:(fun e -> apply_selection e cbegin cend) visible_editors
   else
     ()
+
+let on_hover custom_doc webview =
+  let hover =
+    Hover.make ~contents:(`MarkdownString (MarkdownString.make ~value:"" ()))
+  in
+  let provideHover ~(document : TextDocument.t) ~(position : Position.t)
+      ~token:_ =
+    let offset = TextDocument.offsetAt document ~position in
+    if document_eq custom_doc document then
+      send_msg "focus" (Ojs.int_to_js offset) ~webview
+    else
+      ();
+    `Value (Some [ hover ])
+  in
+  let provider = HoverProvider.create ~provideHover in
+  Vscode.Languages.registerHoverProvider ~selector:(`String "ocaml") ~provider
+
+let activate_hover_mode ~document =
+  let webview =
+    match Map.find !webview_map (doc_string_uri ~document) with
+    | Some wv -> wv
+    | None -> failwith "Webview wasn't found while desactivating hover mode"
+  in
+  on_hover document webview
 
 let resolveCustomTextEditor ~(document : TextDocument.t) ~webviewPanel ~token:_
     : CustomTextEditorProvider.ResolvedEditor.t =
@@ -132,7 +158,7 @@ module Command = struct
         let webview =
           match Map.find !webview_map (doc_string_uri ~document) with
           | Some wv -> wv
-          | None -> failwith "Webview wasnt found"
+          | None -> failwith "Webview wasn't found"
         in
         let offset = TextDocument.offsetAt document ~position in
         Promise.make (fun ~resolve:_ ~reject:_ ->
@@ -142,6 +168,25 @@ module Command = struct
     in
     Extension_commands.register_text_editor
       ~id:Extension_consts.Commands.reveal_ast_node handler
+
+  let _switch_hover_mode =
+    let handler _ ~textEditor ~edit:_ ~args:_ =
+      let (_ : unit Promise.t) =
+        Promise.make (fun ~resolve:_ ~reject:_ ->
+            match !hover_disposable_ref with
+            | Some d ->
+              Disposable.dispose d;
+              hover_disposable_ref := None
+            | None ->
+              hover_disposable_ref :=
+                Some
+                  (activate_hover_mode
+                     ~document:(TextEditor.document textEditor)))
+      in
+      ()
+    in
+    Extension_commands.register_text_editor
+      ~id:Extension_consts.Commands.switch_hover_mode handler
 end
 
 let register extension =

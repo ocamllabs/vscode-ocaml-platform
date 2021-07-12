@@ -211,10 +211,16 @@
         "command": "ocaml.open-ast-explorer-to-the-side",
         "category": "OCaml",
         "title": "AST preview"
-      },{
+      },
+      {
         "command": "ocaml.reveal-ast-node",
         "category": "OCaml",
         "title": "Reveal Ast Node"
+      },
+      {
+        "command": "ocaml.switch-hover-mode",
+        "category": "OCaml",
+        "title": "Switch to hover AST reveal mode"
       }
     ],
     "keybindings": [
@@ -258,6 +264,11 @@
         "command": "ocaml.reveal-ast-node",
         "key": "Shift+Ctrl+D",
         "when": "editorTextFocus && editorLangId == ocaml"
+      },
+      {
+        "command": "ocaml.switch-hover-mode",
+        "key": "Shift+Ctrl+H",
+        "when": "editorTextFocus && editorLangId == ocaml"
       }
     ],
     "menus": {
@@ -266,7 +277,8 @@
           "command": "ocaml.evaluate-selection",
           "group": "OCaml",
           "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir"
-        },{
+        },
+        {
           "command": "ocaml.reveal-ast-node",
           "group": "OCaml",
           "when": "editorTextFocus && editorLangId == ocaml"
