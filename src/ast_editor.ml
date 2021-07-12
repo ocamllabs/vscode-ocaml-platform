@@ -31,6 +31,36 @@ let onDidChangeTextDocument_listener event ~(document : TextDocument.t)
   else
     ()
 
+let onDidReceiveMessage_listener msg ~(document : TextDocument.t) =
+  if Ojs.has_property msg "begin" && Ojs.has_property msg "end" then
+    let cbegin =
+      Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg "begin"))
+    in
+    let cend =
+      Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg "end"))
+    in
+    let visible_editors =
+      List.filter (Vscode.Window.visibleTextEditors ()) ~f:(fun editor ->
+          let visible_doc = TextEditor.document editor in
+          document_eq document visible_doc)
+    in
+    let apply_selection editor cbegin cend =
+      let document = TextEditor.document editor in
+      let anchor = Vscode.TextDocument.positionAt document ~offset:cbegin in
+      let active = Vscode.TextDocument.positionAt document ~offset:cend in
+      TextEditor.set_selection editor (Selection.makePositions ~anchor ~active);
+      TextEditor.revealRange editor
+        ~range:(Range.makePositions ~start:anchor ~end_:active)
+        ();
+      (*FIXME: not accessing editor after the combination of revealRange and
+        set_selection (separately) results in a exception being thrown*)
+      let _ = TextEditor.selections editor in
+      ()
+    in
+    List.iter ~f:(fun e -> apply_selection e cbegin cend) visible_editors
+  else
+    ()
+
 let resolveCustomTextEditor ~(document : TextDocument.t) ~webviewPanel ~token:_
     : CustomTextEditorProvider.ResolvedEditor.t =
   let _ = document in
@@ -40,9 +70,15 @@ let resolveCustomTextEditor ~(document : TextDocument.t) ~webviewPanel ~token:_
       ~listener:(onDidChangeTextDocument_listener ~webview ~document)
       ()
   in
+  let onDidReceiveMessage_disposable =
+    WebView.onDidReceiveMessage webview
+      ~listener:(onDidReceiveMessage_listener ~document)
+      ()
+  in
   let _ =
     WebviewPanel.onDidDispose webviewPanel
       ~listener:(fun () ->
+        Disposable.dispose onDidReceiveMessage_disposable;
         Disposable.dispose onDidChangeTextDocument_disposable)
       ()
   in
