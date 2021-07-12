@@ -1,8 +1,12 @@
 open Import
 
+let webview_map = ref (Map.empty (module String))
+
 let read_html_file () =
   let filename = Node.__dirname () ^ "/../astexplorer/dist/index.html" in
   Fs.readFile filename
+
+let doc_string_uri ~document = Uri.toString (TextDocument.uri document) ()
 
 let document_eq a b =
   String.equal
@@ -65,6 +69,9 @@ let resolveCustomTextEditor ~(document : TextDocument.t) ~webviewPanel ~token:_
     : CustomTextEditorProvider.ResolvedEditor.t =
   let _ = document in
   let webview = WebviewPanel.webview webviewPanel in
+  (*persist the webview*)
+  webview_map :=
+    Map.set !webview_map ~key:(doc_string_uri ~document) ~data:webview;
   let onDidChangeTextDocument_disposable =
     Workspace.onDidChangeTextDocument
       ~listener:(onDidChangeTextDocument_listener ~webview ~document)
@@ -115,6 +122,26 @@ module Command = struct
     in
     Extension_commands.register_text_editor
       ~id:Extension_consts.Commands.open_ast_explorer_to_the_side handler
+
+  let _reveal_ast_node =
+    let handler _ ~textEditor ~edit:_ ~args:_ =
+      let (_ : unit Promise.t) =
+        let selection = Vscode.TextEditor.selection textEditor in
+        let document = TextEditor.document textEditor in
+        let position = Vscode.Selection.start selection in
+        let webview =
+          match Map.find !webview_map (doc_string_uri ~document) with
+          | Some wv -> wv
+          | None -> failwith "Webview wasnt found"
+        in
+        let offset = TextDocument.offsetAt document ~position in
+        Promise.make (fun ~resolve:_ ~reject:_ ->
+            send_msg "focus" (Ojs.int_to_js offset) ~webview)
+      in
+      ()
+    in
+    Extension_commands.register_text_editor
+      ~id:Extension_consts.Commands.reveal_ast_node handler
 end
 
 let register extension =

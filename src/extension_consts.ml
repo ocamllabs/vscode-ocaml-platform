@@ -39,6 +39,8 @@ module Commands = struct
 
   let open_ast_explorer_to_the_side =
     ocaml_prefixed "open-ast-explorer-to-the-side"
+
+  let reveal_ast_node = ocaml_prefixed "reveal-ast-node"
 end
 
 module Command_errors = struct

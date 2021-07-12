@@ -211,6 +211,10 @@
         "command": "ocaml.open-ast-explorer-to-the-side",
         "category": "OCaml",
         "title": "AST preview"
+      },{
+        "command": "ocaml.reveal-ast-node",
+        "category": "OCaml",
+        "title": "Reveal Ast Node"
       }
     ],
     "keybindings": [
@@ -249,6 +253,11 @@
         "command": "ocaml.prev-hole",
         "key": "Shift+Alt+L",
         "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+      },
+      {
+        "command": "ocaml.reveal-ast-node",
+        "key": "Shift+Ctrl+D",
+        "when": "editorTextFocus && editorLangId == ocaml"
       }
     ],
     "menus": {
@@ -257,6 +266,10 @@
           "command": "ocaml.evaluate-selection",
           "group": "OCaml",
           "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir"
+        },{
+          "command": "ocaml.reveal-ast-node",
+          "group": "OCaml",
+          "when": "editorTextFocus && editorLangId == ocaml"
         }
       ],
       "commandPalette": [

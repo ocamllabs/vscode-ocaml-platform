@@ -45,7 +45,9 @@ class Index extends React.Component {
               time: 120,
               treeAdapter: getTreeAdapter(newParser),
             },
-          });
+          }); 
+        case "focus":
+          this.setState({ position: event.data.value });
           break;
       }
     });
