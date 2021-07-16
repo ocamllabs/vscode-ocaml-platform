@@ -11,6 +11,10 @@ let pp_doc_to_changed_origin_map = ref (Map.empty (module String))
 
 let origin_to_pp_doc_map = ref (Map.empty (module String))
 
+let put_keys_into_a_list data_serached map =
+  Map.filteri ~f:(fun ~key:_ ~data -> String.equal data_serached data) map
+  |> Map.to_alist |> List.unzip |> fst
+
 let set_changes_tracking origin pp_doc =
   origin_to_pp_doc_map :=
     Map.set !origin_to_pp_doc_map
@@ -207,6 +211,36 @@ let open_pp_doc ~document =
   in
   0
 
+let reload_pp_doc ~document =
+  let open Promise.Syntax in
+  let visibleTextEditors = Window.visibleTextEditors () in
+  let origin_uri =
+    match
+      put_keys_into_a_list (doc_string_uri ~document) !origin_to_pp_doc_map
+      (*FIXME: this can fail because origin_to_pp_doc_map is not cleaned on
+        closed document *)
+    with
+    | x :: _ -> x
+    | _ -> failwith "Failed finding the original document URI."
+  in
+  let* original_document =
+    Workspace.openTextDocument (`Uri (Uri.parse origin_uri ()))
+  in
+  match
+    List.find
+      ~f:(fun editor -> document_eq (TextEditor.document editor) document)
+      visibleTextEditors
+  with
+  | Some _ ->
+    let+ _ =
+      set_origin_changed ~key:(doc_string_uri ~document) ~data:false;
+      replace_document_content
+        ~content:(get_pp_pp_structure ~document:original_document)
+        ~document
+    in
+    0
+  | None -> Promise.resolve 1
+
 let manage_choice choice ~document : int Promise.t =
   let path = Path.of_string (project_root_path ~document) in
   let buildCmd () =
@@ -216,7 +250,14 @@ let manage_choice choice ~document : int Promise.t =
     let open Promise.Syntax in
     let* res = buildCmd () in
     if res.exitCode = 0 then
-      open_pp_doc ~document
+      (* FIXME: remove entries on document close *)
+      if
+        Map.existsi !pp_doc_to_changed_origin_map ~f:(fun ~key ~data:_ ->
+            String.equal key (doc_string_uri ~document))
+      then
+        reload_pp_doc ~document
+      else
+        open_pp_doc ~document
     else
       let* perror =
         Window.showErrorMessage
@@ -348,13 +389,40 @@ let text_document_content_provider_ppx =
   in
   TextDocumentContentProvider.create ~provideTextDocumentContent ~onDidChange
 
+let manage_changed_origin ~document =
+  let open Promise.Syntax in
+  let* choice =
+    Window.showInformationMessage
+      ~message:
+        "The original document have been changed, would you like to rebuild \
+         the project?"
+      ~choices:[ ("Run `dune build`", 0); ("Cancel", 1) ]
+      ()
+  in
+  manage_choice choice ~document
+
 let onDidSaveTextDocument_listener_pp document =
   on_origin_update_content document
+
+let onDidChangeActiveTextEditor_listener e =
+  if not (TextEditor.t_to_js e |> Ojs.is_null) then
+    let document = TextEditor.document e in
+    match Map.find !pp_doc_to_changed_origin_map (doc_string_uri ~document) with
+    | Some true ->
+      let _ = manage_changed_origin ~document in
+      ()
+    | _ -> ()
+  else
+    ()
 
 let register extension =
   let editorProvider =
     `CustomEditorProvider
       (CustomTextEditorProvider.create ~resolveCustomTextEditor)
+  in
+  let _ =
+    Window.onDidChangeActiveTextEditor ()
+      ~listener:onDidChangeActiveTextEditor_listener ()
   in
   let disposable =
     Vscode.Window.registerCustomEditorProvider ~viewType:"ast-editor"
