@@ -3,6 +3,8 @@ open Ppx_utils
 
 let webview_map = ref (Map.empty (module String))
 
+let original_mode = ref true
+
 let hover_disposable_ref = ref None
 
 let doc_string_uri ~document = Uri.toString (TextDocument.uri document) ()
@@ -80,7 +82,9 @@ let onDidChangeTextDocument_listener event ~(document : TextDocument.t)
     ()
 
 let onDidReceiveMessage_listener msg ~(document : TextDocument.t) =
-  if Ojs.has_property msg "begin" && Ojs.has_property msg "end" then
+  if Ojs.has_property msg "selectedOutput" then
+    original_mode := not !original_mode
+  else if Ojs.has_property msg "begin" && Ojs.has_property msg "end" then
     let cbegin =
       Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg "begin"))
     in
