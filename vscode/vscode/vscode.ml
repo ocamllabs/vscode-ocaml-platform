@@ -2216,6 +2216,9 @@ module Workspace = struct
     val workspaceFile : unit -> Uri.t or_undefined
       [@@js.get "vscode.workspace.workspaceFile"]
 
+    val rootPath : unit -> string or_undefined
+      [@@js.get "vscode.workspace.rootPath"]
+
     val textDocuments : unit -> TextDocument.t list
       [@@js.get "vscode.workspace.textDocuments"]
 
@@ -2237,6 +2240,10 @@ module Workspace = struct
     val registerTextDocumentContentProvider :
       scheme:string -> provider:TextDocumentContentProvider.t -> Disposable.t
       [@@js.global "vscode.workspace.registerTextDocumentContentProvider"]
+
+    val asRelativePath :
+      pathOrUri:([ `String of string | `Uri of Uri.t ][@js.union]) -> string
+      [@@js.global "vscode.workspace.asRelativePath"]
 
     val getConfiguration :
          ?section:string
