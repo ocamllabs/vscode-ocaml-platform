@@ -45,7 +45,16 @@ class Index extends React.Component {
               time: 120,
               treeAdapter: getTreeAdapter(newParser),
             },
-          }); 
+          });
+          this.setState({
+            ppAstResult: {
+              ast: parseRes.pp_ast,
+              error: null,
+              time: 120,
+              treeAdapter: getTreeAdapter(newParser),
+            },
+          });
+          break;
         case "focus":
           this.setState({ position: event.data.value });
           break;
@@ -65,6 +74,7 @@ class Index extends React.Component {
         <div className="container">
           <ASTOutput
             parseResult={this.state.astResult}
+            ppParseResult={this.state.ppAstResult}
             position={this.state.position}
           />
           {this.message}

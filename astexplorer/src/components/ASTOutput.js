@@ -16,7 +16,7 @@ function formatTime(time) {
   return `${(time / 1000).toFixed(2)}s`;
 }
 
-export default function ASTOutput({ parseResult = {}, position = null }) {
+export default function ASTOutput({ parseResult = {}, ppParseResult = {}, position = null }) {
   const [selectedOutput, setSelectedOutput] = useState(0);
   const { ast = null } = parseResult;
   let output;
@@ -26,7 +26,7 @@ export default function ASTOutput({ parseResult = {}, position = null }) {
       {
         React.createElement(
           visualizations[0],
-          { parseResult , position, selectedOutput },
+          { parseResult: (selectedOutput == 0 ? parseResult : ppParseResult), position, selectedOutput },
         )
       }
     </ErrorBoundary>
@@ -46,7 +46,7 @@ export default function ASTOutput({ parseResult = {}, position = null }) {
         className={cx({
           active: selectedOutput == index,
         })}>
-        {"Original"}
+        {index === 0 ? "Original" : "Preprocessed"}
       </button>
   );
 
