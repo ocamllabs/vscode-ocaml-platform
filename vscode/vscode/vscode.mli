@@ -1745,6 +1745,8 @@ module Workspace : sig
 
   val onDidCloseTextDocument : TextDocument.t Event.t
 
+  val onDidSaveTextDocument : TextDocument.t Event.t
+
   val applyEdit : edit:WorkspaceEdit.t -> bool Promise.t
 
   val getConfiguration :

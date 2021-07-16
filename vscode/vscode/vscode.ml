@@ -2218,6 +2218,7 @@ module Workspace = struct
   module OnDidChangeWorkspaceFolders = Event.Make (WorkspaceFolder)
   module OnDidOpenTextDocument = Event.Make (TextDocument)
   module OnDidCloseTextDocument = Event.Make (TextDocument)
+  module OnDidSaveTextDocument = Event.Make (TextDocument)
   module OnDidChangeTextDocument = Event.Make (TextDocumentChangeEvent)
 
   type textDocumentOptions =
@@ -2250,6 +2251,9 @@ module Workspace = struct
 
     val onDidOpenTextDocument : OnDidOpenTextDocument.t
       [@@js.global "vscode.workspace.onDidOpenTextDocument"]
+
+    val onDidSaveTextDocument : OnDidSaveTextDocument.t
+      [@@js.global "vscode.workspace.onDidSaveTextDocument"]
 
     val onDidCloseTextDocument : OnDidCloseTextDocument.t
       [@@js.global "vscode.workspace.onDidCloseTextDocument"]
