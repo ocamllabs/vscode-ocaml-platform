@@ -64,8 +64,12 @@ let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
   let _pp_path = get_pp_path ~document in
   let pp_value =
     try
+      let ppml_structure = get_preprocessed_structure (get_pp_path ~document) in
       let pp_code = get_pp_pp_structure ~document in
-      let reparsed_json = Dumpast.transform pp_code in
+      let reparsed_structure =
+        pp_code |> Lexing.from_string |> Parse.implementation
+      in
+      let reparsed_json = Dumpast.reparse ppml_structure reparsed_structure in
       reparsed_json
     with
     | _ -> null
