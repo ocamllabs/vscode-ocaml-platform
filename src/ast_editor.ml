@@ -7,6 +7,32 @@ let hover_disposable_ref = ref None
 
 let doc_string_uri ~document = Uri.toString (TextDocument.uri document) ()
 
+let pp_doc_to_changed_origin_map = ref (Map.empty (module String))
+
+let origin_to_pp_doc_map = ref (Map.empty (module String))
+
+let set_changes_tracking origin pp_doc =
+  origin_to_pp_doc_map :=
+    Map.set !origin_to_pp_doc_map
+      ~key:(doc_string_uri ~document:origin)
+      ~data:(doc_string_uri ~document:pp_doc);
+  pp_doc_to_changed_origin_map :=
+    Map.set
+      !pp_doc_to_changed_origin_map
+      ~key:(doc_string_uri ~document:pp_doc)
+      ~data:false
+
+let set_origin_changed ~data ~key =
+  pp_doc_to_changed_origin_map :=
+    Map.set !pp_doc_to_changed_origin_map ~key ~data
+
+let on_origin_update_content changed_document =
+  match
+    Map.find !origin_to_pp_doc_map (doc_string_uri ~document:changed_document)
+  with
+  | Some key -> set_origin_changed ~key ~data:true
+  | None -> ()
+
 let read_html_file () =
   let filename = Node.__dirname () ^ "/../astexplorer/dist/index.html" in
   Fs.readFile filename
@@ -170,6 +196,7 @@ let open_pp_doc ~document =
       (`Uri
         (Uri.parse ("post-ppx: " ^ TextDocument.fileName document ^ "?") ()))
   in
+  set_changes_tracking document doc;
   let _ =
     let+ _ = replace_document_content ~content:pp_pp_str ~document:doc in
     ()
@@ -321,6 +348,9 @@ let text_document_content_provider_ppx =
   in
   TextDocumentContentProvider.create ~provideTextDocumentContent ~onDidChange
 
+let onDidSaveTextDocument_listener_pp document =
+  on_origin_update_content document
+
 let register extension =
   let editorProvider =
     `CustomEditorProvider
@@ -334,5 +364,10 @@ let register extension =
   let disposable =
     Vscode.Workspace.registerTextDocumentContentProvider ~scheme:"post-ppx"
       ~provider:text_document_content_provider_ppx
+  in
+  Vscode.ExtensionContext.subscribe extension ~disposable;
+  let disposable =
+    Workspace.onDidSaveTextDocument ~listener:onDidSaveTextDocument_listener_pp
+      ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable
