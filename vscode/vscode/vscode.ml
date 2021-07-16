@@ -818,6 +818,26 @@ module WorkspaceConfiguration = struct
     [%js.to: T.t] (get_default this ~section ~defaultValue)
 end
 
+module WorkspaceEdit = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val size : t -> int [@@js.get]
+
+    val set_size : t -> int -> unit [@@js.set]
+
+    val replace :
+         t
+      -> uri:Uri.t
+      -> range:Range.t
+      -> newText:string (*TODO ->?metadata:WorkspaceEditEntryMetadata.t*)
+      -> unit
+      [@@js.call]
+
+    val make : unit -> t [@@js.new "vscode.WorkspaceEdit"]]
+end
+
 module StatusBarAlignment = struct
   type t =
     | Left [@js 1]
@@ -2236,6 +2256,9 @@ module Workspace = struct
 
     val onDidChangeTextDocument : OnDidChangeTextDocument.t
       [@@js.global "vscode.workspace.onDidChangeTextDocument"]
+
+    val applyEdit : edit:WorkspaceEdit.t -> bool Promise.t
+      [@@js.global "vscode.workspace.applyEdit"]
 
     val registerTextDocumentContentProvider :
       scheme:string -> provider:TextDocumentContentProvider.t -> Disposable.t

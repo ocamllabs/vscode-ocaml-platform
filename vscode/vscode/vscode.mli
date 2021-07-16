@@ -632,6 +632,23 @@ module WorkspaceConfiguration : sig
     -> Promise.void
 end
 
+module WorkspaceEdit : sig
+  include Js.T
+
+  val size : t -> int
+
+  val set_size : t -> int -> unit
+
+  val replace :
+       t
+    -> uri:Uri.t
+    -> range:Range.t
+    -> newText:string (*TODO ->?metadata:WorkspaceEditEntryMetadata.t*)
+    -> unit
+
+  val make : unit -> t
+end
+
 module StatusBarAlignment : sig
   type t =
     | Left
@@ -1727,6 +1744,8 @@ module Workspace : sig
   val onDidOpenTextDocument : TextDocument.t Event.t
 
   val onDidCloseTextDocument : TextDocument.t Event.t
+
+  val applyEdit : edit:WorkspaceEdit.t -> bool Promise.t
 
   val getConfiguration :
        ?section:string
