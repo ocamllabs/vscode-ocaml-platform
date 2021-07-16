@@ -1615,6 +1615,26 @@ module Progress : sig
   val report : t -> value:value -> unit
 end
 
+module TextDocumentContentChangeEvent : sig
+  include Js.T
+
+  val range : t -> Range.t
+
+  val rangeLength : t -> int
+
+  val rangeOffset : t -> int
+
+  val text : t -> string
+end
+
+module TextDocumentChangeEvent : sig
+  include Js.T
+
+  val contentChanges : t -> TextDocumentContentChangeEvent.t list
+
+  val document : t -> TextDocument.t
+end
+
 module Workspace : sig
   val workspaceFolders : unit -> WorkspaceFolder.t list
 
@@ -1623,6 +1643,8 @@ module Workspace : sig
   val workspaceFile : unit -> Uri.t option
 
   val onDidChangeWorkspaceFolders : WorkspaceFolder.t Event.t
+
+  val onDidChangeTextDocument : TextDocumentChangeEvent.t Event.t
 
   val getWorkspaceFolder : uri:Uri.t -> WorkspaceFolder.t option
 
