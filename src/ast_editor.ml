@@ -13,6 +13,10 @@ let pp_doc_to_changed_origin_map = ref (Map.empty (module String))
 
 let origin_to_pp_doc_map = ref (Map.empty (module String))
 
+let entry_exists k d =
+  Map.existsi !origin_to_pp_doc_map ~f:(fun ~key ~data ->
+      String.equal d data && String.equal k key)
+
 let put_keys_into_a_list data_serached map =
   Map.filteri ~f:(fun ~key:_ ~data -> String.equal data_serached data) map
   |> Map.to_alist |> List.unzip |> fst
@@ -95,10 +99,22 @@ let onDidReceiveMessage_listener msg ~(document : TextDocument.t) =
     let cend =
       Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg "end"))
     in
-    let visible_editors =
-      List.filter (Vscode.Window.visibleTextEditors ()) ~f:(fun editor ->
+    let maybe_pair_editors =
+      List.map (Vscode.Window.visibleTextEditors ()) ~f:(fun editor ->
           let visible_doc = TextEditor.document editor in
-          document_eq document visible_doc)
+          if (* !original_mode && *) document_eq document visible_doc then
+            (Some editor, None)
+          else if
+            (* (not !original_mode) && *)
+            (entry_exists (doc_string_uri ~document))
+              (doc_string_uri ~document:visible_doc)
+          then
+            (None, Some editor)
+          else
+            (None, None))
+      |> List.filter ~f:(function
+           | None, None -> false
+           | _ -> true)
     in
     let apply_selection editor cbegin cend =
       let document = TextEditor.document editor in
@@ -109,11 +125,27 @@ let onDidReceiveMessage_listener msg ~(document : TextDocument.t) =
         ~range:(Range.makePositions ~start:anchor ~end_:active)
         ();
       (*FIXME: not accessing editor after the combination of revealRange and
-        set_selection (separately) results in a exception being thrown*)
+        set_selection (separately) results in a expetion being thrown*)
       let _ = TextEditor.selections editor in
       ()
     in
-    List.iter ~f:(fun e -> apply_selection e cbegin cend) visible_editors
+    List.iter
+      ~f:(fun e ->
+        match e with
+        | Some editor, None -> apply_selection editor cbegin cend
+        | None, Some editor
+          when Ojs.has_property msg "r_begin"
+               && Ojs.has_property msg "r_end"
+               && not !original_mode ->
+          let rcbegin =
+            Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg "r_begin"))
+          in
+          let rcend =
+            Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg "r_end"))
+          in
+          apply_selection editor rcbegin rcend
+        | _ -> ())
+      maybe_pair_editors
   else
     ()
 
@@ -324,14 +356,34 @@ module Command = struct
         let selection = Vscode.TextEditor.selection textEditor in
         let document = TextEditor.document textEditor in
         let position = Vscode.Selection.start selection in
-        let webview =
+        let webview_opt =
           match Map.find !webview_map (doc_string_uri ~document) with
-          | Some wv -> wv
-          | None -> failwith "Webview wasn't found"
+          | wv_opt when !original_mode -> wv_opt
+          | None -> (
+            match
+              put_keys_into_a_list (doc_string_uri ~document)
+                !origin_to_pp_doc_map
+            with
+            | [ k ] -> (
+              match Map.find !webview_map k with
+              | wv_opt when not !original_mode -> wv_opt
+              | _ -> None)
+            | _ -> None)
+          | _ -> None
         in
         let offset = TextDocument.offsetAt document ~position in
         Promise.make (fun ~resolve:_ ~reject:_ ->
-            send_msg "focus" (Ojs.int_to_js offset) ~webview)
+            match webview_opt with
+            | Some webview -> send_msg "focus" (Ojs.int_to_js offset) ~webview
+            | None ->
+              let _ =
+                Window.showErrorMessage
+                  ~message:
+                    "Wrong outputmode inside the ASTexplorer, please select \
+                     the correct tab"
+                  ~choices:[ ("Close", 0) ] ()
+              in
+              ())
       in
       ()
     in
