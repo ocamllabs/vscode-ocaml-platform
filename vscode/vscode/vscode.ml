@@ -2173,6 +2173,27 @@ module TextDocumentChangeEvent = struct
     val document : t -> TextDocument.t [@@js.get]]
 end
 
+module TextDocumentContentProvider = struct
+  include Interface.Make ()
+
+  module OnDidChange = Event.Make (Uri)
+
+  include
+    [%js:
+    val onDidChange : t -> OnDidChange.t [@@js.get]
+
+    val provideTextDocumentContent :
+      t -> uri:Uri.t -> token:CancellationToken.t -> string ProviderResult.t
+      [@@js.call]
+
+    val create :
+         onDidChange:OnDidChange.t
+      -> provideTextDocumentContent:
+           (uri:Uri.t -> token:CancellationToken.t -> string ProviderResult.t)
+      -> t
+      [@@js.builder]]
+end
+
 module Workspace = struct
   module OnDidChangeWorkspaceFolders = Event.Make (WorkspaceFolder)
   module OnDidOpenTextDocument = Event.Make (TextDocument)
@@ -2212,6 +2233,10 @@ module Workspace = struct
 
     val onDidChangeTextDocument : OnDidChangeTextDocument.t
       [@@js.global "vscode.workspace.onDidChangeTextDocument"]
+
+    val registerTextDocumentContentProvider :
+      scheme:string -> provider:TextDocumentContentProvider.t -> Disposable.t
+      [@@js.global "vscode.workspace.registerTextDocumentContentProvider"]
 
     val getConfiguration :
          ?section:string

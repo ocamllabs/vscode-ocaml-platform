@@ -1669,6 +1669,21 @@ module TextDocumentChangeEvent : sig
   val document : t -> TextDocument.t
 end
 
+module TextDocumentContentProvider : sig
+  include Js.T
+
+  val onDidChange : t -> Uri.t Event.t
+
+  val provideTextDocumentContent :
+    t -> uri:Uri.t -> token:CancellationToken.t -> string ProviderResult.t
+
+  val create :
+       onDidChange:Uri.t Event.t
+    -> provideTextDocumentContent:
+         (uri:Uri.t -> token:CancellationToken.t -> string ProviderResult.t)
+    -> t
+end
+
 module Workspace : sig
   val workspaceFolders : unit -> WorkspaceFolder.t list
 
@@ -1713,6 +1728,9 @@ module Workspace : sig
     -> ?scope:ConfigurationScope.t
     -> unit
     -> WorkspaceConfiguration.t
+
+  val registerTextDocumentContentProvider :
+    scheme:string -> provider:TextDocumentContentProvider.t -> Disposable.t
 end
 
 module TreeItemCollapsibleState : sig
