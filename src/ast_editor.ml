@@ -189,6 +189,15 @@ module Command = struct
       ~id:Extension_consts.Commands.switch_hover_mode handler
 end
 
+let text_document_content_provider_ppx =
+  let module EventEmitter = EventEmitter.Make (Uri) in
+  let event_emitter = EventEmitter.make () in
+  let onDidChange = EventEmitter.event event_emitter in
+  let provideTextDocumentContent ~uri:_ ~token:_ : string ProviderResult.t =
+    `Value None
+  in
+  TextDocumentContentProvider.create ~provideTextDocumentContent ~onDidChange
+
 let register extension =
   let editorProvider =
     `CustomEditorProvider
@@ -197,5 +206,10 @@ let register extension =
   let disposable =
     Vscode.Window.registerCustomEditorProvider ~viewType:"ast-editor"
       ~provider:editorProvider
+  in
+  Vscode.ExtensionContext.subscribe extension ~disposable;
+  let disposable =
+    Vscode.Workspace.registerTextDocumentContentProvider ~scheme:"post-ppx"
+      ~provider:text_document_content_provider_ppx
   in
   Vscode.ExtensionContext.subscribe extension ~disposable
