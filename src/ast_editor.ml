@@ -1,4 +1,5 @@
 open Import
+open Ppx_utils
 
 let webview_map = ref (Map.empty (module String))
 
@@ -137,6 +138,82 @@ let open_ast_explorer ~uri =
   in
   ()
 
+let replace_document_content ~document ~content =
+  let first_line = TextDocument.lineAt document ~line:0 in
+  let last_line =
+    TextDocument.lineAt document ~line:(TextDocument.lineCount document - 1)
+  in
+  let range =
+    Range.makePositions
+      ~start:(TextLine.range first_line |> Range.start)
+      ~end_:(TextLine.range last_line |> Range.end_)
+  in
+  let edit = WorkspaceEdit.make () in
+  WorkspaceEdit.replace edit
+    ~uri:(TextDocument.uri document)
+    ~range ~newText:content;
+  Workspace.applyEdit ~edit
+
+let open_pp_doc ~document =
+  let open Promise.Syntax in
+  let pp_pp_str = get_pp_pp_structure ~document in
+  let* doc =
+    Workspace.openTextDocument
+      (`Uri
+        (Uri.parse ("post-ppx: " ^ TextDocument.fileName document ^ "?") ()))
+  in
+  let _ =
+    let+ _ = replace_document_content ~content:pp_pp_str ~document:doc in
+    ()
+  in
+  let+ _ =
+    Window.showTextDocument ~document:(`TextDocument doc)
+      ~column:ViewColumn.Beside ()
+  in
+  0
+
+let manage_choice choice ~document : int Promise.t =
+  let path = Path.of_string (project_root_path ~document) in
+  let buildCmd () =
+    Cmd.run ~cwd:path (Cmd.Shell "eval $(opam env); dune build")
+  in
+  let rec build_project () =
+    let open Promise.Syntax in
+    let* res = buildCmd () in
+    if res.exitCode = 0 then
+      open_pp_doc ~document
+    else
+      let* perror =
+        Window.showErrorMessage
+          ~message:"Building project failed, fix project errors and retry."
+          ~choices:[ ("Retry running `dune build`", 0); ("Abandon", 1) ]
+          ()
+      in
+      match perror with
+      | Some 0 -> build_project ()
+      | _ -> Promise.resolve 1
+  in
+  match choice with
+  | Some 0 -> build_project ()
+  | _ -> Promise.resolve 1
+
+let manage_open_failure ~document =
+  let open Promise.Syntax in
+  let* choice =
+    Window.showInformationMessage
+      ~message:
+        ("Seems like the file '"
+        ^ relative_document_path ~document
+        ^ "' haven't been preprocessed yet.")
+      ~choices:[ ("Run `dune build`", 0); ("Abandon", 1) ]
+      ()
+  in
+  manage_choice choice ~document
+
+let open_preprocessed_doc_to_the_side ~document =
+  try open_pp_doc ~document with
+  | _ -> manage_open_failure ~document
+
 module Command = struct
   let _open_ast_explorer_to_the_side =
     let handler _ ~textEditor ~edit:_ ~args:_ =
@@ -187,6 +264,23 @@ module Command = struct
     in
     Extension_commands.register_text_editor
       ~id:Extension_consts.Commands.switch_hover_mode handler
+
+  let _show_preprocessed_document =
+    let handler _ ~textEditor ~edit:_ ~args:_ =
+      let document = TextEditor.document textEditor in
+      let (_ : unit Promise.t) =
+        Promise.make (fun ~resolve:_ ~reject:_ ->
+            let _ =
+              let open Promise.Syntax in
+              let+ _ = open_preprocessed_doc_to_the_side ~document in
+              ()
+            in
+            ())
+      in
+      ()
+    in
+    Extension_commands.register_text_editor
+      ~id:Extension_consts.Commands.show_preprocessed_document handler
 end
 
 let text_document_content_provider_ppx =
@@ -194,7 +288,7 @@ let text_document_content_provider_ppx =
   let event_emitter = EventEmitter.make () in
   let onDidChange = EventEmitter.event event_emitter in
   let provideTextDocumentContent ~uri:_ ~token:_ : string ProviderResult.t =
-    `Value None
+    `Value (Some "")
   in
   TextDocumentContentProvider.create ~provideTextDocumentContent ~onDidChange
 

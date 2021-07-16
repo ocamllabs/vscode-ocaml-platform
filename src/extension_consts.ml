@@ -43,6 +43,8 @@ module Commands = struct
   let reveal_ast_node = ocaml_prefixed "reveal-ast-node"
 
   let switch_hover_mode = ocaml_prefixed "switch-hover-mode"
+
+  let show_preprocessed_document = ocaml_prefixed "show-preprocessed-document"
 end
 
 module Command_errors = struct

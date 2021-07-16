@@ -33,6 +33,7 @@
     "onCommand:ocaml.open-terminal",
     "onCommand:ocaml.open-terminal-select",
     "onCommand:ocaml.open-ast-explorer-to-the-side",
+    "onCommand:ocaml.show-preprocessed-document",
     "onCustomEditor:ast-editor",
     "workspaceContains:**/dune-project",
     "workspaceContains:**/*.opam",
@@ -211,6 +212,11 @@
         "command": "ocaml.open-ast-explorer-to-the-side",
         "category": "OCaml",
         "title": "AST preview"
+      },
+      {
+        "command": "ocaml.show-preprocessed-document",
+        "category": "OCaml",
+        "title": "Show Preprocessed Document"
       },
       {
         "command": "ocaml.reveal-ast-node",
