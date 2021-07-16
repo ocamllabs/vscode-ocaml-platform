@@ -25,10 +25,18 @@ let send_msg t value ~(webview : WebView.t) =
 
 let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
   let open Jsonoo.Encode in
-  let ast_js =
-    object_ [ ("ast", TextDocument.getText document () |> Dumpast.transform) ]
+  let origin_json = TextDocument.getText document () |> Dumpast.transform in
+  let _pp_path = get_pp_path ~document in
+  let pp_value =
+    try
+      let pp_code = get_pp_pp_structure ~document in
+      let reparsed_json = Dumpast.transform pp_code in
+      reparsed_json
+    with
+    | _ -> null
   in
-  send_msg "parse" (Jsonoo.t_to_js ast_js) ~webview
+  let astpair = object_ [ ("ast", origin_json); ("pp_ast", pp_value) ] in
+  send_msg "parse" (Jsonoo.t_to_js astpair) ~webview
 
 let onDidChangeTextDocument_listener event ~(document : TextDocument.t)
     ~(webview : WebView.t) =
