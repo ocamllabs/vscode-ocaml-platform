@@ -222,6 +222,14 @@ let open_preprocessed_doc_to_the_side ~document =
   try open_pp_doc ~document with
   | _ -> manage_open_failure ~document
 
+let open_both_ppx_ast ~document =
+  let open Promise.Syntax in
+  let+ pp_doc_open = open_preprocessed_doc_to_the_side ~document in
+  if pp_doc_open = 0 then
+    open_ast_explorer ~uri:(TextDocument.uri document)
+  else
+    ()
+
 module Command = struct
   let _open_ast_explorer_to_the_side =
     let handler _ ~textEditor ~edit:_ ~args:_ =
@@ -289,6 +297,19 @@ module Command = struct
     in
     Extension_commands.register_text_editor
       ~id:Extension_consts.Commands.show_preprocessed_document handler
+
+  let _open_pp_editor_and_ast_explorer =
+    let handler _ ~textEditor ~edit:_ ~args:_ =
+      let (_ : unit Promise.t) =
+        let document = TextEditor.document textEditor in
+        Promise.make (fun ~resolve:_ ~reject:_ ->
+            let _ = open_both_ppx_ast ~document in
+            ())
+      in
+      ()
+    in
+    Extension_commands.register_text_editor
+      ~id:Extension_consts.Commands.open_pp_editor_and_ast_explorer handler
 end
 
 let text_document_content_provider_ppx =

@@ -34,6 +34,7 @@
     "onCommand:ocaml.open-terminal-select",
     "onCommand:ocaml.open-ast-explorer-to-the-side",
     "onCommand:ocaml.show-preprocessed-document",
+    "onCommand:ocaml.open-pp-editor-and-ast-explorer",
     "onCustomEditor:ast-editor",
     "workspaceContains:**/dune-project",
     "workspaceContains:**/*.opam",
@@ -227,6 +228,11 @@
         "command": "ocaml.switch-hover-mode",
         "category": "OCaml",
         "title": "Switch to hover AST reveal mode"
+      },
+      {
+        "command": "ocaml.open-pp-editor-and-ast-explorer",
+        "category": "OCaml",
+        "title": "Open both ppx editor and AST explorer to the Side"
       }
     ],
     "keybindings": [

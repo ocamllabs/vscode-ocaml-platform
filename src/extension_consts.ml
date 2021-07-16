@@ -45,6 +45,9 @@ module Commands = struct
   let switch_hover_mode = ocaml_prefixed "switch-hover-mode"
 
   let show_preprocessed_document = ocaml_prefixed "show-preprocessed-document"
+
+  let open_pp_editor_and_ast_explorer =
+    ocaml_prefixed "open-pp-editor-and-ast-explorer"
 end
 
 module Command_errors = struct
