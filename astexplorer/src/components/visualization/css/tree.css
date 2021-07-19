@@ -25,7 +25,7 @@
 .tree-visualization > ul {
   cursor: default;
   box-sizing: border-box;
-  font-family: monospace;
+  font-family: sans-serif;
   -webkit-touch-callout: none;
   user-select: none;
   flex: 1;
