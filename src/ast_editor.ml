@@ -78,17 +78,30 @@ let send_msg t value ~(webview : WebView.t) =
 
 let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
   let open Jsonoo.Encode in
-  let origin_json = TextDocument.getText document () |> Dumpast.transform in
+  let origin_json =
+    Dumpast.transform (TextDocument.getText document ()) (get_kind ~document)
+  in
   let _pp_path = get_pp_path ~document in
   let pp_value =
     try
-      let ppml_structure = get_preprocessed_structure (get_pp_path ~document) in
-      let pp_code = get_pp_pp_structure ~document in
-      let reparsed_structure =
-        pp_code |> Lexing.from_string |> Parse.implementation
-      in
-      let reparsed_json = Dumpast.reparse ppml_structure reparsed_structure in
-      reparsed_json
+      (*FIXME: adapt according to ppxlibs issue resulution *)
+      match get_preprocessed_ast (get_pp_path ~document) with
+      | Impl ppml_structure ->
+        let pp_code = get_reparsed_code_from_pp_file ~document in
+        let reparsed_structure =
+          pp_code |> Lexing.from_string |> Parse.implementation
+        in
+        let reparsed_json = Dumpast.reparse ppml_structure reparsed_structure in
+        reparsed_json
+      | Intf signature ->
+        let pp_code = get_reparsed_code_from_pp_file ~document in
+        let reparsed_signature =
+          pp_code |> Lexing.from_string |> Parse.interface
+        in
+        let reparsed_json =
+          Dumpast.reparse_signature signature reparsed_signature
+        in
+        reparsed_json
     with
     | _ -> null
   in
@@ -249,7 +262,7 @@ let replace_document_content ~document ~content =
 
 let open_pp_doc ~document =
   let open Promise.Syntax in
-  let pp_pp_str = get_pp_pp_structure ~document in
+  let pp_pp_str = get_reparsed_code_from_pp_file ~document in
   let* doc =
     Workspace.openTextDocument
       (`Uri
@@ -288,7 +301,7 @@ let reload_pp_doc ~document =
     let+ _ =
       set_origin_changed ~key:(doc_string_uri ~document) ~data:false;
       replace_document_content
-        ~content:(get_pp_pp_structure ~document:original_document)
+        ~content:(get_reparsed_code_from_pp_file ~document:original_document)
         ~document
     in
     0

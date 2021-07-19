@@ -387,10 +387,17 @@ let reparse_ast =
         parse_ast#longident x
   end
 
-let transform source =
+let transform source kind =
+  let open Ppx_utils in
   try
-    let v = Parse.implementation (Lexing.from_string source) in
-    parse_ast#structure v
+    match kind with
+    | Structure ->
+      let v = Parse.implementation (Lexing.from_string source) in
+      parse_ast#structure v
+    | Signature ->
+      let v = Parse.interface (Lexing.from_string source) in
+      parse_ast#signature v
+    | Unknown -> Jsonoo.Encode.string "Unknown file extension"
   with
   | _ -> Jsonoo.Encode.string "Syntax error"
 
@@ -399,3 +406,5 @@ let from_structure (structure : Parsetree.structure) =
   | _ -> Jsonoo.Encode.string "Syntax error"
 
 let reparse s s' = reparse_ast#structure s s'
+
+let reparse_signature s s' = reparse_ast#signature s s'
