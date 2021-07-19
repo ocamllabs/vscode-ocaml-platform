@@ -23,6 +23,10 @@ release-build:
 		--sources-content=false
 .PHONY: release-build
 
+view-build:
+	npm run --prefix astexplorer build
+.PHONY: view-build
+
 watch:
 	dune build @all -w --terminal-persistence=clear-on-rebuild
 .PHONY: watch
