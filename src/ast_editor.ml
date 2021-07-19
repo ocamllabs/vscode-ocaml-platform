@@ -21,6 +21,20 @@ let put_keys_into_a_list data_serached map =
   Map.filteri ~f:(fun ~key:_ ~data -> String.equal data_serached data) map
   |> Map.to_alist |> List.unzip |> fst
 
+let find_webview_by_doc ~document =
+  match Map.find !webview_map (doc_string_uri ~document) with
+  | wv_opt when !original_mode -> wv_opt
+  | None -> (
+    match
+      put_keys_into_a_list (doc_string_uri ~document) !origin_to_pp_doc_map
+    with
+    | [ k ] -> (
+      match Map.find !webview_map k with
+      | wv_opt when not !original_mode -> wv_opt
+      | _ -> None)
+    | _ -> None)
+  | _ -> None
+
 let remove_keys_by_data map d =
   map := Map.filteri ~f:(fun ~key:_ ~data -> not (String.equal data d)) !map
 
@@ -166,12 +180,9 @@ let on_hover custom_doc webview =
   Vscode.Languages.registerHoverProvider ~selector:(`String "ocaml") ~provider
 
 let activate_hover_mode ~document =
-  let webview =
-    match Map.find !webview_map (doc_string_uri ~document) with
-    | Some wv -> wv
-    | None -> failwith "Webview wasn't found while desactivating hover mode"
-  in
-  on_hover document webview
+  match find_webview_by_doc ~document with
+  | Some webview -> on_hover document webview
+  | None -> failwith "Webview wasn't found while switching hover mode"
 
 let resolveCustomTextEditor ~(document : TextDocument.t) ~webviewPanel ~token:_
     : CustomTextEditorProvider.ResolvedEditor.t =
@@ -357,21 +368,7 @@ module Command = struct
         let selection = Vscode.TextEditor.selection textEditor in
         let document = TextEditor.document textEditor in
         let position = Vscode.Selection.start selection in
-        let webview_opt =
-          match Map.find !webview_map (doc_string_uri ~document) with
-          | wv_opt when !original_mode -> wv_opt
-          | None -> (
-            match
-              put_keys_into_a_list (doc_string_uri ~document)
-                !origin_to_pp_doc_map
-            with
-            | [ k ] -> (
-              match Map.find !webview_map k with
-              | wv_opt when not !original_mode -> wv_opt
-              | _ -> None)
-            | _ -> None)
-          | _ -> None
-        in
+        let webview_opt = find_webview_by_doc ~document in
         let offset = TextDocument.offsetAt document ~position in
         Promise.make (fun ~resolve:_ ~reject:_ ->
             match webview_opt with
