@@ -193,6 +193,7 @@ let resolveCustomTextEditor ~(document : TextDocument.t) ~webviewPanel ~token:_
   let _ =
     WebviewPanel.onDidDispose webviewPanel
       ~listener:(fun () ->
+        original_mode := true;
         Disposable.dispose onDidReceiveMessage_disposable;
         Disposable.dispose onDidChangeTextDocument_disposable)
       ()
