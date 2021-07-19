@@ -251,6 +251,14 @@
       },
       {
         "command": "editor.action.codeAction",
+        "key": "Alt+C",
+        "args": {
+          "kind": "construct"
+        },
+        "when": "editorLangId == ocaml"
+      },
+      {
+        "command": "editor.action.codeAction",
         "key": "Alt+P",
         "args": {
           "kind": "inferred_intf"

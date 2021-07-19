@@ -47,7 +47,7 @@ fmt:
 
 # builds and packages the extension for installment
 pkg: build
-	vsce package --out ./test_extension.vsix --yarn
+	yarn exec -- vsce package --out ./test_extension.vsix
 .PHONY: pkg
 
 # builds, packages, and installs the extension to your VS Code
