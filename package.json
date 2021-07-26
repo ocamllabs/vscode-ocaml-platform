@@ -917,17 +917,7 @@
             "filenamePattern": "*.ml"
           }
         ]
-      },
-      {
-        "viewType": "pp-editor",
-        "displayName": "Preprocessed AST preview",
-        "priority": "option",
-        "selector": [
-          {
-            "filenamePattern": "*.ml"
-          }
-        ]
-      }
+      } 
     ]
   },
   "scripts": {
