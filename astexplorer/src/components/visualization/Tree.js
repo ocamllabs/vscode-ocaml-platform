@@ -1,15 +1,15 @@
 import Element from './tree/Element';
 import PropTypes from 'prop-types';
 import React from 'react';
-import {publish} from '../../utils/pubsub.js';
-import {logEvent} from '../../utils/logger';
-import {treeAdapterFromParseResult} from '../../core/TreeAdapter.js';
-import {SelectedNodeProvider} from './SelectedNodeContext.js';
+import { publish } from '../../utils/pubsub.js';
+import { logEvent } from '../../utils/logger';
+import { treeAdapterFromParseResult } from '../../core/TreeAdapter.js';
+import { SelectedNodeProvider } from './SelectedNodeContext.js';
 import focusNodes from './focusNodes.js'
 
 import './css/tree.css'
 
-const {useReducer, useMemo, useRef, useLayoutEffect} = React;
+const { useReducer, useMemo, useRef, useLayoutEffect } = React;
 
 const STORAGE_KEY = 'tree_settings';
 
@@ -19,7 +19,6 @@ function initSettings() {
     JSON.parse(storedSettings) :
     {
       autofocus: true,
-      hideFunctions: true,
       hideEmptyKeys: false,
       hideLocationData: false,
       hideTypeKeys: true,
@@ -27,7 +26,7 @@ function initSettings() {
 }
 
 function reducer(state, element) {
-  const newState = {...state, [element.name]: element.checked};
+  const newState = { ...state, [element.name]: element.checked };
 
   global.localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
   logEvent(
@@ -50,7 +49,7 @@ function makeCheckbox(name, settings, updateSettings) {
   );
 }
 
-export default function Tree({parseResult, position}) {
+export default function Tree({ parseResult, position }) {
   const [settings, updateSettings] = useReducer(reducer, null, initSettings);
   const treeAdapter = useMemo(
     () => treeAdapterFromParseResult(parseResult, settings),
@@ -66,7 +65,7 @@ export default function Tree({parseResult, position}) {
   return (
     <div className="tree-visualization container">
       <div className="toolbar">
-        {treeAdapter.getConfigurableFilters().map(filter => (
+        {treeAdapter.getConfigurableFilters().map(filter => filter.key != 'hideTypeKeys' ? (
           <span key={filter.key}>
             <label>
               {makeCheckbox(filter.key, settings, updateSettings)}
@@ -74,9 +73,9 @@ export default function Tree({parseResult, position}) {
             </label>
             &#8203;
           </span>
-        ))}
+        ) : '')}
       </div>
-      <ul ref={rootElement} onMouseLeave={() => {/*publish('CLEAR_HIGHLIGHT');*/}}>
+      <ul ref={rootElement} onMouseLeave={() => {/*publish('CLEAR_HIGHLIGHT');*/ }}>
         <SelectedNodeProvider>
           <Element
             value={parseResult.ast}

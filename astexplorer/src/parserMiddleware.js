@@ -1,6 +1,6 @@
 
 
-import { ignoreKeysFilter, locationInformationFilter, functionFilter, emptyKeysFilter, typeKeysFilter } from './core/TreeAdapter.js';
+import { ignoreKeysFilter, locationInformationFilter, emptyKeysFilter, typeKeysFilter } from './core/TreeAdapter.js';
 
 export default function getTreeAdapter(newParser) {
     return {
