@@ -151,10 +151,6 @@ let onDidReceiveMessage_listener msg ~(document : TextDocument.t) =
       TextEditor.revealRange editor
         ~range:(Range.makePositions ~start:anchor ~end_:active)
         ();
-      (*FIXME: not accessing editor after the combination of revealRange and
-        set_selection (separately) results in a expetion being thrown*)
-      let _ = TextEditor.selections editor in
-      ()
     in
     List.iter
       ~f:(fun e ->
