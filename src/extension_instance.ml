@@ -56,7 +56,7 @@ let stop_server t =
       LanguageClient.stop client)
 
 let start_language_server t =
-  stop_server t;
+  stop_server t (* in case we are REstarting the server *);
   let res =
     let open Promise.Result.Syntax in
     let* () =
