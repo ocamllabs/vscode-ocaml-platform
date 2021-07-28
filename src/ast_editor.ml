@@ -228,7 +228,8 @@ let resolveCustomTextEditor ~(document : TextDocument.t) ~webviewPanel ~token:_
   `Promise p
 
 let open_ast_explorer ~uri =
-  let _ =
+  let open Promise.Syntax in
+  let+ _ =
     Vscode.Commands.executeCommand ~command:"vscode.openWith"
       ~args:
         [ Uri.t_to_js uri
@@ -348,18 +349,18 @@ let open_preprocessed_doc_to_the_side ~document =
 
 let open_both_ppx_ast ~document =
   let open Promise.Syntax in
-  let+ pp_doc_open = open_preprocessed_doc_to_the_side ~document in
+  let* pp_doc_open = open_preprocessed_doc_to_the_side ~document in
   if pp_doc_open = 0 then
     open_ast_explorer ~uri:(TextDocument.uri document)
   else
-    ()
+    Promise.make (fun ~resolve:_ ~reject:_ -> show_message `Warn "Failed to open Preprocessed Document")
 
 module Command = struct
   let _open_ast_explorer_to_the_side =
     let handler _ ~textEditor ~edit:_ ~args:_ =
       let (_ : unit Promise.t) =
         let uri = TextEditor.document textEditor |> TextDocument.uri in
-        Promise.make (fun ~resolve:_ ~reject:_ -> open_ast_explorer ~uri)
+        open_ast_explorer ~uri
       in
       ()
     in
