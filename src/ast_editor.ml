@@ -81,27 +81,34 @@ let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
   in
   let pp_value =
     (*FIXME: adapt according to ppxlibs issue resulution *)
-    match get_preprocessed_ast (Pp_path.get_pp_path ~document) with
-    | Ok ast -> (
-      match ast with
-      | Impl ppml_structure ->
-        let pp_code = get_reparsed_code_from_pp_file ~document in
-        let reparsed_structure =
-          pp_code |> Lexing.from_string |> Parse.implementation
-        in
-        let reparsed_json = Dumpast.reparse ppml_structure reparsed_structure in
-        reparsed_json
-      | Intf signature ->
-        let pp_code = get_reparsed_code_from_pp_file ~document in
-        let reparsed_signature =
-          pp_code |> Lexing.from_string |> Parse.interface
-        in
-        let reparsed_json =
-          Dumpast.reparse_signature signature reparsed_signature
-        in
-        reparsed_json)
-    | Error err_msg ->
-      show_message `Error "%s" err_msg;
+    match Pp_path.get_pp_path ~document with
+    | Some path -> (
+      match get_preprocessed_ast path with
+      | Ok ast -> (
+        match ast with
+        | Impl ppml_structure ->
+          let pp_code = get_reparsed_code_from_pp_file ~document in
+          let reparsed_structure =
+            pp_code |> Lexing.from_string |> Parse.implementation
+          in
+          let reparsed_json =
+            Dumpast.reparse ppml_structure reparsed_structure
+          in
+          reparsed_json
+        | Intf signature ->
+          let pp_code = get_reparsed_code_from_pp_file ~document in
+          let reparsed_signature =
+            pp_code |> Lexing.from_string |> Parse.interface
+          in
+          let reparsed_json =
+            Dumpast.reparse_signature signature reparsed_signature
+          in
+          reparsed_json)
+      | Error err_msg ->
+        show_message `Error "%s" err_msg;
+        Jsonoo.Encode.null)
+    | None ->
+      show_message `Error "%s" "project root path wasn't found";
       Jsonoo.Encode.null
   in
 
@@ -302,35 +309,40 @@ let reload_pp_doc ~document =
   | None -> Promise.resolve 1
 
 let manage_choice choice ~document : int Promise.t =
-  let path = Path.of_string (Ppx_tools.Pp_path.project_root_path ~document) in
-  let buildCmd () =
-    Cmd.run ~cwd:path (Cmd.Shell "eval $(opam env); dune build")
-  in
-  let rec build_project () =
-    let open Promise.Syntax in
-    let* res = buildCmd () in
-    if res.exitCode = 0 then
-      if
-        Map.existsi !pp_doc_to_changed_origin_map ~f:(fun ~key ~data:_ ->
-            String.equal key (doc_string_uri ~document))
-      then
-        reload_pp_doc ~document
+  match Ppx_tools.Pp_path.project_root_path () with
+  | None ->
+    show_message `Error "%s" "Error : project root wasn't found";
+    Promise.resolve 1
+  | Some root -> (
+    let path = Path.of_string root in
+    let buildCmd () =
+      Cmd.run ~cwd:path (Cmd.Shell "eval $(opam env); dune build")
+    in
+    let rec build_project () =
+      let open Promise.Syntax in
+      let* res = buildCmd () in
+      if res.exitCode = 0 then
+        if
+          Map.existsi !pp_doc_to_changed_origin_map ~f:(fun ~key ~data:_ ->
+              String.equal key (doc_string_uri ~document))
+        then
+          reload_pp_doc ~document
+        else
+          open_pp_doc ~document
       else
-        open_pp_doc ~document
-    else
-      let* perror =
-        Window.showErrorMessage
-          ~message:"Building project failed, fix project errors and retry."
-          ~choices:[ ("Retry running `dune build`", 0); ("Abandon", 1) ]
-          ()
-      in
-      match perror with
-      | Some 0 -> build_project ()
-      | _ -> Promise.resolve 1
-  in
-  match choice with
-  | Some 0 -> build_project ()
-  | _ -> Promise.resolve 1
+        let* perror =
+          Window.showErrorMessage
+            ~message:"Building project failed, fix project errors and retry."
+            ~choices:[ ("Retry running `dune build`", 0); ("Abandon", 1) ]
+            ()
+        in
+        match perror with
+        | Some 0 -> build_project ()
+        | _ -> Promise.resolve 1
+    in
+    match choice with
+    | Some 0 -> build_project ()
+    | _ -> Promise.resolve 1)
 
 let manage_open_failure ~document =
   let open Promise.Syntax in

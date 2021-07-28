@@ -9,11 +9,7 @@ type kind =
 let relative_document_path ~document =
   Workspace.asRelativePath ~pathOrUri:(`Uri (TextDocument.uri document))
 
-let project_root_path ~document =
-  let relative = relative_document_path ~document in
-  match Workspace.rootPath () with
-  | Some rootPath -> rootPath
-  | None -> raise (Failure ("Couldnt find root path for " ^ relative))
+let project_root_path () = Workspace.rootPath ()
 
 let get_kind ~document =
   let relative = relative_document_path ~document in
@@ -23,20 +19,18 @@ let get_kind ~document =
   | _ -> Unknown
 
 let get_pp_path ~(document : TextDocument.t) =
-  try
-    let relative = relative_document_path ~document in
-    let root = project_root_path ~document in
-    match get_kind ~document with
-    | Structure ->
-      root ^ "/_build/default/"
-      ^ String.sub ~pos:0 ~len:(String.length relative - 2) relative
-      ^ "pp.ml"
-    | Signature ->
-      root ^ "/_build/default/"
-      ^ String.sub ~pos:0 ~len:(String.length relative - 3) relative
-      ^ "pp.mli"
-    | Unknown -> failwith "Unknown file extension"
-  with
-  | Failure errorMsg -> errorMsg
-
-
+  let relative = relative_document_path ~document in
+  match project_root_path () with
+  | Some root ->
+    Some
+      (match get_kind ~document with
+      | Structure ->
+        root ^ "/_build/default/"
+        ^ String.sub ~pos:0 ~len:(String.length relative - 2) relative
+        ^ "pp.ml"
+      | Signature ->
+        root ^ "/_build/default/"
+        ^ String.sub ~pos:0 ~len:(String.length relative - 3) relative
+        ^ "pp.mli"
+      | Unknown -> failwith "Unknown file extension")
+  | None -> None
