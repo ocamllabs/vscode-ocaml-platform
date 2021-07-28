@@ -1,5 +1,4 @@
 open Import
-open Ppx_utils
 
 let webview_map = ref (Map.empty (module String))
 
@@ -81,9 +80,10 @@ let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
       (Pp_path.get_kind ~document)
   in
   let pp_value =
-    try
-      (*FIXME: adapt according to ppxlibs issue resulution *)
-      match get_preprocessed_ast (get_pp_path ~document) with
+    (*FIXME: adapt according to ppxlibs issue resulution *)
+    match get_preprocessed_ast (Pp_path.get_pp_path ~document) with
+    | Ok ast -> (
+      match ast with
       | Impl ppml_structure ->
         let pp_code = get_reparsed_code_from_pp_file ~document in
         let reparsed_structure =
@@ -99,10 +99,12 @@ let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
         let reparsed_json =
           Dumpast.reparse_signature signature reparsed_signature
         in
-        reparsed_json
-    with
-    | _ -> Jsonoo.Encode.null
+        reparsed_json)
+    | Error (Read_error err_msg) ->
+      show_message `Error "%s" err_msg;
+      Jsonoo.Encode.null
   in
+
   let astpair =
     Jsonoo.Encode.object_ [ ("ast", origin_json); ("pp_ast", pp_value) ]
   in
@@ -256,7 +258,7 @@ let replace_document_content ~document ~content =
 
 let open_pp_doc ~document =
   let open Promise.Syntax in
-  let pp_pp_str = get_reparsed_code_from_pp_file ~document in
+  let pp_pp_str = Ppx_tools.get_reparsed_code_from_pp_file ~document in
   let* doc =
     Workspace.openTextDocument
       (`Uri
@@ -292,14 +294,15 @@ let reload_pp_doc ~document =
     let+ (_ : bool) =
       set_origin_changed ~key:(doc_string_uri ~document) ~data:false;
       replace_document_content
-        ~content:(get_reparsed_code_from_pp_file ~document:original_document)
+        ~content:
+          (Ppx_tools.get_reparsed_code_from_pp_file ~document:original_document)
         ~document
     in
     0
   | None -> Promise.resolve 1
 
 let manage_choice choice ~document : int Promise.t =
-  let path = Path.of_string (project_root_path ~document) in
+  let path = Path.of_string (Ppx_tools.Pp_path.project_root_path ~document) in
   let buildCmd () =
     Cmd.run ~cwd:path (Cmd.Shell "eval $(opam env); dune build")
   in
@@ -335,7 +338,7 @@ let manage_open_failure ~document =
     Window.showInformationMessage
       ~message:
         ("Seems like the file '"
-        ^ relative_document_path ~document
+        ^ Ppx_tools.Pp_path.relative_document_path ~document
         ^ "' haven't been preprocessed yet.")
       ~choices:[ ("Run `dune build`", 0); ("Abandon", 1) ]
       ()
