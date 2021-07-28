@@ -24,7 +24,7 @@ release-build:
 .PHONY: release-build
 
 view-build:
-	npm run --prefix astexplorer build
+	yarn --cwd astexplorer build
 .PHONY: view-build
 
 watch:
