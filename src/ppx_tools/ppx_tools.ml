@@ -11,4 +11,4 @@ let get_reparsed_code_from_pp_file ~document =
     match ast with
     | Impl structure -> Caml.Format.asprintf "%a" Pprintast.structure structure
     | Intf signature -> Caml.Format.asprintf "%a" Pprintast.signature signature)
-  | Error (Read_error err_msg) -> err_msg
+  | Error err_msg -> err_msg

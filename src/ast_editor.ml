@@ -100,7 +100,7 @@ let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
           Dumpast.reparse_signature signature reparsed_signature
         in
         reparsed_json)
-    | Error (Read_error err_msg) ->
+    | Error err_msg ->
       show_message `Error "%s" err_msg;
       Jsonoo.Encode.null
   in
