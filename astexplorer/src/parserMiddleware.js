@@ -12,7 +12,6 @@ export default function getTreeAdapter(newParser) {
             walkNode: newParser.forEachProperty.bind(newParser),
             filters: [
                 ignoreKeysFilter(newParser._ignoredProperties),
-                functionFilter(),
                 emptyKeysFilter(),
                 locationInformationFilter(newParser.locationProps),
                 typeKeysFilter(newParser.typeProps),

@@ -142,7 +142,6 @@ const TreeAdapterConfigs = {
 
   estree: {
     filters: [
-      functionFilter(),
       emptyKeysFilter(),
       locationInformationFilter(new Set(['range', 'loc', 'start', 'end'])),
       typeKeysFilter(),
@@ -207,13 +206,6 @@ export function locationInformationFilter(keys) {
   );
 }
 
-export function functionFilter() {
-  return {
-    key: 'hideFunctions',
-    label: 'Hide methods',
-    test(value) { return typeof value === 'function'; },
-  };
-}
 
 export function emptyKeysFilter() {
   return {
