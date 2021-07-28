@@ -273,6 +273,7 @@ body {
   font-size: 14px;
   margin-left: -1px;
   border-bottom: 1px solid #ddd;
+  color: #000000;
 }
 
 .output .toolbar > button {
