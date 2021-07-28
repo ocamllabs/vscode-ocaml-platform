@@ -150,7 +150,7 @@ let onDidReceiveMessage_listener msg ~(document : TextDocument.t) =
       TextEditor.set_selection editor (Selection.makePositions ~anchor ~active);
       TextEditor.revealRange editor
         ~range:(Range.makePositions ~start:anchor ~end_:active)
-        ();
+        ()
     in
     List.iter
       ~f:(fun e ->
@@ -383,14 +383,9 @@ module Command = struct
             match webview_opt with
             | Some webview -> send_msg "focus" (Ojs.int_to_js offset) ~webview
             | None ->
-              let _ =
-                Window.showErrorMessage
-                  ~message:
-                    "Wrong outputmode inside the ASTexplorer, please select \
-                     the correct tab"
-                  ~choices:[ ("Close", 0) ] ()
-              in
-              ())
+              show_message `Warn
+                "Wrong output mode inside the AST explorer, please select the \
+                 correct tab")
       in
       ()
     in
