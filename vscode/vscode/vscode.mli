@@ -183,6 +183,8 @@ module Uri : sig
   val toString : t -> ?skipEncoding:bool -> unit -> string
 
   val toJson : t -> Jsonoo.t
+
+  val equal : t -> t -> bool
 end
 
 module TextDocument : sig

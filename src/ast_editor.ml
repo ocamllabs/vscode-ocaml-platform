@@ -64,10 +64,7 @@ let read_html_file () =
   let filename = Node.__dirname () ^ "/../astexplorer/dist/index.html" in
   Fs.readFile filename
 
-let document_eq a b =
-  String.equal
-    (Uri.toString (TextDocument.uri a) ())
-    (Uri.toString (TextDocument.uri b) ())
+let document_eq a b = Uri.equal (TextDocument.uri a) (TextDocument.uri b)
 
 let send_msg t value ~(webview : WebView.t) =
   let msg = Ojs.empty_obj () in

@@ -219,6 +219,8 @@ module Uri = struct
     iter_set change "query" [%js.of: string] query;
     iter_set change "fragment" [%js.of: string] fragment;
     with_ this change
+
+  let equal a b = String.equal (toString a ()) (toString b ())
 end
 
 module TextDocument = struct
