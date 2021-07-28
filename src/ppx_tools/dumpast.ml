@@ -45,12 +45,6 @@ let parse_ast =
 
     method array f arg = list id (Array.to_list arg |> List.map f)
 
-    (* method! structure_item { pstr_desc; pstr_loc } = object_ [ ("type",
-       string "structure_item") ; ("pstr_desc", super#structure_item_desc
-       pstr_desc) ; ("pstr_loc", super#location pstr_loc) ] *)
-
-    (* method! expression_desc = function | Pexp_constraint ({ pexp_desc; _ },
-       _) -> super#expression_desc pexp_desc | arg -> super#expression_desc arg *)
     (*FIXME*)
     method! open_infos _a { popen_expr; popen_override; popen_loc; _ } =
       let popen_expr = _a popen_expr in
@@ -64,28 +58,24 @@ let parse_ast =
         ; ("popen_attributes", popen_attributes)
         ]
 
-    (* method! structure s = object_ [ ("structure", list self#structure_item s)
-       ] *)
-    (* method! class_infos : 'a . ('a -> Jsonoo.t) -> 'a class_infos ->
-       Jsonoo.t= fun _a -> fun { pci_virt; pci_params; pci_name; pci_expr;
-       pci_loc; pci_attributes } -> let pci_virt = self#virtual_flag pci_virt in
-       let pci_params = self#list (fun (a, b) -> let a = self#core_type a in let
-       b = (fun (a, b) -> let a = self#variance a in let b = self#injectivity b
-       in tuple2 id id (a,b)) b in tuple2 id id (a,b)) pci_params in let
-       pci_name = self#loc self#string pci_name in let pci_expr = _a pci_expr in
-       let pci_loc = self#location pci_loc in let pci_attributes =
-       self#attributes pci_attributes in self#record "class_infos" [("pci_virt",
-       pci_virt); ("pci_params", pci_params); ("pci_name", pci_name);
-       ("pci_expr", pci_expr); ("pci_loc", pci_loc); ("pci_attributes",
-       pci_attributes)] *)
+   
   end
 
 let warn_ast_diff method_name =
-    Import.show_message `Warn
-      "Unable to match the original AST with the reparsed one starting at %s \
-       method. cf issue_ref"
-      (*TODO: open an issue explaining the context.*) method_name
-  
+  let open Promise.Syntax in
+  let (_ : unit Promise.t) =
+    let+ (_ : 'a option) =
+      Vscode.Window.showErrorMessage
+        ~message:
+          ("Unable to match the original AST with the reparsed one starting \
+            at  " ^ method_name)
+        ()
+    in
+    ()
+  in
+  ()
+
+(*TODO: open an issue explaining the context.*)
 
 let reparse_ast =
   let open Traverse_ast2 in
@@ -141,8 +131,7 @@ let reparse_ast =
     method constr label args =
       match args with
       | [] -> Jsonoo.Encode.object_ [ ("type", Jsonoo.Encode.string label) ]
-      | _ ->
-        Jsonoo.Encode.object_ (("type", Jsonoo.Encode.string label) :: args)
+      | _ -> Jsonoo.Encode.object_ (("type", Jsonoo.Encode.string label) :: args)
 
     method char value _ = Jsonoo.Encode.char value
 
@@ -386,7 +375,7 @@ let reparse_ast =
   end
 
 let transform source kind =
-  let open Ppx_utils in
+  let open Pp_path in
   try
     match kind with
     | Structure ->

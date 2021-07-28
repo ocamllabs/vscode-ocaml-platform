@@ -1,0 +1,4 @@
+(library
+ (name ppx_tools)
+ (libraries base vscode ppxlib)
+ (modes byte))

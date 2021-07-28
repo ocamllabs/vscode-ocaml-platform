@@ -1,4 +1,4 @@
-val transform : string -> Ppx_utils.kind -> Jsonoo.t
+val transform : string -> Pp_path.kind -> Jsonoo.t
 
 val from_structure : Parsetree.structure -> Jsonoo.t
 

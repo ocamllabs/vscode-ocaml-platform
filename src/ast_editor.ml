@@ -77,9 +77,11 @@ let send_msg t value ~(webview : WebView.t) =
   ()
 
 let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
-  let open Jsonoo.Encode in
+  let open Ppx_tools in
   let origin_json =
-    Dumpast.transform (TextDocument.getText document ()) (get_kind ~document)
+    Dumpast.transform
+      (TextDocument.getText document ())
+      (Pp_path.get_kind ~document)
   in
   let pp_value =
     try
@@ -102,9 +104,11 @@ let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
         in
         reparsed_json
     with
-    | _ -> null
+    | _ -> Jsonoo.Encode.null
   in
-  let astpair = object_ [ ("ast", origin_json); ("pp_ast", pp_value) ] in
+  let astpair =
+    Jsonoo.Encode.object_ [ ("ast", origin_json); ("pp_ast", pp_value) ]
+  in
   send_msg "parse" (Jsonoo.t_to_js astpair) ~webview
 
 let onDidChangeTextDocument_listener event ~(document : TextDocument.t)
