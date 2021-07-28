@@ -212,7 +212,7 @@
       {
         "command": "ocaml.open-ast-explorer-to-the-side",
         "category": "OCaml",
-        "title": "AST preview"
+        "title": "Open AST explorer"
       },
       {
         "command": "ocaml.show-preprocessed-document",
@@ -232,7 +232,7 @@
       {
         "command": "ocaml.open-pp-editor-and-ast-explorer",
         "category": "OCaml",
-        "title": "Open both ppx editor and AST explorer to the Side"
+        "title": "Open both Preprocessed Document and AST explorer to the side"
       }
     ],
     "keybindings": [
@@ -915,9 +915,12 @@
         "selector": [
           {
             "filenamePattern": "*.ml"
+          },
+          {
+            "filenamePattern": "*.mli"
           }
         ]
-      } 
+      }
     ]
   },
   "scripts": {
