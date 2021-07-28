@@ -282,12 +282,12 @@
       },
       {
         "command": "ocaml.reveal-ast-node",
-        "key": "Shift+Ctrl+D",
+        "key": "Alt+N",
         "when": "editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface "
       },
       {
         "command": "ocaml.switch-hover-mode",
-        "key": "Shift+Ctrl+H",
+        "key": "Alt+H",
         "when": "editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface "
       }
     ],
