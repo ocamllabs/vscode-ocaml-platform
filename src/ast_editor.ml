@@ -112,8 +112,6 @@ let onDidChangeTextDocument_listener event ~(document : TextDocument.t)
   let changed_document = TextDocumentChangeEvent.document event in
   if document_eq document changed_document then
     transform_to_ast ~document ~webview
-  else
-    ()
 
 let onDidReceiveMessage_listener msg ~(document : TextDocument.t) =
   if Ojs.has_property msg "selectedOutput" then
@@ -353,7 +351,8 @@ let open_both_ppx_ast ~document =
   if pp_doc_open = 0 then
     open_ast_explorer ~uri:(TextDocument.uri document)
   else
-    Promise.make (fun ~resolve:_ ~reject:_ -> show_message `Warn "Failed to open Preprocessed Document")
+    Promise.make (fun ~resolve:_ ~reject:_ ->
+        show_message `Warn "Failed to open Preprocessed Document")
 
 module Command = struct
   let _open_ast_explorer_to_the_side =
