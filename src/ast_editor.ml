@@ -73,7 +73,7 @@ let send_msg t value ~(webview : WebView.t) =
   let msg = Ojs.empty_obj () in
   Ojs.set_prop_ascii msg "type" (Ojs.string_to_js t);
   Ojs.set_prop_ascii msg "value" value;
-  let _ = WebView.postMessage webview msg in
+  let (_ : bool Promise.t) = WebView.postMessage webview msg in
   ()
 
 let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
@@ -81,7 +81,6 @@ let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
   let origin_json =
     Dumpast.transform (TextDocument.getText document ()) (get_kind ~document)
   in
-  let _pp_path = get_pp_path ~document in
   let pp_value =
     try
       (*FIXME: adapt according to ppxlibs issue resulution *)
@@ -195,7 +194,6 @@ let activate_hover_mode ~document =
 
 let resolveCustomTextEditor ~(document : TextDocument.t) ~webviewPanel ~token:_
     : CustomTextEditorProvider.ResolvedEditor.t =
-  let _ = document in
   let webview = WebviewPanel.webview webviewPanel in
   (*persist the webview*)
   webview_map :=
@@ -210,7 +208,7 @@ let resolveCustomTextEditor ~(document : TextDocument.t) ~webviewPanel ~token:_
       ~listener:(onDidReceiveMessage_listener ~document)
       ()
   in
-  let _ =
+  let (_ : Disposable.t) =
     WebviewPanel.onDidDispose webviewPanel
       ~listener:(fun () ->
         original_mode := true;
@@ -265,11 +263,8 @@ let open_pp_doc ~document =
         (Uri.parse ("post-ppx: " ^ TextDocument.fileName document ^ "?") ()))
   in
   set_changes_tracking document doc;
-  let _ =
-    let+ _ = replace_document_content ~content:pp_pp_str ~document:doc in
-    ()
-  in
-  let+ _ =
+  let* (_ : bool) = replace_document_content ~content:pp_pp_str ~document:doc in
+  let+ (_ : TextEditor.t) =
     Window.showTextDocument ~document:(`TextDocument doc)
       ~column:ViewColumn.Beside ()
   in
@@ -294,7 +289,7 @@ let reload_pp_doc ~document =
       visibleTextEditors
   with
   | Some _ ->
-    let+ _ =
+    let+ (_ : bool) =
       set_origin_changed ~key:(doc_string_uri ~document) ~data:false;
       replace_document_content
         ~content:(get_reparsed_code_from_pp_file ~document:original_document)
@@ -415,13 +410,9 @@ module Command = struct
     let handler _ ~textEditor ~edit:_ ~args:_ =
       let document = TextEditor.document textEditor in
       let (_ : unit Promise.t) =
-        Promise.make (fun ~resolve:_ ~reject:_ ->
-            let _ =
-              let open Promise.Syntax in
-              let+ _ = open_preprocessed_doc_to_the_side ~document in
-              ()
-            in
-            ())
+        let open Promise.Syntax in
+        let+ (_ : int) = open_preprocessed_doc_to_the_side ~document in
+        ()
       in
       ()
     in
@@ -432,9 +423,7 @@ module Command = struct
     let handler _ ~textEditor ~edit:_ ~args:_ =
       let (_ : unit Promise.t) =
         let document = TextEditor.document textEditor in
-        Promise.make (fun ~resolve:_ ~reject:_ ->
-            let _ = open_both_ppx_ast ~document in
-            ())
+        open_both_ppx_ast ~document
       in
       ()
     in
@@ -471,7 +460,7 @@ let onDidChangeActiveTextEditor_listener e =
     let document = TextEditor.document e in
     match Map.find !pp_doc_to_changed_origin_map (doc_string_uri ~document) with
     | Some true ->
-      let _ = manage_changed_origin ~document in
+      let (_ : int Promise.t) = manage_changed_origin ~document in
       ()
     | _ -> ()
   else
@@ -482,8 +471,8 @@ let close_visible_editors_by_uri uri =
     let visibleDocument = TextEditor.document e in
     let open Promise.Syntax in
     if String.equal uri (doc_string_uri ~document:visibleDocument) then
-      let _ =
-        let+ _ =
+      let (_ : Ojs.t option Promise.t) =
+        let* (_ : TextEditor.t) =
           Window.showTextDocument ~document:(`TextDocument visibleDocument) ()
         in
         Vscode.Commands.executeCommand
@@ -513,10 +502,11 @@ let register extension =
     `CustomEditorProvider
       (CustomTextEditorProvider.create ~resolveCustomTextEditor)
   in
-  let _ =
+  let disposable =
     Window.onDidChangeActiveTextEditor ()
       ~listener:onDidChangeActiveTextEditor_listener ()
   in
+  Vscode.ExtensionContext.subscribe extension ~disposable;
   let disposable =
     Vscode.Window.registerCustomEditorProvider ~viewType:"ast-editor"
       ~provider:editorProvider

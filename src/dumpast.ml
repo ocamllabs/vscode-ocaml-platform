@@ -81,13 +81,11 @@ let parse_ast =
   end
 
 let warn_ast_diff method_name =
-  let _ =
     Import.show_message `Warn
       "Unable to match the original AST with the reparsed one starting at %s \
        method. cf issue_ref"
       (*TODO: open an issue explaining the context.*) method_name
-  in
-  ()
+  
 
 let reparse_ast =
   let open Traverse_ast2 in
