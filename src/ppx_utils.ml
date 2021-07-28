@@ -40,8 +40,7 @@ let get_pp_path ~(document : TextDocument.t) =
 
 let get_preprocessed_ast path =
   let open Ppxlib in
-  let input_source = Utils.Ast_io.File path in
-  match Utils.Ast_io.read input_source ~input_kind:Necessarily_binary with
+  match Ast_io.read path with
   | Ok { ast; _ } -> ast
   | Error _ -> failwith ("Some error occured on parsing the " ^ path)
 
