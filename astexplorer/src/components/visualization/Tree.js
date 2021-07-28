@@ -66,11 +66,6 @@ export default function Tree({parseResult, position}) {
   return (
     <div className="tree-visualization container">
       <div className="toolbar">
-        <label title="Auto open the node at the cursor in the source code">
-          {makeCheckbox('autofocus', settings, updateSettings)}
-          Autofocus
-        </label>
-        &#8203;
         {treeAdapter.getConfigurableFilters().map(filter => (
           <span key={filter.key}>
             <label>
