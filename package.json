@@ -360,7 +360,7 @@
       ]
     },
     "configuration": {
-      "title": "OCaml configuration",
+      "title": "OCaml Platform",
       "properties": {
         "ocaml.sandbox": {
           "type": "object",
