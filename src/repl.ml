@@ -107,10 +107,10 @@ let create_terminal instance sandbox =
 
          That's hacky, buy hey, if vscode-python does it, so can we...
          https://github.com/microsoft/vscode-python/blob/main/src/client/terminals/codeExecution/terminalCodeExecution.ts#L54 *)
-      let+ _ =
+      let+ () =
         Promise.make (fun ~resolve ~reject:_ ->
             let (_ : Node.Timeout.t) =
-              Node.setTimeout (fun () -> resolve true) 2500
+              Node.setTimeout (fun () -> resolve ()) 2500
             in
             ())
       in
