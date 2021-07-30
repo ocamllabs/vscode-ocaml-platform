@@ -1,38 +1,34 @@
 open Import
 
-type 'a t =
+type 'a setting =
   { key : string
   ; to_json : 'a -> Jsonoo.t
   ; of_json : Jsonoo.t -> 'a
   ; scope : ConfigurationTarget.t
   }
 
-let create ~scope ~key ~of_json ~to_json = { scope; key; to_json; of_json }
+let create_setting ~scope ~key ~of_json ~to_json =
+  { scope; key; to_json; of_json }
 
-let get ?section t =
+let get ?section setting =
   let section = Workspace.getConfiguration ?section () in
-  match WorkspaceConfiguration.get section ~section:t.key with
+  match WorkspaceConfiguration.get section ~section:setting.key with
   | None -> None
   | Some v -> (
-    match t.of_json (Jsonoo.t_of_js v) with
+    match setting.of_json (Jsonoo.t_of_js v) with
     | s -> Some s
     | exception Jsonoo.Decode_error msg ->
-      show_message `Error "Setting %s is invalid: %s" t.key msg;
+      show_message `Error "Setting %s is invalid: %s" setting.key msg;
       None)
 
-let set ?section t v =
+let set ?section setting v =
   let section = Workspace.getConfiguration ?section () in
   match Workspace.name () with
   | None -> Promise.return ()
   | Some _ ->
-    let value = Jsonoo.t_to_js (t.to_json v) in
-    WorkspaceConfiguration.update section ~section:t.key ~value
-      ~configurationTarget:(`ConfigurationTarget t.scope) ()
-
-let string =
-  let to_json = Jsonoo.Encode.string in
-  let of_json = Jsonoo.Decode.string in
-  create ~of_json ~to_json
+    let value = Jsonoo.t_to_js (setting.to_json v) in
+    WorkspaceConfiguration.update section ~section:setting.key ~value
+      ~configurationTarget:(`ConfigurationTarget setting.scope) ()
 
 let workspace_folder_var folder =
   Printf.sprintf "${workspaceFolder:%s}" (WorkspaceFolder.name folder)

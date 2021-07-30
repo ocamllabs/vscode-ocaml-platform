@@ -3,7 +3,7 @@ open Import
 let ocaml_env_binary = Path.of_string "ocaml-env"
 
 let ocaml_env_setting =
-  Settings.create ~scope:Global ~key:"ocaml.useOcamlEnv"
+  Settings.create_setting ~scope:Global ~key:"ocaml.useOcamlEnv"
     ~of_json:Jsonoo.Decode.bool ~to_json:Jsonoo.Encode.bool
 
 let use_ocaml_env () =

@@ -13,7 +13,7 @@ module Repl_path = struct
 
   let key = "path"
 
-  let t = Settings.create ~scope:Global ~key ~of_json ~to_json
+  let t = Settings.create_setting ~scope:Global ~key ~of_json ~to_json
 end
 
 module Repl_args = struct
@@ -29,7 +29,7 @@ module Repl_args = struct
 
   let key = "args"
 
-  let t = Settings.create ~scope:Global ~key ~of_json ~to_json
+  let t = Settings.create_setting ~scope:Global ~key ~of_json ~to_json
 end
 
 let get_repl_path () =
