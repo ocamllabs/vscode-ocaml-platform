@@ -178,7 +178,8 @@ module Setting = struct
       object_ [ kind; ("switch", encode_vars @@ Opam.Switch.name switch) ]
     | Custom template -> object_ [ kind; ("template", string template) ]
 
-  let t = Settings.create ~scope:Workspace ~key:"sandbox" ~of_json ~to_json
+  let t =
+    Settings.create_setting ~scope:Workspace ~key:"sandbox" ~of_json ~to_json
 end
 
 let available_sandboxes () =

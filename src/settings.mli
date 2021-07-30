@@ -1,19 +1,31 @@
 open Import
 
-type 'a t
+(** This module is more of a "settings manager", which works with VS Code's
+    [WorkspaceConfiguration] to retrieve and set settings. A setting is
+    represented by ['value setting] type defined below. *)
 
-val get : ?section:string -> 'a t -> 'a option
+(** ['value setting] represents a setting (word used as a singular of
+    "settings"), which has a value of type ['value] *)
+type 'value setting
 
-val set : ?section:string -> 'a t -> 'a -> unit Promise.t
+(* TODO: improve the treatment of "section"
 
-val create :
+   All settings in the extension are defined using a dot-separated path, e.g.,
+   [ocaml.dune.autoDetect]. In some places, we treat [key] as this whole path
+   for the setting, [ocaml.dune.autoDetect], and in some places we use
+   [autoDetect] as the key and [ocaml.dune] as the "section". VS Code allows
+   this, but this non uniform treatment is bad. We should enforce a nicer API. *)
+
+val get : ?section:string -> 'value setting -> 'value option
+
+val set : ?section:string -> 'value setting -> 'value -> unit Promise.t
+
+val create_setting :
      scope:ConfigurationTarget.t
   -> key:string
-  -> of_json:(Jsonoo.t -> 'a)
-  -> to_json:('a -> Jsonoo.t)
-  -> 'a t
-
-val string : scope:ConfigurationTarget.t -> key:string -> string t
+  -> of_json:(Jsonoo.t -> 'value)
+  -> to_json:('value -> Jsonoo.t)
+  -> 'value setting
 
 (** replace ${workspaceFolder:folder_name} variables with workspace folder paths *)
 val resolve_workspace_vars : string -> string

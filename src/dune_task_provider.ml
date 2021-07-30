@@ -24,7 +24,8 @@ module Setting = struct
     bool t
 
   let t =
-    Settings.create ~scope:Workspace ~key:"dune.autoDetect" ~of_json ~to_json
+    Settings.create_setting ~scope:Workspace ~key:"dune.autoDetect" ~of_json
+      ~to_json
 end
 
 let folder_relative_path folders file =

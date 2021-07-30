@@ -22,7 +22,7 @@ module ShellPath = struct
     in
     Platform.Map.find map Platform.t
 
-  let t = Settings.create ~scope:Global ~key ~of_json ~to_json
+  let t = Settings.create_setting ~scope:Global ~key ~of_json ~to_json
 end
 
 module ShellArgs = struct
@@ -47,7 +47,7 @@ module ShellArgs = struct
     in
     Platform.Map.find map Platform.t
 
-  let t = Settings.create ~scope:Global ~key ~of_json ~to_json
+  let t = Settings.create_setting ~scope:Global ~key ~of_json ~to_json
 end
 
 let get_shell_path () =
