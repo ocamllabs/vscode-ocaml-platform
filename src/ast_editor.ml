@@ -1,63 +1,6 @@
 open Import
 
-let webview_map = ref (Map.empty (module String))
-
-let original_mode = ref true
-
-let hover_disposable_ref = ref None
-
 let doc_string_uri ~document = Uri.toString (TextDocument.uri document) ()
-
-let pp_doc_to_changed_origin_map = ref (Map.empty (module String))
-
-let origin_to_pp_doc_map = ref (Map.empty (module String))
-
-let entry_exists k d =
-  Map.existsi !origin_to_pp_doc_map ~f:(fun ~key ~data ->
-      String.equal d data && String.equal k key)
-
-let put_keys_into_a_list data_serached map =
-  Map.filteri ~f:(fun ~key:_ ~data -> String.equal data_serached data) map
-  |> Map.to_alist |> List.unzip |> fst
-
-let find_webview_by_doc ~document =
-  match Map.find !webview_map (doc_string_uri ~document) with
-  | wv_opt when !original_mode -> wv_opt
-  | None -> (
-    match
-      put_keys_into_a_list (doc_string_uri ~document) !origin_to_pp_doc_map
-    with
-    | [ k ] -> (
-      match Map.find !webview_map k with
-      | wv_opt when not !original_mode -> wv_opt
-      | _ -> None)
-    | _ -> None)
-  | _ -> None
-
-let remove_keys_by_data map d =
-  map := Map.filteri ~f:(fun ~key:_ ~data -> not (String.equal data d)) !map
-
-let set_changes_tracking origin pp_doc =
-  origin_to_pp_doc_map :=
-    Map.set !origin_to_pp_doc_map
-      ~key:(doc_string_uri ~document:origin)
-      ~data:(doc_string_uri ~document:pp_doc);
-  pp_doc_to_changed_origin_map :=
-    Map.set
-      !pp_doc_to_changed_origin_map
-      ~key:(doc_string_uri ~document:pp_doc)
-      ~data:false
-
-let set_origin_changed ~data ~key =
-  pp_doc_to_changed_origin_map :=
-    Map.set !pp_doc_to_changed_origin_map ~key ~data
-
-let on_origin_update_content changed_document =
-  match
-    Map.find !origin_to_pp_doc_map (doc_string_uri ~document:changed_document)
-  with
-  | Some key -> set_origin_changed ~key ~data:true
-  | None -> ()
 
 let read_html_file () =
   let filename = Node.__dirname () ^ "/../astexplorer/dist/index.html" in
@@ -123,9 +66,13 @@ let onDidChangeTextDocument_listener event ~(document : TextDocument.t)
   if document_eq document changed_document then
     transform_to_ast ~document ~webview
 
-let onDidReceiveMessage_listener msg ~(document : TextDocument.t) =
+let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
+  let ast_editor_state = Extension_instance.ast_editor_state instance in
   if Ojs.has_property msg "selectedOutput" then
-    original_mode := not !original_mode
+    Ast_editor_state.set_original_mode ast_editor_state
+      (Int.of_string
+         (Ojs.string_of_js (Ojs.get_prop_ascii msg "selectedOutput"))
+      = 0)
   else if Ojs.has_property msg "begin" && Ojs.has_property msg "end" then
     let cbegin =
       Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg "begin"))
@@ -140,7 +87,8 @@ let onDidReceiveMessage_listener msg ~(document : TextDocument.t) =
             (Some editor, None)
           else if
             (* (not !original_mode) && *)
-            (entry_exists (doc_string_uri ~document))
+            (Ast_editor_state.entry_exists ast_editor_state
+               (doc_string_uri ~document))
               (doc_string_uri ~document:visible_doc)
           then
             (None, Some editor)
@@ -166,7 +114,7 @@ let onDidReceiveMessage_listener msg ~(document : TextDocument.t) =
         | None, Some editor
           when Ojs.has_property msg "r_begin"
                && Ojs.has_property msg "r_end"
-               && not !original_mode ->
+               && not (Ast_editor_state.get_original_mode ast_editor_state) ->
           let rcbegin =
             Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg "r_begin"))
           in
@@ -195,17 +143,21 @@ let on_hover custom_doc webview =
   let provider = HoverProvider.create ~provideHover in
   Vscode.Languages.registerHoverProvider ~selector:(`String "ocaml") ~provider
 
-let activate_hover_mode ~document =
-  match find_webview_by_doc ~document with
+let activate_hover_mode instance ~document =
+  let ast_editor_state = Extension_instance.ast_editor_state instance in
+  match Ast_editor_state.find_webview_by_doc ast_editor_state ~document with
   | Some webview -> on_hover document webview
   | None -> failwith "Webview wasn't found while switching hover mode"
 
-let resolveCustomTextEditor ~(document : TextDocument.t) ~webviewPanel ~token:_
-    : CustomTextEditorProvider.ResolvedEditor.t =
+let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
+    ~token:_ : CustomTextEditorProvider.ResolvedEditor.t =
   let webview = WebviewPanel.webview webviewPanel in
   (*persist the webview*)
-  webview_map :=
-    Map.set !webview_map ~key:(doc_string_uri ~document) ~data:webview;
+  let ast_editor_state = Extension_instance.ast_editor_state instance in
+  Ast_editor_state.set_webview_map ast_editor_state
+    (Map.set
+       (Ast_editor_state.get_webview_map ast_editor_state)
+       ~key:(doc_string_uri ~document) ~data:webview);
   let onDidChangeTextDocument_disposable =
     Workspace.onDidChangeTextDocument
       ~listener:(onDidChangeTextDocument_listener ~webview ~document)
@@ -213,13 +165,13 @@ let resolveCustomTextEditor ~(document : TextDocument.t) ~webviewPanel ~token:_
   in
   let onDidReceiveMessage_disposable =
     WebView.onDidReceiveMessage webview
-      ~listener:(onDidReceiveMessage_listener ~document)
+      ~listener:(onDidReceiveMessage_listener instance ~document)
       ()
   in
   let (_ : Disposable.t) =
     WebviewPanel.onDidDispose webviewPanel
       ~listener:(fun () ->
-        original_mode := true;
+        Ast_editor_state.set_original_mode ast_editor_state true;
         Disposable.dispose onDidReceiveMessage_disposable;
         Disposable.dispose onDidChangeTextDocument_disposable)
       ()
@@ -263,15 +215,16 @@ let replace_document_content ~document ~content =
     ~range ~newText:content;
   Workspace.applyEdit ~edit
 
-let open_pp_doc ~document =
+let open_pp_doc instance ~document =
   let open Promise.Syntax in
+  let ast_editor_state = Extension_instance.ast_editor_state instance in
   let pp_pp_str = Ppx_tools.get_reparsed_code_from_pp_file ~document in
   let* doc =
     Workspace.openTextDocument
       (`Uri
         (Uri.parse ("post-ppx: " ^ TextDocument.fileName document ^ "?") ()))
   in
-  set_changes_tracking document doc;
+  Ast_editor_state.set_changes_tracking ast_editor_state document doc;
   let* (_ : bool) = replace_document_content ~content:pp_pp_str ~document:doc in
   let+ (_ : TextEditor.t) =
     Window.showTextDocument ~document:(`TextDocument doc)
@@ -279,15 +232,18 @@ let open_pp_doc ~document =
   in
   0
 
-let reload_pp_doc ~document =
+let reload_pp_doc instance ~document =
   let open Promise.Syntax in
+  let ast_editor_state = Extension_instance.ast_editor_state instance in
   let visibleTextEditors = Window.visibleTextEditors () in
   let origin_uri =
     match
-      put_keys_into_a_list (doc_string_uri ~document) !origin_to_pp_doc_map
+      Ast_editor_state.find_original_doc_by_pp_uri
+        ~uri_string:(doc_string_uri ~document)
+        (Ast_editor_state.get_origin_to_pp_doc_map ast_editor_state)
     with
-    | x :: _ -> x
-    | _ -> failwith "Failed finding the original document URI."
+    | Some x -> x
+    | None -> failwith "Failed finding the original document URI."
   in
   let* original_document =
     Workspace.openTextDocument (`Uri (Uri.parse origin_uri ()))
@@ -299,7 +255,8 @@ let reload_pp_doc ~document =
   with
   | Some _ ->
     let+ (_ : bool) =
-      set_origin_changed ~key:(doc_string_uri ~document) ~data:false;
+      Ast_editor_state.set_origin_changed ast_editor_state
+        ~key:(doc_string_uri ~document) ~data:false;
       replace_document_content
         ~content:
           (Ppx_tools.get_reparsed_code_from_pp_file ~document:original_document)
@@ -308,7 +265,8 @@ let reload_pp_doc ~document =
     0
   | None -> Promise.resolve 1
 
-let manage_choice choice ~document : int Promise.t =
+let manage_choice instance choice ~document : int Promise.t =
+  let ast_editor_state = Extension_instance.ast_editor_state instance in
   match Ppx_tools.Pp_path.project_root_path () with
   | None ->
     show_message `Error "%s" "Error : project root wasn't found";
@@ -323,12 +281,13 @@ let manage_choice choice ~document : int Promise.t =
       let* res = buildCmd () in
       if res.exitCode = 0 then
         if
-          Map.existsi !pp_doc_to_changed_origin_map ~f:(fun ~key ~data:_ ->
-              String.equal key (doc_string_uri ~document))
+          Map.existsi
+            (Ast_editor_state.get_pp_doc_to_changed_origin_map ast_editor_state)
+            ~f:(fun ~key ~data:_ -> String.equal key (doc_string_uri ~document))
         then
-          reload_pp_doc ~document
+          reload_pp_doc instance ~document
         else
-          open_pp_doc ~document
+          open_pp_doc instance ~document
       else
         let* perror =
           Window.showErrorMessage
@@ -344,7 +303,7 @@ let manage_choice choice ~document : int Promise.t =
     | Some 0 -> build_project ()
     | _ -> Promise.resolve 1)
 
-let manage_open_failure ~document =
+let manage_open_failure instance ~document =
   let open Promise.Syntax in
   let* choice =
     Window.showInformationMessage
@@ -355,15 +314,15 @@ let manage_open_failure ~document =
       ~choices:[ ("Run `dune build`", 0); ("Abandon", 1) ]
       ()
   in
-  manage_choice choice ~document
+  manage_choice instance choice ~document
 
-let open_preprocessed_doc_to_the_side ~document =
-  try open_pp_doc ~document with
-  | _ -> manage_open_failure ~document
+let open_preprocessed_doc_to_the_side instance ~document =
+  try open_pp_doc instance ~document with
+  | _ -> manage_open_failure instance ~document
 
-let open_both_ppx_ast ~document =
+let open_both_ppx_ast instance ~document =
   let open Promise.Syntax in
-  let* pp_doc_open = open_preprocessed_doc_to_the_side ~document in
+  let* pp_doc_open = open_preprocessed_doc_to_the_side instance ~document in
   if pp_doc_open = 0 then
     open_ast_explorer ~uri:(TextDocument.uri document)
   else
@@ -383,19 +342,22 @@ module Command = struct
       ~id:Extension_consts.Commands.open_ast_explorer_to_the_side handler
 
   let _reveal_ast_node =
-    let handler _ ~textEditor ~edit:_ ~args:_ =
+    let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
       let (_ : unit Promise.t) =
         let selection = Vscode.TextEditor.selection textEditor in
         let document = TextEditor.document textEditor in
         let position = Vscode.Selection.start selection in
-        let webview_opt = find_webview_by_doc ~document in
+        let ast_editor_state = Extension_instance.ast_editor_state instance in
+        let webview_opt =
+          Ast_editor_state.find_webview_by_doc ast_editor_state ~document
+        in
         let offset = TextDocument.offsetAt document ~position in
         Promise.make (fun ~resolve:_ ~reject:_ ->
             match webview_opt with
             | Some webview -> send_msg "focus" (Ojs.int_to_js offset) ~webview
             | None ->
               show_message `Warn
-                "Wrong output mode inside the AST explorer, please select the \
+                "Wrong output modee inside the AST explorer, please select the \
                  correct tab")
       in
       ()
@@ -404,18 +366,21 @@ module Command = struct
       ~id:Extension_consts.Commands.reveal_ast_node handler
 
   let _switch_hover_mode =
-    let handler _ ~textEditor ~edit:_ ~args:_ =
+    let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
       let (_ : unit Promise.t) =
         Promise.make (fun ~resolve:_ ~reject:_ ->
-            match !hover_disposable_ref with
+            let ast_editor_state =
+              Extension_instance.ast_editor_state instance
+            in
+            match Ast_editor_state.get_hover_disposable ast_editor_state with
             | Some d ->
               Disposable.dispose d;
-              hover_disposable_ref := None
+              Ast_editor_state.set_hover_disposable ast_editor_state None
             | None ->
-              hover_disposable_ref :=
-                Some
-                  (activate_hover_mode
-                     ~document:(TextEditor.document textEditor)))
+              Ast_editor_state.set_hover_disposable ast_editor_state
+                (Some
+                   (activate_hover_mode instance
+                      ~document:(TextEditor.document textEditor))))
       in
       ()
     in
@@ -423,11 +388,11 @@ module Command = struct
       ~id:Extension_consts.Commands.switch_hover_mode handler
 
   let _show_preprocessed_document =
-    let handler _ ~textEditor ~edit:_ ~args:_ =
+    let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
       let document = TextEditor.document textEditor in
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
-        let+ (_ : int) = open_preprocessed_doc_to_the_side ~document in
+        let+ (_ : int) = open_preprocessed_doc_to_the_side instance ~document in
         ()
       in
       ()
@@ -436,10 +401,10 @@ module Command = struct
       ~id:Extension_consts.Commands.show_preprocessed_document handler
 
   let _open_pp_editor_and_ast_explorer =
-    let handler _ ~textEditor ~edit:_ ~args:_ =
+    let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
       let (_ : unit Promise.t) =
         let document = TextEditor.document textEditor in
-        open_both_ppx_ast ~document
+        open_both_ppx_ast instance ~document
       in
       ()
     in
@@ -456,7 +421,7 @@ let text_document_content_provider_ppx =
   in
   TextDocumentContentProvider.create ~provideTextDocumentContent ~onDidChange
 
-let manage_changed_origin ~document =
+let manage_changed_origin instance ~document =
   let open Promise.Syntax in
   let* choice =
     Window.showInformationMessage
@@ -466,17 +431,24 @@ let manage_changed_origin ~document =
       ~choices:[ ("Run `dune build`", 0); ("Cancel", 1) ]
       ()
   in
-  manage_choice choice ~document
+  manage_choice instance choice ~document
 
-let onDidSaveTextDocument_listener_pp document =
-  on_origin_update_content document
+let onDidSaveTextDocument_listener_pp instance document =
+  let ast_editor_state = Extension_instance.ast_editor_state instance in
+  Ast_editor_state.on_origin_update_content ast_editor_state document
 
-let onDidChangeActiveTextEditor_listener e =
+let onDidChangeActiveTextEditor_listener instance e =
+  let ast_editor_state = Extension_instance.ast_editor_state instance in
+
   if not (TextEditor.t_to_js e |> Ojs.is_null) then
     let document = TextEditor.document e in
-    match Map.find !pp_doc_to_changed_origin_map (doc_string_uri ~document) with
+    match
+      Map.find
+        (Ast_editor_state.get_pp_doc_to_changed_origin_map ast_editor_state)
+        (doc_string_uri ~document)
+    with
     | Some true ->
-      let (_ : int Promise.t) = manage_changed_origin ~document in
+      let (_ : int Promise.t) = manage_changed_origin instance ~document in
       ()
     | _ -> ()
   else
@@ -500,27 +472,21 @@ let close_visible_editors_by_uri uri =
   in
   Window.visibleTextEditors () |> List.iter ~f
 
-let onDidCloseTextDocument_listener (document : TextDocument.t) =
-  let origin_uri = doc_string_uri ~document in
-  match Map.find !origin_to_pp_doc_map origin_uri with
-  | Some uri ->
-    pp_doc_to_changed_origin_map := Map.remove !pp_doc_to_changed_origin_map uri;
-    origin_to_pp_doc_map := Map.remove !origin_to_pp_doc_map origin_uri;
-    (* close corresponding pp buffers to avoid confusion *)
-    close_visible_editors_by_uri uri
-  | None ->
-    remove_keys_by_data origin_to_pp_doc_map origin_uri;
-    pp_doc_to_changed_origin_map :=
-      Map.remove !pp_doc_to_changed_origin_map origin_uri
+let onDidCloseTextDocument_listener instance (document : TextDocument.t) =
+  let ast_editor_state = Extension_instance.ast_editor_state instance in
+  Ast_editor_state.remove_doc_entries ast_editor_state document;
+  close_visible_editors_by_uri (Uri.toString (TextDocument.uri document) ())
 
-let register extension =
+let register extension _instance =
   let editorProvider =
     `CustomEditorProvider
-      (CustomTextEditorProvider.create ~resolveCustomTextEditor)
+      (CustomTextEditorProvider.create
+         ~resolveCustomTextEditor:(resolveCustomTextEditor _instance))
   in
   let disposable =
     Window.onDidChangeActiveTextEditor ()
-      ~listener:onDidChangeActiveTextEditor_listener ()
+      ~listener:(onDidChangeActiveTextEditor_listener _instance)
+      ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable;
   let disposable =
@@ -530,7 +496,8 @@ let register extension =
 
   Vscode.ExtensionContext.subscribe extension ~disposable;
   let disposable =
-    Workspace.onDidCloseTextDocument ~listener:onDidCloseTextDocument_listener
+    Workspace.onDidCloseTextDocument
+      ~listener:(onDidCloseTextDocument_listener _instance)
       ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable;
@@ -540,7 +507,8 @@ let register extension =
   in
   Vscode.ExtensionContext.subscribe extension ~disposable;
   let disposable =
-    Workspace.onDidSaveTextDocument ~listener:onDidSaveTextDocument_listener_pp
+    Workspace.onDidSaveTextDocument
+      ~listener:(onDidSaveTextDocument_listener_pp _instance)
       ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable

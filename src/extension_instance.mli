@@ -25,3 +25,5 @@ val repl : t -> Terminal_sandbox.t option
 val set_repl : t -> Terminal.t -> unit
 
 val close_repl : t -> unit
+
+val ast_editor_state : t -> Ast_editor_state.t
