@@ -141,27 +141,25 @@ module Setting = struct
     | Custom _ -> Custom
 
   let of_json json =
-    let open Jsonoo.Decode in
-    let decode_vars json = Settings.resolve_workspace_vars (string json) in
-    let kind = field "kind" Kind.of_json json in
+    let decode_vars json =
+      Settings.resolve_workspace_vars (Jsonoo.Decode.string json)
+    in
+    let kind = Jsonoo.Decode.field "kind" Kind.of_json json in
     match (kind : Kind.t) with
     | Global -> Global
     | Esy ->
       let manifest =
-        field "root"
-          (fun js -> Path.of_string (decode_vars js) |> Esy.Manifest.of_path)
-          json
+        Jsonoo.Decode.field "root" decode_vars json
+        |> Path.of_string |> Esy.Manifest.of_path
       in
       Esy manifest
-    | Opam ->
-      field "switch"
-        (fun js ->
-          match Opam.Switch.of_string (decode_vars js) with
-          | Some switch -> Opam switch
-          | None -> Global)
-        json
+    | Opam -> (
+      Jsonoo.Decode.field "switch" decode_vars json |> Opam.Switch.of_string
+      |> function
+      | Some switch -> Opam switch
+      | None -> Global)
     | Custom ->
-      let template = field "template" decode_vars json in
+      let template = Jsonoo.Decode.field "template" decode_vars json in
       Custom template
 
   let to_json (t : t) =
