@@ -879,7 +879,7 @@
     "vscode-languageclient": "7.0.0"
   },
   "devDependencies": {
-    "@types/vscode": "1.57.0",
+    "@types/vscode": "1.58.1",
     "esbuild": "0.12.17",
     "fs-extra": "10.0.0",
     "mocha": "9.0.3",
