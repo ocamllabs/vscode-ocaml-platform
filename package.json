@@ -367,6 +367,14 @@
           "default": null,
           "description": "Determines where to find the sandbox for a given project"
         },
+        "ocaml.server.extraEnv": {
+          "type": [
+            "null",
+            "object"
+          ],
+          "default": null,
+          "markdownDescription": "Extra environment variables that will be passed to OCaml LSP executable. Useful for debugging purposes mostly."
+        },
         "ocaml.dune.autoDetect": {
           "type": "boolean",
           "default": true,
