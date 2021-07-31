@@ -57,3 +57,27 @@ let substitute_workspace_vars setting =
       String.substr_replace_all acc
         ~pattern:(workspace_folder_path folder)
         ~with_:(workspace_folder_var folder))
+
+module ExtraEnv = struct
+  let setting =
+    let of_json =
+      let dict_of_hashtbl hashtbl =
+        Stdlib.Hashtbl.to_seq hashtbl |> Interop.Dict.of_seq
+      in
+      Jsonoo.Decode.(
+        map (Option.map ~f:dict_of_hashtbl) (nullable (dict string)))
+    in
+    let to_json =
+      let hashtbl_of_dict json =
+        Interop.Dict.to_seq json |> Stdlib.Hashtbl.of_seq
+      in
+      Jsonoo.Encode.nullable (fun json ->
+          hashtbl_of_dict json |> Jsonoo.Encode.(dict string))
+    in
+    create_setting ~scope:ConfigurationTarget.Workspace
+      ~key:"ocaml.server.extraEnv" ~of_json ~to_json
+
+  let get () = get setting |> Option.join
+end
+
+let server_extraEnv = ExtraEnv.get

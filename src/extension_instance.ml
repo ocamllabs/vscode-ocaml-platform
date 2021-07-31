@@ -33,13 +33,21 @@ let client_options () =
 let server_options sandbox =
   let command = Sandbox.get_command sandbox "ocamllsp" [] in
   Cmd.log command;
+  let env =
+    let extra_env_vars =
+      Settings.server_extraEnv () |> Option.value ~default:Interop.Dict.empty
+    in
+    Interop.Dict.union (fun _k _v1 v2 -> Some v2) Process.Env.env extra_env_vars
+  in
   match command with
   | Shell command ->
-    let options = LanguageClient.ExecutableOptions.create ~shell:true () in
+    let options = LanguageClient.ExecutableOptions.create ~env ~shell:true () in
     LanguageClient.Executable.create ~command ~options ()
   | Spawn { bin; args } ->
     let command = Path.to_string bin in
-    let options = LanguageClient.ExecutableOptions.create ~shell:false () in
+    let options =
+      LanguageClient.ExecutableOptions.create ~env ~shell:false ()
+    in
     LanguageClient.Executable.create ~command ~args ~options ()
 
 let stop_server t =

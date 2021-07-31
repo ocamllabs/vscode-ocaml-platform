@@ -32,3 +32,5 @@ val resolve_workspace_vars : string -> string
 
 (** replace workspace folder paths with ${workspaceFolder:folder_name} variables *)
 val substitute_workspace_vars : string -> string
+
+val server_extraEnv : unit -> string Interop.Dict.t option
