@@ -2714,6 +2714,144 @@ module Window = struct
     [%js.to: TreeView.t] (createTreeView ~viewId ~options)
 end
 
+module CodeLens = struct
+  include Class.Make ()
+
+  include
+    [%js:
+    val command : t -> Command.t [@@js.get]
+
+    val isResolved : t -> bool [@@js.get]
+
+    val range : t -> Range.t [@@js.get]
+
+    val make : range:Range.t -> ?command:Command.t -> unit -> t
+      [@@js.new "vscode.CodeLens"]]
+end
+
+module CodeLensProvider = struct
+  include Interface.Generic (Ojs) ()
+
+  module OnDidChangeCodeLenses = Event.Make (Js.Unit)
+
+  module Make (T : Js.T) = struct
+    type t = T.t generic [@@js]
+
+    include
+      [%js:
+      val onDidChangeCodeLenses : t -> OnDidChangeCodeLenses.t or_undefined
+        [@@js.get]
+
+      val provideCodeLenses :
+           t
+        -> document:TextDocument.t
+        -> token:CancellationToken.t
+        -> T.t list ProviderResult.t
+        [@@js.call]
+
+      val resolveCodeLens :
+        t -> codeLens:T.t -> token:CancellationToken.t -> T.t ProviderResult.t
+        [@@js.call]
+
+      val create :
+           onDidChangeCodeLenses:OnDidChangeCodeLenses.t or_undefined
+        -> provideCodeLenses:
+             (   document:TextDocument.t
+              -> token:CancellationToken.t
+              -> T.t list ProviderResult.t)
+        -> resolveCodeLens:
+             (codeLens:T.t -> token:CancellationToken.t -> T.t ProviderResult.t)
+        -> t
+        [@@js.builder]]
+  end
+end
+
+module DebugAdapterDescriptor = struct
+  include Interface.Make ()
+end
+
+module DebugAdapterExecutableOptions = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val cwd : t -> string or_undefined [@@js.get]
+
+    val env : t -> string Dict.t or_undefined [@@js.get]
+
+    val create : ?cwd:string -> ?env:string Dict.t -> unit -> t [@@js.builder]]
+end
+
+module DebugAdapterExecutable = struct
+  include Class.Extend (DebugAdapterDescriptor) ()
+
+  include
+    [%js:
+    val make :
+         command:string
+      -> ?args:string list
+      -> ?options:DebugAdapterExecutableOptions.t
+      -> unit
+      -> t
+      [@@js.new "vscode.DebugAdapterExecutable"]]
+end
+
+module DebugSession = struct
+  include Class.Make ()
+end
+
+module DebugAdapterDescriptorFactory = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val createDebugAdapterDescriptor :
+         t
+      -> session:DebugSession.t
+      -> executable:DebugAdapterExecutable.t or_undefined
+      -> DebugAdapterDescriptor.t ProviderResult.t
+      [@@js.call]
+
+    val create :
+         createDebugAdapterDescriptor:
+           (   session:DebugSession.t
+            -> executable:DebugAdapterExecutable.t or_undefined
+            -> DebugAdapterDescriptor.t ProviderResult.t)
+      -> t
+      [@@js.builder]]
+end
+
+module DebugConfigurationProvider = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val create :
+         provideDebugConfigurations:
+           (   folder:WorkspaceFolder.t or_undefined
+            -> token:CancellationToken.t
+            -> Ojs.t list ProviderResult.t)
+      -> resolveDebugConfiguration:
+           (   folder:WorkspaceFolder.t or_undefined
+            -> debugConfiguration:Ojs.t
+            -> token:CancellationToken.t
+            -> Ojs.t ProviderResult.t)
+      -> resolveDebugConfigurationWithSubstitutedVariables:
+           (   folder:WorkspaceFolder.t or_undefined
+            -> debugConfiguration:Ojs.t
+            -> token:CancellationToken.t
+            -> Ojs.t ProviderResult.t)
+      -> t
+      [@@js.builder]]
+end
+
+module DebugConfigurationProviderTriggerKind = struct
+  type t =
+    | Initial [@js 1] [@js.default]
+    | Dynamic [@js 2]
+  [@@js.enum] [@@js]
+end
+
 module Commands = struct
   include
     [%js:
@@ -2756,7 +2894,16 @@ module Languages = struct
       [@@js.global "vscode.languages.getDiagnostics"]
 
     val getDiagnostics_all : unit -> (Uri.t * Diagnostic.t list) list
-      [@@js.global "vscode.languages.getDiagnostics"]]
+      [@@js.global "vscode.languages.getDiagnostics"]
+
+    val registerCodeLensProvider :
+      selector:DocumentSelector.t -> provider:Ojs.t -> Disposable.t
+      [@@js.global "vscode.languages.registerCodeLensProvider"]]
+
+  let registerCodeLensProvider (type a) (module T : Js.T with type t = a)
+      ~(selector : DocumentSelector.t) ~(provider : a CodeLensProvider.t) =
+    registerCodeLensProvider ~selector
+      ~provider:(CodeLensProvider.generic_to_js T.t_to_js provider)
 end
 
 module Tasks = struct
@@ -2769,4 +2916,30 @@ end
 
 module Env = struct
   include [%js: val shell : unit -> string [@@js.get "vscode.env.shell"]]
+end
+
+module Debug = struct
+  include
+    [%js:
+    val registerDebugAdapterDescriptorFactory :
+         debugType:string
+      -> factory:DebugAdapterDescriptorFactory.t
+      -> Disposable.t
+      [@@js.global "vscode.debug.registerDebugAdapterDescriptorFactory"]
+
+    val registerDebugConfigurationProvider :
+         debugType:string
+      -> provider:DebugConfigurationProvider.t
+      -> ?triggerKind:DebugConfigurationProviderTriggerKind.t
+      -> unit
+      -> Disposable.t
+      [@@js.global "vscode.debug.registerDebugConfigurationProvider"]
+
+    val startDebugging :
+         folder:WorkspaceFolder.t or_undefined
+      -> nameOrConfiguration:Ojs.t
+      -> ?parentSessionOrOptions:Ojs.t
+      -> unit
+      -> bool Promise.t
+      [@@js.global "vscode.debug.startDebugging"]]
 end

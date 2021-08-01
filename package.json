@@ -39,7 +39,11 @@
     "workspaceContains:**/*.mll",
     "workspaceContains:**/*.mly",
     "workspaceContains:**/*.re",
-    "workspaceContains:**/*.rei"
+    "workspaceContains:**/*.rei",
+    "onDebugResolve:ocaml.dune-executable",
+    "onDebugInitialConfigurations",
+    "onDebugDynamicConfigurations:ocaml.dune-executable",
+    "onCommand:ocaml.debug.variable-goto-closure-code-location"
   ],
   "icon": "assets/logo.png",
   "contributes": {
@@ -837,6 +841,200 @@
         "language": "cram",
         "scopeName": "source.cram",
         "path": "./syntaxes/cram.json"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "ocaml",
+        "label": "OCaml Bytecode",
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "program"
+            ],
+            "properties": {
+              "noDebug": {
+                "type": "boolean",
+                "default": false
+              },
+              "cwd": {
+                "type": "string",
+                "description": "The working directory for debuggee program."
+              },
+              "env": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Environment variables passed to the debuggee program.",
+                "default": {}
+              },
+              "program": {
+                "type": "string",
+                "description": "The path of debuggee program."
+              },
+              "arguments": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "The command-line arguments for the debuggee program.",
+                "default": []
+              },
+              "source_dirs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "The path to search sources.",
+                "default": []
+              },
+              "onlyDebugGlob": {
+                "type": "string",
+                "description": "Only debug sources which match `onlyDebugGlob`.",
+                "default": "true"
+              },
+              "followForkMode": {
+                "enum": [
+                  "forkChild",
+                  "forkParent"
+                ],
+                "description": "Set which process the debugger follows on fork.",
+                "default": "forkParent"
+              },
+              "yieldSteps": {
+                "type": "number",
+                "description": "Max steps to execute in batch. Debugger can not response other requests when executing steps in batch.",
+                "default": 4096
+              },
+              "console": {
+                "enum": [
+                  "internalConsole",
+                  "integratedTerminal",
+                  "externalTerminal"
+                ],
+                "description": "Where to launch the debug target: internal console, integrated terminal, or external terminal.",
+                "default": "integratedTerminal"
+              },
+              "stopOnEntry": {
+                "type": "boolean",
+                "description": "Automatically stop after launch.",
+                "default": false
+              },
+              "_debugLog": {
+                "type": "string",
+                "description": "File to Log debug messages."
+              }
+            }
+          }
+        }
+      },
+      {
+        "type": "ocaml.dune-executable",
+        "label": "OCaml Bytecode (Dune)",
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "duneFile"
+            ],
+            "properties": {
+              "duneFile": {
+                "type": "string",
+                "description": "Path to dune file"
+              },
+              "executable": {
+                "type": "string",
+                "description": "Which executable to debug"
+              },
+              "workspaceDir": {
+                "type": "string",
+                "description": "Specified dune workspace folder to locate bytecode to debug. Default to `${workspaceFolder}`"
+              },
+              "buildDir": {
+                "type": "string",
+                "description": "Specified dune build folder to locate bytecode to debug. Default to `_build`"
+              },
+              "context": {
+                "type": "string",
+                "description": "Specified dune context to locate bytecode to debug. Default to `default`"
+              },
+              "noDebug": {
+                "type": "boolean",
+                "default": false
+              },
+              "cwd": {
+                "type": "string",
+                "description": "The working directory for debuggee program."
+              },
+              "env": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Environment variables passed to the debuggee program.",
+                "default": {}
+              },
+              "arguments": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "The command-line arguments for the debuggee program.",
+                "default": []
+              },
+              "onlyDebugGlob": {
+                "type": "string",
+                "description": "Only debug sources which match `onlyDebugGlob`.",
+                "default": "true"
+              },
+              "followForkMode": {
+                "enum": [
+                  "forkChild",
+                  "forkParent"
+                ],
+                "description": "Set which process the debugger follows on fork.",
+                "default": "forkParent"
+              },
+              "yieldSteps": {
+                "type": "number",
+                "description": "Max steps to execute in batch. Debugger can not response other requests when executing steps in batch.",
+                "default": 4096
+              },
+              "console": {
+                "enum": [
+                  "internalConsole",
+                  "integratedTerminal",
+                  "externalTerminal"
+                ],
+                "description": "Where to launch the debug target: internal console, integrated terminal, or external terminal.",
+                "default": "integratedTerminal"
+              },
+              "stopOnEntry": {
+                "type": "boolean",
+                "description": "Automatically stop after launch.",
+                "default": false
+              },
+              "_debugLog": {
+                "type": "string",
+                "description": "File to Log debug messages."
+              }
+            }
+          }
+        }
+      }
+    ],
+    "breakpoints": [
+      {
+        "language": "ocaml"
+      },
+      {
+        "language": "reason"
+      },
+      {
+        "language": "ocaml.ocamllex"
+      },
+      {
+        "language": "ocaml.menhir"
       }
     ],
     "snippets": [

@@ -117,6 +117,8 @@ module Path : sig
   val isAbsolute : string -> bool
 
   val join : string list -> string
+
+  val relative : from:string -> to_:string -> string
 end
 
 module Os : sig

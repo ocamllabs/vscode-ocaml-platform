@@ -36,6 +36,13 @@ module Commands = struct
   let next_hole = ocaml_prefixed "next-hole"
 
   let prev_hole = ocaml_prefixed "prev-hole"
+
+  let debug_dune_executables = ocaml_prefixed "--debug-dune-executables"
+
+  let debug_dune_executable = ocaml_prefixed "debug-dune-executable"
+
+  let debug_variable_goto_closure_code_location =
+    ocaml_prefixed "debug-variable-goto-closure-code-location"
 end
 
 module Command_errors = struct

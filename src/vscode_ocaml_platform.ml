@@ -35,6 +35,8 @@ let activate (extension : ExtensionContext.t) =
   Treeview_commands.register extension;
   Treeview_help.register extension;
   Repl.register extension instance;
+  Debugger.register extension instance;
+  Debug_code_lens.register extension instance;
   let sandbox_opt = Sandbox.of_settings_or_detect () in
   let (_ : unit Promise.t) =
     let* sandbox_opt = sandbox_opt in

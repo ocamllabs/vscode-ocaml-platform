@@ -145,7 +145,10 @@ module Path = struct
 
     val isAbsolute : string -> bool [@@js.global "path.isAbsolute"]
 
-    val join : (string list[@js.variadic]) -> string [@@js.global "path.join"]]
+    val join : (string list[@js.variadic]) -> string [@@js.global "path.join"]
+
+    val relative : from:string -> to_:string -> string
+      [@@js.global "path.relative"]]
 
   let delimiter =
     assert (String.length delimiter = 1);

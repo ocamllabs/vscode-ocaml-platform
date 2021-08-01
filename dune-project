@@ -40,7 +40,11 @@
   (jsonoo
    (>= 0.2.1))
   (opam-file-format
-   (>= 2.1.2))))
+   (>= 2.1.2))
+  (parsexp
+   (>= 0.14.0))
+  (iter
+   (>= 1.2.1))))
 
 (package
  (name vscode)

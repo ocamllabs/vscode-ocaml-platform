@@ -295,6 +295,66 @@ end = struct
     command Extension_consts.Commands.prev_hole (jump_to_hole pick_prev_hole)
 end
 
+module Debug_commands : sig
+  val _debug_dune_executables : t
+
+  val _debug_dune_executable : t
+
+  val _debug_variable_goto_closure_code_location : t
+end = struct
+  let _debug_dune_executables =
+    let handler (_instance : Extension_instance.t) ~args =
+      let fileName, names =
+        match args with
+        | [ fileName; names ] ->
+          (Ojs.string_of_js fileName, Ojs.list_of_js Ojs.string_of_js names)
+        | _ -> assert false
+      in
+      let _ =
+        let open Promise.Syntax in
+        let* name =
+          match names with
+          | [] -> Promise.return None
+          | [ name ] -> Promise.return (Some name)
+          | names -> Vscode.Window.showQuickPick ~items:names ()
+        in
+        match name with
+        | None -> Promise.return ()
+        | Some name ->
+          let* _ =
+            Vscode.Commands.executeCommand
+              ~command:Extension_consts.Commands.debug_dune_executable
+              ~args:[ Ojs.string_to_js fileName; Ojs.string_to_js name ]
+          in
+          Promise.return ()
+      in
+      ()
+    in
+    command Extension_consts.Commands.debug_dune_executables handler
+
+  let _debug_dune_executable =
+    let handler (instance : Extension_instance.t) ~args =
+      let fileName, name =
+        match args with
+        | [ fileName; name ] ->
+          (Ojs.string_of_js fileName, Ojs.string_of_js name)
+        | _ -> assert false
+      in
+      let _ = Debugger.startDebuggingDuneExecutable instance fileName name in
+      ()
+    in
+    command Extension_consts.Commands.debug_dune_executable handler
+
+  let _debug_variable_goto_closure_code_location =
+    let handler (instance : Extension_instance.t) ~args =
+      ignore instance;
+      ignore args
+      (* TODO *)
+    in
+    command Extension_consts.Commands.debug_variable_goto_closure_code_location
+      handler
+end
+
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in
