@@ -827,8 +827,6 @@ module WorkspaceEdit = struct
     [%js:
     val size : t -> int [@@js.get]
 
-    val set_size : t -> int -> unit [@@js.set]
-
     val replace :
          t
       -> uri:Uri.t

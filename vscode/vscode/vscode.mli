@@ -639,8 +639,6 @@ module WorkspaceEdit : sig
 
   val size : t -> int
 
-  val set_size : t -> int -> unit
-
   val replace :
        t
     -> uri:Uri.t
