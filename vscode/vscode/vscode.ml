@@ -821,7 +821,7 @@ module WorkspaceConfiguration = struct
 end
 
 module WorkspaceEdit = struct
-  include Interface.Make ()
+  include Class.Make ()
 
   include
     [%js:
