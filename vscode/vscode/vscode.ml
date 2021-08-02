@@ -2200,16 +2200,17 @@ module TextDocumentContentProvider = struct
 
   include
     [%js:
-    val onDidChange : t -> OnDidChange.t [@@js.get]
+    val onDidChange : t -> OnDidChange.t or_undefined [@@js.get]
 
     val provideTextDocumentContent :
       t -> uri:Uri.t -> token:CancellationToken.t -> string ProviderResult.t
       [@@js.call]
 
     val create :
-         onDidChange:OnDidChange.t
+         ?onDidChange:OnDidChange.t
       -> provideTextDocumentContent:
            (uri:Uri.t -> token:CancellationToken.t -> string ProviderResult.t)
+      -> unit
       -> t
       [@@js.builder]]
 end

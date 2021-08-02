@@ -1689,15 +1689,16 @@ end
 module TextDocumentContentProvider : sig
   include Js.T
 
-  val onDidChange : t -> Uri.t Event.t
+  val onDidChange : t -> Uri.t Event.t option
 
   val provideTextDocumentContent :
     t -> uri:Uri.t -> token:CancellationToken.t -> string ProviderResult.t
 
   val create :
-       onDidChange:Uri.t Event.t
+       ?onDidChange:Uri.t Event.t
     -> provideTextDocumentContent:
          (uri:Uri.t -> token:CancellationToken.t -> string ProviderResult.t)
+    -> unit
     -> t
 end
 

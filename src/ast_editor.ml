@@ -419,7 +419,7 @@ let text_document_content_provider_ppx =
   let provideTextDocumentContent ~uri:_ ~token:_ : string ProviderResult.t =
     `Value (Some "")
   in
-  TextDocumentContentProvider.create ~provideTextDocumentContent ~onDidChange
+  TextDocumentContentProvider.create ~provideTextDocumentContent ~onDidChange ()
 
 let manage_changed_origin instance ~document =
   let open Promise.Syntax in
