@@ -81,6 +81,23 @@ end
 module ClientOptions = struct
   include Interface.Make ()
 
+  type any_or_thunk =
+    [ `Any of Ojs.t
+    | `Thunk of unit -> Ojs.t
+    ]
+
+  let any_or_thunk_of_js js_val =
+    match Ojs.type_of js_val with
+    | "object" -> `Any js_val
+    | "function" -> `Thunk ([%js.to: unit -> Ojs.t] js_val)
+    | unexpected_type ->
+      failwith @@ "any_or_thunk_of_js: expected 'object' or 'function' but got "
+      ^ unexpected_type
+
+  let any_or_thunk_to_js = function
+    | `Any ojs -> ojs
+    | `Thunk f -> [%js.of: unit -> Ojs.t] f
+
   include
     [%js:
     val documentSelector : t -> DocumentSelector.t or_undefined [@@js.get]
@@ -89,10 +106,13 @@ module ClientOptions = struct
 
     val revealOutputChannelOn : t -> RevealOutputChannelOn.t [@@js.get]
 
+    val initializationOptions : t -> any_or_thunk or_undefined [@@js.get]
+
     val create :
          ?documentSelector:DocumentSelector.t
       -> ?outputChannel:Vscode.OutputChannel.t
       -> ?revealOutputChannelOn:RevealOutputChannelOn.t
+      -> ?initializationOptions:any_or_thunk
       -> unit
       -> t
       [@@js.builder]]

@@ -66,16 +66,24 @@ end
 module ClientOptions : sig
   include Js.T
 
+  type any_or_thunk =
+    [ `Any of Ojs.t
+    | `Thunk of unit -> Ojs.t
+    ]
+
   val documentSelector : t -> DocumentSelector.t option
 
   val outputChannel : t -> Vscode.OutputChannel.t option
 
   val revealOutputChannelOn : t -> RevealOutputChannelOn.t
 
+  val initializationOptions : t -> any_or_thunk or_undefined
+
   val create :
        ?documentSelector:DocumentSelector.t
     -> ?outputChannel:Vscode.OutputChannel.t
     -> ?revealOutputChannelOn:RevealOutputChannelOn.t
+    -> ?initializationOptions:any_or_thunk
     -> unit
     -> t
 end

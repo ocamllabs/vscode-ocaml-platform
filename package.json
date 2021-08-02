@@ -390,6 +390,11 @@
           ],
           "default": "off"
         },
+        "ocaml.server.construct.useLocalContext": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Constructing a value by type should use local context. Call command \"OCaml: Restart Language Server\" after change."
+        },
         "ocaml.useOcamlEnv": {
           "type": "boolean",
           "default": true,

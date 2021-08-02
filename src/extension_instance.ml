@@ -15,6 +15,40 @@ let ocaml_lsp t = Option.map ~f:snd t.lsp_client
 
 let lsp_client t = t.lsp_client
 
+(** This module is used to represent [initializationOptions] passed to
+    [LanguageClient.ClientOptions];
+
+    This module is useful to have a more structured way to compute
+    initialization options. *)
+module InitializationOptions : sig
+  val compute : unit -> [> `Any of Ojs.t ]
+end = struct
+  type merlin_construct_options = { use_local_context : bool }
+
+  let json_of_merlin_construct_options { use_local_context } =
+    Jsonoo.Encode.(object_ [ ("use_local_context", bool use_local_context) ])
+
+  let construct_use_local =
+    Settings.create_setting ~scope:ConfigurationTarget.Workspace
+      ~key:"ocaml.server.construct.useLocalContext" ~of_json:Jsonoo.Decode.bool
+      ~to_json:Jsonoo.Encode.bool
+
+  type t = { construct : merlin_construct_options }
+
+  let json_of_t { construct } =
+    Jsonoo.Encode.object_
+      [ ("construct", json_of_merlin_construct_options construct) ]
+
+  let compute () =
+    let use_local_context =
+      Option.value_exn (Settings.get construct_use_local)
+      (* [value_exn] because it has default value = [false], so should always be
+         [Some _] *)
+    in
+    let t = { construct = { use_local_context } } in
+    `Any (json_of_t t |> Jsonoo.t_to_js)
+end
+
 let client_options () =
   let documentSelector =
     LanguageClient.DocumentSelector.
@@ -27,8 +61,9 @@ let client_options () =
   in
   let (lazy outputChannel) = Output.language_server_output_channel in
   let revealOutputChannelOn = LanguageClient.RevealOutputChannelOn.Never in
+  let initializationOptions = InitializationOptions.compute () in
   LanguageClient.ClientOptions.create ~outputChannel ~revealOutputChannelOn
-    ~documentSelector ()
+    ~initializationOptions ~documentSelector ()
 
 let server_options sandbox =
   let command = Sandbox.get_command sandbox "ocamllsp" [] in
