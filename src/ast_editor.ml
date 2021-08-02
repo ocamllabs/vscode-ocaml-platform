@@ -138,7 +138,7 @@ let on_hover custom_doc webview =
       send_msg "focus" (Ojs.int_to_js offset) ~webview
     else
       ();
-    `Value (Some [ hover ])
+    `Value (Some hover)
   in
   let provider = HoverProvider.create ~provideHover in
   Vscode.Languages.registerHoverProvider ~selector:(`String "ocaml") ~provider

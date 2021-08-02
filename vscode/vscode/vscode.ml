@@ -1925,7 +1925,7 @@ module Hover = struct
     [%js:
     val contents : t -> MarkdownString.t [@@js.get]
 
-    val range : t -> Range.t or_undefined[@@js.get]
+    val range : t -> Range.t or_undefined [@@js.get]
 
     val make :
          contents:
@@ -1947,7 +1947,7 @@ module HoverProvider = struct
       -> document:TextDocument.t
       -> position:Position.t
       -> token:CancellationToken.t
-      -> Hover.t list ProviderResult.t
+      -> Hover.t ProviderResult.t
       [@@js.call]
 
     val create :
@@ -1955,7 +1955,7 @@ module HoverProvider = struct
            (   document:TextDocument.t
             -> position:Position.t
             -> token:CancellationToken.t
-            -> Hover.t list ProviderResult.t)
+            -> Hover.t ProviderResult.t)
       -> t
       [@@js.builder]]
 end

@@ -1489,14 +1489,14 @@ module HoverProvider : sig
     -> document:TextDocument.t
     -> position:Position.t
     -> token:CancellationToken.t
-    -> Hover.t list ProviderResult.t
+    -> Hover.t ProviderResult.t
 
   val create :
        provideHover:
          (   document:TextDocument.t
           -> position:Position.t
           -> token:CancellationToken.t
-          -> Hover.t list ProviderResult.t)
+          -> Hover.t ProviderResult.t)
     -> t
 end
 
