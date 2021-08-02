@@ -1471,7 +1471,7 @@ module Hover : sig
 
   val contents : t -> MarkdownString.t
 
-  val range : t -> Range.t
+  val range : t -> Range.t option
 
   val make :
        contents:

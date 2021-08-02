@@ -1925,7 +1925,7 @@ module Hover = struct
     [%js:
     val contents : t -> MarkdownString.t [@@js.get]
 
-    val range : t -> Range.t [@@js.get]
+    val range : t -> Range.t or_undefined[@@js.get]
 
     val make :
          contents:
