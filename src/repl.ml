@@ -122,13 +122,11 @@ let create_terminal instance sandbox =
 
 let get_code text_editor =
   let selection = TextEditor.selection text_editor in
-  let start_line = Selection.start selection |> Position.line in
-  let end_line = Selection.end_ selection |> Position.line in
-  let start_char = Selection.start selection |> Position.character in
-  let end_char = Selection.end_ selection |> Position.character in
+  let start = Selection.start selection in
+  let end_ = Selection.end_ selection in
   let document = TextEditor.document text_editor in
-  if start_line = end_line && start_char = end_char then
-    let line = TextDocument.lineAt document ~line:start_line in
+  if Position.isEqual start ~other:end_ then
+    let line = TextDocument.lineAt document ~line:(Position.line start) in
     TextLine.text line
   else
     TextDocument.getText document ~range:(selection :> Range.t) ()
