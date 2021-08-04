@@ -121,19 +121,17 @@ let create_terminal instance sandbox =
         Ok term))
 
 let get_code text_editor =
-  let selection = Vscode.TextEditor.selection text_editor in
-  let start_line = Vscode.Selection.start selection |> Vscode.Position.line in
-  let end_line = Vscode.Selection.end_ selection |> Vscode.Position.line in
-  let start_char =
-    Vscode.Selection.start selection |> Vscode.Position.character
-  in
-  let end_char = Vscode.Selection.end_ selection |> Vscode.Position.character in
-  let document = Vscode.TextEditor.document text_editor in
+  let selection = TextEditor.selection text_editor in
+  let start_line = Selection.start selection |> Position.line in
+  let end_line = Selection.end_ selection |> Position.line in
+  let start_char = Selection.start selection |> Position.character in
+  let end_char = Selection.end_ selection |> Position.character in
+  let document = TextEditor.document text_editor in
   if start_line = end_line && start_char = end_char then
-    let line = Vscode.TextDocument.lineAt document ~line:start_line in
-    Vscode.TextLine.text line
+    let line = TextDocument.lineAt document ~line:start_line in
+    TextLine.text line
   else
-    Vscode.TextDocument.getText document ~range:(selection :> Vscode.Range.t) ()
+    TextDocument.getText document ~range:(selection :> Range.t) ()
 
 let prepare_code code =
   if String.is_suffix code ~suffix:";;" then
