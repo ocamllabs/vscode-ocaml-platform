@@ -184,7 +184,7 @@ module Command = struct
     in
     Extension_commands.register ~id:Extension_consts.Commands.open_repl handler
 
-  let _evaluate_selection =
+  let _evaluate_expression =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
@@ -241,7 +241,7 @@ module Command = struct
       ()
     in
     Extension_commands.register_text_editor
-      ~id:Extension_consts.Commands.evaluate_selection handler
+      ~id:Extension_consts.Commands.evaluate_expression handler
 end
 
 let register extension instance =

@@ -221,7 +221,10 @@ prefix `OCaml:`:
 | `ocaml.current-dune-file`    | Open Dune File (located in the same folder) |                    |
 | `ocaml.switch-impl-intf`     | Switch implementation/interface             | `Alt+O`            |
 | `ocaml.open-repl`            | Open REPL                                   |                    |
-| `ocaml.evaluate-selection`   | Evaluate Selection                          | `Shift+Enter`      |
+| `ocaml.evaluate-expression`  | Evaluate Expression in REPL                 | `Shift+Enter`      |
+
+Note: `ocaml.evaluate-expression` was previously named
+`ocaml.evaluate-selection`.
 
 ## FAQ
 
