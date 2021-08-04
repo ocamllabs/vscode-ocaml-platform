@@ -84,7 +84,7 @@ let default_repl sandbox =
 let open_terminal instance sandbox =
   match Extension_instance.repl instance with
   | Some term ->
-    Terminal_sandbox.show term;
+    Terminal_sandbox.show ~preserveFocus:true term;
     Promise.return (Ok term)
   | None -> (
     let open Promise.Syntax in
