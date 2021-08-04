@@ -79,7 +79,9 @@ let default_repl sandbox =
   | true, false -> Sandbox.get_command sandbox "utop" []
   | false, _ -> Sandbox.get_command sandbox "ocaml" []
 
-let create_terminal instance sandbox =
+(** opens a terminal containing the REPL either by creating a new terminal or
+    showing the existing one *)
+let open_terminal instance sandbox =
   match Extension_instance.repl instance with
   | Some term ->
     Terminal_sandbox.show term;
@@ -150,7 +152,7 @@ module Command = struct
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
         let+ (result : (Terminal.t, string) result) =
-          create_terminal instance sandbox
+          open_terminal instance sandbox
         in
         let (_ : (Terminal.t, unit) result) =
           Result.map_error result ~f:(fun err -> log "%s" err)
@@ -166,7 +168,7 @@ module Command = struct
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
-        let* term = create_terminal instance sandbox in
+        let* term = open_terminal instance sandbox in
         match term with
         | Error err ->
           show_message `Error "Could not start the REPL: %s" err;
