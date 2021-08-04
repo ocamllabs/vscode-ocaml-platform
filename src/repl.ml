@@ -89,11 +89,11 @@ let open_terminal instance sandbox =
   | None -> (
     let open Promise.Syntax in
     let* cmd =
-      match (get_repl_path (), get_repl_args ()) with
-      | Some bin, Some args ->
+      match get_repl_path () with
+      | Some bin ->
+        let args = Option.value (get_repl_args ()) ~default:[] in
         Sandbox.get_command sandbox bin args |> Promise.return
-      | Some bin, None -> Sandbox.get_command sandbox bin [] |> Promise.return
-      | None, _ -> default_repl sandbox
+      | None -> default_repl sandbox
     in
     let* result = Cmd.check cmd in
     match result with
