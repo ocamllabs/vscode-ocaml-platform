@@ -22,6 +22,12 @@
 - Add `ocaml.server.extraEnv` configuration option to pass extra environment
   variables to the language server, i.e., OCaml-LSP (#674)
 
+- Add `ocaml.server.construct.useLocalContext` configuration option to turn
+  on/off use of local context in `Construct an expression` code action. In other
+  words, if turned on, the extension will also construct expressions from
+  currently defined values. Can be used only with OCaml LSP version starting
+  from 1.8.0.
+
 ## 1.8.4
 
 - Fix inclusion of files in extension package
