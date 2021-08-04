@@ -5,6 +5,7 @@ type t =
   ; handleSwitchImplIntf : bool
   ; handleInferIntf : bool
   ; handleTypedHoles : bool
+  ; handleWrappingAstNode : bool
   }
 
 let default =
@@ -12,6 +13,7 @@ let default =
   ; handleSwitchImplIntf = false
   ; handleInferIntf = false
   ; handleTypedHoles = false
+  ; handleWrappingAstNode = false
   }
 
 let default_field key decode default json =
@@ -35,10 +37,15 @@ let of_json (json : Jsonoo.t) =
     let handleTypedHoles =
       default_field "handleTypedHoles" bool default.handleTypedHoles json
     in
+    let handleWrappingAstNode =
+      default_field "handleWrappingAstNode" bool default.handleWrappingAstNode
+        json
+    in
     { interfaceSpecificLangId
     ; handleSwitchImplIntf
     ; handleInferIntf
     ; handleTypedHoles
+    ; handleWrappingAstNode
     }
   with
   | Jsonoo.Decode_error _ ->
@@ -63,3 +70,5 @@ let can_handle_switch_impl_intf t = t.handleSwitchImplIntf
 let can_handle_infer_intf t = t.handleSwitchImplIntf
 
 let can_handle_typed_holes t = t.handleTypedHoles
+
+let can_handle_wrapping_ast_node t = t.handleWrappingAstNode

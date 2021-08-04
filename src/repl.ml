@@ -120,16 +120,22 @@ let create_terminal instance sandbox =
         Extension_instance.set_repl instance term;
         Ok term))
 
-let get_code text_editor =
+(** returns selected code; returns [None] if nothing is selected, i.e.,
+    selection start and end are same *)
+let get_selected_code text_editor =
   let selection = TextEditor.selection text_editor in
-  let start = Selection.start selection in
-  let end_ = Selection.end_ selection in
   let document = TextEditor.document text_editor in
-  if Position.isEqual start ~other:end_ then
-    let line = TextDocument.lineAt document ~line:(Position.line start) in
-    TextLine.text line
+  if
+    Position.isEqual
+      (Selection.start selection)
+      ~other:(Selection.end_ selection)
+  then
+    None
   else
-    TextDocument.getText document ~range:(selection :> Range.t) ()
+    let selected_text =
+      TextDocument.getText document ~range:(selection :> Range.t) ()
+    in
+    Some selected_text
 
 let prepare_code code =
   if String.is_suffix code ~suffix:";;" then
@@ -160,14 +166,54 @@ module Command = struct
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
-        let+ term = create_terminal instance sandbox in
+        let* term = create_terminal instance sandbox in
         match term with
-        | Error err -> show_message `Error "Could not start the REPL: %s" err
-        | Ok term ->
-          let code = get_code textEditor in
-          if String.length code > 0 then
-            let code = prepare_code code in
-            Terminal_sandbox.send term code
+        | Error err ->
+          show_message `Error "Could not start the REPL: %s" err;
+          Promise.return ()
+        | Ok term -> (
+          match get_selected_code textEditor with
+          | Some code ->
+            Promise.return
+              (if String.length code > 0 then
+                let code = prepare_code code in
+                Terminal_sandbox.send term code)
+          | None -> (
+            let open Promise.Syntax in
+            match Extension_instance.lsp_client instance with
+            | None ->
+              show_message `Warn "ocamllsp is not running.";
+              Promise.return ()
+            | Some (_, ocaml_lsp)
+              when not (Ocaml_lsp.can_handle_wrapping_ast_node ocaml_lsp) ->
+              (* we fall back to pre ocaml-lsp v1.8.0 behavior; we don't advise
+                 to update ocaml-lsp because latest ocaml-lsp-s require 4.12.0
+                 which the user may not have switched to *)
+              let document = TextEditor.document textEditor in
+              let selection = TextEditor.selection textEditor in
+              let start = Selection.start selection in
+              let code =
+                TextDocument.lineAt document ~line:(Position.line start)
+                |> TextLine.text
+              in
+              Terminal_sandbox.send term (prepare_code code);
+              Promise.return ()
+            | Some (client, _ocaml_lsp) -> (
+              let doc = TextEditor.document textEditor in
+              let uri = TextDocument.uri doc in
+              let position =
+                let selection = TextEditor.selection textEditor in
+                Selection.start selection
+              in
+              let+ range =
+                Custom_requests.Wrapping_ast_node.send_request client ~doc:uri
+                  ~position
+              in
+              match range with
+              | None -> ()
+              | Some range ->
+                let code = TextDocument.getText doc ~range () in
+                Terminal_sandbox.send term (prepare_code code))))
       in
       ()
     in
