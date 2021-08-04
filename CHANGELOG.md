@@ -14,6 +14,7 @@
   code `match Some 1 with Some _ -> _ | None -> _`. While the first underscore
   is a valid "match-all"/wildcard pattern, the rest of underscores are typed
   holes that one needs to replace with valid OCaml code. These new commands help
+  to navigate easily from one hole to another (#643)
 
 - Rename the extension's section in VS Code Settings from `OCaml configuration`
   to `OCaml Platform` (#674)
