@@ -16,6 +16,59 @@
   holes that one needs to replace with valid OCaml code. These new commands help
   to navigate easily from one hole to another (#643)
 
+- Improve evaluating code in REPL
+
+  - Important: rename `Evaluate Selection` to `Evaluate Expression in REPL`
+    because we now support evaluating not only selections, but expressions
+    depending on the cursor position -- read more below!
+
+    Reminder: you can send an expression (whether by selection or expression
+    enclosing the cursor) via a keyboard shortcut `shift+enter`.
+
+  - Add support for evaluating expressions depending on the cursor position
+
+    - If you explicitly select a piece of code, that code will be evaluated in
+      the REPL
+
+    - BUT if you don't select anything, the closest "toplevel" expression
+      enclosing the cursor will be evaluated. Let's see some examples (`<n>` is
+      cursor position for example number `n`)
+
+      ```ocaml
+      let k = <1> 1
+      <2>
+      module M = struct<3>
+        let a =
+          let <4> b = 1 in
+          b + 1
+        <5>
+        let u = ()
+      end
+      ```
+
+      | Your cursor | Evaluated expression        | Rationale                                                                                        |
+      | ----------- | --------------------------- | ------------------------------------------------------------------------------------------------ |
+      | <1>         | `let k = 1`                 | Toplevel expression under cursor                                                                 |
+      | <2>         | whole code block            | Cursor is in-between, so whole "file" is evaluated                                               |
+      | <3>         | `module M = ... end`        | Cursor is on the module definition                                                               |
+      | <4>         | `let a = let b = 1 in b + 1 | "Toplevel" expression for the cursor; it's used because it's "closer" than the module definition |
+      | <5>         | `let a = ... let u = ()`    | It's often useful to have module's definitions in the REPL environment                           |
+
+  - Improved workflow for opening a terminal:
+
+    If the `ocaml.repl.path` and `ocaml.repl.args` configuration options are
+    given, then they are used to open a terminal and launch a REPL.
+
+    Otherwise, the user is prompted to write a string command to launch the REPL
+    in an input box; for example, `dune utop my_library`.
+
+    If the user doesn't enter anything, a default (\*) REPL is created:
+
+    - If you have both `dune` and `utop`, use `dune utop` command to create a
+      REPL;
+    - If only `utop`, then `utop`;
+    - Else, `ocaml`.
+
 - Rename the extension's section in VS Code Settings from `OCaml configuration`
   to `OCaml Platform` (#674)
 
