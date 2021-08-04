@@ -142,6 +142,18 @@ module Position = struct
     let character = Position.character t in
     Jsonoo.Encode.(object_ [ ("line", int line); ("character", int character) ])
 
+  type position =
+    { line : int
+    ; character : int
+    }
+
+  let position_of_t t =
+    let line = Position.line t in
+    let character = Position.character t in
+    { line; character }
+
+  let t_of_position { line; character } = Position.make ~line ~character
+
   include Vscode.Position
 end
 
@@ -161,6 +173,21 @@ module Range = struct
     let start = Range.start t |> Position.json_of_t in
     let end_ = Range.end_ t |> Position.json_of_t in
     Jsonoo.Encode.(object_ [ ("start", start); ("end", end_) ])
+
+  type range =
+    { start : Position.position
+    ; end_ : Position.position
+    }
+
+  let range_of_t t =
+    let start = Range.start t |> Position.position_of_t in
+    let end_ = Range.end_ t |> Position.position_of_t in
+    { start; end_ }
+
+  let t_of_range { start; end_ } =
+    let start = Position.t_of_position start in
+    let end_ = Position.t_of_position end_ in
+    Range.makePositions ~start ~end_
 
   include Vscode.Range
 end
