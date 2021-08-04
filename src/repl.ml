@@ -89,11 +89,32 @@ let open_terminal instance sandbox =
   | None -> (
     let open Promise.Syntax in
     let* cmd =
+      let get_cmd_from_inputbox () =
+        let options =
+          InputBoxOptions.create ~title:"Command to launch REPL"
+            ~prompt:
+              "dune utop my_library (* note: [dune utop my_executable] isn't \
+               supported *)"
+            ~placeHolder:"dune utop " ()
+        in
+        let+ (cmd : string option) = Window.showInputBox ~options () in
+        Option.bind cmd ~f:(function
+          | "" -> None
+          | cmd -> (
+            match String.split cmd ~on:' ' with
+            | [] -> None
+            | bin :: args -> Some (Cmd.Spawn { bin = Path.of_string bin; args })
+            ))
+      in
       match get_repl_path () with
       | Some bin ->
         let args = Option.value (get_repl_args ()) ~default:[] in
         Sandbox.get_command sandbox bin args |> Promise.return
-      | None -> default_repl sandbox
+      | None -> (
+        let* cmd_from_inputbox = get_cmd_from_inputbox () in
+        match cmd_from_inputbox with
+        | Some cmd -> Promise.return cmd
+        | None -> default_repl sandbox)
     in
     let* result = Cmd.check cmd in
     match result with
