@@ -121,3 +121,35 @@ module Repl_args = struct
 end
 
 let repl_args = Repl_args.get
+
+module Repl_terminal = struct
+  type t =
+    | Always_existing_terminal
+    | Always_create_new_terminal
+    | Always_ask
+
+  let setting =
+    let of_json json =
+      Jsonoo.Decode.string json |> function
+      | "Always existing terminal" -> Always_existing_terminal
+      | "Always create new terminal" -> Always_create_new_terminal
+      | "Always ask" -> Always_ask
+      | _ -> assert false
+    in
+    let to_json t =
+      let s =
+        match t with
+        | Always_existing_terminal -> "Always existing terminal"
+        | Always_create_new_terminal -> "Always create new terminal"
+        | Always_ask -> "Always ask"
+      in
+      Jsonoo.Encode.string s
+    in
+    create_setting ~scope:ConfigurationTarget.Workspace
+      ~key:"ocaml.repl.terminal" ~to_json ~of_json
+
+  let get () = Option.value_exn (get setting)
+  (* [_exn] because we have a default value *)
+end
+
+let repl_terminal = Repl_terminal.get

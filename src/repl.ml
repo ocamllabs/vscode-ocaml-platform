@@ -86,8 +86,7 @@ let open_repl_in_existing_terminal terminal command =
   in
   terminal
 
-let ask_repl_in_new_terminal_or_existing () =
-  let open Promise.Syntax in
+let user_picks_terminal ~include_create_new_terminal () =
   let choices =
     let existings_terminal_choices =
       let terminals = Window.terminals () |> Sequence.of_list in
@@ -106,10 +105,19 @@ let ask_repl_in_new_terminal_or_existing () =
       in
       Sequence.zip qpick_terminals terminals |> Sequence.to_list
     in
-    let create_new_terminal_choice =
-      (QuickPickItem.create ~label:"Create New Terminal" (), `New_terminal)
-    in
-    create_new_terminal_choice :: existings_terminal_choices
+    if not include_create_new_terminal then
+      match existings_terminal_choices with
+      | _ :: _ -> existings_terminal_choices
+      | [] ->
+        ( QuickPickItem.create ~label:"Create New Terminal"
+            ~description:"because there are no existing terminals" ()
+        , `New_terminal )
+        :: existings_terminal_choices
+    else
+      let create_new_terminal_choice =
+        (QuickPickItem.create ~label:"Create New Terminal" (), `New_terminal)
+      in
+      create_new_terminal_choice :: existings_terminal_choices
   in
   let options =
     QuickPickOptions.create ~title:"Pick Terminal to Launch a REPL in" ()
@@ -155,7 +163,14 @@ let open_terminal instance sandbox : Terminal.t Or_error.t Promise.t =
         (Error "Running a REPL from a Shell command is not supported")
     | Ok (Spawn command) -> (
       (* TODO: add a setting: always new / always reuse / pickable *)
-      let* pick = ask_repl_in_new_terminal_or_existing () in
+      let* pick =
+        match Settings.repl_terminal () with
+        | Settings.Repl_terminal.Always_create_new_terminal ->
+          Promise.return (Some `New_terminal)
+        | Always_existing_terminal ->
+          user_picks_terminal ~include_create_new_terminal:false ()
+        | Always_ask -> user_picks_terminal ~include_create_new_terminal:true ()
+      in
       let pick = Option.value pick ~default:`New_terminal in
       let terminal =
         match pick with

@@ -521,6 +521,16 @@
           ],
           "items": "string",
           "default": null
+        },
+        "ocaml.repl.terminal": {
+          "markdownDescription": "Pick whether terminal should always open in a new/existing terminal, or should ask every time.",
+          "type": "string",
+          "default": "Always ask",
+          "enum": [
+            "Always existing terminal",
+            "Always create new terminal",
+            "Always ask"
+          ]
         }
       }
     },

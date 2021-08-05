@@ -41,3 +41,12 @@ val server_extraEnv : unit -> string Interop.Dict.t option
 val repl_path : unit -> string option
 
 val repl_args : unit -> string list option
+
+module Repl_terminal : sig
+  type t =
+    | Always_existing_terminal
+    | Always_create_new_terminal
+    | Always_ask
+end
+
+val repl_terminal : unit -> Repl_terminal.t
