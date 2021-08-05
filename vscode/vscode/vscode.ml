@@ -2658,7 +2658,7 @@ module WebviewPanelOptions = struct
     [%js:
     val enableFindWidget : t -> bool or_undefined [@@js.get]
 
-    val retainContextWhenHidden : t -> bool or_undefined[@@js.get]]
+    val retainContextWhenHidden : t -> bool or_undefined [@@js.get]]
 end
 
 module WebviewPortMapping = struct
@@ -2730,64 +2730,14 @@ module WebView = struct
       [@@js.builder]]
 end
 
-module rec WebviewPanel : sig
-  include Js.T
-
-  module LightDarkIcon : sig
-    type t =
-      { light : [ `Uri of Uri.t ]
-      ; dark : [ `Uri of Uri.t ]
-      }
-
-    include Js.T with type t := t
-  end
-
-  val onDidChangeViewState :
-    t -> WebviewPanelOnDidChangeViewStateEvent.t Event.t
-
-  val onDidDispose : t -> unit Event.t
-
-  val active : t -> bool
-
-  type iconPath =
-    [ `Uri of Uri.t
-    | `LightDark of LightDarkIcon.t
-    ]
-
-  val options : t -> WebviewPanelOptions.t
-
-  val title : t -> string
-
-  val viewColumn : t -> ViewColumn.t
-
-  val viewType : t -> string
-
-  val visible : t -> bool
-
-  val webview : t -> WebView.t
-
-  val set_webview : t -> WebView.t -> unit
-
-  val dispose : t -> Js.Any.t
-
-  val reveal :
-    t -> ?preserveFocus:bool -> ?viewColumn:ViewColumn.t -> unit -> unit
-
-  val create :
-       onDidChangeViewState:WebviewPanelOnDidChangeViewStateEvent.t Event.t
-    -> onDidDispose:unit Event.t
-    -> active:bool
-    -> options:WebviewPanelOptions.t
-    -> title:string
-    -> viewColumn:ViewColumn.t
-    -> viewType:string
-    -> visible:bool
-    -> webview:WebView.t
-    -> dispose:Js.Any.t
-    -> reveal:(?preserveFocus:bool -> ?viewColumn:ViewColumn.t -> unit -> unit)
-    -> t
-end = struct
+module WebviewPanel = struct
   include Interface.Make ()
+
+  module WebviewPanelOnDidChangeViewStateEvent = struct
+    include Interface.Make ()
+
+    include [%js: val webviewPanel : t -> t [@@js.get]]
+  end
 
   module LightDarkIcon = struct
     type t =
@@ -2862,16 +2812,6 @@ end = struct
            (?preserveFocus:bool -> ?viewColumn:ViewColumn.t -> unit -> unit)
       -> t
       [@@js.builder]]
-end
-
-and WebviewPanelOnDidChangeViewStateEvent : sig
-  include Js.T
-
-  val webviewPanel : t -> WebviewPanel.t
-end = struct
-  include Interface.Make ()
-
-  include [%js: val webviewPanel : t -> WebviewPanel.t [@@js.get]]
 end
 
 module CustomTextEditorProvider = struct

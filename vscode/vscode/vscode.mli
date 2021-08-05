@@ -2069,8 +2069,14 @@ module WebView : sig
     -> t
 end
 
-module rec WebviewPanel : sig
+module WebviewPanel : sig
   include Js.T
+
+  module WebviewPanelOnDidChangeViewStateEvent : sig
+    include Js.T
+
+    val webviewPanel : t -> t
+  end
 
   module LightDarkIcon : sig
     type t =
@@ -2125,12 +2131,6 @@ module rec WebviewPanel : sig
     -> dispose:Js.Any.t
     -> reveal:(?preserveFocus:bool -> ?viewColumn:ViewColumn.t -> unit -> unit)
     -> t
-end
-
-and WebviewPanelOnDidChangeViewStateEvent : sig
-  include Js.T
-
-  val webviewPanel : t -> WebviewPanel.t
 end
 
 module CustomTextEditorProvider : sig
