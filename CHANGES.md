@@ -64,10 +64,10 @@
 
     If the user doesn't enter anything, a default (\*) REPL is created:
 
-    - If you have both `dune` and `utop`, use `dune utop` command to create a
-      REPL;
-    - If only `utop`, then `utop`;
-    - Else, `ocaml`.
+    - If you have both `dune` and `utop` and the project _seems_ "buildable",
+      use `dune utop` command to create a REPL;
+    - If only `utop` is installed, then use command `utop` to launch REPL;
+    - Else, use the default OCaml REPL `ocaml`.
 
 - Rename the extension's section in VS Code Settings from `OCaml configuration`
   to `OCaml Platform` (#674)
