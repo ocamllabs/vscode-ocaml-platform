@@ -15,6 +15,13 @@ let send_msg t value ~(webview : WebView.t) =
   let (_ : bool Promise.t) = WebView.postMessage webview msg in
   ()
 
+let fetch_pp_code ~document =
+  match Ppx_tools.get_reparsed_code_from_pp_file ~document with
+  | Ok code -> code
+  | Error err_msg ->
+    show_message `Error "%s" err_msg;
+    ""
+
 let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
   let open Ppx_tools in
   let origin_json =
@@ -28,9 +35,9 @@ let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
     | Some path -> (
       match get_preprocessed_ast path with
       | Ok ast -> (
+        let pp_code = fetch_pp_code ~document in
         match ast with
         | Impl ppml_structure ->
-          let pp_code = get_reparsed_code_from_pp_file ~document in
           let reparsed_structure =
             pp_code |> Lexing.from_string |> Parse.implementation
           in
@@ -39,7 +46,6 @@ let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
           in
           reparsed_json
         | Intf signature ->
-          let pp_code = get_reparsed_code_from_pp_file ~document in
           let reparsed_signature =
             pp_code |> Lexing.from_string |> Parse.interface
           in
@@ -218,7 +224,7 @@ let replace_document_content ~document ~content =
 let open_pp_doc instance ~document =
   let open Promise.Syntax in
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  let pp_pp_str = Ppx_tools.get_reparsed_code_from_pp_file ~document in
+  let pp_pp_str = fetch_pp_code ~document in
   let* doc =
     Workspace.openTextDocument
       (`Uri
@@ -258,8 +264,7 @@ let reload_pp_doc instance ~document =
       Ast_editor_state.set_origin_changed ast_editor_state
         ~key:(doc_string_uri ~document) ~data:false;
       replace_document_content
-        ~content:
-          (Ppx_tools.get_reparsed_code_from_pp_file ~document:original_document)
+        ~content:(fetch_pp_code ~document:original_document)
         ~document
     in
     0
@@ -303,14 +308,10 @@ let manage_choice instance choice ~document : int Promise.t =
     | Some 0 -> build_project ()
     | _ -> Promise.resolve 1)
 
-let manage_open_failure instance ~document =
+let manage_open_failure err_msg instance ~document =
   let open Promise.Syntax in
   let* choice =
-    Window.showInformationMessage
-      ~message:
-        ("Seems like the file '"
-        ^ Ppx_tools.Pp_path.relative_document_path ~document
-        ^ "' haven't been preprocessed yet.")
+    Window.showInformationMessage ~message:err_msg
       ~choices:[ ("Run `dune build`", 0); ("Abandon", 1) ]
       ()
   in
@@ -318,7 +319,7 @@ let manage_open_failure instance ~document =
 
 let open_preprocessed_doc_to_the_side instance ~document =
   try open_pp_doc instance ~document with
-  | _ -> manage_open_failure instance ~document
+  | Sys_error e -> manage_open_failure e instance ~document
 
 let open_both_ppx_ast instance ~document =
   let open Promise.Syntax in

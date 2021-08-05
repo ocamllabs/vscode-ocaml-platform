@@ -33,4 +33,7 @@ let get_pp_path ~(document : TextDocument.t) =
         ^ String.sub ~pos:0 ~len:(String.length relative - 3) relative
         ^ "pp.mli"
       | Unknown -> failwith "Unknown file extension")
-  | None -> None
+  | None ->
+    (let _ = Window.showErrorMessage ~message:"NONE." () in
+     ());
+    None
