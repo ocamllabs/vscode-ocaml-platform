@@ -59,6 +59,63 @@ let repl_from_inputbox sandbox =
     None
   | Some (bin :: args) -> Some (Sandbox.get_command sandbox bin args)
 
+let create_new_terminal ~name command sandbox =
+  Terminal_sandbox.create ~name ~command sandbox
+
+let open_repl_in_existing_terminal terminal command =
+  let _launch_repl : unit =
+    let { Cmd.bin; args } = command in
+    let bin = Path.to_string bin in
+
+    let repl_command = bin :: args in
+    (* if user closes the REPL that is opened by sending the REPL command, the
+       rest of expressions will be sent to terminal if we don't close it
+       together with REPL; hence we chain an exit *)
+    let open_repl_and_kill_terminal_on_repl_close =
+      let exit =
+        match Platform.t with
+        | Platform.Win32 -> "Exit" (* TODO: works on windows? *)
+        | Platform.Darwin
+        | Platform.Linux
+        | Platform.Other ->
+          "exit"
+      in
+      repl_command @ [ ";"; exit ] |> String.concat ~sep:" "
+    in
+    Terminal_sandbox.send terminal open_repl_and_kill_terminal_on_repl_close
+  in
+  terminal
+
+let ask_repl_in_new_terminal_or_existing () =
+  let open Promise.Syntax in
+  let choices =
+    let existings_terminal_choices =
+      let terminals = Window.terminals () |> Sequence.of_list in
+      let qpick_terminals =
+        Sequence.map terminals ~f:(fun terminal ->
+            let name = Terminal.name terminal in
+            QuickPickItem.create ~label:name
+              ~detail:
+                "Make sure the Terminal doesn't have another process running \
+                 in the foreground. Note: Exiting the REPL will result in \
+                 closing the terminal."
+              ())
+      in
+      let terminals =
+        Sequence.map terminals ~f:(fun t -> `Existing_terminal t)
+      in
+      Sequence.zip qpick_terminals terminals |> Sequence.to_list
+    in
+    let create_new_terminal_choice =
+      (QuickPickItem.create ~label:"Create New Terminal" (), `New_terminal)
+    in
+    create_new_terminal_choice :: existings_terminal_choices
+  in
+  let options =
+    QuickPickOptions.create ~title:"Pick Terminal to Launch a REPL in" ()
+  in
+  Window.showQuickPickItems ~choices ~options ()
+
 (** opens a terminal containing the REPL either by creating a new terminal or
     showing the existing one *)
 let open_terminal instance sandbox : Terminal.t Or_error.t Promise.t =
@@ -98,63 +155,13 @@ let open_terminal instance sandbox : Terminal.t Or_error.t Promise.t =
         (Error "Running a REPL from a Shell command is not supported")
     | Ok (Spawn command) -> (
       (* TODO: add a setting: always new / always reuse / pickable *)
-      let choices =
-        let existings_terminal_choices =
-          let terminals = Window.terminals () |> Sequence.of_list in
-          let qpick_terminals =
-            Sequence.map terminals ~f:(fun terminal ->
-                let name = Terminal.name terminal in
-                QuickPickItem.create ~label:name
-                  ~detail:
-                    "Make sure the Terminal doesn't have another process \
-                     running in the foreground. Note: Exiting the REPL will \
-                     result in closing the terminal."
-                  ())
-          in
-          let terminals =
-            Sequence.map terminals ~f:(fun t -> `Existing_terminal t)
-          in
-          Sequence.zip qpick_terminals terminals |> Sequence.to_list
-        in
-        let create_new_terminal_choice =
-          (QuickPickItem.create ~label:"Create New Terminal" (), `New_terminal)
-        in
-        create_new_terminal_choice :: existings_terminal_choices
-      in
-      let* pick =
-        let options =
-          QuickPickOptions.create ~title:"Pick Terminal to Launch a REPL in" ()
-        in
-        Window.showQuickPickItems ~choices ~options ()
-      in
+      let* pick = ask_repl_in_new_terminal_or_existing () in
       let pick = Option.value pick ~default:`New_terminal in
       let terminal =
         match pick with
-        | `New_terminal -> Terminal_sandbox.create ~name ~command sandbox
+        | `New_terminal -> create_new_terminal ~name command sandbox
         | `Existing_terminal terminal ->
-          let _launch_repl : unit =
-            let { Cmd.bin; args } = command in
-            let bin = Path.to_string bin in
-
-            let repl_command = bin :: args in
-            (* if user closes the REPL that is opened by sending the REPL
-               command, the rest of expressions will be sent to terminal if we
-               don't close it together with REPL; hence we chain an exit *)
-            let open_repl_and_kill_terminal_on_repl_close =
-              let exit =
-                match Platform.t with
-                | Platform.Win32 -> "Exit" (* FIXME: works on windows? *)
-                | Platform.Darwin
-                | Platform.Linux
-                | Platform.Other ->
-                  "exit"
-              in
-              repl_command @ [ ";"; exit ] |> String.concat ~sep:" "
-            in
-            Terminal_sandbox.send terminal
-              open_repl_and_kill_terminal_on_repl_close
-          in
-          terminal
+          open_repl_in_existing_terminal terminal command
       in
       Terminal_sandbox.show terminal;
       (* Wait for UTop or OCaml REPL to be initialized before sending text to
