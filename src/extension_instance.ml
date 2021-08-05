@@ -144,9 +144,7 @@ let set_sandbox t new_sandbox =
 
 let repl t = t.repl
 
-let set_repl t repl = t.repl <- Some repl
-
-let close_repl t = t.repl <- None
+let set_repl t repl = t.repl <- repl
 
 let open_terminal sandbox =
   let terminal = Terminal_sandbox.create sandbox in

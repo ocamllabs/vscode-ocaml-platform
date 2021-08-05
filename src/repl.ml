@@ -108,7 +108,7 @@ let open_terminal instance sandbox =
       match Terminal.exitStatus term with
       | Some _ -> Error "The REPL terminal could not be open"
       | None ->
-        Extension_instance.set_repl instance term;
+        Extension_instance.set_repl instance (Some term);
         Ok term))
 
 (** returns selected code; returns [None] if nothing is selected, i.e.,
@@ -223,7 +223,7 @@ let register extension instance =
     Vscode.Window.onDidCloseTerminal ()
       ~listener:(fun terminal ->
         if String.equal (Vscode.Terminal.name terminal) name then
-          Extension_instance.close_repl instance)
+          Extension_instance.set_repl instance None)
       ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable
