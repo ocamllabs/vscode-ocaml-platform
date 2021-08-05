@@ -296,6 +296,43 @@ module Command = struct
     in
     Extension_commands.register_text_editor
       ~id:Extension_consts.Commands.evaluate_expression handler
+
+  let open_terminal_send_text instance text err_msg =
+    let open Promise.Syntax in
+    let sandbox = Extension_instance.sandbox instance in
+    let+ (result : (Terminal.t, string) result) =
+      open_terminal instance sandbox
+    in
+    match result with
+    | Error e -> show_message `Error "%s: %s" err_msg e
+    | Ok terminal -> Terminal_sandbox.send terminal (text ())
+
+  let evaluate_file ~repl_directive command_id err_msg =
+    let handler (instance : Extension_instance.t) ~args:_ =
+      let text_editor = Window.activeTextEditor () in
+      let (_ : unit Promise.t) =
+        match text_editor with
+        | None -> Promise.return ()
+        | Some text_editor ->
+          let document = TextEditor.document text_editor in
+          let uri = TextDocument.uri document in
+          let path = Uri.path uri in
+          open_terminal_send_text instance
+            (fun () -> Printf.sprintf "%s \"%s\";;" repl_directive path)
+            err_msg
+      in
+      ()
+    in
+    Extension_commands.register ~id:command_id handler
+
+  let _evaluate_file =
+    evaluate_file ~repl_directive:"#use" Extension_consts.Commands.evaluate_file
+      "Error in 'Evaluate Current File in REPL'"
+
+  let _evaluate_file_as_module =
+    evaluate_file ~repl_directive:"#mod_use"
+      Extension_consts.Commands.evaluate_file_as_module
+      "Error in 'Evaluate Current File as a module in REPL'"
 end
 
 let register extension instance =

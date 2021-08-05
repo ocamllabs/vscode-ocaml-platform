@@ -210,6 +210,16 @@
         "title": "Evaluate Expression in REPL"
       },
       {
+        "command": "ocaml.evaluate-file",
+        "category": "OCaml",
+        "title": "Evaluate Current File in REPL"
+      },
+      {
+        "command": "ocaml.evaluate-file-as-module",
+        "category": "OCaml",
+        "title": "Evaluate Current File as a Module in REPL"
+      },
+      {
         "command": "ocaml.open-ast-explorer-to-the-side",
         "category": "OCaml",
         "title": "Open AST explorer"
@@ -331,6 +341,18 @@
         {
           "command": "ocaml.prev-hole",
           "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+        },
+        {
+          "command": "ocaml.evaluate-expression",
+          "when": "editorLangId == ocaml"
+        },
+        {
+          "command": "ocaml.evaluate-file",
+          "when": "editorLangId == ocaml"
+        },
+        {
+          "command": "ocaml.evaluate-file-as-module",
+          "when": "editorLangId == ocaml"
         },
         {
           "command": "ocaml.refresh-switches",
