@@ -103,8 +103,7 @@ let open_terminal instance sandbox =
           | cmd -> (
             match String.split cmd ~on:' ' with
             | [] -> None
-            | bin :: args -> Some (Cmd.Spawn { bin = Path.of_string bin; args })
-            ))
+            | bin :: args -> Some (Sandbox.get_command sandbox bin args)))
       in
       match get_repl_path () with
       | Some bin ->
