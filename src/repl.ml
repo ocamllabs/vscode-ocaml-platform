@@ -159,11 +159,17 @@ let get_selected_code text_editor =
     in
     Some selected_text
 
-let prepare_code code =
-  if String.is_suffix code ~suffix:";;" then
-    code
+(** preformat code by trimming it, inserting newlines at both ends for nicer
+    looking input to the repl, and append [;;] if wasn't present already in the
+    trimmed code *)
+let preformat_code code =
+  let is_repl_ready s = String.is_suffix s ~suffix:";;" in
+  let trimmed_code = String.strip code in
+  if is_repl_ready code then
+    (* newline is for nicer look in REPL *)
+    "\n" ^ trimmed_code
   else
-    code ^ ";;"
+    Printf.sprintf "\n%s\n;;" trimmed_code
 
 module Command = struct
   let _open_repl =
@@ -198,7 +204,7 @@ module Command = struct
           | Some code ->
             Promise.return
               (if String.length code > 0 then
-                let code = prepare_code code in
+                let code = preformat_code code in
                 Terminal_sandbox.send term code)
           | None -> (
             let open Promise.Syntax in
@@ -218,7 +224,7 @@ module Command = struct
                 TextDocument.lineAt document ~line:(Position.line start)
                 |> TextLine.text
               in
-              Terminal_sandbox.send term (prepare_code code);
+              Terminal_sandbox.send term (preformat_code code);
               Promise.return ()
             | Some (client, _ocaml_lsp) -> (
               let doc = TextEditor.document textEditor in
@@ -235,7 +241,7 @@ module Command = struct
               | None -> ()
               | Some range ->
                 let code = TextDocument.getText doc ~range () in
-                Terminal_sandbox.send term (prepare_code code))))
+                Terminal_sandbox.send term (preformat_code code))))
       in
       ()
     in
