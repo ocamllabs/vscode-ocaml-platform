@@ -2005,9 +2005,9 @@ end
 module WebviewPanelOptions : sig
   include Js.T
 
-  val enableFindWidget : t -> bool
+  val enableFindWidget : t -> bool option
 
-  val retainContextWhenHidden : t -> bool
+  val retainContextWhenHidden : t -> bool option
 end
 
 module WebviewPortMapping : sig

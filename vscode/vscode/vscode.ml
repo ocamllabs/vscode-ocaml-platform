@@ -2656,9 +2656,9 @@ module WebviewPanelOptions = struct
 
   include
     [%js:
-    val enableFindWidget : t -> bool [@@js.get]
+    val enableFindWidget : t -> bool or_undefined [@@js.get]
 
-    val retainContextWhenHidden : t -> bool [@@js.get]]
+    val retainContextWhenHidden : t -> bool or_undefined[@@js.get]]
 end
 
 module WebviewPortMapping = struct
