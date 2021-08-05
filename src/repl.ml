@@ -92,10 +92,10 @@ let open_terminal instance sandbox =
       let get_cmd_from_inputbox () =
         let options =
           InputBoxOptions.create ~title:"Command to launch REPL"
-            ~prompt:
-              "dune utop my_library (* note: [dune utop my_executable] isn't \
-               supported *)"
             ~placeHolder:"dune utop " ()
+            ~prompt:
+              "For example (without backticks): `dune utop my_library`. If not \
+               provided, a default REPL will open."
         in
         let+ (cmd : string option) = Window.showInputBox ~options () in
         Option.bind cmd ~f:(function
