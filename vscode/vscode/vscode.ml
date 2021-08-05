@@ -2781,7 +2781,7 @@ module WebviewPanel = struct
 
     val title : t -> string [@@js.get]
 
-    val viewColumn : t -> ViewColumn.t [@@js.get]
+    val viewColumn : t -> ViewColumn.t or_undefined [@@js.get]
 
     val viewType : t -> string [@@js.get]
 

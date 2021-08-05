@@ -2103,7 +2103,7 @@ module WebviewPanel : sig
 
   val title : t -> string
 
-  val viewColumn : t -> ViewColumn.t
+  val viewColumn : t -> ViewColumn.t option
 
   val viewType : t -> string
 
