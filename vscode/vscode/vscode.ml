@@ -2741,17 +2741,10 @@ module WebviewPanel = struct
 
   module LightDarkIcon = struct
     type t =
-      { light : ([ `Uri of Uri.t ][@js.union])
-      ; dark : ([ `Uri of Uri.t ][@js.union])
+      { light : Uri.t
+      ; dark : Uri.t
       }
     [@@js]
-
-    let t_of_js js_val =
-      let light_js = Ojs.get_prop_ascii js_val "light" in
-      let dark_js = Ojs.get_prop_ascii js_val "dark" in
-      let light = `Uri ([%js.to: Uri.t] light_js) in
-      let dark = `Uri ([%js.to: Uri.t] dark_js) in
-      { light; dark }
   end
 
   type iconPath =
@@ -2770,10 +2763,6 @@ module WebviewPanel = struct
     val onDidChangeViewState : t -> OnDidChangeViewState.t [@@js.get]
 
     val onDidDispose : t -> OnDidDispose.t [@@js.get]
-
-    (*let iconPath_of_js js_val = if Ojs.has_property js_val "path" then `Uri
-      ([%js.to: Uri.t] js_val) else if Ojs.has_property js_val "light" then
-      `LightDark ([%js.to: LightDarkIcon.t] js_val) else assert false*)
 
     val active : t -> bool [@@js.get]
 

@@ -2080,8 +2080,8 @@ module WebviewPanel : sig
 
   module LightDarkIcon : sig
     type t =
-      { light : [ `Uri of Uri.t ]
-      ; dark : [ `Uri of Uri.t ]
+      { light : Uri.t
+      ; dark : Uri.t
       }
 
     include Js.T with type t := t
