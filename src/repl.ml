@@ -3,40 +3,34 @@ open Import
 module Repl_path = struct
   type t = string option
 
-  let of_json json =
-    let open Jsonoo.Decode in
-    nullable string json
+  let of_json json = Jsonoo.Decode.(nullable string) json
 
-  let to_json (t : t) =
-    let open Jsonoo.Encode in
-    nullable string t
+  let to_json (t : t) = Jsonoo.Encode.(nullable string) t
 
-  let key = "path"
+  let key = "ocaml.repl.path"
 
-  let t = Settings.create_setting ~scope:Global ~key ~of_json ~to_json
+  let t =
+    Settings.create_setting ~scope:ConfigurationTarget.Workspace ~key ~of_json
+      ~to_json
 end
 
 module Repl_args = struct
   type t = string list option
 
-  let of_json json =
-    let open Jsonoo.Decode in
-    nullable (list string) json
+  let of_json json = Jsonoo.Decode.(nullable (list string)) json
 
-  let to_json (t : t) =
-    let open Jsonoo.Encode in
-    nullable (list string) t
+  let to_json (t : t) = Jsonoo.Encode.(nullable (list string)) t
 
-  let key = "args"
+  let key = "ocaml.repl.args"
 
-  let t = Settings.create_setting ~scope:Global ~key ~of_json ~to_json
+  let t =
+    Settings.create_setting ~scope:ConfigurationTarget.Workspace ~key ~of_json
+      ~to_json
 end
 
-let get_repl_path () =
-  Option.join (Settings.get ~section:"ocaml.repl" Repl_path.t)
+let get_repl_path () = Settings.get Repl_path.t |> Option.join
 
-let get_repl_args () =
-  Option.join (Settings.get ~section:"ocaml.repl" Repl_args.t)
+let get_repl_args () = Settings.get Repl_args.t |> Option.join
 
 let name = "REPL"
 
