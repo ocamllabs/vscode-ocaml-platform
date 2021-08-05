@@ -104,13 +104,7 @@ let open_terminal instance sandbox =
 
          That's hacky, buy hey, if vscode-python does it, so can we...
          https://github.com/microsoft/vscode-python/blob/main/src/client/terminals/codeExecution/terminalCodeExecution.ts#L54 *)
-      let+ () =
-        Promise.make (fun ~resolve ~reject:_ ->
-            let (_ : Node.Timeout.t) =
-              Node.setTimeout (fun () -> resolve ()) 2500
-            in
-            ())
-      in
+      let+ () = Node.set_timeout 2500 in
       match Terminal.exitStatus term with
       | Some _ -> Error "The REPL terminal could not be open"
       | None ->

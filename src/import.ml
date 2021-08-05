@@ -193,3 +193,14 @@ module Range = struct
 end
 
 let sprintf = Printf.sprintf
+
+module Node = struct
+  let set_timeout milliseconds =
+    Promise.make (fun ~resolve ~reject:_ ->
+        let (_ : Node.Timeout.t) =
+          Node.setTimeout (fun () -> resolve ()) milliseconds
+        in
+        ())
+
+  include Node
+end
