@@ -213,16 +213,18 @@ prefix `OCaml:`:
 
 ![commands](./doc/commands.png)
 
-| Name                         | Description                                 | Keyboard Shortcuts |
-| ---------------------------- | ------------------------------------------- | ------------------ |
-| `ocaml.select-sandbox`       | Select sandbox for this workspace           |                    |
-| `ocaml.server.restart`       | Restart language server                     |                    |
-| `ocaml.open-terminal`        | Open a terminal (current sandbox)           |                    |
-| `ocaml.open-terminal-select` | Open a terminal (select a sandbox)          |                    |
-| `ocaml.current-dune-file`    | Open Dune File (located in the same folder) |                    |
-| `ocaml.switch-impl-intf`     | Switch implementation/interface             | `Alt+O`            |
-| `ocaml.open-repl`            | Open REPL                                   |                    |
-| `ocaml.evaluate-expression`  | Evaluate Expression in REPL                 | `Shift+Enter`      |
+| Name                            | Description                                 | Keyboard Shortcuts |
+| ------------------------------- | ------------------------------------------- | ------------------ |
+| `ocaml.select-sandbox`          | Select sandbox for this workspace           |                    |
+| `ocaml.server.restart`          | Restart language server                     |                    |
+| `ocaml.open-terminal`           | Open a terminal (current sandbox)           |                    |
+| `ocaml.open-terminal-select`    | Open a terminal (select a sandbox)          |                    |
+| `ocaml.current-dune-file`       | Open Dune File (located in the same folder) |                    |
+| `ocaml.switch-impl-intf`        | Switch implementation/interface             | `Alt+O`            |
+| `ocaml.open-repl`               | Open REPL                                   |                    |
+| `ocaml.evaluate-expression`     | Evaluate Expression in REPL                 | `Shift+Enter`      |
+| `ocaml.evaluate-file`           | Evaluate Current File in REPL               |                    |
+| `ocaml.evaluate-file-as-module` | Evaluate Current File as a Module           |                    |
 
 Note: `ocaml.evaluate-expression` was previously named
 `ocaml.evaluate-selection`.
