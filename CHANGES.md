@@ -56,18 +56,31 @@
 
   - Improved workflow for opening a terminal:
 
-    If the `ocaml.repl.path` and `ocaml.repl.args` configuration options are
-    given, then they are used to open a terminal and launch a REPL.
+    - Picking which REPL to use
 
-    Otherwise, the user is prompted to write a string command to launch the REPL
-    in an input box; for example, `dune utop my_library`.
+      If the `ocaml.repl.path` and `ocaml.repl.args` configuration options are
+      given, then they are used to open a terminal and launch a REPL.
 
-    If the user doesn't enter anything, a default (\*) REPL is created:
+      Otherwise, the user is prompted to write a string command to launch the
+      REPL in an input box; for example, `dune utop my_library`.
 
-    - If you have both `dune` and `utop` and the project _seems_ "buildable",
-      use `dune utop` command to create a REPL;
-    - If only `utop` is installed, then use command `utop` to launch REPL;
-    - Else, use the default OCaml REPL `ocaml`.
+      If the user doesn't enter anything, a default (\*) REPL is created:
+
+      - If you have both `dune` and `utop` and the project _seems_ "buildable",
+        use `dune utop` command to create a REPL;
+      - If only `utop` is installed, then use command `utop` to launch REPL;
+      - Else, use the default OCaml REPL `ocaml`.
+
+    - Picking to launch REPL in a new terminal or existing
+
+      When the extension figures out which command to use for launching a REPL
+      (from user config, explicit command provided in the input box mentioned,
+      or a default REPL), the user is prompted to pick whether they want the
+      REPL to be in a newly created terminal or an existing one.
+
+      One can avoid picking whether to use a new or existing terminal each time,
+      by providing a setting `ocaml.repl.terminal`: always create a new
+      terminal, always use an existing one, always pick which to use.
 
 - Rename the extension's section in VS Code Settings from `OCaml configuration`
   to `OCaml Platform` (#674)
