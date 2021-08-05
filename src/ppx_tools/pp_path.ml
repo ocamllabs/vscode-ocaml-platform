@@ -7,7 +7,7 @@ type kind =
   | Unknown
 
 let relative_document_path ~document =
-  Workspace.asRelativePath ~pathOrUri:(`Uri (TextDocument.uri document))
+  Workspace.asRelativePath ~pathOrUri:(`Uri (TextDocument.uri document)) ()
 
 let project_root_path () = Workspace.rootPath ()
 

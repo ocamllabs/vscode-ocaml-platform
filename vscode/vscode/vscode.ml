@@ -2270,7 +2270,10 @@ module Workspace = struct
       [@@js.global "vscode.workspace.registerTextDocumentContentProvider"]
 
     val asRelativePath :
-      pathOrUri:([ `String of string | `Uri of Uri.t ][@js.union]) -> string
+         pathOrUri:([ `String of string | `Uri of Uri.t ][@js.union])
+      -> ?includeWorkspaceFolder:bool
+      -> unit
+      -> string
       [@@js.global "vscode.workspace.asRelativePath"]
 
     val getConfiguration :
