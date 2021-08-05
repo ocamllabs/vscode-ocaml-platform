@@ -68,9 +68,9 @@ let set_origin_changed t ~data ~key =
   t.pp_doc_to_changed_origin_map <-
     Map.set t.pp_doc_to_changed_origin_map ~key ~data
 
-let entry_exists t k d =
+let entry_exists t ~origin_doc ~pp_doc =
   Map.existsi t.origin_to_pp_doc_map ~f:(fun ~key ~data ->
-      String.equal d data && String.equal k key)
+      String.equal pp_doc data && String.equal origin_doc key)
 
 let get_origin_to_pp_doc_map t = t.origin_to_pp_doc_map
 

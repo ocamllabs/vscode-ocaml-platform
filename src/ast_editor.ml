@@ -94,8 +94,8 @@ let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
           else if
             (* (not !original_mode) && *)
             (Ast_editor_state.entry_exists ast_editor_state
-               (doc_string_uri ~document))
-              (doc_string_uri ~document:visible_doc)
+               ~origin_doc:(doc_string_uri ~document))
+              ~pp_doc:(doc_string_uri ~document:visible_doc)
           then
             (None, Some editor)
           else

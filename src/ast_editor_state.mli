@@ -21,7 +21,7 @@ val set_hover_disposable : t -> Disposable.t option -> unit
 
 val set_origin_changed : t -> data:bool -> key:string -> unit
 
-val entry_exists : t -> string -> string -> bool
+val entry_exists : t -> origin_doc:string -> pp_doc:string -> bool
 
 val get_origin_to_pp_doc_map :
   t -> (string, string, String.comparator_witness) Map.t
