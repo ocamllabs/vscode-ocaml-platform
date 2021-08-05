@@ -219,7 +219,8 @@ let replace_document_content ~document ~content =
   WorkspaceEdit.replace edit
     ~uri:(TextDocument.uri document)
     ~range ~newText:content;
-  Workspace.applyEdit ~edit
+  let (_ : bool Promise.t) = Workspace.applyEdit ~edit in
+  ()
 
 let open_pp_doc instance ~document =
   let open Promise.Syntax in
@@ -231,7 +232,7 @@ let open_pp_doc instance ~document =
         (Uri.parse ("post-ppx: " ^ TextDocument.fileName document ^ "?") ()))
   in
   Ast_editor_state.set_changes_tracking ast_editor_state document doc;
-  let* (_ : bool) = replace_document_content ~content:pp_pp_str ~document:doc in
+  replace_document_content ~content:pp_pp_str ~document:doc;
   let+ (_ : TextEditor.t) =
     Window.showTextDocument ~document:(`TextDocument doc)
       ~column:ViewColumn.Beside ()
@@ -260,14 +261,12 @@ let reload_pp_doc instance ~document =
       visibleTextEditors
   with
   | Some _ ->
-    let+ (_ : bool) =
-      Ast_editor_state.set_origin_changed ast_editor_state
-        ~key:(doc_string_uri ~document) ~data:false;
-      replace_document_content
-        ~content:(fetch_pp_code ~document:original_document)
-        ~document
-    in
-    0
+    Ast_editor_state.set_origin_changed ast_editor_state
+      ~key:(doc_string_uri ~document) ~data:false;
+    replace_document_content
+      ~content:(fetch_pp_code ~document:original_document)
+      ~document;
+    Promise.resolve 1
   | None -> Promise.resolve 1
 
 let manage_choice instance choice ~document : int Promise.t =
