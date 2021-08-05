@@ -41,6 +41,24 @@ let default_repl sandbox =
   | true, false -> Sandbox.get_command sandbox "utop" []
   | false, _ -> Sandbox.get_command sandbox "ocaml" []
 
+(** If [ocaml.repl.path] isn't set, we offer user an input box to enter the
+    command to launch REPL, e.g., [dune utop]. This function shows that input
+    box to the user and returns its contents. *)
+let repl_from_inputbox sandbox =
+  let options =
+    InputBoxOptions.create ~title:"Command to launch REPL"
+      ~placeHolder:"example: dune utop" ()
+      ~prompt:"If not provided, a default REPL will open."
+  in
+  let open Promise.Syntax in
+  let+ (cmd : string option) = Window.showInputBox ~options () in
+  let bin_and_args = Option.map cmd ~f:(String.split ~on:' ') in
+  match bin_and_args with
+  | None
+  | Some [] ->
+    None
+  | Some (bin :: args) -> Some (Sandbox.get_command sandbox bin args)
+
 (** opens a terminal containing the REPL either by creating a new terminal or
     showing the existing one *)
 let open_terminal instance sandbox =
@@ -50,32 +68,27 @@ let open_terminal instance sandbox =
     Promise.return (Ok term)
   | None -> (
     let open Promise.Syntax in
+    (* when [ocaml.repl.path] setting isn't set or is invalid, we offer an input
+       box to the user to get the command to launch REPL; if that doesn't
+       succeed we launch default REPL. *)
+    let repl_when_invalid_repl_settings () =
+      let* cmd_from_inputbox = repl_from_inputbox sandbox in
+      match cmd_from_inputbox with
+      | Some cmd -> Promise.return cmd
+      | None -> default_repl sandbox
+    in
     let* cmd =
-      let get_cmd_from_inputbox () =
-        let options =
-          InputBoxOptions.create ~title:"Command to launch REPL"
-            ~placeHolder:"dune utop " ()
-            ~prompt:
-              "For example (without backticks): `dune utop my_library`. If not \
-               provided, a default REPL will open."
-        in
-        let+ (cmd : string option) = Window.showInputBox ~options () in
-        Option.bind cmd ~f:(function
-          | "" -> None
-          | cmd -> (
-            match String.split cmd ~on:' ' with
-            | [] -> None
-            | bin :: args -> Some (Sandbox.get_command sandbox bin args)))
-      in
       match Settings.repl_path () with
-      | Some bin ->
+      | None -> repl_when_invalid_repl_settings ()
+      | Some bin when not (String.is_empty bin) ->
         let args = Option.value (Settings.repl_args ()) ~default:[] in
         Sandbox.get_command sandbox bin args |> Promise.return
-      | None -> (
-        let* cmd_from_inputbox = get_cmd_from_inputbox () in
-        match cmd_from_inputbox with
-        | Some cmd -> Promise.return cmd
-        | None -> default_repl sandbox)
+      | Some _ ->
+        show_message `Warn
+          "REPL Path setting is set to an empty string, which is not a valid \
+           path to a REPL executable. Consider fixing that if you want to \
+           launch REPL from that setting.";
+        repl_when_invalid_repl_settings ()
     in
     let* result = Cmd.check cmd in
     match result with
@@ -83,8 +96,8 @@ let open_terminal instance sandbox =
     | Ok (Shell _) ->
       Promise.return
         (Error "Running a REPL from a Shell command is not supported")
-    | Ok (Spawn cmd) -> (
-      let term = Terminal_sandbox.create ~name ~command:cmd sandbox in
+    | Ok (Spawn command) -> (
+      let term = Terminal_sandbox.create ~name ~command sandbox in
       Terminal_sandbox.show term;
       (* Wait for UTop or OCaml REPL to be initialized before sending text to
          the terminal.
