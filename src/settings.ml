@@ -87,3 +87,37 @@ module ExtraEnv = struct
 end
 
 let server_extraEnv = ExtraEnv.get
+
+module Repl_path = struct
+  type t = string option
+
+  let of_json json = Jsonoo.Decode.(nullable string) json
+
+  let to_json (t : t) = Jsonoo.Encode.(nullable string) t
+
+  let key = "ocaml.repl.path"
+
+  let setting =
+    create_setting ~scope:ConfigurationTarget.Workspace ~key ~of_json ~to_json
+
+  let get () = get setting |> Option.join
+end
+
+let repl_path = Repl_path.get
+
+module Repl_args = struct
+  type t = string list option
+
+  let of_json json = Jsonoo.Decode.(nullable (list string)) json
+
+  let to_json (t : t) = Jsonoo.Encode.(nullable (list string)) t
+
+  let key = "ocaml.repl.args"
+
+  let setting =
+    create_setting ~scope:ConfigurationTarget.Workspace ~key ~of_json ~to_json
+
+  let get () = get setting |> Option.join
+end
+
+let repl_args = Repl_args.get

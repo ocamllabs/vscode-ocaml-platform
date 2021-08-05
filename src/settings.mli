@@ -37,3 +37,7 @@ val resolve_workspace_vars : string -> string
 val substitute_workspace_vars : string -> string
 
 val server_extraEnv : unit -> string Interop.Dict.t option
+
+val repl_path : unit -> string option
+
+val repl_args : unit -> string list option

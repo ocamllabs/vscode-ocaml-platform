@@ -1,37 +1,5 @@
 open Import
 
-module Repl_path = struct
-  type t = string option
-
-  let of_json json = Jsonoo.Decode.(nullable string) json
-
-  let to_json (t : t) = Jsonoo.Encode.(nullable string) t
-
-  let key = "ocaml.repl.path"
-
-  let t =
-    Settings.create_setting ~scope:ConfigurationTarget.Workspace ~key ~of_json
-      ~to_json
-end
-
-module Repl_args = struct
-  type t = string list option
-
-  let of_json json = Jsonoo.Decode.(nullable (list string)) json
-
-  let to_json (t : t) = Jsonoo.Encode.(nullable (list string)) t
-
-  let key = "ocaml.repl.args"
-
-  let t =
-    Settings.create_setting ~scope:ConfigurationTarget.Workspace ~key ~of_json
-      ~to_json
-end
-
-let get_repl_path () = Settings.get Repl_path.t |> Option.join
-
-let get_repl_args () = Settings.get Repl_args.t |> Option.join
-
 let name = "REPL"
 
 let has_utop sandbox =
@@ -99,9 +67,9 @@ let open_terminal instance sandbox =
             | [] -> None
             | bin :: args -> Some (Sandbox.get_command sandbox bin args)))
       in
-      match get_repl_path () with
+      match Settings.repl_path () with
       | Some bin ->
-        let args = Option.value (get_repl_args ()) ~default:[] in
+        let args = Option.value (Settings.repl_args ()) ~default:[] in
         Sandbox.get_command sandbox bin args |> Promise.return
       | None -> (
         let* cmd_from_inputbox = get_cmd_from_inputbox () in
