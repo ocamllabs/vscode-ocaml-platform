@@ -1,4 +1,3 @@
-;;
 print_endline "Hello"
 
 let blah () =

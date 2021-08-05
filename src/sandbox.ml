@@ -391,7 +391,7 @@ let sandbox_candidates ~workspace_folders =
   in
 
   let+ esy, opam = Promise.all2 (esy, opam) in
-  global :: custom :: esy @ opam
+  (global :: custom :: esy) @ opam
 
 let select_sandbox () =
   let open Promise.Syntax in

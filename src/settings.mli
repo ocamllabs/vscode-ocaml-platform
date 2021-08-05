@@ -14,7 +14,8 @@ type 'value setting
    [ocaml.dune.autoDetect]. In some places, we treat [key] as this whole path
    for the setting, [ocaml.dune.autoDetect], and in some places we use
    [autoDetect] as the key and [ocaml.dune] as the "section". VS Code allows
-   this, but this non uniform treatment is bad. We should enforce a nicer API. *)
+   this, but this non uniform treatment is bad. We should enforce a nicer
+   API. *)
 
 val get : ?section:string -> 'value setting -> 'value option
 
@@ -27,10 +28,12 @@ val create_setting :
   -> to_json:('value -> Jsonoo.t)
   -> 'value setting
 
-(** replace ${workspaceFolder:folder_name} variables with workspace folder paths *)
+(** replace ${workspaceFolder:folder_name} variables with workspace folder
+    paths *)
 val resolve_workspace_vars : string -> string
 
-(** replace workspace folder paths with ${workspaceFolder:folder_name} variables *)
+(** replace workspace folder paths with ${workspaceFolder:folder_name}
+    variables *)
 val substitute_workspace_vars : string -> string
 
 val server_extraEnv : unit -> string Interop.Dict.t option
