@@ -24,6 +24,12 @@ depends: [
   "jsonoo" {>= "0.2.1"}
   "odoc" {with-doc}
 ]
+pin-depends: [
+  [
+     "ppxlib.0.22"
+     "git+https://github.com/ocaml-ppx/ppxlib#master"
+  ]
+]
 build: [
   ["dune" "subst"] {dev}
   [
