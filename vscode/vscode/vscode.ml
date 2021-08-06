@@ -2737,9 +2737,11 @@ module WebviewPanel = struct
   include Interface.Make ()
 
   module WebviewPanelOnDidChangeViewStateEvent = struct
+    type webviewPanel = t [@@js]
+
     include Interface.Make ()
 
-    include [%js: val webviewPanel : t -> t [@@js.get]]
+    include [%js: val webviewPanel : t -> webviewPanel [@@js.get]]
   end
 
   module LightDarkIcon = struct

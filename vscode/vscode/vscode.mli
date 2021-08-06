@@ -2076,9 +2076,11 @@ module WebviewPanel : sig
   include Js.T
 
   module WebviewPanelOnDidChangeViewStateEvent : sig
+    type webviewPanel := t
+
     include Js.T
 
-    val webviewPanel : t -> t
+    val webviewPanel : t -> webviewPanel
   end
 
   module LightDarkIcon : sig
