@@ -1,11 +1,11 @@
-import BrowserInteractor from './BrowserInteractor';
-import VsCodeInteractorFactory from './VsCodeInteractorFactory';
+import BrowserInteractor from "./BrowserInteractor";
+import VsCodeInteractorFactory from "./VsCodeInteractorFactory";
 
 function tryAcquireVsCodeApi() {
   try {
     return acquireVsCodeApi();
-  }
-  catch { // In this case we are not in VsCode context
+  } catch {
+    // In this case we are not in VsCode context
     return null;
   }
 }
@@ -15,14 +15,13 @@ function create() {
 
   if (vsCodeApi === null) {
     return BrowserInteractor;
-  }
-  else {
+  } else {
     return VsCodeInteractorFactory.createFromVsCodeApi(vsCodeApi);
   }
 }
 
 const InteractorFactory = {
-  create : create
-}
+  create: create,
+};
 
 export default InteractorFactory;

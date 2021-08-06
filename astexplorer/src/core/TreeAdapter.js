@@ -2,7 +2,6 @@
  * Configurable base class for all tree traversal.
  */
 class TreeAdapter {
-
   constructor(adapterOptions, filterValues) {
     this._ranges = new WeakMap();
     this._filterValues = filterValues;
@@ -13,7 +12,9 @@ class TreeAdapter {
    * Used by UI components to render an appropriate input for each filter.
    */
   getConfigurableFilters() {
-    return (this._adapterOptions.filters || []).filter(filter => Boolean(filter.key));
+    return (this._adapterOptions.filters || []).filter((filter) =>
+      Boolean(filter.key)
+    );
   }
 
   /**
@@ -31,7 +32,7 @@ class TreeAdapter {
   getRange(node) {
     if (node == null) {
       return null;
-    }//FIXME
+    } //FIXME
     /* if (this._ranges.has(node)) {
       return this._ranges.get(node);
     } */
@@ -90,7 +91,10 @@ class TreeAdapter {
   }
 
   isLocationProp(key) {
-    return this._adapterOptions.locationProps && this._adapterOptions.locationProps.has(key);
+    return (
+      this._adapterOptions.locationProps &&
+      this._adapterOptions.locationProps.has(key)
+    );
   }
 
   /**
@@ -105,7 +109,7 @@ class TreeAdapter {
   }
 
   isObject(node) {
-    return Boolean(node) && typeof node === 'object' && !this.isArray(node);
+    return Boolean(node) && typeof node === "object" && !this.isArray(node);
   }
 
   /**
@@ -115,7 +119,7 @@ class TreeAdapter {
     if (node != null) {
       for (const result of this._adapterOptions.walkNode(node)) {
         if (
-          (this._adapterOptions.filters || []).some(filter => {
+          (this._adapterOptions.filters || []).some((filter) => {
             if (filter.key && !this._filterValues[filter.key]) {
               return false;
             }
@@ -128,7 +132,6 @@ class TreeAdapter {
       }
     }
   }
-
 }
 
 const TreeAdapterConfigs = {
@@ -136,35 +139,41 @@ const TreeAdapterConfigs = {
     filters: [],
     openByDefault: () => false,
     nodeToRange: () => null,
-    nodeToName: () => { throw new Error('nodeToName must be passed'); },
-    walkNode: () => { throw new Error('walkNode must be passed'); },
+    nodeToName: () => {
+      throw new Error("nodeToName must be passed");
+    },
+    walkNode: () => {
+      throw new Error("walkNode must be passed");
+    },
   },
 
   estree: {
     filters: [
       emptyKeysFilter(),
-      locationInformationFilter(new Set(['range', 'loc', 'start', 'end'])),
+      locationInformationFilter(new Set(["range", "loc", "start", "end"])),
       typeKeysFilter(),
     ],
-    openByDefaultNodes: new Set(['Program']),
+    openByDefaultNodes: new Set(["Program"]),
     openByDefaultKeys: new Set([
-      'body',
-      'elements', // array literals
-      'declarations', // variable declaration
-      'expression', // expression statements
+      "body",
+      "elements", // array literals
+      "declarations", // variable declaration
+      "expression", // expression statements
     ]),
     openByDefault(node, key) {
-      return node && this.openByDefaultNodes.has(node.type) ||
-        this.openByDefaultKeys.has(key);
+      return (
+        (node && this.openByDefaultNodes.has(node.type)) ||
+        this.openByDefaultKeys.has(key)
+      );
     },
     nodeToRange(node) {
-      if (!(node && typeof node === 'object')) {
+      if (!(node && typeof node === "object")) {
         return null;
       }
       if (node.range) {
         return node.range;
       }
-      if (typeof node.start === 'number' && typeof node.end === 'number') {
+      if (typeof node.start === "number" && typeof node.end === "number") {
         return [node.start, node.end];
       }
       return null;
@@ -173,13 +182,13 @@ const TreeAdapterConfigs = {
       return node.type;
     },
     *walkNode(node) {
-      if (node && typeof node === 'object') {
+      if (node && typeof node === "object") {
         for (let prop in node) {
           yield {
             value: node[prop],
             key: prop,
             computed: false,
-          }
+          };
         }
       }
     },
@@ -194,37 +203,32 @@ export function ignoreKeysFilter(keys = new Set(), key, label) {
   return {
     key,
     label,
-    test(_, key) { return keys.has(key); },
+    test(_, key) {
+      return keys.has(key);
+    },
   };
 }
 
 export function locationInformationFilter(keys) {
-  return ignoreKeysFilter(
-    keys,
-    'hideLocationData',
-    'Hide location data',
-  );
+  return ignoreKeysFilter(keys, "hideLocationData", "Hide location data");
 }
-
 
 export function emptyKeysFilter() {
   return {
-    key: 'hideEmptyKeys',
-    label: 'Hide empty keys',
+    key: "hideEmptyKeys",
+    label: "Hide empty keys",
     test(value, key, fromArray) {
-      return (value == null ||
-        JSON.stringify(value) === JSON.stringify({ "[]": [] })
-        /*|| JSON.stringify(value) === JSON.stringify([])*/) && !fromArray;
+      return (
+        (value == null ||
+          JSON.stringify(value) === JSON.stringify({ "[]": [] })) &&
+        /*|| JSON.stringify(value) === JSON.stringify([])*/ !fromArray
+      );
     },
   };
 }
 
 export function typeKeysFilter(keys) {
-  return ignoreKeysFilter(
-    keys,
-    'hideTypeKeys',
-    'Hide type keys',
-  );
+  return ignoreKeysFilter(keys, "hideTypeKeys", "Hide type keys");
 }
 
 function createTreeAdapter(type, adapterOptions, filterValues) {
@@ -233,14 +237,10 @@ function createTreeAdapter(type, adapterOptions, filterValues) {
   }
   return new TreeAdapter(
     Object.assign({}, TreeAdapterConfigs[type], adapterOptions),
-    filterValues,
+    filterValues
   );
 }
 
 export function treeAdapterFromParseResult({ treeAdapter }, filterValues) {
-  return createTreeAdapter(
-    treeAdapter.type,
-    treeAdapter.options,
-    filterValues,
-  );
+  return createTreeAdapter(treeAdapter.type, treeAdapter.options, filterValues);
 }

@@ -13,7 +13,6 @@ export function subscribe(topic, handler) {
 }
 
 export function publish(topic, data) {
-  
   /* if (subscribers[topic]) {
     setTimeout(function callSubscribers() {
       if (subscribers[topic]) {

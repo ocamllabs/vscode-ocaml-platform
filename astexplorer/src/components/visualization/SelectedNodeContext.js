@@ -1,11 +1,13 @@
-import React from 'react';
+import React from "react";
 
 const SelectedNodeContext = React.createContext();
 
 function useSelectedNode() {
   const context = React.useContext(SelectedNodeContext);
   if (!context) {
-    throw new Error('useSelectedNode must be used within a SelectedNodeContext');
+    throw new Error(
+      "useSelectedNode must be used within a SelectedNodeContext"
+    );
   }
   return context;
 }
@@ -29,4 +31,4 @@ function SelectedNodeProvider(props) {
   return <SelectedNodeContext.Provider value={setSelectedNode} {...props} />;
 }
 
-export {SelectedNodeProvider, useSelectedNode};
+export { SelectedNodeProvider, useSelectedNode };

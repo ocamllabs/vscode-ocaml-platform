@@ -1,9 +1,9 @@
-export default function debounce(f, timeout=100) {
+export default function debounce(f, timeout = 100) {
   let timer;
   let lastArgs;
   let lastThis;
 
-  return function(...args) {
+  return function (...args) {
     lastThis = this;
     lastArgs = args;
     if (timer) {

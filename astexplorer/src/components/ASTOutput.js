@@ -1,8 +1,8 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import cx from '../utils/classnames.js';
-import visualizations from './visualization';
-import { vscode } from '../vscode'
+import PropTypes from "prop-types";
+import React from "react";
+import cx from "../utils/classnames.js";
+import visualizations from "./visualization";
+import { vscode } from "../vscode";
 
 const { useState } = React;
 
@@ -16,47 +16,48 @@ function formatTime(time) {
   return `${(time / 1000).toFixed(2)}s`;
 }
 
-export default function ASTOutput({ parseResult = {}, ppParseResult = {}, position = null }) {
+export default function ASTOutput({
+  parseResult = {},
+  ppParseResult = {},
+  position = null,
+}) {
   const [selectedOutput, setSelectedOutput] = useState(0);
   const { ast = null } = parseResult;
   let output;
 
   output = (
     <ErrorBoundary>
-      {
-        React.createElement(
-          visualizations[0],
-          { parseResult: (selectedOutput == 0 ? parseResult : ppParseResult), position, selectedOutput },
-        )
-      }
+      {React.createElement(visualizations[0], {
+        parseResult: selectedOutput == 0 ? parseResult : ppParseResult,
+        position,
+        selectedOutput,
+      })}
     </ErrorBoundary>
-  )
-
-  let buttons = visualizations.map(
-    (_, index) =>
-      <button
-        key={index}
-        value={index}
-        onClick={event => {
-          setSelectedOutput(event.target.value);
-          vscode.postMessage({
-            selectedOutput: event.target.value.toString()
-          });
-        }}
-        className={cx({
-          active: selectedOutput == index,
-        })}>
-        {index === 0 ? "Original" : "Preprocessed"}
-      </button>
   );
+
+  let buttons = visualizations.map((_, index) => (
+    <button
+      key={index}
+      value={index}
+      onClick={(event) => {
+        setSelectedOutput(event.target.value);
+        vscode.postMessage({
+          selectedOutput: event.target.value.toString(),
+        });
+      }}
+      className={cx({
+        active: selectedOutput == index,
+      })}
+    >
+      {index === 0 ? "Original" : "Preprocessed"}
+    </button>
+  ));
 
   return (
     <div className="output highlight">
       <div className="toolbar">
         {buttons}
-        <span className="time">
-          {formatTime(parseResult.time)}
-        </span>
+        <span className="time">{formatTime(parseResult.time)}</span>
       </div>
       {output}
     </div>
@@ -97,4 +98,3 @@ class ErrorBoundary extends React.Component {
 ErrorBoundary.propTypes = {
   children: PropTypes.node,
 };
-

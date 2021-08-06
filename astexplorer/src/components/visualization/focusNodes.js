@@ -18,15 +18,15 @@
  */
 let nodes;
 
-export default function(message, arg) {
+export default function (message, arg) {
   switch (message) {
-    case 'init':
+    case "init":
       nodes = new Set();
       break;
-    case 'add':
+    case "add":
       nodes.add(arg);
       break;
-    case 'focus': {
+    case "focus": {
       const root = arg.current;
       const size = nodes.size;
       try {
@@ -43,7 +43,7 @@ export default function(message, arg) {
             const distance = elementRect.y - center;
             const minDistance = Math.min(
               Math.abs(distance),
-              Math.abs(distance + elementRect.height),
+              Math.abs(distance + elementRect.height)
             );
 
             if (!closest || closest[1] > minDistance) {
@@ -57,9 +57,8 @@ export default function(message, arg) {
         }
       } catch (e) {
         // eslint-disable-next-line no-console
-        console.error('Unable to scroll node into view:', e.message);
+        console.error("Unable to scroll node into view:", e.message);
       }
-
     }
   }
 }

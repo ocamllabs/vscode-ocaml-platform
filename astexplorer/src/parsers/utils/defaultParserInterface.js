@@ -1,5 +1,5 @@
-import React from 'react';
-import SettingsRenderer from './SettingsRenderer';
+import React from "react";
+import SettingsRenderer from "./SettingsRenderer";
 
 /**
  * The minimal interface that every parser must implement. This object provides
@@ -54,7 +54,7 @@ export default {
    * Those properties of an AST node (object) that provide node name
    * so that they can be hidden in the UI if the option is selected.
    */
-  typeProps: new Set(['type']),
+  typeProps: new Set(["type"]),
 
   /**
    * Whether or not the provided node should be automatically expanded.
@@ -76,7 +76,7 @@ export default {
    * A more or less human readable name of the node.
    */
   getNodeName(node) {
-    if (node && typeof node.type !== 'object') {
+    if (node && typeof node.type !== "object") {
       return node.type;
     }
   },
@@ -87,7 +87,7 @@ export default {
    * is not implemnted as plain JavaScript object.
    */
   *forEachProperty(node) {
-    if (node && typeof node === 'object') {
+    if (node && typeof node === "object") {
       for (let prop in node) {
         if (this._ignoredProperties.has(prop)) {
           continue;
@@ -96,7 +96,7 @@ export default {
           value: node[prop],
           key: prop,
           computed: false,
-        }
+        };
       }
     }
   },
@@ -144,11 +144,11 @@ export default {
    */
   _getSettingsConfiguration(defaultOptions) {
     const keys = Object.keys(defaultOptions);
-    return keys.length > 0 ?
-      {
-        fields: keys,
-      } :
-      null;
+    return keys.length > 0
+      ? {
+          fields: keys,
+        }
+      : null;
   },
 
   hasSettings() {
@@ -170,7 +170,7 @@ export default {
    * that all options are set.
    */
   _mergeDefaultOptions(currentOptions, defaultOptions) {
-    return {...defaultOptions, ...currentOptions};
+    return { ...defaultOptions, ...currentOptions };
   },
 
   /**
@@ -180,16 +180,16 @@ export default {
    */
   renderSettings(settings, onChange) {
     const defaultOptions = this.getDefaultOptions();
-    const settingsConfiguration = this._getSettingsConfiguration(
-      defaultOptions,
-    );
+    const settingsConfiguration =
+      this._getSettingsConfiguration(defaultOptions);
     if (!settingsConfiguration) {
       return null;
     }
 
-    settings = settings == null ?
-      defaultOptions :
-      this._mergeDefaultOptions(settings, defaultOptions);
+    settings =
+      settings == null
+        ? defaultOptions
+        : this._mergeDefaultOptions(settings, defaultOptions);
 
     return (
       <SettingsRenderer

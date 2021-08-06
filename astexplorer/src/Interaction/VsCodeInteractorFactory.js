@@ -1,42 +1,44 @@
 import Interactor from "./Interactor";
 
 const VsCodeStateChangeCallbacks = {
-  getDirectoryInfo: directoryInfo => {}
-}
+  getDirectoryInfo: (directoryInfo) => {},
+};
 
 const VsCodeStateChangeBuffer = {
-  directoryInfo: ""
-}
+  directoryInfo: "",
+};
 
-window.addEventListener('message', event => {
+window.addEventListener("message", (event) => {
   const message = event.data;
 
-  switch(message.command){
-    case 'getDirectoryInfo':
+  switch (message.command) {
+    case "getDirectoryInfo":
       VsCodeStateChangeBuffer.directoryInfo += message.directoryInfo;
-      VsCodeStateChangeCallbacks.getDirectoryInfo(VsCodeStateChangeBuffer.directoryInfo);
-    break;
+      VsCodeStateChangeCallbacks.getDirectoryInfo(
+        VsCodeStateChangeBuffer.directoryInfo
+      );
+      break;
   }
 });
 
 function createFromVsCodeApi(vscode) {
-  Interactor.showInformationMessage = text =>
+  Interactor.showInformationMessage = (text) =>
     vscode.postMessage({
-    command: 'showInformationMessage',
-    text: text
-  });
+      command: "showInformationMessage",
+      text: text,
+    });
 
-  Interactor.getDirectoryInfo = callback => {
+  Interactor.getDirectoryInfo = (callback) => {
     VsCodeStateChangeCallbacks.getDirectoryInfo = callback;
     VsCodeStateChangeBuffer.directoryInfo = "";
-    vscode.postMessage({ command: 'getDirectoryInfo' });
-  }
+    vscode.postMessage({ command: "getDirectoryInfo" });
+  };
 
   return Interactor;
 }
 
 const VsCodeInteractorFactory = {
-  createFromVsCodeApi: vscode => createFromVsCodeApi(vscode)
-}
+  createFromVsCodeApi: (vscode) => createFromVsCodeApi(vscode),
+};
 
 export default VsCodeInteractorFactory;
