@@ -34,9 +34,9 @@ let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
     match Pp_path.get_pp_path ~document with
     | Some path -> (
       match get_preprocessed_ast path with
-      | Ok ast -> (
+      | Ok res -> (
         let pp_code = fetch_pp_code ~document in
-        match ast with
+        match Ppxlib.Ast_io.get_ast res with
         | Impl ppml_structure ->
           let reparsed_structure =
             pp_code |> Lexing.from_string |> Parse.implementation
