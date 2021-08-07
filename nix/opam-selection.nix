@@ -13,8 +13,8 @@ let
         {
           owner = "ocaml";
           repo = "opam-repository";
-          rev = "a794118c21859c28d8ec443d6479eac62cc7fb7f";
-          sha256 = "0bbcbxvhxhab29gpd0rigzr9jx89x94k5miix7xsfl3wgmsr00s6";
+          rev = "5beb78717a8bb4f6d7e87c52f15d762931c6072c";
+          sha256 = "1madrn91bfki7m6xg9x72f3gm9w9b765kzzkbjf2w0b2aqx7cy2m";
         };
         src = (pkgs.fetchFromGitHub) fetch;
       };
@@ -166,16 +166,16 @@ in
       };
       opamSrc = repoPath (repos.opam-repository.src) 
       {
-        hash = "sha256:14avjwn2qy2gy1680jxnklnx7vw93lrw8f6ixhkk8kqkjajapyq4";
-        package = "packages/dune/dune.2.8.5";
+        hash = "sha256:0014dz25yn6m4b5f0m22jncy26ayq9v8zc7pq9rsg28ja1l4shrk";
+        package = "packages/dune/dune.2.9.0";
       };
       pname = "dune";
       src = pkgs.fetchurl 
       {
-        sha256 = "0a9n8ilsi3kyx5xqvk5s7iikk6y3pkpm5mvsn5za5ivlzf1i40br";
-        url = "https://github.com/ocaml/dune/releases/download/2.8.5/dune-2.8.5.tbz";
+        sha256 = "07m476kgagpd6kzm3jq30yfxqspr2hychah0xfqs14z82zxpq8dv";
+        url = "https://github.com/ocaml/dune/releases/download/2.9.0/dune-2.9.0.tbz";
       };
-      version = "2.8.5";
+      version = "2.9.0";
     };
     dune-configurator = 
     {
@@ -188,16 +188,16 @@ in
       };
       opamSrc = repoPath (repos.opam-repository.src) 
       {
-        hash = "sha256:0m0i7fkiin3kmd1x7zzs8yxhbkib2kch49j6hzj9vnsbpkcjhknc";
-        package = "packages/dune-configurator/dune-configurator.2.8.5";
+        hash = "sha256:16pfh5a0myc8j3c3hrmxhjr315xsjcwr4l59sdcxjba004g3v2g9";
+        package = "packages/dune-configurator/dune-configurator.2.9.0";
       };
       pname = "dune-configurator";
       src = pkgs.fetchurl 
       {
-        sha256 = "0a9n8ilsi3kyx5xqvk5s7iikk6y3pkpm5mvsn5za5ivlzf1i40br";
-        url = "https://github.com/ocaml/dune/releases/download/2.8.5/dune-2.8.5.tbz";
+        sha256 = "07m476kgagpd6kzm3jq30yfxqspr2hychah0xfqs14z82zxpq8dv";
+        url = "https://github.com/ocaml/dune/releases/download/2.9.0/dune-2.9.0.tbz";
       };
-      version = "2.8.5";
+      version = "2.9.0";
     };
     easy-format = 
     {
@@ -468,26 +468,6 @@ in
       src = null;
       version = "2";
     };
-    ocaml-migrate-parsetree = 
-    {
-      opamInputs = 
-      {
-        dune = selection.dune;
-        ocaml = selection.ocaml;
-      };
-      opamSrc = repoPath (repos.opam-repository.src) 
-      {
-        hash = "sha256:18cw30az9wgpqjvg7fcdjgxzi294nkxriilan81nxw7bszmhs08l";
-        package = "packages/ocaml-migrate-parsetree/ocaml-migrate-parsetree.2.1.0";
-      };
-      pname = "ocaml-migrate-parsetree";
-      src = pkgs.fetchurl 
-      {
-        sha256 = "07x7lm45kny0mi0fjvzw51445brm0dgy099cw0gpyly0wj77hyrq";
-        url = "https://github.com/ocaml-ppx/ocaml-migrate-parsetree/releases/download/v2.1.0/ocaml-migrate-parsetree-v2.1.0.tbz";
-      };
-      version = "2.1.0";
-    };
     ocamlbuild = 
     {
       opamInputs = {
@@ -573,23 +553,14 @@ in
         dune = selection.dune;
         ocaml = selection.ocaml;
         ocaml-compiler-libs = selection.ocaml-compiler-libs;
-        ocaml-migrate-parsetree = selection.ocaml-migrate-parsetree;
         ppx_derivers = selection.ppx_derivers;
         sexplib0 = selection.sexplib0;
         stdlib-shims = selection.stdlib-shims;
       };
-      opamSrc = repoPath (repos.opam-repository.src) 
-      {
-        hash = "sha256:1v6a2cnpl9ad1yws2725yd0j6wbymv3wyryp93mki0v31iwz93hb";
-        package = "packages/ppxlib/ppxlib.0.22.0";
-      };
+      opamSrc = "ppxlib.opam";
       pname = "ppxlib";
-      src = pkgs.fetchurl 
-      {
-        sha256 = "0ykdp55i6x1a5mbxjlvwcfvs4kvzxqnn2bi2lf224rk677h93sry";
-        url = "https://github.com/ocaml-ppx/ppxlib/releases/download/0.22.0/ppxlib-0.22.0.tbz";
-      };
-      version = "0.22.0";
+      src = self.directSrc "ppxlib";
+      version = "development";
     };
     promise_jsoo = 
     {
