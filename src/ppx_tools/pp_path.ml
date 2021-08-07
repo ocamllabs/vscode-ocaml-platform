@@ -13,9 +13,9 @@ let project_root_path () = Workspace.rootPath ()
 
 let get_kind ~document =
   let relative = relative_document_path ~document in
-  match String.sub ~pos:(String.length relative - 3) ~len:3 relative with
+  match Caml.Filename.extension relative with
   | ".ml" -> Structure
-  | "mli" -> Signature
+  | ".mli" -> Signature
   | _ -> Unknown
 
 let get_pp_path ~(document : TextDocument.t) =
