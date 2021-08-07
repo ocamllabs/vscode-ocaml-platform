@@ -25,14 +25,12 @@ let get_pp_path ~(document : TextDocument.t) =
     let (_ : _ Promise.t) = Window.showErrorMessage ~message:"NONE." () in
     None
   | Some root ->
-    Some
-      (match get_kind ~document with
-      | Structure ->
-        root ^ "/_build/default/"
-        ^ String.sub ~pos:0 ~len:(String.length relative - 2) relative
-        ^ "pp.ml"
-      | Signature ->
-        root ^ "/_build/default/"
-        ^ String.sub ~pos:0 ~len:(String.length relative - 3) relative
-        ^ "pp.mli"
-      | Unknown -> failwith "Unknown file extension")
+    let build_root = "_build/default" in
+    let fname =
+      match get_kind ~document with
+      | Unknown -> failwith "Unknown file extension"
+      | Structure -> String.chop_suffix_exn ~suffix:".ml" relative ^ ".pp.ml"
+      | Signature -> String.chop_suffix_exn ~suffix:".mli" relative ^ "pp.mli"
+    in
+    let ( / ) = Caml.Filename.concat in
+    Some (root / build_root / fname)
