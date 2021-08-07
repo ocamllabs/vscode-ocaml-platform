@@ -21,6 +21,9 @@ let get_kind ~document =
 let get_pp_path ~(document : TextDocument.t) =
   let relative = relative_document_path ~document in
   match project_root_path () with
+  | None ->
+    let (_ : _ Promise.t) = Window.showErrorMessage ~message:"NONE." () in
+    None
   | Some root ->
     Some
       (match get_kind ~document with
@@ -33,7 +36,3 @@ let get_pp_path ~(document : TextDocument.t) =
         ^ String.sub ~pos:0 ~len:(String.length relative - 3) relative
         ^ "pp.mli"
       | Unknown -> failwith "Unknown file extension")
-  | None ->
-    (let _ = Window.showErrorMessage ~message:"NONE." () in
-     ());
-    None
