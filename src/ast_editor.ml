@@ -65,49 +65,43 @@ let onDidChangeTextDocument_listener event ~(document : TextDocument.t)
 
 let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  if Ojs.has_property msg "selectedOutput" then
-    Ast_editor_state.set_original_mode ast_editor_state
-      (Int.of_string
-         (Ojs.string_of_js (Ojs.get_prop_ascii msg "selectedOutput"))
-      = 0)
-  else if Ojs.has_property msg "begin" && Ojs.has_property msg "end" then
-    let cbegin =
-      Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg "begin"))
-    in
-    let cend =
-      Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg "end"))
-    in
-    let apply_selection editor cbegin cend =
-      let document = TextEditor.document editor in
-      let anchor = Vscode.TextDocument.positionAt document ~offset:cbegin in
-      let active = Vscode.TextDocument.positionAt document ~offset:cend in
-      TextEditor.set_selection editor (Selection.makePositions ~anchor ~active);
-      TextEditor.revealRange editor
-        ~range:(Range.makePositions ~start:anchor ~end_:active)
-        ()
-    in
-    Vscode.Window.visibleTextEditors ()
-    |> List.iter ~f:(fun editor ->
-           let visible_doc = TextEditor.document editor in
-           if (* !original_mode && *) document_eq document visible_doc then
-             apply_selection editor cbegin cend
-           else if
-             (* (not !original_mode) && *)
-             (Ast_editor_state.entry_exists ast_editor_state
-                ~origin_doc:(doc_string_uri ~document))
-               ~pp_doc:(doc_string_uri ~document:visible_doc)
-             && Ojs.has_property msg "r_begin"
-             && Ojs.has_property msg "r_end"
-             && not (Ast_editor_state.get_original_mode ast_editor_state)
-           then
-             let rcbegin =
-               Int.of_string
-                 (Ojs.string_of_js (Ojs.get_prop_ascii msg "r_begin"))
-             in
-             let rcend =
-               Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg "r_end"))
-             in
-             apply_selection editor rcbegin rcend)
+  let int_prop name =
+    if Ojs.has_property msg name then
+      Some (Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg name)))
+    else
+      None
+  in
+  match int_prop "selectedOutput" with
+  | Some i -> Ast_editor_state.set_original_mode ast_editor_state (i = 0)
+  | None -> (
+    match Option.both (int_prop "begin") (int_prop "end") with
+    | None -> ()
+    | Some (cbegin, cend) ->
+      let apply_selection editor cbegin cend =
+        let document = TextEditor.document editor in
+        let anchor = Vscode.TextDocument.positionAt document ~offset:cbegin in
+        let active = Vscode.TextDocument.positionAt document ~offset:cend in
+        TextEditor.set_selection editor
+          (Selection.makePositions ~anchor ~active);
+        TextEditor.revealRange editor
+          ~range:(Range.makePositions ~start:anchor ~end_:active)
+          ()
+      in
+      Vscode.Window.visibleTextEditors ()
+      |> List.iter ~f:(fun editor ->
+             let visible_doc = TextEditor.document editor in
+             if (* !original_mode && *) document_eq document visible_doc then
+               apply_selection editor cbegin cend
+             else if
+               (* (not !original_mode) && *)
+               (Ast_editor_state.entry_exists ast_editor_state
+                  ~origin_doc:(doc_string_uri ~document))
+                 ~pp_doc:(doc_string_uri ~document:visible_doc)
+               && not (Ast_editor_state.get_original_mode ast_editor_state)
+             then
+               match Option.both (int_prop "r_begin") (int_prop "r_end") with
+               | None -> ()
+               | Some (rcbegin, rcend) -> apply_selection editor rcbegin rcend))
 
 let on_hover custom_doc webview =
   let hover =
