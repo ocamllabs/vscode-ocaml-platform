@@ -57,8 +57,6 @@ let parse_ast =
         ; ("popen_loc", popen_loc)
         ; ("popen_attributes", popen_attributes)
         ]
-
-   
   end
 
 let warn_ast_diff method_name =
@@ -131,7 +129,8 @@ let reparse_ast =
     method constr label args =
       match args with
       | [] -> Jsonoo.Encode.object_ [ ("type", Jsonoo.Encode.string label) ]
-      | _ -> Jsonoo.Encode.object_ (("type", Jsonoo.Encode.string label) :: args)
+      | _ ->
+        Jsonoo.Encode.object_ (("type", Jsonoo.Encode.string label) :: args)
 
     method char value _ = Jsonoo.Encode.char value
 

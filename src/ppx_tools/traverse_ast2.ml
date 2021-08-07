@@ -61,7 +61,6 @@ class virtual ['res] lift2 =
 
     method location_stack : location_stack -> location_stack -> 'res =
       fun l l' ->
-        
         (*Reparsing adds/removes location_stack*)
         match (l, l') with
         | [], _ :: _ -> self#list self#location l' l'
@@ -699,15 +698,11 @@ class virtual ['res] lift2 =
           self#constr "Pexp_extension" [ ("extension", a) ]
         | Pexp_unreachable, Pexp_unreachable ->
           self#constr "Pexp_unreachable" []
-          (*BEGIN SPECIAL CASES*)
+        (*BEGIN SPECIAL CASES*)
         (* The difference seems to be related to Js_of_ocaml: The typical
-             generated code resulting in this case: 
-             ``` (fun (type res) -> fun
-                    (type t9) -> 
-                      fun (type t8) -> 
-                        fun (t9 : t9 Js_of_ocaml.Js.t) -> ...
-             ``` 
-        *)
+           generated code resulting in this case: ``` (fun (type res) -> fun
+           (type t9) -> fun (type t8) -> fun (t9 : t9 Js_of_ocaml.Js.t) -> ...
+           ``` *)
         | ( Pexp_apply (({ pexp_desc = Pexp_newtype _; _ } as exp1), al_exp_list)
           , Pexp_newtype _ ) ->
           self#expression_desc x
@@ -718,26 +713,22 @@ class virtual ['res] lift2 =
           let a = self#loc self#string a a' in
           let b = self#expression b b' in
           self#constr "Pexp_newtype" [ ("label loc", a); ("expression", b) ]
-        (*Also caused by js_of_ocaml :
-           with following code : 
-        `(Js_of_ocaml.Js.Unsafe.get t0 "QRCode" : res) ` 
-        *)
+        (*Also caused by js_of_ocaml : with following code :
+          `(Js_of_ocaml.Js.Unsafe.get t0 "QRCode" : res) ` *)
         | ( Pexp_constraint (a, b)
           , Pexp_apply ({ pexp_desc = Pexp_constraint (a', b'); _ }, _) ) ->
           let a = self#expression a a' in
           let b = self#core_type b b' in
           self#constr "Pexp_constraint" [ ("expression", a); ("core_type", b) ]
-        (*Caused by : 
-        `let open! ((Ppx_deriving_yojson_runtime)[@ocaml.warning "-A"]) in ... ` 
-        *)
+        (*Caused by : `let open! ((Ppx_deriving_yojson_runtime)[@ocaml.warning
+          "-A"]) in ... ` *)
         | ( Pexp_open (a, b)
           , Pexp_constraint ({ pexp_desc = Pexp_open (a', b'); _ }, _) ) ->
           let a = self#open_declaration a a' in
           let b = self#expression b b' in
           self#constr "Pexp_open" [ ("open_declaration", a); ("expression", b) ]
-        (* Caused by : 
-        `(let open! ((Ppx_deriving_runtime)[@ocaml.warning "-A"])...` 
-        *)
+        (* Caused by : `(let open! ((Ppx_deriving_runtime)[@ocaml.warning
+           "-A"])...` *)
         | ( Pexp_let (a, b, c)
           , Pexp_constraint ({ pexp_desc = Pexp_let (a', b', c'); _ }, _) ) ->
           let a = self#rec_flag a a' in
@@ -772,11 +763,8 @@ class virtual ['res] lift2 =
             ; ("pattern", c)
             ; ("expression", d)
             ]
-        (* Caused by: 
-        ``` fun env -> 
-              fun _visitors_this_0 -> 
-                fun _visitors_this_1 -> ```
-          in opams package morbig/src/CST for instance *)
+        (* Caused by: ``` fun env -> fun _visitors_this_0 -> fun
+           _visitors_this_1 -> ``` in opams package morbig/src/CST for instance *)
         | ( Pexp_fun (a, b, c, d)
           , Pexp_poly ({ pexp_desc = Pexp_fun (a', b', c', d'); _ }, _) ) ->
           let a = self#arg_label a a' in
@@ -789,17 +777,13 @@ class virtual ['res] lift2 =
             ; ("pattern", c)
             ; ("expression", d)
             ]
-        (* Caused by this recurent piece of code:
-               ((fun (type res) ->
-                    fun (type t9) ->
-                      fun (type t8) ->
-                  fun (t9 : t9 Js_of_ocaml.Js.t) ->
-                    fun (t8 : t8) ->
-                      fun (_ : t9 -> < set: t8 -> unit   ;.. >  Js_of_ocaml.Js.gen_prop)
-                -> (Js_of_ocaml.Js.Unsafe.set t9 "config"
-                   (Js_of_ocaml.Js.Unsafe.inject t8) : unit)))
-                (((math : < .. >  Js_of_ocaml.Js.t))[@merlin.hide ])
-                (_s "TeX-AMS_HTML-full") (fun x -> x#config) *)
+        (* Caused by this recurent piece of code: ((fun (type res) -> fun (type
+           t9) -> fun (type t8) -> fun (t9 : t9 Js_of_ocaml.Js.t) -> fun (t8 :
+           t8) -> fun (_ : t9 -> < set: t8 -> unit ;.. >
+           Js_of_ocaml.Js.gen_prop) -> (Js_of_ocaml.Js.Unsafe.set t9 "config"
+           (Js_of_ocaml.Js.Unsafe.inject t8) : unit))) (((math : < .. >
+           Js_of_ocaml.Js.t))[@merlin.hide ]) (_s "TeX-AMS_HTML-full") (fun x ->
+           x#config) *)
         | ( oexpr_desc
           , Pexp_newtype
               ( lloc1
@@ -840,7 +824,7 @@ class virtual ['res] lift2 =
             Pexp_sequence ({ seqexp1 with pexp_desc = normalized_apply }, e2)
           in
           self#expression_desc oexpr_desc normalized_pexp_desc2
-         (*Same as Ppat_tuple, unwrapping singleton*)
+        (*Same as Ppat_tuple, unwrapping singleton*)
         | Pexp_tuple [ exp1 ], pexp_desc' ->
           self#expression_desc x
             (Pexp_tuple [ { exp1 with pexp_desc = pexp_desc' } ])
@@ -1793,8 +1777,7 @@ class virtual ['res] lift2 =
 
     method structure : structure -> structure -> 'res =
       (*Fixme: additional structure item inside ppml (ppx show for instance)*)
-      fun l l' ->
-        self#list self#structure_item l l'
+      fun l l' -> self#list self#structure_item l l'
 
     method structure_item : structure_item -> structure_item -> 'res =
       fun { pstr_desc; pstr_loc }
