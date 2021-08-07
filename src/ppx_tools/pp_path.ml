@@ -30,7 +30,7 @@ let get_pp_path ~(document : TextDocument.t) =
       match get_kind ~document with
       | Unknown -> failwith "Unknown file extension"
       | Structure -> String.chop_suffix_exn ~suffix:".ml" relative ^ ".pp.ml"
-      | Signature -> String.chop_suffix_exn ~suffix:".mli" relative ^ "pp.mli"
+      | Signature -> String.chop_suffix_exn ~suffix:".mli" relative ^ ".pp.mli"
     in
     let ( / ) = Caml.Filename.concat in
     Some (root / build_root / fname)
