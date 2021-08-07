@@ -32,33 +32,24 @@ let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
   let pp_value =
     (*FIXME: adapt according to ppxlibs issue resulution *)
     match Pp_path.get_pp_path ~document with
-    | Some path -> (
-      match get_preprocessed_ast path with
-      | Ok res -> (
-        let pp_code = fetch_pp_code ~document in
-        match Ppxlib.Ast_io.get_ast res with
-        | Impl ppml_structure ->
-          let reparsed_structure =
-            pp_code |> Lexing.from_string |> Parse.implementation
-          in
-          let reparsed_json =
-            Dumpast.reparse ppml_structure reparsed_structure
-          in
-          reparsed_json
-        | Intf signature ->
-          let reparsed_signature =
-            pp_code |> Lexing.from_string |> Parse.interface
-          in
-          let reparsed_json =
-            Dumpast.reparse_signature signature reparsed_signature
-          in
-          reparsed_json)
-      | Error err_msg ->
-        show_message `Error "%s" err_msg;
-        Jsonoo.Encode.null)
     | None ->
       show_message `Error "%s" "project root path wasn't found";
       Jsonoo.Encode.null
+    | Some path -> (
+      match get_preprocessed_ast path with
+      | Error err_msg ->
+        show_message `Error "%s" err_msg;
+        Jsonoo.Encode.null
+      | Ok res -> (
+        let pp_code = fetch_pp_code ~document in
+        let lex = Lexing.from_string pp_code in
+        match Ppxlib.Ast_io.get_ast res with
+        | Impl ppml_structure ->
+          let reparsed_structure = Parse.implementation lex in
+          Dumpast.reparse ppml_structure reparsed_structure
+        | Intf signature ->
+          let reparsed_signature = Parse.interface lex in
+          Dumpast.reparse_signature signature reparsed_signature))
   in
 
   let astpair =
