@@ -104,17 +104,20 @@ let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
                | Some (rcbegin, rcend) -> apply_selection editor rcbegin rcend))
 
 let on_hover custom_doc webview =
-  let hover =
-    Hover.make ~contents:(`MarkdownString (MarkdownString.make ~value:"" ()))
+  let provider =
+    let provideHover ~(document : TextDocument.t) ~(position : Position.t)
+        ~token:_ =
+      let offset = TextDocument.offsetAt document ~position in
+      if document_eq custom_doc document then
+        send_msg "focus" (Ojs.int_to_js offset) ~webview;
+      let hover =
+        Hover.make
+          ~contents:(`MarkdownString (MarkdownString.make ~value:"" ()))
+      in
+      `Value (Some hover)
+    in
+    HoverProvider.create ~provideHover
   in
-  let provideHover ~(document : TextDocument.t) ~(position : Position.t)
-      ~token:_ =
-    let offset = TextDocument.offsetAt document ~position in
-    if document_eq custom_doc document then
-      send_msg "focus" (Ojs.int_to_js offset) ~webview;
-    `Value (Some hover)
-  in
-  let provider = HoverProvider.create ~provideHover in
   Vscode.Languages.registerHoverProvider ~selector:(`String "ocaml") ~provider
 
 let activate_hover_mode instance ~document =
@@ -132,17 +135,17 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
     (Map.set
        (Ast_editor_state.get_webview_map ast_editor_state)
        ~key:(doc_string_uri ~document) ~data:webview);
-  let onDidChangeTextDocument_disposable =
-    Workspace.onDidChangeTextDocument
-      ~listener:(onDidChangeTextDocument_listener ~webview ~document)
-      ()
-  in
-  let onDidReceiveMessage_disposable =
-    WebView.onDidReceiveMessage webview
-      ~listener:(onDidReceiveMessage_listener instance ~document)
-      ()
-  in
   let (_ : Disposable.t) =
+    let onDidReceiveMessage_disposable =
+      WebView.onDidReceiveMessage webview
+        ~listener:(onDidReceiveMessage_listener instance ~document)
+        ()
+    in
+    let onDidChangeTextDocument_disposable =
+      Workspace.onDidChangeTextDocument
+        ~listener:(onDidChangeTextDocument_listener ~webview ~document)
+        ()
+    in
     WebviewPanel.onDidDispose webviewPanel
       ~listener:(fun () ->
         Ast_editor_state.set_original_mode ast_editor_state true;
@@ -251,14 +254,15 @@ let manage_choice instance choice ~document : int Promise.t =
       let open Promise.Syntax in
       let* res = build_cmd () in
       if res.exitCode = 0 then
-        if
-          Map.existsi
-            (Ast_editor_state.get_pp_doc_to_changed_origin_map ast_editor_state)
-            ~f:(fun ~key ~data:_ -> String.equal key (doc_string_uri ~document))
+        (if
+         Map.existsi
+           (Ast_editor_state.get_pp_doc_to_changed_origin_map ast_editor_state)
+           ~f:(fun ~key ~data:_ -> String.equal key (doc_string_uri ~document))
         then
-          reload_pp_doc instance ~document
+          reload_pp_doc
         else
-          open_pp_doc instance ~document
+          open_pp_doc)
+          instance ~document
       else
         let* perror =
           Window.showErrorMessage
@@ -311,14 +315,16 @@ module Command = struct
   let _reveal_ast_node =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
       let (_ : unit Promise.t) =
-        let selection = Vscode.TextEditor.selection textEditor in
         let document = TextEditor.document textEditor in
-        let position = Vscode.Selection.start selection in
-        let ast_editor_state = Extension_instance.ast_editor_state instance in
         let webview_opt =
+          let ast_editor_state = Extension_instance.ast_editor_state instance in
           Ast_editor_state.find_webview_by_doc ast_editor_state ~document
         in
-        let offset = TextDocument.offsetAt document ~position in
+        let offset =
+          let selection = Vscode.TextEditor.selection textEditor in
+          let position = Vscode.Selection.start selection in
+          TextDocument.offsetAt document ~position
+        in
         Promise.make (fun ~resolve:_ ~reject:_ ->
             match webview_opt with
             | Some webview -> send_msg "focus" (Ojs.int_to_js offset) ~webview
@@ -339,15 +345,18 @@ module Command = struct
             let ast_editor_state =
               Extension_instance.ast_editor_state instance
             in
-            match Ast_editor_state.get_hover_disposable ast_editor_state with
-            | Some d ->
-              Disposable.dispose d;
-              Ast_editor_state.set_hover_disposable ast_editor_state None
-            | None ->
-              Ast_editor_state.set_hover_disposable ast_editor_state
-                (Some
-                   (activate_hover_mode instance
-                      ~document:(TextEditor.document textEditor))))
+            let hover_dispoable =
+              match Ast_editor_state.get_hover_disposable ast_editor_state with
+              | Some d ->
+                Disposable.dispose d;
+                None
+              | None ->
+                Some
+                  (activate_hover_mode instance
+                     ~document:(TextEditor.document textEditor))
+            in
+            Ast_editor_state.set_hover_disposable ast_editor_state
+              hover_dispoable)
       in
       ()
     in
@@ -381,8 +390,10 @@ end
 
 let text_document_content_provider_ppx =
   let module EventEmitter = EventEmitter.Make (Uri) in
-  let event_emitter = EventEmitter.make () in
-  let onDidChange = EventEmitter.event event_emitter in
+  let onDidChange =
+    let event_emitter = EventEmitter.make () in
+    EventEmitter.event event_emitter
+  in
   let provideTextDocumentContent ~uri:_ ~token:_ : string ProviderResult.t =
     `Value (Some "")
   in
