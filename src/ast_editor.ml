@@ -78,19 +78,20 @@ let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
       Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg "end"))
     in
     let maybe_pair_editors =
-      List.map (Vscode.Window.visibleTextEditors ()) ~f:(fun editor ->
-          let visible_doc = TextEditor.document editor in
-          if (* !original_mode && *) document_eq document visible_doc then
-            (Some editor, None)
-          else if
-            (* (not !original_mode) && *)
-            (Ast_editor_state.entry_exists ast_editor_state
-               ~origin_doc:(doc_string_uri ~document))
-              ~pp_doc:(doc_string_uri ~document:visible_doc)
-          then
-            (None, Some editor)
-          else
-            (None, None))
+      Vscode.Window.visibleTextEditors ()
+      |> List.map ~f:(fun editor ->
+             let visible_doc = TextEditor.document editor in
+             if (* !original_mode && *) document_eq document visible_doc then
+               (Some editor, None)
+             else if
+               (* (not !original_mode) && *)
+               (Ast_editor_state.entry_exists ast_editor_state
+                  ~origin_doc:(doc_string_uri ~document))
+                 ~pp_doc:(doc_string_uri ~document:visible_doc)
+             then
+               (None, Some editor)
+             else
+               (None, None))
       |> List.filter ~f:(function
            | None, None -> false
            | _ -> true)
@@ -104,8 +105,7 @@ let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
         ~range:(Range.makePositions ~start:anchor ~end_:active)
         ()
     in
-    List.iter
-      ~f:(fun e ->
+    List.iter maybe_pair_editors ~f:(fun e ->
         match e with
         | Some editor, None -> apply_selection editor cbegin cend
         | None, Some editor
@@ -120,7 +120,6 @@ let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
           in
           apply_selection editor rcbegin rcend
         | _ -> ())
-      maybe_pair_editors
 
 let on_hover custom_doc webview =
   let hover =
@@ -247,6 +246,7 @@ let reload_pp_doc instance ~document =
       ~f:(fun editor -> document_eq (TextEditor.document editor) document)
       visibleTextEditors
   with
+  | None -> Promise.resolve 1
   | Some _ ->
     Ast_editor_state.set_origin_changed ast_editor_state
       ~key:(doc_string_uri ~document) ~data:false;
@@ -254,7 +254,6 @@ let reload_pp_doc instance ~document =
       ~content:(fetch_pp_code ~document:original_document)
       ~document;
     Promise.resolve 1
-  | None -> Promise.resolve 1
 
 let manage_choice instance choice ~document : int Promise.t =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
@@ -263,13 +262,13 @@ let manage_choice instance choice ~document : int Promise.t =
     show_message `Error "%s" "Error : project root wasn't found";
     Promise.resolve 1
   | Some root -> (
-    let path = Path.of_string root in
-    let buildCmd () =
-      Cmd.run ~cwd:path (Cmd.Shell "eval $(opam env); dune build")
+    let build_cmd =
+      let cwd = Path.of_string root in
+      fun path -> Cmd.run ~cwd (Cmd.Shell "eval $(opam env); dune build")
     in
     let rec build_project () =
       let open Promise.Syntax in
-      let* res = buildCmd () in
+      let* res = build_cmd () in
       if res.exitCode = 0 then
         if
           Map.existsi
