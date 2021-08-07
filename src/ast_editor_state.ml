@@ -84,20 +84,20 @@ let on_origin_update_content t changed_document =
 
 let get_pp_doc_to_changed_origin_map t = t.pp_doc_to_changed_origin_map
 
-let remove_doc_entries t uri =
-  let origin_uri = Uri.toString (TextDocument.uri uri) () in
-  match Map.find t.origin_to_pp_doc_map origin_uri with
-  | Some uri ->
-    t.pp_doc_to_changed_origin_map <-
-      Map.remove t.pp_doc_to_changed_origin_map uri;
-    t.origin_to_pp_doc_map <- Map.remove t.origin_to_pp_doc_map origin_uri
-  | None ->
-    t.origin_to_pp_doc_map <-
-      Map.filteri
-        ~f:(fun ~key:_ ~data -> not (String.equal data origin_uri))
-        t.origin_to_pp_doc_map;
-    t.pp_doc_to_changed_origin_map <-
-      Map.remove t.pp_doc_to_changed_origin_map origin_uri
+let remove_doc_entries (t : t) uri =
+  let pp_doc_to_changed_origin_map, origin_to_pp_doc_map =
+    let origin_uri = Uri.toString (TextDocument.uri uri) () in
+    match Map.find t.origin_to_pp_doc_map origin_uri with
+    | Some uri ->
+      ( Map.remove t.pp_doc_to_changed_origin_map uri
+      , Map.remove t.origin_to_pp_doc_map origin_uri )
+    | None ->
+      ( Map.remove t.pp_doc_to_changed_origin_map origin_uri
+      , Map.filteri t.origin_to_pp_doc_map ~f:(fun ~key:_ ~data ->
+            not (String.equal data origin_uri)) )
+  in
+  t.pp_doc_to_changed_origin_map <- pp_doc_to_changed_origin_map;
+  t.origin_to_pp_doc_map <- origin_to_pp_doc_map
 
 let set_webview_map t map = t.webview_map <- map
 
