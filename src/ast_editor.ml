@@ -264,7 +264,7 @@ let manage_choice instance choice ~document : int Promise.t =
   | Some root -> (
     let build_cmd =
       let cwd = Path.of_string root in
-      fun path -> Cmd.run ~cwd (Cmd.Shell "eval $(opam env); dune build")
+      fun () -> Cmd.run ~cwd (Cmd.Shell "eval $(opam env); dune build")
     in
     let rec build_project () =
       let open Promise.Syntax in
