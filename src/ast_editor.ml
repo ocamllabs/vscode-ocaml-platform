@@ -77,25 +77,6 @@ let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
     let cend =
       Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg "end"))
     in
-    let maybe_pair_editors =
-      Vscode.Window.visibleTextEditors ()
-      |> List.map ~f:(fun editor ->
-             let visible_doc = TextEditor.document editor in
-             if (* !original_mode && *) document_eq document visible_doc then
-               (Some editor, None)
-             else if
-               (* (not !original_mode) && *)
-               (Ast_editor_state.entry_exists ast_editor_state
-                  ~origin_doc:(doc_string_uri ~document))
-                 ~pp_doc:(doc_string_uri ~document:visible_doc)
-             then
-               (None, Some editor)
-             else
-               (None, None))
-      |> List.filter ~f:(function
-           | None, None -> false
-           | _ -> true)
-    in
     let apply_selection editor cbegin cend =
       let document = TextEditor.document editor in
       let anchor = Vscode.TextDocument.positionAt document ~offset:cbegin in
@@ -105,21 +86,28 @@ let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
         ~range:(Range.makePositions ~start:anchor ~end_:active)
         ()
     in
-    List.iter maybe_pair_editors ~f:(fun e ->
-        match e with
-        | Some editor, None -> apply_selection editor cbegin cend
-        | None, Some editor
-          when Ojs.has_property msg "r_begin"
-               && Ojs.has_property msg "r_end"
-               && not (Ast_editor_state.get_original_mode ast_editor_state) ->
-          let rcbegin =
-            Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg "r_begin"))
-          in
-          let rcend =
-            Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg "r_end"))
-          in
-          apply_selection editor rcbegin rcend
-        | _ -> ())
+    Vscode.Window.visibleTextEditors ()
+    |> List.iter ~f:(fun editor ->
+           let visible_doc = TextEditor.document editor in
+           if (* !original_mode && *) document_eq document visible_doc then
+             apply_selection editor cbegin cend
+           else if
+             (* (not !original_mode) && *)
+             (Ast_editor_state.entry_exists ast_editor_state
+                ~origin_doc:(doc_string_uri ~document))
+               ~pp_doc:(doc_string_uri ~document:visible_doc)
+             && Ojs.has_property msg "r_begin"
+             && Ojs.has_property msg "r_end"
+             && not (Ast_editor_state.get_original_mode ast_editor_state)
+           then
+             let rcbegin =
+               Int.of_string
+                 (Ojs.string_of_js (Ojs.get_prop_ascii msg "r_begin"))
+             in
+             let rcend =
+               Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg "r_end"))
+             in
+             apply_selection editor rcbegin rcend)
 
 let on_hover custom_doc webview =
   let hover =
@@ -242,9 +230,8 @@ let reload_pp_doc instance ~document =
     Workspace.openTextDocument (`Uri (Uri.parse origin_uri ()))
   in
   match
-    List.find
-      ~f:(fun editor -> document_eq (TextEditor.document editor) document)
-      visibleTextEditors
+    List.find visibleTextEditors ~f:(fun editor ->
+        document_eq (TextEditor.document editor) document)
   with
   | None -> Promise.resolve 1
   | Some _ ->
