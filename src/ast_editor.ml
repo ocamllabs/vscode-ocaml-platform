@@ -130,8 +130,6 @@ let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
           apply_selection editor rcbegin rcend
         | _ -> ())
       maybe_pair_editors
-  else
-    ()
 
 let on_hover custom_doc webview =
   let hover =
@@ -141,9 +139,7 @@ let on_hover custom_doc webview =
       ~token:_ =
     let offset = TextDocument.offsetAt document ~position in
     if document_eq custom_doc document then
-      send_msg "focus" (Ojs.int_to_js offset) ~webview
-    else
-      ();
+      send_msg "focus" (Ojs.int_to_js offset) ~webview;
     `Value (Some hover)
   in
   let provider = HoverProvider.create ~provideHover in
@@ -439,7 +435,6 @@ let onDidSaveTextDocument_listener_pp instance document =
 
 let onDidChangeActiveTextEditor_listener instance e =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-
   if not (TextEditor.t_to_js e |> Ojs.is_null) then
     let document = TextEditor.document e in
     match
@@ -451,8 +446,6 @@ let onDidChangeActiveTextEditor_listener instance e =
       let (_ : int Promise.t) = manage_changed_origin instance ~document in
       ()
     | _ -> ()
-  else
-    ()
 
 let close_visible_editors_by_uri uri =
   let f e =
@@ -466,8 +459,6 @@ let close_visible_editors_by_uri uri =
         Vscode.Commands.executeCommand
           ~command:"workbench.action.closeActiveEditor" ~args:[]
       in
-      ()
-    else
       ()
   in
   Window.visibleTextEditors () |> List.iter ~f
