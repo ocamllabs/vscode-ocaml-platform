@@ -12,7 +12,7 @@ pkgs.mkShell {
     yarn
     nodejs-14_x
     gnumake
-    ocamlformat
+    ocamlformat_0_18_0
     ocamlPackages.ocaml-lsp
   ]);
 }
