@@ -25,8 +25,22 @@
 - Add `ocaml.server.construct.useLocalContext` configuration option to turn
   on/off use of local context in `Construct an expression` code action. In other
   words, if turned on, the extension will also construct expressions from
-  currently defined values. Can be used only with OCaml LSP version starting
-  from 1.8.0.
+  currently defined values.
+
+  Example:
+
+  ```ocaml
+  type t = { name: string }
+
+  let john : t =
+    let doe = { name = "John" } in
+    _ (* <- construct is triggered on this typed hole *)
+  ```
+
+  With `Local` mode _on_, the suggested values will include the _local_ variable
+  `doe` along with other expressions such as `{ name = _ }`.
+
+  Note: Can be used only with OCaml LSP version starting from 1.8.0.
 
 ## 1.8.4
 
