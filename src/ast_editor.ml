@@ -269,22 +269,25 @@ let manage_choice instance choice ~document : int Promise.t =
         let* perror =
           Window.showErrorMessage
             ~message:"Building project failed, fix project errors and retry."
-            ~choices:[ ("Retry running `dune build`", 0); ("Abandon", 1) ]
+            ~choices:
+              [ ("Retry running `dune build`", `Build); ("Abandon", `Abandon) ]
             ()
         in
         match perror with
-        | Some 0 -> build_project ()
-        | _ -> Promise.resolve 1
+        | Some `Build -> build_project ()
+        | Some `Abandon -> Promise.resolve 1
+        | _ -> Promise.resolve (-1)
     in
     match choice with
-    | Some 0 -> build_project ()
-    | _ -> Promise.resolve 1)
+    | Some `Build -> build_project ()
+    | Some `Abandon -> Promise.resolve 1
+    | _ -> Promise.resolve (-1))
 
 let manage_open_failure err_msg instance ~document =
   let open Promise.Syntax in
   let* choice =
     Window.showInformationMessage ~message:err_msg
-      ~choices:[ ("Run `dune build`", 0); ("Abandon", 1) ]
+      ~choices:[ ("Run `dune build`", `Build); ("Abandon", `Abandon) ]
       ()
   in
   manage_choice instance choice ~document
@@ -408,7 +411,7 @@ let manage_changed_origin instance ~document =
       ~message:
         "The original document have been changed, would you like to rebuild \
          the project?"
-      ~choices:[ ("Run `dune build`", 0); ("Cancel", 1) ]
+      ~choices:[ ("Run `dune build`", `Build); ("Cancel", `Abandon) ]
       ()
   in
   manage_choice instance choice ~document
