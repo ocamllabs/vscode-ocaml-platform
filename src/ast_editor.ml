@@ -196,21 +196,24 @@ let replace_document_content ~document ~content =
   ()
 
 let open_pp_doc instance ~document =
-  let open Promise.Syntax in
-  let ast_editor_state = Extension_instance.ast_editor_state instance in
-  let pp_pp_str = fetch_pp_code ~document in
-  let* doc =
-    Workspace.openTextDocument
-      (`Uri
-        (Uri.parse ("post-ppx: " ^ TextDocument.fileName document ^ "?") ()))
-  in
-  Ast_editor_state.set_changes_tracking ast_editor_state document doc;
-  replace_document_content ~content:pp_pp_str ~document:doc;
-  let+ (_ : TextEditor.t) =
-    Window.showTextDocument ~document:(`TextDocument doc)
-      ~column:ViewColumn.Beside ()
-  in
-  0
+  try
+    let open Promise.Syntax in
+    let ast_editor_state = Extension_instance.ast_editor_state instance in
+    let pp_pp_str = fetch_pp_code ~document in
+    let* doc =
+      Workspace.openTextDocument
+        (`Uri
+          (Uri.parse ("post-ppx: " ^ TextDocument.fileName document ^ "?") ()))
+    in
+    Ast_editor_state.set_changes_tracking ast_editor_state document doc;
+    replace_document_content ~content:pp_pp_str ~document:doc;
+    let+ (_ : TextEditor.t) =
+      Window.showTextDocument ~document:(`TextDocument doc)
+        ~column:ViewColumn.Beside ()
+    in
+    Ok 0
+  with
+  | Sys_error e -> Promise.return (Error e)
 
 let reload_pp_doc instance ~document =
   let open Promise.Syntax in
@@ -293,8 +296,11 @@ and manage_open_failure err_msg instance ~document =
   manage_choice instance choice ~document
 
 and open_preprocessed_doc_to_the_side instance ~document =
-  try open_pp_doc instance ~document with
-  | Sys_error e -> manage_open_failure e instance ~document
+  let open Promise.Syntax in
+  let* result = open_pp_doc instance ~document in
+  match result with
+  | Ok x -> Promise.return x
+  | Error e -> manage_open_failure e instance ~document
 
 let open_both_ppx_ast instance ~document =
   let open Promise.Syntax in
