@@ -30,7 +30,6 @@ let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
       (Pp_path.get_kind ~document)
   in
   let pp_value =
-    (*FIXME: adapt according to ppxlibs issue resulution *)
     match Pp_path.get_pp_path ~document with
     | None ->
       show_message `Error "%s" "project root path wasn't found";
@@ -126,8 +125,8 @@ let activate_hover_mode instance ~document =
   | Some webview -> on_hover document webview
   | None -> failwith "Webview wasn't found while switching hover mode"
 
-let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
-    ~token:_ : CustomTextEditorProvider.ResolvedEditor.t =
+let resolveCustomTextEditor extension instance ~(document : TextDocument.t)
+    ~webviewPanel ~token:_ : CustomTextEditorProvider.ResolvedEditor.t =
   let webview = WebviewPanel.webview webviewPanel in
   (*persist the webview*)
   let ast_editor_state = Extension_instance.ast_editor_state instance in
@@ -135,7 +134,7 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
     (Map.set
        (Ast_editor_state.get_webview_map ast_editor_state)
        ~key:(doc_string_uri ~document) ~data:webview);
-  let (_ : Disposable.t) =
+  let (disposable : Disposable.t) =
     let onDidReceiveMessage_disposable =
       WebView.onDidReceiveMessage webview
         ~listener:(onDidReceiveMessage_listener instance ~document)
@@ -153,6 +152,7 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
         Disposable.dispose onDidChangeTextDocument_disposable)
       ()
   in
+  Vscode.ExtensionContext.subscribe extension ~disposable;
   transform_to_ast ~document ~webview;
   let options = WebView.options webview in
   WebviewOptions.set_enableScripts options true;
@@ -450,15 +450,15 @@ let onDidCloseTextDocument_listener instance (document : TextDocument.t) =
   Ast_editor_state.remove_doc_entries ast_editor_state document;
   close_visible_editors_by_uri (Uri.toString (TextDocument.uri document) ())
 
-let register extension _instance =
+let register extension instance =
   let editorProvider =
     `CustomEditorProvider
       (CustomTextEditorProvider.create
-         ~resolveCustomTextEditor:(resolveCustomTextEditor _instance))
+         ~resolveCustomTextEditor:(resolveCustomTextEditor extension instance))
   in
   let disposable =
     Window.onDidChangeActiveTextEditor ()
-      ~listener:(onDidChangeActiveTextEditor_listener _instance)
+      ~listener:(onDidChangeActiveTextEditor_listener instance)
       ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable;
@@ -470,7 +470,7 @@ let register extension _instance =
   Vscode.ExtensionContext.subscribe extension ~disposable;
   let disposable =
     Workspace.onDidCloseTextDocument
-      ~listener:(onDidCloseTextDocument_listener _instance)
+      ~listener:(onDidCloseTextDocument_listener instance)
       ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable;
@@ -481,7 +481,7 @@ let register extension _instance =
   Vscode.ExtensionContext.subscribe extension ~disposable;
   let disposable =
     Workspace.onDidSaveTextDocument
-      ~listener:(onDidSaveTextDocument_listener_pp _instance)
+      ~listener:(onDidSaveTextDocument_listener_pp instance)
       ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable
