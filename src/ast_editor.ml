@@ -123,7 +123,9 @@ let activate_hover_mode instance ~document =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   match Ast_editor_state.find_webview_by_doc ast_editor_state ~document with
   | Some webview -> on_hover document webview
-  | None -> failwith "Webview wasn't found while switching hover mode"
+  | None ->
+    show_message `Error "Webview wasn't found while switching hover mode";
+    failwith "Webview wasn't found while switching hover mode"
 
 let resolveCustomTextEditor extension instance ~(document : TextDocument.t)
     ~webviewPanel ~token:_ : CustomTextEditorProvider.ResolvedEditor.t =
