@@ -1,5 +1,16 @@
 open Ppxlib
 
+(* This exception occurs when two AST ( the first is the preprocessed one, read
+   from binary file and the second is the result of reparsing the Pprintast of
+   the first one.) contain structural differences due to the fact that the same
+   code can have multiple AST representation. Basic example of such difference
+   is `Pexp_tuple [el]` (singleton tuple) which gives `(pprintast_value_of_el)`
+   when pretty printing and is reparsed to just `el` since brackets are simply
+   ignored. For all (known) difference cases, refer to the end of
+   `expression_desc` and `pattern_desc` methods. The string value of the
+   exception carries the name of the method indicating the algebraic type where
+   the (yet unkown) difference has occured which might help with further
+   debugging - c.f. https://github.com/arozovyk/ast_diff *)
 exception Reparse_error of string
 
 class virtual ['res] lift2 =
@@ -749,7 +760,8 @@ class virtual ['res] lift2 =
             ; ("pattern", c)
             ; ("expression", d)
             ]
-        (*Caused by: `fun x -> Ppx_deriving_runtime.Format.asprintf "%a" pp x ` *)
+        (*Caused by: `fun x -> Ppx_deriving_runtime.Format.asprintf "%a" pp x
+          ` *)
         | ( Pexp_fun (a, b, c, d)
           , Pexp_constraint ({ pexp_desc = Pexp_fun (a', b', c', d'); _ }, _) )
           ->
@@ -764,7 +776,8 @@ class virtual ['res] lift2 =
             ; ("expression", d)
             ]
         (* Caused by: ``` fun env -> fun _visitors_this_0 -> fun
-           _visitors_this_1 -> ``` in opams package morbig/src/CST for instance *)
+           _visitors_this_1 -> ``` in opams package morbig/src/CST for
+           instance *)
         | ( Pexp_fun (a, b, c, d)
           , Pexp_poly ({ pexp_desc = Pexp_fun (a', b', c', d'); _ }, _) ) ->
           let a = self#arg_label a a' in
