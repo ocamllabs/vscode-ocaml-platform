@@ -1,11 +1,21 @@
 open Import
 
 type t =
-  { mutable webview_map : (string, WebView.t, String.comparator_witness) Map.t
+  { (* The webview store that maps string value of Uri.t of the document to the
+       related webview. *)
+    mutable webview_map : (string, WebView.t, String.comparator_witness) Map.t
+        (* Indicates current mode inside AST explorer (true = Original, false =
+           Prerocessed) *)
   ; mutable original_mode : bool
+        (* Contains Some value when hover mode is enabled, None otherwise *)
   ; mutable hover_disposable : Disposable.t option
+        (* Mapping between string value of Uri.t of the original (non
+           preprocessed) document to boolean, indicating that the document has
+           changed since opening its Preprocessed Document *)
   ; mutable pp_doc_to_changed_origin_map :
       (string, bool, String.comparator_witness) Map.t
+        (* Mapping beween the original and Preprocessed Document used to
+           simultaneously communicate with a common webview. *)
   ; mutable origin_to_pp_doc_map :
       (string, string, String.comparator_witness) Map.t
   }
