@@ -25,8 +25,7 @@ let make () =
 
 let find_original_doc_by_pp_uri ~uri_string map =
   let r =
-    Map.filteri ~f:(fun ~key:_ ~data -> String.equal uri_string data) map
-    |> Map.to_alist |> List.unzip |> fst
+    Map.filter ~f:(fun data -> String.equal uri_string data) map |> Map.keys
   in
   match r with
   | k :: _ -> Some k
