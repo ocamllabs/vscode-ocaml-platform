@@ -196,10 +196,11 @@ let replace_document_content ~document ~content =
   ()
 
 let open_pp_doc instance ~document =
-  try
-    let open Promise.Syntax in
-    let ast_editor_state = Extension_instance.ast_editor_state instance in
-    let pp_pp_str = fetch_pp_code ~document in
+  let open Promise.Syntax in
+  let ast_editor_state = Extension_instance.ast_editor_state instance in
+  match fetch_pp_code ~document with
+  | exception Sys_error e -> Promise.return (Error e)
+  | pp_pp_str ->
     let* doc =
       Workspace.openTextDocument
         (`Uri
@@ -212,8 +213,6 @@ let open_pp_doc instance ~document =
         ~column:ViewColumn.Beside ()
     in
     Ok 0
-  with
-  | Sys_error e -> Promise.return (Error e)
 
 let reload_pp_doc instance ~document =
   let open Promise.Syntax in
