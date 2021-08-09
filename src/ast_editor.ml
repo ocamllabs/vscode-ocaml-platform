@@ -241,7 +241,7 @@ let reload_pp_doc instance ~document =
       ~document;
     Promise.resolve 1
 
-let manage_choice instance choice ~document : int Promise.t =
+let rec manage_choice instance choice ~document : int Promise.t =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   match Ppx_tools.Pp_path.project_root_path () with
   | None ->
@@ -263,7 +263,7 @@ let manage_choice instance choice ~document : int Promise.t =
         then
           reload_pp_doc
         else
-          open_pp_doc)
+          open_preprocessed_doc_to_the_side)
           instance ~document
       else
         let* perror =
@@ -283,7 +283,7 @@ let manage_choice instance choice ~document : int Promise.t =
     | Some `Abandon -> Promise.resolve 1
     | _ -> Promise.resolve (-1))
 
-let manage_open_failure err_msg instance ~document =
+and manage_open_failure err_msg instance ~document =
   let open Promise.Syntax in
   let* choice =
     Window.showInformationMessage ~message:err_msg
@@ -292,7 +292,7 @@ let manage_open_failure err_msg instance ~document =
   in
   manage_choice instance choice ~document
 
-let open_preprocessed_doc_to_the_side instance ~document =
+and open_preprocessed_doc_to_the_side instance ~document =
   try open_pp_doc instance ~document with
   | Sys_error e -> manage_open_failure e instance ~document
 
