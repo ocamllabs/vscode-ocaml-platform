@@ -60,20 +60,14 @@ let parse_ast =
   end
 
 let warn_ast_diff method_name =
-  let open Promise.Syntax in
-  let (_ : unit Promise.t) =
-    let+ (_ : 'a option) =
-      Vscode.Window.showErrorMessage
-        ~message:
-          ("Unable to match the original AST with the reparsed one starting \
-            at  " ^ method_name)
-        ()
-    in
-    ()
+  let (_ : _ Promise.t) =
+    Vscode.Window.showErrorMessage
+      ~message:
+        ("Unable to match the original AST with the reparsed one starting at  "
+       ^ method_name)
+      ()
   in
   ()
-
-(*TODO: open an issue explaining the context.*)
 
 let reparse_ast =
   let open Traverse_ast2 in
@@ -129,8 +123,7 @@ let reparse_ast =
     method constr label args =
       match args with
       | [] -> Jsonoo.Encode.object_ [ ("type", Jsonoo.Encode.string label) ]
-      | _ ->
-        Jsonoo.Encode.object_ (("type", Jsonoo.Encode.string label) :: args)
+      | _ -> Jsonoo.Encode.object_ (("type", Jsonoo.Encode.string label) :: args)
 
     method char value _ = Jsonoo.Encode.char value
 
@@ -385,11 +378,11 @@ let transform source kind =
       parse_ast#signature v
     | Unknown -> Jsonoo.Encode.string "Unknown file extension"
   with
-  | _ -> Jsonoo.Encode.string "Syntax error"
+  | Syntaxerr.Error _ -> Jsonoo.Encode.null
 
 let from_structure (structure : Parsetree.structure) =
   try parse_ast#structure structure with
-  | _ -> Jsonoo.Encode.string "Syntax error"
+  | Syntaxerr.Error _ -> Jsonoo.Encode.null
 
 let reparse s s' = reparse_ast#structure s s'
 
