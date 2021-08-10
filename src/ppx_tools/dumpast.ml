@@ -70,15 +70,14 @@ let warn_ast_diff method_name =
   ()
 
 let reparse_ast =
-  let open Traverse_ast2 in
   let with_reparse f on_reparse =
     try f () with
-    | Reparse_error m ->
+    | Traverse_ast2.Reparse_error m ->
       warn_ast_diff m;
       on_reparse ()
   in
   object (self)
-    inherit [Jsonoo.t] lift2 as super
+    inherit [Jsonoo.t] Traverse_ast2.lift2 as super
 
     method unit () = Jsonoo.Encode.null
 

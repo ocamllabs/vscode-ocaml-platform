@@ -760,8 +760,7 @@ class virtual ['res] lift2 =
             ; ("pattern", c)
             ; ("expression", d)
             ]
-        (*Caused by: `fun x -> Ppx_deriving_runtime.Format.asprintf "%a" pp x
-          ` *)
+        (*Caused by: `fun x -> Ppx_deriving_runtime.Format.asprintf "%a" pp x ` *)
         | ( Pexp_fun (a, b, c, d)
           , Pexp_constraint ({ pexp_desc = Pexp_fun (a', b', c', d'); _ }, _) )
           ->
@@ -776,8 +775,7 @@ class virtual ['res] lift2 =
             ; ("expression", d)
             ]
         (* Caused by: ``` fun env -> fun _visitors_this_0 -> fun
-           _visitors_this_1 -> ``` in opams package morbig/src/CST for
-           instance *)
+           _visitors_this_1 -> ``` in opams package morbig/src/CST for instance *)
         | ( Pexp_fun (a, b, c, d)
           , Pexp_poly ({ pexp_desc = Pexp_fun (a', b', c', d'); _ }, _) ) ->
           let a = self#arg_label a a' in
