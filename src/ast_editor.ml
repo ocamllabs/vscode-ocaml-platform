@@ -15,8 +15,20 @@ let send_msg t value ~(webview : WebView.t) =
   let (_ : bool Promise.t) = WebView.postMessage webview msg in
   ()
 
+let get_reparsed_code_from_pp_file ~document =
+  match Ppx_tools.Pp_path.get_pp_path ~document with
+  | None -> Error "Error : path to preprocessed document wasn't found"
+  | Some pp_path ->
+    Ppx_tools.get_preprocessed_ast pp_path
+    |> Result.map ~f:(fun res ->
+           match Ppxlib.Ast_io.get_ast res with
+           | Impl structure ->
+             Caml.Format.asprintf "%a" Pprintast.structure structure
+           | Intf signature ->
+             Caml.Format.asprintf "%a" Pprintast.signature signature)
+
 let fetch_pp_code ~document =
-  match Ppx_tools.get_reparsed_code_from_pp_file ~document with
+  match get_reparsed_code_from_pp_file ~document with
   | Ok code -> code
   | Error err_msg ->
     show_message `Error "%s" err_msg;
