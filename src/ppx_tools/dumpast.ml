@@ -340,14 +340,13 @@ let reparse_ast =
 
 let transform source kind =
   try
-    match (kind : Pp_path.kind) with
-    | Structure ->
+    match kind with
+    | `Impl ->
       let v = Parse.implementation (Lexing.from_string source) in
       parse_ast#structure v
-    | Signature ->
+    | `Intf ->
       let v = Parse.interface (Lexing.from_string source) in
       parse_ast#signature v
-    | Unknown -> Jsonoo.Encode.string "Unknown file extension"
   with
   | Syntaxerr.Error _ -> Jsonoo.Encode.null
 

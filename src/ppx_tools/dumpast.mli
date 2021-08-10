@@ -1,4 +1,4 @@
-val transform : string -> Pp_path.kind -> Jsonoo.t
+val transform : string -> [ `Intf | `Impl ] -> Jsonoo.t
 
 val from_structure : Parsetree.structure -> Jsonoo.t
 

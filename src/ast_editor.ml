@@ -25,9 +25,11 @@ let fetch_pp_code ~document =
 let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
   let open Ppx_tools in
   let origin_json =
-    Dumpast.transform
-      (TextDocument.getText document ())
-      (Pp_path.get_kind ~document)
+    let text = TextDocument.getText document () in
+    match Pp_path.get_kind ~document with
+    | Structure -> Dumpast.transform text `Impl
+    | Signature -> Dumpast.transform text `Intf
+    | Unknown -> Jsonoo.Encode.string "Unknown file extension"
   in
   let pp_value =
     match Pp_path.get_pp_path ~document with
