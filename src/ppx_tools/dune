@@ -1,4 +1,4 @@
 (library
  (name ppx_tools)
- (libraries base vscode ppxlib)
+ (libraries base vscode jsonoo promise_jsoo ppxlib)
  (modes byte))
