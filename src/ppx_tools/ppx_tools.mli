@@ -1,9 +1,5 @@
 open Vscode
 
-module Traverse_ast : module type of Traverse_ast
-
-module Traverse_ast2 : module type of Traverse_ast2
-
 module Dumpast : module type of Dumpast
 
 module Pp_path : module type of Pp_path

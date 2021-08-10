@@ -1,6 +1,4 @@
 open Base
-module Traverse_ast = Traverse_ast
-module Traverse_ast2 = Traverse_ast2
 module Dumpast = Dumpast
 module Pp_path = Pp_path
 
