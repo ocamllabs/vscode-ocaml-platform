@@ -71,6 +71,12 @@ let warn_ast_diff method_name =
 
 let reparse_ast =
   let open Traverse_ast2 in
+  let with_reparse f on_reparse =
+    try f () with
+    | Reparse_error m ->
+      warn_ast_diff m;
+      on_reparse ()
+  in
   object (self)
     inherit [Jsonoo.t] lift2 as super
 
@@ -123,7 +129,8 @@ let reparse_ast =
     method constr label args =
       match args with
       | [] -> Jsonoo.Encode.object_ [ ("type", Jsonoo.Encode.string label) ]
-      | _ -> Jsonoo.Encode.object_ (("type", Jsonoo.Encode.string label) :: args)
+      | _ ->
+        Jsonoo.Encode.object_ (("type", Jsonoo.Encode.string label) :: args)
 
     method char value _ = Jsonoo.Encode.char value
 
@@ -162,208 +169,174 @@ let reparse_ast =
         ]
 
     method! directive_argument_desc x x' =
-      try super#directive_argument_desc x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#directive_argument_desc x
+      with_reparse
+        (fun () -> super#directive_argument_desc x x')
+        (fun () -> parse_ast#directive_argument_desc x)
 
     method! toplevel_phrase x x' =
-      try super#toplevel_phrase x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#toplevel_phrase x
+      with_reparse
+        (fun () -> super#toplevel_phrase x x')
+        (fun () -> parse_ast#toplevel_phrase x)
 
     method! structure_item_desc x x' =
-      try super#structure_item_desc x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#structure_item_desc x
+      with_reparse
+        (fun () -> super#structure_item_desc x x')
+        (fun () -> parse_ast#structure_item_desc x)
 
     method! module_expr_desc x x' =
-      try super#module_expr_desc x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#module_expr_desc x
+      with_reparse
+        (fun () -> super#module_expr_desc x x')
+        (fun () -> parse_ast#module_expr_desc x)
 
     method! with_constraint x x' =
-      try super#with_constraint x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#with_constraint x
+      with_reparse
+        (fun () -> super#with_constraint x x')
+        (fun () -> parse_ast#with_constraint x)
 
     method! signature_item_desc x x' =
-      try super#signature_item_desc x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#signature_item_desc x
+      with_reparse
+        (fun () -> super#signature_item_desc x x')
+        (fun () -> parse_ast#signature_item_desc x)
 
     method! functor_parameter x x' =
-      try super#functor_parameter x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#functor_parameter x
+      with_reparse
+        (fun () -> super#functor_parameter x x')
+        (fun () -> parse_ast#functor_parameter x)
 
     method! module_type_desc x x' =
-      try super#module_type_desc x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#module_type_desc x
+      with_reparse
+        (fun () -> super#module_type_desc x x')
+        (fun () -> parse_ast#module_type_desc x)
 
     method! class_field_kind x x' =
-      try super#class_field_kind x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#class_field_kind x
+      with_reparse
+        (fun () -> super#class_field_kind x x')
+        (fun () -> parse_ast#class_field_kind x)
 
     method! class_field_desc x x' =
-      try super#class_field_desc x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#class_field_desc x
+      with_reparse
+        (fun () -> super#class_field_desc x x')
+        (fun () -> parse_ast#class_field_desc x)
 
     method! class_expr_desc x x' =
-      try super#class_expr_desc x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#class_expr_desc x
+      with_reparse
+        (fun () -> super#class_expr_desc x x')
+        (fun () -> parse_ast#class_expr_desc x)
 
     method! class_type_field_desc x x' =
-      try super#class_type_field_desc x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#class_type_field_desc x
+      with_reparse
+        (fun () -> super#class_type_field_desc x x')
+        (fun () -> parse_ast#class_type_field_desc x)
 
     method! class_type_desc x x' =
-      try super#class_type_desc x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#class_type_desc x
+      with_reparse
+        (fun () -> super#class_type_desc x x')
+        (fun () -> parse_ast#class_type_desc x)
 
     method! extension_constructor_kind x x' =
-      try super#extension_constructor_kind x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#extension_constructor_kind x
+      with_reparse
+        (fun () -> super#extension_constructor_kind x x')
+        (fun () -> parse_ast#extension_constructor_kind x)
 
     method! constructor_arguments x x' =
-      try super#constructor_arguments x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#constructor_arguments x
+      with_reparse
+        (fun () -> super#constructor_arguments x x')
+        (fun () -> parse_ast#constructor_arguments x)
 
     method! type_kind x x' =
-      try super#type_kind x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#type_kind x
+      with_reparse
+        (fun () -> super#type_kind x x')
+        (fun () -> parse_ast#type_kind x)
 
     method! expression_desc x x' =
-      try super#expression_desc x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#expression_desc x
+      with_reparse
+        (fun () -> super#expression_desc x x')
+        (fun () -> parse_ast#expression_desc x)
 
     method! pattern_desc x x' =
-      try super#pattern_desc x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#pattern_desc x
+      with_reparse
+        (fun () -> super#pattern_desc x x')
+        (fun () -> parse_ast#pattern_desc x)
 
     method! object_field_desc x x' =
-      try super#object_field_desc x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#object_field_desc x
+      with_reparse
+        (fun () -> super#object_field_desc x x')
+        (fun () -> parse_ast#object_field_desc x)
 
     method! row_field_desc x x' =
-      try super#row_field_desc x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#row_field_desc x
+      with_reparse
+        (fun () -> super#row_field_desc x x')
+        (fun () -> parse_ast#row_field_desc x)
 
     method! core_type_desc x x' =
-      try super#core_type_desc x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#core_type_desc x
+      with_reparse
+        (fun () -> super#core_type_desc x x')
+        (fun () -> parse_ast#core_type_desc x)
 
     method! payload x x' =
-      try super#payload x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#payload x
+      with_reparse
+        (fun () -> super#payload x x')
+        (fun () -> parse_ast#payload x)
 
     method! constant x x' =
-      try super#constant x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#constant x
+      with_reparse
+        (fun () -> super#constant x x')
+        (fun () -> parse_ast#constant x)
 
     method! injectivity x x' =
-      try super#injectivity x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#injectivity x
+      with_reparse
+        (fun () -> super#injectivity x x')
+        (fun () -> parse_ast#injectivity x)
 
     method! arg_label x x' =
-      try super#arg_label x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#arg_label x
+      with_reparse
+        (fun () -> super#arg_label x x')
+        (fun () -> parse_ast#arg_label x)
 
     method! variance x x' =
-      try super#variance x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#variance x
+      with_reparse
+        (fun () -> super#variance x x')
+        (fun () -> parse_ast#variance x)
 
     method! closed_flag x x' =
-      try super#closed_flag x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#closed_flag x
+      with_reparse
+        (fun () -> super#closed_flag x x')
+        (fun () -> parse_ast#closed_flag x)
 
     method! override_flag x x' =
-      try super#override_flag x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#override_flag x
+      with_reparse
+        (fun () -> super#override_flag x x')
+        (fun () -> parse_ast#override_flag x)
 
     method! virtual_flag x x' =
-      try super#virtual_flag x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#virtual_flag x
+      with_reparse
+        (fun () -> super#virtual_flag x x')
+        (fun () -> parse_ast#virtual_flag x)
 
     method! mutable_flag x x' =
-      try super#mutable_flag x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#mutable_flag x
+      with_reparse
+        (fun () -> super#mutable_flag x x')
+        (fun () -> parse_ast#mutable_flag x)
 
     method! private_flag x x' =
-      try super#private_flag x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#private_flag x
+      with_reparse
+        (fun () -> super#private_flag x x')
+        (fun () -> parse_ast#private_flag x)
 
     method! direction_flag x x' =
-      try super#direction_flag x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#direction_flag x
+      with_reparse
+        (fun () -> super#direction_flag x x')
+        (fun () -> parse_ast#direction_flag x)
 
     method! rec_flag x x' =
-      try super#rec_flag x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#rec_flag x
+      with_reparse
+        (fun () -> super#rec_flag x x')
+        (fun () -> parse_ast#rec_flag x)
 
     method! longident x x' =
-      try super#longident x x' with
-      | Reparse_error m ->
-        warn_ast_diff m;
-        parse_ast#longident x
+      with_reparse
+        (fun () -> super#longident x x')
+        (fun () -> parse_ast#longident x)
   end
 
 let transform source kind =
