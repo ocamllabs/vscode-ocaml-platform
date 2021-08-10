@@ -339,9 +339,8 @@ let reparse_ast =
   end
 
 let transform source kind =
-  let open Pp_path in
   try
-    match kind with
+    match (kind : Pp_path.kind) with
     | Structure ->
       let v = Parse.implementation (Lexing.from_string source) in
       parse_ast#structure v
