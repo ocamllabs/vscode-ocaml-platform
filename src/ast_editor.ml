@@ -15,24 +15,66 @@ let send_msg t value ~(webview : WebView.t) =
   let (_ : bool Promise.t) = WebView.postMessage webview msg in
   ()
 
-let get_reparsed_code_from_pp_file ~document =
-  match Ppx_tools.Pp_path.get_pp_path ~document with
-  | None -> Error "Error : path to preprocessed document wasn't found"
-  | Some pp_path ->
-    Ppx_tools.get_preprocessed_ast pp_path
-    |> Result.map ~f:(fun res ->
-           match Ppxlib.Ast_io.get_ast res with
-           | Impl structure ->
-             Caml.Format.asprintf "%a" Pprintast.structure structure
-           | Intf signature ->
-             Caml.Format.asprintf "%a" Pprintast.signature signature)
+module Pp_path : sig
+  type kind =
+    | Structure
+    | Signature
+    | Unknown
+
+  val project_root_path : unit -> string option
+
+  val get_kind : document:TextDocument.t -> kind
+
+  val get_pp_path : document:TextDocument.t -> string option
+end = struct
+  type kind =
+    | Structure
+    | Signature
+    | Unknown
+
+  let relative_document_path ~document =
+    Workspace.asRelativePath ~pathOrUri:(`Uri (TextDocument.uri document)) ()
+
+  let project_root_path () = Workspace.rootPath ()
+
+  let get_kind ~document =
+    let relative = relative_document_path ~document in
+    match Caml.Filename.extension relative with
+    | ".ml" -> Structure
+    | ".mli" -> Signature
+    | _ -> Unknown
+
+  let get_pp_path ~(document : TextDocument.t) =
+    let relative = relative_document_path ~document in
+    match project_root_path () with
+    | None ->
+      let (_ : _ Promise.t) = Window.showErrorMessage ~message:"NONE." () in
+      None
+    | Some root ->
+      let build_root = "_build/default" in
+      let fname =
+        match get_kind ~document with
+        | Unknown -> failwith "Unknown file extension"
+        | Structure -> String.chop_suffix_exn ~suffix:".ml" relative ^ ".pp.ml"
+        | Signature ->
+          String.chop_suffix_exn ~suffix:".mli" relative ^ ".pp.mli"
+      in
+      let ( / ) = Caml.Filename.concat in
+      Some (root / build_root / fname)
+end
 
 let fetch_pp_code ~document =
-  match get_reparsed_code_from_pp_file ~document with
-  | Ok code -> code
-  | Error err_msg ->
-    show_message `Error "%s" err_msg;
+  match Pp_path.get_pp_path ~document with
+  | None ->
+    show_message `Error "Unable to find preprocessed file for %s"
+      (Uri.toString (TextDocument.uri document) ());
     ""
+  | Some path -> (
+    match Ppx_tools.get_reparsed_code_from_pp_file ~path with
+    | Ok code -> code
+    | Error err_msg ->
+      show_message `Error "%s" err_msg;
+      "")
 
 let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
   let open Ppx_tools in
@@ -259,7 +301,7 @@ let reload_pp_doc instance ~document =
 
 let rec manage_choice instance choice ~document : int Promise.t =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  match Ppx_tools.Pp_path.project_root_path () with
+  match Pp_path.project_root_path () with
   | None ->
     show_message `Error "%s" "Error : project root wasn't found";
     Promise.resolve 1
