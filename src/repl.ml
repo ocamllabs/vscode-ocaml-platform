@@ -124,6 +124,17 @@ let user_picks_terminal ~include_create_new_terminal () =
   in
   Window.showQuickPickItems ~choices ~options ()
 
+let explain_unix_shell_exit_code ?command ~code () : string option =
+  let fmted_cmd =
+    Option.value_map command ~default:"" ~f:(fun c -> Printf.sprintf "'%s' " c)
+  in
+  let fmted_msg msg = Some (Printf.sprintf msg fmted_cmd) in
+  match code with
+  | 126 -> fmted_msg "Command %scannot execute"
+  | 127 -> fmted_msg "Command %snot found"
+  | 130 -> fmted_msg "Command %sterminated by 'control+c'"
+  | _ -> None
+
 (** opens a terminal containing the REPL either by creating a new terminal or
     showing the existing one *)
 let open_terminal instance sandbox : Terminal.t Or_error.t Promise.t =
@@ -185,10 +196,27 @@ let open_terminal instance sandbox : Terminal.t Or_error.t Promise.t =
          https://github.com/microsoft/vscode-python/blob/main/src/client/terminals/codeExecution/terminalCodeExecution.ts#L54 *)
       let+ () = Node.set_timeout 2500 in
       match Terminal.exitStatus terminal with
-      | Some _ -> Error "The REPL terminal could not be open"
       | None ->
         Extension_instance.set_repl instance (Some terminal);
-        Ok terminal))
+        Ok terminal
+      | Some exit_status -> (
+        let default_err =
+          Error "a terminal for REPL could not be open for some reason"
+        in
+        match Platform.t with
+        | Platform.Win32
+        | Other ->
+          default_err
+        | Darwin
+        | Linux -> (
+          match TerminalExitStatus.code exit_status with
+          | None -> default_err
+          | Some 0 -> default_err
+          | Some code ->
+            (* TODO: add ~command to [explain] fn *)
+            Option.map (explain_unix_shell_exit_code ~code ()) ~f:(fun e ->
+                Error e)
+            |> Option.value ~default:default_err))))
 
 (** returns selected code; returns [None] if nothing is selected, i.e.,
     selection start and end are same *)
