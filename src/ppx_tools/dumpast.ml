@@ -349,16 +349,21 @@ let transform source kind =
     match kind with
     | `Impl ->
       let v = Parse.implementation (Lexing.from_string source) in
-      parse_ast#structure v
+      Ok (parse_ast#structure v)
     | `Intf ->
       let v = Parse.interface (Lexing.from_string source) in
-      parse_ast#signature v
+      Ok (parse_ast#signature v)
   with
-  | Syntaxerr.Error _ -> Jsonoo.Encode.null
+  | Syntaxerr.Error e ->
+    (*TODO output the error in AST explorer*)
+    Error
+      (Caml.Format.asprintf "%a" Location.print (Syntaxerr.location_of_error e))
 
 let from_structure (structure : Parsetree.structure) =
-  try parse_ast#structure structure with
-  | Syntaxerr.Error _ -> Jsonoo.Encode.null
+  try Ok (parse_ast#structure structure) with
+  | Syntaxerr.Error e ->
+    Error
+      (Caml.Format.asprintf "%a" Location.print (Syntaxerr.location_of_error e))
 
 let reparse s s' = reparse_ast#structure s s'
 

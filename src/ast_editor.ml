@@ -81,8 +81,14 @@ let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
   let origin_json =
     let text = TextDocument.getText document () in
     match Pp_path.get_kind ~document with
-    | Structure -> Dumpast.transform text `Impl
-    | Signature -> Dumpast.transform text `Intf
+    | Structure -> (
+      match Dumpast.transform text `Impl with
+      | Ok res -> res
+      | Error msg -> Jsonoo.Encode.string msg)
+    | Signature -> (
+      match Dumpast.transform text `Intf with
+      | Ok res -> res
+      | Error msg -> Jsonoo.Encode.string msg)
     | Unknown -> Jsonoo.Encode.string "Unknown file extension"
   in
   let pp_value =
