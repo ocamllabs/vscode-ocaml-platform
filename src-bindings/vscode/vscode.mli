@@ -277,6 +277,8 @@ module Selection : sig
     -> activeCharacter:int
     -> t
 
+  val isEmpty : t -> bool
+
   val isReversed : t -> bool
 end
 

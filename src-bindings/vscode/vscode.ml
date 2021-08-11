@@ -324,6 +324,8 @@ module Selection = struct
       -> t
       [@@js.new "vscode.Selection"]
 
+    val isEmpty : t -> bool [@@js.get]
+
     val isReversed : t -> bool [@@js.get]]
 end
 

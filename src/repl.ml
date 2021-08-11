@@ -219,11 +219,7 @@ let open_terminal instance sandbox : Terminal.t Or_error.t Promise.t =
 let get_selected_code text_editor =
   let selection = TextEditor.selection text_editor in
   let document = TextEditor.document text_editor in
-  if
-    Position.isEqual
-      (Selection.start selection)
-      ~other:(Selection.end_ selection)
-  then
+  if Selection.isEmpty selection then
     None
   else
     let selected_text =
