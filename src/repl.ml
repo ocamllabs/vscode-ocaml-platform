@@ -47,7 +47,7 @@ let default_repl sandbox =
 let repl_from_inputbox sandbox =
   let options =
     InputBoxOptions.create ~title:"Command to launch REPL"
-      ~placeHolder:"example: dune utop" ()
+      ~placeHolder:"example: utop" ()
       ~prompt:"If not provided, a default REPL will open."
   in
   let open Promise.Syntax in
