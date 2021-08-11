@@ -1089,7 +1089,7 @@ end
 module TerminalExitStatus : sig
   include Js.T
 
-  val code : t -> int
+  val code : t -> int or_undefined
 
   val create : code:int -> t
 end

@@ -1434,7 +1434,7 @@ module TerminalExitStatus = struct
 
   include
     [%js:
-    val code : t -> int [@@js.get]
+    val code : t -> int or_undefined [@@js.get]
 
     val create : code:int -> t [@@js.builder]]
 end
