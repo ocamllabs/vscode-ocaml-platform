@@ -1,5 +1,24 @@
 open Ppxlib
 
+(** Simultaneous double AST traversal class
+
+    It is used to serialise [Parsetree] type values to some arbitrary type
+    keeping location from both arguments.
+
+    The [('res, string ) result ] type signifies that [Ok res] will be returned
+    when the two AST ( the first is the preprocessed one, read from binary file
+    and the second is the result of reparsing the Pprintast of the first one.)
+    are structurally identical (expect their [Location.t] values); The
+    [Error err_msg] occurs when two ASTs contain structural differences due to
+    the fact that the same code can have multiple AST representation. Basic
+    example of such difference is [Pexp_tuple \[el\]] (singleton tuple) which
+    gives [(pprintast_value_of_el)] when pretty printing and is then reparsed to
+    just [el] since brackets are simply ignored. For all (known) difference
+    cases, refer to the end of {!expression_desc} and {!pattern_desc} methods.
+    The string value of the [Error] carries the name of the method indicating
+    the algebraic type where the (yet unkown) difference has occured which might
+    help with further debugging - c.f. {{:https://github.com/arozovyk/ast_diff}
+    ast_diff} *)
 class virtual ['res] lift2 =
   object (self)
     method virtual tuple
