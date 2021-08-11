@@ -1475,6 +1475,11 @@ module Terminal = struct
     val dispose : t -> unit [@@js.call]]
 
   let disposable this = Disposable.make ~dispose:(fun () -> dispose this)
+
+  let exit_status t =
+    match exitStatus t with
+    | None -> `Not_exited_yet
+    | Some s -> `Exit_status s
 end
 
 module OutputChannel = struct

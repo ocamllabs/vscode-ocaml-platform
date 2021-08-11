@@ -1119,6 +1119,9 @@ module Terminal : sig
   val dispose : t -> unit
 
   val disposable : t -> Disposable.t
+
+  val exit_status :
+    t -> [ `Exit_status of TerminalExitStatus.t | `Not_exited_yet ]
 end
 
 module OutputChannel : sig
