@@ -1,43 +1,45 @@
 open Ppxlib
 
-(* This exception occurs when two AST ( the first is the preprocessed one, read
-   from binary file and the second is the result of reparsing the Pprintast of
-   the first one.) contain structural differences due to the fact that the same
-   code can have multiple AST representation. Basic example of such difference
-   is `Pexp_tuple [el]` (singleton tuple) which gives `(pprintast_value_of_el)`
-   when pretty printing and is reparsed to just `el` since brackets are simply
-   ignored. For all (known) difference cases, refer to the end of
-   `expression_desc` and `pattern_desc` methods. The string value of the
-   exception carries the name of the method indicating the algebraic type where
-   the (yet unkown) difference has occured which might help with further
-   debugging - c.f. https://github.com/arozovyk/ast_diff *)
-exception Reparse_error of string
-
 class virtual ['res] lift2 =
   object (self)
-    (* constraint 'res = Jsonoo.t *)
-    method virtual tuple : (string * 'res) list -> 'res
+    method virtual tuple
+        : (string * ('res, string) result) list -> ('res, string) result
 
     method virtual option
-        : 'a. ('a -> 'a -> 'res) -> 'a option -> 'a option -> 'res
+        : 'a.
+             ('a -> 'a -> ('res, string) result)
+          -> 'a option
+          -> 'a option
+          -> ('res, string) result
 
-    method virtual bool : bool -> bool -> 'res
+    method virtual bool : bool -> bool -> ('res, string) result
 
-    method virtual char : char -> char -> 'res
+    method virtual char : char -> char -> ('res, string) result
 
-    method virtual constr : string -> (string * 'res) list -> 'res
+    method virtual constr
+        :    string
+          -> (string * ('res, string) result) list
+          -> ('res, string) result
 
-    method virtual int : int -> int -> 'res
+    method virtual int : int -> int -> ('res, string) result
 
-    method virtual bool : bool -> bool -> 'res
+    method virtual bool : bool -> bool -> ('res, string) result
 
-    method virtual list : 'a. ('a -> 'a -> 'res) -> 'a list -> 'a list -> 'res
+    method virtual list
+        : 'a.
+             ('a -> 'a -> ('res, string) result)
+          -> 'a list
+          -> 'a list
+          -> ('res, string) result
 
-    method virtual record : string -> (string * 'res) list -> 'res
+    method virtual record
+        :    string
+          -> (string * ('res, string) result) list
+          -> ('res, string) result
 
-    method virtual string : string -> string -> 'res
+    method virtual string : string -> string -> ('res, string) result
 
-    method position : position -> position -> 'res =
+    method position : position -> position -> ('res, string) result =
       fun { pos_fname; pos_lnum; pos_bol; pos_cnum }
           { pos_fname = pos_fname'
           ; pos_lnum = pos_lnum'
@@ -58,7 +60,7 @@ class virtual ['res] lift2 =
           ; ("pos_cnum", pos_cnum)
           ]
 
-    method location : location -> location -> 'res =
+    method location : location -> location -> ('res, string) result =
       fun { loc_start; loc_end; loc_ghost }
           { loc_start = loc_start'; loc_end = loc_end'; loc_ghost = loc_ghost' } ->
         let loc_start = self#position loc_start loc_start' in
@@ -70,7 +72,8 @@ class virtual ['res] lift2 =
           ; ("loc_ghost", loc_ghost)
           ]
 
-    method location_stack : location_stack -> location_stack -> 'res =
+    method location_stack
+        : location_stack -> location_stack -> ('res, string) result =
       fun l l' ->
         (*Reparsing adds/removes location_stack*)
         match (l, l') with
@@ -78,13 +81,18 @@ class virtual ['res] lift2 =
         | _ :: _, [] -> self#list self#location l l
         | _ -> self#list self#location l l'
 
-    method loc : 'a. ('a -> 'a -> 'res) -> 'a loc -> 'a loc -> 'res =
+    method loc
+        : 'a.
+             ('a -> 'a -> ('res, string) result)
+          -> 'a loc
+          -> 'a loc
+          -> ('res, string) result =
       fun _a { txt; loc } { txt = txt'; loc = loc' } ->
         let txt = _a txt txt' in
         let loc = self#location loc loc' in
         self#record "loc" [ ("txt", txt); ("loc", loc) ]
 
-    method longident : longident -> longident -> 'res =
+    method longident : longident -> longident -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Lident a, Lident a' ->
@@ -98,63 +106,69 @@ class virtual ['res] lift2 =
           let a = self#longident a a' in
           let b = self#longident b b' in
           self#constr "Lapply" [ ("longident1", a); ("longident2", b) ]
-        | _ -> raise (Reparse_error "longident")
+        | _ -> Error "longident"
 
-    method longident_loc : longident_loc -> longident_loc -> 'res =
+    method longident_loc
+        : longident_loc -> longident_loc -> ('res, string) result =
       self#loc self#longident
 
-    method rec_flag : rec_flag -> rec_flag -> 'res =
+    method rec_flag : rec_flag -> rec_flag -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Nonrecursive, Nonrecursive -> self#constr "Nonrecursive" []
         | Recursive, Recursive -> self#constr "Recursive" []
-        | _ -> raise (Reparse_error "rec_flag")
+        | _ -> Error "rec_flag"
 
-    method direction_flag : direction_flag -> direction_flag -> 'res =
+    method direction_flag
+        : direction_flag -> direction_flag -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Upto, Upto -> self#constr "Upto" []
         | Downto, Downto -> self#constr "Downto" []
-        | _ -> raise (Reparse_error "direction_flag")
+        | _ -> Error "direction_flag"
 
-    method private_flag : private_flag -> private_flag -> 'res =
+    method private_flag : private_flag -> private_flag -> ('res, string) result
+        =
       fun x x' ->
         match (x, x') with
         | Private, Private -> self#constr "Private" []
         | Public, Public -> self#constr "Public" []
-        | _ -> raise (Reparse_error "private_flag")
+        | _ -> Error "private_flag"
 
-    method mutable_flag : mutable_flag -> mutable_flag -> 'res =
+    method mutable_flag : mutable_flag -> mutable_flag -> ('res, string) result
+        =
       fun x x' ->
         match (x, x') with
         | Immutable, Immutable -> self#constr "Immutable" []
         | Mutable, Mutable -> self#constr "Mutable" []
-        | _ -> raise (Reparse_error "mutable_flag")
+        | _ -> Error "mutable_flag"
 
-    method virtual_flag : virtual_flag -> virtual_flag -> 'res =
+    method virtual_flag : virtual_flag -> virtual_flag -> ('res, string) result
+        =
       fun x x' ->
         match (x, x') with
         | Virtual, Virtual -> self#constr "Virtual" []
         | Concrete, Concrete -> self#constr "Concrete" []
-        | _ -> raise (Reparse_error "virtual_flag")
+        | _ -> Error "virtual_flag"
 
-    method override_flag : override_flag -> override_flag -> 'res =
+    method override_flag
+        : override_flag -> override_flag -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Override, Override -> self#constr "Override" []
         | Fresh, Fresh -> self#constr "Fresh" []
-        | _ -> raise (Reparse_error "override_flag")
+        | _ -> Error "override_flag"
 
-    method closed_flag : closed_flag -> closed_flag -> 'res =
+    method closed_flag : closed_flag -> closed_flag -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Closed, Closed -> self#constr "Closed" []
         | Open, Open -> self#constr "Open" []
-        | _ -> raise (Reparse_error "closed_flag")
+        | _ -> Error "closed_flag"
 
-    method label : label -> label -> 'res = self#string
+    method label : label -> label -> ('res, string) result = self#string
 
-    method arg_label : arg_label -> arg_label -> 'res =
+    method arg_label : arg_label -> arg_label -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Nolabel, Nolabel -> self#constr "Nolabel" []
@@ -164,24 +178,24 @@ class virtual ['res] lift2 =
         | Optional a, Optional a' ->
           let a = self#string a a' in
           self#constr "Optional" [ ("label", a) ]
-        | _ -> raise (Reparse_error "arg_label")
+        | _ -> Error "arg_label"
 
-    method variance : variance -> variance -> 'res =
+    method variance : variance -> variance -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Covariant, Covariant -> self#constr "Covariant" []
         | Contravariant, Contravariant -> self#constr "Contravariant" []
         | NoVariance, NoVariance -> self#constr "NoVariance" []
-        | _ -> raise (Reparse_error "variance")
+        | _ -> Error "variance"
 
-    method injectivity : injectivity -> injectivity -> 'res =
+    method injectivity : injectivity -> injectivity -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Injective, Injective -> self#constr "Injective" []
         | NoInjectivity, NoInjectivity -> self#constr "NoInjectivity" []
-        | _ -> raise (Reparse_error "injectivity")
+        | _ -> Error "injectivity"
 
-    method constant : constant -> constant -> 'res =
+    method constant : constant -> constant -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Pconst_integer (a, b), Pconst_integer (a', b') ->
@@ -201,9 +215,9 @@ class virtual ['res] lift2 =
           let a = self#string a a' in
           let b = self#option self#char b b' in
           self#constr "Pconst_float" [ ("label", a); ("char option", b) ]
-        | _ -> raise (Reparse_error "constant")
+        | _ -> Error "constant"
 
-    method attribute : attribute -> attribute -> 'res =
+    method attribute : attribute -> attribute -> ('res, string) result =
       fun { attr_name; attr_payload; attr_loc }
           { attr_name = attr_name'
           ; attr_payload = attr_payload'
@@ -218,16 +232,16 @@ class virtual ['res] lift2 =
           ; ("attr_loc", attr_loc)
           ]
 
-    method extension : extension -> extension -> 'res =
+    method extension : extension -> extension -> ('res, string) result =
       fun (a, b) (a', b') ->
         let a = self#loc self#string a a' in
         let b = self#payload b b' in
         self#tuple [ ("label loc", a); ("payload", b) ]
 
-    method attributes : attributes -> attributes -> 'res =
+    method attributes : attributes -> attributes -> ('res, string) result =
       self#list self#attribute
 
-    method payload : payload -> payload -> 'res =
+    method payload : payload -> payload -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | PStr a, PStr a' ->
@@ -243,9 +257,9 @@ class virtual ['res] lift2 =
           let a = self#pattern a a' in
           let b = self#option self#expression b b' in
           self#constr "PPat" [ ("pattern", a); ("expression option", b) ]
-        | _ -> raise (Reparse_error "payload")
+        | _ -> Error "payload"
 
-    method core_type : core_type -> core_type -> 'res =
+    method core_type : core_type -> core_type -> ('res, string) result =
       fun { ptyp_desc; ptyp_loc; ptyp_loc_stack; ptyp_attributes }
           { ptyp_desc = ptyp_desc'
           ; ptyp_loc = ptyp_loc'
@@ -267,7 +281,8 @@ class virtual ['res] lift2 =
           ; ("ptyp_attributes", ptyp_attributes)
           ]
 
-    method core_type_desc : core_type_desc -> core_type_desc -> 'res =
+    method core_type_desc
+        : core_type_desc -> core_type_desc -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Ptyp_any, Ptyp_any -> self#constr "Ptyp_any" []
@@ -321,9 +336,10 @@ class virtual ['res] lift2 =
         | Ptyp_extension a, Ptyp_extension a' ->
           let a = self#extension a a' in
           self#constr "Ptyp_extension" [ ("extension", a) ]
-        | _ -> raise (Reparse_error "core_type_desc")
+        | _ -> Error "core_type_desc"
 
-    method package_type : package_type -> package_type -> 'res =
+    method package_type : package_type -> package_type -> ('res, string) result
+        =
       fun (a, b) (a', b') ->
         let a = self#longident_loc a a' in
         let b =
@@ -337,7 +353,7 @@ class virtual ['res] lift2 =
         self#tuple
           [ ("longident_loc", a); ("(longident_loc * core_type) list", b b') ]
 
-    method row_field : row_field -> row_field -> 'res =
+    method row_field : row_field -> row_field -> ('res, string) result =
       fun { prf_desc; prf_loc; prf_attributes }
           { prf_desc = prf_desc'
           ; prf_loc = prf_loc'
@@ -352,7 +368,8 @@ class virtual ['res] lift2 =
           ; ("prf_attributes", prf_attributes)
           ]
 
-    method row_field_desc : row_field_desc -> row_field_desc -> 'res =
+    method row_field_desc
+        : row_field_desc -> row_field_desc -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Rtag (a, b, c), Rtag (a', b', c') ->
@@ -364,9 +381,10 @@ class virtual ['res] lift2 =
         | Rinherit a, Rinherit a' ->
           let a = self#core_type a a' in
           self#constr "Rinherit" [ ("core_type", a) ]
-        | _ -> raise (Reparse_error "row_field_desc")
+        | _ -> Error "row_field_desc"
 
-    method object_field : object_field -> object_field -> 'res =
+    method object_field : object_field -> object_field -> ('res, string) result
+        =
       fun { pof_desc; pof_loc; pof_attributes }
           { pof_desc = pof_desc'
           ; pof_loc = pof_loc'
@@ -381,7 +399,8 @@ class virtual ['res] lift2 =
           ; ("pof_attributes", pof_attributes)
           ]
 
-    method object_field_desc : object_field_desc -> object_field_desc -> 'res =
+    method object_field_desc
+        : object_field_desc -> object_field_desc -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Otag (a, b), Otag (a', b') ->
@@ -391,9 +410,9 @@ class virtual ['res] lift2 =
         | Oinherit a, Oinherit a' ->
           let a = self#core_type a a' in
           self#constr "Oinherit" [ ("core_type", a) ]
-        | _ -> raise (Reparse_error "object_field_desc")
+        | _ -> Error "object_field_desc"
 
-    method pattern : pattern -> pattern -> 'res =
+    method pattern : pattern -> pattern -> ('res, string) result =
       fun { ppat_desc; ppat_loc; ppat_loc_stack; ppat_attributes }
           { ppat_desc = ppat_desc'
           ; ppat_loc = ppat_loc'
@@ -415,7 +434,8 @@ class virtual ['res] lift2 =
           ; ("ppat_attributes", ppat_attributes)
           ]
 
-    method pattern_desc : pattern_desc -> pattern_desc -> 'res =
+    method pattern_desc : pattern_desc -> pattern_desc -> ('res, string) result
+        =
       fun x x' ->
         match (x, x') with
         | Ppat_any, Ppat_any -> self#constr "Ppat_any" []
@@ -492,9 +512,9 @@ class virtual ['res] lift2 =
         | Ppat_tuple [ exp1 ], ppat_desc' ->
           self#pattern_desc x
             (Ppat_tuple [ { exp1 with ppat_desc = ppat_desc' } ])
-        | _ -> raise (Reparse_error "pattern_desc")
+        | _ -> Error "pattern_desc"
 
-    method expression : expression -> expression -> 'res =
+    method expression : expression -> expression -> ('res, string) result =
       fun { pexp_desc; pexp_loc; pexp_loc_stack; pexp_attributes }
           { pexp_desc = pexp_desc'
           ; pexp_loc = pexp_loc'
@@ -516,7 +536,8 @@ class virtual ['res] lift2 =
           ; ("pexp_attributes", pexp_attributes)
           ]
 
-    method expression_desc : expression_desc -> expression_desc -> 'res =
+    method expression_desc
+        : expression_desc -> expression_desc -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Pexp_ident a, Pexp_ident a' ->
@@ -760,7 +781,8 @@ class virtual ['res] lift2 =
             ; ("pattern", c)
             ; ("expression", d)
             ]
-        (*Caused by: `fun x -> Ppx_deriving_runtime.Format.asprintf "%a" pp x ` *)
+        (*Caused by: `fun x -> Ppx_deriving_runtime.Format.asprintf "%a" pp x
+          ` *)
         | ( Pexp_fun (a, b, c, d)
           , Pexp_constraint ({ pexp_desc = Pexp_fun (a', b', c', d'); _ }, _) )
           ->
@@ -775,7 +797,8 @@ class virtual ['res] lift2 =
             ; ("expression", d)
             ]
         (* Caused by: ``` fun env -> fun _visitors_this_0 -> fun
-           _visitors_this_1 -> ``` in opams package morbig/src/CST for instance *)
+           _visitors_this_1 -> ``` in opams package morbig/src/CST for
+           instance *)
         | ( Pexp_fun (a, b, c, d)
           , Pexp_poly ({ pexp_desc = Pexp_fun (a', b', c', d'); _ }, _) ) ->
           let a = self#arg_label a a' in
@@ -839,9 +862,9 @@ class virtual ['res] lift2 =
         | Pexp_tuple [ exp1 ], pexp_desc' ->
           self#expression_desc x
             (Pexp_tuple [ { exp1 with pexp_desc = pexp_desc' } ])
-        | _ -> raise (Reparse_error "expression_desc")
+        | _ -> Error "expression_desc"
 
-    method case : case -> case -> 'res =
+    method case : case -> case -> ('res, string) result =
       fun { pc_lhs; pc_guard; pc_rhs }
           { pc_lhs = pc_lhs'; pc_guard = pc_guard'; pc_rhs = pc_rhs' } ->
         let pc_lhs = self#pattern pc_lhs pc_lhs' in
@@ -850,14 +873,14 @@ class virtual ['res] lift2 =
         self#record "case"
           [ ("pc_lhs", pc_lhs); ("pc_guard", pc_guard); ("pc_rhs", pc_rhs) ]
 
-    method letop : letop -> letop -> 'res =
+    method letop : letop -> letop -> ('res, string) result =
       fun { let_; ands; body } { let_ = let_'; ands = ands'; body = body' } ->
         let let_ = self#binding_op let_ let_' in
         let ands = self#list self#binding_op ands ands' in
         let body = self#expression body body' in
         self#record "letop" [ ("let_", let_); ("ands", ands); ("body", body) ]
 
-    method binding_op : binding_op -> binding_op -> 'res =
+    method binding_op : binding_op -> binding_op -> ('res, string) result =
       fun { pbop_op; pbop_pat; pbop_exp; pbop_loc }
           { pbop_op = pbop_op'
           ; pbop_pat = pbop_pat'
@@ -875,7 +898,8 @@ class virtual ['res] lift2 =
           ; ("pbop_loc", pbop_loc)
           ]
 
-    method value_description : value_description -> value_description -> 'res =
+    method value_description
+        : value_description -> value_description -> ('res, string) result =
       fun { pval_name; pval_type; pval_prim; pval_attributes; pval_loc }
           { pval_name = pval_name'
           ; pval_type = pval_type'
@@ -898,7 +922,8 @@ class virtual ['res] lift2 =
           ; ("pval_loc", pval_loc)
           ]
 
-    method type_declaration : type_declaration -> type_declaration -> 'res =
+    method type_declaration
+        : type_declaration -> type_declaration -> ('res, string) result =
       fun { ptype_name
           ; ptype_params
           ; ptype_cstrs
@@ -963,7 +988,7 @@ class virtual ['res] lift2 =
           ; ("ptype_loc", ptype_loc)
           ]
 
-    method type_kind : type_kind -> type_kind -> 'res =
+    method type_kind : type_kind -> type_kind -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Ptype_abstract, Ptype_abstract -> self#constr "Ptype_abstract" []
@@ -974,9 +999,10 @@ class virtual ['res] lift2 =
           let a = self#list self#label_declaration a a' in
           self#constr "Ptype_record" [ ("label_declaration list", a) ]
         | Ptype_open, Ptype_open -> self#constr "Ptype_open" []
-        | _ -> raise (Reparse_error "type_kind")
+        | _ -> Error "type_kind"
 
-    method label_declaration : label_declaration -> label_declaration -> 'res =
+    method label_declaration
+        : label_declaration -> label_declaration -> ('res, string) result =
       fun { pld_name; pld_mutable; pld_type; pld_loc; pld_attributes }
           { pld_name = pld_name'
           ; pld_mutable = pld_mutable'
@@ -998,7 +1024,9 @@ class virtual ['res] lift2 =
           ]
 
     method constructor_declaration
-        : constructor_declaration -> constructor_declaration -> 'res =
+        :    constructor_declaration
+          -> constructor_declaration
+          -> ('res, string) result =
       fun { pcd_name; pcd_args; pcd_res; pcd_loc; pcd_attributes }
           { pcd_name = pcd_name'
           ; pcd_args = pcd_args'
@@ -1020,7 +1048,9 @@ class virtual ['res] lift2 =
           ]
 
     method constructor_arguments
-        : constructor_arguments -> constructor_arguments -> 'res =
+        :    constructor_arguments
+          -> constructor_arguments
+          -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Pcstr_tuple a, Pcstr_tuple a' ->
@@ -1029,9 +1059,10 @@ class virtual ['res] lift2 =
         | Pcstr_record a, Pcstr_record a' ->
           let a = self#list self#label_declaration a a' in
           self#constr "Pcstr_record" [ ("label_declaration list", a) ]
-        | _ -> raise (Reparse_error "constructor_arguments")
+        | _ -> Error "constructor_arguments"
 
-    method type_extension : type_extension -> type_extension -> 'res =
+    method type_extension
+        : type_extension -> type_extension -> ('res, string) result =
       fun { ptyext_path
           ; ptyext_params
           ; ptyext_constructors
@@ -1081,7 +1112,9 @@ class virtual ['res] lift2 =
           ]
 
     method extension_constructor
-        : extension_constructor -> extension_constructor -> 'res =
+        :    extension_constructor
+          -> extension_constructor
+          -> ('res, string) result =
       fun { pext_name; pext_kind; pext_loc; pext_attributes }
           { pext_name = pext_name'
           ; pext_kind = pext_kind'
@@ -1101,7 +1134,8 @@ class virtual ['res] lift2 =
           ; ("pext_attributes", pext_attributes)
           ]
 
-    method type_exception : type_exception -> type_exception -> 'res =
+    method type_exception
+        : type_exception -> type_exception -> ('res, string) result =
       fun { ptyexn_constructor; ptyexn_loc; ptyexn_attributes }
           { ptyexn_constructor = ptyexn_constructor'
           ; ptyexn_loc = ptyexn_loc'
@@ -1121,7 +1155,9 @@ class virtual ['res] lift2 =
           ]
 
     method extension_constructor_kind
-        : extension_constructor_kind -> extension_constructor_kind -> 'res =
+        :    extension_constructor_kind
+          -> extension_constructor_kind
+          -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Pext_decl (a, b), Pext_decl (a', b') ->
@@ -1132,9 +1168,9 @@ class virtual ['res] lift2 =
         | Pext_rebind a, Pext_rebind a' ->
           let a = self#longident_loc a a' in
           self#constr "Pext_rebind" [ ("longident_loc", a) ]
-        | _ -> raise (Reparse_error "extension_constructor_kind")
+        | _ -> Error "extension_constructor_kind"
 
-    method class_type : class_type -> class_type -> 'res =
+    method class_type : class_type -> class_type -> ('res, string) result =
       fun { pcty_desc; pcty_loc; pcty_attributes }
           { pcty_desc = pcty_desc'
           ; pcty_loc = pcty_loc'
@@ -1151,7 +1187,8 @@ class virtual ['res] lift2 =
           ; ("pcty_attributes", pcty_attributes)
           ]
 
-    method class_type_desc : class_type_desc -> class_type_desc -> 'res =
+    method class_type_desc
+        : class_type_desc -> class_type_desc -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Pcty_constr (a, b), Pcty_constr (a', b') ->
@@ -1175,9 +1212,10 @@ class virtual ['res] lift2 =
           let a = self#open_description a a' in
           let b = self#class_type b b' in
           self#constr "Pcty_open" [ ("open_description", a); ("class_type", b) ]
-        | _ -> raise (Reparse_error "class_type_desc")
+        | _ -> Error "class_type_desc"
 
-    method class_signature : class_signature -> class_signature -> 'res =
+    method class_signature
+        : class_signature -> class_signature -> ('res, string) result =
       fun { pcsig_self; pcsig_fields }
           { pcsig_self = pcsig_self'; pcsig_fields = pcsig_fields' } ->
         let pcsig_self = self#core_type pcsig_self pcsig_self' in
@@ -1187,7 +1225,8 @@ class virtual ['res] lift2 =
         self#record "class_signature"
           [ ("pcsig_self", pcsig_self); ("pcsig_fields", pcsig_fields) ]
 
-    method class_type_field : class_type_field -> class_type_field -> 'res =
+    method class_type_field
+        : class_type_field -> class_type_field -> ('res, string) result =
       fun { pctf_desc; pctf_loc; pctf_attributes }
           { pctf_desc = pctf_desc'
           ; pctf_loc = pctf_loc'
@@ -1205,7 +1244,9 @@ class virtual ['res] lift2 =
           ]
 
     method class_type_field_desc
-        : class_type_field_desc -> class_type_field_desc -> 'res =
+        :    class_type_field_desc
+          -> class_type_field_desc
+          -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Pctf_inherit a, Pctf_inherit a' ->
@@ -1260,10 +1301,14 @@ class virtual ['res] lift2 =
         | Pctf_extension a, Pctf_extension a' ->
           let a = self#extension a a' in
           self#constr "Pctf_extension" [ ("extension", a) ]
-        | _ -> raise (Reparse_error "class_type_field_desc")
+        | _ -> Error "class_type_field_desc"
 
     method class_infos
-        : 'a. ('a -> 'a -> 'res) -> 'a class_infos -> 'a class_infos -> 'res =
+        : 'a.
+             ('a -> 'a -> ('res, string) result)
+          -> 'a class_infos
+          -> 'a class_infos
+          -> ('res, string) result =
       fun _a
           { pci_virt; pci_params; pci_name; pci_expr; pci_loc; pci_attributes }
           { pci_virt = pci_virt'
@@ -1302,14 +1347,17 @@ class virtual ['res] lift2 =
           ; ("pci_attributes", pci_attributes)
           ]
 
-    method class_description : class_description -> class_description -> 'res =
+    method class_description
+        : class_description -> class_description -> ('res, string) result =
       self#class_infos self#class_type
 
     method class_type_declaration
-        : class_type_declaration -> class_type_declaration -> 'res =
+        :    class_type_declaration
+          -> class_type_declaration
+          -> ('res, string) result =
       self#class_infos self#class_type
 
-    method class_expr : class_expr -> class_expr -> 'res =
+    method class_expr : class_expr -> class_expr -> ('res, string) result =
       fun { pcl_desc; pcl_loc; pcl_attributes }
           { pcl_desc = pcl_desc'
           ; pcl_loc = pcl_loc'
@@ -1324,7 +1372,8 @@ class virtual ['res] lift2 =
           ; ("pcl_attributes", pcl_attributes)
           ]
 
-    method class_expr_desc : class_expr_desc -> class_expr_desc -> 'res =
+    method class_expr_desc
+        : class_expr_desc -> class_expr_desc -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Pcl_constr (a, b), Pcl_constr (a', b') ->
@@ -1375,9 +1424,10 @@ class virtual ['res] lift2 =
           let a = self#open_description a a' in
           let b = self#class_expr b b' in
           self#constr "Pcl_open" [ ("open_description", a); ("class_expr", b) ]
-        | _ -> raise (Reparse_error "class_expr_desc")
+        | _ -> Error "class_expr_desc"
 
-    method class_structure : class_structure -> class_structure -> 'res =
+    method class_structure
+        : class_structure -> class_structure -> ('res, string) result =
       fun { pcstr_self; pcstr_fields }
           { pcstr_self = pcstr_self'; pcstr_fields = pcstr_fields' } ->
         let pcstr_self = self#pattern pcstr_self pcstr_self' in
@@ -1387,7 +1437,7 @@ class virtual ['res] lift2 =
         self#record "class_structure"
           [ ("pcstr_self", pcstr_self); ("pcstr_fields", pcstr_fields) ]
 
-    method class_field : class_field -> class_field -> 'res =
+    method class_field : class_field -> class_field -> ('res, string) result =
       fun { pcf_desc; pcf_loc; pcf_attributes }
           { pcf_desc = pcf_desc'
           ; pcf_loc = pcf_loc'
@@ -1402,7 +1452,8 @@ class virtual ['res] lift2 =
           ; ("pcf_attributes", pcf_attributes)
           ]
 
-    method class_field_desc : class_field_desc -> class_field_desc -> 'res =
+    method class_field_desc
+        : class_field_desc -> class_field_desc -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Pcf_inherit (a, b, c), Pcf_inherit (a', b', c') ->
@@ -1459,9 +1510,10 @@ class virtual ['res] lift2 =
         | Pcf_extension a, Pcf_extension a' ->
           let a = self#extension a a' in
           self#constr "Pcf_extension" [ ("extension", a) ]
-        | _ -> raise (Reparse_error "class_field_desc")
+        | _ -> Error "class_field_desc"
 
-    method class_field_kind : class_field_kind -> class_field_kind -> 'res =
+    method class_field_kind
+        : class_field_kind -> class_field_kind -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Cfk_virtual a, Cfk_virtual a' ->
@@ -1471,12 +1523,13 @@ class virtual ['res] lift2 =
           let a = self#override_flag a a' in
           let b = self#expression b b' in
           self#constr "Cfk_concrete" [ ("override_flag", a); ("expression", b) ]
-        | _ -> raise (Reparse_error "class_field_kind")
+        | _ -> Error "class_field_kind"
 
-    method class_declaration : class_declaration -> class_declaration -> 'res =
+    method class_declaration
+        : class_declaration -> class_declaration -> ('res, string) result =
       self#class_infos self#class_expr
 
-    method module_type : module_type -> module_type -> 'res =
+    method module_type : module_type -> module_type -> ('res, string) result =
       fun { pmty_desc; pmty_loc; pmty_attributes }
           { pmty_desc = pmty_desc'
           ; pmty_loc = pmty_loc'
@@ -1493,7 +1546,8 @@ class virtual ['res] lift2 =
           ; ("pmty_attributes", pmty_attributes)
           ]
 
-    method module_type_desc : module_type_desc -> module_type_desc -> 'res =
+    method module_type_desc
+        : module_type_desc -> module_type_desc -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Pmty_ident a, Pmty_ident a' ->
@@ -1521,9 +1575,10 @@ class virtual ['res] lift2 =
         | Pmty_alias a, Pmty_alias a' ->
           let a = self#longident_loc a a' in
           self#constr "Pmty_alias" [ ("longident_loc", a) ]
-        | _ -> raise (Reparse_error "module_type_desc")
+        | _ -> Error "module_type_desc"
 
-    method functor_parameter : functor_parameter -> functor_parameter -> 'res =
+    method functor_parameter
+        : functor_parameter -> functor_parameter -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Unit, Unit -> self#constr "Unit" []
@@ -1531,12 +1586,13 @@ class virtual ['res] lift2 =
           let a = self#loc (self#option self#string) a in
           let b = self#module_type b b' in
           self#constr "Named" [ ("label option loc", a a'); ("module_type", b) ]
-        | _ -> raise (Reparse_error "functor_parameter")
+        | _ -> Error "functor_parameter"
 
-    method signature : signature -> signature -> 'res =
+    method signature : signature -> signature -> ('res, string) result =
       self#list self#signature_item
 
-    method signature_item : signature_item -> signature_item -> 'res =
+    method signature_item
+        : signature_item -> signature_item -> ('res, string) result =
       fun { psig_desc; psig_loc }
           { psig_desc = psig_desc'; psig_loc = psig_loc' } ->
         let psig_desc = self#signature_item_desc psig_desc psig_desc' in
@@ -1545,7 +1601,7 @@ class virtual ['res] lift2 =
           [ ("psig_desc", psig_desc); ("psig_loc", psig_loc) ]
 
     method signature_item_desc
-        : signature_item_desc -> signature_item_desc -> 'res =
+        : signature_item_desc -> signature_item_desc -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Psig_value a, Psig_value a' ->
@@ -1596,10 +1652,10 @@ class virtual ['res] lift2 =
           let a = self#extension a a' in
           let b = self#attributes b b' in
           self#constr "Psig_extension" [ ("extension", a); ("attributes", b) ]
-        | _ -> raise (Reparse_error "signature_item_desc")
+        | _ -> Error "signature_item_desc"
 
-    method module_declaration : module_declaration -> module_declaration -> 'res
-        =
+    method module_declaration
+        : module_declaration -> module_declaration -> ('res, string) result =
       fun { pmd_name; pmd_type; pmd_attributes; pmd_loc }
           { pmd_name = pmd_name'
           ; pmd_type = pmd_type'
@@ -1618,7 +1674,7 @@ class virtual ['res] lift2 =
           ]
 
     method module_substitution
-        : module_substitution -> module_substitution -> 'res =
+        : module_substitution -> module_substitution -> ('res, string) result =
       fun { pms_name; pms_manifest; pms_attributes; pms_loc }
           { pms_name = pms_name'
           ; pms_manifest = pms_manifest'
@@ -1637,7 +1693,9 @@ class virtual ['res] lift2 =
           ]
 
     method module_type_declaration
-        : module_type_declaration -> module_type_declaration -> 'res =
+        :    module_type_declaration
+          -> module_type_declaration
+          -> ('res, string) result =
       fun { pmtd_name; pmtd_type; pmtd_attributes; pmtd_loc }
           { pmtd_name = pmtd_name'
           ; pmtd_type = pmtd_type'
@@ -1658,7 +1716,11 @@ class virtual ['res] lift2 =
           ]
 
     method open_infos
-        : 'a. ('a -> 'a -> 'res) -> 'a open_infos -> 'a open_infos -> 'res =
+        : 'a.
+             ('a -> 'a -> ('res, string) result)
+          -> 'a open_infos
+          -> 'a open_infos
+          -> ('res, string) result =
       fun _a { popen_expr; popen_override; popen_loc; popen_attributes }
           { popen_expr = popen_expr'
           ; popen_override = popen_override'
@@ -1680,15 +1742,20 @@ class virtual ['res] lift2 =
           ; ("popen_attributes", popen_attributes)
           ]
 
-    method open_description : open_description -> open_description -> 'res =
+    method open_description
+        : open_description -> open_description -> ('res, string) result =
       self#open_infos self#longident_loc
 
-    method open_declaration : open_declaration -> open_declaration -> 'res =
+    method open_declaration
+        : open_declaration -> open_declaration -> ('res, string) result =
       self#open_infos self#module_expr
 
     method include_infos
-        : 'a. ('a -> 'a -> 'res) -> 'a include_infos -> 'a include_infos -> 'res
-        =
+        : 'a.
+             ('a -> 'a -> ('res, string) result)
+          -> 'a include_infos
+          -> 'a include_infos
+          -> ('res, string) result =
       fun _a { pincl_mod; pincl_loc; pincl_attributes }
           { pincl_mod = pincl_mod'
           ; pincl_loc = pincl_loc'
@@ -1706,14 +1773,15 @@ class virtual ['res] lift2 =
           ]
 
     method include_description
-        : include_description -> include_description -> 'res =
+        : include_description -> include_description -> ('res, string) result =
       self#include_infos self#module_type
 
     method include_declaration
-        : include_declaration -> include_declaration -> 'res =
+        : include_declaration -> include_declaration -> ('res, string) result =
       self#include_infos self#module_expr
 
-    method with_constraint : with_constraint -> with_constraint -> 'res =
+    method with_constraint
+        : with_constraint -> with_constraint -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Pwith_type (a, b), Pwith_type (a', b') ->
@@ -1736,9 +1804,9 @@ class virtual ['res] lift2 =
           let b = self#longident_loc b b' in
           self#constr "Pwith_modsubst"
             [ ("longident_loc1", a); ("longident_loc2", b) ]
-        | _ -> raise (Reparse_error "with_constraint")
+        | _ -> Error "with_constraint"
 
-    method module_expr : module_expr -> module_expr -> 'res =
+    method module_expr : module_expr -> module_expr -> ('res, string) result =
       fun { pmod_desc; pmod_loc; pmod_attributes }
           { pmod_desc = pmod_desc'
           ; pmod_loc = pmod_loc'
@@ -1755,7 +1823,8 @@ class virtual ['res] lift2 =
           ; ("pmod_attributes", pmod_attributes)
           ]
 
-    method module_expr_desc : module_expr_desc -> module_expr_desc -> 'res =
+    method module_expr_desc
+        : module_expr_desc -> module_expr_desc -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Pmod_ident a, Pmod_ident a' ->
@@ -1784,13 +1853,14 @@ class virtual ['res] lift2 =
         | Pmod_extension a, Pmod_extension a' ->
           let a = self#extension a a' in
           self#constr "Pmod_extension" [ ("extension", a) ]
-        | _ -> raise (Reparse_error "module_expr_desc")
+        | _ -> Error "module_expr_desc"
 
-    method structure : structure -> structure -> 'res =
+    method structure : structure -> structure -> ('res, string) result =
       (*Fixme: additional structure item inside ppml (ppx show for instance)*)
       fun l l' -> self#list self#structure_item l l'
 
-    method structure_item : structure_item -> structure_item -> 'res =
+    method structure_item
+        : structure_item -> structure_item -> ('res, string) result =
       fun { pstr_desc; pstr_loc }
           { pstr_desc = pstr_desc'; pstr_loc = pstr_loc' } ->
         let pstr_desc = self#structure_item_desc pstr_desc pstr_desc' in
@@ -1799,7 +1869,7 @@ class virtual ['res] lift2 =
           [ ("pstr_desc", pstr_desc); ("pstr_loc", pstr_loc) ]
 
     method structure_item_desc
-        : structure_item_desc -> structure_item_desc -> 'res =
+        : structure_item_desc -> structure_item_desc -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Pstr_eval (a, b), Pstr_eval (a', b') ->
@@ -1853,9 +1923,10 @@ class virtual ['res] lift2 =
           let a = self#extension a a' in
           let b = self#attributes b b' in
           self#constr "Pstr_extension" [ ("extension", a); ("attributes", b) ]
-        | _ -> raise (Reparse_error "structure_item_desc")
+        | _ -> Error "structure_item_desc"
 
-    method value_binding : value_binding -> value_binding -> 'res =
+    method value_binding
+        : value_binding -> value_binding -> ('res, string) result =
       fun { pvb_pat; pvb_expr; pvb_attributes; pvb_loc }
           { pvb_pat = pvb_pat'
           ; pvb_expr = pvb_expr'
@@ -1873,7 +1944,8 @@ class virtual ['res] lift2 =
           ; ("pvb_loc", pvb_loc)
           ]
 
-    method module_binding : module_binding -> module_binding -> 'res =
+    method module_binding
+        : module_binding -> module_binding -> ('res, string) result =
       fun { pmb_name; pmb_expr; pmb_attributes; pmb_loc }
           { pmb_name = pmb_name'
           ; pmb_expr = pmb_expr'
@@ -1891,7 +1963,8 @@ class virtual ['res] lift2 =
           ; ("pmb_loc", pmb_loc)
           ]
 
-    method toplevel_phrase : toplevel_phrase -> toplevel_phrase -> 'res =
+    method toplevel_phrase
+        : toplevel_phrase -> toplevel_phrase -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Ptop_def a, Ptop_def a' ->
@@ -1900,10 +1973,10 @@ class virtual ['res] lift2 =
         | Ptop_dir a, Ptop_dir a' ->
           let a = self#toplevel_directive a a' in
           self#constr "Ptop_dir" [ ("toplevel_directive", a) ]
-        | _ -> raise (Reparse_error "toplevel_phrase")
+        | _ -> Error "toplevel_phrase"
 
-    method toplevel_directive : toplevel_directive -> toplevel_directive -> 'res
-        =
+    method toplevel_directive
+        : toplevel_directive -> toplevel_directive -> ('res, string) result =
       fun { pdir_name; pdir_arg; pdir_loc }
           { pdir_name = pdir_name'; pdir_arg = pdir_arg'; pdir_loc = pdir_loc' } ->
         let pdir_name = self#loc self#string pdir_name pdir_name' in
@@ -1915,8 +1988,8 @@ class virtual ['res] lift2 =
           ; ("pdir_loc", pdir_loc)
           ]
 
-    method directive_argument : directive_argument -> directive_argument -> 'res
-        =
+    method directive_argument
+        : directive_argument -> directive_argument -> ('res, string) result =
       fun { pdira_desc; pdira_loc }
           { pdira_desc = pdira_desc'; pdira_loc = pdira_loc' } ->
         let pdira_desc = self#directive_argument_desc pdira_desc pdira_desc' in
@@ -1925,7 +1998,9 @@ class virtual ['res] lift2 =
           [ ("pdira_desc", pdira_desc); ("pdira_loc", pdira_loc) ]
 
     method directive_argument_desc
-        : directive_argument_desc -> directive_argument_desc -> 'res =
+        :    directive_argument_desc
+          -> directive_argument_desc
+          -> ('res, string) result =
       fun x x' ->
         match (x, x') with
         | Pdir_string a, Pdir_string a' ->
@@ -1941,7 +2016,7 @@ class virtual ['res] lift2 =
         | Pdir_bool a, Pdir_bool a' ->
           let a = self#bool a a' in
           self#constr "Pdir_bool" [ ("bool", a) ]
-        | _ -> raise (Reparse_error "directive_argument_desc")
+        | _ -> Error "directive_argument_desc"
 
-    method cases : cases -> cases -> 'res = self#list self#case
+    method cases : cases -> cases -> ('res, string) result = self#list self#case
   end

@@ -102,9 +102,11 @@ let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
         | Impl ppml_structure ->
           let reparsed_structure = Parse.implementation lex in
           Dumpast.reparse ppml_structure reparsed_structure
+          |> Result.ok_or_failwith
         | Intf signature ->
           let reparsed_signature = Parse.interface lex in
-          Dumpast.reparse_signature signature reparsed_signature))
+          Dumpast.reparse_signature signature reparsed_signature
+          |> Result.ok_or_failwith))
   in
 
   let astpair =

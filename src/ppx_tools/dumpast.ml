@@ -71,50 +71,69 @@ let warn_ast_diff method_name =
 
 let reparse_ast =
   let with_reparse f on_reparse =
-    try f () with
-    | Traverse_ast2.Reparse_error m ->
+    match f () with
+    | Ok res -> Ok res
+    | Error m ->
       warn_ast_diff m;
-      on_reparse ()
+      Ok (on_reparse ())
   in
   object (self)
     inherit [Jsonoo.t] Traverse_ast2.lift2 as super
 
-    method unit () = Jsonoo.Encode.null
+    method unit () = Ok Jsonoo.Encode.null
 
     method tuple args =
-      Jsonoo.Encode.object_ (("type", Jsonoo.Encode.string "tuple") :: args)
+      let args =
+        List.map (fun (label, res) -> (label, Result.get_ok res)) args
+      in
+      Ok
+        (Jsonoo.Encode.object_ (("type", Jsonoo.Encode.string "tuple") :: args))
 
-    method string value _ = Jsonoo.Encode.string value
+    method string value _ = Ok (Jsonoo.Encode.string value)
 
-    method float value _ = Jsonoo.Encode.float value
+    method float value _ = Ok (Jsonoo.Encode.float value)
 
-    method bool value _ = Jsonoo.Encode.bool value
+    method bool value _ = Ok (Jsonoo.Encode.bool value)
 
     method record label args =
-      Jsonoo.Encode.object_ (("type", Jsonoo.Encode.string label) :: args)
+      let args =
+        List.map (fun (label, res) -> (label, Result.get_ok res)) args
+      in
+      Ok (Jsonoo.Encode.object_ (("type", Jsonoo.Encode.string label) :: args))
 
     method other _ _ =
-      Jsonoo.Encode.string "serializing other values is not supported yet"
+      Ok (Jsonoo.Encode.string "serializing other values is not supported yet")
 
     method nativeint _ _ =
-      Jsonoo.Encode.string "serializing nativeint is not supported yet"
+      Ok (Jsonoo.Encode.string "serializing nativeint is not supported yet")
 
     method int64 _ _ =
-      Jsonoo.Encode.string "serializing int64 is not supported yet"
+      Ok (Jsonoo.Encode.string "serializing int64 is not supported yet")
 
     method int32 _ _ =
-      Jsonoo.Encode.string "serializing int32 is not supported yet"
+      Ok (Jsonoo.Encode.string "serializing int32 is not supported yet")
 
-    method int value _ = Jsonoo.Encode.int value
+    method int value _ = Ok (Jsonoo.Encode.int value)
 
     method list f l l' =
-      (*FIXME different length?*)
-      if List.length l > List.length l' then
-        List.map2 f l l |> Jsonoo.Encode.list (fun x -> x)
-      else if List.length l < List.length l' then
-        List.map2 f l' l' |> Jsonoo.Encode.list (fun x -> x)
+      let l_length = List.length l in
+      let l_length' = List.length l' in
+
+      if l_length > l_length' then
+        Ok
+          (Jsonoo.Encode.list
+             (fun x -> x)
+             (List.map2 (fun x x' -> Result.get_ok (f x x')) l l))
+      else if l_length < l_length' then
+        Ok
+          (Jsonoo.Encode.list
+             (fun x -> x)
+             (List.map2 (fun x x' -> Result.get_ok (f x x')) l' l'))
       else
-        List.map2 f l l' |> Jsonoo.Encode.list (fun x -> x)
+        Ok
+          (Jsonoo.Encode.list
+             (fun x -> x)
+             (List.map2 (fun x x' -> Result.get_ok (f x x')) l l'))
 
     method option f o o' =
       match (o, o') with
@@ -122,18 +141,23 @@ let reparse_ast =
         let a = f x x' in
         a
       | None, None ->
-        Jsonoo.Encode.object_ [ ("type", Jsonoo.Encode.string "None") ]
-      | _ -> raise (Traverse_ast2.Reparse_error "option")
+        Ok (Jsonoo.Encode.object_ [ ("type", Jsonoo.Encode.string "None") ])
+      | _ -> Error "option"
 
     method constr label args =
+      let args =
+        List.map (fun (label, res) -> (label, Result.get_ok res)) args
+      in
       match args with
-      | [] -> Jsonoo.Encode.object_ [ ("type", Jsonoo.Encode.string label) ]
+      | [] ->
+        Ok (Jsonoo.Encode.object_ [ ("type", Jsonoo.Encode.string label) ])
       | _ ->
-        Jsonoo.Encode.object_ (("type", Jsonoo.Encode.string label) :: args)
+        Ok
+          (Jsonoo.Encode.object_ (("type", Jsonoo.Encode.string label) :: args))
 
-    method char value _ = Jsonoo.Encode.char value
+    method char value _ = Ok (Jsonoo.Encode.char value)
 
-    method! location : location -> location -> Jsonoo.t =
+    method! location : location -> location -> (Jsonoo.t, string) result =
       fun { loc_start; loc_end; loc_ghost }
           { loc_start = loc_start'; loc_end = loc_end'; loc_ghost = loc_ghost' } ->
         let loc_start = super#position loc_start loc_start in
@@ -148,24 +172,6 @@ let reparse_ast =
           ; ("origin_loc_end", loc_end)
           ; ("loc_ghost", loc_ghost)
           ]
-
-    method! open_infos _a { popen_expr; popen_override; popen_loc; _ }
-        { popen_expr = popen_expr'
-        ; popen_override = popen_override'
-        ; popen_loc = popen_loc'
-        ; _
-        } =
-      let popen_expr = _a popen_expr popen_expr' in
-      let popen_override = self#override_flag popen_override popen_override' in
-      let popen_loc = self#location popen_loc popen_loc' in
-      let popen_attributes = Jsonoo.Encode.null in
-      (*FIXME*)
-      self#record "open_infos"
-        [ ("popen_expr", popen_expr)
-        ; ("popen_override", popen_override)
-        ; ("popen_loc", popen_loc)
-        ; ("popen_attributes", popen_attributes)
-        ]
 
     method! directive_argument_desc x x' =
       with_reparse
