@@ -284,9 +284,8 @@ let reload_pp_doc instance ~document =
   let visibleTextEditors = Window.visibleTextEditors () in
   let origin_uri =
     match
-      Ast_editor_state.find_original_doc_by_pp_uri
+      Ast_editor_state.find_original_doc_by_pp_uri ast_editor_state
         ~uri_string:(doc_string_uri ~document)
-        (Ast_editor_state.get_origin_to_pp_doc_map ast_editor_state)
     with
     | Some x -> x
     | None -> failwith "Failed finding the original document URI."

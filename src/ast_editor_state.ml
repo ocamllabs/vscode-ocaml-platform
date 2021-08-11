@@ -33,13 +33,8 @@ let make () =
   ; origin_to_pp_doc_map
   }
 
-let find_original_doc_by_pp_uri ~uri_string map =
-  let r =
-    Map.filter ~f:(fun data -> String.equal uri_string data) map |> Map.keys
-  in
-  match r with
-  | k :: _ -> Some k
-  | _ -> None
+let find_original_doc_by_pp_uri t ~uri_string =
+  Map.find t.origin_to_pp_doc_map uri_string
 
 let find_webview_by_doc t ~document =
   let doc_uri = Uri.toString (TextDocument.uri document) () in
@@ -48,9 +43,7 @@ let find_webview_by_doc t ~document =
   | Some _ -> None
   | None -> (
     let open Option.O in
-    let* key =
-      find_original_doc_by_pp_uri ~uri_string:doc_uri t.origin_to_pp_doc_map
-    in
+    let* key = find_original_doc_by_pp_uri ~uri_string:doc_uri t in
     match Map.find t.webview_map key with
     | wv_opt when not t.original_mode -> wv_opt
     | _ -> None)

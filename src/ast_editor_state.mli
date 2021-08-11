@@ -7,8 +7,7 @@ type t
 
 val make : unit -> t
 
-val find_original_doc_by_pp_uri :
-  uri_string:string -> ('a, string, 'b) Import.Map.t -> 'a option
+val find_original_doc_by_pp_uri : t -> uri_string:string -> string option
 
 val find_webview_by_doc : t -> document:TextDocument.t -> WebView.t option
 
