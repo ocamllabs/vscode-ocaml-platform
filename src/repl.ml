@@ -135,8 +135,8 @@ let open_terminal instance sandbox : Terminal.t Or_error.t Promise.t =
     let open Promise.Syntax in
     (* when [ocaml.repl.path] setting isn't set or is invalid, we offer an input
        box to the user to get the command to launch REPL; if that doesn't
-       succeed we launch default REPL. *)
-    let repl_when_invalid_repl_settings () =
+       succeed, we launch default REPL. *)
+    let repl_terminal_no_repl_path () =
       let* cmd_from_inputbox = repl_from_inputbox sandbox in
       match cmd_from_inputbox with
       | Some cmd -> Promise.return cmd
@@ -144,16 +144,16 @@ let open_terminal instance sandbox : Terminal.t Or_error.t Promise.t =
     in
     let* cmd =
       match Settings.repl_path () with
-      | None -> repl_when_invalid_repl_settings ()
-      | Some bin when not (String.is_empty bin) ->
-        let args = Option.value (Settings.repl_args ()) ~default:[] in
-        Sandbox.get_command sandbox bin args |> Promise.return
-      | Some _ ->
+      | None -> repl_terminal_no_repl_path ()
+      | Some "" ->
         show_message `Warn
           "REPL Path setting is set to an empty string, which is not a valid \
            path to a REPL executable. Consider fixing that if you want to \
-           launch REPL from that setting.";
-        repl_when_invalid_repl_settings ()
+           launch REPL from that setting next time.";
+        repl_terminal_no_repl_path ()
+      | Some bin ->
+        let args = Option.value (Settings.repl_args ()) ~default:[] in
+        Sandbox.get_command sandbox bin args |> Promise.return
     in
     let* result = Cmd.check cmd in
     match result with
