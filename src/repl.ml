@@ -194,7 +194,7 @@ let open_terminal instance sandbox : Terminal.t Or_error.t Promise.t =
 
          That's hacky, buy hey, if vscode-python does it, so can we...
          https://github.com/microsoft/vscode-python/blob/main/src/client/terminals/codeExecution/terminalCodeExecution.ts#L54 *)
-      let+ () = Node.set_timeout 2500 in
+      let+ () = Node.set_timeout 1500 in
       match Terminal.exitStatus terminal with
       | None ->
         Extension_instance.set_repl instance (Some terminal);
