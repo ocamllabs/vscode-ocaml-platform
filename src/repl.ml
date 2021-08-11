@@ -202,10 +202,10 @@ let open_terminal instance sandbox : Terminal.t Or_error.t Promise.t =
           open_repl_in_existing_terminal terminal command
       in
       Terminal_sandbox.show ~preserveFocus:true terminal;
-      (* Wait for UTop or OCaml REPL to be initialized before sending text to
-         the terminal.
-
-         That's hacky, buy hey, if vscode-python does it, so can we...
+      (* With the current vscode API we can't check if there's a process running
+         in the foreground or whether the REPL is ready to evaluate code (eg
+         it's setting up env), so we wait for the init to happen. So does python
+         extension:
          https://github.com/microsoft/vscode-python/blob/main/src/client/terminals/codeExecution/terminalCodeExecution.ts#L54 *)
       let+ () = Node.set_timeout 1500 in
       match Terminal.exit_status terminal with
