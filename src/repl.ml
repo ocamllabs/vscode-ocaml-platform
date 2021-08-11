@@ -248,10 +248,7 @@ module Command = struct
         let+ (result : (Terminal.t, string) result) =
           open_terminal instance sandbox
         in
-        let (_ : (Terminal.t, unit) result) =
-          Result.map_error result ~f:(fun err -> log "%s" err)
-        in
-        ()
+        Result.iter_error result ~f:(fun err -> log "%s" err)
       in
       ()
     in
@@ -270,10 +267,10 @@ module Command = struct
         | Ok term -> (
           match get_selected_code textEditor with
           | Some code ->
-            Promise.return
-              (if String.length code > 0 then
-                let code = preformat_code code in
-                Terminal_sandbox.send term code)
+            (if String.length code > 0 then
+              let code = preformat_code code in
+              Terminal_sandbox.send term code);
+            Promise.return ()
           | None -> (
             let open Promise.Syntax in
             match Extension_instance.lsp_client instance with
