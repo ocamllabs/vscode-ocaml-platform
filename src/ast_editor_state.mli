@@ -1,5 +1,8 @@
 open Import
 
+(** This module's interface is private to [Ast_editor.t]. It is in a separate
+    module to avoid circular dependencies with [Extension_instance.t] *)
+
 type t
 
 val make : unit -> t
