@@ -162,7 +162,6 @@ let open_terminal instance sandbox : Terminal.t Or_error.t Promise.t =
       Promise.return
         (Error "Running a REPL from a Shell command is not supported")
     | Ok (Spawn command) -> (
-      (* TODO: add a setting: always new / always reuse / pickable *)
       let* pick =
         match Settings.repl_terminal () with
         | Settings.Repl_terminal.Always_create_new_terminal ->
@@ -178,7 +177,7 @@ let open_terminal instance sandbox : Terminal.t Or_error.t Promise.t =
         | `Existing_terminal terminal ->
           open_repl_in_existing_terminal terminal command
       in
-      Terminal_sandbox.show terminal;
+      Terminal_sandbox.show ~preserveFocus:true terminal;
       (* Wait for UTop or OCaml REPL to be initialized before sending text to
          the terminal.
 
