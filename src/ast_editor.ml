@@ -19,8 +19,6 @@ module Pp_path : sig
     | Signature
     | Unknown
 
-  val project_root_path : unit -> string option
-
   val get_kind : document:TextDocument.t -> kind
 
   val get_pp_path : document:TextDocument.t -> string option
@@ -304,53 +302,28 @@ let reload_pp_doc instance ~document =
     replace_document_content
       ~content:(fetch_pp_code ~document:original_document)
       ~document;
-    Promise.resolve 1
+    Promise.resolve 0
 
 let rec manage_choice instance choice ~document : int Promise.t =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  match Pp_path.project_root_path () with
-  | None ->
-    show_message `Error "%s" "Error : project root wasn't found";
-    Promise.resolve 1
-  | Some root -> (
-    let build_cmd =
-      let cwd = Path.of_string root in
-      fun () -> Cmd.run ~cwd (Cmd.Shell "eval $(opam env); dune build")
-    in
-    let rec build_project () =
-      let open Promise.Syntax in
-      let* res = build_cmd () in
-      if res.exitCode = 0 then
-        (match
-           (Ast_editor_state.pp_status ast_editor_state)
-             (TextDocument.uri document)
-         with
-        | `Original -> reload_pp_doc
-        | `Absent_or_pped -> open_preprocessed_doc_to_the_side)
-          instance ~document
-      else
-        let* perror =
-          Window.showErrorMessage
-            ~message:"Building project failed, fix project errors and retry."
-            ~choices:
-              [ ("Retry running `dune build`", `Build); ("Abandon", `Abandon) ]
-            ()
-        in
-        match perror with
-        | Some `Build -> build_project ()
-        | Some `Abandon -> Promise.resolve 1
-        | _ -> Promise.resolve (-1)
-    in
-    match choice with
-    | Some `Build -> build_project ()
-    | Some `Abandon -> Promise.resolve 1
-    | _ -> Promise.resolve (-1))
+  match choice with
+  | Some `Update
+  | Some `Retry ->
+    (match
+       (Ast_editor_state.pp_status ast_editor_state) (TextDocument.uri document)
+     with
+    | `Original -> reload_pp_doc
+    | `Absent_or_pped -> open_preprocessed_doc_to_the_side)
+      instance ~document
+  | Some `Abandon -> Promise.resolve 1
+  | _ -> Promise.resolve (-1)
 
 and manage_open_failure err_msg instance ~document =
   let open Promise.Syntax in
   let* choice =
-    Window.showInformationMessage ~message:err_msg
-      ~choices:[ ("Run `dune build`", `Build); ("Abandon", `Abandon) ]
+    Window.showInformationMessage
+      ~message:(err_msg ^ " Please make sure your project is built and retry.")
+      ~choices:[ ("Retry", `Retry); ("Abandon", `Abandon) ]
       ()
   in
   manage_choice instance choice ~document
@@ -476,9 +449,9 @@ let manage_changed_origin instance ~document =
   let* choice =
     Window.showInformationMessage
       ~message:
-        "The original document have been changed, would you like to rebuild \
-         the project?"
-      ~choices:[ ("Run `dune build`", `Build); ("Cancel", `Abandon) ]
+        "The original document has been changed, please rebuild the project \
+         and update."
+      ~choices:[ ("Update", `Update); ("Cancel", `Abandon) ]
       ()
   in
   manage_choice instance choice ~document
