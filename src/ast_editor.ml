@@ -318,14 +318,12 @@ let rec manage_choice instance choice ~document : int Promise.t =
       let open Promise.Syntax in
       let* res = build_cmd () in
       if res.exitCode = 0 then
-        (if
-         Map.existsi
-           (Ast_editor_state.get_pp_doc_to_changed_origin_map ast_editor_state)
-           ~f:(fun ~key ~data:_ -> String.equal key (doc_string_uri ~document))
-        then
-          reload_pp_doc
-        else
-          open_preprocessed_doc_to_the_side)
+        (match
+           (Ast_editor_state.find_pp_doc ast_editor_state)
+             (doc_string_uri ~document)
+         with
+        | Some true -> reload_pp_doc
+        | _ -> open_preprocessed_doc_to_the_side)
           instance ~document
       else
         let* perror =
@@ -490,9 +488,7 @@ let onDidChangeActiveTextEditor_listener instance e =
   if not (TextEditor.t_to_js e |> Ojs.is_null) then
     let document = TextEditor.document e in
     match
-      Map.find
-        (Ast_editor_state.get_pp_doc_to_changed_origin_map ast_editor_state)
-        (doc_string_uri ~document)
+      Ast_editor_state.find_pp_doc ast_editor_state (doc_string_uri ~document)
     with
     | Some true ->
       let (_ : int Promise.t) = manage_changed_origin instance ~document in

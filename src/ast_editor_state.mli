@@ -25,13 +25,12 @@ val set_origin_changed : t -> data:bool -> key:string -> unit
 
 val entry_exists : t -> origin_doc:string -> pp_doc:string -> bool
 
-val get_origin_to_pp_doc_map :
-  t -> (string, string, String.comparator_witness) Map.t
-
 val on_origin_update_content : t -> TextDocument.t -> unit
 
 val get_pp_doc_to_changed_origin_map :
   t -> (string, bool, String.comparator_witness) Map.t
+
+val find_pp_doc : t -> string -> bool option
 
 val remove_doc_entries : t -> TextDocument.t -> unit
 
