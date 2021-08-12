@@ -316,8 +316,9 @@ let rec manage_choice instance choice ~document =
       reload_pp_doc
     | `Absent_or_pped -> open_preprocessed_doc_to_the_side)
       instance ~document
-  | Some `Abandon -> Promise.return (Error "Operation has been abandoned.")
-  | None -> Promise.return (Error "Choice value is None for some reason.")
+  | Some `Abandon
+  | None ->
+    Promise.return (Error "Operation has been abandoned.")
 
 and manage_open_failure err_msg instance ~document =
   let open Promise.Syntax in
