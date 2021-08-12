@@ -37,9 +37,10 @@ let parse_ast =
       | None -> Jsonoo.Encode.object_ [ ("type", Jsonoo.Encode.string "None") ]
 
     method constr label args =
-      match args with
-      | [] -> object_ [ ("type", string label) ]
-      | _ -> object_ (("type", string label) :: args)
+      Jsonoo.Encode.object_
+        (match args with
+        | [] -> [ ("type", string label) ]
+        | _ -> ("type", string label) :: args)
 
     method char value = char value
 
@@ -71,11 +72,12 @@ let warn_ast_diff method_name =
 
 let reparse_ast =
   let with_reparse f on_reparse =
-    match f () with
-    | Ok res -> Ok res
-    | Error m ->
-      warn_ast_diff m;
-      Ok (on_reparse ())
+    Ok
+      (match f () with
+      | Ok res -> res
+      | Error m ->
+        warn_ast_diff m;
+        on_reparse ())
   in
   object (self)
     inherit [Jsonoo.t] Traverse_ast2.lift2 as super
@@ -118,22 +120,15 @@ let reparse_ast =
     method list f l l' =
       let l_length = List.length l in
       let l_length' = List.length l' in
-
-      if l_length > l_length' then
-        Ok
-          (Jsonoo.Encode.list
-             (fun x -> x)
-             (List.map2 (fun x x' -> Result.get_ok (f x x')) l l))
-      else if l_length < l_length' then
-        Ok
-          (Jsonoo.Encode.list
-             (fun x -> x)
-             (List.map2 (fun x x' -> Result.get_ok (f x x')) l' l'))
-      else
-        Ok
-          (Jsonoo.Encode.list
-             (fun x -> x)
-             (List.map2 (fun x x' -> Result.get_ok (f x x')) l l'))
+      Ok
+        (Jsonoo.Encode.list
+           (fun x -> x)
+           (if l_length > l_length' then
+             List.map2 (fun x x' -> Result.get_ok (f x x')) l l
+           else if l_length < l_length' then
+             List.map2 (fun x x' -> Result.get_ok (f x x')) l' l'
+           else
+             List.map2 (fun x x' -> Result.get_ok (f x x')) l l'))
 
     method option f o o' =
       match (o, o') with
@@ -148,12 +143,11 @@ let reparse_ast =
       let args =
         List.map (fun (label, res) -> (label, Result.get_ok res)) args
       in
-      match args with
-      | [] ->
-        Ok (Jsonoo.Encode.object_ [ ("type", Jsonoo.Encode.string label) ])
-      | _ ->
-        Ok
-          (Jsonoo.Encode.object_ (("type", Jsonoo.Encode.string label) :: args))
+      Ok
+        (Jsonoo.Encode.object_
+           (match args with
+           | [] -> [ ("type", Jsonoo.Encode.string label) ]
+           | _ -> ("type", Jsonoo.Encode.string label) :: args))
 
     method char value _ = Ok (Jsonoo.Encode.char value)
 
@@ -346,13 +340,14 @@ let reparse_ast =
 
 let transform source kind =
   try
-    match kind with
-    | `Impl ->
-      let v = Parse.implementation (Lexing.from_string source) in
-      Ok (parse_ast#structure v)
-    | `Intf ->
-      let v = Parse.interface (Lexing.from_string source) in
-      Ok (parse_ast#signature v)
+    Ok
+      (match kind with
+      | `Impl ->
+        let v = Parse.implementation (Lexing.from_string source) in
+        parse_ast#structure v
+      | `Intf ->
+        let v = Parse.interface (Lexing.from_string source) in
+        parse_ast#signature v)
   with
   | Syntaxerr.Error e ->
     (*TODO output the error in AST explorer*)
