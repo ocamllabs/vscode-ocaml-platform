@@ -309,7 +309,7 @@ let rec manage_choice instance choice ~document : int Promise.t =
        (Ast_editor_state.pp_status ast_editor_state) (TextDocument.uri document)
      with
     | `Original ->
-      (Ast_editor_state.remove_after_updating ast_editor_state) ~document;
+      (Ast_editor_state.remove_dirty_original_doc ast_editor_state) ~document;
       reload_pp_doc
     | `Absent_or_pped -> open_preprocessed_doc_to_the_side)
       instance ~document

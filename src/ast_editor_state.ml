@@ -10,11 +10,10 @@ type t =
   ; mutable original_mode : bool
         (* Contains Some value when hover mode is enabled, None otherwise *)
   ; mutable hover_disposable : Disposable.t option
-        (* Mapping between string value of Uri.t of the original (non
-           preprocessed) document to boolean, indicating that the document has
-           changed since opening its Preprocessed Document *)
-  ; mutable pp_doc_to_changed_origin_set :
-      (string, String.comparator_witness) Set.t
+        (* A set containing original documents (as opposed to Preprocessed
+           Document) that have been changed since last Preprocessed Document
+           opening (or reload) *)
+  ; mutable dirty_original_doc_set : (string, String.comparator_witness) Set.t
         (* Mapping beween the original and Preprocessed Document used to
            simultaneously communicate with a common webview. *)
   ; mutable origin_to_pp_doc_map :
@@ -25,12 +24,12 @@ let make () =
   let webview_map = Map.empty (module String) in
   let original_mode = true in
   let hover_disposable = None in
-  let pp_doc_to_changed_origin_set = Set.empty (module String) in
+  let dirty_original_doc_set = Set.empty (module String) in
   let origin_to_pp_doc_map = Map.empty (module String) in
   { webview_map
   ; original_mode
   ; hover_disposable
-  ; pp_doc_to_changed_origin_set
+  ; dirty_original_doc_set
   ; origin_to_pp_doc_map
   }
 
@@ -78,22 +77,21 @@ let on_origin_update_content t changed_document =
   let uri = Uri.toString changed_document () in
   match Map.find t.origin_to_pp_doc_map (Uri.toString changed_document ()) with
   | None -> ()
-  | Some _ ->
-    t.pp_doc_to_changed_origin_set <- Set.add t.pp_doc_to_changed_origin_set uri
+  | Some _ -> t.dirty_original_doc_set <- Set.add t.dirty_original_doc_set uri
 
 let remove_doc_entries (t : t) uri =
-  let pp_doc_to_changed_origin_set, origin_to_pp_doc_map =
+  let dirty_original_doc_set, origin_to_pp_doc_map =
     let origin_uri = Uri.toString (TextDocument.uri uri) () in
     match Map.find t.origin_to_pp_doc_map origin_uri with
     | Some uri ->
-      ( Set.remove t.pp_doc_to_changed_origin_set uri
+      ( Set.remove t.dirty_original_doc_set uri
       , Map.remove t.origin_to_pp_doc_map origin_uri )
     | None ->
-      ( Set.remove t.pp_doc_to_changed_origin_set origin_uri
+      ( Set.remove t.dirty_original_doc_set origin_uri
       , Map.filteri t.origin_to_pp_doc_map ~f:(fun ~key:_ ~data ->
             not (String.equal data origin_uri)) )
   in
-  t.pp_doc_to_changed_origin_set <- pp_doc_to_changed_origin_set;
+  t.dirty_original_doc_set <- dirty_original_doc_set;
   t.origin_to_pp_doc_map <- origin_to_pp_doc_map
 
 let set_webview t uri webview =
@@ -102,7 +100,7 @@ let set_webview t uri webview =
 
 let pp_status t uri =
   if
-    Set.exists t.pp_doc_to_changed_origin_set ~f:(fun el ->
+    Set.exists t.dirty_original_doc_set ~f:(fun el ->
         match find_original_doc_by_pp_uri t uri with
         | Some uri -> String.equal el uri
         | None -> false)
@@ -111,9 +109,8 @@ let pp_status t uri =
   else
     `Absent_or_pped
 
-let remove_after_updating t ~document =
+let remove_dirty_original_doc t ~document =
   match find_original_doc_by_pp_uri t (TextDocument.uri document) with
   | Some uri ->
-    t.pp_doc_to_changed_origin_set <-
-      Set.remove t.pp_doc_to_changed_origin_set uri
+    t.dirty_original_doc_set <- Set.remove t.dirty_original_doc_set uri
   | None -> ()

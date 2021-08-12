@@ -31,4 +31,4 @@ val remove_doc_entries : t -> TextDocument.t -> unit
 
 val set_webview : t -> Uri.t -> WebView.t -> unit
 
-val remove_after_updating : t -> document:TextDocument.t -> unit
+val remove_dirty_original_doc : t -> document:TextDocument.t -> unit
