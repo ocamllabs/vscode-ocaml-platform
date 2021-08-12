@@ -319,11 +319,11 @@ let rec manage_choice instance choice ~document : int Promise.t =
       let* res = build_cmd () in
       if res.exitCode = 0 then
         (match
-           (Ast_editor_state.find_pp_doc ast_editor_state)
+           (Ast_editor_state.pp_status ast_editor_state)
              (doc_string_uri ~document)
          with
-        | Some true -> reload_pp_doc
-        | _ -> open_preprocessed_doc_to_the_side)
+        | `Original -> reload_pp_doc
+        | `Absent_or_pped -> open_preprocessed_doc_to_the_side)
           instance ~document
       else
         let* perror =
@@ -488,12 +488,12 @@ let onDidChangeActiveTextEditor_listener instance e =
   if not (TextEditor.t_to_js e |> Ojs.is_null) then
     let document = TextEditor.document e in
     match
-      Ast_editor_state.find_pp_doc ast_editor_state (doc_string_uri ~document)
+      Ast_editor_state.pp_status ast_editor_state (doc_string_uri ~document)
     with
-    | Some true ->
+    | `Absent_or_pped -> ()
+    | `Original ->
       let (_ : int Promise.t) = manage_changed_origin instance ~document in
       ()
-    | _ -> ()
 
 let close_visible_editors_by_uri uri =
   let f e =

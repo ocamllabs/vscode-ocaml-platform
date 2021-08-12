@@ -101,4 +101,9 @@ let remove_doc_entries (t : t) uri =
 let set_webview t key webview =
   t.webview_map <- Map.set ~key ~data:webview t.webview_map
 
-let find_pp_doc t key = Map.find t.pp_doc_to_changed_origin_map key
+let pp_status t key =
+  match Map.find t.pp_doc_to_changed_origin_map key with
+  | Some true -> `Original
+  | Some false
+  | None ->
+    `Absent_or_pped

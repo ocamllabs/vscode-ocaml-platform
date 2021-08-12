@@ -30,7 +30,7 @@ val on_origin_update_content : t -> TextDocument.t -> unit
 val get_pp_doc_to_changed_origin_map :
   t -> (string, bool, String.comparator_witness) Map.t
 
-val find_pp_doc : t -> string -> bool option
+val pp_status : t -> string -> [ `Absent_or_pped | `Original ]
 
 val remove_doc_entries : t -> TextDocument.t -> unit
 
