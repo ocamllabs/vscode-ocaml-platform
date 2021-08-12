@@ -37,15 +37,12 @@ let find_original_doc_by_pp_uri t ~uri = Map.find t.origin_to_pp_doc_map uri
 
 let find_webview_by_doc t ~document =
   let doc_uri = Uri.toString (TextDocument.uri document) () in
-  match Map.find t.webview_map doc_uri with
-  | wv_opt when t.original_mode -> wv_opt
-  | Some _ -> None
-  | None -> (
+  if t.original_mode then
+    Map.find t.webview_map doc_uri
+  else
     let open Option.O in
-    let* key = find_original_doc_by_pp_uri ~uri_string:doc_uri t in
-    match Map.find t.webview_map key with
-    | wv_opt when not t.original_mode -> wv_opt
-    | _ -> None)
+    let* key = find_original_doc_by_pp_uri ~uri:doc_uri t in
+    Map.find t.webview_map key
 
 let set_changes_tracking t origin pp_doc =
   let origin_uri = Uri.toString (TextDocument.uri origin) () in
