@@ -35,7 +35,4 @@ val get_pp_doc_to_changed_origin_map :
 
 val remove_doc_entries : t -> TextDocument.t -> unit
 
-val get_webview_map : t -> (string, WebView.t, String.comparator_witness) Map.t
-
-val set_webview_map :
-  t -> (string, WebView.t, String.comparator_witness) Map.t -> unit
+val set_webview : t -> string -> WebView.t -> unit

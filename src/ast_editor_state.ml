@@ -100,6 +100,5 @@ let remove_doc_entries (t : t) uri =
   t.pp_doc_to_changed_origin_map <- pp_doc_to_changed_origin_map;
   t.origin_to_pp_doc_map <- origin_to_pp_doc_map
 
-let set_webview_map t map = t.webview_map <- map
-
-let get_webview_map t = t.webview_map
+let set_webview t key webview =
+  t.webview_map <- Map.set ~key ~data:webview t.webview_map
