@@ -13,8 +13,8 @@ type t =
         (* Mapping between string value of Uri.t of the original (non
            preprocessed) document to boolean, indicating that the document has
            changed since opening its Preprocessed Document *)
-  ; mutable pp_doc_to_changed_origin_map :
-      (string, bool, String.comparator_witness) Map.t
+  ; mutable pp_doc_to_changed_origin_set :
+      (string, String.comparator_witness) Set.t
         (* Mapping beween the original and Preprocessed Document used to
            simultaneously communicate with a common webview. *)
   ; mutable origin_to_pp_doc_map :
@@ -25,12 +25,12 @@ let make () =
   let webview_map = Map.empty (module String) in
   let original_mode = true in
   let hover_disposable = None in
-  let pp_doc_to_changed_origin_map = Map.empty (module String) in
+  let pp_doc_to_changed_origin_set = Set.empty (module String) in
   let origin_to_pp_doc_map = Map.empty (module String) in
   { webview_map
   ; original_mode
   ; hover_disposable
-  ; pp_doc_to_changed_origin_map
+  ; pp_doc_to_changed_origin_set
   ; origin_to_pp_doc_map
   }
 
@@ -57,9 +57,7 @@ let set_changes_tracking t origin pp_doc =
   let origin_uri = Uri.toString (TextDocument.uri origin) () in
   let pp_doc_uri = Uri.toString (TextDocument.uri pp_doc) () in
   t.origin_to_pp_doc_map <-
-    Map.set t.origin_to_pp_doc_map ~key:origin_uri ~data:pp_doc_uri;
-  t.pp_doc_to_changed_origin_map <-
-    Map.set t.pp_doc_to_changed_origin_map ~key:pp_doc_uri ~data:false
+    Map.set t.origin_to_pp_doc_map ~key:origin_uri ~data:pp_doc_uri
 
 let get_original_mode t = t.original_mode
 
@@ -70,10 +68,9 @@ let get_hover_disposable t = t.hover_disposable
 let set_hover_disposable t hover_disposable =
   t.hover_disposable <- hover_disposable
 
-let set_origin_changed t ~data ~key =
-  let key = Uri.toString key () in
-  t.pp_doc_to_changed_origin_map <-
-    Map.set t.pp_doc_to_changed_origin_map ~key ~data
+let set_origin_changed t ~uri =
+  let uri = Uri.toString uri () in
+  t.pp_doc_to_changed_origin_set <- Set.add t.pp_doc_to_changed_origin_set uri
 
 let entry_exists t ~origin_doc ~pp_doc =
   let pp_doc = Uri.toString pp_doc () in
@@ -84,23 +81,22 @@ let entry_exists t ~origin_doc ~pp_doc =
 let on_origin_update_content t changed_document =
   match Map.find t.origin_to_pp_doc_map (Uri.toString changed_document ()) with
   | None -> ()
-  | Some key ->
-    t.pp_doc_to_changed_origin_map <-
-      Map.set t.pp_doc_to_changed_origin_map ~key ~data:true
+  | Some uri ->
+    t.pp_doc_to_changed_origin_set <- Set.add t.pp_doc_to_changed_origin_set uri
 
 let remove_doc_entries (t : t) uri =
-  let pp_doc_to_changed_origin_map, origin_to_pp_doc_map =
+  let pp_doc_to_changed_origin_set, origin_to_pp_doc_map =
     let origin_uri = Uri.toString (TextDocument.uri uri) () in
     match Map.find t.origin_to_pp_doc_map origin_uri with
     | Some uri ->
-      ( Map.remove t.pp_doc_to_changed_origin_map uri
+      ( Set.remove t.pp_doc_to_changed_origin_set uri
       , Map.remove t.origin_to_pp_doc_map origin_uri )
     | None ->
-      ( Map.remove t.pp_doc_to_changed_origin_map origin_uri
+      ( Set.remove t.pp_doc_to_changed_origin_set origin_uri
       , Map.filteri t.origin_to_pp_doc_map ~f:(fun ~key:_ ~data ->
             not (String.equal data origin_uri)) )
   in
-  t.pp_doc_to_changed_origin_map <- pp_doc_to_changed_origin_map;
+  t.pp_doc_to_changed_origin_set <- pp_doc_to_changed_origin_set;
   t.origin_to_pp_doc_map <- origin_to_pp_doc_map
 
 let set_webview t uri webview =
@@ -108,8 +104,10 @@ let set_webview t uri webview =
   t.webview_map <- Map.set ~key ~data:webview t.webview_map
 
 let pp_status t uri =
-  match Map.find t.pp_doc_to_changed_origin_map (Uri.toString uri ()) with
-  | Some true -> `Original
-  | Some false
-  | None ->
+  if
+    Set.exists t.pp_doc_to_changed_origin_set ~f:(fun e ->
+        String.equal e (Uri.toString uri ()))
+  then
+    `Original
+  else
     `Absent_or_pped

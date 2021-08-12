@@ -21,7 +21,7 @@ val get_hover_disposable : t -> Disposable.t option
 
 val set_hover_disposable : t -> Disposable.t option -> unit
 
-val set_origin_changed : t -> data:bool -> key:Uri.t -> unit
+val set_origin_changed : t -> uri:Uri.t -> unit
 
 val entry_exists : t -> origin_doc:Uri.t -> pp_doc:Uri.t -> bool
 

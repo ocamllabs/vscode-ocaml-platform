@@ -297,8 +297,7 @@ let reload_pp_doc instance ~document =
   | None -> Promise.resolve 1
   | Some _ ->
     Ast_editor_state.set_origin_changed ast_editor_state
-      ~key:(TextDocument.uri document)
-      ~data:false;
+      ~uri:(TextDocument.uri document);
     replace_document_content
       ~content:(fetch_pp_code ~document:original_document)
       ~document;
