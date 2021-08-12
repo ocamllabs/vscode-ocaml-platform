@@ -97,18 +97,17 @@ let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
       | Error err_msg ->
         show_message `Error "%s" err_msg;
         Jsonoo.Encode.null
-      | Ok res -> (
+      | Ok res ->
         let pp_code = fetch_pp_code ~document in
         let lex = Lexing.from_string pp_code in
-        match Ppxlib.Ast_io.get_ast res with
-        | Impl ppml_structure ->
-          let reparsed_structure = Parse.implementation lex in
-          Dumpast.reparse ppml_structure reparsed_structure
-          |> Result.ok_or_failwith
-        | Intf signature ->
-          let reparsed_signature = Parse.interface lex in
-          Dumpast.reparse_signature signature reparsed_signature
-          |> Result.ok_or_failwith))
+        Result.ok_or_failwith
+          (match Ppxlib.Ast_io.get_ast res with
+          | Impl ppml_structure ->
+            let reparsed_structure = Parse.implementation lex in
+            Dumpast.reparse ppml_structure reparsed_structure
+          | Intf signature ->
+            let reparsed_signature = Parse.interface lex in
+            Dumpast.reparse_signature signature reparsed_signature))
   in
 
   let astpair =
