@@ -33,8 +33,7 @@ let make () =
   ; origin_to_pp_doc_map
   }
 
-let find_original_doc_by_pp_uri t ~uri_string =
-  Map.find t.origin_to_pp_doc_map uri_string
+let find_original_doc_by_pp_uri t ~uri = Map.find t.origin_to_pp_doc_map uri
 
 let find_webview_by_doc t ~document =
   let doc_uri = Uri.toString (TextDocument.uri document) () in
@@ -98,11 +97,11 @@ let remove_doc_entries (t : t) uri =
   t.pp_doc_to_changed_origin_map <- pp_doc_to_changed_origin_map;
   t.origin_to_pp_doc_map <- origin_to_pp_doc_map
 
-let set_webview t key webview =
-  t.webview_map <- Map.set ~key ~data:webview t.webview_map
+let set_webview t ~uri webview =
+  t.webview_map <- Map.set ~key:uri ~data:webview t.webview_map
 
-let pp_status t key =
-  match Map.find t.pp_doc_to_changed_origin_map key with
+let pp_status t ~uri =
+  match Map.find t.pp_doc_to_changed_origin_map uri with
   | Some true -> `Original
   | Some false
   | None ->

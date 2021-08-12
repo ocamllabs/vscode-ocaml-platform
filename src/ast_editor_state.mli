@@ -7,7 +7,7 @@ type t
 
 val make : unit -> t
 
-val find_original_doc_by_pp_uri : t -> uri_string:string -> string option
+val find_original_doc_by_pp_uri : t -> uri:string -> string option
 
 val find_webview_by_doc : t -> document:TextDocument.t -> WebView.t option
 
@@ -30,8 +30,8 @@ val on_origin_update_content : t -> TextDocument.t -> unit
 val get_pp_doc_to_changed_origin_map :
   t -> (string, bool, String.comparator_witness) Map.t
 
-val pp_status : t -> string -> [ `Absent_or_pped | `Original ]
+val pp_status : t -> uri:string -> [ `Absent_or_pped | `Original ]
 
 val remove_doc_entries : t -> TextDocument.t -> unit
 
-val set_webview : t -> string -> WebView.t -> unit
+val set_webview : t -> uri:string -> WebView.t -> unit

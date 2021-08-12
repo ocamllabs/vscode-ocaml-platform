@@ -195,7 +195,7 @@ let resolveCustomTextEditor extension instance ~(document : TextDocument.t)
     ~webviewPanel ~token:_ : CustomTextEditorProvider.ResolvedEditor.t =
   let webview = WebviewPanel.webview webviewPanel in
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  Ast_editor_state.set_webview ast_editor_state (doc_string_uri ~document)
+  Ast_editor_state.set_webview ast_editor_state ~uri:(doc_string_uri ~document)
     webview;
   let (disposable : Disposable.t) =
     let onDidReceiveMessage_disposable =
@@ -282,7 +282,7 @@ let reload_pp_doc instance ~document =
   let origin_uri =
     match
       Ast_editor_state.find_original_doc_by_pp_uri ast_editor_state
-        ~uri_string:(doc_string_uri ~document)
+        ~uri:(doc_string_uri ~document)
     with
     | Some x -> x
     | None -> failwith "Failed finding the original document URI."
@@ -320,7 +320,7 @@ let rec manage_choice instance choice ~document : int Promise.t =
       if res.exitCode = 0 then
         (match
            (Ast_editor_state.pp_status ast_editor_state)
-             (doc_string_uri ~document)
+             ~uri:(doc_string_uri ~document)
          with
         | `Original -> reload_pp_doc
         | `Absent_or_pped -> open_preprocessed_doc_to_the_side)
@@ -488,7 +488,8 @@ let onDidChangeActiveTextEditor_listener instance e =
   if not (TextEditor.t_to_js e |> Ojs.is_null) then
     let document = TextEditor.document e in
     match
-      Ast_editor_state.pp_status ast_editor_state (doc_string_uri ~document)
+      Ast_editor_state.pp_status ast_editor_state
+        ~uri:(doc_string_uri ~document)
     with
     | `Absent_or_pped -> ()
     | `Original ->
