@@ -77,8 +77,6 @@ let on_origin_update_content t changed_document =
   | Some key -> set_origin_changed t ~key ~data:true
   | None -> ()
 
-let get_pp_doc_to_changed_origin_map t = t.pp_doc_to_changed_origin_map
-
 let remove_doc_entries (t : t) uri =
   let pp_doc_to_changed_origin_map, origin_to_pp_doc_map =
     let origin_uri = Uri.toString (TextDocument.uri uri) () in

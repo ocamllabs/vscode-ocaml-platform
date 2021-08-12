@@ -27,9 +27,6 @@ val entry_exists : t -> origin_doc:string -> pp_doc:string -> bool
 
 val on_origin_update_content : t -> TextDocument.t -> unit
 
-val get_pp_doc_to_changed_origin_map :
-  t -> (string, bool, String.comparator_witness) Map.t
-
 val pp_status : t -> uri:string -> [ `Absent_or_pped | `Original ]
 
 val remove_doc_entries : t -> TextDocument.t -> unit
