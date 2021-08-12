@@ -1,4 +1,5 @@
 open Import
+module Uri = Vscode.Uri
 
 type t =
   { (* The webview store that maps string value of Uri.t of the document to the
@@ -33,15 +34,15 @@ let make () =
   ; origin_to_pp_doc_map
   }
 
-let find_original_doc_by_pp_uri t ~uri = Map.find t.origin_to_pp_doc_map uri
+let find_original_doc_by_pp_uri t uri =
+  Map.find t.origin_to_pp_doc_map (Uri.toString uri ())
 
-let find_webview_by_doc t ~document =
-  let doc_uri = Uri.toString (TextDocument.uri document) () in
+let find_webview_by_doc t doc_uri =
   if t.original_mode then
-    Map.find t.webview_map doc_uri
+    Map.find t.webview_map (Uri.toString doc_uri ())
   else
     let open Option.O in
-    let* key = find_original_doc_by_pp_uri ~uri:doc_uri t in
+    let* key = find_original_doc_by_pp_uri t doc_uri in
     Map.find t.webview_map key
 
 let set_changes_tracking t origin pp_doc =
@@ -62,20 +63,22 @@ let set_hover_disposable t hover_disposable =
   t.hover_disposable <- hover_disposable
 
 let set_origin_changed t ~data ~key =
+  let key = Uri.toString key () in
   t.pp_doc_to_changed_origin_map <-
     Map.set t.pp_doc_to_changed_origin_map ~key ~data
 
 let entry_exists t ~origin_doc ~pp_doc =
+  let pp_doc = Uri.toString pp_doc () in
+  let origin_doc = Uri.toString origin_doc () in
   Map.existsi t.origin_to_pp_doc_map ~f:(fun ~key ~data ->
       String.equal pp_doc data && String.equal origin_doc key)
 
 let on_origin_update_content t changed_document =
-  match
-    Map.find t.origin_to_pp_doc_map
-      (Uri.toString (TextDocument.uri changed_document) ())
-  with
-  | Some key -> set_origin_changed t ~key ~data:true
+  match Map.find t.origin_to_pp_doc_map (Uri.toString changed_document ()) with
   | None -> ()
+  | Some key ->
+    t.pp_doc_to_changed_origin_map <-
+      Map.set t.pp_doc_to_changed_origin_map ~key ~data:true
 
 let remove_doc_entries (t : t) uri =
   let pp_doc_to_changed_origin_map, origin_to_pp_doc_map =
@@ -92,11 +95,12 @@ let remove_doc_entries (t : t) uri =
   t.pp_doc_to_changed_origin_map <- pp_doc_to_changed_origin_map;
   t.origin_to_pp_doc_map <- origin_to_pp_doc_map
 
-let set_webview t ~uri webview =
-  t.webview_map <- Map.set ~key:uri ~data:webview t.webview_map
+let set_webview t uri webview =
+  let key = Uri.toString uri () in
+  t.webview_map <- Map.set ~key ~data:webview t.webview_map
 
-let pp_status t ~uri =
-  match Map.find t.pp_doc_to_changed_origin_map uri with
+let pp_status t uri =
+  match Map.find t.pp_doc_to_changed_origin_map (Uri.toString uri ()) with
   | Some true -> `Original
   | Some false
   | None ->

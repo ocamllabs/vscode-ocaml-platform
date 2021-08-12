@@ -1,7 +1,5 @@
 open Import
 
-let doc_string_uri ~document = Uri.toString (TextDocument.uri document) ()
-
 let read_html_file () =
   let filename = Node.__dirname () ^ "/../astexplorer/dist/index.html" in
   Fs.readFile filename
@@ -158,8 +156,8 @@ let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
              else if
                (* (not !original_mode) && *)
                (Ast_editor_state.entry_exists ast_editor_state
-                  ~origin_doc:(doc_string_uri ~document))
-                 ~pp_doc:(doc_string_uri ~document:visible_doc)
+                  ~origin_doc:(TextDocument.uri document))
+                 ~pp_doc:(TextDocument.uri visible_doc)
                && not (Ast_editor_state.get_original_mode ast_editor_state)
              then
                match Option.both (int_prop "r_begin") (int_prop "r_end") with
@@ -185,7 +183,10 @@ let on_hover custom_doc webview =
 
 let activate_hover_mode instance ~document =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  match Ast_editor_state.find_webview_by_doc ast_editor_state ~document with
+  match
+    Ast_editor_state.find_webview_by_doc ast_editor_state
+      (TextDocument.uri document)
+  with
   | Some webview -> on_hover document webview
   | None ->
     show_message `Error "Webview wasn't found while switching hover mode";
@@ -195,7 +196,8 @@ let resolveCustomTextEditor extension instance ~(document : TextDocument.t)
     ~webviewPanel ~token:_ : CustomTextEditorProvider.ResolvedEditor.t =
   let webview = WebviewPanel.webview webviewPanel in
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  Ast_editor_state.set_webview ast_editor_state ~uri:(doc_string_uri ~document)
+  Ast_editor_state.set_webview ast_editor_state
+    (TextDocument.uri document)
     webview;
   let (disposable : Disposable.t) =
     let onDidReceiveMessage_disposable =
@@ -282,7 +284,7 @@ let reload_pp_doc instance ~document =
   let origin_uri =
     match
       Ast_editor_state.find_original_doc_by_pp_uri ast_editor_state
-        ~uri:(doc_string_uri ~document)
+        (TextDocument.uri document)
     with
     | Some x -> x
     | None -> failwith "Failed finding the original document URI."
@@ -297,7 +299,8 @@ let reload_pp_doc instance ~document =
   | None -> Promise.resolve 1
   | Some _ ->
     Ast_editor_state.set_origin_changed ast_editor_state
-      ~key:(doc_string_uri ~document) ~data:false;
+      ~key:(TextDocument.uri document)
+      ~data:false;
     replace_document_content
       ~content:(fetch_pp_code ~document:original_document)
       ~document;
@@ -320,7 +323,7 @@ let rec manage_choice instance choice ~document : int Promise.t =
       if res.exitCode = 0 then
         (match
            (Ast_editor_state.pp_status ast_editor_state)
-             ~uri:(doc_string_uri ~document)
+             (TextDocument.uri document)
          with
         | `Original -> reload_pp_doc
         | `Absent_or_pped -> open_preprocessed_doc_to_the_side)
@@ -386,7 +389,8 @@ module Command = struct
         let document = TextEditor.document textEditor in
         let webview_opt =
           let ast_editor_state = Extension_instance.ast_editor_state instance in
-          Ast_editor_state.find_webview_by_doc ast_editor_state ~document
+          Ast_editor_state.find_webview_by_doc ast_editor_state
+            (TextDocument.uri document)
         in
         let offset =
           let selection = Vscode.TextEditor.selection textEditor in
@@ -481,15 +485,15 @@ let manage_changed_origin instance ~document =
 
 let onDidSaveTextDocument_listener_pp instance document =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  Ast_editor_state.on_origin_update_content ast_editor_state document
+  Ast_editor_state.on_origin_update_content ast_editor_state
+    (TextDocument.uri document)
 
 let onDidChangeActiveTextEditor_listener instance e =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   if not (TextEditor.t_to_js e |> Ojs.is_null) then
     let document = TextEditor.document e in
     match
-      Ast_editor_state.pp_status ast_editor_state
-        ~uri:(doc_string_uri ~document)
+      Ast_editor_state.pp_status ast_editor_state (TextDocument.uri document)
     with
     | `Absent_or_pped -> ()
     | `Original ->
@@ -500,7 +504,8 @@ let close_visible_editors_by_uri uri =
   let f e =
     let visibleDocument = TextEditor.document e in
     let open Promise.Syntax in
-    if String.equal uri (doc_string_uri ~document:visibleDocument) then
+    if String.equal uri (Uri.toString (TextDocument.uri visibleDocument) ())
+    then
       let (_ : Ojs.t option Promise.t) =
         let* (_ : TextEditor.t) =
           Window.showTextDocument ~document:(`TextDocument visibleDocument) ()
