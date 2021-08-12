@@ -267,7 +267,7 @@ let open_pp_doc instance ~document =
         (`Uri
           (Uri.parse ("post-ppx: " ^ TextDocument.fileName document ^ "?") ()))
     in
-    Ast_editor_state.set_changes_tracking ast_editor_state document doc;
+    Ast_editor_state.associate_origin_and_pp ast_editor_state document doc;
     replace_document_content ~content:pp_pp_str ~document:doc;
     let+ (_ : TextEditor.t) =
       Window.showTextDocument ~document:(`TextDocument doc)
@@ -296,8 +296,6 @@ let reload_pp_doc instance ~document =
   with
   | None -> Promise.resolve 1
   | Some _ ->
-    Ast_editor_state.set_origin_changed ast_editor_state
-      ~uri:(TextDocument.uri document);
     replace_document_content
       ~content:(fetch_pp_code ~document:original_document)
       ~document;
@@ -311,7 +309,9 @@ let rec manage_choice instance choice ~document : int Promise.t =
     (match
        (Ast_editor_state.pp_status ast_editor_state) (TextDocument.uri document)
      with
-    | `Original -> reload_pp_doc
+    | `Original ->
+      (Ast_editor_state.remove_after_updating ast_editor_state) ~document;
+      reload_pp_doc
     | `Absent_or_pped -> open_preprocessed_doc_to_the_side)
       instance ~document
   | Some `Abandon -> Promise.resolve 1
@@ -339,9 +339,10 @@ let open_both_ppx_ast instance ~document =
   let* pp_doc_open = open_preprocessed_doc_to_the_side instance ~document in
   if pp_doc_open = 0 then
     open_ast_explorer ~uri:(TextDocument.uri document)
-  else
-    Promise.make (fun ~resolve:_ ~reject:_ ->
-        show_message `Warn "Failed to open Preprocessed Document")
+  else (
+    show_message `Warn "Failed to open Preprocessed Document";
+    Promise.resolve ()
+  )
 
 module Command = struct
   let _open_ast_explorer_to_the_side =
@@ -357,53 +358,45 @@ module Command = struct
 
   let _reveal_ast_node =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
-      let (_ : unit Promise.t) =
-        let document = TextEditor.document textEditor in
-        let webview_opt =
-          let ast_editor_state = Extension_instance.ast_editor_state instance in
-          Ast_editor_state.find_webview_by_doc ast_editor_state
-            (TextDocument.uri document)
-        in
-        let offset =
-          let selection = Vscode.TextEditor.selection textEditor in
-          let position = Vscode.Selection.start selection in
-          TextDocument.offsetAt document ~position
-        in
-        Promise.make (fun ~resolve:_ ~reject:_ ->
-            match webview_opt with
-            | Some webview -> send_msg "focus" (Ojs.int_to_js offset) ~webview
-            | None ->
-              show_message `Warn
-                "Wrong output modee inside the AST explorer, please select the \
-                 correct tab")
+      let document = TextEditor.document textEditor in
+      let webview_opt =
+        let ast_editor_state = Extension_instance.ast_editor_state instance in
+        Ast_editor_state.find_webview_by_doc ast_editor_state
+          (TextDocument.uri document)
       in
-      ()
+      let offset =
+        let selection = Vscode.TextEditor.selection textEditor in
+        let position = Vscode.Selection.start selection in
+        TextDocument.offsetAt document ~position
+      in
+
+      match webview_opt with
+      | Some webview -> send_msg "focus" (Ojs.int_to_js offset) ~webview
+      | None ->
+        show_message `Warn
+          "Wrong output modee inside the AST explorer, please select the \
+           correct tab"
     in
+
     Extension_commands.register_text_editor
       ~id:Extension_consts.Commands.reveal_ast_node handler
 
   let _switch_hover_mode =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
-      let (_ : unit Promise.t) =
-        Promise.make (fun ~resolve:_ ~reject:_ ->
-            let ast_editor_state =
-              Extension_instance.ast_editor_state instance
-            in
-            let hover_dispoable =
-              match Ast_editor_state.get_hover_disposable ast_editor_state with
-              | Some d ->
-                Disposable.dispose d;
-                None
-              | None ->
-                Some
-                  (activate_hover_mode instance
-                     ~document:(TextEditor.document textEditor))
-            in
-            Ast_editor_state.set_hover_disposable ast_editor_state
-              hover_dispoable)
+      let ast_editor_state = Extension_instance.ast_editor_state instance in
+      let hover_dispoable =
+        match Ast_editor_state.get_hover_disposable ast_editor_state with
+        | Some d ->
+          Disposable.dispose d;
+          None
+        | None ->
+          Some
+            (activate_hover_mode instance
+               ~document:(TextEditor.document textEditor))
       in
-      ()
+      Ast_editor_state.set_hover_disposable ast_editor_state hover_dispoable
     in
+
     Extension_commands.register_text_editor
       ~id:Extension_consts.Commands.switch_hover_mode handler
 

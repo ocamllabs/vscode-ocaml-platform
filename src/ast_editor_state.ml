@@ -53,7 +53,7 @@ let find_webview_by_doc t doc_uri =
     let* key = find_original_doc_by_pp_uri t doc_uri in
     Map.find t.webview_map key
 
-let set_changes_tracking t origin pp_doc =
+let associate_origin_and_pp t origin pp_doc =
   let origin_uri = Uri.toString (TextDocument.uri origin) () in
   let pp_doc_uri = Uri.toString (TextDocument.uri pp_doc) () in
   t.origin_to_pp_doc_map <-
@@ -68,10 +68,6 @@ let get_hover_disposable t = t.hover_disposable
 let set_hover_disposable t hover_disposable =
   t.hover_disposable <- hover_disposable
 
-let set_origin_changed t ~uri =
-  let uri = Uri.toString uri () in
-  t.pp_doc_to_changed_origin_set <- Set.add t.pp_doc_to_changed_origin_set uri
-
 let entry_exists t ~origin_doc ~pp_doc =
   let pp_doc = Uri.toString pp_doc () in
   let origin_doc = Uri.toString origin_doc () in
@@ -79,9 +75,10 @@ let entry_exists t ~origin_doc ~pp_doc =
       String.equal pp_doc data && String.equal origin_doc key)
 
 let on_origin_update_content t changed_document =
+  let uri = Uri.toString changed_document () in
   match Map.find t.origin_to_pp_doc_map (Uri.toString changed_document ()) with
   | None -> ()
-  | Some uri ->
+  | Some _ ->
     t.pp_doc_to_changed_origin_set <- Set.add t.pp_doc_to_changed_origin_set uri
 
 let remove_doc_entries (t : t) uri =
@@ -105,9 +102,18 @@ let set_webview t uri webview =
 
 let pp_status t uri =
   if
-    Set.exists t.pp_doc_to_changed_origin_set ~f:(fun e ->
-        String.equal e (Uri.toString uri ()))
+    Set.exists t.pp_doc_to_changed_origin_set ~f:(fun el ->
+        match find_original_doc_by_pp_uri t uri with
+        | Some uri -> String.equal el uri
+        | None -> false)
   then
     `Original
   else
     `Absent_or_pped
+
+let remove_after_updating t ~document =
+  match find_original_doc_by_pp_uri t (TextDocument.uri document) with
+  | Some uri ->
+    t.pp_doc_to_changed_origin_set <-
+      Set.remove t.pp_doc_to_changed_origin_set uri
+  | None -> ()

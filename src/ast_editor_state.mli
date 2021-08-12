@@ -11,7 +11,7 @@ val find_original_doc_by_pp_uri : t -> Uri.t -> string option
 
 val find_webview_by_doc : t -> Vscode.Uri.t -> WebView.t option
 
-val set_changes_tracking : t -> TextDocument.t -> TextDocument.t -> unit
+val associate_origin_and_pp : t -> TextDocument.t -> TextDocument.t -> unit
 
 val get_original_mode : t -> bool
 
@@ -20,8 +20,6 @@ val set_original_mode : t -> bool -> unit
 val get_hover_disposable : t -> Disposable.t option
 
 val set_hover_disposable : t -> Disposable.t option -> unit
-
-val set_origin_changed : t -> uri:Uri.t -> unit
 
 val entry_exists : t -> origin_doc:Uri.t -> pp_doc:Uri.t -> bool
 
@@ -32,3 +30,5 @@ val pp_status : t -> Uri.t -> [ `Absent_or_pped | `Original ]
 val remove_doc_entries : t -> TextDocument.t -> unit
 
 val set_webview : t -> Uri.t -> WebView.t -> unit
+
+val remove_after_updating : t -> document:TextDocument.t -> unit
