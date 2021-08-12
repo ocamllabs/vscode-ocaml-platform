@@ -266,7 +266,9 @@ let open_pp_doc instance ~document =
         (`Uri
           (Uri.parse ("post-ppx: " ^ TextDocument.fileName document ^ "?") ()))
     in
-    Ast_editor_state.associate_origin_and_pp ast_editor_state document doc;
+    Ast_editor_state.associate_origin_and_pp ast_editor_state
+      ~origin_uri:(TextDocument.uri document)
+      ~pp_doc_uri:(TextDocument.uri doc);
     replace_document_content ~content:pp_pp_str ~document:doc;
     let+ (_ : TextEditor.t) =
       Window.showTextDocument ~document:(`TextDocument doc)
@@ -309,7 +311,8 @@ let rec manage_choice instance choice ~document =
        (Ast_editor_state.pp_status ast_editor_state) (TextDocument.uri document)
      with
     | `Original ->
-      (Ast_editor_state.remove_dirty_original_doc ast_editor_state) ~document;
+      (Ast_editor_state.remove_dirty_original_doc ast_editor_state)
+        ~pp_uri:(TextDocument.uri document);
       reload_pp_doc
     | `Absent_or_pped -> open_preprocessed_doc_to_the_side)
       instance ~document
@@ -487,7 +490,8 @@ let close_visible_editors_by_uri uri =
 
 let onDidCloseTextDocument_listener instance (document : TextDocument.t) =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  Ast_editor_state.remove_doc_entries ast_editor_state document;
+  Ast_editor_state.remove_doc_entries ast_editor_state
+    (TextDocument.uri document);
   close_visible_editors_by_uri (Uri.toString (TextDocument.uri document) ())
 
 let register extension instance =

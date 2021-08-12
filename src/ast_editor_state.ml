@@ -52,9 +52,9 @@ let find_webview_by_doc t doc_uri =
     let* key = find_original_doc_by_pp_uri t doc_uri in
     Map.find t.webview_map key
 
-let associate_origin_and_pp t origin pp_doc =
-  let origin_uri = Uri.toString (TextDocument.uri origin) () in
-  let pp_doc_uri = Uri.toString (TextDocument.uri pp_doc) () in
+let associate_origin_and_pp t ~origin_uri ~pp_doc_uri =
+  let origin_uri = Uri.toString origin_uri () in
+  let pp_doc_uri = Uri.toString pp_doc_uri () in
   t.origin_to_pp_doc_map <-
     Map.set t.origin_to_pp_doc_map ~key:origin_uri ~data:pp_doc_uri
 
@@ -81,15 +81,15 @@ let on_origin_update_content t changed_document =
 
 let remove_doc_entries (t : t) uri =
   let dirty_original_doc_set, origin_to_pp_doc_map =
-    let origin_uri = Uri.toString (TextDocument.uri uri) () in
-    match Map.find t.origin_to_pp_doc_map origin_uri with
+    let uri = Uri.toString uri () in
+    match Map.find t.origin_to_pp_doc_map uri with
     | Some uri ->
       ( Set.remove t.dirty_original_doc_set uri
-      , Map.remove t.origin_to_pp_doc_map origin_uri )
+      , Map.remove t.origin_to_pp_doc_map uri )
     | None ->
-      ( Set.remove t.dirty_original_doc_set origin_uri
+      ( Set.remove t.dirty_original_doc_set uri
       , Map.filteri t.origin_to_pp_doc_map ~f:(fun ~key:_ ~data ->
-            not (String.equal data origin_uri)) )
+            not (String.equal data uri)) )
   in
   t.dirty_original_doc_set <- dirty_original_doc_set;
   t.origin_to_pp_doc_map <- origin_to_pp_doc_map
@@ -109,8 +109,8 @@ let pp_status t uri =
   else
     `Absent_or_pped
 
-let remove_dirty_original_doc t ~document =
-  match find_original_doc_by_pp_uri t (TextDocument.uri document) with
+let remove_dirty_original_doc t ~pp_uri =
+  match find_original_doc_by_pp_uri t pp_uri with
   | Some uri ->
     t.dirty_original_doc_set <- Set.remove t.dirty_original_doc_set uri
   | None -> ()
