@@ -293,14 +293,14 @@ let reload_pp_doc instance ~document =
     List.find visibleTextEditors ~f:(fun editor ->
         document_eq (TextEditor.document editor) document)
   with
-  | None -> Promise.resolve 1
+  | None -> Promise.return (Error "Visible editor wasn't found")
   | Some _ ->
     replace_document_content
       ~content:(fetch_pp_code ~document:original_document)
       ~document;
-    Promise.resolve 0
+    Promise.return (Ok 0)
 
-let rec manage_choice instance choice ~document : int Promise.t =
+let rec manage_choice instance choice ~document =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   match choice with
   | Some `Update
@@ -313,8 +313,8 @@ let rec manage_choice instance choice ~document : int Promise.t =
       reload_pp_doc
     | `Absent_or_pped -> open_preprocessed_doc_to_the_side)
       instance ~document
-  | Some `Abandon -> Promise.resolve 1
-  | _ -> Promise.resolve (-1)
+  | Some `Abandon -> Promise.return (Error "Operation has been abandoned.")
+  | None -> Promise.return (Error "Choice value is None for some reason.")
 
 and manage_open_failure err_msg instance ~document =
   let open Promise.Syntax in
@@ -330,18 +330,18 @@ and open_preprocessed_doc_to_the_side instance ~document =
   let open Promise.Syntax in
   let* result = open_pp_doc instance ~document in
   match result with
-  | Ok x -> Promise.return x
+  | Ok x -> Promise.return (Ok x)
   | Error e -> manage_open_failure e instance ~document
 
 let open_both_ppx_ast instance ~document =
   let open Promise.Syntax in
   let* pp_doc_open = open_preprocessed_doc_to_the_side instance ~document in
-  if pp_doc_open = 0 then
-    open_ast_explorer ~uri:(TextDocument.uri document)
-  else (
-    show_message `Warn "Failed to open Preprocessed Document";
-    Promise.resolve ()
-  )
+
+  match pp_doc_open with
+  | Ok _ -> open_ast_explorer ~uri:(TextDocument.uri document)
+  | Error e ->
+    show_message `Error "%s" e;
+    Promise.return ()
 
 module Command = struct
   let _open_ast_explorer_to_the_side =
@@ -404,7 +404,9 @@ module Command = struct
       let document = TextEditor.document textEditor in
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
-        let+ (_ : int) = open_preprocessed_doc_to_the_side instance ~document in
+        let+ (_ : (int, string) result) =
+          open_preprocessed_doc_to_the_side instance ~document
+        in
         ()
       in
       ()
@@ -461,7 +463,9 @@ let onDidChangeActiveTextEditor_listener instance e =
     with
     | `Absent_or_pped -> ()
     | `Original ->
-      let (_ : int Promise.t) = manage_changed_origin instance ~document in
+      let (_ : (int, string) result Promise.t) =
+        manage_changed_origin instance ~document
+      in
       ()
 
 let close_visible_editors_by_uri uri =
