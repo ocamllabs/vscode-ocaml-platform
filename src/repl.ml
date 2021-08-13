@@ -24,7 +24,7 @@ let can_build sandbox =
     (* If the workspace contains several dune-project, we don't know how to
        build it. *)
     Promise.return false
-  | el :: _ -> (
+  | [ el ] -> (
     let cwd = Stdlib.Filename.dirname (Uri.fsPath el) |> Path.of_string in
     let cmd = Sandbox.get_command sandbox "dune" [ "build" ] in
     let+ result = Cmd.output ~cwd cmd in
@@ -34,12 +34,18 @@ let can_build sandbox =
 
 let default_repl sandbox =
   let open Promise.Syntax in
-  let* has_utop = has_utop sandbox in
-  let+ can_build = can_build sandbox in
-  match (has_utop, can_build) with
-  | true, true -> Sandbox.get_command sandbox "dune" [ "utop" ]
-  | true, false -> Sandbox.get_command sandbox "utop" []
-  | false, _ -> Sandbox.get_command sandbox "ocaml" []
+  let+ bin, args =
+    let* has_utop = has_utop sandbox in
+    match has_utop with
+    | false -> Promise.return ("ocaml", [])
+    | true ->
+      let+ can_build = can_build sandbox in
+      if can_build then
+        ("dune", [ "utop" ])
+      else
+        ("utop", [])
+  in
+  Sandbox.get_command sandbox bin args
 
 (** If [ocaml.repl.path] isn't set, we offer user an input box to enter the
     command to launch REPL, e.g., [dune utop]. This function shows that input
