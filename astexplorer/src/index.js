@@ -36,26 +36,30 @@ class Index extends React.Component {
     });
     window.addEventListener("message", (event) => {
       switch (event.data.type) {
-        case "parse":
-          var parseRes = event.data.value;
+        case "ast":
           this.setState({
             astResult: {
-              ast: parseRes.ast,
-              error: null,
-              time: 120,
+              ast: event.data.value.ast,
+              error: event.data.value.error,
+              time: 0,
               treeAdapter: getTreeAdapter(newParser),
             },
           });
+          this.setState({
+            error: null,
+          });
+          break;
+        case "pp_ast":
           this.setState({
             ppAstResult: {
-              ast: parseRes.pp_ast,
-              error: null,
-              time: 120,
+              ast: event.data.value.ast,
+              error: event.data.value.error,
+              time: 0,
               treeAdapter: getTreeAdapter(newParser),
             },
           });
           this.setState({
-            error: null
+            error: null,
           });
           break;
         case "focus":

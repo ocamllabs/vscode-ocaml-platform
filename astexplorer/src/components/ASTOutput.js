@@ -20,9 +20,14 @@ export default function ASTOutput({
   parseResult = {},
   ppParseResult = {},
   position = null,
-  error = null
+  error = null,
 }) {
-
+  if (parseResult.error) {
+    return <h4 style={{ color: "red" }}>{parseResult.error.toString()}</h4>;
+  }
+  if (ppParseResult.error) {
+    return <h4 style={{ color: "red" }}>{ppParseResult.error.toString()}</h4>;
+  }
   const [selectedOutput, setSelectedOutput] = useState(0);
   const { ast = null } = parseResult;
   let output;
@@ -32,7 +37,7 @@ export default function ASTOutput({
         parseResult: selectedOutput == 0 ? parseResult : ppParseResult,
         position,
         selectedOutput,
-        error
+        error,
       })}
     </ErrorBoundary>
   );
@@ -59,7 +64,8 @@ export default function ASTOutput({
     <div className="output highlight">
       <div className="toolbar">
         {buttons}
-        <span className="time">{formatTime(parseResult.time)}</span>
+        {/*         <span className="time">{formatTime(parseResult.time)}</span>
+         */}{" "}
       </div>
       {output}
     </div>
@@ -80,17 +86,13 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(error, errorInfo) {
     this.setState({
       error: error,
-      errorInfo: errorInfo
-    })
+      errorInfo: errorInfo,
+    });
   }
 
   render() {
     if (this.state.errorInfo) {
-      return (
-        <h4 style={{ color: "red" }}>
-          {this.state.error.toString()}
-        </h4>
-      );
+      return <h4 style={{ color: "red" }}>{this.state.error.toString()}</h4>;
     }
     return this.props.children;
   }

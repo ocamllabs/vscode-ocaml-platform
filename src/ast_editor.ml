@@ -44,7 +44,9 @@ end = struct
     let relative = relative_document_path ~document in
     match project_root_path () with
     | None ->
-      let (_ : _ Promise.t) = Window.showErrorMessage ~message:"NONE." () in
+      let (_ : _ Promise.t) =
+        Window.showErrorMessage ~message:"Project root wasn't found." ()
+      in
       None
     | Some root ->
       let build_root = "_build/default" in
@@ -72,54 +74,80 @@ let fetch_pp_code ~document =
       show_message `Error "%s" err_msg;
       "")
 
-let transform_to_ast ~(document : TextDocument.t) ~(webview : WebView.t) =
+let transform_to_ast instance ~(document : TextDocument.t)
+    ~(webview : WebView.t) =
+  let ast_editor_state = Extension_instance.ast_editor_state instance in
+
   let open Ppx_tools in
-  let origin_json =
-    let text = TextDocument.getText document () in
-    match Pp_path.get_kind ~document with
-    | Structure -> (
-      match Dumpast.transform text `Impl with
-      | Ok res -> res
-      | Error msg -> Jsonoo.Encode.string msg)
-    | Signature -> (
-      match Dumpast.transform text `Intf with
-      | Ok res -> res
-      | Error msg -> Jsonoo.Encode.string msg)
-    | Unknown -> Jsonoo.Encode.string "Unknown file extension"
-  in
-  let pp_value =
-    match Pp_path.get_pp_path ~document with
-    | None ->
-      show_message `Error "%s" "project root path wasn't found";
-      Jsonoo.Encode.null
-    | Some path -> (
-      match get_preprocessed_ast path with
-      | Error err_msg ->
-        show_message `Error "%s" err_msg;
-        Jsonoo.Encode.null
-      | Ok res ->
-        let pp_code = fetch_pp_code ~document in
-        let lex = Lexing.from_string pp_code in
-        Result.ok_or_failwith
-          (match Ppxlib.Ast_io.get_ast res with
-          | Impl ppml_structure ->
-            let reparsed_structure = Parse.implementation lex in
-            Dumpast.reparse ppml_structure reparsed_structure
-          | Intf signature ->
-            let reparsed_signature = Parse.interface lex in
-            Dumpast.reparse_signature signature reparsed_signature))
-  in
+  if Ast_editor_state.get_original_mode ast_editor_state then
+    let origin_json =
+      let text = TextDocument.getText document () in
+      let tranform kind =
+        match Dumpast.transform text kind with
+        | Ok res ->
+          Jsonoo.Encode.object_ [ ("ast", res); ("error", Jsonoo.Encode.null) ]
+        | Error msg ->
+          Jsonoo.Encode.object_
+            [ ("ast", Jsonoo.Encode.null); ("error", Jsonoo.Encode.string msg) ]
+      in
+      match Pp_path.get_kind ~document with
+      | Structure -> tranform `Impl
+      | Signature -> tranform `Intf
+      | Unknown ->
+        Jsonoo.Encode.object_
+          [ ("ast", Jsonoo.Encode.null)
+          ; ("error", Jsonoo.Encode.string "Unknown file extension")
+          ]
+    in
+    send_msg "ast" (Jsonoo.t_to_js origin_json) ~webview
+  else
+    let pp_value =
+      match Pp_path.get_pp_path ~document with
+      | None ->
+        Jsonoo.Encode.object_
+          [ ("ast", Jsonoo.Encode.null)
+          ; ("error", Jsonoo.Encode.string "Project root path wasn't found")
+          ]
+        (* let err_msg = "Project root path wasn't found" in send_msg "error"
+           (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview;
+           show_message `Error "%s" err_msg; failwith err_msg *)
+      | Some path -> (
+        match get_preprocessed_ast path with
+        | Error err_msg ->
+          Jsonoo.Encode.object_
+            [ ("ast", Jsonoo.Encode.null)
+            ; ("error", Jsonoo.Encode.string err_msg)
+            ]
+        (* send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js)
+           ~webview; show_message `Error "%s" err_msg; failwith err_msg *)
+        | Ok res ->
+          let pp_json =
+            let pp_code = fetch_pp_code ~document in
+            let lex = Lexing.from_string pp_code in
+            Result.ok_or_failwith
+              (match Ppxlib.Ast_io.get_ast res with
+              | Impl ppml_structure ->
+                let reparsed_structure = Parse.implementation lex in
+                Dumpast.reparse ppml_structure reparsed_structure
+              | Intf signature ->
+                let reparsed_signature = Parse.interface lex in
+                Dumpast.reparse_signature signature reparsed_signature)
+          in
+          Jsonoo.Encode.object_
+            [ ("ast", pp_json); ("error", Jsonoo.Encode.null) ])
+    in
+    send_msg "pp_ast" (Jsonoo.t_to_js pp_value) ~webview
 
-  let astpair =
-    Jsonoo.Encode.object_ [ ("ast", origin_json); ("pp_ast", pp_value) ]
-  in
-  send_msg "parse" (Jsonoo.t_to_js astpair) ~webview
-
-let onDidChangeTextDocument_listener event ~(document : TextDocument.t)
+let onDidChangeTextDocument_listener instance event ~(document : TextDocument.t)
     ~(webview : WebView.t) =
   let changed_document = TextDocumentChangeEvent.document event in
   if document_eq document changed_document then
-    transform_to_ast ~document ~webview
+    transform_to_ast instance ~document ~webview
+
+let refresh_ast_explorer instance ~document ~webview_opt =
+  match webview_opt with
+  | Some webview -> transform_to_ast instance ~document ~webview
+  | None -> ()
 
 let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
@@ -130,7 +158,14 @@ let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
       None
   in
   match int_prop "selectedOutput" with
-  | Some i -> Ast_editor_state.set_original_mode ast_editor_state (i = 0)
+  | Some i ->
+    let webview_opt =
+      let ast_editor_state = Extension_instance.ast_editor_state instance in
+      Ast_editor_state.find_webview_by_doc ast_editor_state
+        (TextDocument.uri document)
+    in
+    Ast_editor_state.set_original_mode ast_editor_state (i = 0);
+    refresh_ast_explorer instance ~document ~webview_opt
   | None -> (
     match Option.both (int_prop "begin") (int_prop "end") with
     | None -> ()
@@ -204,7 +239,7 @@ let resolveCustomTextEditor extension instance ~(document : TextDocument.t)
     in
     let onDidChangeTextDocument_disposable =
       Workspace.onDidChangeTextDocument
-        ~listener:(onDidChangeTextDocument_listener ~webview ~document)
+        ~listener:(onDidChangeTextDocument_listener instance ~webview ~document)
         ()
     in
     WebviewPanel.onDidDispose webviewPanel
@@ -215,7 +250,7 @@ let resolveCustomTextEditor extension instance ~(document : TextDocument.t)
       ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable;
-  transform_to_ast ~document ~webview;
+  transform_to_ast instance ~document ~webview;
   let options = WebView.options webview in
   WebviewOptions.set_enableScripts options true;
   WebView.set_options webview options;
@@ -307,15 +342,16 @@ let rec manage_choice instance choice ~document =
   match choice with
   | Some `Update
   | Some `Retry ->
-    (match
-       (Ast_editor_state.pp_status ast_editor_state) (TextDocument.uri document)
-     with
-    | `Original ->
-      (Ast_editor_state.remove_dirty_original_doc ast_editor_state)
-        ~pp_uri:(TextDocument.uri document);
-      reload_pp_doc
-    | `Absent_or_pped -> open_preprocessed_doc_to_the_side)
-      instance ~document
+      (match
+         (Ast_editor_state.pp_status ast_editor_state)
+           (TextDocument.uri document)
+       with
+      | `Original ->
+        (Ast_editor_state.remove_dirty_original_doc ast_editor_state)
+          ~pp_uri:(TextDocument.uri document);
+        reload_pp_doc
+      | `Absent_or_pped -> open_preprocessed_doc_to_the_side)
+        instance ~document
   | Some `Abandon
   | None ->
     Promise.return (Error "Operation has been abandoned.")
