@@ -88,10 +88,12 @@ module Switch = struct
     | Named n -> Path.(opam.root / n)
 
   let equal x y =
-    match (x, y) with
-    | Local x, Local y -> Path.equal x y
-    | Named x, Named y -> String.equal x y
-    | _, _ -> false
+    (* Windows paths are case-insensitive *)
+    match (Platform.t, x, y) with
+    | Win32, Local x, Local y -> Path.iequal x y
+    | _, Local x, Local y -> Path.equal x y
+    | _, Named x, Named y -> String.equal x y
+    | _, _, _ -> false
 end
 
 module Switch_state : sig

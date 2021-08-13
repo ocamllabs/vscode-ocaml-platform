@@ -4,11 +4,17 @@ type t
 
 val equal : t -> t -> bool
 
+(** [iequal p0 p1] is [true] if and only if [p1] and [p2] are equal but case
+    insensitive to any ASCII-uppercase/-lowercase differences. *)
+val iequal : t -> t -> bool
+
 val of_string : string -> t
 
 val to_string : t -> string
 
 val delimiter : char
+
+val sep : char
 
 val is_absolute : t -> bool
 

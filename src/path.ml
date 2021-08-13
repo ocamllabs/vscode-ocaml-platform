@@ -4,11 +4,15 @@ type t = string
 
 let equal = String.equal
 
+let iequal p0 p1 = String.equal (String.lowercase p0) (String.lowercase p1)
+
 let of_string s = s
 
 let to_string s = s
 
 let delimiter = Node.Path.delimiter
+
+let sep = Node.Path.sep
 
 let is_absolute t = Node.Path.isAbsolute t
 
