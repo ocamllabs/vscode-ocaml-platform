@@ -77,64 +77,50 @@ let fetch_pp_code ~document =
 let transform_to_ast instance ~(document : TextDocument.t)
     ~(webview : WebView.t) =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-
   let open Ppx_tools in
+  let make_value result =
+    match result with
+    | Ok ast ->
+      Jsonoo.Encode.object_ [ ("ast", ast); ("error", Jsonoo.Encode.null) ]
+    | Error error_msg ->
+      Jsonoo.Encode.object_
+        [ ("ast", Jsonoo.Encode.null)
+        ; ("error", Jsonoo.Encode.string error_msg)
+        ]
+  in
   if Ast_editor_state.get_original_mode ast_editor_state then
     let origin_json =
       let text = TextDocument.getText document () in
-      let tranform kind =
-        match Dumpast.transform text kind with
-        | Ok res ->
-          Jsonoo.Encode.object_ [ ("ast", res); ("error", Jsonoo.Encode.null) ]
-        | Error msg ->
-          Jsonoo.Encode.object_
-            [ ("ast", Jsonoo.Encode.null); ("error", Jsonoo.Encode.string msg) ]
-      in
       match Pp_path.get_kind ~document with
-      | Structure -> tranform `Impl
-      | Signature -> tranform `Intf
-      | Unknown ->
-        Jsonoo.Encode.object_
-          [ ("ast", Jsonoo.Encode.null)
-          ; ("error", Jsonoo.Encode.string "Unknown file extension")
-          ]
+      | Structure -> make_value (Dumpast.transform text `Impl)
+      | Signature -> make_value (Dumpast.transform text `Intf)
+      | Unknown -> make_value (Error "Unknown file extension")
     in
     send_msg "ast" (Jsonoo.t_to_js origin_json) ~webview
   else
     let pp_value =
-      match Pp_path.get_pp_path ~document with
-      | None ->
-        Jsonoo.Encode.object_
-          [ ("ast", Jsonoo.Encode.null)
-          ; ("error", Jsonoo.Encode.string "Project root path wasn't found")
-          ]
-        (* let err_msg = "Project root path wasn't found" in send_msg "error"
-           (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview;
-           show_message `Error "%s" err_msg; failwith err_msg *)
-      | Some path -> (
-        match get_preprocessed_ast path with
-        | Error err_msg ->
-          Jsonoo.Encode.object_
-            [ ("ast", Jsonoo.Encode.null)
-            ; ("error", Jsonoo.Encode.string err_msg)
-            ]
-        (* send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js)
-           ~webview; show_message `Error "%s" err_msg; failwith err_msg *)
-        | Ok res ->
-          let pp_json =
-            let pp_code = fetch_pp_code ~document in
-            let lex = Lexing.from_string pp_code in
-            Result.ok_or_failwith
-              (match Ppxlib.Ast_io.get_ast res with
-              | Impl ppml_structure ->
-                let reparsed_structure = Parse.implementation lex in
-                Dumpast.reparse ppml_structure reparsed_structure
-              | Intf signature ->
-                let reparsed_signature = Parse.interface lex in
-                Dumpast.reparse_signature signature reparsed_signature)
-          in
-          Jsonoo.Encode.object_
-            [ ("ast", pp_json); ("error", Jsonoo.Encode.null) ])
+      try
+        match Pp_path.get_pp_path ~document with
+        | None -> make_value (Error "Project root path wasn't found")
+        | Some path -> (
+          match get_preprocessed_ast path with
+          | Error err_msg -> make_value (Error err_msg)
+          | Ok res ->
+            let pp_json =
+              let pp_code = fetch_pp_code ~document in
+              let lex = Lexing.from_string pp_code in
+              Result.ok_or_failwith
+                (match Ppxlib.Ast_io.get_ast res with
+                | Impl ppml_structure ->
+                  let reparsed_structure = Parse.implementation lex in
+                  Dumpast.reparse ppml_structure reparsed_structure
+                | Intf signature ->
+                  let reparsed_signature = Parse.interface lex in
+                  Dumpast.reparse_signature signature reparsed_signature)
+            in
+            make_value (Ok pp_json))
+      with
+      | Sys_error e -> make_value (Error e)
     in
     send_msg "pp_ast" (Jsonoo.t_to_js pp_value) ~webview
 
@@ -359,6 +345,7 @@ let rec manage_choice instance choice ~document =
       | `Absent_or_pped -> open_preprocessed_doc_to_the_side)
         instance ~document
     in
+    (*Find and update the webview*)
     (match
        Ast_editor_state.find_original_doc_by_pp_uri ast_editor_state
          (TextDocument.uri document)
