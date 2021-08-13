@@ -22,12 +22,6 @@ export default function ASTOutput({
   position = null,
   error = null,
 }) {
-  if (parseResult.error) {
-    return <h4 style={{ color: "red" }}>{parseResult.error.toString()}</h4>;
-  }
-  if (ppParseResult.error) {
-    return <h4 style={{ color: "red" }}>{ppParseResult.error.toString()}</h4>;
-  }
   const [selectedOutput, setSelectedOutput] = useState(0);
   const { ast = null } = parseResult;
   let output;
@@ -37,7 +31,8 @@ export default function ASTOutput({
         parseResult: selectedOutput == 0 ? parseResult : ppParseResult,
         position,
         selectedOutput,
-        error,
+        origin_error: parseResult.error,
+        pp_error: ppParseResult.error,
       })}
     </ErrorBoundary>
   );

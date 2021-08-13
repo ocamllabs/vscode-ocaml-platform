@@ -49,9 +49,17 @@ function makeCheckbox(name, settings, updateSettings) {
   );
 }
 
-export default function Tree({ parseResult, position, error }) {
-  if (error) {
-    return <h4 style={{ color: "red" }}>{error}</h4>;
+export default function Tree({
+  parseResult,
+  position,
+  origin_error,
+  pp_error,
+}) {
+  if (origin_error) {
+    return <h4 style={{ color: "red" }}>{origin_error.toString()}</h4>;
+  }
+  if (pp_error) {
+    return <h4 style={{ color: "red" }}>{pp_error.toString()}</h4>;
   }
   const [settings, updateSettings] = useReducer(reducer, null, initSettings);
   const treeAdapter = useMemo(
