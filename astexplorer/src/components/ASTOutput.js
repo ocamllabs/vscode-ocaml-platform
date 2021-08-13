@@ -20,17 +20,19 @@ export default function ASTOutput({
   parseResult = {},
   ppParseResult = {},
   position = null,
+  error = null
 }) {
+
   const [selectedOutput, setSelectedOutput] = useState(0);
   const { ast = null } = parseResult;
   let output;
-
   output = (
     <ErrorBoundary>
       {React.createElement(visualizations[0], {
         parseResult: selectedOutput == 0 ? parseResult : ppParseResult,
         position,
         selectedOutput,
+        error
       })}
     </ErrorBoundary>
   );
@@ -72,25 +74,24 @@ ASTOutput.propTypes = {
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { error: null, errorInfo: null };
   }
 
-  static getDerivedStateFromError() {
-    // Update state so the next render will show the fallback UI.
-    return { hasError: true };
+  componentDidCatch(error, errorInfo) {
+    this.setState({
+      error: error,
+      errorInfo: errorInfo
+    })
   }
 
   render() {
-    /*if (this.state.hasError) {
-      // You can render any custom fallback UI
+    if (this.state.errorInfo) {
       return (
-        <div style={{ padding: 20 }}>
-          An error was caught while rendering the AST. This usually is an issue with
-          astexplorer itself. Have a look at the console for more information.
-          Consider <a href="https://github.com/fkling/astexplorer/issues/new?template=bug_report.md">filing a bug report</a>, but <a href="https://github.com/fkling/astexplorer/issues/">check first</a> if one doesn&quot;t already exist. Thank you!
-        </div>
+        <h4 style={{ color: "red" }}>
+          {this.state.error.toString()}
+        </h4>
       );
-    }*/
+    }
     return this.props.children;
   }
 }

@@ -54,9 +54,15 @@ class Index extends React.Component {
               treeAdapter: getTreeAdapter(newParser),
             },
           });
+          this.setState({
+            error: null
+          });
           break;
         case "focus":
           this.setState({ position: event.data.value });
+          break;
+        case "error":
+          this.setState({ error: event.data.value });
           break;
       }
     });
@@ -76,6 +82,7 @@ class Index extends React.Component {
             parseResult={this.state.astResult}
             ppParseResult={this.state.ppAstResult}
             position={this.state.position}
+            error={this.state.error}
           />
           {this.message}
         </div>
