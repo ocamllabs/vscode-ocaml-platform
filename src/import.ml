@@ -174,21 +174,6 @@ module Range = struct
     let end_ = Range.end_ t |> Position.json_of_t in
     Jsonoo.Encode.(object_ [ ("start", start); ("end", end_) ])
 
-  type range =
-    { start : Position.position
-    ; end_ : Position.position
-    }
-
-  let range_of_t t =
-    let start = Range.start t |> Position.position_of_t in
-    let end_ = Range.end_ t |> Position.position_of_t in
-    { start; end_ }
-
-  let t_of_range { start; end_ } =
-    let start = Position.t_of_position start in
-    let end_ = Position.t_of_position end_ in
-    Range.makePositions ~start ~end_
-
   include Vscode.Range
 end
 
