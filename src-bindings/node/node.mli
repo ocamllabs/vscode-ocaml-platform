@@ -20,6 +20,8 @@ val setInterval : (unit -> unit) -> int -> Timeout.t
 
 val setTimeout : (unit -> unit) -> int -> Timeout.t
 
+val setTimeoutPromise : milliseconds:int -> unit Promise.t
+
 module Process : sig
   val cwd : unit -> string
 

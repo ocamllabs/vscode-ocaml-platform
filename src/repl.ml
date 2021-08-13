@@ -207,7 +207,7 @@ let open_terminal instance sandbox : Terminal.t Or_error.t Promise.t =
          it's setting up env), so we wait for the init to happen. So does python
          extension:
          https://github.com/microsoft/vscode-python/blob/main/src/client/terminals/codeExecution/terminalCodeExecution.ts#L54 *)
-      let+ () = Node.set_timeout 1500 in
+      let+ () = Node.setTimeoutPromise ~milliseconds:1500 in
       match Terminal.exit_status terminal with
       | `Not_exited_yet ->
         Extension_instance.set_repl instance (Some terminal);

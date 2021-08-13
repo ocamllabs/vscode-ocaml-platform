@@ -26,6 +26,11 @@ include
 
   val setTimeout : (unit -> unit) -> int -> Timeout.t [@@js.global]]
 
+let setTimeoutPromise ~(milliseconds : int) =
+  Promise.make (fun ~resolve ~reject:_ ->
+      let (_ : Timeout.t) = setTimeout resolve milliseconds in
+      ())
+
 module Process = struct
   include
     [%js:
