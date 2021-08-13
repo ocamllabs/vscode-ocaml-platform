@@ -213,7 +213,24 @@ let open_terminal instance sandbox : Terminal.t Or_error.t Promise.t =
          it's setting up env), so we wait for the init to happen. So does python
          extension:
          https://github.com/microsoft/vscode-python/blob/main/src/client/terminals/codeExecution/terminalCodeExecution.ts#L54 *)
-      let+ () = Node.setTimeoutPromise ~milliseconds:1500 in
+      let+ () =
+        (* another hack: calling [dune utop] builds the library, so we wait
+           longer time, while calling [utop] or [ocaml] doesn't need much wait
+           time before sending the command *)
+        let wait_time =
+          if String.is_suffix (Path.to_string command.Cmd.bin) ~suffix:"dune"
+          then (
+            show_message `Info
+              "Calling `dune utop ...` builds code, so that may take more time \
+               than we expect before sending the code to the terminal. If we \
+               send code too early before the REPL is fully launched, \
+               re-evaluate that code when the REPL has properly launched.";
+            3000
+          ) else
+            1500
+        in
+        Node.setTimeoutPromise ~milliseconds:wait_time
+      in
       match Terminal.exit_status terminal with
       | `Not_exited_yet ->
         Extension_instance.set_repl instance (Some terminal);
