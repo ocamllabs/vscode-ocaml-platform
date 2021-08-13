@@ -342,6 +342,12 @@ let rec manage_choice instance choice ~document =
   match choice with
   | Some `Update
   | Some `Retry ->
+    let webview_opt =
+      let ast_editor_state = Extension_instance.ast_editor_state instance in
+      Ast_editor_state.find_webview_by_doc ast_editor_state
+        (TextDocument.uri document)
+    in
+    let res =
       (match
          (Ast_editor_state.pp_status ast_editor_state)
            (TextDocument.uri document)
@@ -352,6 +358,20 @@ let rec manage_choice instance choice ~document =
         reload_pp_doc
       | `Absent_or_pped -> open_preprocessed_doc_to_the_side)
         instance ~document
+    in
+    (match
+       Ast_editor_state.find_original_doc_by_pp_uri ast_editor_state
+         (TextDocument.uri document)
+     with
+    | Some uri ->
+      let (_ : unit Promise.t) =
+        let open Promise.Syntax in
+        let* document = Workspace.openTextDocument (`Uri (Uri.parse uri ())) in
+        Promise.return (refresh_ast_explorer instance ~document ~webview_opt)
+      in
+      ()
+    | None -> refresh_ast_explorer instance ~document ~webview_opt);
+    res
   | Some `Abandon
   | None ->
     Promise.return (Error "Operation has been abandoned.")
