@@ -350,15 +350,18 @@ let transform source kind =
         parse_ast#signature v)
   with
   | Syntaxerr.Error e ->
-    (*TODO output the error in AST explorer*)
     Error
-      (Caml.Format.asprintf "%a" Location.print (Syntaxerr.location_of_error e))
+      ("Syntax error at : "
+      ^ Caml.Format.asprintf "%a" Location.print (Syntaxerr.location_of_error e)
+      )
 
 let from_structure (structure : Parsetree.structure) =
   try Ok (parse_ast#structure structure) with
   | Syntaxerr.Error e ->
     Error
-      (Caml.Format.asprintf "%a" Location.print (Syntaxerr.location_of_error e))
+      ("Syntax error at : "
+      ^ Caml.Format.asprintf "%a" Location.print (Syntaxerr.location_of_error e)
+      )
 
 let reparse s s' = reparse_ast#structure s s'
 

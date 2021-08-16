@@ -1,5 +1,7 @@
 open Import
 
+exception User_error of string
+
 let read_html_file () =
   let filename = Node.__dirname () ^ "/../astexplorer/dist/index.html" in
   Fs.readFile filename
@@ -80,13 +82,8 @@ let transform_to_ast instance ~(document : TextDocument.t)
   let open Ppx_tools in
   let make_value result =
     match result with
-    | Ok ast ->
-      Jsonoo.Encode.object_ [ ("ast", ast); ("error", Jsonoo.Encode.null) ]
-    | Error error_msg ->
-      Jsonoo.Encode.object_
-        [ ("ast", Jsonoo.Encode.null)
-        ; ("error", Jsonoo.Encode.string error_msg)
-        ]
+    | Ok ast -> ast
+    | Error error_msg -> raise (User_error error_msg)
   in
   if Ast_editor_state.get_original_mode ast_editor_state then
     let origin_json =
@@ -94,17 +91,17 @@ let transform_to_ast instance ~(document : TextDocument.t)
       match Pp_path.get_kind ~document with
       | Structure -> make_value (Dumpast.transform text `Impl)
       | Signature -> make_value (Dumpast.transform text `Intf)
-      | Unknown -> make_value (Error "Unknown file extension")
+      | Unknown -> raise (User_error "Unknown file extension")
     in
     send_msg "ast" (Jsonoo.t_to_js origin_json) ~webview
   else
     let pp_value =
       try
         match Pp_path.get_pp_path ~document with
-        | None -> make_value (Error "Project root path wasn't found")
+        | None -> raise (User_error "Project root path wasn't found")
         | Some path -> (
           match get_preprocessed_ast path with
-          | Error err_msg -> make_value (Error err_msg)
+          | Error err_msg -> raise (User_error err_msg)
           | Ok res ->
             let pp_json =
               let pp_code = fetch_pp_code ~document in
@@ -120,7 +117,7 @@ let transform_to_ast instance ~(document : TextDocument.t)
             in
             make_value (Ok pp_json))
       with
-      | Sys_error e -> make_value (Error e)
+      | Sys_error e -> raise (User_error e)
     in
     send_msg "pp_ast" (Jsonoo.t_to_js pp_value) ~webview
 
@@ -128,11 +125,17 @@ let onDidChangeTextDocument_listener instance event ~(document : TextDocument.t)
     ~(webview : WebView.t) =
   let changed_document = TextDocumentChangeEvent.document event in
   if document_eq document changed_document then
-    transform_to_ast instance ~document ~webview
+    try transform_to_ast instance ~document ~webview with
+    | User_error err_msg ->
+      send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview
 
 let refresh_ast_explorer instance ~document ~webview_opt =
   match webview_opt with
-  | Some webview -> transform_to_ast instance ~document ~webview
+  | Some webview -> (
+    try transform_to_ast instance ~document ~webview with
+    | User_error err_msg ->
+      send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview
+    )
   | None -> ()
 
 let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
@@ -236,7 +239,9 @@ let resolveCustomTextEditor extension instance ~(document : TextDocument.t)
       ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable;
-  transform_to_ast instance ~document ~webview;
+  (try transform_to_ast instance ~document ~webview with
+  | User_error err_msg ->
+    send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview);
   let options = WebView.options webview in
   WebviewOptions.set_enableScripts options true;
   WebView.set_options webview options;
@@ -383,7 +388,6 @@ and open_preprocessed_doc_to_the_side instance ~document =
 let open_both_ppx_ast instance ~document =
   let open Promise.Syntax in
   let* pp_doc_open = open_preprocessed_doc_to_the_side instance ~document in
-
   match pp_doc_open with
   | Ok _ -> open_ast_explorer ~uri:(TextDocument.uri document)
   | Error e ->
