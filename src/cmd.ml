@@ -113,7 +113,8 @@ let log ?(result : ChildProcess.return option) (t : t) =
     match t with
     | Spawn { bin; args } ->
       ("bin", string (Path.to_string bin))
-      :: ("args", list string args) :: fields
+      :: ("args", list string args)
+      :: fields
     | Shell command_line -> ("shell", string command_line) :: fields
   in
   match result with

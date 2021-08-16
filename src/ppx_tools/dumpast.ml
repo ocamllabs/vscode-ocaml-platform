@@ -2,7 +2,7 @@ open Ppxlib
 
 let parse_ast =
   let open Jsonoo.Encode in
-  object  
+  object
     inherit [Jsonoo.t] Traverse_ast.lift
 
     method unit () = null
@@ -45,8 +45,6 @@ let parse_ast =
     method char value = char value
 
     method array f arg = list id (Array.to_list arg |> List.map f)
-
-     
   end
 
 let warn_ast_diff method_name =
