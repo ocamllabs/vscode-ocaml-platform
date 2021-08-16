@@ -131,12 +131,11 @@ let onDidChangeTextDocument_listener instance event ~(document : TextDocument.t)
 
 let refresh_ast_explorer instance ~document ~webview_opt =
   match webview_opt with
+  | None -> ()
   | Some webview -> (
     try transform_to_ast instance ~document ~webview with
     | User_error err_msg ->
       send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview
-    )
-  | None -> ()
 
 let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
@@ -357,8 +356,8 @@ let rec manage_choice instance choice ~document =
     | Some uri ->
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
-        let* document = Workspace.openTextDocument (`Uri (Uri.parse uri ())) in
-        Promise.return (refresh_ast_explorer instance ~document ~webview_opt)
+        let+ document = Workspace.openTextDocument (`Uri (Uri.parse uri ())) in
+        refresh_ast_explorer instance ~document ~webview_opt
       in
       ()
     | None -> refresh_ast_explorer instance ~document ~webview_opt);
