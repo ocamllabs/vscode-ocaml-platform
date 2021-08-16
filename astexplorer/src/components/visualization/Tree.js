@@ -18,11 +18,11 @@ function initSettings() {
   return storedSettings
     ? JSON.parse(storedSettings)
     : {
-      autofocus: true,
-      hideEmptyKeys: false,
-      hideLocationData: false,
-      hideTypeKeys: true,
-    };
+        autofocus: true,
+        hideEmptyKeys: false,
+        hideLocationData: false,
+        hideTypeKeys: true,
+      };
 }
 
 function reducer(state, element) {
@@ -49,11 +49,7 @@ function makeCheckbox(name, settings, updateSettings) {
   );
 }
 
-export default function Tree({
-  parseResult,
-  position,
-  error
-}) {
+export default function Tree({ parseResult, position, error }) {
   if (error) {
     return <h4 style={{ color: "red" }}>{error.toString()}</h4>;
   }

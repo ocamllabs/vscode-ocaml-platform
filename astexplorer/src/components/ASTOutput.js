@@ -31,7 +31,7 @@ export default function ASTOutput({
         parseResult: selectedOutput == 0 ? parseResult : ppParseResult,
         position,
         selectedOutput,
-        error
+        error,
       })}
     </ErrorBoundary>
   );
