@@ -79,7 +79,7 @@ let fetch_pp_code ~document =
 let transform_to_ast instance ~(document : TextDocument.t)
     ~(webview : WebView.t) =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  let open Ppx_tools in
+  let module Dumpast = Ppx_tools.Dumpast in
   let make_value result =
     match result with
     | Ok ast -> ast
@@ -100,7 +100,7 @@ let transform_to_ast instance ~(document : TextDocument.t)
         match Pp_path.get_pp_path ~document with
         | None -> raise (User_error "Project root path wasn't found")
         | Some path -> (
-          match get_preprocessed_ast path with
+          match Ppx_tools.get_preprocessed_ast path with
           | Error err_msg -> raise (User_error err_msg)
           | Ok res ->
             let pp_json =
