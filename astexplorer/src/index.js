@@ -39,8 +39,8 @@ class Index extends React.Component {
         case "ast":
           this.setState({
             astResult: {
-              ast: event.data.value.ast,
-              error: event.data.value.error,
+              ast: event.data.value,
+              error: null,
               time: 0,
               treeAdapter: getTreeAdapter(newParser),
             },
@@ -52,8 +52,8 @@ class Index extends React.Component {
         case "pp_ast":
           this.setState({
             ppAstResult: {
-              ast: event.data.value.ast,
-              error: event.data.value.error,
+              ast: event.data.value,
+              error: null,
               time: 0,
               treeAdapter: getTreeAdapter(newParser),
             },
