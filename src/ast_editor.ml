@@ -136,6 +136,7 @@ let refresh_ast_explorer instance ~document ~webview_opt =
     try transform_to_ast instance ~document ~webview with
     | User_error err_msg ->
       send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview
+    )
 
 let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
