@@ -4,10 +4,9 @@ class virtual ['res] lift =
   object (self)
     method virtual record : string -> (string * 'res) list -> 'res
 
-    method virtual constr : string -> (string * 'res) list -> 'rest
+    method virtual constr : string -> (string * 'res) list -> 'res
 
     method virtual tuple : (string * 'res) list -> 'res
-    (* TODO find a pretty way to output tuples *)
 
     method virtual bool : bool -> 'res
 

@@ -1873,7 +1873,6 @@ class virtual ['res] lift2 =
         | _ -> Error "module_expr_desc"
 
     method structure : structure -> structure -> ('res, string) result =
-      (*Fixme: additional structure item inside ppml (ppx show for instance)*)
       fun l l' -> self#list self#structure_item l l'
 
     method structure_item

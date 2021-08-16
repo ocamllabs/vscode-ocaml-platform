@@ -2,7 +2,7 @@ open Ppxlib
 
 let parse_ast =
   let open Jsonoo.Encode in
-  object (self)
+  object  
     inherit [Jsonoo.t] Traverse_ast.lift
 
     method unit () = null
@@ -46,18 +46,7 @@ let parse_ast =
 
     method array f arg = list id (Array.to_list arg |> List.map f)
 
-    (*FIXME*)
-    method! open_infos _a { popen_expr; popen_override; popen_loc; _ } =
-      let popen_expr = _a popen_expr in
-      let popen_override = self#override_flag popen_override in
-      let popen_loc = self#location popen_loc in
-      let popen_attributes = null in
-      self#record "open_infos"
-        [ ("popen_expr", popen_expr)
-        ; ("popen_override", popen_override)
-        ; ("popen_loc", popen_loc)
-        ; ("popen_attributes", popen_attributes)
-        ]
+     
   end
 
 let warn_ast_diff method_name =
