@@ -213,14 +213,14 @@ let activate_hover_mode instance ~document =
     show_message `Error "Webview wasn't found while switching hover mode";
     failwith "Webview wasn't found while switching hover mode"
 
-let resolveCustomTextEditor extension instance ~(document : TextDocument.t)
-    ~webviewPanel ~token:_ : CustomTextEditorProvider.ResolvedEditor.t =
+let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
+    ~token:_ : CustomTextEditorProvider.ResolvedEditor.t =
   let webview = WebviewPanel.webview webviewPanel in
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   Ast_editor_state.set_webview ast_editor_state
     (TextDocument.uri document)
     webview;
-  let (disposable : Disposable.t) =
+  let (_ : Disposable.t) =
     let onDidReceiveMessage_disposable =
       WebView.onDidReceiveMessage webview
         ~listener:(onDidReceiveMessage_listener instance ~document)
@@ -238,7 +238,6 @@ let resolveCustomTextEditor extension instance ~(document : TextDocument.t)
         Disposable.dispose onDidChangeTextDocument_disposable)
       ()
   in
-  Vscode.ExtensionContext.subscribe extension ~disposable;
   (try transform_to_ast instance ~document ~webview with
   | User_error err_msg ->
     send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview);
@@ -546,7 +545,7 @@ let register extension instance =
   let editorProvider =
     `CustomEditorProvider
       (CustomTextEditorProvider.create
-         ~resolveCustomTextEditor:(resolveCustomTextEditor extension instance))
+         ~resolveCustomTextEditor:(resolveCustomTextEditor instance))
   in
   let disposable =
     Window.onDidChangeActiveTextEditor ()
