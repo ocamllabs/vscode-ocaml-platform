@@ -299,7 +299,7 @@ let open_pp_doc instance ~document =
       Window.showTextDocument ~document:(`TextDocument doc)
         ~column:ViewColumn.Beside ()
     in
-    Ok 0
+    Ok ()
 
 let reload_pp_doc instance ~document =
   let open Promise.Syntax in
@@ -325,7 +325,7 @@ let reload_pp_doc instance ~document =
     replace_document_content
       ~content:(fetch_pp_code ~document:original_document)
       ~document;
-    Promise.return (Ok 0)
+    Promise.return (Ok ())
 
 let rec manage_choice instance choice ~document =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
@@ -381,7 +381,7 @@ and open_preprocessed_doc_to_the_side instance ~document =
   let open Promise.Syntax in
   let* result = open_pp_doc instance ~document in
   match result with
-  | Ok x -> Promise.return (Ok x)
+  | Ok () -> Promise.return (Ok ())
   | Error e -> manage_open_failure e instance ~document
 
 let open_both_ppx_ast instance ~document =
@@ -454,7 +454,7 @@ module Command = struct
       let document = TextEditor.document textEditor in
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
-        let+ (_ : (int, string) result) =
+        let+ (_ : (unit, string) result) =
           open_preprocessed_doc_to_the_side instance ~document
         in
         ()
@@ -513,7 +513,7 @@ let onDidChangeActiveTextEditor_listener instance e =
     with
     | `Absent_or_pped -> ()
     | `Original ->
-      let (_ : (int, string) result Promise.t) =
+      let (_ : (unit, string) result Promise.t) =
         manage_changed_origin instance ~document
       in
       ()
