@@ -70,13 +70,14 @@ let fetch_pp_code ~document =
   | None ->
     show_message `Error "Unable to find preprocessed file for %s"
       (Uri.toString (TextDocument.uri document) ());
-    ""
+    Ok ""
   | Some path -> (
     match Ppx_tools.get_reparsed_code_from_pp_file ~path with
-    | Ok code -> code
-    | Error err_msg ->
+    | Ok code -> Ok code
+    | Error (Io_error err_msg) -> Error err_msg
+    | Error (Read_error err_msg) ->
       show_message `Error "%s" err_msg;
-      "")
+      Ok "")
 
 let transform_to_ast instance ~(document : TextDocument.t)
     ~(webview : WebView.t) =
@@ -98,28 +99,31 @@ let transform_to_ast instance ~(document : TextDocument.t)
     send_msg "ast" (Jsonoo.t_to_js origin_json) ~webview
   else
     let pp_value =
-      try
-        match Pp_path.get_pp_path ~document with
-        | None -> raise (User_error "Project root path wasn't found")
-        | Some path -> (
-          match Ppx_tools.get_preprocessed_ast path with
-          | Error err_msg -> raise (User_error err_msg)
-          | Ok res ->
-            let pp_json =
-              let pp_code = fetch_pp_code ~document in
-              let lex = Lexing.from_string pp_code in
-              Result.ok_or_failwith
-                (match Ppxlib.Ast_io.get_ast res with
-                | Impl ppml_structure ->
-                  let reparsed_structure = Parse.implementation lex in
-                  Dumpast.reparse ppml_structure reparsed_structure
-                | Intf signature ->
-                  let reparsed_signature = Parse.interface lex in
-                  Dumpast.reparse_signature signature reparsed_signature)
+      match Pp_path.get_pp_path ~document with
+      | None -> raise (User_error "Project root path wasn't found")
+      | Some path -> (
+        match Ppx_tools.get_preprocessed_ast path with
+        | Error (Io_error err_msg)
+        | Error (Read_error err_msg) ->
+          raise (User_error err_msg)
+        | Ok res ->
+          let pp_json =
+            let pp_code =
+              match fetch_pp_code ~document with
+              | Ok s -> s
+              | Error m -> raise (User_error m)
             in
-            make_value (Ok pp_json))
-      with
-      | Sys_error e -> raise (User_error e)
+            let lex = Lexing.from_string pp_code in
+            Result.ok_or_failwith
+              (match Ppxlib.Ast_io.get_ast res with
+              | Impl ppml_structure ->
+                let reparsed_structure = Parse.implementation lex in
+                Dumpast.reparse ppml_structure reparsed_structure
+              | Intf signature ->
+                let reparsed_signature = Parse.interface lex in
+                Dumpast.reparse_signature signature reparsed_signature)
+          in
+          make_value (Ok pp_json))
     in
     send_msg "pp_ast" (Jsonoo.t_to_js pp_value) ~webview
 
@@ -286,8 +290,8 @@ let open_pp_doc instance ~document =
   let open Promise.Syntax in
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   match fetch_pp_code ~document with
-  | exception Sys_error e -> Promise.return (Error e)
-  | pp_pp_str ->
+  | Error e -> Promise.return (Error e)
+  | Ok pp_pp_str ->
     let* doc =
       Workspace.openTextDocument
         (`Uri
@@ -323,11 +327,12 @@ let reload_pp_doc instance ~document =
         document_eq (TextEditor.document editor) document)
   with
   | None -> Promise.return (Error "Visible editor wasn't found")
-  | Some _ ->
-    replace_document_content
-      ~content:(fetch_pp_code ~document:original_document)
-      ~document;
-    Promise.return (Ok ())
+  | Some _ -> (
+    match fetch_pp_code ~document:original_document with
+    | Error m -> raise (User_error m)
+    | Ok content ->
+      replace_document_content ~content ~document;
+      Promise.return (Ok ()))
 
 let rec manage_choice instance choice ~document =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
