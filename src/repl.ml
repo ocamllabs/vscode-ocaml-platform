@@ -218,8 +218,7 @@ let open_terminal instance sandbox : Terminal.t Or_error.t Promise.t =
            longer time, while calling [utop] or [ocaml] doesn't need much wait
            time before sending the command *)
         let wait_time =
-          if String.is_suffix (Path.to_string command.Cmd.bin) ~suffix:"dune"
-          then (
+          if List.exists command.Cmd.args ~f:(String.equal "dune") then (
             show_message `Info
               "Calling `dune utop ...` builds code, so that may take more time \
                than we expect before sending the code to the terminal. If we \
