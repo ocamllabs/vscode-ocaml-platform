@@ -164,3 +164,5 @@ module Range = struct
 
   include Vscode.Range
 end
+
+let sprintf = Printf.sprintf
