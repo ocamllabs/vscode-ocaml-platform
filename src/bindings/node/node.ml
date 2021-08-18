@@ -137,6 +137,8 @@ module Path = struct
     [%js:
     val delimiter : string [@@js.global "path.delimiter"]
 
+    val sep : string [@@js.global "path.sep"]
+
     val basename : string -> string [@@js.global "path.basename"]
 
     val dirname : string -> string [@@js.global "path.dirname"]
@@ -150,6 +152,10 @@ module Path = struct
   let delimiter =
     assert (String.length delimiter = 1);
     delimiter.[0]
+
+  let sep =
+    assert (String.length sep = 1);
+    sep.[0]
 end
 
 module Fs = struct

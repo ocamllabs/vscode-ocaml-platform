@@ -108,6 +108,8 @@ end
 module Path : sig
   val delimiter : char
 
+  val sep : char
+
   val basename : string -> string
 
   val dirname : string -> string

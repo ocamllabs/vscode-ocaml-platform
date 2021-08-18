@@ -53,8 +53,14 @@ let resolve_workspace_vars setting =
   Interop.Regexp.replace setting ~regexp ~replacer
 
 let substitute_workspace_vars setting =
+  (* Windows paths are case-insensitive *)
+  let folder_replace_all =
+    match Platform.t with
+    | Win32 -> String.Caseless.substr_replace_all
+    | _ -> String.substr_replace_all
+  in
   List.fold (Workspace.workspaceFolders ()) ~init:setting ~f:(fun acc folder ->
-      String.substr_replace_all acc
+      folder_replace_all acc
         ~pattern:(workspace_folder_path folder)
         ~with_:(workspace_folder_var folder))
 
