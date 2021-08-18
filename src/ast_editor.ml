@@ -54,7 +54,9 @@ end = struct
       let build_root = "_build/default" in
       let fname =
         match get_kind ~document with
-        | Unknown -> failwith "Unknown file extension"
+        | Unknown ->
+          let uri = Uri.toString (TextDocument.uri document) () in
+          raise (User_error (sprintf "File %s has unknown file extension" uri))
         | Structure -> String.chop_suffix_exn ~suffix:".ml" relative ^ ".pp.ml"
         | Signature ->
           String.chop_suffix_exn ~suffix:".mli" relative ^ ".pp.mli"
