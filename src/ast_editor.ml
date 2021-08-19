@@ -215,10 +215,10 @@ let activate_hover_mode instance ~document =
     Ast_editor_state.find_webview_by_doc ast_editor_state
       (TextDocument.uri document)
   with
-  | Some webview -> on_hover document webview
+  | Some webview -> Some (on_hover document webview)
   | None ->
-    show_message `Error "Webview wasn't found while switching hover mode";
-    failwith "Webview wasn't found while switching hover mode"
+    show_message `Error "No open AST editor was found.";
+    None
 
 let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
     ~token:_ : CustomTextEditorProvider.ResolvedEditor.t =
@@ -447,9 +447,8 @@ module Command = struct
           Disposable.dispose d;
           None
         | None ->
-          Some
-            (activate_hover_mode instance
-               ~document:(TextEditor.document textEditor))
+          activate_hover_mode instance
+            ~document:(TextEditor.document textEditor)
       in
       Ast_editor_state.set_hover_disposable ast_editor_state hover_dispoable
     in
