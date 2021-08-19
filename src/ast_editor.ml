@@ -106,24 +106,25 @@ let transform_to_ast instance ~(document : TextDocument.t)
         | Error (Io_error err_msg)
         | Error (Read_error err_msg) ->
           raise (User_error err_msg)
-        | Ok res ->
-          let pp_json =
+        | Ok res -> (
+          let pp_json_res =
             let pp_code =
               match fetch_pp_code ~document with
               | Ok s -> s
               | Error m -> raise (User_error m)
             in
             let lex = Lexing.from_string pp_code in
-            Result.ok_or_failwith
-              (match Ppxlib.Ast_io.get_ast res with
-              | Impl ppml_structure ->
-                let reparsed_structure = Parse.implementation lex in
-                Dumpast.reparse ppml_structure reparsed_structure
-              | Intf signature ->
-                let reparsed_signature = Parse.interface lex in
-                Dumpast.reparse_signature signature reparsed_signature)
+            match Ppxlib.Ast_io.get_ast res with
+            | Impl ppml_structure ->
+              let reparsed_structure = Parse.implementation lex in
+              Dumpast.reparse ppml_structure reparsed_structure
+            | Intf signature ->
+              let reparsed_signature = Parse.interface lex in
+              Dumpast.reparse_signature signature reparsed_signature
           in
-          make_value (Ok pp_json))
+          match pp_json_res with
+          | Error err_msg -> raise (User_error err_msg)
+          | Ok pp_json -> make_value (Ok pp_json)))
     in
     send_msg "pp_ast" (Jsonoo.t_to_js pp_value) ~webview
 
