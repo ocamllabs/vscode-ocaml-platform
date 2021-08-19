@@ -6,6 +6,7 @@ import { logEvent } from "../../utils/logger";
 import { treeAdapterFromParseResult } from "../../core/TreeAdapter.js";
 import { SelectedNodeProvider } from "./SelectedNodeContext.js";
 import focusNodes from "./focusNodes.js";
+import { vscode } from "../../vscode";
 
 import "./css/tree.css";
 
@@ -49,7 +50,7 @@ function makeCheckbox(name, settings, updateSettings) {
   );
 }
 
-export default function Tree({ parseResult, position, error }) {
+export default function Tree({ parseResult, position, error, selectedOutput }) {
   if (error) {
     return <h4 style={{ color: "red" }}>{error.toString()}</h4>;
   }
@@ -80,6 +81,20 @@ export default function Tree({ parseResult, position, error }) {
           ) : (
             ""
           )
+        )}
+        {selectedOutput == 1 ? (
+          <button
+            className={""}
+            onClick={() => {
+              vscode.postMessage({
+                refresh_pp_webview: selectedOutput.toString(),
+              });
+            }}
+          >
+            Reload AST
+          </button>
+        ) : (
+          ""
         )}
       </div>
       <ul

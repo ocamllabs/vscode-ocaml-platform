@@ -130,16 +130,13 @@ let onDidChangeTextDocument_listener instance event ~(document : TextDocument.t)
     | User_error err_msg ->
       send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview
 
-let refresh_ast_explorer instance ~document ~webview_opt =
-  match webview_opt with
-  | None -> ()
-  | Some webview -> (
-    try transform_to_ast instance ~document ~webview with
-    | User_error err_msg ->
-      send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview
-    )
+let update_ast instance ~document ~webview =
+  try transform_to_ast instance ~document ~webview with
+  | User_error err_msg ->
+    send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview
 
-let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
+let onDidReceiveMessage_listener instance msg ~webview
+    ~(document : TextDocument.t) =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   let int_prop name =
     if Ojs.has_property msg name then
@@ -147,18 +144,13 @@ let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
     else
       None
   in
+
   match int_prop "selectedOutput" with
   | Some i ->
-    let webview_opt =
-      let ast_editor_state = Extension_instance.ast_editor_state instance in
-      Ast_editor_state.find_webview_by_doc ast_editor_state
-        (TextDocument.uri document)
-    in
     Ast_editor_state.set_original_mode ast_editor_state (i = 0);
-    refresh_ast_explorer instance ~document ~webview_opt
+    update_ast instance ~document ~webview
   | None -> (
     match Option.both (int_prop "begin") (int_prop "end") with
-    | None -> ()
     | Some (cbegin, cend) ->
       let apply_selection editor cbegin cend =
         let document = TextEditor.document editor in
@@ -184,7 +176,11 @@ let onDidReceiveMessage_listener instance msg ~(document : TextDocument.t) =
              then
                match Option.both (int_prop "r_begin") (int_prop "r_end") with
                | None -> ()
-               | Some (rcbegin, rcend) -> apply_selection editor rcbegin rcend))
+               | Some (rcbegin, rcend) -> apply_selection editor rcbegin rcend)
+    | None -> (
+      match int_prop "refresh_pp_webview" with
+      | None -> ()
+      | Some _ -> update_ast instance ~document ~webview))
 
 let on_hover custom_doc webview =
   let provider =
@@ -224,7 +220,7 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
   let (_ : Disposable.t) =
     let onDidReceiveMessage_disposable =
       WebView.onDidReceiveMessage webview
-        ~listener:(onDidReceiveMessage_listener instance ~document)
+        ~listener:(onDidReceiveMessage_listener instance ~webview ~document)
         ()
     in
     let onDidChangeTextDocument_disposable =
@@ -337,11 +333,6 @@ let rec manage_choice instance choice ~document =
   match choice with
   | Some `Update
   | Some `Retry ->
-    let webview_opt =
-      let ast_editor_state = Extension_instance.ast_editor_state instance in
-      Ast_editor_state.find_webview_by_doc ast_editor_state
-        (TextDocument.uri document)
-    in
     let res =
       (match
          (Ast_editor_state.pp_status ast_editor_state)
@@ -355,6 +346,15 @@ let rec manage_choice instance choice ~document =
         instance ~document
     in
     (*Find and update the webview*)
+    let webview_opt =
+      Ast_editor_state.find_webview_by_doc ast_editor_state
+        (TextDocument.uri document)
+    in
+    let reload webview_opt ~document =
+      match webview_opt with
+      | None -> ()
+      | Some webview -> update_ast instance ~document ~webview
+    in
     (match
        Ast_editor_state.find_original_doc_by_pp_uri ast_editor_state
          (TextDocument.uri document)
@@ -363,10 +363,10 @@ let rec manage_choice instance choice ~document =
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let+ document = Workspace.openTextDocument (`Uri (Uri.parse uri ())) in
-        refresh_ast_explorer instance ~document ~webview_opt
+        reload ~document webview_opt
       in
       ()
-    | None -> refresh_ast_explorer instance ~document ~webview_opt);
+    | None -> reload webview_opt ~document);
     res
   | Some `Abandon
   | None ->
