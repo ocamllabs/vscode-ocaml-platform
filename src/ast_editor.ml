@@ -67,7 +67,7 @@ end
 
 let fetch_pp_code ~document =
   match Pp_path.get_pp_path ~document with
-  | Error err_msg -> Error (Ppx_tools.Io_error err_msg)
+  | Error err_msg -> Error err_msg
   | Ok path -> Ppx_tools.get_reparsed_code_from_pp_file ~path
 
 let transform_to_ast instance ~(document : TextDocument.t)
@@ -94,18 +94,13 @@ let transform_to_ast instance ~(document : TextDocument.t)
       | Error err_msg -> raise (User_error err_msg)
       | Ok path -> (
         match Ppx_tools.get_preprocessed_ast path with
-        | Error (Io_error err_msg)
-        | Error (Read_error err_msg) ->
-          raise (User_error err_msg)
+        | Error err_msg -> raise (User_error err_msg)
         | Ok res -> (
           let pp_json_res =
             let pp_code =
               match fetch_pp_code ~document with
               | Ok s -> s
-              | Error (Ppx_tools.Io_error err_msg) ->
-                raise (User_error ("Io_error: " ^ err_msg))
-              | Error (Ppx_tools.Read_error err_msg) ->
-                raise (User_error ("Read_error: " ^ err_msg))
+              | Error err_msg -> raise (User_error err_msg)
             in
             let lex = Lexing.from_string pp_code in
             match Ppxlib.Ast_io.get_ast res with
@@ -321,9 +316,7 @@ let reload_pp_doc instance ~document =
     | None -> Promise.return (Error "Visible editor wasn't found")
     | Some _ -> (
       match fetch_pp_code ~document:original_document with
-      | Error (Io_error err_msg)
-      | Error (Read_error err_msg) ->
-        Promise.return (Error err_msg)
+      | Error err_msg -> Promise.return (Error err_msg)
       | Ok content ->
         replace_document_content ~content ~document;
         Promise.return (Ok ())))
@@ -387,9 +380,7 @@ and open_preprocessed_doc_to_the_side instance ~document =
   let* result = open_pp_doc instance ~document in
   match result with
   | Ok () -> Promise.return (Ok ())
-  | Error (Io_error err_msg)
-  | Error (Read_error err_msg) ->
-    manage_open_failure err_msg instance ~document
+  | Error err_msg -> manage_open_failure err_msg instance ~document
 
 let open_both_ppx_ast instance ~document =
   let open Promise.Syntax in
