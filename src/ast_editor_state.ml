@@ -98,6 +98,10 @@ let set_webview t uri webview =
   let key = Uri.toString uri () in
   t.webview_map <- Map.set ~key ~data:webview t.webview_map
 
+let remove_webview t uri =
+  let key = Uri.toString uri () in
+  t.webview_map <- Map.remove t.webview_map key
+
 let pp_status t uri =
   if
     Set.exists t.dirty_original_doc_set ~f:(fun el ->

@@ -241,6 +241,8 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
     WebviewPanel.onDidDispose webviewPanel
       ~listener:(fun () ->
         Ast_editor_state.set_original_mode ast_editor_state true;
+        Ast_editor_state.remove_webview ast_editor_state
+          (TextDocument.uri document);
         Disposable.dispose onDidReceiveMessage_disposable;
         Disposable.dispose onDidChangeTextDocument_disposable)
       ()

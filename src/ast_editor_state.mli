@@ -32,3 +32,5 @@ val remove_doc_entries : t -> Uri.t -> unit
 val set_webview : t -> Uri.t -> WebView.t -> unit
 
 val remove_dirty_original_doc : t -> pp_uri:Uri.t -> unit
+
+val remove_webview : t -> Uri.t -> unit
