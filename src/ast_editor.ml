@@ -23,7 +23,7 @@ module Pp_path : sig
 
   val get_kind : document:TextDocument.t -> kind
 
-  val get_pp_path : document:TextDocument.t -> string option
+  val get_pp_path : document:TextDocument.t -> (string, string) result
 end = struct
   type kind =
     | Structure
@@ -45,39 +45,30 @@ end = struct
   let get_pp_path ~(document : TextDocument.t) =
     let relative = relative_document_path ~document in
     match project_root_path () with
-    | None ->
-      let (_ : _ Promise.t) =
-        Window.showErrorMessage ~message:"Project root wasn't found." ()
-      in
-      None
-    | Some root ->
+    | None -> Error "Project root wasn't found."
+    | Some root -> (
       let build_root = "_build/default" in
-      let fname =
+      let fname_opt =
         match get_kind ~document with
-        | Unknown ->
-          let uri = Uri.toString (TextDocument.uri document) () in
-          raise (User_error (sprintf "File %s has unknown file extension" uri))
-        | Structure -> String.chop_suffix_exn ~suffix:".ml" relative ^ ".pp.ml"
+        | Unknown -> None
+        | Structure ->
+          Some (String.chop_suffix_exn ~suffix:".ml" relative ^ ".pp.ml")
         | Signature ->
-          String.chop_suffix_exn ~suffix:".mli" relative ^ ".pp.mli"
+          Some (String.chop_suffix_exn ~suffix:".mli" relative ^ ".pp.mli")
       in
-      let ( / ) = Caml.Filename.concat in
-      Some (root / build_root / fname)
+      match fname_opt with
+      | Some fname ->
+        let ( / ) = Caml.Filename.concat in
+        Ok (root / build_root / fname)
+      | None ->
+        let uri = Uri.toString (TextDocument.uri document) () in
+        Error (sprintf "File %s has unknown file extension" uri))
 end
 
 let fetch_pp_code ~document =
   match Pp_path.get_pp_path ~document with
-  | None ->
-    show_message `Error "Unable to find preprocessed file for %s"
-      (Uri.toString (TextDocument.uri document) ());
-    Ok ""
-  | Some path -> (
-    match Ppx_tools.get_reparsed_code_from_pp_file ~path with
-    | Ok code -> Ok code
-    | Error (Io_error err_msg) -> Error err_msg
-    | Error (Read_error err_msg) ->
-      show_message `Error "%s" err_msg;
-      Ok "")
+  | Error err_msg -> Error (Ppx_tools.Io_error err_msg)
+  | Ok path -> Ppx_tools.get_reparsed_code_from_pp_file ~path
 
 let transform_to_ast instance ~(document : TextDocument.t)
     ~(webview : WebView.t) =
@@ -100,8 +91,8 @@ let transform_to_ast instance ~(document : TextDocument.t)
   else
     let pp_value =
       match Pp_path.get_pp_path ~document with
-      | None -> raise (User_error "Project root path wasn't found")
-      | Some path -> (
+      | Error err_msg -> raise (User_error err_msg)
+      | Ok path -> (
         match Ppx_tools.get_preprocessed_ast path with
         | Error (Io_error err_msg)
         | Error (Read_error err_msg) ->
@@ -111,7 +102,10 @@ let transform_to_ast instance ~(document : TextDocument.t)
             let pp_code =
               match fetch_pp_code ~document with
               | Ok s -> s
-              | Error m -> raise (User_error m)
+              | Error (Ppx_tools.Io_error err_msg) ->
+                raise (User_error ("Io_error: " ^ err_msg))
+              | Error (Ppx_tools.Read_error err_msg) ->
+                raise (User_error ("Read_error: " ^ err_msg))
             in
             let lex = Lexing.from_string pp_code in
             match Ppxlib.Ast_io.get_ast res with
@@ -331,7 +325,9 @@ let reload_pp_doc instance ~document =
     | None -> Promise.return (Error "Visible editor wasn't found")
     | Some _ -> (
       match fetch_pp_code ~document:original_document with
-      | Error m -> raise (User_error m)
+      | Error (Io_error err_msg)
+      | Error (Read_error err_msg) ->
+        Promise.return (Error err_msg)
       | Ok content ->
         replace_document_content ~content ~document;
         Promise.return (Ok ())))
@@ -391,7 +387,9 @@ and open_preprocessed_doc_to_the_side instance ~document =
   let* result = open_pp_doc instance ~document in
   match result with
   | Ok () -> Promise.return (Ok ())
-  | Error e -> manage_open_failure e instance ~document
+  | Error (Io_error err_msg)
+  | Error (Read_error err_msg) ->
+    manage_open_failure err_msg instance ~document
 
 let open_both_ppx_ast instance ~document =
   let open Promise.Syntax in
