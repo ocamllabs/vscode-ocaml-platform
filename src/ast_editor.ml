@@ -314,28 +314,27 @@ let reload_pp_doc instance ~document =
   let open Promise.Syntax in
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   let visibleTextEditors = Window.visibleTextEditors () in
-  let origin_uri =
+  let origin_uri_opt =
+    Ast_editor_state.find_original_doc_by_pp_uri ast_editor_state
+      (TextDocument.uri document)
+  in
+  match origin_uri_opt with
+  | None -> Promise.return (Error "Failed finding the original document URI.")
+  | Some origin_uri -> (
+    let* original_document =
+      Workspace.openTextDocument (`Uri (Uri.parse origin_uri ()))
+    in
     match
-      Ast_editor_state.find_original_doc_by_pp_uri ast_editor_state
-        (TextDocument.uri document)
+      List.find visibleTextEditors ~f:(fun editor ->
+          document_eq (TextEditor.document editor) document)
     with
-    | Some x -> x
-    | None -> failwith "Failed finding the original document URI."
-  in
-  let* original_document =
-    Workspace.openTextDocument (`Uri (Uri.parse origin_uri ()))
-  in
-  match
-    List.find visibleTextEditors ~f:(fun editor ->
-        document_eq (TextEditor.document editor) document)
-  with
-  | None -> Promise.return (Error "Visible editor wasn't found")
-  | Some _ -> (
-    match fetch_pp_code ~document:original_document with
-    | Error m -> raise (User_error m)
-    | Ok content ->
-      replace_document_content ~content ~document;
-      Promise.return (Ok ()))
+    | None -> Promise.return (Error "Visible editor wasn't found")
+    | Some _ -> (
+      match fetch_pp_code ~document:original_document with
+      | Error m -> raise (User_error m)
+      | Ok content ->
+        replace_document_content ~content ~document;
+        Promise.return (Ok ())))
 
 let rec manage_choice instance choice ~document =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
