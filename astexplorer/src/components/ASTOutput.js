@@ -85,9 +85,9 @@ class ErrorBoundary extends React.Component {
   }
 
   render() {
-    if (this.state.errorInfo) {
+    /* if (this.state.errorInfo) {
       return <h4 style={{ color: "red" }}>{this.state.error.toString()}</h4>;
-    }
+    } */
     return this.props.children;
   }
 }
