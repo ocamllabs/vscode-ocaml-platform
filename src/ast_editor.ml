@@ -50,7 +50,7 @@ module Pp_path : sig
 
   val get_kind : document:TextDocument.t -> kind
 
-  val get_pp_path : document:TextDocument.t -> (string, string) result
+  val get_pp_path : document:TextDocument.t -> string
 end = struct
   type kind =
     | Structure
@@ -72,7 +72,7 @@ end = struct
   let get_pp_path ~(document : TextDocument.t) =
     let relative = relative_document_path ~document in
     match project_root_path () with
-    | None -> Error "Project root wasn't found."
+    | None -> raise (User_error "Project root wasn't found.")
     | Some root -> (
       let build_root = "_build/default" in
       let fname_opt =
@@ -86,16 +86,15 @@ end = struct
       match fname_opt with
       | Some fname ->
         let ( / ) = Caml.Filename.concat in
-        Ok (root / build_root / fname)
+        root / build_root / fname
       | None ->
         let uri = Uri.toString (TextDocument.uri document) () in
-        Error (sprintf "File %s has unknown file extension" uri))
+        raise (User_error (sprintf "File %s has unknown file extension" uri)))
 end
 
 let fetch_pp_code ~document =
-  match Pp_path.get_pp_path ~document with
-  | Error err_msg -> Error err_msg
-  | Ok path -> Ppx_tools.get_reparsed_code_from_pp_file ~path
+  let path = Pp_path.get_pp_path ~document in
+  Ppx_tools.get_reparsed_code_from_pp_file ~path
 
 let transform_to_ast instance ~(document : TextDocument.t)
     ~(webview : WebView.t) =
@@ -117,30 +116,28 @@ let transform_to_ast instance ~(document : TextDocument.t)
     send_msg "ast" (Jsonoo.t_to_js origin_json) ~webview
   else
     let pp_value =
-      match Pp_path.get_pp_path ~document with
+      let path = Pp_path.get_pp_path ~document in
+      match Ppx_tools.get_preprocessed_ast path with
       | Error err_msg -> raise (User_error err_msg)
-      | Ok path -> (
-        match Ppx_tools.get_preprocessed_ast path with
-        | Error err_msg -> raise (User_error err_msg)
-        | Ok res -> (
-          let pp_json_res =
-            let pp_code =
-              match fetch_pp_code ~document with
-              | Ok s -> s
-              | Error err_msg -> raise (User_error err_msg)
-            in
-            let lex = Lexing.from_string pp_code in
-            match Ppxlib.Ast_io.get_ast res with
-            | Impl ppml_structure ->
-              let reparsed_structure = Parse.implementation lex in
-              Dumpast.reparse ppml_structure reparsed_structure
-            | Intf signature ->
-              let reparsed_signature = Parse.interface lex in
-              Dumpast.reparse_signature signature reparsed_signature
+      | Ok res -> (
+        let pp_json_res =
+          let pp_code =
+            match fetch_pp_code ~document with
+            | Ok s -> s
+            | Error err_msg -> raise (User_error err_msg)
           in
-          match pp_json_res with
-          | Error err_msg -> raise (User_error err_msg)
-          | Ok pp_json -> make_value (Ok pp_json)))
+          let lex = Lexing.from_string pp_code in
+          match Ppxlib.Ast_io.get_ast res with
+          | Impl ppml_structure ->
+            let reparsed_structure = Parse.implementation lex in
+            Dumpast.reparse ppml_structure reparsed_structure
+          | Intf signature ->
+            let reparsed_signature = Parse.interface lex in
+            Dumpast.reparse_signature signature reparsed_signature
+        in
+        match pp_json_res with
+        | Error err_msg -> raise (User_error err_msg)
+        | Ok pp_json -> make_value (Ok pp_json))
     in
     send_msg "pp_ast" (Jsonoo.t_to_js pp_value) ~webview
 
@@ -226,9 +223,7 @@ let activate_hover_mode instance ~document =
       (TextDocument.uri document)
   with
   | Some webview -> Some (on_hover document webview)
-  | None ->
-    show_message `Error "No open AST editor was found.";
-    None
+  | None -> raise (User_error "No open AST editor was found.")
 
 let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
     ~token:_ : CustomTextEditorProvider.ResolvedEditor.t =
@@ -417,10 +412,8 @@ let open_both_ppx_ast instance ~document =
   let open Promise.Syntax in
   let* pp_doc_open = open_preprocessed_doc_to_the_side instance ~document in
   match pp_doc_open with
-  | Ok _ -> open_ast_explorer ~uri:(TextDocument.uri document)
-  | Error e ->
-    show_message `Error "%s" e;
-    Promise.return ()
+  | Ok () -> open_ast_explorer ~uri:(TextDocument.uri document)
+  | Error e -> raise (User_error e)
 
 module Command = struct
   let _open_ast_explorer_to_the_side =
@@ -454,9 +447,10 @@ module Command = struct
       match webview_opt with
       | Some webview -> send_msg "focus" (Ojs.int_to_js offset) ~webview
       | None ->
-        show_message `Warn
-          "Wrong output modee inside the AST explorer, please select the \
-           correct tab"
+        raise
+          (User_error
+             "Can't reveal node. Please check if AST explorer is open and \
+              right mode is chosen.")
     in
     let handler e ~textEditor ~edit ~args =
       Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
