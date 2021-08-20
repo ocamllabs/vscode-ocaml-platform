@@ -2,6 +2,33 @@ open Import
 
 exception User_error of string
 
+module Handlers = struct
+  let unpwrap = function
+    | `Ok () -> ()
+    | `Error err_msg -> show_message `Error "%s" err_msg
+
+  let w1 f x =
+    try `Ok (f x) with
+    | User_error e -> `Error e
+
+  let ws f x y =
+    match f x with
+    | `Ok f' -> (
+      try `Ok (f' y) with
+      | User_error e -> `Error e)
+    | `Error e -> `Error e
+
+  let w2 f = ws (w1 f)
+
+  let w3 f x = ws (w2 f x)
+
+  let w4 f x y = ws (w3 f x y)
+
+  let w5 f x y z = ws (w4 f x y z)
+
+  let _w6 f x y z w = ws (w5 f x y z w)
+end
+
 let read_html_file () =
   let filename = Node.__dirname () ^ "/../astexplorer/dist/index.html" in
   Fs.readFile filename
@@ -117,8 +144,7 @@ let transform_to_ast instance ~(document : TextDocument.t)
     in
     send_msg "pp_ast" (Jsonoo.t_to_js pp_value) ~webview
 
-let onDidChangeTextDocument_listener instance event ~(document : TextDocument.t)
-    ~(webview : WebView.t) =
+let onDidChangeTextDocument_listener instance document webview event =
   let changed_document = TextDocumentChangeEvent.document event in
   if document_eq document changed_document then
     try transform_to_ast instance ~document ~webview with
@@ -130,8 +156,7 @@ let update_ast instance ~document ~webview =
   | User_error err_msg ->
     send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview
 
-let onDidReceiveMessage_listener instance msg ~webview
-    ~(document : TextDocument.t) =
+let onDidReceiveMessage_listener instance webview document msg =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   let int_prop name =
     if Ojs.has_property msg name then
@@ -214,14 +239,20 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
     webview;
   let (_ : Disposable.t) =
     let onDidReceiveMessage_disposable =
-      WebView.onDidReceiveMessage webview
-        ~listener:(onDidReceiveMessage_listener instance ~webview ~document)
-        ()
+      let listener msg =
+        Handlers.unpwrap
+          (Handlers.w4 onDidReceiveMessage_listener instance webview document
+             msg)
+      in
+      WebView.onDidReceiveMessage webview ~listener ()
     in
     let onDidChangeTextDocument_disposable =
-      Workspace.onDidChangeTextDocument
-        ~listener:(onDidChangeTextDocument_listener instance ~webview ~document)
-        ()
+      let listener event =
+        Handlers.unpwrap
+          (Handlers.w4 onDidChangeTextDocument_listener instance document
+             webview event)
+      in
+      Workspace.onDidChangeTextDocument ~listener ()
     in
     WebviewPanel.onDidDispose webviewPanel
       ~listener:(fun () ->
@@ -400,6 +431,9 @@ module Command = struct
       in
       ()
     in
+    let handler e ~textEditor ~edit ~args =
+      Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
+    in
     Extension_commands.register_text_editor
       ~id:Extension_consts.Commands.open_ast_explorer_to_the_side handler
 
@@ -424,7 +458,9 @@ module Command = struct
           "Wrong output modee inside the AST explorer, please select the \
            correct tab"
     in
-
+    let handler e ~textEditor ~edit ~args =
+      Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
+    in
     Extension_commands.register_text_editor
       ~id:Extension_consts.Commands.reveal_ast_node handler
 
@@ -442,7 +478,9 @@ module Command = struct
       in
       Ast_editor_state.set_hover_disposable ast_editor_state hover_dispoable
     in
-
+    let handler e ~textEditor ~edit ~args =
+      Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
+    in
     Extension_commands.register_text_editor
       ~id:Extension_consts.Commands.switch_hover_mode handler
 
@@ -458,6 +496,9 @@ module Command = struct
       in
       ()
     in
+    let handler e ~textEditor ~edit ~args =
+      Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
+    in
     Extension_commands.register_text_editor
       ~id:Extension_consts.Commands.show_preprocessed_document handler
 
@@ -468,6 +509,9 @@ module Command = struct
         open_both_ppx_ast instance ~document
       in
       ()
+    in
+    let handler e ~textEditor ~edit ~args =
+      Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
     in
     Extension_commands.register_text_editor
       ~id:Extension_consts.Commands.open_pp_editor_and_ast_explorer handler
@@ -539,37 +583,41 @@ let onDidCloseTextDocument_listener instance (document : TextDocument.t) =
   close_visible_editors_by_uri (Uri.toString (TextDocument.uri document) ())
 
 let register extension instance =
+  (*Register listener that monitors active editor change. *)
+  let listener text_editor =
+    Handlers.unpwrap
+      (Handlers.w1 (onDidChangeActiveTextEditor_listener instance) text_editor)
+  in
+  let disposable = Window.onDidChangeActiveTextEditor () ~listener () in
+  Vscode.ExtensionContext.subscribe extension ~disposable;
+  (*Register custom editor provider that is the AST explorer. *)
   let editorProvider =
     `CustomEditorProvider
       (CustomTextEditorProvider.create
          ~resolveCustomTextEditor:(resolveCustomTextEditor instance))
   in
   let disposable =
-    Window.onDidChangeActiveTextEditor ()
-      ~listener:(onDidChangeActiveTextEditor_listener instance)
-      ()
-  in
-  Vscode.ExtensionContext.subscribe extension ~disposable;
-  let disposable =
     Vscode.Window.registerCustomEditorProvider ~viewType:"ast-editor"
       ~provider:editorProvider
   in
-
   Vscode.ExtensionContext.subscribe extension ~disposable;
-  let disposable =
-    Workspace.onDidCloseTextDocument
-      ~listener:(onDidCloseTextDocument_listener instance)
-      ()
+  (*Register listener that monitors closing documents. *)
+  let listener document =
+    Handlers.unpwrap
+      (Handlers.w1 (onDidCloseTextDocument_listener instance) document)
   in
+  let disposable = Workspace.onDidCloseTextDocument ~listener () in
   Vscode.ExtensionContext.subscribe extension ~disposable;
+  (*Register listener that monitors saving documents. *)
+  let listener document =
+    Handlers.unpwrap
+      (Handlers.w1 (onDidSaveTextDocument_listener_pp instance) document)
+  in
+  let disposable = Workspace.onDidSaveTextDocument ~listener () in
+  Vscode.ExtensionContext.subscribe extension ~disposable;
+  (*Register content provider that enables opening Preprocessed Documents *)
   let disposable =
     Vscode.Workspace.registerTextDocumentContentProvider ~scheme:"post-ppx"
       ~provider:text_document_content_provider_ppx
-  in
-  Vscode.ExtensionContext.subscribe extension ~disposable;
-  let disposable =
-    Workspace.onDidSaveTextDocument
-      ~listener:(onDidSaveTextDocument_listener_pp instance)
-      ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable
