@@ -43,8 +43,8 @@ let of_json (json : Jsonoo.t) =
   with
   | Jsonoo.Decode_error _ ->
     show_message `Warn
-      "unexpected experimental capabilities from lsp server. Some features \
-       might be missing";
+      "Unexpected experimental capabilities from the language server. Falling \
+       back to default: no experimental capabilities set.";
     default
 
 let of_initialize_result (t : LanguageClient.InitializeResult.t) =
