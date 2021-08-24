@@ -166,3 +166,18 @@ module Range = struct
 end
 
 let sprintf = Printf.sprintf
+
+(** Logs to the extension's output channel *)
+let log_chan ~section kind fmt =
+  let kind_s =
+    match kind with
+    | `Warn -> "warn"
+    | `Info -> "info"
+    | `Error -> "error"
+  in
+  Printf.ksprintf
+    (fun s ->
+      let value = Printf.sprintf "%s: [%s] %s" kind_s section s in
+      let (lazy output) = Output.extension_output_channel in
+      OutputChannel.appendLine output ~value)
+    fmt
