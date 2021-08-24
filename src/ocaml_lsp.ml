@@ -15,17 +15,16 @@ let default =
   }
 
 let of_json (json : Jsonoo.t) =
-  let has_capability cap json =
-    let decoder = Jsonoo.Decode.(field cap bool) in
-    Jsonoo.Decode.try_default false decoder json
+  let experimental_caps_tbl = Jsonoo.Decode.(dict bool) json in
+  let has_capability cap =
+    Stdlib.Hashtbl.find_opt experimental_caps_tbl cap
+    |> Option.value ~default:false
   in
   try
-    let interfaceSpecificLangId =
-      has_capability "interfaceSpecificLangId" json
-    in
-    let handleSwitchImplIntf = has_capability "handleSwitchImplIntf" json in
-    let handleInferIntf = has_capability "handleInferIntf" json in
-    let handleTypedHoles = has_capability "handleTypedHoles" json in
+    let interfaceSpecificLangId = has_capability "interfaceSpecificLangId" in
+    let handleSwitchImplIntf = has_capability "handleSwitchImplIntf" in
+    let handleInferIntf = has_capability "handleInferIntf" in
+    let handleTypedHoles = has_capability "handleTypedHoles" in
     { interfaceSpecificLangId
     ; handleSwitchImplIntf
     ; handleInferIntf
