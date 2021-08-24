@@ -14,27 +14,18 @@ let default =
   ; handleTypedHoles = false
   }
 
-let default_field key decode default json =
-  let open Jsonoo.Decode in
-  try_default default (field key decode) json
-
 let of_json (json : Jsonoo.t) =
-  let open Jsonoo.Decode in
+  let has_capability cap json =
+    let decoder = Jsonoo.Decode.(field cap bool) in
+    Jsonoo.Decode.try_default false decoder json
+  in
   try
     let interfaceSpecificLangId =
-      default_field "interfaceSpecificLangId" bool
-        default.interfaceSpecificLangId json
+      has_capability "interfaceSpecificLangId" json
     in
-    let handleSwitchImplIntf =
-      default_field "handleSwitchImplIntf" bool default.handleSwitchImplIntf
-        json
-    in
-    let handleInferIntf =
-      default_field "handleInferIntf" bool default.handleInferIntf json
-    in
-    let handleTypedHoles =
-      default_field "handleTypedHoles" bool default.handleTypedHoles json
-    in
+    let handleSwitchImplIntf = has_capability "handleSwitchImplIntf" json in
+    let handleInferIntf = has_capability "handleInferIntf" json in
+    let handleTypedHoles = has_capability "handleTypedHoles" json in
     { interfaceSpecificLangId
     ; handleSwitchImplIntf
     ; handleInferIntf
