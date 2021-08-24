@@ -58,7 +58,8 @@ let stop_server t =
 
 let start_language_server t =
   stop_server t;
-  let res =
+  let open Promise.Syntax in
+  let+ res =
     let open Promise.Result.Syntax in
     let* () =
       let cmd = Sandbox.get_command t.sandbox "ocamllsp" [ "--version" ] in
@@ -67,7 +68,9 @@ let start_language_server t =
       if res.exitCode = 0 then
         Ok ()
       else
-        Error "Sandbox initialisation failed: ocaml-lsp-server is not installed"
+        Error
+          "Sandbox initialization failed: `ocaml-lsp-server` is not installed \
+           in the current sandbox."
     in
     let serverOptions = server_options t.sandbox in
     let clientOptions = client_options () in
@@ -76,7 +79,6 @@ let start_language_server t =
         ~serverOptions ~clientOptions ()
     in
     LanguageClient.start client;
-
     let open Promise.Syntax in
     let+ initialize_result = LanguageClient.readyInitializeResult client in
     let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
@@ -97,8 +99,6 @@ let start_language_server t =
          Consider updating ocamllsp.";
     Ok ()
   in
-  let open Promise.Syntax in
-  let+ res = res in
   match res with
   | Ok () -> ()
   | Error s -> show_message `Error "Error starting server: %s" s
