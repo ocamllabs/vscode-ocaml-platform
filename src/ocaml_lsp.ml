@@ -31,10 +31,11 @@ let of_json (json : Jsonoo.t) =
     ; handleTypedHoles
     }
   with
-  | Jsonoo.Decode_error _ ->
+  | Jsonoo.Decode_error err ->
     show_message `Warn
       "Unexpected experimental capabilities from the language server. Falling \
        back to default: no experimental capabilities set.";
+    log_chan `Error ~section:"Ocaml_lsp.of_json" "%s" err;
     default
 
 let of_initialize_result (t : LanguageClient.InitializeResult.t) =
