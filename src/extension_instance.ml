@@ -5,6 +5,7 @@ type t =
   ; mutable repl : Terminal_sandbox.t option
   ; mutable lsp_client : (LanguageClient.t * Ocaml_lsp.t) option
   ; sandbox_info : StatusBarItem.t
+  ; ast_editor_state : Ast_editor_state.t
   }
 
 let sandbox t = t.sandbox
@@ -129,7 +130,8 @@ end
 let make () =
   let sandbox = Sandbox.Global in
   let sandbox_info = Sandbox_info.make sandbox in
-  { sandbox; lsp_client = None; sandbox_info; repl = None }
+  let ast_editor_state = Ast_editor_state.make () in
+  { sandbox; lsp_client = None; sandbox_info; repl = None; ast_editor_state }
 
 let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
@@ -149,6 +151,8 @@ let close_repl t = t.repl <- None
 let open_terminal sandbox =
   let terminal = Terminal_sandbox.create sandbox in
   Terminal_sandbox.show terminal
+
+let ast_editor_state t = t.ast_editor_state
 
 let disposable t =
   Disposable.make ~dispose:(fun () ->

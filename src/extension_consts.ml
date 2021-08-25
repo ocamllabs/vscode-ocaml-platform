@@ -36,6 +36,18 @@ module Commands = struct
   let next_hole = ocaml_prefixed "next-hole"
 
   let prev_hole = ocaml_prefixed "prev-hole"
+
+  let open_ast_explorer_to_the_side =
+    ocaml_prefixed "open-ast-explorer-to-the-side"
+
+  let reveal_ast_node = ocaml_prefixed "reveal-ast-node"
+
+  let switch_hover_mode = ocaml_prefixed "switch-hover-mode"
+
+  let show_preprocessed_document = ocaml_prefixed "show-preprocessed-document"
+
+  let open_pp_editor_and_ast_explorer =
+    ocaml_prefixed "open-pp-editor-and-ast-explorer"
 end
 
 module Command_errors = struct

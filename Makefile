@@ -23,6 +23,10 @@ release-build:
 		--sources-content=false
 .PHONY: release-build
 
+view-build:
+	yarn --cwd astexplorer build
+.PHONY: view-build
+
 watch:
 	dune build @all -w --terminal-persistence=clear-on-rebuild
 .PHONY: watch
