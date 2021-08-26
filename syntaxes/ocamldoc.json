@@ -20,8 +20,8 @@
         },
         {
           "comment": "embedded ocaml source",
-          "begin": "\\[",
-          "end": "\\]",
+          "begin": "(?<!\\\\)\\[",
+          "end": "(?<!\\\\)\\]",
           "contentName": "source.embedded.ocamldoc",
           "patterns": [{ "include": "source.ocaml" }]
         }

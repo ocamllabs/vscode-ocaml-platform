@@ -22,10 +22,12 @@
 - Add `ocaml.server.extraEnv` configuration option to pass extra environment
   variables to the language server, i.e., OCaml-LSP (#674)
 
-- Parsetree exploration and development tools. It is now possible to explore
-  the structure of the parsetree in a custom editor. Additionally, it is
-  possible to view preprocessed source of any OCaml source file (when
-  applicable). Full functionality is available only for dune projects. (#666)
+- Parsetree exploration and development tools. It is now possible to explore the
+  structure of the parsetree in a custom editor. Additionally, it is possible to
+  view preprocessed source of any OCaml source file (when applicable). Full
+  functionality is available only for dune projects. (#666)
+
+- Fix highlighting of escaped odoc source code braces (#690)
 
 ## 1.8.4
 
