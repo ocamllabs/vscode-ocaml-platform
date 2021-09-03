@@ -39,3 +39,6 @@ build: [
   ]
 ]
 dev-repo: "git+https://github.com/ocamllabs/vscode-ocaml-platform.git"
+pin-depends: [
+  [ "ppxlib.dev" "git+https://github.com/ocaml-ppx/ppxlib.git" ]
+]
