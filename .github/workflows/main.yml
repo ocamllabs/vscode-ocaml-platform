@@ -52,13 +52,17 @@ jobs:
           cache-key: ${{ hashFiles('esy.lock/index.json') }}
 
       - name: Install npm packages
-        run: yarn --frozen-lockfile
+        run: |
+          yarn --frozen-lockfile --cwd astexplorer
+          yarn --frozen-lockfile
 
       - name: Check formatting
         run: yarn fmt:check
 
       - name: Build extension
-        run: opam exec -- make release-build
+        run: |
+          opam exec -- make view-build
+          opam exec -- make release-build
 
       - name: Package extension
         run: yarn package
