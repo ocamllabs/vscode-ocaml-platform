@@ -173,6 +173,17 @@ module Promise = struct
   let don't_wait_for_unit (_p : unit Promise.t) = ()
 
   include Promise
+
+  module Result = struct
+    include Promise.Result
+
+    let fold ~ok ~error p =
+      let open Promise.Syntax in
+      let+ r = p in
+      match r with
+      | Ok v -> Ok (ok v)
+      | Error e -> Error (error e)
+  end
 end
 
 let sprintf = Printf.sprintf
