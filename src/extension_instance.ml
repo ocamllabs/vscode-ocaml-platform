@@ -16,92 +16,102 @@ let ocaml_lsp t = Option.map ~f:snd t.lsp_client
 
 let lsp_client t = t.lsp_client
 
-let client_options () =
-  let documentSelector =
-    LanguageClient.DocumentSelector.
-      [| language "ocaml"
-       ; language "ocaml.interface"
-       ; language "ocaml.ocamllex"
-       ; language "ocaml.menhir"
-       ; language "reason"
-      |]
-  in
-  let (lazy outputChannel) = Output.language_server_output_channel in
-  let revealOutputChannelOn = LanguageClient.RevealOutputChannelOn.Never in
-  LanguageClient.ClientOptions.create ~outputChannel ~revealOutputChannelOn
-    ~documentSelector ()
-
-let server_options sandbox =
-  let command = Sandbox.get_command sandbox "ocamllsp" [] in
-  Cmd.log command;
-  let env =
-    let extra_env_vars =
-      Settings.server_extraEnv () |> Option.value ~default:Interop.Dict.empty
-    in
-    Interop.Dict.union (fun _k _v1 v2 -> Some v2) Process.Env.env extra_env_vars
-  in
-  match command with
-  | Shell command ->
-    let options = LanguageClient.ExecutableOptions.create ~env ~shell:true () in
-    LanguageClient.Executable.create ~command ~options ()
-  | Spawn { bin; args } ->
-    let command = Path.to_string bin in
-    let options =
-      LanguageClient.ExecutableOptions.create ~env ~shell:false ()
-    in
-    LanguageClient.Executable.create ~command ~args ~options ()
-
 let stop_server t =
   Option.iter t.lsp_client ~f:(fun (client, _) ->
       t.lsp_client <- None;
       LanguageClient.stop client)
 
-let start_language_server t =
-  stop_server t;
-  let open Promise.Syntax in
-  let+ res =
-    let open Promise.Result.Syntax in
-    let* () =
-      let cmd = Sandbox.get_command t.sandbox "ocamllsp" [ "--version" ] in
-      let open Promise.Syntax in
-      let+ (res : Node.ChildProcess.return) = Cmd.run cmd in
-      if res.exitCode = 0 then
-        Ok ()
-      else
-        Error
-          "Sandbox initialization failed: `ocaml-lsp-server` is not installed \
-           in the current sandbox."
+module Language_server_init : sig
+  val start_language_server : t -> unit Promise.t
+end = struct
+  let client_options () =
+    let documentSelector =
+      LanguageClient.DocumentSelector.
+        [| language "ocaml"
+         ; language "ocaml.interface"
+         ; language "ocaml.ocamllex"
+         ; language "ocaml.menhir"
+         ; language "reason"
+        |]
     in
-    let serverOptions = server_options t.sandbox in
-    let clientOptions = client_options () in
-    let client =
-      LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
-        ~serverOptions ~clientOptions ()
+    let (lazy outputChannel) = Output.language_server_output_channel in
+    let revealOutputChannelOn = LanguageClient.RevealOutputChannelOn.Never in
+    LanguageClient.ClientOptions.create ~outputChannel ~revealOutputChannelOn
+      ~documentSelector ()
+
+  let server_options sandbox =
+    let command = Sandbox.get_command sandbox "ocamllsp" [] in
+    Cmd.log command;
+    let env =
+      let extra_env_vars =
+        Settings.server_extraEnv () |> Option.value ~default:Interop.Dict.empty
+      in
+      Interop.Dict.union
+        (fun _k _v1 v2 -> Some v2)
+        Process.Env.env extra_env_vars
     in
-    LanguageClient.start client;
+    match command with
+    | Shell command ->
+      let options =
+        LanguageClient.ExecutableOptions.create ~env ~shell:true ()
+      in
+      LanguageClient.Executable.create ~command ~options ()
+    | Spawn { bin; args } ->
+      let command = Path.to_string bin in
+      let options =
+        LanguageClient.ExecutableOptions.create ~env ~shell:false ()
+      in
+      LanguageClient.Executable.create ~command ~args ~options ()
+
+  let start_language_server t =
+    stop_server t;
     let open Promise.Syntax in
-    let+ initialize_result = LanguageClient.readyInitializeResult client in
-    let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
-    t.lsp_client <- Some (client, ocaml_lsp);
-    if
-      (not (Ocaml_lsp.has_interface_specific_lang_id ocaml_lsp))
-      || (not (Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp))
-      || not (Ocaml_lsp.can_handle_infer_intf ocaml_lsp)
-      (* TODO: switch to ocaml-lsp version based approach Using
-         [initializeResult] of [LanguageClient] we can get ocaml-lsp's version.
-         We can use versions instead of capabilities to suggest the user to
-         update their ocaml-lsp. *)
-    then
-      show_message `Warn
-        "The installed version of ocamllsp is out of date. Some features may \
-         be unavailable or degraded in functionality: switching between \
-         implementation and interface files, functionality in mli sources. \
-         Consider updating ocamllsp.";
-    Ok ()
-  in
-  match res with
-  | Ok () -> ()
-  | Error s -> show_message `Error "Error starting server: %s" s
+    let+ res =
+      let open Promise.Result.Syntax in
+      let* () =
+        let cmd = Sandbox.get_command t.sandbox "ocamllsp" [ "--version" ] in
+        let open Promise.Syntax in
+        let+ (res : Node.ChildProcess.return) = Cmd.run cmd in
+        if res.exitCode = 0 then
+          Ok ()
+        else
+          Error
+            "Sandbox initialization failed: `ocaml-lsp-server` is not \
+             installed in the current sandbox."
+      in
+      let serverOptions = server_options t.sandbox in
+      let clientOptions = client_options () in
+      let client =
+        LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
+          ~serverOptions ~clientOptions ()
+      in
+      LanguageClient.start client;
+      let open Promise.Syntax in
+      let+ initialize_result = LanguageClient.readyInitializeResult client in
+      let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
+      t.lsp_client <- Some (client, ocaml_lsp);
+      if
+        (not (Ocaml_lsp.has_interface_specific_lang_id ocaml_lsp))
+        || (not (Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp))
+        || not (Ocaml_lsp.can_handle_infer_intf ocaml_lsp)
+        (* TODO: switch to ocaml-lsp version based approach Using
+           [initializeResult] of [LanguageClient] we can get ocaml-lsp's
+           version. We can use versions instead of capabilities to suggest the
+           user to update their ocaml-lsp. *)
+      then
+        show_message `Warn
+          "The installed version of ocamllsp is out of date. Some features may \
+           be unavailable or degraded in functionality: switching between \
+           implementation and interface files, functionality in mli sources. \
+           Consider updating ocamllsp.";
+      Ok ()
+    in
+    match res with
+    | Ok () -> ()
+    | Error s -> show_message `Error "Error starting server: %s" s
+end
+
+include Language_server_init
 
 module Sandbox_info : sig
   val make : Sandbox.t -> StatusBarItem.t
