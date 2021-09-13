@@ -165,6 +165,16 @@ module Range = struct
   include Vscode.Range
 end
 
+module Promise = struct
+  let don't_wait_for (_p : _ Promise.t) = ()
+
+  (** prefer this function over [don't_wait_for] when the promise has type
+      [unit Promise.t] *)
+  let don't_wait_for_unit (_p : unit Promise.t) = ()
+
+  include Promise
+end
+
 let sprintf = Printf.sprintf
 
 (** Logs to the extension's output channel *)
