@@ -87,7 +87,7 @@ end = struct
       in
       LanguageClient.start client;
       let open Promise.Syntax in
-      let+ initialize_result = LanguageClient.readyInitializeResult client in
+      let+ initialize_result = LanguageClient.ready_initialize_result client in
       let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
       t.lsp_client <- Some (client, ocaml_lsp);
       if
