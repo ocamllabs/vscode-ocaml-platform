@@ -63,25 +63,26 @@ end = struct
       in
       LanguageClient.Executable.create ~command ~args ~options ()
 
+  let check_ocaml_lsp_available sandbox =
+    let ocaml_lsp_version sandbox =
+      Sandbox.get_command sandbox "ocamllsp" [ "--version" ]
+    in
+    Cmd.output (ocaml_lsp_version sandbox)
+    |> Promise.Result.fold
+         ~ok:(fun (_ : string) -> ())
+         ~error:(fun (_ : string) ->
+           "Sandbox initialization failed: `ocaml-lsp-server` is not installed \
+            in the current sandbox.")
+
   let start_language_server t =
     stop_server t;
     let open Promise.Syntax in
     let+ res =
       let open Promise.Result.Syntax in
-      let* () =
-        let cmd = Sandbox.get_command t.sandbox "ocamllsp" [ "--version" ] in
-        let open Promise.Syntax in
-        let+ (res : Node.ChildProcess.return) = Cmd.run cmd in
-        if res.exitCode = 0 then
-          Ok ()
-        else
-          Error
-            "Sandbox initialization failed: `ocaml-lsp-server` is not \
-             installed in the current sandbox."
-      in
-      let serverOptions = server_options t.sandbox in
-      let clientOptions = client_options () in
+      let* () = check_ocaml_lsp_available t.sandbox in
       let client =
+        let serverOptions = server_options t.sandbox in
+        let clientOptions = client_options () in
         LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
           ~serverOptions ~clientOptions ()
       in
