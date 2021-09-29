@@ -78,6 +78,99 @@ module Command = struct
     Extension_commands.register
       ~id:Extension_consts.Commands.open_sandbox_documentation handler
 
+  (* let check_if_live_preview_extension_is_installed () = let open
+     Promise.Syntax in let is_live_preview_extension_installed =
+     Extensions.is_extension_installed "ms-vscode.live-server" in if
+     is_live_preview_extension_installed then Promise.resolve true else let+
+     choices = Window.showErrorMessage ~message:"Live preview extension must be
+     installed." ~choices:[ ("Install", `Install) ] () in match choices with |
+     None -> false | Some `Install -> let (_ : Ojs.t option Promise.t) =
+     Vscode.Commands.executeCommand ~command:"workbench.extensions.search"
+     ~args:[ Ojs.string_to_js "ms-vscode.live-server" ] in false *)
+
+  let _generate_documentation =
+    let handler (instance : Extension_instance.t) ~args =
+      let _ =
+        let sandbox = Extension_instance.sandbox instance in
+        let open Promise.Syntax in
+        let+ odig = Odig.of_sandbox sandbox in
+        match odig with
+        | Error e ->
+          let message =
+            match e with
+            | Odig.Not_supported_sandbox ->
+              Printf.sprintf
+                "This functionality is not supported for %s sandbox"
+                (Sandbox.to_string sandbox)
+            | Odig.Odig_not_installed ->
+              "Odig must be installed to generate the documentation."
+          in
+          let+ _ = Window.showErrorMessage ~message () in
+          ()
+        | Ok odig ->
+          let is_live_preview_extension_installed =
+            Extensions.is_extension_installed "ms-vscode.live-server"
+          in
+          if not is_live_preview_extension_installed then
+            let+ choices =
+              Window.showErrorMessage
+                ~message:"Live preview extension must be installed."
+                ~choices:[ ("Install", `Install) ]
+                ()
+            in
+            match choices with
+            | None -> ()
+            | Some `Install ->
+              let _ =
+                Vscode.Commands.executeCommand
+                  ~command:"workbench.extensions.search"
+                  ~args:[ Ojs.string_to_js "ms-vscode.live-server" ]
+              in
+              ()
+          else
+            let arg = List.hd_exn args in
+            let dep = Dependency.t_of_js arg in
+            let name = Sandbox.Package.name dep in
+            let* cache_dir = Odig.cache_dir odig in
+            let options =
+              ProgressOptions.create ~location:(`ProgressLocation Notification)
+                ~title:(Printf.sprintf "Generating documenation for %s" name)
+                ~cancellable:false ()
+            in
+            let task ~progress:_ ~token:_ =
+              let+ result = Odig.odoc_exec odig name in
+              let _ =
+                match result with
+                | Ok _ -> Promise.resolve ()
+                | Error _ ->
+                  let+ _ =
+                    Window.showErrorMessage
+                      ~message:
+                        (Printf.sprintf
+                           "Error while generating documentation for %s" name)
+                      ()
+                  in
+                  ()
+              in
+              Ojs.null
+            in
+            let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+            let htmlDocumentationPath = Path.(cache_dir / ("/html/" ^ name)) in
+            let (_ : Ojs.t option Promise.t) =
+              Vscode.Commands.executeCommand
+                ~command:"livePreview.start.preview.atFile"
+                ~args:
+                  [ Ojs.string_to_js (Path.to_string htmlDocumentationPath)
+                  ; Ojs.bool_to_js false (* Path is absolute *)
+                  ]
+            in
+            ()
+      in
+      ()
+    in
+    Extension_commands.register
+      ~id:Extension_consts.Commands.generate_sandbox_documentation handler
+
   let _uninstall =
     let handler (instance : Extension_instance.t) ~args =
       let (_ : unit Promise.t) =

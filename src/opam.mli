@@ -57,6 +57,8 @@ val upgrade : t -> Switch.t -> Cmd.t
 (* Remove a list of packages from a switch *)
 val remove : t -> Switch.t -> string list -> Cmd.t
 
+val path : t -> Switch.t -> Path.t
+
 (* Initialize a new Opam environment. *)
 val init : t -> Cmd.t
 
@@ -101,3 +103,6 @@ val exec : t -> Switch.t -> args:string list -> Cmd.t
 
 (** Check that two instances of [Opam] are equal. *)
 val equal : t -> t -> bool
+
+(** Check that a package is installed in the given switch. *)
+val has_package : t -> Switch.t -> string -> bool Promise.t

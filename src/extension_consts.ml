@@ -27,6 +27,9 @@ module Commands = struct
 
   let open_sandbox_documentation = ocaml_prefixed "open-sandbox-documentation"
 
+  let generate_sandbox_documentation =
+    ocaml_prefixed "generate-sandbox-documentation"
+
   let open_current_dune_file = ocaml_prefixed "current-dune-file"
 
   let evaluate_selection = ocaml_prefixed "evaluate-selection"

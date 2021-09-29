@@ -1425,6 +1425,19 @@ module ExtensionTerminalOptions = struct
     val create : name:string -> pty:Pseudoterminal.t -> t [@@js.builder]]
 end
 
+module Extension = struct
+  include Interface.Make ()
+end
+
+module Extensions = struct
+  include
+    [%js:
+    val getExtension : string -> Extension.t or_undefined
+      [@@js.global "vscode.extensions.getExtension"]]
+
+  let is_extension_installed name = Option.is_some (getExtension name)
+end
+
 module TerminalExitStatus = struct
   include Interface.Make ()
 

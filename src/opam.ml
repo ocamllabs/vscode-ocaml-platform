@@ -270,6 +270,11 @@ let upgrade t switch = spawn t [ "upgrade"; switch_arg switch; "-y" ]
 let remove t switch packages =
   spawn t ("remove" :: switch_arg switch :: "-y" :: packages)
 
+let path (opam : t) (switch : Switch.t) =
+  match switch with
+  | Local p -> Path.(p / "_opam")
+  | Named n -> Path.(opam.root / n)
+
 let switch_compiler t switch =
   let open Promise.Syntax in
   let+ switch_state = Switch_state.of_switch t switch in
@@ -300,3 +305,13 @@ let root_packages t switch =
 let package_remove t switch packages =
   let names = List.map ~f:Package.name packages in
   remove t switch names
+
+let has_package t switch package_name =
+  let open Promise.Syntax in
+  let+ packages = packages t switch in
+  match packages with
+  | Ok packages ->
+    packages
+    |> List.exists ~f:(fun package ->
+           String.equal (Package.name package) package_name)
+  | Error _ -> false

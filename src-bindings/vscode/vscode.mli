@@ -1100,6 +1100,16 @@ module ExtensionTerminalOptions : sig
   val create : name:string -> pty:Pseudoterminal.t -> t
 end
 
+module Extension : sig
+  include Js.T
+end
+
+module Extensions : sig
+  val getExtension : string -> Extension.t or_undefined
+
+  val is_extension_installed : string -> bool
+end
+
 module TerminalExitStatus : sig
   include Js.T
 

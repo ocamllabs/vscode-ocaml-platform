@@ -180,6 +180,15 @@
         }
       },
       {
+        "command": "ocaml.generate-sandbox-documentation",
+        "category": "OCaml",
+        "title": "Generate Documentation",
+        "icon": {
+          "light": "assets/book-open-light.svg",
+          "dark": "assets/book-open-dark.svg"
+        }
+      },
+      {
         "command": "ocaml.open-sandbox-documentation",
         "category": "OCaml",
         "title": "Open Documentation",
@@ -418,6 +427,11 @@
         {
           "command": "ocaml.open-sandbox-documentation",
           "when": "view == ocaml-sandbox && viewItem == package-with-doc",
+          "group": "inline"
+        },
+        {
+          "command": "ocaml.generate-sandbox-documentation",
+          "when": "view == ocaml-sandbox",
           "group": "inline"
         }
       ]
