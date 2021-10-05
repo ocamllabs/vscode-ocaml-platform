@@ -14,7 +14,7 @@ jobs:
           - ubuntu-latest
           - windows-latest
         ocaml-compiler:
-          - 4.12.x
+          - 4.13.x
         node-version:
           - 14.x
 
@@ -37,9 +37,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install ocaml-lsp-server
-        run: |
-          opam pin ocaml-lsp-server https://github.com/ocaml/ocaml-lsp.git --no-action
-          opam install ocaml-lsp-server
+        run: opam install ocaml-lsp-server
 
       - name: Install opam packages
         run: opam install . --deps-only --with-test
@@ -47,26 +45,19 @@ jobs:
       - name: Use latest esy
         run: npm install --global esy
 
-      - name: Install esy packages
-        uses: esy/github-action@v1
-        with:
-          cache-key: ${{ hashFiles('esy.lock/index.json') }}
-
       - name: Install npm packages
         run: |
-          yarn --frozen-lockfile --cwd astexplorer
-          yarn --frozen-lockfile
+          npm ci --prefix astexplorer
+          npm ci
 
       - name: Check formatting
-        run: yarn fmt:check
+        run: npm run fmt:check
 
       - name: Build extension
-        run: |
-          opam exec -- make view-build
-          opam exec -- make release-build
+        run: opam exec -- make build-release
 
       - name: Package extension
-        run: yarn package
+        run: npm run package
 
       - name: Upload artifact
         if: runner.os == 'Linux'
@@ -78,19 +69,19 @@ jobs:
       - name: Test extension
         uses: GabrielBB/xvfb-action@v1
         with:
-          run: yarn test
+          run: npm run test
         env:
           OPAMSWITCH: ${{ github.workspace }}
 
       - name: Publish extension to VSCode Marketplace
         if: success() && runner.os == 'Linux' && contains(github.ref, 'refs/tags')
-        run: yarn deploy:vsce
+        run: npm run deploy:vsce
         env:
           VSCE_PAT: ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
 
       - name: Publish extension to Open VSX
         if: success() && runner.os == 'Linux' && contains(github.ref, 'refs/tags')
-        run: yarn deploy:ovsx --pat "$OVSX_PAT"
+        run: npm run deploy:ovsx --pat "$OVSX_PAT"
         env:
           OVSX_PAT: ${{ secrets.OPEN_VSX_TOKEN }}
 
@@ -120,7 +111,7 @@ jobs:
     strategy:
       matrix:
         ocaml-compiler:
-          - 4.12.x
+          - 4.13.x
         node-version:
           - 14.x
 
@@ -142,13 +133,13 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install npm packages
-        run: yarn --frozen-lockfile
+        run: npm ci
 
       - run: opam depext opam-dune-lint --install
 
       - run: opam install . --deps-only
 
-      - run: opam exec -- make release-build
+      - run: opam exec -- make build-release
 
       - run: opam exec -- opam-dune-lint
 
@@ -156,7 +147,7 @@ jobs:
     strategy:
       matrix:
         ocaml-compiler:
-          - 4.12.x
+          - 4.13.x
 
     runs-on: ubuntu-latest
 

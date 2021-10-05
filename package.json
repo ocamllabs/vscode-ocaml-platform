@@ -939,7 +939,7 @@
     "package": "vsce package --out vscode-ocaml.vsix --yarn",
     "deploy:vsce": "vsce publish --packagePath vscode-ocaml.vsix --yarn",
     "deploy:ovsx": "ovsx publish --yarn",
-    "fmt:check": "prettier --check --ignore-path _opam .",
+    "fmt:check": "prettier --check \"test/**/*.js\"",
     "fmt": "prettier --write \"test/**/*.js\""
   },
   "dependencies": {

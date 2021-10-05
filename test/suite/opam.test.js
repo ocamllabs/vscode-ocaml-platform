@@ -50,6 +50,6 @@ suite("Basic tests", () => {
       console.log(cp.execSync("opam switch remove e2e --yes").toString());
       console.log("  Removing test project");
       fs.removeSync(projectPath);
-    } catch (e) { }
+    } catch (e) {}
   }).timeout(100000000000);
 });
