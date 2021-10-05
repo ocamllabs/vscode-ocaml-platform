@@ -8,7 +8,7 @@ const vscode = require("vscode");
 const { Uri } = vscode;
 
 const root = path.dirname(path.dirname(__dirname));
-const fixtureSrcDir = path.join(root, "fixtures");
+const fixtureSrcDir = path.join(root, "test", "fixtures");
 
 suite("Basic tests", () => {
   test("Opam tests", async () => {
@@ -50,6 +50,6 @@ suite("Basic tests", () => {
       console.log(cp.execSync("opam switch remove e2e --yes").toString());
       console.log("  Removing test project");
       fs.removeSync(projectPath);
-    } catch (e) {}
+    } catch (e) { }
   }).timeout(100000000000);
 });

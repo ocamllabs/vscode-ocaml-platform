@@ -1,7 +1,7 @@
 {
   "name": "ocaml-platform",
-  "displayName": "OCaml Platform",
-  "description": "Official OCaml Support from OCamlLabs",
+  "displayName": "OCaml",
+  "description": "Official OCaml language extension for VSCode",
   "license": "MIT",
   "version": "1.8.4",
   "publisher": "ocamllabs",
@@ -939,8 +939,8 @@
     "package": "vsce package --out ocaml-platform.vsix --yarn",
     "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --yarn",
     "deploy:ovsx": "ovsx publish --yarn",
-    "fmt:check": "prettier --check .",
-    "fmt": "prettier --write ."
+    "fmt:check": "prettier --check --ignore-path _opam .",
+    "fmt": "prettier --write \"test/**/*.js\""
   },
   "dependencies": {
     "vscode-languageclient": "7.0.0"
@@ -955,5 +955,17 @@
     "prettier": "2.4.1",
     "vsce": "1.100.1",
     "vscode-test": "1.6.1"
+  },
+  "prettier": {
+    "proseWrap": "always",
+    "endOfLine": "auto",
+    "overrides": [
+      {
+        "files": "*.yml",
+        "options": {
+          "proseWrap": "preserve"
+        }
+      }
+    ]
   }
 }

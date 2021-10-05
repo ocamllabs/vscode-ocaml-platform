@@ -1,15 +1,26 @@
+# ocamlbuild working directory
 _build/
-_esy/
+
+# ocamlbuild targets
+*.byte
+*.native
+
+# Merlin configuring file for Vim and Emacs
+.merlin
+
+# Dune generated files
+*.install
+
+# Local OPAM switch
 _opam/
-.vscode-test/
-dist/
-lib/
+
+# Normal npm stuff
 node_modules/
 
-.DS_Store
-.merlin
+# VSCode settings
 .vscode/settings.json
-*.log
-*.vsix
 
-test_extension.vsix
+# VSCode build artifacts
+dist/
+.vscode-test/
+*.vsix
