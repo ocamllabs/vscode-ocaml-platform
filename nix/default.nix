@@ -24,7 +24,7 @@ let
         {
           inherit ppxlib;
           vscode = default;
-          "vscode-ocaml-platform" = default;
+          "vscode-ocaml" = default;
         };
 
   };

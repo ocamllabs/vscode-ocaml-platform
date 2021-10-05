@@ -1,9 +1,9 @@
 (lang dune 2.7)
 
-(name vscode-ocaml-platform)
+(name vscode-ocaml)
 
 (source
- (github ocamllabs/vscode-ocaml-platform))
+ (github ocamllabs/vscode-ocaml))
 
 (license ISC)
 
@@ -22,7 +22,7 @@
 (generate_opam_files true)
 
 (package
- (name vscode-ocaml-platform)
+ (name vscode-ocaml)
  (synopsis "Visual Studio Code extension for OCaml")
  (depends
   (vscode

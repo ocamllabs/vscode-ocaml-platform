@@ -7,7 +7,7 @@ let
 in with local;
 
 pkgs.mkShell {
-  inputsFrom = [ vscode vscode-ocaml-platform ];
+  inputsFrom = [ vscode vscode-ocaml ];
   buildInputs = (with pkgs; [
     yarn
     nodejs-14_x
