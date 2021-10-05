@@ -681,7 +681,7 @@ in
       src = self.directSrc "vscode";
       version = "development";
     };
-    vscode-ocaml = 
+    vscode-ocaml-platform = 
     {
       opamInputs = 
       {
@@ -695,9 +695,9 @@ in
         promise_jsoo = selection.promise_jsoo;
         vscode = selection.vscode;
       };
-      opamSrc = "vscode-ocaml.opam";
-      pname = "vscode-ocaml";
-      src = self.directSrc "vscode-ocaml";
+      opamSrc = "vscode-ocaml-platform.opam";
+      pname = "vscode-ocaml-platform";
+      src = self.directSrc "vscode-ocaml-platform";
       version = "development";
     };
     yojson = 

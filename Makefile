@@ -19,8 +19,8 @@ switch: create_switch deps ## Create an opam switch and install development depe
 
 .PHONY: build
 build: ## Build the project
-	opam exec -- dune build src/vscode_ocaml.bc.js
-	yarn esbuild _build/default/src/vscode_ocaml.bc.js \
+	opam exec -- dune build src/vscode_ocaml_platform.bc.js
+	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
 		--external:vscode \
 		--outdir=dist \
@@ -30,8 +30,8 @@ build: ## Build the project
 
 .PHONY: build-release
 build-release:
-	opam exec -- dune build src/vscode_ocaml.bc.js --profile=release
-	yarn esbuild _build/default/src/vscode_ocaml.bc.js \
+	opam exec -- dune build src/vscode_ocaml_platform.bc.js --profile=release
+	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
 		--external:vscode \
 		--outdir=dist \

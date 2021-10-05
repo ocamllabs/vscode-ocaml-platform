@@ -13,7 +13,7 @@
     "url": "https://github.com/ocamllabs/vscode-ocaml-platform/issues"
   },
   "homepage": "https://github.com/ocamllabs/vscode-ocaml-platform",
-  "main": "./dist/vscode_ocaml.bc.js",
+  "main": "./dist/vscode_ocaml_platform.bc.js",
   "engines": {
     "vscode": "^1.57.0"
   },
@@ -936,8 +936,8 @@
     "test:opam": "node ./test/runOpamTests.js",
     "test:problems": "node ./test/runProblemMatcherTests.js",
     "test": "npm-run-all -s test:*",
-    "package": "vsce package --out vscode-ocaml.vsix --yarn",
-    "deploy:vsce": "vsce publish --packagePath vscode-ocaml.vsix --yarn",
+    "package": "vsce package --out ocaml-platform.vsix --yarn",
+    "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --yarn",
     "deploy:ovsx": "ovsx publish --yarn",
     "fmt:check": "prettier --check \"test/**/*.js\"",
     "fmt": "prettier --write \"test/**/*.js\""
