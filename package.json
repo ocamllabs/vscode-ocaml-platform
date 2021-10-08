@@ -1,6 +1,6 @@
 {
   "name": "ocaml-platform",
-  "displayName": "OCaml",
+  "displayName": "OCaml Platform",
   "description": "Official OCaml language extension for VSCode",
   "license": "MIT",
   "version": "1.8.4",
