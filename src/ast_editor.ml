@@ -130,9 +130,15 @@ let transform_to_ast instance ~(document : TextDocument.t)
           match Ppxlib.Ast_io.get_ast res with
           | Impl ppml_structure ->
             let reparsed_structure = Parse.implementation lex in
+            let reparsed_structure =
+              Ppxlib_ast.Selected_ast.Of_ocaml.copy_structure reparsed_structure
+            in
             Dumpast.reparse ppml_structure reparsed_structure
           | Intf signature ->
             let reparsed_signature = Parse.interface lex in
+            let reparsed_signature =
+              Ppxlib_ast.Selected_ast.Of_ocaml.copy_signature reparsed_signature
+            in
             Dumpast.reparse_signature signature reparsed_signature
         in
         match pp_json_res with

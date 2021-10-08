@@ -6,7 +6,7 @@ const cp = require("child_process");
 const { runTests } = require("vscode-test");
 
 const root = path.dirname(__dirname);
-const sampleEsySrc = path.join(root, "fixtures", "sample-esy");
+const sampleEsySrc = path.join(root, "test", "fixtures", "sample-esy");
 const projectPath = path.join(os.tmpdir(), "sample-esy");
 
 async function main() {

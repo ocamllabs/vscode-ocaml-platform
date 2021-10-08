@@ -61,7 +61,7 @@ writing code.
    - or clicking on the package icon at the bottom of VSCode window and picking
      your sandbox from the menu
 
-     ![pick sandbox](./readme-assets/pick_sandbox.png)
+     ![pick sandbox](./doc/pick_sandbox.png)
 
    > _What's a sandbox?_ A sandbox is like an isolated environment for your
    > project, so everything you install is just installed inside this
@@ -210,7 +210,7 @@ An easy way to see what commands are offered by the extension in the currently
 open file, you can invoke VSCode Command Palette and search for commands with
 prefix `OCaml:`:
 
-![commands](./readme-assets/commands.png)
+![commands](./doc/commands.png)
 
 | Name                         | Description                                 | Keyboard Shortcuts |
 | ---------------------------- | ------------------------------------------- | ------------------ |

@@ -1,3 +1,5 @@
+open Ppxlib
+
 (** [transform s k] transforms syntactically correct code containted in [s] into
     its AST serialized as a [Jsonoo.t] value. The kind [k] specifies if it is an
     interface or an implementation. [Error err_msg] is returned on syntax error *)
