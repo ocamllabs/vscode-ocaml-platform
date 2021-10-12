@@ -12,7 +12,7 @@
       "end": "\\)",
       "beginCaptures": {
         "1": {
-          "name": "meta.class.stanza.dune"
+          "name": "keyword.other.dune"
         }
       },
       "patterns": [
@@ -326,6 +326,9 @@
           "captures": {
             "1": {
               "name": "entity.tag.list.parenthesis.dune"
+            },
+            "2": {
+              "name": "variable.other.dune"
             }
           },
           "comment": "ok, for this one, I didn't know what to choose",
@@ -340,7 +343,7 @@
     "atom": {
       "patterns": [
         {
-          "name": "meta.atom.dune",
+          "name": "keyword.other.dune",
           "match": "\\b[^[[:space:]]]+\\b"
         }
       ]

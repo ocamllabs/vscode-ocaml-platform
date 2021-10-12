@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Improve dune highlighting (#106)
+
 - Add commands `Jump to Next Typed Hole` (shortcut: `Alt + L`) and
   `Jump to Previous Typed Hole` (shortcut: `Alt + Shift + L`)
 
