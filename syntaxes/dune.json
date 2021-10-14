@@ -139,7 +139,8 @@
                   "1": { "name": "variable.other.declaration.dune" }
                 },
                 "patterns": [{ "include": "#general" }]
-              }]
+              },
+              { "include": "#general" }]
             },
             {
               "comment": "ppx_runtime_libraries/virtual_deps/flags/ocamlc_flags/ocamlopt_flags/library_flags/ocamlopt/c_library_flags/modules_without_implementation/private_modules/allow_overlapping_dependencies/enabled_if/inline_tests/root_module",
