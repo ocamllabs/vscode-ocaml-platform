@@ -1,6 +1,7 @@
 # Change Log
 
 ## Unreleased
+- Dune syntax highlighting fix (#742)
 
 - Fix the detection of opam's root directory when no switch is detected (#831)
 
@@ -19,6 +20,7 @@
 
 - Activate extension on cram files, or when the workspace contains
   dune-workspace or dune files. (#750)
+
 
 - Add commands `Jump to Next Typed Hole` (shortcut: `Alt + L`) and
   `Jump to Previous Typed Hole` (shortcut: `Alt + Shift + L`)
