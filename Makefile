@@ -42,10 +42,6 @@ build-release:
 		--sourcemap \
 		--sources-content=false
 
-.PHONY: install
-install: all ## Install the packages on the system
-	opam exec -- dune install --root .
-
 .PHONY: start
 start: all ## Run the produced executable
 	opam exec -- dune build @run --force --no-buffer
