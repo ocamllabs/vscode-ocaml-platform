@@ -75,7 +75,7 @@ watch: ## Watch for the filesystem and rebuild on every change
 
 .PHONY: vs-pkg
 vs-pkg: build # Builds and packages the extension for installment
-	npm run -- vsce package --out ./test_extension.vsix
+	npm exec -- vsce package --out ./test_extension.vsix
 
 .PHONY: vs-install
 vs-install: pkg # Builds, packages, and installs the extension to your VS Code
