@@ -42,10 +42,6 @@ build-release:
 		--sourcemap \
 		--sources-content=false
 
-.PHONY: start
-start: all ## Run the produced executable
-	opam exec -- dune build @run --force --no-buffer
-
 .PHONY: test
 test: ## Run the unit tests
 	opam exec -- dune build --root . @runtest
