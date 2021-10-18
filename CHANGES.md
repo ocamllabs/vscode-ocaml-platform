@@ -2,8 +2,8 @@
 
 ## Unreleased
 
-- Add commands `Jump to Next Typed Hole` (shortcut: `Alt + Y`) and
-  `Jump to Previous Typed Hole` (shortcut: `Alt + Shift + Y`)
+- Add commands `Jump to Next Typed Hole` (shortcut: `Alt + L`) and
+  `Jump to Previous Typed Hole` (shortcut: `Alt + Shift + L`)
 
   _What typed holes are_
 
@@ -32,6 +32,10 @@
   (#745)
 
 - Fix highlighting of escaped odoc source code braces (#690)
+
+- `opam exec` is now called with `--set-switch` flag; this is useful when we
+  launch a terminal within a certain sandbox set in the extension (#744, fixes
+  #655)
 
 ## 1.8.4
 
