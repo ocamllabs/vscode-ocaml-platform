@@ -12,7 +12,7 @@ deps: ## Install development dependencies
 
 .PHONY: create_switch
 create_switch:
-	opam switch create . 4.13.1 --no-install
+	opam switch create . 4.12.1 --no-install
 
 .PHONY: switch
 switch: create_switch deps ## Create an opam switch and install development dependencies
@@ -65,12 +65,12 @@ fmt: ## Format the codebase with ocamlformat
 watch: ## Watch for the filesystem and rebuild on every change
 	opam exec -- dune build @all -w --terminal-persistence=clear-on-rebuild
 
-.PHONY: vs-pkg
-vs-pkg: build # Builds and packages the extension for installment
+.PHONY: pkg
+pkg: build # Builds and packages the extension for installment
 	npm exec -- vsce package --out ./test_extension.vsix
 
-.PHONY: vs-install
-vs-install: vs-pkg # Builds, packages, and installs the extension to your VS Code
+.PHONY: install
+install: pkg # Builds, packages, and installs the extension to your VS Code
 	code --force --install-extension test_extension.vsix
 
 .PHONY: nix/opam-selection.nix
