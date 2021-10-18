@@ -222,7 +222,7 @@ end
 
 let switch_arg switch = "--switch=" ^ Switch.name switch
 
-let exec t switch ~args = spawn t ("exec" :: switch_arg switch :: "--" :: args)
+let exec t switch ~args = spawn t ("exec" :: switch_arg switch :: "--set-switch" :: "--" :: args)
 
 let init t = spawn t [ "init"; "-y" ]
 
@@ -268,7 +268,6 @@ let install t switch ~packages =
   spawn t ("install" :: switch_arg switch :: "-y" :: packages)
 
 let update t switch = spawn t [ "update"; switch_arg switch ]
-
 let upgrade t switch = spawn t [ "upgrade"; switch_arg switch; "-y" ]
 
 let remove t switch packages =
