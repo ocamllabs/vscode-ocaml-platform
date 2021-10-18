@@ -78,7 +78,7 @@ vs-pkg: build # Builds and packages the extension for installment
 	npm exec -- vsce package --out ./test_extension.vsix
 
 .PHONY: vs-install
-vs-install: pkg # Builds, packages, and installs the extension to your VS Code
+vs-install: vs-pkg # Builds, packages, and installs the extension to your VS Code
 	code --force --install-extension test_extension.vsix
 
 .PHONY: nix/opam-selection.nix
