@@ -27,6 +27,10 @@
   view preprocessed source of any OCaml source file (when applicable). Full
   functionality is available only for dune projects. (#666)
 
+- Add commands `Show OCaml Language Server Output`,
+  `Show OCaml Platform Extension Output`, and `Show OCaml Commands Output`.
+  (#745)
+
 - Fix highlighting of escaped odoc source code braces (#690)
 
 ## 1.8.4

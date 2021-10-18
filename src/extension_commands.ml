@@ -133,6 +133,20 @@ let _open_current_dune_file =
   in
   command Extension_consts.Commands.open_current_dune_file handler
 
+let ( _open_ocamllsp_output_pane
+    , _open_ocaml_platform_ext_pane
+    , _open_ocaml_commands_pane ) =
+  let handler output (_instance : Extension_instance.t) ~args:_ =
+    let show_output (lazy output) = OutputChannel.show output () in
+    show_output output
+  in
+  ( command Extension_consts.Commands.open_ocamllsp_output
+      (handler Output.language_server_output_channel)
+  , command Extension_consts.Commands.open_ocaml_platform_ext_output
+      (handler Output.extension_output_channel)
+  , command Extension_consts.Commands.open_ocaml_commands_output
+      (handler Output.command_output_channel) )
+
 module Holes_commands : sig
   val _jump_to_prev_hole : t
 
