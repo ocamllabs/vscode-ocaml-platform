@@ -287,12 +287,12 @@
       },
       {
         "command": "ocaml.next-hole",
-        "key": "Alt+L",
+        "key": "Alt+Y",
         "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
       },
       {
         "command": "ocaml.prev-hole",
-        "key": "Shift+Alt+L",
+        "key": "Shift+Alt+Y",
         "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
       },
       {
