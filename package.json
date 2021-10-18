@@ -233,6 +233,21 @@
         "command": "ocaml.open-pp-editor-and-ast-explorer",
         "category": "OCaml",
         "title": "Open both Preprocessed Document and AST explorer to the side"
+      },
+      {
+        "command": "ocaml.open-ocamllsp-output",
+        "category": "OCaml",
+        "title": "Show OCaml Language Server Output"
+      },
+      {
+        "command": "ocaml.open-ocaml-platform-ext-output",
+        "category": "OCaml",
+        "title": "Show OCaml Platform Extension Output"
+      },
+      {
+        "command": "ocaml.open-ocaml-commands-output",
+        "category": "OCaml",
+        "title": "Show OCaml Commands Output"
       }
     ],
     "keybindings": [

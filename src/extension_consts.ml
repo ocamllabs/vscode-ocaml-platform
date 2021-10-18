@@ -48,6 +48,13 @@ module Commands = struct
 
   let open_pp_editor_and_ast_explorer =
     ocaml_prefixed "open-pp-editor-and-ast-explorer"
+
+  let open_ocamllsp_output = ocaml_prefixed "open-ocamllsp-output"
+
+  let open_ocaml_platform_ext_output =
+    ocaml_prefixed "open-ocaml-platform-ext-output"
+
+  let open_ocaml_commands_output = ocaml_prefixed "open-ocaml-commands-output"
 end
 
 module Command_errors = struct
