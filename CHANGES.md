@@ -2,8 +2,8 @@
 
 ## Unreleased
 
-- Add commands `Jump to Next Typed Hole` (shortcut: `Alt + L`) and
-  `Jump to Previous Typed Hole` (shortcut: `Alt + Shift + L`)
+- Add commands `Jump to Next Typed Hole` (shortcut: `Alt + Y`) and
+  `Jump to Previous Typed Hole` (shortcut: `Alt + Shift + Y`)
 
   _What typed holes are_
 
