@@ -6,7 +6,7 @@ all:
 
 .PHONY: deps
 deps: ## Install development dependencies
-	opam install -y ocamlformat ocamlformat-rpc ocaml-lsp-server $(DEV_DEPS)
+	opam install -y ocamlformat.0.19.0 ocamlformat-rpc ocaml-lsp-server $(DEV_DEPS)
 	npm install
 	opam install --deps-only --with-test --with-doc -y .
 
