@@ -35,7 +35,7 @@ Visual Studio Code extension for OCaml and relevant tools.
      package.
    - Install
      [ocamlformat](https://github.com/ocaml-ppx/ocamlformat#installation)
-     package if you want source code formatting support.
+     package if you want source file formatting support.
 
      Note: Formatting support also requires having `.ocamlformat` file in your
      project root directory.
@@ -96,8 +96,11 @@ help:
 - if you don't understand how to the extension works or how to make it work
   correctly, create a new discussion in the repository Discussions
   [tab](https://github.com/ocamllabs/vscode-ocaml-platform/discussions).
-- if the extension seems to misbehave, file an issue in the repository Issues
-  [tab](https://github.com/ocamllabs/vscode-ocaml-platform/issues).
+- if the extension seems to misbehave:
+  - see [Debugging](#debugging) section to see if you can see any reported
+    errors
+  - file an issue in the repository Issues
+    [tab](https://github.com/ocamllabs/vscode-ocaml-platform/issues).
 
 ### Windows
 
@@ -222,6 +225,68 @@ prefix `OCaml:`:
 | `ocaml.switch-impl-intf`     | Switch implementation/interface             | `Alt+O`            |
 | `ocaml.open-repl`            | Open REPL                                   |                    |
 | `ocaml.evaluate-selection`   | Evaluate Selection                          | `Shift+Enter`      |
+
+## Debugging
+
+### Problems with code or file formatting support
+
+If you are experiencing problems with OCaml code support, e.g., you invoke
+`Go to Definition` on a symbol (for example, a variable name), but nothing
+happens, or you hover the cursor over a symbol and don't see its type, the
+problem is likely to be with OCaml-LSP, which is responsible for code support.
+
+Two steps to see if there are reported problems with OCaml-LSP (which you can
+either act upon yourself if you can or report the problem in Issues/Discussion
+of this repository):
+
+1. Set the `ocaml.trace.server` setting to `verbose` in VS Code settings.
+
+![trace verbose](doc/trace_verbose.png)
+
+2. Invoke command `OCaml: Show OCaml Language Server Output` from the VS Code
+   Command Palette. This command shows requests and responses exchanged between
+   this extension and OCaml-LSP. If, for example, `Go to Definition` is not
+   working when you think it should, you may see some exception logged in this
+   Output View:
+
+   ```
+   [Error - 10:41:51 PM] Locate failed. File_not_found: 'Fiber' seems to originate from 'Fiber' whose ML file could not be found
+   ```
+
+   You can also sometimes see explicitly an exception being thrown. Such kind of
+   information in an issue report is usually very helpful in detecting and
+   fixing the problem.
+
+If you face such kind of problems that you cannot resolve on your own, please,
+check that the issue hasn't been reported yet and report in
+[Issues](https://github.com/ocaml/ocaml-lsp/issues) if necessary.
+
+Note: File formatting is performed on the OCaml-LSP side, so OCaml-LSP may be
+the culprit in a formatting problem. Make sure, however, that you've read
+[Getting Started](#getting-started) section, which describes some initial setup
+required for file formatting to work.
+
+### Problems with this Extension or OPAM support in the Extension
+
+One by one, invoke and see outputs for commands
+`OCaml: Show OCaml Platform Extension Output` and
+`OCaml: Show OCaml Commands Output`. In these Output Views you may see errors
+and warnings, which can be handy to detect and fix the problem you're facing.
+Please, check the issue you're facing hasn't been already reported and report in
+[Issues](https://github.com/ocamllabs/vscode-ocaml-platform/issues) tab of this
+repository, if necessary.
+
+### Things to include in your Issue report
+
+It is helpful to include information such as
+
+- Operation system information
+- VS Code version
+- OCaml Platform Extension version
+- OCaml-LSP version
+- Reproducible setup (some codebase, for example, where we can see the bug
+  happening) the problem
+- Output View information described above
 
 ## FAQ
 
