@@ -49,9 +49,9 @@ let _select_sandbox =
         Extension_instance.set_sandbox instance new_sandbox;
         let* () = Sandbox.save_to_settings new_sandbox in
         let (_ : Ojs.t option Promise.t) =
-        Vscode.Commands.executeCommand
-          ~command:Extension_consts.Commands.refresh_switches ~args:[]
-      in
+          Vscode.Commands.executeCommand
+            ~command:Extension_consts.Commands.refresh_switches ~args:[]
+        in
         Extension_instance.start_language_server instance
     in
     ()
