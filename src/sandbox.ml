@@ -298,8 +298,7 @@ let save_to_settings sandbox =
     | Global -> Setting.Global
     | Custom template -> Setting.Custom template
   in
-  let+ () = Settings.set ~section:"ocaml" Setting.t (to_setting sandbox) in
-  ()
+  Settings.set ~section:"ocaml" Setting.t (to_setting sandbox)
 
 module Candidate = struct
   type nonrec t =
