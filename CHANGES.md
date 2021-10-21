@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Activate extension on cram files, or when the workspace contains
+  dune-workspace or dune files. (#750)
+
 - Add commands `Jump to Next Typed Hole` (shortcut: `Alt + L`) and
   `Jump to Previous Typed Hole` (shortcut: `Alt + Shift + L`)
 
