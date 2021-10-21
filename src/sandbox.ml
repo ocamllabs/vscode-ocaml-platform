@@ -291,13 +291,19 @@ let of_settings_or_detect () =
   | None -> detect ()
 
 let save_to_settings sandbox =
+  let open Promise.Syntax in
   let to_setting = function
     | Esy (_, root) -> Setting.Esy root
     | Opam (_, switch) -> Setting.Opam switch
     | Global -> Setting.Global
     | Custom template -> Setting.Custom template
   in
-  Settings.set ~section:"ocaml" Setting.t (to_setting sandbox)
+  let+ () = Settings.set ~section:"ocaml" Setting.t (to_setting sandbox) in
+  let (_ : Ojs.t option Promise.t) =
+    Vscode.Commands.executeCommand
+      ~command:Extension_consts.Commands.refresh_switches ~args:[]
+  in
+  ()
 
 module Candidate = struct
   type nonrec t =
