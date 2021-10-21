@@ -299,10 +299,6 @@ let save_to_settings sandbox =
     | Custom template -> Setting.Custom template
   in
   let+ () = Settings.set ~section:"ocaml" Setting.t (to_setting sandbox) in
-  let (_ : Ojs.t option Promise.t) =
-    Vscode.Commands.executeCommand
-      ~command:Extension_consts.Commands.refresh_switches ~args:[]
-  in
   ()
 
 module Candidate = struct
