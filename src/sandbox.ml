@@ -382,12 +382,27 @@ let sandbox_candidates ~workspace_folders =
   let opam =
     let* opam = available.opam in
     match opam with
-    | None -> Promise.return []
-    | Some opam ->
+    | None -> Promise.return ([], None)
+    | Some opam -> (
+      let* current_switch = Opam.switch_show opam in
       let+ switches = Opam.switch_list opam in
-      List.map switches ~f:(fun sw ->
+      match current_switch with
+      | None ->
+        ( List.map switches ~f:(fun sw ->
+              let sandbox = Opam (opam, sw) in
+              { Candidate.sandbox; status = Ok () })
+        , None )
+      | Some current_switch ->
+        let f sw =
           let sandbox = Opam (opam, sw) in
-          { Candidate.sandbox; status = Ok () })
+          if Opam.Switch.equal current_switch sw then
+            None
+          else
+            Some { Candidate.sandbox; status = Ok () }
+        in
+        ( List.filter_map switches ~f
+        , let sandbox = Opam (opam, current_switch) in
+          Some { Candidate.sandbox; status = Ok () } ))
   in
   let global = Candidate.ok Global in
   let custom =
@@ -396,8 +411,10 @@ let sandbox_candidates ~workspace_folders =
        custom commands in [select] *)
   in
 
-  let+ esy, opam = Promise.all2 (esy, opam) in
-  (global :: custom :: esy) @ opam
+  let+ esy, (opam, current_switch) = Promise.all2 (esy, opam) in
+  match current_switch with
+  | None -> (global :: custom :: esy) @ opam
+  | Some current_switch -> (current_switch :: global :: custom :: esy) @ opam
 
 let select_sandbox () =
   let open Promise.Syntax in
