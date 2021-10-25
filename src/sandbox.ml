@@ -291,7 +291,6 @@ let of_settings_or_detect () =
   | None -> detect ()
 
 let save_to_settings sandbox =
-  let open Promise.Syntax in
   let to_setting = function
     | Esy (_, root) -> Setting.Esy root
     | Opam (_, switch) -> Setting.Opam switch
@@ -306,7 +305,7 @@ module Candidate = struct
     ; status : (unit, string) result
     }
 
-  let to_quick_pick { sandbox; status } =
+  let to_quick_pick current_switch { sandbox; status } =
     let create = QuickPickItem.create in
     let description =
       match status with
@@ -319,7 +318,16 @@ module Candidate = struct
         | _ -> None)
     in
     match sandbox with
-    | Opam (_, Named name) -> create ~label:name ?description ()
+    | Opam (_, Named name) ->
+      let detail =
+        let open Option.Monad_infix in
+        current_switch >>= fun current_switch ->
+        if Opam.Switch.equal (Named name) current_switch then
+          Some "Opam's current switch"
+        else
+          None
+      in
+      create ~label:name ?description ?detail ()
     | Opam (_, Local path) ->
       let project_name = Path.basename path in
       let project_path = Path.to_string path in
@@ -343,10 +351,16 @@ let select_sandbox (choices : Candidate.t list) =
   let placeHolder =
     "Which package manager would you like to manage the sandbox?"
   in
+  let open Promise.Syntax in
+  let* current_switch =
+    let open Promise.Option.Syntax in
+    let* opam = Opam.make () in
+    Opam.switch_show opam
+  in
   let choices =
     List.map
       ~f:(fun (sandbox : Candidate.t) ->
-        let quick_pick = Candidate.to_quick_pick sandbox in
+        let quick_pick = Candidate.to_quick_pick current_switch sandbox in
         (quick_pick, sandbox))
       choices
   in
