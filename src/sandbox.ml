@@ -317,21 +317,28 @@ module Candidate = struct
         | Esy _ -> Some "Esy"
         | _ -> None)
     in
+    let open Option.O in
     match sandbox with
     | Opam (_, Named name) ->
       let detail =
-        let open Option.Monad_infix in
-        current_switch >>= fun current_switch ->
-        if Opam.Switch.equal (Named name) current_switch then
-          Some "Opam's current switch"
-        else
-          None
+        let* current_switch = current_switch in
+        Option.some_if
+          (Opam.Switch.equal (Named name) current_switch)
+          "Opam's current switch"
       in
       create ~label:name ?description ?detail ()
     | Opam (_, Local path) ->
       let project_name = Path.basename path in
       let project_path = Path.to_string path in
-      create ~label:project_name ~detail:project_path ?description ()
+      let detail =
+        Option.value_map current_switch ~default:project_path
+          ~f:(fun current_switch ->
+            if Opam.Switch.equal current_switch (Local path) then
+              "Opam's current switch " ^ project_path
+            else
+              project_path)
+      in
+      create ~label:project_name ~detail ?description ()
     | Esy (_, manifest) ->
       let p = Esy.Manifest.path manifest in
       let project_name = Path.basename p in
@@ -421,9 +428,9 @@ let sandbox_candidates ~workspace_folders =
   in
 
   let+ esy, (opam, current_switch) = Promise.all2 (esy, opam) in
-  match current_switch with
-  | None -> (global :: custom :: esy) @ opam
-  | Some current_switch -> (current_switch :: global :: custom :: esy) @ opam
+  let cs = (global :: custom :: esy) @ opam in
+  Option.value_map current_switch ~default:cs ~f:(fun current_switch ->
+      current_switch :: cs)
 
 let select_sandbox () =
   let open Promise.Syntax in
