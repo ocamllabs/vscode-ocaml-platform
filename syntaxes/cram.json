@@ -65,6 +65,11 @@
       "comment": "everything else is a comment",
       "name": "comment.line.cram",
       "match": "^.*$"
+    },
+    {
+      "comment": "***** UNREACHABLE *****",
+      "match": "\\*\\*\\*\\*\\*[[:space:]]UNREACHABLE[[:space:]]\\*\\*\\*\\*\\*",
+      "name": "invalid.unreachable.cram"
     }
   ],
   "repository": {
@@ -155,11 +160,6 @@
           ]
         }
       ]
-    },
-    "error": {
-      "comment": "***** UNREACHABLE *****",
-      "match": "\\*\\*\\*\\*\\*[[:space:]]UNREACHABLE[[:space:]]\\*\\*\\*\\*\\*",
-      "name": "invalid.unreachable.cram"
     }
   }
 }
