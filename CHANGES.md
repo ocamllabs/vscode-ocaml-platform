@@ -1,6 +1,7 @@
 # Change Log
 
 ## Unreleased
+- Highlighted the UNREACHABLE element in cram .t files
 
 - Add commands `Jump to Next Typed Hole` (shortcut: `Alt + L`) and
   `Jump to Previous Typed Hole` (shortcut: `Alt + Shift + L`)
