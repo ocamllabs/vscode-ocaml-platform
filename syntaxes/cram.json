@@ -155,6 +155,11 @@
           ]
         }
       ]
+    },
+    "error": {
+      "comment": "***** UNREACHABLE *****",
+      "match": "\\*\\*\\*\\*\\*[[:space:]]UNREACHABLE[[:space:]]\\*\\*\\*\\*\\*",
+      "name": "invalid.unreachable.cram"
     }
   }
 }
