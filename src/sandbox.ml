@@ -331,12 +331,11 @@ module Candidate = struct
       let project_name = Path.basename path in
       let project_path = Path.to_string path in
       let detail =
-        Option.value_map current_switch ~default:project_path
-          ~f:(fun current_switch ->
-            if Opam.Switch.equal current_switch (Local path) then
-              "Opam's current switch " ^ project_path
-            else
-              project_path)
+        match current_switch with
+        | Some current_switch when Opam.Switch.equal current_switch (Local path)
+          ->
+          "Opam's current switch " ^ project_path
+        | _ -> project_path
       in
       create ~label:project_name ~detail ?description ()
     | Esy (_, manifest) ->
@@ -404,10 +403,12 @@ let sandbox_candidates ~workspace_folders =
       let+ switches = Opam.switch_list opam in
       match current_switch with
       | None ->
-        ( List.map switches ~f:(fun sw ->
+        let switches =
+          List.map switches ~f:(fun sw ->
               let sandbox = Opam (opam, sw) in
               { Candidate.sandbox; status = Ok () })
-        , None )
+        in
+        (switches, None)
       | Some current_switch ->
         let f sw =
           let sandbox = Opam (opam, sw) in
@@ -416,9 +417,12 @@ let sandbox_candidates ~workspace_folders =
           else
             Some { Candidate.sandbox; status = Ok () }
         in
-        ( List.filter_map switches ~f
-        , let sandbox = Opam (opam, current_switch) in
-          Some { Candidate.sandbox; status = Ok () } ))
+        let sandboxes = List.filter_map switches ~f
+        and current_switch_sandbox =
+          let sandbox = Opam (opam, current_switch) in
+          Some { Candidate.sandbox; status = Ok () }
+        in
+        (sandboxes, current_switch_sandbox))
   in
   let global = Candidate.ok Global in
   let custom =

@@ -5,7 +5,7 @@ module Dependency = struct
     | Package : Opam.Package.t -> t
     | Switch : Opam.t * Opam.Switch.t -> t
 
-  let dependency_is_sandbox sandbox dependency =
+  let dependency_is_sandbox dependency sandbox =
     match (sandbox, dependency) with
     | Sandbox.Opam (opam1, switch1), Switch (opam2, switch2) ->
       Opam.equal opam1 opam2 && Opam.Switch.equal switch1 switch2
@@ -38,31 +38,30 @@ module Dependency = struct
       | Some _ -> "package-with-doc"
       | None -> "package")
 
-  let icon = function
+  let icon dependency is_current_sandbox =
+    match dependency with
     | Switch _ ->
-      fun is_current_sandbox ->
-        let selected =
-          if is_current_sandbox then
-            "-selected"
-          else
-            ""
-        in
-        TreeItem.LightDarkIcon.
-          { light =
-              `String
-                (Path.asset @@ "dependency-light" ^ selected ^ ".svg"
-                |> Path.to_string)
-          ; dark =
-              `String
-                (Path.asset @@ "dependency-dark" ^ selected ^ ".svg"
-                |> Path.to_string)
-          }
+      let selected =
+        if is_current_sandbox then
+          "-selected"
+        else
+          ""
+      in
+      TreeItem.LightDarkIcon.
+        { light =
+            `String
+              (Path.asset @@ "dependency-light" ^ selected ^ ".svg"
+              |> Path.to_string)
+        ; dark =
+            `String
+              (Path.asset @@ "dependency-dark" ^ selected ^ ".svg"
+              |> Path.to_string)
+        }
     | Package _ ->
-      fun _is_current_sandbox ->
-        TreeItem.LightDarkIcon.
-          { light = `String (Path.asset "number-light.svg" |> Path.to_string)
-          ; dark = `String (Path.asset "number-dark.svg" |> Path.to_string)
-          }
+      TreeItem.LightDarkIcon.
+        { light = `String (Path.asset "number-light.svg" |> Path.to_string)
+        ; dark = `String (Path.asset "number-dark.svg" |> Path.to_string)
+        }
 
   let collapsible_state = function
     | Switch _ -> Vscode.TreeItemCollapsibleState.Collapsed
@@ -76,9 +75,7 @@ module Dependency = struct
     let open Promise.Syntax in
     let* current_sandbox = Sandbox.of_settings_or_detect () in
     let is_current_sandbox =
-      match current_sandbox with
-      | None -> false
-      | Some current_sandbox -> dependency_is_sandbox current_sandbox dependency
+      Option.exists current_sandbox ~f:(dependency_is_sandbox dependency)
     in
     let icon = `LightDark (icon dependency is_current_sandbox) in
     let collapsibleState = collapsible_state dependency in
