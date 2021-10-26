@@ -14,6 +14,13 @@
       }
     },
     {
+      "comment": "***** UNREACHABLE *****",
+      "match": "^  (\\*\\*\\*\\*\\*[[:space:]]UNREACHABLE[[:space:]]\\*\\*\\*\\*\\*)$",
+      "captures": {
+        "1": { "name": "invalid.unreachable.cram" }
+      }
+    },    
+    {
       "comment": "regex output",
       "match": "^  (.*) \\((re)\\)$",
       "captures": {

@@ -1,6 +1,7 @@
 # Change Log
 
 ## Unreleased
+- Highlighted the UNREACHABLE element in cram .t files (#754)
 
 - Activate extension on cram files, or when the workspace contains
   dune-workspace or dune files. (#750)
