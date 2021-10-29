@@ -359,6 +359,9 @@ let select_sandbox (choices : Candidate.t list) =
     let open Promise.Option.Syntax in
     let* opam = Opam.make () in
     Opam.switch_show ?cwd:(workspace_root ()) opam
+    (* TODO: this is slightly dangerous because [workspace_root] returns [None]
+       when there are several workspaces, so [opam switch show] will return an
+       incorrect result for local switches *)
   in
   let choices =
     List.map
