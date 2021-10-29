@@ -310,18 +310,23 @@ module Candidate = struct
     let description =
       match status with
       | Error s -> Some (Printf.sprintf "Invalid sandbox: %s" s)
-      | Ok () -> (
-          let open Option.O in
-          let+ description_prefix = match sandbox with
-            | Opam (_, Local _) -> Some "Local switch"
-            | Opam (_, Named _) -> Some "Global switch"
-            | Esy _ -> Some "Esy"
-            | _ -> None in
-          let description_suffix = match sandbox with
-            | Opam (_, switch) when Option.exists current_switch ~f:(Opam.Switch.equal switch) -> " | Currently active switch in environment"
-            | _ -> "" in
-          description_prefix ^ description_suffix
-        )
+      | Ok () ->
+        let open Option.O in
+        let+ description_prefix =
+          match sandbox with
+          | Opam (_, Local _) -> Some "Local switch"
+          | Opam (_, Named _) -> Some "Global switch"
+          | Esy _ -> Some "Esy"
+          | _ -> None
+        in
+        let description_suffix =
+          match sandbox with
+          | Opam (_, switch)
+            when Option.exists current_switch ~f:(Opam.Switch.equal switch) ->
+            " | Currently active switch in environment"
+          | _ -> ""
+        in
+        description_prefix ^ description_suffix
     in
     match sandbox with
     | Opam (_, Named name) -> create ~label:name ?description ()

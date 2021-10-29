@@ -5,10 +5,10 @@ module Dependency = struct
     | Package : Opam.Package.t -> t
     | Switch : Opam.t * Opam.Switch.t -> t
 
-  let equals_opam_sandbox dependency sandbox =
-    match (sandbox, dependency) with
-    | Sandbox.Opam (opam1, switch1), Switch (opam2, switch2) ->
-      Opam.equal opam1 opam2 && Opam.Switch.equal switch1 switch2
+  let equals_opam_sandbox t sandbox =
+    match (t, sandbox) with
+    | Switch (opam, switch), Sandbox.Opam (opam_, switch_) ->
+      Opam.equal opam opam_ && Opam.Switch.equal switch switch_
     | _ -> false
 
   let t_of_js : Ojs.t -> t = Stdlib.Obj.magic
