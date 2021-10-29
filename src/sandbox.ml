@@ -229,6 +229,8 @@ let of_settings () : t option Promise.t =
   | Some Global -> Promise.return (Some Global)
   | Some (Custom template) -> Promise.return (Some (Custom template))
 
+(** If [Workspace.workspaceFolders()] returns a list with a single element,
+    returns it; otherwise, returns [None]. *)
 let workspace_root () =
   match Workspace.workspaceFolders () with
   | [] -> None
@@ -333,8 +335,7 @@ module Candidate = struct
     | Opam (_, Local path) ->
       let project_name = Path.basename path in
       let project_path = Path.to_string path in
-      let detail = project_path in
-      create ~label:project_name ~detail ?description ()
+      create ~label:project_name ~detail:project_path ?description ()
     | Esy (_, manifest) ->
       let p = Esy.Manifest.path manifest in
       let project_name = Path.basename p in
