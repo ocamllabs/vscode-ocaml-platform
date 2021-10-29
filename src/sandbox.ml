@@ -321,7 +321,7 @@ module Candidate = struct
             | Named _ -> "Global switch"
           in
           if Option.exists current_switch ~f:(Opam.Switch.equal switch) then
-            Some (switch_kind_s ^ " | Currently active switch in environment")
+            Some (switch_kind_s ^ " | Currently active switch in project root")
           else
             Some switch_kind_s
         | Esy (_, _) -> Some "Esy"
