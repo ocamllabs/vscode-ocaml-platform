@@ -1,6 +1,7 @@
 # Change Log
 
 ## Unreleased
+
 - Highlighted the UNREACHABLE element in cram .t files (#754)
 
 - Activate extension on cram files, or when the workspace contains
@@ -40,6 +41,9 @@
 - `opam exec` is now called with `--set-switch` flag; this is useful when we
   launch a terminal within a certain sandbox set in the extension (#744, fixes
   #655)
+
+- The currently active OPAM switch in the workspace folder (project root) is
+  shown first in the list of sandboxes when selecting a sandbox (#751)
 
 ## 1.8.4
 
