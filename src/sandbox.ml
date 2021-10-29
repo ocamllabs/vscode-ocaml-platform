@@ -358,10 +358,8 @@ let select_sandbox (choices : Candidate.t list) =
   let* current_switch =
     let open Promise.Option.Syntax in
     let* opam = Opam.make () in
-    Opam.switch_show ?cwd:(workspace_root ()) opam
-    (* TODO: this is slightly dangerous because [workspace_root] returns [None]
-       when there are several workspaces, so [opam switch show] will return an
-       incorrect result for local switches *)
+    let* cwd = workspace_root () |> Promise.return in
+    Opam.switch_show ~cwd opam
   in
   let choices =
     List.map
@@ -399,7 +397,11 @@ let sandbox_candidates ~workspace_folders =
     match opam with
     | None -> Promise.return ([], None)
     | Some opam -> (
-      let* current_switch = Opam.switch_show ?cwd:(workspace_root ()) opam in
+      let* current_switch =
+        match workspace_root () with
+        | None -> Promise.return None
+        | Some cwd -> Opam.switch_show ~cwd opam
+      in
       let+ switches = Opam.switch_list opam in
       match current_switch with
       | None ->
