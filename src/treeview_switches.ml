@@ -5,7 +5,7 @@ module Dependency = struct
     | Package : Opam.Package.t -> t
     | Switch : Opam.t * Opam.Switch.t -> t
 
-  let dependency_is_sandbox dependency sandbox =
+  let equals_opam_sandbox dependency sandbox =
     match (sandbox, dependency) with
     | Sandbox.Opam (opam1, switch1), Switch (opam2, switch2) ->
       Opam.equal opam1 opam2 && Opam.Switch.equal switch1 switch2
@@ -71,12 +71,10 @@ module Dependency = struct
       else
         TreeItemCollapsibleState.None
 
-  let to_treeitem dependency =
+  let to_treeitem instance dependency =
     let open Promise.Syntax in
-    let* current_sandbox = Sandbox.of_settings_or_detect () in
-    let is_current_sandbox =
-      Option.exists current_sandbox ~f:(dependency_is_sandbox dependency)
-    in
+    let current_sandbox = Extension_instance.sandbox instance in
+    let is_current_sandbox = equals_opam_sandbox dependency current_sandbox in
     let icon = `LightDark (icon dependency is_current_sandbox) in
     let collapsibleState = collapsible_state dependency in
     let label =
@@ -178,7 +176,8 @@ module Command = struct
       ~id:Extension_consts.Commands.open_switches_documentation handler
 end
 
-let getTreeItem ~element = `Promise (Dependency.to_treeitem element)
+let getTreeItem instance ~element =
+  `Promise (Dependency.to_treeitem instance element)
 
 let getChildren ?opam ?element () =
   match (opam, element) with
@@ -195,11 +194,12 @@ let getChildren ?opam ?element () =
     in
     `Promise items
 
-let register extension =
+let register extension instance =
   let (_ : unit Promise.t) =
     let open Promise.Syntax in
     let+ opam = Opam.make () in
     let getChildren = getChildren ?opam in
+    let getTreeItem = getTreeItem instance in
     let module EventEmitter =
       Vscode.EventEmitter.Make (Interop.Js.Or_undefined (Dependency)) in
     let event_emitter = EventEmitter.make () in

@@ -47,12 +47,7 @@ let _select_sandbox =
       | None (* sandbox selection cancelled *) -> Promise.return ()
       | Some new_sandbox ->
         Extension_instance.set_sandbox instance new_sandbox;
-        let p1 = Sandbox.save_to_settings new_sandbox in
-        let p2 =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_switches ~args:[]
-        in
-        let* (), _ = Promise.all2 (p1, p2) in
+        let* () = Sandbox.save_to_settings new_sandbox in
         Extension_instance.start_language_server instance
     in
     ()

@@ -311,32 +311,24 @@ module Candidate = struct
       match status with
       | Error s -> Some (Printf.sprintf "Invalid sandbox: %s" s)
       | Ok () -> (
-        match sandbox with
-        | Opam (_, Local _) -> Some "Local switch"
-        | Opam (_, Named _) -> Some "Global switch"
-        | Esy _ -> Some "Esy"
-        | _ -> None)
+          let open Option.O in
+          let+ description_prefix = match sandbox with
+            | Opam (_, Local _) -> Some "Local switch"
+            | Opam (_, Named _) -> Some "Global switch"
+            | Esy _ -> Some "Esy"
+            | _ -> None in
+          let description_suffix = match sandbox with
+            | Opam (_, switch) when Option.exists current_switch ~f:(Opam.Switch.equal switch) -> " | Currently active switch in environment"
+            | _ -> "" in
+          description_prefix ^ description_suffix
+        )
     in
-    let open Option.O in
     match sandbox with
-    | Opam (_, Named name) ->
-      let detail =
-        let* current_switch = current_switch in
-        Option.some_if
-          (Opam.Switch.equal (Named name) current_switch)
-          "Opam's current switch"
-      in
-      create ~label:name ?description ?detail ()
+    | Opam (_, Named name) -> create ~label:name ?description ()
     | Opam (_, Local path) ->
       let project_name = Path.basename path in
       let project_path = Path.to_string path in
-      let detail =
-        match current_switch with
-        | Some current_switch when Opam.Switch.equal current_switch (Local path)
-          ->
-          "Opam's current switch " ^ project_path
-        | _ -> project_path
-      in
+      let detail = project_path in
       create ~label:project_name ~detail ?description ()
     | Esy (_, manifest) ->
       let p = Esy.Manifest.path manifest in
@@ -361,7 +353,7 @@ let select_sandbox (choices : Candidate.t list) =
   let* current_switch =
     let open Promise.Option.Syntax in
     let* opam = Opam.make () in
-    Opam.switch_show opam
+    Opam.switch_show ?cwd:(workspace_root ()) opam
   in
   let choices =
     List.map
@@ -399,7 +391,7 @@ let sandbox_candidates ~workspace_folders =
     match opam with
     | None -> Promise.return ([], None)
     | Some opam -> (
-      let* current_switch = Opam.switch_show opam in
+      let* current_switch = Opam.switch_show ?cwd:(workspace_root ()) opam in
       let+ switches = Opam.switch_list opam in
       match current_switch with
       | None ->

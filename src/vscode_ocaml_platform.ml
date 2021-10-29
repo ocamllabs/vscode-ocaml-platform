@@ -30,7 +30,7 @@ let activate (extension : ExtensionContext.t) =
   Dune_formatter.register extension instance;
   Dune_task_provider.register extension instance;
   Extension_commands.register_all_commands extension instance;
-  Treeview_switches.register extension;
+  Treeview_switches.register extension instance;
   Treeview_sandbox.register extension instance;
   Treeview_commands.register extension;
   Treeview_help.register extension;
