@@ -5,6 +5,12 @@ module Dependency = struct
     | Package : Opam.Package.t -> t
     | Switch : Opam.t * Opam.Switch.t -> t
 
+  let equals_opam_sandbox t sandbox =
+    match (t, sandbox) with
+    | Switch (opam, switch), Sandbox.Opam (opam_, switch_) ->
+      Opam.equal opam opam_ && Opam.Switch.equal switch switch_
+    | _ -> false
+
   let t_of_js : Ojs.t -> t = Stdlib.Obj.magic
 
   let t_to_js : t -> Ojs.t = Stdlib.Obj.magic
@@ -32,11 +38,24 @@ module Dependency = struct
       | Some _ -> "package-with-doc"
       | None -> "package")
 
-  let icon = function
+  let icon dependency is_current_sandbox =
+    match dependency with
     | Switch _ ->
+      let selected =
+        if is_current_sandbox then
+          "-selected"
+        else
+          ""
+      in
       TreeItem.LightDarkIcon.
-        { light = `String (Path.asset "dependency-light.svg" |> Path.to_string)
-        ; dark = `String (Path.asset "dependency-dark.svg" |> Path.to_string)
+        { light =
+            `String
+              (Path.asset @@ "dependency-light" ^ selected ^ ".svg"
+              |> Path.to_string)
+        ; dark =
+            `String
+              (Path.asset @@ "dependency-dark" ^ selected ^ ".svg"
+              |> Path.to_string)
         }
     | Package _ ->
       TreeItem.LightDarkIcon.
@@ -52,9 +71,11 @@ module Dependency = struct
       else
         TreeItemCollapsibleState.None
 
-  let to_treeitem dependency =
+  let to_treeitem instance dependency =
     let open Promise.Syntax in
-    let icon = `LightDark (icon dependency) in
+    let current_sandbox = Extension_instance.sandbox instance in
+    let is_current_sandbox = equals_opam_sandbox dependency current_sandbox in
+    let icon = `LightDark (icon dependency is_current_sandbox) in
     let collapsibleState = collapsible_state dependency in
     let label =
       `TreeItemLabel (Vscode.TreeItemLabel.create ~label:(label dependency) ())
@@ -155,7 +176,8 @@ module Command = struct
       ~id:Extension_consts.Commands.open_switches_documentation handler
 end
 
-let getTreeItem ~element = `Promise (Dependency.to_treeitem element)
+let getTreeItem instance ~element =
+  `Promise (Dependency.to_treeitem instance element)
 
 let getChildren ?opam ?element () =
   match (opam, element) with
@@ -172,11 +194,12 @@ let getChildren ?opam ?element () =
     in
     `Promise items
 
-let register extension =
+let register extension instance =
   let (_ : unit Promise.t) =
     let open Promise.Syntax in
     let+ opam = Opam.make () in
     let getChildren = getChildren ?opam in
+    let getTreeItem = getTreeItem instance in
     let module EventEmitter =
       Vscode.EventEmitter.Make (Interop.Js.Or_undefined (Dependency)) in
     let event_emitter = EventEmitter.make () in

@@ -139,6 +139,9 @@ let set_sandbox t new_sandbox =
   let (_ : Ojs.t option Promise.t) =
     Vscode.Commands.executeCommand
       ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
+  and (_ : Ojs.t option Promise.t) =
+    Vscode.Commands.executeCommand
+      ~command:Extension_consts.Commands.refresh_switches ~args:[]
   in
   ()
 

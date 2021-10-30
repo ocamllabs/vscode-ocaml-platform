@@ -229,6 +229,8 @@ let of_settings () : t option Promise.t =
   | Some Global -> Promise.return (Some Global)
   | Some (Custom template) -> Promise.return (Some (Custom template))
 
+(** If [Workspace.workspaceFolders()] returns a list with a single element,
+    returns it; otherwise, returns [None]. *)
 let workspace_root () =
   match Workspace.workspaceFolders () with
   | [] -> None
@@ -305,17 +307,27 @@ module Candidate = struct
     ; status : (unit, string) result
     }
 
-  let to_quick_pick { sandbox; status } =
+  let to_quick_pick current_switch { sandbox; status } =
     let create = QuickPickItem.create in
     let description =
       match status with
       | Error s -> Some (Printf.sprintf "Invalid sandbox: %s" s)
       | Ok () -> (
         match sandbox with
-        | Opam (_, Local _) -> Some "Local switch"
-        | Opam (_, Named _) -> Some "Global switch"
-        | Esy _ -> Some "Esy"
-        | _ -> None)
+        | Opam (_, switch) ->
+          let switch_kind_s =
+            match switch with
+            | Local _ -> "Local switch"
+            | Named _ -> "Global switch"
+          in
+          if Option.exists current_switch ~f:(Opam.Switch.equal switch) then
+            Some (switch_kind_s ^ " | Currently active switch in project root")
+          else
+            Some switch_kind_s
+        | Esy (_, _) -> Some "Esy"
+        | Global
+        | Custom _ ->
+          None)
     in
     match sandbox with
     | Opam (_, Named name) -> create ~label:name ?description ()
@@ -342,10 +354,17 @@ let select_sandbox (choices : Candidate.t list) =
   let placeHolder =
     "Which package manager would you like to manage the sandbox?"
   in
+  let open Promise.Syntax in
+  let* current_switch =
+    let open Promise.Option.Syntax in
+    let* opam = Opam.make () in
+    let* cwd = workspace_root () |> Promise.return in
+    Opam.switch_show ~cwd opam
+  in
   let choices =
     List.map
       ~f:(fun (sandbox : Candidate.t) ->
-        let quick_pick = Candidate.to_quick_pick sandbox in
+        let quick_pick = Candidate.to_quick_pick current_switch sandbox in
         (quick_pick, sandbox))
       choices
   in
@@ -376,12 +395,36 @@ let sandbox_candidates ~workspace_folders =
   let opam =
     let* opam = available.opam in
     match opam with
-    | None -> Promise.return []
-    | Some opam ->
+    | None -> Promise.return ([], None)
+    | Some opam -> (
+      let* current_switch =
+        match workspace_root () with
+        | None -> Promise.return None
+        | Some cwd -> Opam.switch_show ~cwd opam
+      in
       let+ switches = Opam.switch_list opam in
-      List.map switches ~f:(fun sw ->
+      match current_switch with
+      | None ->
+        let switches =
+          List.map switches ~f:(fun sw ->
+              let sandbox = Opam (opam, sw) in
+              { Candidate.sandbox; status = Ok () })
+        in
+        (switches, None)
+      | Some current_switch ->
+        let f sw =
           let sandbox = Opam (opam, sw) in
-          { Candidate.sandbox; status = Ok () })
+          if Opam.Switch.equal current_switch sw then
+            None
+          else
+            Some { Candidate.sandbox; status = Ok () }
+        in
+        let sandboxes = List.filter_map switches ~f
+        and current_switch_sandbox =
+          let sandbox = Opam (opam, current_switch) in
+          Some { Candidate.sandbox; status = Ok () }
+        in
+        (sandboxes, current_switch_sandbox))
   in
   let global = Candidate.ok Global in
   let custom =
@@ -390,8 +433,10 @@ let sandbox_candidates ~workspace_folders =
        custom commands in [select] *)
   in
 
-  let+ esy, opam = Promise.all2 (esy, opam) in
-  (global :: custom :: esy) @ opam
+  let+ esy, (opam, current_switch) = Promise.all2 (esy, opam) in
+  let cs = (global :: custom :: esy) @ opam in
+  Option.value_map current_switch ~default:cs ~f:(fun current_switch ->
+      current_switch :: cs)
 
 let select_sandbox () =
   let open Promise.Syntax in
