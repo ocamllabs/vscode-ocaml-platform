@@ -43,7 +43,10 @@
   #655)
 
 - The currently active OPAM switch in the workspace folder (project root) is
-  shown first in the list of sandboxes when selecting a sandbox (#751)
+  shown first in the list of sandboxes when selecting a sandbox. (#751)
+
+- Show a different icon for the currently active OPAM switch in the "OPAM
+  Switches" tree view (#751)
 
 ## 1.8.4
 
