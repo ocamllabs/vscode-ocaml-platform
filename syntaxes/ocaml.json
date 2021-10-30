@@ -126,12 +126,12 @@
           "match": "\\(\\*\\*\\)"
         },
         {
-          "comment": "ocamldoc comment",
+          "comment": "odoc comment",
           "name": "comment.doc.ocaml",
           "begin": "\\(\\*\\*",
           "end": "\\*\\)",
           "patterns": [
-            { "include": "source.ocaml.ocamldoc#markup" },
+            { "include": "source.ocaml.odoc#markup" },
             { "include": "#strings-in-comments" },
             { "include": "#comments" }
           ]

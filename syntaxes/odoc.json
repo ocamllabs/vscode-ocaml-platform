@@ -1,0 +1,58 @@
+{
+  "scopeName": "source.ocaml.odoc",
+  "name": "comment.other.odoc",
+  "fileTypes": ["mld"],
+  "patterns": [
+    {
+      "name": "comment.other.odoc",
+      "begin": "",
+      "end": "",
+      "patterns": [{ "include": "#markup" }]
+    },
+    {
+      "comment": "section header",
+      "begin": "\\^{[[:space:]]*\\{[[:space:]]?[0-9]+\\}[[:space:]]?[^\\s+[a-zA-Z\\s]+[.?!]$]\\b",
+      "end": "\\}",
+      "beginCaptures": {
+        "1": { "name": "constant.language.odoc" }
+      },
+      "contentName": "",
+      "patterns": [{ "include": "#markup" }]
+    },
+    {
+      "comment": "label",
+      "begin": "\\{[[:space:]]\\{[[:space:]]*\\b",
+      "end": "\\}",
+      "beginCaptures": {
+        "1": { "name": "constant.language.odoc" }
+      },
+      "contentName": "",
+      "patterns": [{ "include": "#markup" }]
+    },
+    {
+      "comment": "text in bold",
+      "begin": "\\{[[:space:]]\\{[[:space:]]*\\b",
+      "end": "\\}",
+      "contentName": "bold",
+      "patterns": [{ "include": "#markup" }]
+    }
+  ],
+  "repository": {
+    "markup": {
+      "patterns": [
+        {
+          "comment": "odoc documentation tag",
+          "name": "keyword.doc-tag.odoc",
+          "match": "\\@[[:lower:]]+"
+        },
+        {
+          "comment": "embedded ocaml source",
+          "begin": "(?<!\\\\)\\[",
+          "end": "(?<!\\\\)\\]",
+          "contentName": "source.embedded.odoc",
+          "patterns": [{ "include": "source.ocaml" }]
+        }
+      ]
+    }
+  }
+}
