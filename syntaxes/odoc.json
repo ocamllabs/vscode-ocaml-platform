@@ -11,29 +11,52 @@
     },
     {
       "comment": "section header",
-      "begin": "\\^{[[:space:]]*\\{[[:space:]]?[0-9]+\\}[[:space:]]?[^\\s+[a-zA-Z\\s]+[.?!]$]\\b",
+      "begin": "\\{\\s\\{[0-9]\\}\\s[[\\w+\\s+]+[\\W]]*\\b",
       "end": "\\}",
       "beginCaptures": {
         "1": { "name": "constant.language.odoc" }
       },
-      "contentName": "",
       "patterns": [{ "include": "#markup" }]
     },
     {
       "comment": "label",
-      "begin": "\\{[[:space:]]\\{[[:space:]]*\\b",
+      "begin": "\\{\\s\\{[0-9]\\}\\s\\:\\s[label]\\s[[\\w+\\s+]+[\\W]]*\\b",
       "end": "\\}",
       "beginCaptures": {
-        "1": { "name": "constant.language.odoc" }
+        "1": { "name": "variable.other.declaration.odoc" }
       },
-      "contentName": "",
       "patterns": [{ "include": "#markup" }]
     },
     {
       "comment": "text in bold",
-      "begin": "\\{[[:space:]]\\{[[:space:]]*\\b",
+      "begin": "\\{[b]\\s[[\\w+\\s+]+[\\W]?]*\\b",
       "end": "\\}",
-      "contentName": "bold",
+      "contentName": "strong",
+      "patterns": [{ "include": "#markup" }]
+    },
+    {
+      "comment": "text in italic",
+      "begin": "\\{[i]\\s[[\\w+\\s+]+[\\W]?]*\\b",
+      "end": "\\}",
+      "contentName": "emphasis",
+      "patterns": [{ "include": "#markup" }]
+    },
+    {
+      "comment": "center text",
+      "begin": "\\{[C]\\s[[\\w+\\s+]+[\\W]?]*\\b",
+      "end": "\\}",
+      "patterns": [{ "include": "#markup" }]
+    },
+    {
+      "comment": "left align text",
+      "begin": "\\{[L]\\s[[\\w+\\s+]+[\\W]?]*\\b",
+      "end": "\\}",
+      "patterns": [{ "include": "#markup" }]
+    },
+    {
+      "comment": "right align text",
+      "begin": "\\{[R]\\s[[\\w+\\s+]+[\\W]?]*\\b",
+      "end": "\\}",
       "patterns": [{ "include": "#markup" }]
     }
   ],
