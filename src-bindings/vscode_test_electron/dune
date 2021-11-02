@@ -1,0 +1,9 @@
+(library
+ (name vscode_test_electron)
+ (public_name vscode.test_electron)
+ (preprocess
+  (pps gen_js_api.ppx))
+ (js_of_ocaml
+  (javascript_files vscode_test_electron_stub.js))
+ (libraries interop promise_jsoo jsonoo js_of_ocaml gen_js_api)
+ (modes byte))
