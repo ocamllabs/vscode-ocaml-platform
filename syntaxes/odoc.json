@@ -27,7 +27,7 @@
         },
         {
           "comment": "section header",
-          "begin": "\\{\\s\\{[[:digit:]]+\\}\\s[[\\w+\\s+]+[\\W]]*\\b",
+          "begin": "\\{\\s\\{[[:digit:]]+\\}\\b",
           "end": "\\}",
           "beginCaptures": {
             "1": { "name": "constant.language.odoc" }
@@ -36,7 +36,7 @@
         },
         {
           "comment": "label",
-          "begin": "\\{\\s\\{[0-9]\\}\\s\\:\\s[label]\\s[[\\w+\\s+]+[\\W]]*\\b",
+          "begin": "\\{\\s\\{[[:digit:]]+\\}\\s\\:\\s[label]\\b",
           "end": "\\}",
           "beginCaptures": {
             "1": { "name": "variable.other.declaration.odoc" }
@@ -45,33 +45,33 @@
         },
         {
           "comment": "text in bold",
-          "begin": "\\{b\\s[[\\w+\\s+]+[\\W]?]*\\b",
+          "begin": "\\{b\\b",
           "end": "\\}",
           "contentName": "strong",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "text in italic",
-          "begin": "\\{i\\s[[\\w+\\s+]+[\\W]?]*\\b",
+          "begin": "\\{i\\b",
           "end": "\\}",
           "contentName": "emphasis",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "center text",
-          "begin": "\\{C\\s[[\\w+\\s+]+[\\W]?]*\\b",
+          "begin": "\\{C\\b",
           "end": "\\}",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "left align text",
-          "begin": "\\{[L]\\s[[\\w+\\s+]+[\\W]?]*\\b",
+          "begin": "\\{L\\b",
           "end": "\\}",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "right align text",
-          "begin": "\\{[R]\\s[[\\w+\\s+]+[\\W]?]*\\b",
+          "begin": "\\{R\\b",
           "end": "\\}",
           "patterns": [{ "include": "#markup" }]
         }
