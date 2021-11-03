@@ -690,10 +690,10 @@
         "configuration": "./languages/oasis.json"
       },
       {
-        "id": "ocaml.ocamldoc",
+        "id": "ocaml.odoc",
         "aliases": [
-          "OCamldoc",
-          "ocamldoc"
+          "Odoc",
+          "odoc"
         ],
         "extensions": [
           ".mld"
@@ -816,9 +816,9 @@
         "path": "./syntaxes/ocamlbuild.json"
       },
       {
-        "language": "ocaml.ocamldoc",
-        "scopeName": "source.ocaml.ocamldoc",
-        "path": "./syntaxes/ocamldoc.json"
+        "language": "ocaml.odoc",
+        "scopeName": "source.ocaml.odoc",
+        "path": "./syntaxes/odoc.json"
       },
       {
         "language": "ocaml.ocamlformat",

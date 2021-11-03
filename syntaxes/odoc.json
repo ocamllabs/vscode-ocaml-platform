@@ -10,70 +10,70 @@
       "patterns": [{ "include": "#markup" }]
     },
     {
-      "comment": "section header",
-      "begin": "\\{\\s\\{[0-9]\\}\\s[[\\w+\\s+]+[\\W]]*\\b",
-      "end": "\\}",
-      "beginCaptures": {
-        "1": { "name": "constant.language.odoc" }
-      },
-      "patterns": [{ "include": "#markup" }]
-    },
-    {
-      "comment": "label",
-      "begin": "\\{\\s\\{[0-9]\\}\\s\\:\\s[label]\\s[[\\w+\\s+]+[\\W]]*\\b",
-      "end": "\\}",
-      "beginCaptures": {
-        "1": { "name": "variable.other.declaration.odoc" }
-      },
-      "patterns": [{ "include": "#markup" }]
-    },
-    {
-      "comment": "text in bold",
-      "begin": "\\{[b]\\s[[\\w+\\s+]+[\\W]?]*\\b",
-      "end": "\\}",
-      "contentName": "strong",
-      "patterns": [{ "include": "#markup" }]
-    },
-    {
-      "comment": "text in italic",
-      "begin": "\\{[i]\\s[[\\w+\\s+]+[\\W]?]*\\b",
-      "end": "\\}",
-      "contentName": "emphasis",
-      "patterns": [{ "include": "#markup" }]
-    },
-    {
-      "comment": "center text",
-      "begin": "\\{[C]\\s[[\\w+\\s+]+[\\W]?]*\\b",
-      "end": "\\}",
-      "patterns": [{ "include": "#markup" }]
-    },
-    {
-      "comment": "left align text",
-      "begin": "\\{[L]\\s[[\\w+\\s+]+[\\W]?]*\\b",
-      "end": "\\}",
-      "patterns": [{ "include": "#markup" }]
-    },
-    {
-      "comment": "right align text",
-      "begin": "\\{[R]\\s[[\\w+\\s+]+[\\W]?]*\\b",
-      "end": "\\}",
-      "patterns": [{ "include": "#markup" }]
+      "comment": "odoc documentation tag",
+      "name": "keyword.doc-tag.odoc",
+      "match": "\\@[[:lower:]]+"
     }
   ],
   "repository": {
     "markup": {
       "patterns": [
         {
-          "comment": "odoc documentation tag",
-          "name": "keyword.doc-tag.odoc",
-          "match": "\\@[[:lower:]]+"
-        },
-        {
           "comment": "embedded ocaml source",
           "begin": "(?<!\\\\)\\[",
           "end": "(?<!\\\\)\\]",
           "contentName": "source.embedded.odoc",
           "patterns": [{ "include": "source.ocaml" }]
+        },
+        {
+          "comment": "section header",
+          "begin": "\\{\\s\\{[[:digit:]]+\\}\\s[[\\w+\\s+]+[\\W]]*\\b",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": { "name": "constant.language.odoc" }
+          },
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "label",
+          "begin": "\\{\\s\\{[0-9]\\}\\s\\:\\s[label]\\s[[\\w+\\s+]+[\\W]]*\\b",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": { "name": "variable.other.declaration.odoc" }
+          },
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "text in bold",
+          "begin": "\\{b\\s[[\\w+\\s+]+[\\W]?]*\\b",
+          "end": "\\}",
+          "contentName": "strong",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "text in italic",
+          "begin": "\\{i\\s[[\\w+\\s+]+[\\W]?]*\\b",
+          "end": "\\}",
+          "contentName": "emphasis",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "center text",
+          "begin": "\\{C\\s[[\\w+\\s+]+[\\W]?]*\\b",
+          "end": "\\}",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "left align text",
+          "begin": "\\{[L]\\s[[\\w+\\s+]+[\\W]?]*\\b",
+          "end": "\\}",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "right align text",
+          "begin": "\\{[R]\\s[[\\w+\\s+]+[\\W]?]*\\b",
+          "end": "\\}",
+          "patterns": [{ "include": "#markup" }]
         }
       ]
     }
