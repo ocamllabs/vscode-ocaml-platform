@@ -27,8 +27,8 @@
         },
         {
           "comment": "section header",
-          "begin": "\\{\\s\\{[[:digit:]]+\\}\\b",
-          "end": "\\}",
+          "begin": "[[:digit:]]\\b",
+          "end": "",
           "beginCaptures": {
             "1": { "name": "constant.language.odoc" }
           },
@@ -36,8 +36,8 @@
         },
         {
           "comment": "label",
-          "begin": "\\{\\s\\{[[:digit:]]+\\}\\s\\:\\s[label]\\b",
-          "end": "\\}",
+          "begin": "[[:digit:]]+\\b",
+          "end": "",
           "beginCaptures": {
             "1": { "name": "variable.other.declaration.odoc" }
           },
