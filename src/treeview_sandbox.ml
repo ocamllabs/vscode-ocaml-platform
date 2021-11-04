@@ -107,7 +107,7 @@ module Command = struct
           in
           let+ _ = Window.showErrorMessage ~message () in
           ()
-        | Ok odig ->
+        | Ok odig -> (
           let is_live_preview_extension_installed =
             Extensions.is_extension_installed "ms-vscode.live-server"
           in
@@ -131,40 +131,41 @@ module Command = struct
             let arg = List.hd_exn args in
             let dep = Dependency.t_of_js arg in
             let name = Sandbox.Package.name dep in
-            let* cache_dir = Odig.cache_dir odig in
             let options =
               ProgressOptions.create ~location:(`ProgressLocation Notification)
                 ~title:(Printf.sprintf "Generating documenation for %s" name)
                 ~cancellable:false ()
             in
-            let task ~progress:_ ~token:_ =
-              let+ result = Odig.odoc_exec odig name in
-              let _ =
-                match result with
-                | Ok _ -> Promise.resolve ()
-                | Error _ ->
-                  let+ _ =
-                    Window.showErrorMessage
-                      ~message:
-                        (Printf.sprintf
-                           "Error while generating documentation for %s" name)
-                      ()
-                  in
+            let task ~progress:_ ~token:_ = Odig.odoc_exec odig name in
+            let* result =
+              Vscode.Window.withProgress
+                (module Interop.Js.Result
+                          (Interop.Js.String)
+                          (Interop.Js.String))
+                ~options ~task
+            in
+            match result with
+            | Error _ ->
+              let+ _ =
+                Window.showErrorMessage
+                  ~message:
+                    (Printf.sprintf
+                       "Error while generating documentation for %s" name)
                   ()
               in
-              Ojs.null
-            in
-            let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
-            let htmlDocumentationPath = Path.(cache_dir / ("/html/" ^ name)) in
-            let (_ : Ojs.t option Promise.t) =
-              Vscode.Commands.executeCommand
-                ~command:"livePreview.start.preview.atFile"
-                ~args:
-                  [ Ojs.string_to_js (Path.to_string htmlDocumentationPath)
-                  ; Ojs.bool_to_js false (* Path is absolute *)
-                  ]
-            in
-            ()
+              ()
+            | Ok _ ->
+              let+ html_dir = Odig.html_dir odig in
+              let htmlDocumentationPath = Path.(html_dir / name) in
+              let (_ : Ojs.t option Promise.t) =
+                Vscode.Commands.executeCommand
+                  ~command:"livePreview.start.preview.atFile"
+                  ~args:
+                    [ Ojs.string_to_js (Path.to_string htmlDocumentationPath)
+                    ; Ojs.bool_to_js false (* Path is absolute *)
+                    ]
+              in
+              ())
       in
       ()
     in
