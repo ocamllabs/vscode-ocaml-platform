@@ -26,8 +26,6 @@ let cmd_ouput t args =
   | None -> assert false
   | Some cmd -> Cmd.output cmd
 
-let odoc_exec t name = cmd_ouput t [ "odig"; "odoc"; name ]
-
 let conf t key =
   let open Promise.Syntax in
   let+ odig_conf_result = cmd_ouput t [ "odig"; "conf" ] in
@@ -61,3 +59,21 @@ let cache_dir t =
   let open Promise.Syntax in
   let+ cache_dir = conf t "cache-dir" in
   Option.value cache_dir ~default:default_cache_dir
+
+let html_dir t =
+  let open Promise.Syntax in
+  let+ cache_dir = cache_dir t in
+  Path.(cache_dir / "/html/")
+
+let odoc_exec t name =
+  let open Promise.Syntax in
+  let* ouput = cmd_ouput t [ "odig"; "odoc"; name ] in
+  match ouput with
+  | Ok _ as ok ->
+    let* html_dir = html_dir t in
+    let+ dir_exists = Fs.exists (Path.to_string html_dir ^ name) in
+    if dir_exists then
+      ok
+    else
+      Error ""
+  | Error _ as e -> Promise.resolve e
