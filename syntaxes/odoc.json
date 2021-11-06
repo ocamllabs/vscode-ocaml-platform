@@ -26,21 +26,23 @@
           "patterns": [{ "include": "source.ocaml" }]
         },
         {
-          "comment": "section header",
-          "begin": "\\{\\s([[:digit:]]+)\\b",
-          "end": "\\}",
-          "beginCaptures": {
-            "1": { "name": "constant.language.odoc" }
-          },
-          "patterns": [{ "include": "#markup" }]
-        },
-        {
           "comment": "label",
-          "begin": "\\{\\s([[:digit:]]+)\\s\\:\\s[label]\\b",
+          "begin": "\\{([[:digit:]]+)\\:([[:space:]]?)label\\b",
           "end": "\\}",
           "beginCaptures": {
             "1": { "name": "variable.other.declaration.odoc" }
           },
+          "contentName": "variable.other.declaration.odoc",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "section header",
+          "begin": "\\{([[:digit:]]+)\\b",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": { "name": "constant.language.odoc" }
+          },
+          "contentName": "constant.language.odoc",
           "patterns": [{ "include": "#markup" }]
         },
         {
@@ -48,6 +50,13 @@
           "begin": "\\{b\\b",
           "end": "\\}",
           "contentName": "strong",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "emphasize text",
+          "begin": "\\{e\\b",
+          "end": "\\}",
+          "contentName": "emphasis",
           "patterns": [{ "include": "#markup" }]
         },
         {
@@ -74,7 +83,86 @@
           "begin": "\\{R\\b",
           "end": "\\}",
           "patterns": [{ "include": "#markup" }]
-        }
+        },
+        {
+          "comment": "unordered list",
+          "begin": "\\{ul\\b",
+          "end": "\\}",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "ordered list",
+          "begin": "\\{ol\\b",
+          "end": "\\}",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "link address text",
+          "begin": "\\{\\{\\:\\b",
+          "end": "\\}",
+          "contentName": "string.other.odoc",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+        "comment": "string in source code",
+        "begin": "\\[\\b",
+        "end": "\\]",
+        "contentName": "string.other.odoc",
+        "patterns": [{ "include": "#markup" }]
+      },
+      {
+        "comment": "string in preformatted source code",
+        "begin": "\\{\\[\\b",
+        "end": "\\}",
+        "contentName": "string.other.odoc",
+        "patterns": [{ "include": "#markup" }]
+      },
+      {
+        "comment": "string in verbatim",
+        "begin": "\\{v\\b",
+        "end": "v\\}",
+        "contentName": "string.other.odoc",
+        "patterns": [{ "include": "#markup" }]
+      },
+      {
+        "comment": "target-specific content",
+        "begin": "\\{\\%\\b",
+        "end": "\\%\\}",
+        "contentName": "string.other.odoc",
+        "patterns": [{ "include": "#markup" }]
+      },
+      {
+        "comment": "cross-reference to an element",
+        "begin": "\\{\\!\\b",
+        "end": "\\}",
+        "contentName": "string.other.odoc",
+        "patterns": [{ "include": "#markup" }]
+      },
+      {
+        "comment": "index table for given modules",
+        "begin": "\\{\\!modules\\:\\b",
+        "end": "\\]",
+        "contentName": "string.other.odoc",
+        "patterns": [{ "include": "#markup" }]
+      },
+      {
+        "comment": "insert a table of links",
+        "begin": "\\{\\!\\b",
+        "end": "\\}",
+        "patterns": [{ "include": "#markup" }]
+      },
+      {
+        "comment": "text in superscript",
+        "begin": "\\{\\^\\b",
+        "end": "\\}",
+        "patterns": [{ "include": "#markup" }]
+      },
+      {
+        "comment": "text in subscript",
+        "begin": "\\{\\_\\b",
+        "end": "\\}",
+        "patterns": [{ "include": "#markup" }]
+      }
       ]
     }
   }
