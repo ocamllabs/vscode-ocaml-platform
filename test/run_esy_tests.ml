@@ -12,12 +12,12 @@ let sample_esy_src =
 let project_path = Path.join [ Os.tmpdir (); "sample-esy" ]
 
 let esy_sandbox_config root =
+  let open Jsonoo in
   let config =
-    Ojs.obj
-      [| ("root", Ojs.string_to_js root); ("kind", Ojs.string_to_js "esy") |]
+    Encode.(object_ [ ("root", string root); ("kind", string "esy") ])
   in
-  let t = Ojs.obj [| ("ocaml.sandbox", config) |] in
-  Jsonoo.(stringify @@ t_of_js t)
+  let t = Encode.(object_ [ ("ocaml.sandbox", config) ]) in
+  stringify t
 
 let main () =
   Fs_extra.copy_sync sample_esy_src project_path;
