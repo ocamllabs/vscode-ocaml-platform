@@ -6,7 +6,7 @@ val of_initialize_result : LanguageClient.InitializeResult.t -> t
 
 val is_version_up_to_date :
      t
-  -> ocaml_v:Ocaml_version.t
+  -> Ocaml_version.t
   -> ( bool
      , [> `Ocaml_version_not_supported of Ocaml_version.t
        | `Unexpected of

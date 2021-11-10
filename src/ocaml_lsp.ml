@@ -74,7 +74,7 @@ let get_version_semver t =
     | None -> Error `Unable_to_parse_version)
   | Error _ as err -> err
 
-let is_version_up_to_date t ~(ocaml_v : Ocaml_version.t) =
+let is_version_up_to_date t ocaml_v =
   let ocamllsp_version = get_version_semver t in
   match ocamllsp_version with
   | Ok v -> (
