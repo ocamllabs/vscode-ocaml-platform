@@ -202,3 +202,19 @@ let log_chan ~section kind fmt =
       let (lazy output) = Output.extension_output_channel in
       OutputChannel.appendLine output ~value)
     fmt
+
+module Ocaml_version = struct
+  let ( > ) v1 v2 = Ocaml_version.compare v1 v2 = 1
+
+  let ( < ) v1 v2 = Ocaml_version.compare v1 v2 = -1
+
+  let ( <= ) v1 v2 =
+    let r = Ocaml_version.compare v1 v2 in
+    r = -1 || r = 0
+
+  let ( >= ) v1 v2 =
+    let r = Ocaml_version.compare v1 v2 in
+    r = 1 || r = 0
+
+  include Ocaml_version
+end
