@@ -4,6 +4,7 @@ type t
 
 val make :
      Sandbox.t
-  -> (t, [ `Ocamlc_missing | `Ocamlc_version_unexpected ]) result Promise.t
+  -> (t, [ `Ocamlc_missing | `Unable_to_parse_version of string ]) result
+     Promise.t
 
-val version_semver : t -> Ocaml_version.t
+val version : t -> Ocaml_version.t
