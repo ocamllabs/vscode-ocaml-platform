@@ -4,6 +4,7 @@ type t =
   { mutable sandbox : Sandbox.t
   ; mutable repl : Terminal_sandbox.t option
   ; mutable lsp_client : (LanguageClient.t * Ocaml_lsp.t) option
+  ; mutable ocaml : Ocaml.t option
   ; sandbox_info : StatusBarItem.t
   ; ast_editor_state : Ast_editor_state.t
   }
@@ -142,7 +143,13 @@ let make () =
   let sandbox = Sandbox.Global in
   let sandbox_info = Sandbox_info.make sandbox in
   let ast_editor_state = Ast_editor_state.make () in
-  { sandbox; lsp_client = None; sandbox_info; repl = None; ast_editor_state }
+  { sandbox
+  ; lsp_client = None
+  ; sandbox_info
+  ; repl = None
+  ; ocaml = None
+  ; ast_editor_state
+  }
 
 let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
@@ -161,6 +168,21 @@ let repl t = t.repl
 let set_repl t repl = t.repl <- Some repl
 
 let close_repl t = t.repl <- None
+
+let update_ocaml_info t =
+  let open Promise.Syntax in
+  let+ ocaml = Ocaml.make t.sandbox in
+  match ocaml with
+  | Ok ocaml -> t.ocaml <- Some ocaml
+  | Error `Ocamlc_missing ->
+    (* we need to put [None] in [t.ocaml] because we don't want [t.ocaml] to be
+       left over from a previous sandbox, which had [ocamlc] *)
+    t.ocaml <- None;
+    show_message `Error "OCaml binaries such as `ocamlc` are missing."
+  | Error (`Unable_to_parse_version v) ->
+    t.ocaml <- None;
+    show_message `Error "Ocaml binary `ocamlc` version could not be parsed: %s"
+      v
 
 let open_terminal sandbox =
   let terminal = Terminal_sandbox.create sandbox in

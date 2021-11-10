@@ -26,4 +26,6 @@ val set_repl : t -> Terminal.t -> unit
 
 val close_repl : t -> unit
 
+val update_ocaml_info : t -> unit Promise.t
+
 val ast_editor_state : t -> Ast_editor_state.t
