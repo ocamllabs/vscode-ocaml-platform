@@ -18,8 +18,6 @@ val is_version_up_to_date :
        ] )
      result
 
-val has_interface_specific_lang_id : t -> bool
-
 val can_handle_switch_impl_intf : t -> bool
 
 val can_handle_infer_intf : t -> bool

@@ -97,9 +97,6 @@ let of_initialize_result (t : LanguageClient.InitializeResult.t) =
   in
   { serverInfo; experimental_capabilities }
 
-let has_interface_specific_lang_id t =
-  t.experimental_capabilities.interfaceSpecificLangId
-
 let can_handle_switch_impl_intf t =
   t.experimental_capabilities.handleSwitchImplIntf
 
