@@ -39,6 +39,8 @@
    (>= 0.3.1))
   (jsonoo
    (>= 0.2.1))
+  (ocaml-version
+   (>= 3.4.0))
   (opam-file-format
    (>= 2.1.2))))
 
