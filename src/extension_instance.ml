@@ -3,8 +3,9 @@ open Import
 type t =
   { mutable sandbox : Sandbox.t
   ; mutable repl : Terminal_sandbox.t option
-  ; mutable lsp_client : (LanguageClient.t * Ocaml_lsp.t) option
   ; mutable ocaml : Ocaml.t option
+        (** invariant: must be set before initializing the language server *)
+  ; mutable lsp_client : (LanguageClient.t * Ocaml_lsp.t) option
   ; sandbox_info : StatusBarItem.t
   ; ast_editor_state : Ast_editor_state.t
   }
@@ -16,6 +17,8 @@ let language_client t = Option.map ~f:fst t.lsp_client
 let ocaml_lsp t = Option.map ~f:snd t.lsp_client
 
 let lsp_client t = t.lsp_client
+
+let ocaml_exn { ocaml; _ } = Option.value_exn ocaml
 
 let stop_server t =
   Option.iter t.lsp_client ~f:(fun (client, _) ->
@@ -92,20 +95,37 @@ end = struct
       let+ initialize_result = LanguageClient.ready_initialize_result client in
       let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
       t.lsp_client <- Some (client, ocaml_lsp);
-      if
-        (not (Ocaml_lsp.has_interface_specific_lang_id ocaml_lsp))
-        || (not (Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp))
-        || not (Ocaml_lsp.can_handle_infer_intf ocaml_lsp)
-        (* TODO: switch to ocaml-lsp version based approach Using
-           [initializeResult] of [LanguageClient] we can get ocaml-lsp's
-           version. We can use versions instead of capabilities to suggest the
-           user to update their ocaml-lsp. *)
-      then
+      (match
+         Ocaml_lsp.is_version_up_to_date ocaml_lsp
+           (Ocaml.version (ocaml_exn t (* so [t.ocaml] must be set *)))
+       with
+      | Ok is_up_to_date ->
+        if not is_up_to_date then
+          show_message `Warn
+            "The installed version of `ocamllsp` is out of date. You may be \
+             missing out on cool features or important bug fixes. Consider \
+             upgrading the package `ocaml-lsp-server`."
+      | Error (`Ocaml_version_not_supported v) ->
         show_message `Warn
-          "The installed version of ocamllsp is out of date. Some features may \
-           be unavailable or degraded in functionality: switching between \
-           implementation and interface files, functionality in mli sources. \
-           Consider updating ocamllsp.";
+          "The installed version of OCaml is not supported by `ocamllsp`: %s. \
+           Consider upgrading OCaml version used in the current sandbox."
+          (Ocaml_version.to_string v)
+      | Error (`Unexpected `Language_server_isn't_ocamllsp) ->
+        show_message `Warn
+          "Using a language server besides `ocamllsp` isn't expected by this \
+           extension. Please, switch to using `ocamllsp` by installing the \
+           package `ocaml-lsp-server` in your current sandbox."
+      | Error (`Unexpected `Missing_serverInfo)
+      | Error (`Unexpected `ServerInfo_version_missing) ->
+        show_message `Warn
+          "The extension expected the server version to be sent by `ocamllsp`. \
+           It is missing. Please, consider upgrading the package \
+           `ocaml-lsp-server`."
+      | Error (`Unexpected `Unable_to_parse_version) ->
+        show_message `Warn
+          "The extension was unable to parse `ocamllsp` version. That's \
+           strange. Consider filing an issue on the project GitHub with the \
+           version of your `ocamllsp`.");
       Ok ()
     in
     match res with

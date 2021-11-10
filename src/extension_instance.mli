@@ -14,6 +14,8 @@ val ocaml_lsp : t -> Ocaml_lsp.t option
 
 val lsp_client : t -> (LanguageClient.t * Ocaml_lsp.t) option
 
+val ocaml_exn : t -> Ocaml.t
+
 val start_language_server : t -> unit Promise.t
 
 val open_terminal : Sandbox.t -> unit

@@ -48,9 +48,7 @@ let _select_sandbox =
       | Some new_sandbox ->
         Extension_instance.set_sandbox instance new_sandbox;
         let* () = Sandbox.save_to_settings new_sandbox in
-        let (_ : unit Promise.t) =
-          Extension_instance.update_ocaml_info instance
-        in
+        let* () = Extension_instance.update_ocaml_info instance in
         Extension_instance.start_language_server instance
     in
     ()
@@ -270,9 +268,33 @@ end = struct
       | None -> show_message `Warn "ocamllsp is not running."
       | Some (_, ocaml_lsp)
         when not (Ocaml_lsp.can_handle_typed_holes ocaml_lsp) ->
+        let suggestion =
+          match
+            Ocaml_lsp.is_version_up_to_date ocaml_lsp
+              (Extension_instance.ocaml_exn instance |> Ocaml.version)
+          with
+          | Ok is_up_to_date ->
+            if is_up_to_date then
+              (* ocamllsp is "up-to-date", so user needs newer ocaml to get
+                 newer ocamllsp, which supports typed holes *)
+              "The extension requires a newer version of `ocamllsp`, which \
+               needs a new version of OCaml. Please, consider upgrading the \
+               OCaml version used in this sandbox."
+            else
+              "Consider upgrading the package `ocaml-lsp-server`."
+          | Error (`Unexpected `Language_server_isn't_ocamllsp)
+          | Error (`Unexpected `Missing_serverInfo)
+          | Error (`Unexpected `ServerInfo_version_missing)
+          | Error (`Unexpected `Unable_to_parse_version)
+          | Error (`Ocaml_version_not_supported (_ : Ocaml_version.t)) ->
+            (* All of the errors are quite rare and should be faced by the user
+               when launching ocaml-lsp not here *)
+            "Something went wrong. The installed `ocamllsp` version seems to \
+             not support this feature."
+        in
         show_message `Warn
-          "The installed version of ocamllsp does not fully support typed \
-           holes. Consider updating ocamllsp."
+          "The installed version of `ocamllsp` does not support typed holes. %s"
+          suggestion
       | Some (client, _ocaml_lsp) ->
         let doc = TextEditor.document text_editor in
         let uri = TextDocument.uri doc in
