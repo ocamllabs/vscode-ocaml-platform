@@ -217,4 +217,10 @@ module Ocaml_version = struct
     r = 1 || r = 0
 
   include Ocaml_version
+
+  module Releases = struct
+    let v4_14_0 = of_string_exn "4.14.0"
+
+    include Releases
+  end
 end
