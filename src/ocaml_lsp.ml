@@ -52,6 +52,44 @@ type t =
   ; experimental_capabilities : Experimental_capabilities.t
   }
 
+let get_version_from_serverInfo { serverInfo; experimental_capabilities = _ } =
+  match serverInfo with
+  | None -> Error `Missing_serverInfo (* ocamllsp should have [serverInfo] *)
+  | Some { name; version } -> (
+    if not (String.equal name "ocamllsp") then (
+      log_chan ~section:"Ocaml_lsp.get_version" `Warn
+        "the language server is not ocamllsp";
+      (* practically impossible but let's be defensive *)
+      Error `Language_server_isn't_ocamllsp
+    ) else
+      match version with
+      | None -> Error `ServerInfo_version_missing
+      | Some v -> Ok v)
+
+let get_version_semver t =
+  match get_version_from_serverInfo t with
+  | Ok v -> (
+    match String.split v ~on:'-' |> List.hd with
+    | Some v -> Ok v
+    | None -> Error `Unable_to_parse_version)
+  | Error _ as err -> err
+
+let is_version_up_to_date t ~(ocaml_v : Ocaml_version.t) =
+  let ocamllsp_version = get_version_semver t in
+  match ocamllsp_version with
+  | Ok v -> (
+    match ocaml_v with
+    | _ when Ocaml_version.(ocaml_v < Releases.v4_06_0) ->
+      Error (`Ocaml_version_not_supported ocaml_v)
+    | _ when Ocaml_version.(ocaml_v < Releases.v4_12_0) ->
+      Ok (String.equal v "1.4.1")
+    | _ when Ocaml_version.(ocaml_v < Releases.v4_13_0) ->
+      Ok (String.equal v "1.8.3")
+    | _ when Ocaml_version.(ocaml_v < of_string_exn "4.14.0") ->
+      Ok (String.equal v "1.9.0~4.13preview")
+    | _ -> Error (`Ocaml_version_not_supported ocaml_v))
+  | Error e -> Error (`Unexpected e)
+
 let of_initialize_result (t : LanguageClient.InitializeResult.t) =
   let serverInfo = LanguageClient.InitializeResult.serverInfo t in
   let experimental_capabilities =
