@@ -15,7 +15,8 @@ module Experimental_capabilities = struct
     ; handleTypedHoles = false
     }
 
-  let of_json (json : Jsonoo.t) =
+  (** Creates [t] given a JSON of form [{ 'handleSwitchImplIntf' : true, .... }] *)
+  let t_of_json (json : Jsonoo.t) =
     let experimental_caps_tbl = Jsonoo.Decode.(dict bool) json in
     let has_capability cap =
       Stdlib.Hashtbl.find_opt experimental_caps_tbl cap
@@ -42,7 +43,7 @@ module Experimental_capabilities = struct
   let of_initialize_result (t : LanguageClient.InitializeResult.t) =
     LanguageClient.InitializeResult.capabilities t
     |> LanguageClient.ServerCapabilities.experimental
-    |> Option.bind ~f:Jsonoo.Decode.(try_optional (field "ocamllsp" of_json))
+    |> Option.bind ~f:Jsonoo.Decode.(try_optional (field "ocamllsp" t_of_json))
     |> Option.value ~default
 end
 
