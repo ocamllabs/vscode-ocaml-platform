@@ -163,12 +163,11 @@ module Command = struct
                       ; uri = Vscode.Uri.file (Path.to_string html_dir)
                       }
                     in
-                    let b =
+                    let _ =
                       Vscode.Workspace.updateWorkspaceFolders ~start
                         ~deleteCount:(Some 0)
                         ~workspaceFoldersToAdd:[ workspaceFoldersToAdd ] ()
                     in
-                    let () = Stdlib.print_endline (Stdlib.string_of_bool b) in
                     Promise.resolve ())
                 | Sandbox.Esy (_, _)
                 | Sandbox.Global
@@ -176,9 +175,6 @@ module Command = struct
                   Promise.resolve ()
               in
               let htmlDocumentationPath = Path.(html_dir / name) in
-              let () =
-                Stdlib.print_endline (Path.to_string htmlDocumentationPath)
-              in
               let (_ : Ojs.t option Promise.t) =
                 Vscode.Commands.executeCommand
                   ~command:"livePreview.start.preview.atFile"
