@@ -1799,6 +1799,18 @@ module Workspace : sig
 
   val registerTextDocumentContentProvider :
     scheme:string -> provider:TextDocumentContentProvider.t -> Disposable.t
+
+  type workspaceFolderToAdd =
+    { name : string
+    ; uri : Uri.t
+    }
+
+  val updateWorkspaceFolders :
+       start:int
+    -> deleteCount:int or_undefined
+    -> workspaceFoldersToAdd:(workspaceFolderToAdd list[@js.variadic])
+    -> unit
+    -> bool
 end
 
 module TreeItemCollapsibleState : sig
