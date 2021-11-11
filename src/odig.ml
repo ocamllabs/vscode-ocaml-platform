@@ -23,13 +23,13 @@ let conf t key =
   | Error _ -> None
   | Ok conf ->
     let lines = String.split_lines conf in
+    let is_whitespace_or_single_quote c =
+      Char.equal c '\'' || Char.is_whitespace c
+    in
     List.map lines ~f:(String.rsplit2 ~on:':')
     |> List.filter_opt
     |> List.find_map ~f:(fun (k, v) ->
            if String.equal k key then
-             let is_whitespace_or_single_quote c =
-               Char.equal c '\'' || Char.is_whitespace c
-             in
              Some
                (String.strip v ~drop:is_whitespace_or_single_quote
                |> Path.of_string)
