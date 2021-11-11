@@ -1,30 +1,20 @@
 open Import
 
-type t = Sandbox.t
+type t = Opam.t * Opam.Switch.t
 
-type of_sandbox_error =
-  | Not_supported_sandbox
-  | Odig_not_installed
+type of_opam_error = Odig_not_installed
 
-let of_sandbox (sandbox : Sandbox.t) =
-  match sandbox with
-  | Sandbox.Opam (opam, switch) ->
-    let open Promise.Syntax in
-    let+ is_installed = Opam.has_package opam switch "odig" in
-    if is_installed then
-      Ok (Sandbox.Opam (opam, switch))
-    else
-      Error Odig_not_installed
-  | Sandbox.Esy (_, _)
-  | Sandbox.Global
-  | Sandbox.Custom _ ->
-    Error Not_supported_sandbox |> Promise.return
+let of_opam (opam, switch) =
+  let open Promise.Syntax in
+  let+ is_installed = Opam.has_package opam switch "odig" in
+  if is_installed then
+    Ok (opam, switch)
+  else
+    Error Odig_not_installed
 
-let cmd_ouput t args =
-  match Sandbox.get_exec_command t args with
-  (* returns None in case of Global or Custom sandbox. *)
-  | None -> assert false
-  | Some cmd -> Cmd.output cmd
+let cmd_ouput (opam, switch) args =
+  let cmd = Opam.exec opam switch ~args in
+  Cmd.output cmd
 
 let conf t key =
   let open Promise.Syntax in
@@ -47,15 +37,8 @@ let conf t key =
              None)
 
 let cache_dir t =
-  let default_cache_dir =
-    match t with
-    | Sandbox.Opam (opam, switch) ->
-      Path.(Opam.path opam switch / "/var/cache/odig/")
-    | Sandbox.Esy (_, _)
-    | Sandbox.Global
-    | Sandbox.Custom _ ->
-      assert false
-  in
+  let opam, switch = t in
+  let default_cache_dir = Path.(Opam.path opam switch / "/var/cache/odig/") in
   let open Promise.Syntax in
   let+ cache_dir = conf t "cache-dir" in
   Option.value cache_dir ~default:default_cache_dir

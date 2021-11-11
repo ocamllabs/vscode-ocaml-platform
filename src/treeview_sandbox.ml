@@ -81,109 +81,124 @@ module Command = struct
   let _generate_documentation =
     let handler (instance : Extension_instance.t) ~args =
       let _ =
-        let sandbox = Extension_instance.sandbox instance in
         let open Promise.Syntax in
-        let+ odig = Odig.of_sandbox sandbox in
-        match odig with
-        | Error e ->
-          let message =
-            match e with
-            | Odig.Not_supported_sandbox ->
+        let sandbox = Extension_instance.sandbox instance in
+        let+ _ =
+          match sandbox with
+          | Sandbox.Esy (_, _)
+          | Sandbox.Global
+          | Sandbox.Custom _ ->
+            let message =
               Printf.sprintf
                 "This functionality is not supported for %s sandbox"
                 (Sandbox.to_string sandbox)
-            | Odig.Odig_not_installed ->
-              "Odig must be installed to generate the documentation."
-          in
-          let+ _ = Window.showErrorMessage ~message () in
-          ()
-        | Ok odig -> (
-          let is_live_preview_extension_installed =
-            Extensions.is_extension_installed "ms-vscode.live-server"
-          in
-          if not is_live_preview_extension_installed then
-            let+ choices =
-              Window.showErrorMessage
-                ~message:
-                  "Live preview extension must be installed to show the \
-                   documentation."
-                ~choices:[ ("Install", `Install) ]
-                ()
             in
-            match choices with
-            | None -> ()
-            | Some `Install ->
-              let _ =
-                Vscode.Commands.executeCommand
-                  ~command:"workbench.extensions.search"
-                  ~args:[ Ojs.string_to_js "ms-vscode.live-server" ]
+            let+ _ = Window.showErrorMessage ~message () in
+            ()
+          | Sandbox.Opam (opam, switch) -> (
+            let* odig = Odig.of_opam (opam, switch) in
+            match odig with
+            | Error e ->
+              let message =
+                match e with
+                | Odig.Odig_not_installed ->
+                  "Odig must be installed to generate the documentation."
               in
+              let+ _ = Window.showErrorMessage ~message () in
               ()
-          else
-            let arg = List.hd_exn args in
-            let dep = Dependency.t_of_js arg in
-            let name = Sandbox.Package.name dep in
-            let options =
-              ProgressOptions.create ~location:(`ProgressLocation Notification)
-                ~title:(Printf.sprintf "Generating documentation for %s" name)
-                ~cancellable:false ()
-            in
-            let task ~progress:_ ~token:_ = Odig.odoc_exec odig name in
-            let* result =
-              Vscode.Window.withProgress
-                (module Interop.Js.Result
-                          (Interop.Js.String)
-                          (Interop.Js.String))
-                ~options ~task
-            in
-            match result with
-            | Error _ ->
-              let+ _ =
-                Window.showErrorMessage
-                  ~message:
-                    (Printf.sprintf
-                       "Error while generating documentation for %s" name)
+            | Ok odig -> (
+              let is_live_preview_extension_installed =
+                Extensions.is_extension_installed "ms-vscode.live-server"
+              in
+              if not is_live_preview_extension_installed then
+                let+ choices =
+                  Window.showErrorMessage
+                    ~message:
+                      "Live preview extension must be installed to show the \
+                       documentation."
+                    ~choices:[ ("Install", `Install) ]
+                    ()
+                in
+                match choices with
+                | None -> ()
+                | Some `Install ->
+                  let _ =
+                    Vscode.Commands.executeCommand
+                      ~command:"workbench.extensions.search"
+                      ~args:[ Ojs.string_to_js "ms-vscode.live-server" ]
+                  in
                   ()
-              in
-              ()
-            | Ok _ ->
-              let* html_dir = Odig.html_dir odig in
-              let+ () =
-                match sandbox with
-                | Sandbox.Opam (_, switch) -> (
-                  match switch with
-                  | Opam.Switch.Local _ -> Promise.resolve ()
-                  | Opam.Switch.Named _ ->
-                    let start =
-                      Vscode.Workspace.workspaceFolders () |> List.length
-                    in
-                    let workspaceFoldersToAdd :
-                        Vscode.Workspace.workspaceFolderToAdd =
-                      { name = "odig_doc"
-                      ; uri = Vscode.Uri.file (Path.to_string html_dir)
-                      }
-                    in
-                    let _ =
-                      Vscode.Workspace.updateWorkspaceFolders ~start
-                        ~deleteCount:(Some 0)
-                        ~workspaceFoldersToAdd:[ workspaceFoldersToAdd ] ()
-                    in
-                    Promise.resolve ())
-                | Sandbox.Esy (_, _)
-                | Sandbox.Global
-                | Sandbox.Custom _ ->
-                  Promise.resolve ()
-              in
-              let htmlDocumentationPath = Path.(html_dir / name) in
-              let (_ : Ojs.t option Promise.t) =
-                Vscode.Commands.executeCommand
-                  ~command:"livePreview.start.preview.atFile"
-                  ~args:
-                    [ Ojs.string_to_js (Path.to_string htmlDocumentationPath)
-                    ; Ojs.bool_to_js false (* Path is absolute *)
-                    ]
-              in
-              ())
+              else
+                let arg = List.hd_exn args in
+                let dep = Dependency.t_of_js arg in
+                let name = Sandbox.Package.name dep in
+                let options =
+                  ProgressOptions.create
+                    ~location:(`ProgressLocation Notification)
+                    ~title:
+                      (Printf.sprintf "Generating documentation for %s" name)
+                    ~cancellable:false ()
+                in
+                let task ~progress:_ ~token:_ = Odig.odoc_exec odig name in
+                let* result =
+                  Vscode.Window.withProgress
+                    (module Interop.Js.Result
+                              (Interop.Js.String)
+                              (Interop.Js.String))
+                    ~options ~task
+                in
+
+                match result with
+                | Error _ ->
+                  let+ _ =
+                    Window.showErrorMessage
+                      ~message:
+                        (Printf.sprintf
+                           "Error while generating documentation for %s" name)
+                      ()
+                  in
+                  ()
+                | Ok _ ->
+                  let* html_dir = Odig.html_dir odig in
+                  let+ () =
+                    match sandbox with
+                    | Sandbox.Opam (_, switch) -> (
+                      match switch with
+                      | Opam.Switch.Local _ -> Promise.resolve ()
+                      | Opam.Switch.Named _ ->
+                        let start =
+                          Vscode.Workspace.workspaceFolders () |> List.length
+                        in
+                        let workspaceFoldersToAdd :
+                            Vscode.Workspace.workspaceFolderToAdd =
+                          { name = "odig_doc"
+                          ; uri = Vscode.Uri.file (Path.to_string html_dir)
+                          }
+                        in
+                        let _ =
+                          Vscode.Workspace.updateWorkspaceFolders ~start
+                            ~deleteCount:(Some 0)
+                            ~workspaceFoldersToAdd:[ workspaceFoldersToAdd ] ()
+                        in
+                        Promise.resolve ())
+                    | Sandbox.Esy (_, _)
+                    | Sandbox.Global
+                    | Sandbox.Custom _ ->
+                      Promise.resolve ()
+                  in
+                  let htmlDocumentationPath = Path.(html_dir / name) in
+                  let (_ : Ojs.t option Promise.t) =
+                    Vscode.Commands.executeCommand
+                      ~command:"livePreview.start.preview.atFile"
+                      ~args:
+                        [ Ojs.string_to_js
+                            (Path.to_string htmlDocumentationPath)
+                        ; Ojs.bool_to_js false (* Path is absolute *)
+                        ]
+                  in
+                  ()))
+        in
+        ()
       in
       ()
     in
