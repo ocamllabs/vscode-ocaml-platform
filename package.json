@@ -376,6 +376,10 @@
         {
           "command": "ocaml.open-sandbox-documentation",
           "when": "false"
+        },
+        {
+          "command": "ocaml.generate-sandbox-documentation",
+          "when": "false"
         }
       ],
       "editor/title": [
