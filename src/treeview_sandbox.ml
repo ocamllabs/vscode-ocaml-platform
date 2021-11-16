@@ -89,9 +89,8 @@ module Command = struct
           | Sandbox.Global
           | Sandbox.Custom _ ->
             let message =
-              Printf.sprintf
-                "This functionality is not supported for %s sandbox"
-                (Sandbox.to_string sandbox)
+              "\"OCaml: Generate Documentation\" command only works with OPAM \
+               sandboxes."
             in
             let+ _ = Window.showErrorMessage ~message () in
             ()
@@ -102,7 +101,8 @@ module Command = struct
               let message =
                 match e with
                 | Odig.Odig_not_installed ->
-                  "Odig must be installed to generate the documentation."
+                  "\"OCaml: Generate Documentation\": the package \"odig\" \
+                   must be installed to generate documentation."
               in
               let+ _ = Window.showErrorMessage ~message () in
               ()
