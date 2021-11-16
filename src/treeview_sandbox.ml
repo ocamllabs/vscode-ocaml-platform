@@ -178,7 +178,7 @@ module Command = struct
                         let _ =
                           Vscode.Workspace.updateWorkspaceFolders ~start
                             ~deleteCount:(Some 0)
-                            ~workspaceFoldersToAdd:[ workspaceFoldersToAdd ] ()
+                            ~workspaceFoldersToAdd:[ workspaceFoldersToAdd ]
                         in
                         Promise.resolve ())
                     | Sandbox.Esy (_, _)

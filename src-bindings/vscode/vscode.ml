@@ -2331,7 +2331,6 @@ module Workspace = struct
          start:int
       -> deleteCount:int or_undefined
       -> workspaceFoldersToAdd:(workspaceFolderToAdd list[@js.variadic])
-      -> unit
       -> bool
       [@@js.global "vscode.workspace.updateWorkspaceFolders"]]
 end

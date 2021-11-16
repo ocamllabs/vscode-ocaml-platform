@@ -1809,7 +1809,6 @@ module Workspace : sig
        start:int
     -> deleteCount:int or_undefined
     -> workspaceFoldersToAdd:(workspaceFolderToAdd list[@js.variadic])
-    -> unit
     -> bool
 end
 
