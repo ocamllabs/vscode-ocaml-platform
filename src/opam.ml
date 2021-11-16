@@ -314,4 +314,11 @@ let has_package t switch package_name =
     packages
     |> List.exists ~f:(fun package ->
            String.equal (Package.name package) package_name)
-  | Error _ -> false
+  | Error e ->
+    let () =
+      log
+        "Unable to determine if package %s is installed in the current switch. \
+         Error: %s"
+        package_name e
+    in
+    false

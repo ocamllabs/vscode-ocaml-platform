@@ -51,12 +51,25 @@ let html_dir t =
 let odoc_exec t name =
   let open Promise.Syntax in
   let* ouput = cmd_ouput t [ "odig"; "odoc"; name ] in
-  match ouput with
-  | Ok _ as ok ->
-    let* html_dir = html_dir t in
-    let+ dir_exists = Fs.exists (Path.to_string html_dir ^ name) in
-    if dir_exists then
-      ok
-    else
-      Error ""
-  | Error _ as e -> Promise.resolve e
+  let+ result =
+    match ouput with
+    | Ok _ as ok ->
+      let* html_dir = html_dir t in
+      let package_html_dir = Path.to_string html_dir ^ name in
+      let+ dir_exists = Fs.exists package_html_dir in
+      if dir_exists then
+        ok
+      else
+        Error
+          (Printf.sprintf
+             "Directory %s should have been created but it doesn\'t exist."
+             package_html_dir)
+    | Error _ as e -> Promise.resolve e
+  in
+  result
+  |> Result.map_error ~f:(fun error ->
+         let () =
+           log "Failed to generate documentation for package %s. Error: %s" name
+             error
+         in
+         error)
