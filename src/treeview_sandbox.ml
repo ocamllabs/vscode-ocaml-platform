@@ -80,10 +80,10 @@ module Command = struct
 
   let _generate_documentation =
     let handler (instance : Extension_instance.t) ~args =
-      let _ =
+      let () =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
-        let+ _ =
+        let (_ : unit Promise.t) =
           match sandbox with
           | Sandbox.Esy (_, _)
           | Sandbox.Global
@@ -92,8 +92,10 @@ module Command = struct
               "\"OCaml: Generate Documentation\" command only works with OPAM \
                sandboxes."
             in
-            let+ _ = Window.showErrorMessage ~message () in
-            ()
+            let (_ : 'a option Promise.t) =
+              Window.showErrorMessage ~message ()
+            in
+            Promise.resolve ()
           | Sandbox.Opam (opam, switch) -> (
             let* odig = Odig.of_opam (opam, switch) in
             match odig with
@@ -104,8 +106,10 @@ module Command = struct
                   "\"OCaml: Generate Documentation\": the package \"odig\" \
                    must be installed to generate documentation."
               in
-              let+ _ = Window.showErrorMessage ~message () in
-              ()
+              let (_ : 'a option Promise.t) =
+                Window.showErrorMessage ~message ()
+              in
+              Promise.resolve ()
             | Ok odig -> (
               let is_live_preview_extension_installed =
                 Extensions.is_extension_installed "ms-vscode.live-server"
@@ -122,7 +126,7 @@ module Command = struct
                 match choices with
                 | None -> ()
                 | Some `Install ->
-                  let _ =
+                  let (_ : Ojs.t option Promise.t) =
                     Vscode.Commands.executeCommand
                       ~command:"workbench.extensions.search"
                       ~args:[ Ojs.string_to_js "ms-vscode.live-server" ]
@@ -149,17 +153,17 @@ module Command = struct
                 in
                 match result with
                 | Error _ ->
-                  let+ _ =
+                  let (_ : 'a option Promise.t) =
                     Window.showErrorMessage
                       ~message:
                         (Printf.sprintf
                            "Error while generating documentation for %s" name)
                       ()
                   in
-                  ()
+                  Promise.resolve ()
                 | Ok _ ->
-                  let* html_dir = Odig.html_dir odig in
-                  let+ () =
+                  let+ html_dir = Odig.html_dir odig in
+                  let () =
                     match sandbox with
                     | Sandbox.Opam (_, Opam.Switch.Named _) ->
                       let start =
@@ -171,17 +175,17 @@ module Command = struct
                         ; uri = Vscode.Uri.file (Path.to_string html_dir)
                         }
                       in
-                      let _ =
+                      let (_ : bool) =
                         Vscode.Workspace.updateWorkspaceFolders ~start
                           ~deleteCount:(Some 0)
                           ~workspaceFoldersToAdd:[ workspaceFoldersToAdd ]
                       in
-                      Promise.resolve ()
+                      ()
                     | Sandbox.Opam (_, Opam.Switch.Local _)
                     | Sandbox.Esy (_, _)
                     | Sandbox.Global
                     | Sandbox.Custom _ ->
-                      Promise.resolve ()
+                      ()
                   in
                   let htmlDocumentationPath = Path.(html_dir / name) in
                   let (_ : Ojs.t option Promise.t) =
