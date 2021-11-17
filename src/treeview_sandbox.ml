@@ -147,7 +147,6 @@ module Command = struct
                               (Interop.Js.String))
                     ~options ~task
                 in
-
                 match result with
                 | Error _ ->
                   let+ _ =
@@ -162,25 +161,23 @@ module Command = struct
                   let* html_dir = Odig.html_dir odig in
                   let+ () =
                     match sandbox with
-                    | Sandbox.Opam (_, switch) -> (
-                      match switch with
-                      | Opam.Switch.Local _ -> Promise.resolve ()
-                      | Opam.Switch.Named _ ->
-                        let start =
-                          Vscode.Workspace.workspaceFolders () |> List.length
-                        in
-                        let workspaceFoldersToAdd :
-                            Vscode.Workspace.workspaceFolderToAdd =
-                          { name = "odig_doc"
-                          ; uri = Vscode.Uri.file (Path.to_string html_dir)
-                          }
-                        in
-                        let _ =
-                          Vscode.Workspace.updateWorkspaceFolders ~start
-                            ~deleteCount:(Some 0)
-                            ~workspaceFoldersToAdd:[ workspaceFoldersToAdd ]
-                        in
-                        Promise.resolve ())
+                    | Sandbox.Opam (_, Opam.Switch.Named _) ->
+                      let start =
+                        Vscode.Workspace.workspaceFolders () |> List.length
+                      in
+                      let workspaceFoldersToAdd :
+                          Vscode.Workspace.workspaceFolderToAdd =
+                        { name = "odig_doc"
+                        ; uri = Vscode.Uri.file (Path.to_string html_dir)
+                        }
+                      in
+                      let _ =
+                        Vscode.Workspace.updateWorkspaceFolders ~start
+                          ~deleteCount:(Some 0)
+                          ~workspaceFoldersToAdd:[ workspaceFoldersToAdd ]
+                      in
+                      Promise.resolve ()
+                    | Sandbox.Opam (_, Opam.Switch.Local _)
                     | Sandbox.Esy (_, _)
                     | Sandbox.Global
                     | Sandbox.Custom _ ->
