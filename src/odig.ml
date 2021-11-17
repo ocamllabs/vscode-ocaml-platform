@@ -26,22 +26,22 @@ let conf t key =
     let is_whitespace_or_single_quote c =
       Char.equal c '\'' || Char.is_whitespace c
     in
-    List.map lines ~f:(String.rsplit2 ~on:':')
-    |> List.filter_opt
-    |> List.find_map ~f:(fun (k, v) ->
-           if String.equal k key then
-             Some
-               (String.strip v ~drop:is_whitespace_or_single_quote
-               |> Path.of_string)
-           else
-             None)
+    List.find_map lines ~f:(fun line ->
+        if String.is_prefix line ~prefix:key then
+          String.lsplit2 line ~on:':'
+          |> Option.map ~f:(fun (_, v) ->
+                 String.strip v ~drop:is_whitespace_or_single_quote)
+        else
+          None)
 
 let cache_dir t =
   let opam, switch = t in
   let default_cache_dir = Path.(Opam.path opam switch / "/var/cache/odig/") in
   let open Promise.Syntax in
   let+ cache_dir = conf t "cache-dir" in
-  Option.value cache_dir ~default:default_cache_dir
+  cache_dir
+  |> Option.map ~f:Path.of_string
+  |> Option.value ~default:default_cache_dir
 
 let html_dir t =
   let open Promise.Syntax in
