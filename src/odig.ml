@@ -16,32 +16,16 @@ let cmd_ouput (opam, switch) args =
   let cmd = Opam.exec opam switch ~args in
   Cmd.output cmd
 
-let conf t key =
-  let open Promise.Syntax in
-  let+ odig_conf_result = cmd_ouput t [ "odig"; "conf" ] in
-  match odig_conf_result with
-  | Error _ -> None
-  | Ok conf ->
-    let lines = String.split_lines conf in
-    let is_whitespace_or_single_quote c =
-      Char.equal c '\'' || Char.is_whitespace c
-    in
-    List.find_map lines ~f:(fun line ->
-        if String.is_prefix line ~prefix:key then
-          String.lsplit2 line ~on:':'
-          |> Option.map ~f:(fun (_, v) ->
-                 String.strip v ~drop:is_whitespace_or_single_quote)
-        else
-          None)
-
 let cache_dir t =
   let opam, switch = t in
   let default_cache_dir = Path.(Opam.path opam switch / "/var/cache/odig/") in
   let open Promise.Syntax in
-  let+ cache_dir = conf t "cache-dir" in
-  cache_dir
-  |> Option.map ~f:Path.of_string
-  |> Option.value ~default:default_cache_dir
+  let+ cache_dir = cmd_ouput t [ "odig"; "cache"; "path" ] in
+  match cache_dir with
+  | Ok cache_dir -> cache_dir |> String.strip |> Path.of_string
+  | Error e ->
+    let () = log "Failed to retrieve odig cache_dir: %s" e in
+    default_cache_dir
 
 let html_dir t =
   let open Promise.Syntax in
