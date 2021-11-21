@@ -84,7 +84,7 @@ let is_version_up_to_date t ocaml_v =
     | _ when Ocaml_version.(ocaml_v < Releases.v4_12_0) ->
       Ok (String.equal v "1.4.1")
     | _ when Ocaml_version.(ocaml_v < Releases.v4_13_0) ->
-      Ok (String.equal v "1.8.3")
+      Ok (String.equal v "1.9.0")
     | _ when Ocaml_version.(ocaml_v < Releases.v4_14_0) ->
       Ok (String.equal v "1.9.0~4.13preview")
     | _ -> Error (`Ocaml_version_not_supported ocaml_v))
