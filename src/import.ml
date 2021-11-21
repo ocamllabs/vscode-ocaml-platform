@@ -166,12 +166,6 @@ module Range = struct
 end
 
 module Promise = struct
-  let don't_wait_for (_p : _ Promise.t) = ()
-
-  (** prefer this function over [don't_wait_for] when the promise has type
-      [unit Promise.t] *)
-  let don't_wait_for_unit (_p : unit Promise.t) = ()
-
   include Promise
 
   module Result = struct
