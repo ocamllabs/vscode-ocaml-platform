@@ -1013,6 +1013,8 @@
     "fmt": "prettier . --write"
   },
   "dependencies": {
+    "polka": "^1.0.0-next.22",
+    "sirv": "^1.0.19",
     "vscode-languageclient": "7.0.0"
   },
   "devDependencies": {
