@@ -55,16 +55,17 @@ type t =
 let get_version_from_serverInfo { serverInfo; experimental_capabilities = _ } =
   match serverInfo with
   | None -> Error `Missing_serverInfo (* ocamllsp should have [serverInfo] *)
-  | Some { name; version } -> (
-    if not (String.equal name "ocamllsp") then (
+  | Some { name; version } ->
+    if String.equal name "ocamllsp" then
+      match version with
+      | None -> Error `ServerInfo_version_missing
+      | Some v -> Ok v
+    else (
       log_chan ~section:"Ocaml_lsp.get_version" `Warn
         "the language server is not ocamllsp";
       (* practically impossible but let's be defensive *)
       Error `Language_server_isn't_ocamllsp
-    ) else
-      match version with
-      | None -> Error `ServerInfo_version_missing
-      | Some v -> Ok v)
+    )
 
 let get_version_semver t =
   match get_version_from_serverInfo t with
