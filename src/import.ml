@@ -202,13 +202,9 @@ module Ocaml_version = struct
 
   let ( < ) v1 v2 = Ocaml_version.compare v1 v2 = -1
 
-  let ( <= ) v1 v2 =
-    let r = Ocaml_version.compare v1 v2 in
-    r = -1 || r = 0
+  let ( <= ) v1 v2 = Ocaml_version.compare v1 v2 <= 0
 
-  let ( >= ) v1 v2 =
-    let r = Ocaml_version.compare v1 v2 in
-    r = 1 || r = 0
+  let ( >= ) v1 v2 = Ocaml_version.compare v1 v2 >= 0
 
   include Ocaml_version
 
