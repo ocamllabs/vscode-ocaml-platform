@@ -164,8 +164,9 @@ module Command = struct
                 | Ok _ ->
                   let+ html_dir = Odig.html_dir odig in
                   let () =
-                    match sandbox with
-                    | Sandbox.Opam (_, Opam.Switch.Named _) ->
+                    match switch with
+                    | Opam.Switch.Local _ -> ()
+                    | Opam.Switch.Named _ ->
                       let start =
                         Vscode.Workspace.workspaceFolders () |> List.length
                       in
@@ -180,11 +181,6 @@ module Command = struct
                           ~deleteCount:(Some 0)
                           ~workspaceFoldersToAdd:[ workspaceFoldersToAdd ]
                       in
-                      ()
-                    | Sandbox.Opam (_, Opam.Switch.Local _)
-                    | Sandbox.Esy (_, _)
-                    | Sandbox.Global
-                    | Sandbox.Custom _ ->
                       ()
                   in
                   let htmlDocumentationPath = Path.(html_dir / name) in
