@@ -271,7 +271,7 @@ end = struct
         let suggestion =
           match
             Ocaml_lsp.is_version_up_to_date ocaml_lsp
-              (Extension_instance.ocaml_exn instance |> Ocaml.version)
+              (Extension_instance.ocaml_version_exn instance)
           with
           | Ok is_up_to_date ->
             if is_up_to_date then

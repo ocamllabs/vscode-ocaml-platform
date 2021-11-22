@@ -3,8 +3,9 @@ open Import
 type t =
   { mutable sandbox : Sandbox.t
   ; mutable repl : Terminal_sandbox.t option
-  ; mutable ocaml : Ocaml.t option
-        (** invariant: must be set before initializing the language server *)
+  ; mutable ocaml_version : Ocaml_version.t option
+        (** assumption: it must be set before initializing the language server;
+            the lang server initialization needs the ocaml version *)
   ; mutable lsp_client : (LanguageClient.t * Ocaml_lsp.t) option
   ; sandbox_info : StatusBarItem.t
   ; ast_editor_state : Ast_editor_state.t
@@ -18,7 +19,7 @@ let ocaml_lsp t = Option.map ~f:snd t.lsp_client
 
 let lsp_client t = t.lsp_client
 
-let ocaml_exn { ocaml; _ } = Option.value_exn ocaml
+let ocaml_version_exn t = Option.value_exn t.ocaml_version
 
 let stop_server t =
   Option.iter t.lsp_client ~f:(fun (client, _) ->
@@ -96,8 +97,7 @@ end = struct
       let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
       t.lsp_client <- Some (client, ocaml_lsp);
       (match
-         Ocaml_lsp.is_version_up_to_date ocaml_lsp
-           (Ocaml.version (ocaml_exn t (* so [t.ocaml] must be set *)))
+         Ocaml_lsp.is_version_up_to_date ocaml_lsp (ocaml_version_exn t)
        with
       | Ok is_up_to_date ->
         if not is_up_to_date then
@@ -167,7 +167,7 @@ let make () =
   ; lsp_client = None
   ; sandbox_info
   ; repl = None
-  ; ocaml = None
+  ; ocaml_version = None
   ; ast_editor_state
   }
 
@@ -191,18 +191,31 @@ let close_repl t = t.repl <- None
 
 let update_ocaml_info t =
   let open Promise.Syntax in
-  let+ ocaml = Ocaml.make t.sandbox in
-  match ocaml with
-  | Ok ocaml -> t.ocaml <- Some ocaml
-  | Error `Ocamlc_missing ->
-    (* we need to put [None] in [t.ocaml] because we don't want [t.ocaml] to be
-       left over from a previous sandbox, which had [ocamlc] *)
-    t.ocaml <- None;
-    show_message `Error "OCaml binaries such as `ocamlc` are missing."
-  | Error (`Unable_to_parse_version v) ->
-    t.ocaml <- None;
-    show_message `Error "Ocaml binary `ocamlc` version could not be parsed: %s"
-      v
+  let+ ocaml_version =
+    let+ r =
+      Sandbox.get_command t.sandbox "ocamlc" [ "--version" ] |> Cmd.output
+    in
+    match r with
+    | Ok v ->
+      Ocaml_version.of_string v
+      |> Result.map_error ~f:(function `Msg _ -> `Unable_to_parse_version v)
+    | Error e ->
+      log_chan ~section:"Ocaml.version_semver" `Warn
+        "Error running `ocamlc --version`: %s" e;
+      Error `Ocamlc_missing
+  in
+  match ocaml_version with
+  | Ok ocaml_version -> t.ocaml_version <- Some ocaml_version
+  | Error e -> (
+    (* [t.ocaml_version <- None] because we don't want [t.ocaml_version] to be
+       left over from a previous sandbox, which successfully set it *)
+    t.ocaml_version <- None;
+    match e with
+    | `Ocamlc_missing ->
+      show_message `Error "OCaml binaries such as `ocamlc` are missing."
+    | `Unable_to_parse_version v ->
+      show_message `Error
+        "Ocaml binary `ocamlc` version could not be parsed: %s" v)
 
 let open_terminal sandbox =
   let terminal = Terminal_sandbox.create sandbox in
