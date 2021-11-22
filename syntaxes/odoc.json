@@ -52,45 +52,45 @@
         },
         {
           "comment": "emphasize text",
-          "begin": "\\{e",
+          "begin": "\\{e\\b",
           "end": "\\}",
           "contentName": "emphasis",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "text in italic",
-          "begin": "\\{i",
+          "begin": "\\{i\\b",
           "end": "\\}",
           "contentName": "emphasis",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "center text",
-          "begin": "\\{C",
+          "begin": "\\{C\\b",
           "end": "\\}",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "left align text",
-          "begin": "\\{L",
+          "begin": "\\{L\\b",
           "end": "\\}",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "right align text",
-          "begin": "\\{R",
+          "begin": "\\{R\\b",
           "end": "\\}",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "unordered list",
-          "begin": "\\{ul",
+          "begin": "\\{ul\\b",
           "end": "\\}",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "ordered list",
-          "begin": "\\{ol",
+          "begin": "\\{ol\\b",
           "end": "\\}",
           "patterns": [{ "include": "#markup" }]
         },
@@ -121,7 +121,7 @@
       },
       {
         "comment": "string in verbatim",
-        "begin": "\\{v",
+        "begin": "\\{v\\b",
         "end": "v\\}",
         "contentName": "string.other.odoc",
         "patterns": [{ "include": "#markup" }]
