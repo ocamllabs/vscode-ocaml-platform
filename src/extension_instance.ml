@@ -130,7 +130,9 @@ end = struct
     in
     match res with
     | Ok () -> ()
-    | Error s -> show_message `Error "Error starting server: %s" s
+    | Error s ->
+      show_message `Error
+        "An error occurred starting the language server `ocamllsp`. %s" s
 end
 
 include Language_server_init
