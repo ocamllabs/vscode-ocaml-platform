@@ -198,7 +198,8 @@ let update_ocaml_info t =
     match r with
     | Ok v ->
       Ocaml_version.of_string v
-      |> Result.map_error ~f:(function `Msg _ -> `Unable_to_parse_version v)
+      |> Result.map_error ~f:(function m ->
+             `Unable_to_parse_version (`Version v, m))
     | Error e ->
       log_chan ~section:"Ocaml.version_semver" `Warn
         "Error running `ocamlc --version`: %s" e;
@@ -211,11 +212,33 @@ let update_ocaml_info t =
        left over from a previous sandbox, which successfully set it *)
     t.ocaml_version <- None;
     match e with
-    | `Ocamlc_missing ->
-      show_message `Error "OCaml binaries such as `ocamlc` are missing."
-    | `Unable_to_parse_version v ->
+    | `Unable_to_parse_version (`Version v, `Msg msg) ->
       show_message `Error
-        "Ocaml binary `ocamlc` version could not be parsed: %s" v)
+        "OCaml bytecode compiler `ocamlc` version could not be parsed. \
+         Version: %s. Error %s"
+        v msg
+    | `Ocamlc_missing ->
+      let (_ : unit Promise.t) =
+        let+ maybe_choice =
+          Window.showErrorMessage
+            ~message:
+              "OCaml bytecode compiler `ocamlc` was not found in the current \
+               sandbox. Do you have OCaml installed in the current sandbox?"
+            ~choices:
+              [ ( "Pick another sandbox"
+                , fun () ->
+                    let (_ : Ojs.t option Promise.t) =
+                      Vscode.Commands.executeCommand
+                        ~command:Extension_consts.Commands.select_sandbox
+                        ~args:[]
+                    in
+                    () )
+              ]
+            ()
+        in
+        Option.iter maybe_choice ~f:(fun f -> f ())
+      in
+      ())
 
 let open_terminal sandbox =
   let terminal = Terminal_sandbox.create sandbox in
