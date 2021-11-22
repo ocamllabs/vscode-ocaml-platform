@@ -77,19 +77,44 @@ let get_version_semver t =
 
 let is_version_up_to_date t ocaml_v =
   let ocamllsp_version = get_version_semver t in
-  match ocamllsp_version with
-  | Ok v -> (
-    match ocaml_v with
-    | _ when Ocaml_version.(ocaml_v < Releases.v4_06_0) ->
-      Error (`Ocaml_version_not_supported ocaml_v)
-    | _ when Ocaml_version.(ocaml_v < Releases.v4_12_0) ->
-      Ok (String.equal v "1.4.1")
-    | _ when Ocaml_version.(ocaml_v < Releases.v4_13_0) ->
-      Ok (String.equal v "1.9.0")
-    | _ when Ocaml_version.(ocaml_v < Releases.v4_14_0) ->
-      Ok (String.equal v "1.9.0~4.13preview")
-    | _ -> Error (`Ocaml_version_not_supported ocaml_v))
-  | Error e -> Error (`Unexpected e)
+  let res =
+    match ocamllsp_version with
+    | Ok v -> (
+      match ocaml_v with
+      | _ when Ocaml_version.(ocaml_v < Releases.v4_06_0) ->
+        Error (`Ocaml_version_not_supported ocaml_v)
+      | _ when Ocaml_version.(ocaml_v < Releases.v4_12_0) ->
+        Ok (String.equal v "1.4.1")
+      | _ when Ocaml_version.(ocaml_v < Releases.v4_13_0) ->
+        Ok (String.equal v "1.9.0")
+      | _ when Ocaml_version.(ocaml_v < Releases.v4_14_0) ->
+        Ok (String.equal v "1.9.0~4.13preview")
+      | _ -> Error (`Ocaml_version_not_supported ocaml_v))
+    | Error e -> Error (`Unexpected e)
+  in
+  Result.map_error res ~f:(fun err ->
+      let msg =
+        match err with
+        | `Ocaml_version_not_supported v ->
+          sprintf
+            "The installed version of OCaml is not supported by `ocamllsp`: \
+             %s. Consider upgrading OCaml version used in the current sandbox."
+            (Ocaml_version.to_string v)
+        | `Unexpected `Language_server_isn't_ocamllsp ->
+          "Using a language server besides `ocamllsp` isn't expected by this \
+           extension. Please, switch to using `ocamllsp` by installing the \
+           package `ocaml-lsp-server` in your current sandbox."
+        | `Unexpected `Missing_serverInfo
+        | `Unexpected `ServerInfo_version_missing ->
+          "The extension expected the server version to be sent by `ocamllsp`. \
+           It is missing. Please, consider upgrading the package \
+           `ocaml-lsp-server`."
+        | `Unexpected `Unable_to_parse_version ->
+          "The extension was unable to parse `ocamllsp` version. That's \
+           strange. Consider filing an issue on the project GitHub with the \
+           version of your `ocamllsp`."
+      in
+      `Msg msg)
 
 let of_initialize_result (t : LanguageClient.InitializeResult.t) =
   let serverInfo = LanguageClient.InitializeResult.serverInfo t in

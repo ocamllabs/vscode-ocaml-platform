@@ -105,27 +105,7 @@ end = struct
             "The installed version of `ocamllsp` is out of date. You may be \
              missing out on cool features or important bug fixes. Consider \
              upgrading the package `ocaml-lsp-server`."
-      | Error (`Ocaml_version_not_supported v) ->
-        show_message `Warn
-          "The installed version of OCaml is not supported by `ocamllsp`: %s. \
-           Consider upgrading OCaml version used in the current sandbox."
-          (Ocaml_version.to_string v)
-      | Error (`Unexpected `Language_server_isn't_ocamllsp) ->
-        show_message `Warn
-          "Using a language server besides `ocamllsp` isn't expected by this \
-           extension. Please, switch to using `ocamllsp` by installing the \
-           package `ocaml-lsp-server` in your current sandbox."
-      | Error (`Unexpected `Missing_serverInfo)
-      | Error (`Unexpected `ServerInfo_version_missing) ->
-        show_message `Warn
-          "The extension expected the server version to be sent by `ocamllsp`. \
-           It is missing. Please, consider upgrading the package \
-           `ocaml-lsp-server`."
-      | Error (`Unexpected `Unable_to_parse_version) ->
-        show_message `Warn
-          "The extension was unable to parse `ocamllsp` version. That's \
-           strange. Consider filing an issue on the project GitHub with the \
-           version of your `ocamllsp`.");
+      | Error (`Msg m) -> show_message `Warn "%s" m);
       Ok ()
     in
     match res with

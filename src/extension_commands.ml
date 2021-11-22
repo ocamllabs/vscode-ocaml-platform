@@ -282,15 +282,8 @@ end = struct
                OCaml version used in this sandbox."
             else
               "Consider upgrading the package `ocaml-lsp-server`."
-          | Error (`Unexpected `Language_server_isn't_ocamllsp)
-          | Error (`Unexpected `Missing_serverInfo)
-          | Error (`Unexpected `ServerInfo_version_missing)
-          | Error (`Unexpected `Unable_to_parse_version)
-          | Error (`Ocaml_version_not_supported (_ : Ocaml_version.t)) ->
-            (* All of the errors are quite rare and should be faced by the user
-               when launching ocaml-lsp not here *)
-            "Something went wrong. The installed `ocamllsp` version seems to \
-             not support this feature."
+          | Error (`Msg m) ->
+            sprintf "There is something wrong with your `ocamllsp`. Error: %s" m
         in
         show_message `Warn
           "The installed version of `ocamllsp` does not support typed holes. %s"
