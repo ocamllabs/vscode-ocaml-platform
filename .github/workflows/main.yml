@@ -161,6 +161,6 @@ jobs:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
           dune-cache: true
 
-      - run: opam depext ocamlformat=$(cat .ocamlformat | grep version | cut -d '=' -f 2) --install
+      - run: opam depext --install ocamlformat=$(awk -F = '/version=/{print $2}' .ocamlformat)
 
       - run: opam exec -- dune build @fmt
