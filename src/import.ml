@@ -165,4 +165,52 @@ module Range = struct
   include Vscode.Range
 end
 
+module Promise = struct
+  include Promise
+
+  module Result = struct
+    include Promise.Result
+
+    let fold ~ok ~error p =
+      let open Promise.Syntax in
+      let+ r = p in
+      match r with
+      | Ok v -> Ok (ok v)
+      | Error e -> Error (error e)
+  end
+end
+
 let sprintf = Printf.sprintf
+
+(** Logs to the extension's output channel *)
+let log_chan ~section kind fmt =
+  let kind_s =
+    match kind with
+    | `Warn -> "warn"
+    | `Info -> "info"
+    | `Error -> "error"
+  in
+  Printf.ksprintf
+    (fun s ->
+      let value = Printf.sprintf "%s: [%s] %s" kind_s section s in
+      let (lazy output) = Output.extension_output_channel in
+      OutputChannel.appendLine output ~value)
+    fmt
+
+module Ocaml_version = struct
+  let ( > ) v1 v2 = Ocaml_version.compare v1 v2 = 1
+
+  let ( < ) v1 v2 = Ocaml_version.compare v1 v2 = -1
+
+  let ( <= ) v1 v2 = Ocaml_version.compare v1 v2 <= 0
+
+  let ( >= ) v1 v2 = Ocaml_version.compare v1 v2 >= 0
+
+  include Ocaml_version
+
+  module Releases = struct
+    let v4_14_0 = of_string_exn "4.14.0"
+
+    include Releases
+  end
+end

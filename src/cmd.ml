@@ -129,10 +129,7 @@ let output ?cwd ?env ?stdin (t : t) =
   if result.exitCode = 0 then
     Ok result.stdout
   else
-    Error
-      (Printf.sprintf
-         "Command failed with %s See output channel for more details"
-         result.stderr)
+    Error (Printf.sprintf "Command failed with error: \n%s" result.stderr)
 
 let equal_spawn s1 s2 =
   Path.equal s1.bin s2.bin && List.equal String.equal s1.args s2.args

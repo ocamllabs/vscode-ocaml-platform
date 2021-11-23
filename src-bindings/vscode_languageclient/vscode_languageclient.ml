@@ -175,7 +175,7 @@ module LanguageClient = struct
       -> Jsonoo.t Promise.t
       [@@js.call]]
 
-  let readyInitializeResult t =
+  let ready_initialize_result t =
     let open Promise.Syntax in
     let+ () = onReady t in
     initializeResult t

@@ -139,7 +139,7 @@ module LanguageClient : sig
 
   val initializeResult : t -> InitializeResult.t
 
-  val readyInitializeResult : t -> InitializeResult.t Promise.t
+  val ready_initialize_result : t -> InitializeResult.t Promise.t
 
   val sendRequest :
        t

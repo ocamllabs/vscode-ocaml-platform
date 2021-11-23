@@ -4,7 +4,8 @@ type t
 
 val of_initialize_result : LanguageClient.InitializeResult.t -> t
 
-val has_interface_specific_lang_id : t -> bool
+val is_version_up_to_date :
+  t -> Ocaml_version.t -> (bool, [ `Msg of string ]) result
 
 val can_handle_switch_impl_intf : t -> bool
 

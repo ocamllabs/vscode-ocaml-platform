@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Warn if the extension sees not the latest OCaml-LSP version compatible with the OCaml 
+  distribution installed in the current sandbox.
+
 - Highlighted the UNREACHABLE element in cram .t files (#754)
 
 - Activate extension on cram files, or when the workspace contains

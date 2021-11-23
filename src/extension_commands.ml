@@ -48,6 +48,7 @@ let _select_sandbox =
       | Some new_sandbox ->
         Extension_instance.set_sandbox instance new_sandbox;
         let* () = Sandbox.save_to_settings new_sandbox in
+        let* () = Extension_instance.update_ocaml_info instance in
         Extension_instance.start_language_server instance
     in
     ()
@@ -267,9 +268,26 @@ end = struct
       | None -> show_message `Warn "ocamllsp is not running."
       | Some (_, ocaml_lsp)
         when not (Ocaml_lsp.can_handle_typed_holes ocaml_lsp) ->
+        let suggestion =
+          match
+            Ocaml_lsp.is_version_up_to_date ocaml_lsp
+              (Extension_instance.ocaml_version_exn instance)
+          with
+          | Ok is_up_to_date ->
+            if is_up_to_date then
+              (* ocamllsp is "up-to-date", so user needs newer ocaml to get
+                 newer ocamllsp, which supports typed holes *)
+              "The extension requires a newer version of `ocamllsp`, which \
+               needs a new version of OCaml. Please, consider upgrading the \
+               OCaml version used in this sandbox."
+            else
+              "Consider upgrading the package `ocaml-lsp-server`."
+          | Error (`Msg m) ->
+            sprintf "There is something wrong with your `ocamllsp`. Error: %s" m
+        in
         show_message `Warn
-          "The installed version of ocamllsp does not fully support typed \
-           holes. Consider updating ocamllsp."
+          "The installed version of `ocamllsp` does not support typed holes. %s"
+          suggestion
       | Some (client, _ocaml_lsp) ->
         let doc = TextEditor.document text_editor in
         let uri = TextDocument.uri doc in
