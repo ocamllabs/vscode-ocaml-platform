@@ -37,8 +37,7 @@ build-release:
 		--outdir=dist \
 		--platform=node \
 		--target=es6 \
-		--minify-whitespace \
-		--minify-syntax \
+		--minify \
 		--sourcemap \
 		--sources-content=false
 
