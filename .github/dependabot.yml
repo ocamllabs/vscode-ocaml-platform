@@ -7,5 +7,5 @@ updates:
     ignore:
       - dependency-name: ovsx
     labels:
-      - "no changelog needed"
+      - "no changelog"
       - dependencies
