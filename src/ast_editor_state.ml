@@ -1,12 +1,16 @@
 open Import
 
+type ast_mode =
+  | Original_ast
+  | Preprocessed_ast
+
 type t =
   { mutable webview_map : (string, WebView.t, String.comparator_witness) Map.t
         (** The webview store that maps string value of Uri.t of the document to
             the related webview. *)
-  ; mutable original_mode : bool
-        (** Indicates current mode inside AST explorer (true = Original, false =
-            Prerocessed) *)
+  ; mutable current_ast_mode : ast_mode
+        (** Indicates current AST mode inside AST explorer: original or
+            preprocessed *)
   ; mutable hover_disposable : Disposable.t option
         (** Contains Some value when hover mode is enabled, None otherwise *)
   ; mutable dirty_original_doc_set : (string, String.comparator_witness) Set.t
@@ -21,13 +25,11 @@ type t =
 
 let make () =
   let webview_map = Map.empty (module String) in
-  let original_mode = true in
-  let hover_disposable = None in
   let dirty_original_doc_set = Set.empty (module String) in
   let origin_to_pp_doc_map = Map.empty (module String) in
   { webview_map
-  ; original_mode
-  ; hover_disposable
+  ; current_ast_mode = Original_ast
+  ; hover_disposable = None
   ; dirty_original_doc_set
   ; origin_to_pp_doc_map
   }
@@ -43,9 +45,9 @@ let find_original_doc_by_pp_uri t uri =
   | exception Found k -> Some k
 
 let find_webview_by_doc t doc_uri =
-  if t.original_mode then
-    Map.find t.webview_map (Uri.toString doc_uri ())
-  else
+  match t.current_ast_mode with
+  | Original_ast -> Map.find t.webview_map (Uri.toString doc_uri ())
+  | Preprocessed_ast ->
     let open Option.O in
     let* key = find_original_doc_by_pp_uri t doc_uri in
     Map.find t.webview_map key
@@ -56,9 +58,9 @@ let associate_origin_and_pp t ~origin_uri ~pp_doc_uri =
   t.origin_to_pp_doc_map <-
     Map.set t.origin_to_pp_doc_map ~key:origin_uri ~data:pp_doc_uri
 
-let get_original_mode t = t.original_mode
+let get_current_ast_mode t = t.current_ast_mode
 
-let set_original_mode t value = t.original_mode <- value
+let set_current_ast_mode t v = t.current_ast_mode <- v
 
 let get_hover_disposable t = t.hover_disposable
 

@@ -5,6 +5,10 @@ open Import
 
 type t
 
+type ast_mode =
+  | Original_ast
+  | Preprocessed_ast
+
 val make : unit -> t
 
 val find_original_doc_by_pp_uri : t -> Uri.t -> string option
@@ -13,9 +17,9 @@ val find_webview_by_doc : t -> Uri.t -> WebView.t option
 
 val associate_origin_and_pp : t -> origin_uri:Uri.t -> pp_doc_uri:Uri.t -> unit
 
-val get_original_mode : t -> bool
+val get_current_ast_mode : t -> ast_mode
 
-val set_original_mode : t -> bool -> unit
+val set_current_ast_mode : t -> ast_mode -> unit
 
 val get_hover_disposable : t -> Disposable.t option
 

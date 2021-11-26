@@ -96,8 +96,7 @@ let fetch_pp_code ~document =
   let path = Pp_path.get_pp_path ~document in
   Ppx_tools.get_reparsed_code_from_pp_file ~path
 
-let transform_to_ast instance ~(document : TextDocument.t)
-    ~(webview : WebView.t) =
+let transform_to_ast instance ~document ~webview =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   let module Dumpast = Ppx_tools.Dumpast in
   let make_value result =
@@ -105,7 +104,8 @@ let transform_to_ast instance ~(document : TextDocument.t)
     | Ok ast -> ast
     | Error error_msg -> raise (User_error error_msg)
   in
-  if Ast_editor_state.get_original_mode ast_editor_state then
+  match Ast_editor_state.get_current_ast_mode ast_editor_state with
+  | Ast_editor_state.Original_ast ->
     let origin_json =
       let text = TextDocument.getText document () in
       match Pp_path.get_kind ~document with
@@ -114,7 +114,7 @@ let transform_to_ast instance ~(document : TextDocument.t)
       | Unknown -> raise (User_error "Unknown file extension")
     in
     send_msg "ast" (Jsonoo.t_to_js origin_json) ~webview
-  else
+  | Preprocessed_ast ->
     let pp_value =
       let path = Pp_path.get_pp_path ~document in
       match Ppx_tools.get_preprocessed_ast path with
@@ -170,7 +170,11 @@ let onDidReceiveMessage_listener instance webview document msg =
 
   match int_prop "selectedOutput" with
   | Some i ->
-    Ast_editor_state.set_original_mode ast_editor_state (i = 0);
+    Ast_editor_state.set_current_ast_mode ast_editor_state
+      (if i = 0 then
+        Ast_editor_state.Original_ast
+      else
+        Preprocessed_ast);
     update_ast instance ~document ~webview
   | None -> (
     match Option.both (int_prop "begin") (int_prop "end") with
@@ -195,7 +199,9 @@ let onDidReceiveMessage_listener instance webview document msg =
                (Ast_editor_state.entry_exists ast_editor_state
                   ~origin_doc:(TextDocument.uri document))
                  ~pp_doc:(TextDocument.uri visible_doc)
-               && not (Ast_editor_state.get_original_mode ast_editor_state)
+               && not
+                    (Poly.equal Ast_editor_state.Original_ast
+                       (Ast_editor_state.get_current_ast_mode ast_editor_state))
              then
                match Option.both (int_prop "r_begin") (int_prop "r_end") with
                | None -> ()
@@ -257,7 +263,8 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
     in
     WebviewPanel.onDidDispose webviewPanel
       ~listener:(fun () ->
-        Ast_editor_state.set_original_mode ast_editor_state true;
+        Ast_editor_state.set_current_ast_mode ast_editor_state
+          Ast_editor_state.Original_ast;
         Ast_editor_state.remove_webview ast_editor_state
           (TextDocument.uri document);
         Disposable.dispose onDidReceiveMessage_disposable;
