@@ -2,22 +2,22 @@ open Import
 module Uri = Vscode.Uri
 
 type t =
-  { (* The webview store that maps string value of Uri.t of the document to the
-       related webview. *)
-    mutable webview_map : (string, WebView.t, String.comparator_witness) Map.t
-        (* Indicates current mode inside AST explorer (true = Original, false =
-           Prerocessed) *)
+  { mutable webview_map : (string, WebView.t, String.comparator_witness) Map.t
+        (** The webview store that maps string value of Uri.t of the document to
+            the related webview. *)
   ; mutable original_mode : bool
-        (* Contains Some value when hover mode is enabled, None otherwise *)
+        (** Indicates current mode inside AST explorer (true = Original, false =
+            Prerocessed) *)
   ; mutable hover_disposable : Disposable.t option
-        (* A set containing original documents (as opposed to Preprocessed
-           Document) that have been changed since last Preprocessed Document
-           opening (or reload) *)
+        (** Contains Some value when hover mode is enabled, None otherwise *)
   ; mutable dirty_original_doc_set : (string, String.comparator_witness) Set.t
-        (* Mapping beween the original and Preprocessed Document used to
-           simultaneously communicate with a common webview. *)
+        (** A set containing original documents (as opposed to Preprocessed
+            Document) that have been changed since last Preprocessed Document
+            opening (or reload) *)
   ; mutable origin_to_pp_doc_map :
       (string, string, String.comparator_witness) Map.t
+        (** Mapping beween the original and Preprocessed Document used to
+            simultaneously communicate with a common webview. *)
   }
 
 let make () =
