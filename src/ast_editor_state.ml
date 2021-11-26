@@ -1,5 +1,4 @@
 open Import
-module Uri = Vscode.Uri
 
 type t =
   { mutable webview_map : (string, WebView.t, String.comparator_witness) Map.t
