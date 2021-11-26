@@ -34,15 +34,14 @@ let make () =
   }
 
 let find_original_doc_by_pp_uri t uri =
-  let r =
-    Map.filter
-      ~f:(fun data -> String.equal (Uri.toString uri ()) data)
-      t.origin_to_pp_doc_map
-    |> Map.keys
-  in
-  match r with
-  | k :: _ -> Some k
-  | _ -> None
+  let uri_s = Uri.toString uri () in
+  let exception Found of string in
+  match
+    Map.iteri t.origin_to_pp_doc_map ~f:(fun ~key ~data ->
+        if String.equal uri_s data then raise (Found key))
+  with
+  | () -> None
+  | exception Found k -> Some k
 
 let find_webview_by_doc t doc_uri =
   if t.original_mode then
