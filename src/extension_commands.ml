@@ -252,6 +252,28 @@ end = struct
       failwith
         "Jump to Previous/Next Hole: incorrect params passed to the command"
 
+  let ocaml_lsp_doesn't_support_holes instance ocaml_lsp =
+    let suggestion =
+      match
+        Ocaml_lsp.is_version_up_to_date ocaml_lsp
+          (Extension_instance.ocaml_version_exn instance)
+      with
+      | Ok is_up_to_date ->
+        if is_up_to_date then
+          (* ocamllsp is "up-to-date", so user needs newer ocaml to get newer
+             ocamllsp, which supports typed holes *)
+          "The extension requires a newer version of `ocamllsp`, which needs a \
+           new version of OCaml. Please, consider upgrading the OCaml version \
+           used in this sandbox."
+        else
+          "Consider upgrading the package `ocaml-lsp-server`."
+      | Error (`Msg m) ->
+        sprintf "There is something wrong with your `ocamllsp`. Error: %s" m
+    in
+    show_message `Warn
+      "The installed version of `ocamllsp` does not support typed holes. %s"
+      suggestion
+
   let jump_to_hole pick_hole (instance : Extension_instance.t) ~args =
     (* this command is available (in the command palette) only when a file is
        open *)
@@ -268,26 +290,7 @@ end = struct
       | None -> show_message `Warn "ocamllsp is not running."
       | Some (_, ocaml_lsp)
         when not (Ocaml_lsp.can_handle_typed_holes ocaml_lsp) ->
-        let suggestion =
-          match
-            Ocaml_lsp.is_version_up_to_date ocaml_lsp
-              (Extension_instance.ocaml_version_exn instance)
-          with
-          | Ok is_up_to_date ->
-            if is_up_to_date then
-              (* ocamllsp is "up-to-date", so user needs newer ocaml to get
-                 newer ocamllsp, which supports typed holes *)
-              "The extension requires a newer version of `ocamllsp`, which \
-               needs a new version of OCaml. Please, consider upgrading the \
-               OCaml version used in this sandbox."
-            else
-              "Consider upgrading the package `ocaml-lsp-server`."
-          | Error (`Msg m) ->
-            sprintf "There is something wrong with your `ocamllsp`. Error: %s" m
-        in
-        show_message `Warn
-          "The installed version of `ocamllsp` does not support typed holes. %s"
-          suggestion
+        ocaml_lsp_doesn't_support_holes instance ocaml_lsp
       | Some (client, _ocaml_lsp) ->
         let doc = TextEditor.document text_editor in
         let uri = TextDocument.uri doc in
