@@ -191,10 +191,38 @@ end = struct
     TextEditor.revealRange text_editor ~range:hole
       ~revealType:TextEditorRevealType.InCenterIfOutsideViewport ()
 
+  let jump_to_hole jump (instance : Extension_instance.t) ~args =
+    (* this command is available (in the command palette) only when a file is
+       open *)
+    match Window.activeTextEditor () with
+    | None ->
+      Extension_consts.Command_errors.text_editor_must_be_active
+        "Jump to Previous/Next Typed Hole"
+        ~expl:"The command looks for holes in an open file."
+      |> show_message `Error "%s"
+    | Some text_editor -> (
+      let open Promise.Syntax in
+      match Extension_instance.lsp_client instance with
+      | None -> show_message `Warn "ocamllsp is not running."
+      | Some (_, ocaml_lsp)
+        when not (Ocaml_lsp.can_handle_typed_holes ocaml_lsp) ->
+        ocaml_lsp_doesn't_support_holes instance ocaml_lsp
+      | Some (client, _ocaml_lsp) ->
+        let doc = TextEditor.document text_editor in
+        let uri = TextDocument.uri doc in
+        let (_ : unit Promise.t) =
+          let+ holes =
+            Custom_requests.Typed_holes.send_request client ~for_doc:uri
+          in
+          jump ~cmd_args:args text_editor
+            ~sorted_holes:(List.sort holes ~compare:Range.compare)
+        in
+        ())
+
   module Prev_hole = struct
+    (** iterate through all hole ranges and pick the one that has start position
+        after the current cursor position *)
     let pick_prev_hole current_pos ~sorted_non_empty_holes_list:holes =
-      (* iterate through all hole ranges and pick the one that has start
-         position after the current cursor position *)
       match holes with
       | [] -> assert false
       | [ r ] -> r
@@ -227,44 +255,17 @@ end = struct
           in
           find_prev_hole fst_range rest
 
-    let jump_to_hole (instance : Extension_instance.t) ~args:_ =
-      (* this command is available (in the command palette) only when a file is
-         open *)
-      match Window.activeTextEditor () with
-      | None ->
-        Extension_consts.Command_errors.text_editor_must_be_active
-          "Jump to Previous/Next Typed Hole"
-          ~expl:"The command looks for holes in an open file."
-        |> show_message `Error "%s"
-      | Some text_editor -> (
-        let open Promise.Syntax in
-        match Extension_instance.lsp_client instance with
-        | None -> show_message `Warn "ocamllsp is not running."
-        | Some (_, ocaml_lsp)
-          when not (Ocaml_lsp.can_handle_typed_holes ocaml_lsp) ->
-          ocaml_lsp_doesn't_support_holes instance ocaml_lsp
-        | Some (client, _ocaml_lsp) ->
-          let doc = TextEditor.document text_editor in
-          let uri = TextDocument.uri doc in
-          let (_ : unit Promise.t) =
-            let+ holes =
-              Custom_requests.Typed_holes.send_request client ~for_doc:uri
-            in
-            match holes with
-            | [] -> show_message `Info "%s" hole_not_found_msg
-            | holes ->
-              let current_pos = current_cursor_pos text_editor in
-              let sorted_non_empty_holes_list =
-                List.sort holes ~compare:Range.compare
-              in
-              let hole =
-                pick_prev_hole current_pos ~sorted_non_empty_holes_list
-              in
-              select_hole_range text_editor hole
-          in
-          ())
+    let jump ~cmd_args:_ text_editor ~sorted_holes =
+      match sorted_holes with
+      | [] -> show_message `Info "%s" hole_not_found_msg
+      | sorted_non_empty_holes_list ->
+        let current_pos = current_cursor_pos text_editor in
+        let hole = pick_prev_hole current_pos ~sorted_non_empty_holes_list in
+        select_hole_range text_editor hole
   end
 
+  (** [Next_hole] has a separate module because this command takes arguments,
+      while [Prev_hole] doesn't. *)
   module Next_hole = struct
     let pick_next_hole current_pos ~sorted_non_empty_holes_list:holes =
       (* we want to find such a range that starts after the current position *)
@@ -301,7 +302,7 @@ end = struct
         passed as the {i first} argument to the command because we want explicit
         names for those configurations, so object keys are useful here. *)
     type arguments =
-      { in_range : Range.t option  (** [inRange]: <Range> *)
+      { in_range : Range.t option  (** [inRange]: <Range> (optional) *)
       ; should_notify_if_no_hole : bool
             (** [shouldNotifyIfNoHole]: <bool> (default = true) *)
       }
@@ -323,61 +324,31 @@ end = struct
         failwith
           "Jump to Previous/Next Hole: incorrect params passed to the command"
 
-    let jump_to_hole (instance : Extension_instance.t) ~args =
-      (* this command is available (in the command palette) only when a file is
-         open *)
-      let hole_not_found_msg = "No typed hole was found in this file" in
-      match Window.activeTextEditor () with
-      | None ->
-        Extension_consts.Command_errors.text_editor_must_be_active
-          "Jump to Previous/Next Typed Hole"
-          ~expl:"The command looks for holes in an open file."
-        |> show_message `Error "%s"
-      | Some text_editor -> (
-        let open Promise.Syntax in
-        match Extension_instance.lsp_client instance with
-        | None -> show_message `Warn "ocamllsp is not running."
-        | Some (_, ocaml_lsp)
-          when not (Ocaml_lsp.can_handle_typed_holes ocaml_lsp) ->
-          ocaml_lsp_doesn't_support_holes instance ocaml_lsp
-        | Some (client, _ocaml_lsp) ->
-          let doc = TextEditor.document text_editor in
-          let uri = TextDocument.uri doc in
-          let (_ : unit Promise.t) =
-            let+ holes =
-              Custom_requests.Typed_holes.send_request client ~for_doc:uri
-            in
-            let { in_range; should_notify_if_no_hole } = parse_arguments args in
-            match holes with
-            | [] ->
-              if should_notify_if_no_hole then
-                show_message `Info "%s" hole_not_found_msg
-            | holes -> (
-              let start_pos =
-                Option.map in_range ~f:Range.start
-                |> Option.value_lazy ~default:(fun () ->
-                       current_cursor_pos text_editor)
-              in
-              let sorted_non_empty_holes_list =
-                List.sort holes ~compare:Range.compare
-              in
-              let hole =
-                pick_next_hole start_pos ~sorted_non_empty_holes_list
-              in
-              match in_range with
-              | None -> select_hole_range text_editor hole
-              | Some in_range ->
-                if Range.contains in_range ~positionOrRange:(`Range hole) then
-                  select_hole_range text_editor hole)
-          in
-          ())
+    let jump ~cmd_args text_editor ~sorted_holes =
+      let { in_range; should_notify_if_no_hole } = parse_arguments cmd_args in
+      match sorted_holes with
+      | [] ->
+        if should_notify_if_no_hole then
+          show_message `Info "%s" hole_not_found_msg
+      | sorted_non_empty_holes_list -> (
+        let start_pos =
+          Option.map in_range ~f:Range.start
+          |> Option.value_lazy ~default:(fun () ->
+                 current_cursor_pos text_editor)
+        in
+        let hole = pick_next_hole start_pos ~sorted_non_empty_holes_list in
+        match in_range with
+        | None -> select_hole_range text_editor hole
+        | Some in_range ->
+          if Range.contains in_range ~positionOrRange:(`Range hole) then
+            select_hole_range text_editor hole)
   end
 
   let _jump_to_next_hole =
-    command Extension_consts.Commands.next_hole Next_hole.jump_to_hole
+    command Extension_consts.Commands.next_hole (jump_to_hole Next_hole.jump)
 
   let _jump_to_prev_hole =
-    command Extension_consts.Commands.prev_hole Prev_hole.jump_to_hole
+    command Extension_consts.Commands.prev_hole (jump_to_hole Prev_hole.jump)
 end
 
 let register extension instance = function
