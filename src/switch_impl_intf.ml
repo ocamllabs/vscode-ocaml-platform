@@ -1,21 +1,5 @@
 open Import
 
-let send_switch_impl_intf_request client uri : string array Promise.t =
-  let data = Jsonoo.Encode.string uri in
-  let open Promise.Syntax in
-  let+ response =
-    LanguageClient.sendRequest client ~meth:"ocamllsp/switchImplIntf" ~data ()
-  in
-  Jsonoo.Decode.(array string) response
-
-let send_infer_intf_request client uri : string Promise.t =
-  let data = Jsonoo.Encode.string uri in
-  let open Promise.Syntax in
-  let+ response =
-    LanguageClient.sendRequest client ~meth:"ocamllsp/inferIntf" ~data ()
-  in
-  Jsonoo.Decode.string response
-
 let insert_inferred_intf ~source_uri client text_editor =
   let open Promise.Syntax in
   (* XXX this seems sketchy. shouldn't it work for reason as well? *)
@@ -23,7 +7,9 @@ let insert_inferred_intf ~source_uri client text_editor =
   | false -> Promise.return ()
   | true ->
     (* If the source file was a .ml, infer the interface *)
-    let* inferred_intf = send_infer_intf_request client source_uri in
+    let* inferred_intf =
+      Custom_requests.send_request client Custom_requests.inferIntf source_uri
+    in
     let+ edit_applied =
       TextEditor.edit text_editor
         ~callback:(fun ~editBuilder ->
@@ -48,7 +34,10 @@ let request_switch client document =
     else
       Promise.return ()
   in
-  let* arr = send_switch_impl_intf_request client source_uri in
+  let* arr =
+    Custom_requests.send_request client Custom_requests.switchImplIntf
+      source_uri
+  in
   match Array.to_list arr with
   | [] ->
     (* 'ocamllsp/switchImplIntf' command's response array cannot be empty *)
