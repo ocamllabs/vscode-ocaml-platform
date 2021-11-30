@@ -1,22 +1,35 @@
 open Import
 
+type ('params, 'response) custom_request =
+  { meth : string
+  ; encode_params : 'params -> Jsonoo.t
+  ; decode_response : Jsonoo.t -> 'response
+  }
+
+let send_request client req params =
+  let data = req.encode_params params in
+  let open Promise.Syntax in
+  let+ response = LanguageClient.sendRequest client ~meth:req.meth ~data () in
+  req.decode_response response
+
 let ocamllsp_prefixed s = "ocamllsp/" ^ s
 
-module Typed_holes : sig
-  (** [send_request client ~for_doc] will fetch ranges of holes in the file at
-      the URI [for_doc] *)
-  val send_request : LanguageClient.t -> for_doc:Uri.t -> Range.t list Promise.t
-end = struct
-  let meth = ocamllsp_prefixed "typedHoles"
+let switchImplIntf =
+  { meth = ocamllsp_prefixed "switchImplIntf"
+  ; encode_params = Jsonoo.Encode.string
+  ; decode_response = Jsonoo.Decode.(array string)
+  }
 
-  let encode_params uri =
-    Jsonoo.Encode.(object_ [ ("uri", string @@ Uri.toString uri ()) ])
+let inferIntf =
+  { meth = ocamllsp_prefixed "inferIntf"
+  ; encode_params = Jsonoo.Encode.string
+  ; decode_response = Jsonoo.Decode.string
+  }
 
-  let decode_response json = Jsonoo.Decode.list Range.t_of_json json
-
-  let send_request client ~for_doc:uri =
-    let data = encode_params uri in
-    let open Promise.Syntax in
-    let+ response = LanguageClient.sendRequest client ~meth ~data () in
-    decode_response response
-end
+let typedHoles =
+  { meth = ocamllsp_prefixed "typedHoles"
+  ; encode_params =
+      (fun uri ->
+        Jsonoo.Encode.(object_ [ ("uri", string @@ Uri.toString uri ()) ]))
+  ; decode_response = Jsonoo.Decode.list Range.t_of_json
+  }

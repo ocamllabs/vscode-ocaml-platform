@@ -293,7 +293,7 @@ end = struct
         let uri = TextDocument.uri doc in
         let (_ : unit Promise.t) =
           let+ holes =
-            Custom_requests.Typed_holes.send_request client ~for_doc:uri
+            Custom_requests.send_request client Custom_requests.typedHoles uri
           in
           let { current_position; notify_if_no_hole } = parse_arguments args in
           match holes with
