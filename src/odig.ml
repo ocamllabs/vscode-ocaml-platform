@@ -6,7 +6,7 @@ type of_opam_error = Odig_not_installed
 
 let of_opam (opam, switch) =
   let open Promise.Syntax in
-  let+ is_installed = Opam.has_package opam switch "odig" in
+  let+ is_installed = Opam.has_package opam switch ~package_name:"odig" in
   if is_installed then
     Ok (opam, switch)
   else
@@ -32,14 +32,14 @@ let html_dir t =
   let+ cache_dir = cache_dir t in
   Path.(cache_dir / "/html/")
 
-let odoc_exec t name =
+let odoc_exec t ~package_name =
   let open Promise.Syntax in
-  let* ouput = cmd_ouput t [ "odig"; "odoc"; name ] in
+  let* ouput = cmd_ouput t [ "odig"; "odoc"; package_name ] in
   let+ result =
     match ouput with
     | Ok _ as ok ->
       let* html_dir = html_dir t in
-      let package_html_dir = Path.to_string html_dir ^ name in
+      let package_html_dir = Path.to_string html_dir ^ package_name in
       let+ dir_exists = Fs.exists package_html_dir in
       if dir_exists then
         ok
@@ -53,7 +53,7 @@ let odoc_exec t name =
   result
   |> Result.map_error ~f:(fun error ->
          let () =
-           log "Failed to generate documentation for package %s. Error: %s" name
-             error
+           log "Failed to generate documentation for package %s. Error: %s"
+             package_name error
          in
          error)

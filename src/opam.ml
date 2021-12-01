@@ -306,7 +306,7 @@ let package_remove t switch packages =
   let names = List.map ~f:Package.name packages in
   remove t switch names
 
-let has_package t switch package_name =
+let has_package t switch ~package_name =
   let open Promise.Syntax in
   let+ packages = packages t switch in
   match packages with

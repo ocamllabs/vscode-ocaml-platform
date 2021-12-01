@@ -105,4 +105,4 @@ val exec : t -> Switch.t -> args:string list -> Cmd.t
 val equal : t -> t -> bool
 
 (** Check that a package is installed in the given switch. *)
-val has_package : t -> Switch.t -> string -> bool Promise.t
+val has_package : t -> Switch.t -> package_name:string -> bool Promise.t

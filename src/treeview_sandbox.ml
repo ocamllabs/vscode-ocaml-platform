@@ -113,14 +113,18 @@ module Command = struct
             | Ok odig -> (
               let arg = List.hd_exn args in
               let dep = Dependency.t_of_js arg in
-              let name = Sandbox.Package.name dep in
+              let package_name = Sandbox.Package.name dep in
               let options =
                 ProgressOptions.create
                   ~location:(`ProgressLocation Notification)
-                  ~title:(Printf.sprintf "Generating documentation for %s" name)
+                  ~title:
+                    (Printf.sprintf "Generating documentation for %s"
+                       package_name)
                   ~cancellable:false ()
               in
-              let task ~progress:_ ~token:_ = Odig.odoc_exec odig name in
+              let task ~progress:_ ~token:_ =
+                Odig.odoc_exec odig ~package_name
+              in
               let* result =
                 Vscode.Window.withProgress
                   (module Interop.Js.Result
@@ -134,7 +138,8 @@ module Command = struct
                   Window.showErrorMessage
                     ~message:
                       (Printf.sprintf
-                         "Error while generating documentation for %s" name)
+                         "Error while generating documentation for %s"
+                         package_name)
                     ()
                 in
                 Promise.resolve ()
@@ -165,7 +170,7 @@ module Command = struct
                     ~args:
                       [ Ojs.string_to_js
                           (Printf.sprintf "http://localhost:%i/%s/index.html"
-                             port name)
+                             port package_name)
                       ]
                 in
                 ()))
