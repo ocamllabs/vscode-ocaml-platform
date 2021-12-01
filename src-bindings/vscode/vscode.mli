@@ -1106,8 +1106,6 @@ end
 
 module Extensions : sig
   val getExtension : string -> Extension.t or_undefined
-
-  val is_extension_installed : string -> bool
 end
 
 module TerminalExitStatus : sig
