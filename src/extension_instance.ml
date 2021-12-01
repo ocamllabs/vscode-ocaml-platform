@@ -7,6 +7,7 @@ type t =
         (** assumption: it must be set before initializing the language server;
             the lang server initialization needs the ocaml version *)
   ; mutable lsp_client : (LanguageClient.t * Ocaml_lsp.t) option
+  ; mutable documentation_server : Polka.t option
   ; sandbox_info : StatusBarItem.t
   ; ast_editor_state : Ast_editor_state.t
   }
@@ -17,6 +18,8 @@ let language_client t = Option.map ~f:fst t.lsp_client
 
 let ocaml_lsp t = Option.map ~f:snd t.lsp_client
 
+let documentation_server t = t.documentation_server
+
 let lsp_client t = t.lsp_client
 
 let ocaml_version_exn t = Option.value_exn t.ocaml_version
@@ -25,6 +28,16 @@ let stop_server t =
   Option.iter t.lsp_client ~f:(fun (client, _) ->
       t.lsp_client <- None;
       LanguageClient.stop client)
+
+let stop_documentation_server t =
+  Option.iter t.documentation_server ~f:(fun polka ->
+      t.documentation_server <- None;
+      let server = Polka.server polka in
+      let (_ : Polka.Server.t) = Polka.Server.close server in
+      ())
+
+let set_documentation_server t documentation_server =
+  t.documentation_server <- Some documentation_server
 
 module Language_server_init : sig
   val start_language_server : t -> unit Promise.t
@@ -160,6 +173,7 @@ let make () =
   ; repl = None
   ; ocaml_version = None
   ; ast_editor_state
+  ; documentation_server = None
   }
 
 let set_sandbox t new_sandbox =
@@ -240,4 +254,5 @@ let ast_editor_state t = t.ast_editor_state
 let disposable t =
   Disposable.make ~dispose:(fun () ->
       StatusBarItem.dispose t.sandbox_info;
-      stop_server t)
+      stop_server t;
+      stop_documentation_server t)
