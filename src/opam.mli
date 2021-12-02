@@ -3,8 +3,12 @@
     The functions in this module either use the result of opam commands, or use
     the filesystem to get the state of opam configurations. *)
 
+type t
+
 (** An Opam switch *)
 module Switch : sig
+  type opam := t
+
   type t =
     | Local of Path.t
     | Named of string
@@ -16,6 +20,8 @@ module Switch : sig
   (** {4 Properties} *)
 
   val name : t -> string
+
+  val path : opam -> t -> Path.t
 
   (** {4 Utilities} *)
 
@@ -41,8 +47,6 @@ module Package : sig
   val dependencies : t -> (t list, string) result Promise.t
 end
 
-type t
-
 val make : ?root:Path.t -> unit -> t option Promise.t
 
 (** Install new packages in a switch *)
@@ -56,8 +60,6 @@ val upgrade : t -> Switch.t -> Cmd.t
 
 (* Remove a list of packages from a switch *)
 val remove : t -> Switch.t -> string list -> Cmd.t
-
-val path : t -> Switch.t -> Path.t
 
 (* Initialize a new Opam environment. *)
 val init : t -> Cmd.t

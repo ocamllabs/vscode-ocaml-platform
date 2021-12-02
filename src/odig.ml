@@ -18,7 +18,9 @@ let cmd_ouput (opam, switch) args =
 
 let cache_dir t =
   let opam, switch = t in
-  let default_cache_dir = Path.(Opam.path opam switch / "/var/cache/odig/") in
+  let default_cache_dir =
+    Path.(Opam.Switch.path opam switch / "/var/cache/odig/")
+  in
   let open Promise.Syntax in
   let+ cache_dir = cmd_ouput t [ "odig"; "cache"; "path" ] in
   match cache_dir with

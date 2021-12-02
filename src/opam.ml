@@ -270,11 +270,6 @@ let upgrade t switch = spawn t [ "upgrade"; switch_arg switch; "-y" ]
 let remove t switch packages =
   spawn t ("remove" :: switch_arg switch :: "-y" :: packages)
 
-let path (opam : t) (switch : Switch.t) =
-  match switch with
-  | Local p -> Path.(p / "_opam")
-  | Named n -> Path.(opam.root / n)
-
 let switch_compiler t switch =
   let open Promise.Syntax in
   let+ switch_state = Switch_state.of_switch t switch in
