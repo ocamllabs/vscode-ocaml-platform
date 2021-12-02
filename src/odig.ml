@@ -2,15 +2,15 @@ open Import
 
 type t = Opam.t * Opam.Switch.t
 
-type of_opam_error = Odig_not_installed
-
 let of_opam (opam, switch) =
   let open Promise.Syntax in
   let+ is_installed = Opam.has_package opam switch ~package_name:"odig" in
   if is_installed then
     Ok (opam, switch)
   else
-    Error Odig_not_installed
+    Error
+      "\"OCaml: the package \"odig\" must be installed to generate \
+       documentation."
 
 let cmd_ouput (opam, switch) args =
   let cmd = Opam.exec opam switch ~args in

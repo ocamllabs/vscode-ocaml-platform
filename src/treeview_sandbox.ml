@@ -99,15 +99,9 @@ module Command = struct
           | Sandbox.Opam (opam, switch) -> (
             let* odig = Odig.of_opam (opam, switch) in
             match odig with
-            | Error e ->
-              let message =
-                match e with
-                | Odig.Odig_not_installed ->
-                  "\"OCaml: Generate Documentation\": the package \"odig\" \
-                   must be installed to generate documentation."
-              in
+            | Error error ->
               let (_ : 'a option Promise.t) =
-                Window.showErrorMessage ~message ()
+                Window.showErrorMessage ~message:error ()
               in
               Promise.resolve ()
             | Ok odig -> (
