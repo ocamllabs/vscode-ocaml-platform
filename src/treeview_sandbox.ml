@@ -139,16 +139,26 @@ module Command = struct
                 in
                 Promise.resolve ()
               | Ok _ ->
-                let+ html_dir = Odig.html_dir odig in
-                let port = 4200 in
-                let serve =
-                  Polka.create ()
-                  |> Polka.use [ Polka.Sirv.serve (html_dir |> Path.to_string) ]
-                  |> Polka.listen port
+                let documentation_server =
+                  Extension_instance.documentation_server instance
                 in
-                let (polka : Polka.t) = serve () in
-                let () =
-                  Extension_instance.set_documentation_server instance polka
+                let port = 4200 in
+                let+ () =
+                  match documentation_server with
+                  | Some _ -> Promise.resolve ()
+                  | None ->
+                    let+ html_dir = Odig.html_dir odig in
+                    let serve =
+                      Polka.create ()
+                      |> Polka.use
+                           [ Polka.Sirv.serve (html_dir |> Path.to_string) ]
+                      |> Polka.listen port
+                    in
+                    let (polka : Polka.t) = serve () in
+                    let () =
+                      Extension_instance.set_documentation_server instance polka
+                    in
+                    ()
                 in
                 let (_ : Ojs.t option Promise.t) =
                   Vscode.Commands.executeCommand ~command:"simpleBrowser.show"
