@@ -89,7 +89,7 @@ module Command = struct
           | Sandbox.Global
           | Sandbox.Custom _ ->
             let message =
-              "\"OCaml: Generate Documentation\" command only works with OPAM \
+              "\"OCaml: Generate Documentation\" command only works with Opam \
                sandboxes."
             in
             let (_ : 'a option Promise.t) =
