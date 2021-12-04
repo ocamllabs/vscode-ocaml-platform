@@ -80,96 +80,80 @@ module Command = struct
 
   let _generate_documentation =
     let handler (instance : Extension_instance.t) ~args =
-      let () =
+      let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
-        let (_ : unit Promise.t) =
-          match sandbox with
-          | Sandbox.Esy (_, _)
-          | Sandbox.Global
-          | Sandbox.Custom _ ->
-            let message =
-              "\"OCaml: Generate Documentation\" command only works with Opam \
-               sandboxes."
-            in
+        let* odig = Odig.of_sandbox sandbox in
+        match odig with
+        | Error error ->
+          let (_ : 'a option Promise.t) =
+            Window.showErrorMessage ~message:error ()
+          in
+          Promise.resolve ()
+        | Ok odig -> (
+          let arg = List.hd_exn args in
+          let dep = Dependency.t_of_js arg in
+          let package_name = Sandbox.Package.name dep in
+          let options =
+            ProgressOptions.create ~location:(`ProgressLocation Notification)
+              ~title:
+                (Printf.sprintf "Generating documentation for %s" package_name)
+              ~cancellable:false ()
+          in
+          let task ~progress:_ ~token:_ = Odig.odoc_exec odig ~package_name in
+          let* result =
+            Vscode.Window.withProgress
+              (module Interop.Js.Result (Interop.Js.String) (Interop.Js.String))
+              ~options ~task
+          in
+          match result with
+          | Error _ ->
             let (_ : 'a option Promise.t) =
-              Window.showErrorMessage ~message ()
+              Window.showErrorMessage
+                ~message:
+                  (Printf.sprintf "Error while generating documentation for %s"
+                     package_name)
+                ()
             in
             Promise.resolve ()
-          | Sandbox.Opam (opam, switch) -> (
-            let* odig = Odig.of_opam (opam, switch) in
-            match odig with
-            | Error error ->
-              let (_ : 'a option Promise.t) =
-                Window.showErrorMessage ~message:error ()
-              in
-              Promise.resolve ()
-            | Ok odig -> (
-              let arg = List.hd_exn args in
-              let dep = Dependency.t_of_js arg in
-              let package_name = Sandbox.Package.name dep in
-              let options =
-                ProgressOptions.create
-                  ~location:(`ProgressLocation Notification)
-                  ~title:
-                    (Printf.sprintf "Generating documentation for %s"
-                       package_name)
-                  ~cancellable:false ()
-              in
-              let task ~progress:_ ~token:_ =
-                Odig.odoc_exec odig ~package_name
-              in
-              let* result =
-                Vscode.Window.withProgress
-                  (module Interop.Js.Result
-                            (Interop.Js.String)
-                            (Interop.Js.String))
-                  ~options ~task
-              in
-              match result with
-              | Error _ ->
-                let (_ : 'a option Promise.t) =
-                  Window.showErrorMessage
-                    ~message:
-                      (Printf.sprintf
-                         "Error while generating documentation for %s"
+          | Ok _ ->
+            let documentation_server =
+              Extension_instance.documentation_server instance
+            in
+            let port = 4200 in
+            let+ () =
+              match documentation_server with
+              | Some _ -> Promise.resolve ()
+              | None -> (
+                let+ html_dir = Odig.html_dir odig in
+                match html_dir with
+                | Error e ->
+                  let (_ : 'a option Promise.t) =
+                    Window.showErrorMessage ~message:e ()
+                  in
+                  ()
+                | Ok html_dir ->
+                  let serve =
+                    Polka.create ()
+                    |> Polka.use
+                         [ Polka.Sirv.serve (html_dir |> Path.to_string) ]
+                    |> Polka.listen port
+                  in
+                  let (polka : Polka.t) = serve () in
+                  let () =
+                    Extension_instance.set_documentation_server instance polka
+                  in
+                  ())
+            in
+            let (_ : Ojs.t option Promise.t) =
+              Vscode.Commands.executeCommand ~command:"simpleBrowser.show"
+                ~args:
+                  [ Ojs.string_to_js
+                      (Printf.sprintf "http://localhost:%i/%s/index.html" port
                          package_name)
-                    ()
-                in
-                Promise.resolve ()
-              | Ok _ ->
-                let documentation_server =
-                  Extension_instance.documentation_server instance
-                in
-                let port = 4200 in
-                let+ () =
-                  match documentation_server with
-                  | Some _ -> Promise.resolve ()
-                  | None ->
-                    let+ html_dir = Odig.html_dir odig in
-                    let serve =
-                      Polka.create ()
-                      |> Polka.use
-                           [ Polka.Sirv.serve (html_dir |> Path.to_string) ]
-                      |> Polka.listen port
-                    in
-                    let (polka : Polka.t) = serve () in
-                    let () =
-                      Extension_instance.set_documentation_server instance polka
-                    in
-                    ()
-                in
-                let (_ : Ojs.t option Promise.t) =
-                  Vscode.Commands.executeCommand ~command:"simpleBrowser.show"
-                    ~args:
-                      [ Ojs.string_to_js
-                          (Printf.sprintf "http://localhost:%i/%s/index.html"
-                             port package_name)
-                      ]
-                in
-                ()))
-        in
-        ()
+                  ]
+            in
+            ())
       in
       ()
     in

@@ -300,20 +300,3 @@ let root_packages t switch =
 let package_remove t switch packages =
   let names = List.map ~f:Package.name packages in
   remove t switch names
-
-let has_package t switch ~package_name =
-  let open Promise.Syntax in
-  let+ packages = packages t switch in
-  match packages with
-  | Ok packages ->
-    packages
-    |> List.exists ~f:(fun package ->
-           String.equal (Package.name package) package_name)
-  | Error e ->
-    let () =
-      log
-        "Unable to determine if package %s is installed in the current switch. \
-         Error: %s"
-        package_name e
-    in
-    false

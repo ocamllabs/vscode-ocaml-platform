@@ -3,12 +3,8 @@
     The functions in this module either use the result of opam commands, or use
     the filesystem to get the state of opam configurations. *)
 
-type t
-
 (** An Opam switch *)
 module Switch : sig
-  type opam := t
-
   type t =
     | Local of Path.t
     | Named of string
@@ -20,8 +16,6 @@ module Switch : sig
   (** {4 Properties} *)
 
   val name : t -> string
-
-  val path : opam -> t -> Path.t
 
   (** {4 Utilities} *)
 
@@ -46,6 +40,8 @@ module Package : sig
 
   val dependencies : t -> (t list, string) result Promise.t
 end
+
+type t
 
 val make : ?root:Path.t -> unit -> t option Promise.t
 
@@ -105,6 +101,3 @@ val exec : t -> Switch.t -> args:string list -> Cmd.t
 
 (** Check that two instances of [Opam] are equal. *)
 val equal : t -> t -> bool
-
-(** Check that a package is installed in the given switch. *)
-val has_package : t -> Switch.t -> package_name:string -> bool Promise.t
