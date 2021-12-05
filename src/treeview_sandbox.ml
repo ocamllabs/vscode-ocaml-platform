@@ -116,44 +116,47 @@ module Command = struct
                 ()
             in
             Promise.resolve ()
-          | Ok _ ->
-            let documentation_server =
-              Extension_instance.documentation_server instance
-            in
-            let port = 4200 in
-            let+ () =
+          | Ok _ -> (
+            let start_server () =
+              let documentation_server =
+                Extension_instance.documentation_server instance
+              in
               match documentation_server with
-              | Some _ -> Promise.resolve ()
+              | Some server ->
+                Promise.resolve (Ok (Documentation_server.port server))
               | None -> (
-                let+ html_dir = Odig.html_dir odig in
+                let* html_dir = Odig.html_dir odig in
                 match html_dir with
-                | Error e ->
-                  let (_ : 'a option Promise.t) =
-                    Window.showErrorMessage ~message:e ()
+                | Error e -> Promise.resolve (Error e)
+                | Ok html_dir -> (
+                  let+ result =
+                    Extension_instance.start_documentation_server instance
+                      ~path:html_dir
                   in
-                  ()
-                | Ok html_dir ->
-                  let serve =
-                    Polka.create ()
-                    |> Polka.use
-                         [ Polka.Sirv.serve (html_dir |> Path.to_string) ]
-                    |> Polka.listen port
-                  in
-                  let (polka : Polka.t) = serve () in
-                  let () =
-                    Extension_instance.set_documentation_server instance polka
-                  in
-                  ())
+                  match result with
+                  | Error e ->
+                    log "Error while starting the documentation server: %s"
+                      (Node.JsError.message e);
+                    Error "OCaml: Error while starting the documentation server"
+                  | Ok server -> Ok (Documentation_server.port server)))
             in
-            let (_ : Ojs.t option Promise.t) =
-              Vscode.Commands.executeCommand ~command:"simpleBrowser.show"
-                ~args:
-                  [ Ojs.string_to_js
-                      (Printf.sprintf "http://localhost:%i/%s/index.html" port
-                         package_name)
-                  ]
-            in
-            ())
+            let+ port = start_server () in
+            match port with
+            | Error e ->
+              let (_ : 'a option Promise.t) =
+                Window.showErrorMessage ~message:e ()
+              in
+              ()
+            | Ok port ->
+              let (_ : Ojs.t option Promise.t) =
+                Vscode.Commands.executeCommand ~command:"simpleBrowser.show"
+                  ~args:
+                    [ Ojs.string_to_js
+                        (Printf.sprintf "http://localhost:%i/%s/index.html" port
+                           package_name)
+                    ]
+              in
+              ()))
       in
       ()
     in

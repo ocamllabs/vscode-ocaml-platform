@@ -14,6 +14,11 @@ module Server : sig
   type t
 
   val close : t -> t
+
+  val on :
+       t
+    -> [ `Close of unit -> unit | `Error of err:Node.JsError.t -> unit ]
+    -> unit
 end
 
 type t

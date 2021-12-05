@@ -175,6 +175,31 @@ module Fs = struct
   let readFile = readFile ~encoding:"utf8"
 end
 
+module Net = struct
+  module Socket = struct
+    include Class.Make ()
+
+    include
+      [%js:
+      val make : unit -> t [@@js.new "net.Socket"]
+
+      val isPaused : t -> bool [@@js.call]
+
+      val destroy : t -> unit [@@js.call]
+
+      val connect : t -> port:int -> host:string -> t [@@js.call]
+
+      val setTimeout : t -> int -> t [@@js.call]
+
+      val on : t -> string -> Ojs.t -> unit [@@js.call]]
+
+    let on t = function
+      | `Connect f -> on t "connect" @@ [%js.of: unit -> unit] f
+      | `Timeout f -> on t "timeout" @@ [%js.of: unit -> unit] f
+      | `Error f -> on t "error" @@ [%js.of: err:JsError.t -> unit] f
+  end
+end
+
 module ChildProcess = struct
   include Class.Make ()
 

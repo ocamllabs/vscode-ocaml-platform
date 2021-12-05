@@ -12,9 +12,10 @@ val language_client : t -> LanguageClient.t option
 
 val ocaml_lsp : t -> Ocaml_lsp.t option
 
-val documentation_server : t -> Polka.t option
+val documentation_server : t -> Documentation_server.t option
 
-val set_documentation_server : t -> Polka.t -> unit
+val start_documentation_server :
+  t -> path:Path.t -> (Documentation_server.t, Promise.error) result Promise.t
 
 val lsp_client : t -> (LanguageClient.t * Ocaml_lsp.t) option
 

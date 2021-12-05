@@ -7,7 +7,15 @@ end
 module Server = struct
   include Interface.Make ()
 
-  include [%js: val close : t -> t [@@js.call]]
+  include
+    [%js:
+    val close : t -> t [@@js.call]
+
+    val on : t -> string -> Ojs.t -> unit [@@js.call]]
+
+  let on t = function
+    | `Close f -> on t "close" @@ [%js.of: unit -> unit] f
+    | `Error f -> on t "error" @@ [%js.of: err:Node.JsError.t -> unit] f
 end
 
 module Sirv = struct
