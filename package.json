@@ -37,6 +37,7 @@
     "onCommand:ocaml.show-preprocessed-document",
     "onCommand:ocaml.open-pp-editor-and-ast-explorer",
     "onCustomEditor:ast-editor",
+    "onCustomEditor:cm-files-editor",
     "workspaceContains:**/dune-workspace",
     "workspaceContains:**/dune",
     "workspaceContains:**/dune-project",
@@ -944,6 +945,27 @@
           },
           {
             "filenamePattern": "*.mli"
+          }
+        ]
+      },
+      {
+        "viewType": "cm-files-editor",
+        "displayName": "Cm files preview",
+        "selector": [
+          {
+            "filenamePattern": "*.cmi"
+          },
+          {
+            "filenamePattern": "*.cmt"
+          },
+          {
+            "filenamePattern": "*.cmti"
+          },
+          {
+            "filenamePattern": "*.cmo"
+          },
+          {
+            "filenamePattern": "*.bc"
           }
         ]
       }
