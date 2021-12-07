@@ -14,6 +14,6 @@
     "ocaml": "4.12.x"
   },
   "devDependencies": {
-    "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam"
+    "@opam/ocaml-lsp-server": "*"
   }
 }
