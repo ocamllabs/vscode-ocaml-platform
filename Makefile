@@ -7,7 +7,8 @@ all:
 .PHONY: deps
 deps: ## Install development dependencies
 	opam install -y ocamlformat.0.19.0 ocamlformat-rpc ocaml-lsp-server $(DEV_DEPS)
-	npm install
+	yarn --frozen-lockfile
+	yarn --frozen-lockfile --cwd astexplorer
 	opam install --deps-only --with-test --with-doc -y .
 
 .PHONY: create_switch
@@ -20,7 +21,7 @@ switch: create_switch deps ## Create an opam switch and install development depe
 .PHONY: build
 build: ## Build the project
 	opam exec -- dune build src/vscode_ocaml_platform.bc.js
-	npm --prefix astexplorer/ run start
+	yarn --cwd astexplorer start
 	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
 		--external:vscode \
@@ -32,7 +33,7 @@ build: ## Build the project
 .PHONY: build-release
 build-release:
 	opam exec -- dune build src/vscode_ocaml_platform.bc.js --profile=release
-	npm --prefix astexplorer run build
+	yarn --cwd astexplorer build
 	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
 		--external:vscode \
@@ -47,7 +48,7 @@ build-release:
 .PHONY: test
 test: ## Run the unit tests
 	opam exec -- dune build --root . @runtest
-	npm run test
+	yarn test
 
 .PHONY: clean
 clean: ## Clean build artifacts and other generated files
@@ -61,7 +62,7 @@ doc: ## Generate odoc documentation
 .PHONY: fmt
 fmt: ## Format the codebase with ocamlformat
 	opam exec -- dune build --root . --auto-promote @fmt
-	npm run fmt
+	yarn fmt
 
 .PHONY: watch
 watch: ## Watch for the filesystem and rebuild on every change
@@ -69,7 +70,7 @@ watch: ## Watch for the filesystem and rebuild on every change
 
 .PHONY: pkg
 pkg: build # Builds and packages the extension for installment
-	npm exec -- vsce package --out ./test_extension.vsix
+	yarn vsce package --out ./test_extension.vsix
 
 .PHONY: install
 install: pkg # Builds, packages, and installs the extension to your VS Code

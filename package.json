@@ -950,7 +950,6 @@
     ]
   },
   "scripts": {
-    "postinstall": "npm --prefix astexplorer install",
     "test:esy": "node ./test/runEsyTests.js",
     "test:opam": "node ./test/runOpamTests.js",
     "test:problems": "node ./test/runProblemMatcherTests.js",
