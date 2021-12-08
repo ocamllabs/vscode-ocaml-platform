@@ -957,8 +957,8 @@
     "package": "vsce package --out ocaml-platform.vsix --yarn",
     "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --yarn",
     "deploy:ovsx": "ovsx publish --yarn",
-    "fmt:check": "prettier --check \"test/**/*.js\"",
-    "fmt": "prettier --write \"test/**/*.js\""
+    "fmt:check": "prettier . --check",
+    "fmt": "prettier . --write"
   },
   "dependencies": {
     "vscode-languageclient": "7.0.0"

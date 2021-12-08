@@ -19,7 +19,7 @@
       "captures": {
         "1": { "name": "invalid.unreachable.cram" }
       }
-    },    
+    },
     {
       "comment": "regex output",
       "match": "^  (.*) \\((re)\\)$",
