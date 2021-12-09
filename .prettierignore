@@ -1,0 +1,12 @@
+# ocamlbuild working directory
+_build/
+
+# Local OPAM switch
+_opam/
+
+# esy
+test/fixtures/sample-esy/_esy/
+test/fixtures/sample-esy/esy.lock/
+
+# Normal npm stuff
+node_modules/
