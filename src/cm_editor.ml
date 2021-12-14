@@ -28,8 +28,9 @@ end = struct
         ~ignoreCreateEvents:true ~ignoreDeleteEvents:true ()
     in
     let disposable =
-      FileSystemWatcher.onDidChange watcher ~callback:(fun _ ->
-          EventEmitter.fire onDidChange_event_emitter ())
+      FileSystemWatcher.onDidChange watcher
+        ~listener:(fun _ -> EventEmitter.fire onDidChange_event_emitter ())
+        ()
     in
     create ~uri ~onDidChange:onDidChange_event ~onDidDispose:onDidDispose_event
       ~dispose:(fun () ->

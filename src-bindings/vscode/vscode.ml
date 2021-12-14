@@ -2218,9 +2218,9 @@ end
 module FileSystemWatcher = struct
   include Interface.Make ()
 
-  include
-    [%js:
-    val onDidChange : t -> callback:(Uri.t -> unit) -> Disposable.t [@@js.call]]
+  module OnDidChange = Event.Make (Uri)
+
+  include [%js: val onDidChange : t -> OnDidChange.t [@@js.get]]
 end
 
 module Workspace = struct

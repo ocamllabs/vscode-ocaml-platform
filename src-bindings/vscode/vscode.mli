@@ -1725,7 +1725,7 @@ end
 module FileSystemWatcher : sig
   include Js.T
 
-  val onDidChange : t -> callback:(Uri.t -> unit) -> Disposable.t
+  val onDidChange : t -> Uri.t Event.t
 end
 
 module Workspace : sig
