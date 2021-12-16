@@ -212,7 +212,7 @@ end = struct
         let uri = TextDocument.uri doc in
         let (_ : unit Promise.t) =
           let+ holes =
-            Custom_requests.Typed_holes.send_request client ~for_doc:uri
+            Custom_requests.send_request client Custom_requests.typedHoles uri
           in
           jump ~cmd_args:args text_editor
             ~sorted_holes:(List.sort holes ~compare:Range.compare)
