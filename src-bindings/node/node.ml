@@ -24,7 +24,9 @@ include
   [%js:
   val setInterval : (unit -> unit) -> int -> Timeout.t [@@js.global]
 
-  val setTimeout : (unit -> unit) -> int -> Timeout.t [@@js.global]]
+  val setTimeout : (unit -> unit) -> int -> Timeout.t [@@js.global]
+
+  val clearTimeout : Timeout.t -> unit [@@js.global]]
 
 module Process = struct
   include

@@ -1,6 +1,6 @@
 type t
 
-val start : port:int -> path:Path.t -> (t, Promise.error) result Promise.t
+val start : port:int -> path:Path.t -> (t, Node.JsError.t) result Promise.t
 
 val port : t -> int
 

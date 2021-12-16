@@ -8,9 +8,30 @@ type t =
 let start ~port ~path =
   Promise.make @@ fun ~resolve ~reject:_ ->
   let polka = Polka.create () in
+
+  let timeout_ref = ref None in
+
+  let timeout_middleware ~request:_ ~response:_ ~next =
+    let () =
+      Option.iter !timeout_ref ~f:Node.clearTimeout;
+      timeout_ref :=
+        Some
+          (Node.setTimeout
+             (fun () ->
+               let (_ : Polka.Server.t) =
+                 Polka.Server.close (Polka.server polka)
+               in
+               ())
+             (* 10 minutes (in ms) *)
+             (60 * 10 * 1000))
+    in
+    next ()
+  in
+
   let serve =
     polka
-    |> Polka.use [ Polka.Sirv.serve (path |> Path.to_string) ]
+    |> Polka.use
+         [ timeout_middleware; Polka.Sirv.serve (path |> Path.to_string) ]
     |> Polka.listen port ~callback:(fun () ->
            resolve (Ok { server = Polka.server polka; port }))
   in

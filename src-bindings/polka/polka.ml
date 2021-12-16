@@ -1,9 +1,5 @@
 open Interop
 
-module Middleware = struct
-  include Interface.Make ()
-end
-
 module Server = struct
   include Interface.Make ()
 
@@ -18,31 +14,48 @@ module Server = struct
     | `Error f -> on t "error" @@ [%js.of: err:Node.JsError.t -> unit] f
 end
 
-module Sirv = struct
-  include
-    [%js:
-    type t = Middleware.t
+type polka = Ojs.t
 
-    val serve : string -> t [@@js.global "sirv"]]
+let polka_of_js = Ojs.t_of_js
+
+let polka_to_js = Ojs.t_to_js
+
+module Middleware = struct
+  module Request = struct
+    include Interface.Make ()
+  end
+
+  module Response = struct
+    include Interface.Make ()
+  end
+
+  type t =
+    request:Request.t -> response:Response.t -> next:(unit -> polka) -> polka
+  [@@js]
 end
 
 include
   [%js:
-  type t
+  val create : unit -> polka [@@js.global "polka"]
 
-  val create : unit -> t [@@js.global "polka"]
-
-  val listen_ : t -> int -> ?callback:(unit -> unit) -> unit -> t
+  val listen_ : polka -> int -> ?callback:(unit -> unit) -> unit -> polka
     [@@js.call "listen"]
 
-  val get_ : t -> string -> (unit -> unit) -> t [@@js.call "get"]
+  val get_ : polka -> string -> (unit -> unit) -> polka [@@js.call "get"]
 
-  val use_ : t -> (Middleware.t list[@js.variadic]) -> t [@@js.call "use"]
+  val use_ : polka -> (Middleware.t list[@js.variadic]) -> polka
+    [@@js.call "use"]
 
-  val server : t -> Server.t [@@js.get]]
+  val server : polka -> Server.t [@@js.get]]
 
 let get path callback t = get_ t path callback
 
 let listen port ?callback t = listen_ t port ?callback
 
 let use middlewares t = use_ t middlewares
+
+module Sirv = struct
+  include
+    [%js:
+    val serve : string -> (Middleware.t[@js.dummy]) [@@js.global "sirv"]]
+end

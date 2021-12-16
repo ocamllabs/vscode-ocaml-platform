@@ -1,15 +1,5 @@
 open Interop
 
-module Middleware : sig
-  include Js.T
-end
-
-module Sirv : sig
-  type t = Middleware.t
-
-  val serve : string -> t
-end
-
 module Server : sig
   type t
 
@@ -21,14 +11,31 @@ module Server : sig
     -> unit
 end
 
-type t
+type polka
 
-val create : unit -> t
+module Middleware : sig
+  module Request : sig
+    include Js.T
+  end
 
-val listen : int -> ?callback:(unit -> unit) -> t -> unit -> t
+  module Response : sig
+    include Js.T
+  end
 
-val get : string -> (unit -> unit) -> t -> t
+  type t =
+    request:Request.t -> response:Response.t -> next:(unit -> polka) -> polka
+end
 
-val use : (Middleware.t list[@js.variadic]) -> t -> t
+val create : unit -> polka
 
-val server : t -> Server.t
+val listen : int -> ?callback:(unit -> unit) -> polka -> unit -> polka
+
+val get : string -> (unit -> unit) -> polka -> polka
+
+val use : Middleware.t list -> polka -> polka
+
+val server : polka -> Server.t
+
+module Sirv : sig
+  val serve : string -> Middleware.t
+end
