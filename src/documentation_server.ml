@@ -5,7 +5,7 @@ type t =
   ; port : int
   }
 
-let start ~port ~path =
+let start ~path ?(port = 0) () =
   Promise.make @@ fun ~resolve ~reject:_ ->
   let polka = Polka.create () in
 
@@ -33,7 +33,10 @@ let start ~port ~path =
     |> Polka.use
          [ timeout_middleware; Polka.Sirv.serve (path |> Path.to_string) ]
     |> Polka.listen port ~callback:(fun () ->
-           resolve (Ok { server = Polka.server polka; port }))
+           let server = Polka.server polka in
+           let address = Polka.Server.address server in
+           let port = Polka.Server.Address.port address in
+           resolve (Ok { server; port }))
   in
   let polka = serve () in
   let server = Polka.server polka in

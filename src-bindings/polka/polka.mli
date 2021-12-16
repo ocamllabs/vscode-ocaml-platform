@@ -1,9 +1,17 @@
 open Interop
 
 module Server : sig
+  module Address : sig
+    include Js.T
+
+    val port : t -> int
+  end
+
   type t
 
   val close : t -> t
+
+  val address : t -> Address.t
 
   val on :
        t

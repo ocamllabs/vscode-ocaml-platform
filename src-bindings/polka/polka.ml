@@ -3,9 +3,17 @@ open Interop
 module Server = struct
   include Interface.Make ()
 
+  module Address = struct
+    include Interface.Make ()
+
+    include [%js: val port : t -> int [@@js.get]]
+  end
+
   include
     [%js:
     val close : t -> t [@@js.call]
+
+    val address : t -> Address.t [@@js.call]
 
     val on : t -> string -> Ojs.t -> unit [@@js.call]]
 

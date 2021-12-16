@@ -36,31 +36,8 @@ let stop_documentation_server t =
 
 let start_documentation_server t ~path =
   stop_documentation_server t;
-  let find_free_port ~start_port =
-    Promise.make @@ fun ~resolve ~reject:_ ->
-    let open Node.Net in
-    let port = ref start_port in
-    let socket = Socket.make () in
-    let (_ : Socket.t) = Socket.setTimeout socket 500 in
-    Socket.on socket
-      (`Connect
-        (fun () ->
-          Socket.destroy socket;
-          port := port.contents + 1;
-          let (_ : Socket.t) =
-            Socket.connect socket ~port:port.contents ~host:"localhost"
-          in
-          ()));
-    Socket.on socket (`Error (fun ~err:_ -> resolve port.contents));
-    Socket.on socket (`Timeout (fun () -> resolve port.contents));
-    let (_ : Socket.t) =
-      Socket.connect socket ~port:port.contents ~host:"localhost"
-    in
-    ()
-  in
   let open Promise.Syntax in
-  let* port = find_free_port ~start_port:3000 in
-  let+ server = Documentation_server.start ~port ~path in
+  let+ server = Documentation_server.start ~path () in
   match server with
   | Ok server ->
     t.documentation_server <- Some server;
