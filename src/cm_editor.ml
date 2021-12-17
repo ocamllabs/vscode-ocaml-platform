@@ -18,11 +18,7 @@ end = struct
     val onDidChange : t -> OnDidChange.t [@@js.get]
 
     val create :
-         uri:Uri.t
-      -> ?onDidChange:OnDidChange.t
-      -> dispose:(unit -> unit)
-      -> unit
-      -> t
+      uri:Uri.t -> onDidChange:OnDidChange.t -> dispose:(unit -> unit) -> t
       [@@js.builder]]
 
   let content t =
@@ -45,9 +41,8 @@ end = struct
         ~listener:(fun _ -> EventEmitter.fire onDidChange_event_emitter ())
         ()
     in
-    create ~uri ~onDidChange:onDidChange_event
-      ~dispose:(fun () -> Disposable.dispose disposable)
-      ()
+    create ~uri ~onDidChange:onDidChange_event ~dispose:(fun () ->
+        Disposable.dispose disposable)
 end
 
 let resolveCustomEditor _instance ~document ~webviewPanel ~token:_ :
