@@ -965,6 +965,18 @@
             "filenamePattern": "*.cmo"
           },
           {
+            "filenamePattern": "*.cma"
+          },
+          {
+            "filenamePattern": "*.cmx"
+          },
+          {
+            "filenamePattern": "*.cmxa"
+          },
+          {
+            "filenamePattern": "*.cmxs"
+          },
+          {
             "filenamePattern": "*.bc"
           }
         ]
