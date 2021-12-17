@@ -6,8 +6,6 @@ module Cm_document : sig
 
   val content : t -> (string, string) result Promise.t
 
-  val create : uri:Uri.t -> dispose:(unit -> unit) -> t
-
   val onDidChange : t -> Js.Unit.t Event.t
 end = struct
   include CustomDocument
