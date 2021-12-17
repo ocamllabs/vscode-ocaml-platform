@@ -4,6 +4,9 @@
 
 - Fix the detection of opam's root directory when no switch is detected (#831)
 
+- Support for opening `.cmi`, `.cmt`, `cmti`, `.cmo`, `.cma`, `.cmx`, `.cmxa`,
+  `.cmxs` and `.bc` files. (#798)
+
 - Warn if the extension sees not the latest OCaml-LSP version compatible with
   the OCaml distribution installed in the current sandbox.
 
