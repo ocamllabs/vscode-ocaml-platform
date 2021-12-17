@@ -789,8 +789,6 @@ module CustomDocument : sig
     val uri : t -> Uri.t
 
     val dispose : t -> unit
-
-    val create : uri:Uri.t -> dispose:(unit -> unit) -> t
   end
 
   include Js.T

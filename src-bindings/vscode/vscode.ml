@@ -2334,8 +2334,6 @@ module CustomDocument = struct
     val uri : t -> Uri.t
 
     val dispose : t -> unit
-
-    val create : uri:Uri.t -> dispose:(unit -> unit) -> t
   end
 
   include Interface.Make ()
