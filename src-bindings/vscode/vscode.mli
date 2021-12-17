@@ -789,7 +789,7 @@ module CustomDocument : sig
 
   val dispose : t -> unit
 
-  val create : uri:Uri.t -> dispose:(unit -> unit) -> unit -> t
+  val create : uri:Uri.t -> dispose:(unit -> unit) -> t
 end
 
 module QuickPickItem : sig

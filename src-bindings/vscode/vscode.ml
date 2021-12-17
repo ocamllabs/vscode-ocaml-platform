@@ -2336,7 +2336,7 @@ module CustomDocument = struct
 
     val dispose : t -> unit [@@js.call]
 
-    val create : uri:Uri.t -> dispose:(unit -> unit) -> unit -> t [@@js.builder]]
+    val create : uri:Uri.t -> dispose:(unit -> unit) -> t [@@js.builder]]
 end
 
 module TreeItemLabel = struct
