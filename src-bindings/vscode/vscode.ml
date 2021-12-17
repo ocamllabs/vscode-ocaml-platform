@@ -2902,7 +2902,7 @@ end
 module CustomReadonlyEditorProvider = struct
   include Interface.Generic (Ojs) ()
 
-  module Make (T : module type of CustomDocument) = struct
+  module Make (T : CustomDocument.T) = struct
     type t = T.t generic [@@js]
 
     include

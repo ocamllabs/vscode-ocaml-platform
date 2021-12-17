@@ -2215,7 +2215,7 @@ end
 module CustomReadonlyEditorProvider : sig
   type 'a t
 
-  module Make (T : module type of CustomDocument) : sig
+  module Make (T : CustomDocument.T) : sig
     type nonrec t = T.t t
 
     val openCustomDocument :
@@ -2373,7 +2373,7 @@ module Window : sig
     -> Disposable.t
 
   val registerCustomReadonlyEditorProvider :
-       'a Js.t
+       (module CustomDocument.T with type t = 'a)
     -> viewType:string
     -> provider:'a CustomReadonlyEditorProvider.t
     -> ?options:RegisterCustomEditorProviderOptions.t
