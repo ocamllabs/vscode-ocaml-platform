@@ -2330,27 +2330,13 @@ end
 module CustomDocument = struct
   include Interface.Make ()
 
-  module OnDidChange = Event.Make (Js.Unit)
-  module OnDidDispose = Event.Make (Js.Unit)
-
   include
     [%js:
     val uri : t -> Uri.t [@@js.get]
 
     val dispose : t -> unit [@@js.call]
 
-    val onDidChange : t -> OnDidChange.t [@@js.get]
-
-    val onDidDispose : t -> OnDidDispose.t [@@js.get]
-
-    val create :
-         uri:Uri.t
-      -> ?onDidChange:OnDidChange.t
-      -> ?onDidDispose:OnDidDispose.t
-      -> dispose:(unit -> unit)
-      -> unit
-      -> t
-      [@@js.builder]]
+    val create : uri:Uri.t -> dispose:(unit -> unit) -> unit -> t [@@js.builder]]
 end
 
 module TreeItemLabel = struct

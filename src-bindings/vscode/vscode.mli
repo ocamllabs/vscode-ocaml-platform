@@ -789,17 +789,7 @@ module CustomDocument : sig
 
   val dispose : t -> unit
 
-  val onDidChange : t -> Js.Unit.t Event.t
-
-  val onDidDispose : t -> Js.Unit.t Event.t
-
-  val create :
-       uri:Uri.t
-    -> ?onDidChange:Js.Unit.t Event.t
-    -> ?onDidDispose:Js.Unit.t Event.t
-    -> dispose:(unit -> unit)
-    -> unit
-    -> t
+  val create : uri:Uri.t -> dispose:(unit -> unit) -> unit -> t
 end
 
 module QuickPickItem : sig

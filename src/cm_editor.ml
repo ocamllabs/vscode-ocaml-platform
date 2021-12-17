@@ -7,8 +7,23 @@ module Cm_document : sig
   val content : t -> (string, string) result Promise.t
 
   val create : uri:Uri.t -> t
+
+  val onDidChange : t -> Js.Unit.t Event.t
 end = struct
   include CustomDocument
+  module OnDidChange = Event.Make (Js.Unit)
+
+  include
+    [%js:
+    val onDidChange : t -> OnDidChange.t [@@js.get]
+
+    val create :
+         uri:Uri.t
+      -> ?onDidChange:OnDidChange.t
+      -> dispose:(unit -> unit)
+      -> unit
+      -> t
+      [@@js.builder]]
 
   let content t =
     let uri = uri t in
@@ -20,8 +35,6 @@ end = struct
     let module EventEmitter = EventEmitter.Make (Js.Unit) in
     let onDidChange_event_emitter = EventEmitter.make () in
     let onDidChange_event = EventEmitter.event onDidChange_event_emitter in
-    let onDidDispose_event_emitter = EventEmitter.make () in
-    let onDidDispose_event = EventEmitter.event onDidDispose_event_emitter in
     let watcher =
       Workspace.createFileSystemWatcher
         (`String (Uri.fsPath uri))
@@ -32,10 +45,8 @@ end = struct
         ~listener:(fun _ -> EventEmitter.fire onDidChange_event_emitter ())
         ()
     in
-    create ~uri ~onDidChange:onDidChange_event ~onDidDispose:onDidDispose_event
-      ~dispose:(fun () ->
-        EventEmitter.fire onDidDispose_event_emitter ();
-        Disposable.dispose disposable)
+    create ~uri ~onDidChange:onDidChange_event
+      ~dispose:(fun () -> Disposable.dispose disposable)
       ()
 end
 
