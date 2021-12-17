@@ -2,6 +2,8 @@ open Import
 
 type t = { make_cmd : string list -> Cmd.t }
 
+(** TODO: propose to install odig. See
+    https://github.com/ocamllabs/vscode-ocaml-platform/pull/771#discussion_r765297112 *)
 let of_sandbox (sandbox : Sandbox.t) =
   let cmd = Sandbox.get_command sandbox "which" [ "odig" ] in
   let open Promise.Syntax in
