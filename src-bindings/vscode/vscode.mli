@@ -783,6 +783,20 @@ module CancellationToken : sig
 end
 
 module CustomDocument : sig
+  module type T = sig
+    type t
+
+    val t_of_js : Ojs.t -> t
+
+    val t_to_js : t -> Ojs.t
+
+    val uri : t -> Uri.t
+
+    val dispose : t -> unit
+
+    val create : uri:Uri.t -> dispose:(unit -> unit) -> t
+  end
+
   include Js.T
 
   val uri : t -> Uri.t
@@ -2201,7 +2215,7 @@ end
 module CustomReadonlyEditorProvider : sig
   type 'a t
 
-  module Make (T : Js.T) : sig
+  module Make (T : module type of CustomDocument) : sig
     type nonrec t = T.t t
 
     val openCustomDocument :

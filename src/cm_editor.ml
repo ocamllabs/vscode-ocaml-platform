@@ -6,7 +6,7 @@ module Cm_document : sig
 
   val content : t -> (string, string) result Promise.t
 
-  val create : uri:Uri.t -> t
+  val create : uri:Uri.t -> dispose:(unit -> unit) -> t
 
   val onDidChange : t -> Js.Unit.t Event.t
 end = struct
@@ -31,7 +31,7 @@ end = struct
     let bin = Path.of_string "ocamlobjinfo" in
     Cmd.(output (Spawn { bin; args = [ file_path ] }))
 
-  let create ~(uri : Uri.t) =
+  let create ~(uri : Uri.t) ~dispose =
     let module EventEmitter = EventEmitter.Make (Js.Unit) in
     let onDidChange_event_emitter = EventEmitter.make () in
     let onDidChange_event = EventEmitter.event onDidChange_event_emitter in
@@ -46,7 +46,9 @@ end = struct
         ()
     in
     create ~uri ~onDidChange:onDidChange_event
-      ~dispose:(fun () -> Disposable.dispose disposable)
+      ~dispose:(fun () ->
+        Disposable.dispose disposable;
+        dispose ())
       ()
 end
 
@@ -88,7 +90,7 @@ let resolveCustomEditor _instance ~document ~webviewPanel ~token:_ :
 
 let openCustomDocument _instance ~(uri : Uri.t) ~openContext:_ ~token:_ :
     Cm_document.t Promise.t =
-  let document = Cm_document.create ~uri in
+  let document = Cm_document.create ~uri ~dispose:(fun () -> ()) in
   Promise.resolve document
 
 let register (extension : ExtensionContext.t) (instance : Extension_instance.t)

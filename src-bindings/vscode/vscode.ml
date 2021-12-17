@@ -2328,6 +2328,20 @@ module TreeItemCollapsibleState = struct
 end
 
 module CustomDocument = struct
+  module type T = sig
+    type t
+
+    val t_of_js : Ojs.t -> t
+
+    val t_to_js : t -> Ojs.t
+
+    val uri : t -> Uri.t
+
+    val dispose : t -> unit
+
+    val create : uri:Uri.t -> dispose:(unit -> unit) -> t
+  end
+
   include Interface.Make ()
 
   include
@@ -2888,7 +2902,7 @@ end
 module CustomReadonlyEditorProvider = struct
   include Interface.Generic (Ojs) ()
 
-  module Make (T : Js.T) = struct
+  module Make (T : module type of CustomDocument) = struct
     type t = T.t generic [@@js]
 
     include
@@ -3152,7 +3166,7 @@ module Window = struct
     [%js.to: TreeView.t] (createTreeView ~viewId ~options)
 
   let registerCustomReadonlyEditorProvider (type a)
-      (module T : Js.T with type t = a) ~(viewType : string)
+      (module T : CustomDocument.T with type t = a) ~(viewType : string)
       ~(provider : a CustomReadonlyEditorProvider.t)
       ?(options : RegisterCustomEditorProviderOptions.t or_undefined) () :
       Disposable.t =
