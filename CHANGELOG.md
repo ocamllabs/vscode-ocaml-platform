@@ -12,6 +12,9 @@
 
 ## 1.9.0
 
+- Add the possibility to generate and show the documentation of an installed
+  package right into VSCode. (#771)
+
 - Dune syntax highlighting fix (#742)
 
   The syntax for dune files has been re-written from scratch for a more correct
