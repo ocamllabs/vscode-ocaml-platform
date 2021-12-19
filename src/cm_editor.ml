@@ -2,7 +2,7 @@ open Import
 open Interop
 
 module Cm_document : sig
-  include module type of CustomDocument
+  include CustomDocument.T
 
   val content : t -> (string, string) result Promise.t
 

@@ -793,9 +793,7 @@ module CustomDocument : sig
 
   include Js.T
 
-  val uri : t -> Uri.t
-
-  val dispose : t -> unit
+  include T
 
   val create : uri:Uri.t -> dispose:(unit -> unit) -> t
 end
