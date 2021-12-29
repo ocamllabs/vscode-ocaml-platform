@@ -45,8 +45,7 @@ end = struct
         Disposable.dispose disposable)
 end
 
-let resolveCustomEditor _instance ~document ~webviewPanel ~token:_ :
-    unit Promise.t =
+let resolveCustomEditor ~document ~webviewPanel ~token:_ : unit Promise.t =
   let open Promise.Syntax in
   let update_content document =
     let+ content = Cm_document.content document in
@@ -81,19 +80,16 @@ let resolveCustomEditor _instance ~document ~webviewPanel ~token:_ :
   in
   update_content document
 
-let openCustomDocument _instance ~(uri : Uri.t) ~openContext:_ ~token:_ :
+let openCustomDocument ~(uri : Uri.t) ~openContext:_ ~token:_ :
     Cm_document.t Promise.t =
   let document = Cm_document.create ~uri in
   Promise.resolve document
 
-let register (extension : ExtensionContext.t) (instance : Extension_instance.t)
-    =
+let register (extension : ExtensionContext.t) =
   let module CustomReadonlyEditorProvider =
     CustomReadonlyEditorProvider.Make (Cm_document) in
   let editorProvider =
-    CustomReadonlyEditorProvider.create
-      ~resolveCustomEditor:(resolveCustomEditor instance)
-      ~openCustomDocument:(openCustomDocument instance)
+    CustomReadonlyEditorProvider.create ~resolveCustomEditor ~openCustomDocument
   in
   let disposable =
     Vscode.Window.registerCustomReadonlyEditorProvider

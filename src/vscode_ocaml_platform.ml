@@ -35,7 +35,7 @@ let activate (extension : ExtensionContext.t) =
   Treeview_commands.register extension;
   Treeview_help.register extension;
   Ast_editor.register extension instance;
-  Cm_editor.register extension instance;
+  Cm_editor.register extension;
   Repl.register extension instance;
   let sandbox_opt = Sandbox.of_settings_or_detect () in
   let (_ : unit Promise.t) =

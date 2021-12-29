@@ -1,1 +1,1 @@
-val register : Vscode.ExtensionContext.t -> Extension_instance.t -> unit
+val register : Vscode.ExtensionContext.t -> unit
