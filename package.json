@@ -950,7 +950,7 @@
       },
       {
         "viewType": "cm-files-editor",
-        "displayName": "Cm files preview",
+        "displayName": "OCaml Compilation Artifact Viewer",
         "selector": [
           {
             "filenamePattern": "*.cmi"
