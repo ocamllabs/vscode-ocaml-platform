@@ -4,7 +4,8 @@ open Interop
 module Cm_document : sig
   include CustomDocument.T
 
-  val content : t -> (string, string) result Promise.t
+  val content :
+    t -> instance:Extension_instance.t -> (string, string) result Promise.t
 
   val onDidChange : t -> Js.Unit.t Event.t
 
@@ -21,11 +22,14 @@ end = struct
       uri:Uri.t -> onDidChange:OnDidChange.t -> dispose:(unit -> unit) -> t
       [@@js.builder]]
 
-  let content t =
+  let content t ~instance =
     let uri = uri t in
     let file_path = Uri.fsPath uri in
-    let bin = Path.of_string "ocamlobjinfo" in
-    Cmd.(output (Spawn { bin; args = [ file_path ] }))
+    let command =
+      let sandbox = Extension_instance.sandbox instance in
+      Sandbox.get_command sandbox "ocamlobjinfo" [ file_path ]
+    in
+    Cmd.output command
 
   let create ~(uri : Uri.t) =
     let module EventEmitter = EventEmitter.Make (Js.Unit) in
@@ -45,10 +49,11 @@ end = struct
         Disposable.dispose disposable)
 end
 
-let resolveCustomEditor ~document ~webviewPanel ~token:_ : unit Promise.t =
+let resolveCustomEditor instance ~document ~webviewPanel ~token:_ :
+    unit Promise.t =
   let open Promise.Syntax in
   let update_content document =
-    let+ content = Cm_document.content document in
+    let+ content = Cm_document.content document ~instance in
     match content with
     | Ok file_content ->
       let webview = WebviewPanel.webview webviewPanel in
@@ -85,11 +90,12 @@ let openCustomDocument ~(uri : Uri.t) ~openContext:_ ~token:_ :
   let document = Cm_document.create ~uri in
   Promise.resolve document
 
-let register (extension : ExtensionContext.t) =
+let register (extension : ExtensionContext.t) (instance : Extension_instance.t)
+    =
   let module CustomReadonlyEditorProvider =
     CustomReadonlyEditorProvider.Make (Cm_document) in
   let editorProvider =
-    CustomReadonlyEditorProvider.create ~resolveCustomEditor ~openCustomDocument
+    CustomReadonlyEditorProvider.create ~resolveCustomEditor:(resolveCustomEditor instance) ~openCustomDocument
   in
   let disposable =
     Vscode.Window.registerCustomReadonlyEditorProvider
