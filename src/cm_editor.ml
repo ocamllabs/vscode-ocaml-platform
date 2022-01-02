@@ -60,13 +60,13 @@ let resolveCustomEditor instance ~document ~webviewPanel ~token:_ :
       WebView.set_html webview (Printf.sprintf "<pre>%s</pre>" file_content)
     | Error e ->
       let uri = Cm_document.uri document in
-      let () = log "Error while trying to read content from file: %s" e in
       let path = Uri.path uri in
+      let file_name = Node.Path.basename path in
       let (_ : 'a option Promise.t) =
         Window.showErrorMessage
           ~message:
-            (Printf.sprintf "Error while trying to read content from %s."
-               (Node.Path.basename path))
+            (Printf.sprintf
+               "Error while trying to read content from %s file. %s" file_name e)
           ()
       in
       ()
@@ -95,7 +95,9 @@ let register (extension : ExtensionContext.t) (instance : Extension_instance.t)
   let module CustomReadonlyEditorProvider =
     CustomReadonlyEditorProvider.Make (Cm_document) in
   let editorProvider =
-    CustomReadonlyEditorProvider.create ~resolveCustomEditor:(resolveCustomEditor instance) ~openCustomDocument
+    CustomReadonlyEditorProvider.create
+      ~resolveCustomEditor:(resolveCustomEditor instance)
+      ~openCustomDocument
   in
   let disposable =
     Vscode.Window.registerCustomReadonlyEditorProvider
