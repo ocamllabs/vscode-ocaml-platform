@@ -24,6 +24,8 @@
     "onLanguage:ocaml",
     "onLanguage:ocaml.interface",
     "onLanguage:reason",
+    "onLanguage:eml",
+    "onLanguage:html-eml",
     "onLanguage:ocaml.ocamllex",
     "onLanguage:ocaml.menhir",
     "onLanguage:dune",
@@ -43,7 +45,8 @@
     "workspaceContains:**/*.mll",
     "workspaceContains:**/*.mly",
     "workspaceContains:**/*.re",
-    "workspaceContains:**/*.rei"
+    "workspaceContains:**/*.rei",
+    "workspaceContains:**/*.eml"
   ],
   "icon": "assets/logo.png",
   "contributes": {
@@ -529,6 +532,12 @@
       "[cram]": {
         "editor.tabSize": 2,
         "editor.insertSpaces": true
+      },
+      "[html-eml]": {
+        "editor.trimAutoWhitespace": false,
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true,
+        "files.trimFinalNewlines": true
       }
     },
     "problemMatchers": [
@@ -572,6 +581,29 @@
           "jbuild"
         ],
         "configuration": "./languages/dune.json"
+      },
+      {
+        "id": "eml",
+        "aliases": [
+          "Embedded OCaml",
+          "Eml",
+          "eml"
+        ],
+        "extensions": [
+          ".html.eml", ".eml"
+        ],
+        "configuration": "./languages/eml.json"
+      },
+      {
+        "id": "html-eml",
+        "aliases": [
+          "HTML (Embedded OCaml)",
+          "HTML (Eml)"
+        ],
+        "extensions": [
+          ".html.eml", ".eml"
+        ],
+        "configuration": "./languages/eml.json"
       },
       {
         "id": "dune-project",
@@ -889,6 +921,16 @@
         "language": "cram",
         "scopeName": "source.cram",
         "path": "./syntaxes/cram.json"
+      },
+      {
+        "language": "eml",
+        "scopeName": "text.ocaml",
+        "path": "./syntaxes/eml.json"
+      },
+      {
+        "language": "html-eml",
+        "scopeName": "text.html.ocaml",
+        "path": "./syntaxes/html-eml.json"
       }
     ],
     "snippets": [
