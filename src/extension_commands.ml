@@ -155,6 +155,8 @@ module Holes_commands : sig
 end = struct
   let hole_not_found_msg = "No typed hole was found in this file"
 
+  (** Shows appropriate message for when the [ocaml-lsp] in use by the extension
+      doesn't support jumping to holes. *)
   let ocaml_lsp_doesn't_support_holes instance ocaml_lsp =
     let suggestion =
       match
@@ -307,41 +309,52 @@ end = struct
             (** [shouldNotifyIfNoHole]: <bool> (default = true) *)
       }
 
+    let default_args = { in_range = None; should_notify_if_no_hole = true }
+
+    let args_use_old_protocol json =
+      Option.is_some
+        (Jsonoo.Decode.(try_optional (field "position" Range.t_of_json)) json)
+      || Option.is_some
+           (Jsonoo.Decode.(try_optional (field "notify-if-no-hole" bool)) json)
+
     let parse_arguments args =
       match args with
-      | [] -> { in_range = None; should_notify_if_no_hole = true }
+      | [] -> Ok default_args
       | [ params_obj ] ->
         let json = Jsonoo.t_of_js params_obj in
-        let in_range =
-          Jsonoo.Decode.(try_optional (field "inRange" Range.t_of_json)) json
-        in
-        let should_notify_if_no_hole =
-          Jsonoo.Decode.(try_default true (field "shouldNotifyIfNoHole" bool))
-            json
-        in
-        { in_range; should_notify_if_no_hole }
-      | _ ->
-        failwith
-          "Jump to Previous/Next Hole: incorrect params passed to the command"
+        if args_use_old_protocol json then
+          Error `Outdated_protocol
+        else
+          let in_range =
+            Jsonoo.Decode.(try_optional (field "inRange" Range.t_of_json)) json
+          in
+          let should_notify_if_no_hole =
+            Jsonoo.Decode.(try_default true (field "shouldNotifyIfNoHole" bool))
+              json
+          in
+          Ok { in_range; should_notify_if_no_hole }
+      | _ -> (* incorrect args passed *) assert false
 
     let jump ~cmd_args text_editor ~sorted_holes =
-      let { in_range; should_notify_if_no_hole } = parse_arguments cmd_args in
-      match sorted_holes with
-      | [] ->
-        if should_notify_if_no_hole then
-          show_message `Info "%s" hole_not_found_msg
-      | sorted_non_empty_holes_list -> (
-        let start_pos =
-          Option.map in_range ~f:Range.start
-          |> Option.value_lazy ~default:(fun () ->
-                 current_cursor_pos text_editor)
-        in
-        let hole = pick_next_hole start_pos ~sorted_non_empty_holes_list in
-        match in_range with
-        | None -> select_hole_range text_editor hole
-        | Some in_range ->
-          if Range.contains in_range ~positionOrRange:(`Range hole) then
-            select_hole_range text_editor hole)
+      match parse_arguments cmd_args with
+      | Error `Outdated_protocol -> ()
+      | Ok { in_range; should_notify_if_no_hole } -> (
+        match sorted_holes with
+        | [] ->
+          if should_notify_if_no_hole then
+            show_message `Info "%s" hole_not_found_msg
+        | sorted_non_empty_holes_list -> (
+          let start_pos =
+            Option.map in_range ~f:Range.start
+            |> Option.value_lazy ~default:(fun () ->
+                   current_cursor_pos text_editor)
+          in
+          let hole = pick_next_hole start_pos ~sorted_non_empty_holes_list in
+          match in_range with
+          | None -> select_hole_range text_editor hole
+          | Some in_range ->
+            if Range.contains in_range ~positionOrRange:(`Range hole) then
+              select_hole_range text_editor hole))
   end
 
   let _jump_to_next_hole =
