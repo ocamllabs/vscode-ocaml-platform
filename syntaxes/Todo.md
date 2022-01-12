@@ -1,0 +1,12 @@
+- <%s %>, the <%s opening tag highlights as an error in some places, highlights as a string in some places and doesn't highlight at all in some places.
+- span tag doesn't highlight
+- <% %>, highlights accurately in some instances and doesn't highlight at all in some.
+- Words that start with capitals are highlighted in every sentence.
+- Punctuations are highlighted in wrong contexts
+- Numbers are highlighted as numerics in wrong contexts
+- <div>-</div>, for div tags written that way, the closing div tag is not highlighted. Also in some contexts the div tag doesn't highlight at all.
+- Keywords like `in`, `of`, `to`, `and`, `with`, `end` are highlighted as keywords in the wrong contexts.
+- Words like `has`, `discover`, `submit` are highlighted as entity.function in the wrong contexts.
+- img tag doesn't highlight at all
+- Tags like h6, rect, div, svg, etc highlight in some cases and don't in some.
+- 

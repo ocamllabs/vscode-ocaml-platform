@@ -9,7 +9,7 @@
           "name": "punctuation.definition.comment.eml"
         }
       },
-      "end": "%>",
+      "end": "//%>",
       "name": "comment.block.eml"
     },
     {
