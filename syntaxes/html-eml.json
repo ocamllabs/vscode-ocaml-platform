@@ -1,7 +1,7 @@
 {
   "fileTypes": ["html.eml"],
-  "foldingStartMarker": "(?x)\n\t\t(<(?i:head|body|table|thead|tbody|tfoot|tr|div|select|fieldset|style|script|ul|ol|form|dl|span|img|)\\b.*?>\n\t\t|<!--(?!.*-->)\n\t\t|\\{\\s*($|\\?>\\s*$|//|/\\*(.*\\*/\\s*$|(?!.*?\\*/)))\n\t\t)",
-  "foldingStopMarker": "(?x)\n\t\t(</(?i:head|body|table|thead|tbody|tfoot|tr|div|select|fieldset|style|script|ul|ol|form|dl|span|img|)>\n\t\t|^\\s*-->\n\t\t|(^|\\s)\\}\n\t\t)",
+  "foldingStartMarker": "(?x)\n\t\t(<(?i:head|body|table|thead|tbody|tfoot|tr|div|select|fieldset|style|script|ul|ol|li|form|dl|span|img|h1|h2|h3|h4|h5|h6|rect|a|p|nav|header|footer)\\b.*?>\n\t\t|<!--(?!.*-->)\n\t\t|\\{\\s*($|\\?>\\s*$|//|/\\*(.*\\*/\\s*$|(?!.*?\\*/)))\n\t\t)",
+  "foldingStopMarker": "(?x)\n\t\t(</(?i:head|body|table|thead|tbody|tfoot|tr|div|select|fieldset|style|script|ul|ol|li|form|dl|span|img|h1|h2|h3|h4|h5|h6|rect|a|p|nav|header|footer)>\n\t\t|^\\s*-->\n\t\t|(^|\\s)\\}\n\t\t)",
   "injections": {
     "R:text.html.ocaml meta.tag meta.attribute string.quoted": {
       "comment": "Uses R: to ensure this matches after any other injections.",
@@ -14,6 +14,13 @@
   },
   "name": "HTML (Embedded OCaml)",
   "patterns": [
+    {
+      "comment": "html text",
+      "match": "\\<(?i:head|body|table|thead|tbody|tfoot|tr|div|select|fieldset|style|script|ul|ol|li|form|dl|span|img|h1|h2|h3|h4|h5|h6|rect|a|p|nav|header|footer)",
+          "captures": {
+            "1": { "name": "text.html" }
+          }
+    },
     {
       "include": "text.html.basic"
     },
