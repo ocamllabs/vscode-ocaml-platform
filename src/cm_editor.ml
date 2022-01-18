@@ -52,6 +52,7 @@ end
 let resolveCustomEditor instance ~document ~webviewPanel ~token:_ :
     unit Promise.t =
   let open Promise.Syntax in
+  let disposables = Stack.create () in
   let update_content document =
     let+ content = Cm_document.content document ~instance in
     match content with
@@ -71,17 +72,20 @@ let resolveCustomEditor instance ~document ~webviewPanel ~token:_ :
       in
       ()
   in
-  let disposable =
+  let (_ : unit) =
     Cm_document.onDidChange document
       ~listener:(fun () ->
         let (_ : unit Promise.t) = update_content document in
         ())
       ()
+    |> Stack.push disposables
   in
-  let (_ : Disposable.t) =
+  let (_ : unit) =
     WebviewPanel.onDidDispose webviewPanel
-      ~listener:(fun () -> Disposable.dispose disposable)
+      ~listener:(fun () ->
+        Disposable.from (Stack.to_list disposables) |> Disposable.dispose)
       ()
+    |> Stack.push disposables
   in
   update_content document
 
