@@ -15,17 +15,24 @@
   "name": "HTML (Embedded OCaml)",
   "patterns": [
     {
-      "comment": "html text",
-      "match": "\\<(?i:head|body|table|thead|tbody|tfoot|tr|div|select|fieldset|style|script|ul|ol|li|form|dl|span|img|h1|h2|h3|h4|h5|h6|rect|a|p|nav|header|footer)",
-          "captures": {
-            "1": { "name": "text.html" }
-          }
+      "name": "source.embedded.ocaml",
+      "match": "(?<=<%)(.+)?(?=%>)",
+      "captures": {
+        "0": {
+          "name": "source.ocaml",
+           "patterns": [
+        {
+          "include": "source.ocaml"
+        }
+      ]
+        }
+      }
     },
-    {
-      "include": "text.html.basic"
-    },
-    {
+   {
       "include": "text.ocaml"
+    },
+    {
+      "include": "#html"
     },
     {
       "include": "source.ocaml"
@@ -84,9 +91,12 @@
 					]
 				},
 				{
-					"begin": "(?i)(^|\\G)\\s*(?=</?[a-zA-Z]+[^\\s/&gt;]*(\\s|$|/?>))",
+					"begin": "(?i)(^|\\G)\\s*(?=<\\/?[a-zA-Z]+[^\\s/&gt;]*(\\s|$|\\/?>))",
 					"patterns": [
 						{
+              "include": "text.ocaml"
+            },
+            {
 							"include": "text.html.derivative"
 						}
 					],
@@ -95,7 +105,10 @@
 				{
 					"begin": "(^|\\G)\\s*(?=(<[a-zA-Z0-9\\-](/?>|\\s.*?>)|</[a-zA-Z0-9\\-]>)\\s*$)",
 					"patterns": [
-						{
+            {
+              "include": "text.ocaml"
+            },
+            {
 							"include": "text.html.derivative"
 						}
 					],

@@ -3,38 +3,19 @@
   "name": "Embedded Ocaml",
   "patterns": [
     {
-      "begin": "<%+#",
-      "captures": {
-        "0": {
-          "name": "punctuation.definition.comment.eml"
-        }
-      },
-      "end": "//%>",
-      "name": "comment.block.eml"
-    },
-    {
-      "begin": "<%+(?!>)[-=]*",
-      "captures": {
-        "0": {
-          "name": "punctuation.section.embedded.ocaml"
-        }
-      },
-      "end": "-?%>",
       "name": "source.ocaml.embedded",
-      "patterns": [
-        {
-          "captures": {
-            "1": {
-              "name": "punctuation.definition.comment.ocaml"
-            }
-          },
-          "match": "(#).*?(?=-?%>)",
-          "name": "comment.line.number-sign.ocaml"
-        },
+      "match": "(?<=<%)(.+)?(?=%>)",
+      "captures": {
+        "0": {
+          "name": "source.ocaml",
+           "patterns": [
         {
           "include": "source.ocaml"
         }
       ]
+        }
+      }
+     
     }
   ],
   "scopeName": "text.ocaml"
