@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fix the detection of opam's root directory when no switch is detected (#831)
+
 - Warn if the extension sees not the latest OCaml-LSP version compatible with
   the OCaml distribution installed in the current sandbox.
 

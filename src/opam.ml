@@ -20,7 +20,9 @@ let make ?root () =
   | Error _, _ -> Promise.return None
   | Ok bin, Some root -> Promise.return (Some { bin; root })
   | Ok bin, None -> (
-    let var_root_cmd = Cmd.Spawn (Cmd.append bin [ "var"; "root" ]) in
+    let var_root_cmd =
+      Cmd.Spawn (Cmd.append bin [ "var"; "--global"; "root" ])
+    in
     let+ var_root_output = Cmd.output var_root_cmd in
     match var_root_output with
     | Error _ -> None
