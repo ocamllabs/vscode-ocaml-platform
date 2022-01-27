@@ -2215,6 +2215,14 @@ module TextDocumentContentProvider = struct
       [@@js.builder]]
 end
 
+module FileSystemWatcher = struct
+  include Interface.Make ()
+
+  module OnDidChange = Event.Make (Uri)
+
+  include [%js: val onDidChange : t -> OnDidChange.t [@@js.get]]
+end
+
 module Workspace = struct
   module OnDidChangeWorkspaceFolders = Event.Make (WorkspaceFolder)
   module OnDidOpenTextDocument = Event.Make (TextDocument)
@@ -2234,6 +2242,15 @@ module Workspace = struct
       [@@js.get "vscode.workspace.workspaceFolders"]
 
     val name : unit -> string or_undefined [@@js.get "vscode.workspace.name"]
+
+    val createFileSystemWatcher :
+         GlobPattern.t
+      -> ?ignoreCreateEvents:(bool[@js.default false])
+      -> ?ignoreChangeEvents:(bool[@js.default false])
+      -> ?ignoreDeleteEvents:(bool[@js.default false])
+      -> unit
+      -> FileSystemWatcher.t
+      [@@js.global "vscode.workspace.createFileSystemWatcher"]
 
     val workspaceFile : unit -> Uri.t or_undefined
       [@@js.get "vscode.workspace.workspaceFile"]
@@ -2308,6 +2325,26 @@ module TreeItemCollapsibleState = struct
     | Collapsed [@js 1]
     | Expanded [@js 2]
   [@@js.enum] [@@js]
+end
+
+module CustomDocument = struct
+  module type T = sig
+    include Js.T
+
+    val uri : t -> Uri.t
+
+    val dispose : t -> unit
+  end
+
+  include Interface.Make ()
+
+  include
+    [%js:
+    val uri : t -> Uri.t [@@js.get]
+
+    val dispose : t -> unit [@@js.call]
+
+    val create : uri:Uri.t -> dispose:(unit -> unit) -> t [@@js.builder]]
 end
 
 module TreeItemLabel = struct
@@ -2850,6 +2887,63 @@ module CustomTextEditorProvider = struct
       [@@js.builder]]
 end
 
+module CustomDocumentOpenContext = struct
+  include Interface.Make ()
+
+  include [%js: val backupId : t -> string or_undefined [@@js.get]]
+end
+
+module CustomReadonlyEditorProvider = struct
+  include Interface.Generic (Ojs) ()
+
+  module Make (T : CustomDocument.T) = struct
+    type t = T.t generic [@@js]
+
+    include
+      [%js:
+      val openCustomDocument :
+           t
+        -> uri:Uri.t
+        -> openContext:CustomDocumentOpenContext.t
+        -> token:CancellationToken.t
+        -> T.t Promise.t
+        [@@js.call]
+
+      val resolveCustomEditor :
+           t
+        -> document:T.t
+        -> webviewPanel:WebviewPanel.t
+        -> token:CancellationToken.t
+        -> unit Promise.t
+        [@@js.call]
+
+      val create :
+           resolveCustomEditor:
+             (   document:T.t
+              -> webviewPanel:WebviewPanel.t
+              -> token:CancellationToken.t
+              -> unit Promise.t)
+        -> openCustomDocument:
+             (   uri:Uri.t
+              -> openContext:CustomDocumentOpenContext.t
+              -> token:CancellationToken.t
+              -> T.t Promise.t)
+        -> t
+        [@@js.builder]]
+  end
+end
+
+module RegisterCustomEditorProviderOptions = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val supportsMultipleEditorsPerDocument : t -> bool or_undefined [@@js.get]
+
+    val create : ?supportsMultipleEditorsPerDocument:bool -> unit -> t
+      [@@js.builder]]
+end
+
 module Window = struct
   module OnDidChangeActiveTextEditor = Event.Make (TextEditor)
   module OnDidChangeVisibleTextEditors = Event.Make (Js.List (TextEditor))
@@ -2992,16 +3086,19 @@ module Window = struct
       -> WebviewPanel.t
       [@@js.global "vscode.window.createWebviewPanel"]
 
-    val registerCustomEditorProvider :
+    val registerCustomTextEditorProvider :
          viewType:string
-      -> provider:
-           ([ `CustomTextEditorProvider of CustomTextEditorProvider.t
-            | `CustomReadonlyEditorProvider of
-              CustomTextEditorProvider.t
-              (*TODO*)
-            | `CustomEditorProvider of CustomTextEditorProvider.t (*TODO*)
-            ]
-           [@js.union])
+      -> provider:CustomTextEditorProvider.t
+      -> ?options:RegisterCustomEditorProviderOptions.t
+      -> unit
+      -> Disposable.t
+      [@@js.global "vscode.window.registerCustomEditorProvider"]
+
+    val registerCustomReadonlyEditorProvider :
+         viewType:string
+      -> provider:Ojs.t
+      -> ?options:RegisterCustomEditorProviderOptions.t
+      -> unit
       -> Disposable.t
       [@@js.global "vscode.window.registerCustomEditorProvider"]]
 
@@ -3061,6 +3158,16 @@ module Window = struct
     let module TreeView = TreeView.Make (T) in
     let options = [%js.of: TreeViewOptions.t] options in
     [%js.to: TreeView.t] (createTreeView ~viewId ~options)
+
+  let registerCustomReadonlyEditorProvider (type a)
+      (module T : CustomDocument.T with type t = a) ~(viewType : string)
+      ~(provider : a CustomReadonlyEditorProvider.t)
+      ?(options : RegisterCustomEditorProviderOptions.t or_undefined) () :
+      Disposable.t =
+    let module CustomReadonlyEditorProvider =
+      CustomReadonlyEditorProvider.Make (T) in
+    let provider = [%js.of: CustomReadonlyEditorProvider.t] provider in
+    registerCustomReadonlyEditorProvider ~viewType ~provider ?options ()
 end
 
 module Commands = struct

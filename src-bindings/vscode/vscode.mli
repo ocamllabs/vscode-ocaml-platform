@@ -782,6 +782,20 @@ module CancellationToken : sig
     -> t
 end
 
+module CustomDocument : sig
+  module type T = sig
+    include Js.T
+
+    val uri : t -> Uri.t
+
+    val dispose : t -> unit
+  end
+
+  include T
+
+  val create : uri:Uri.t -> dispose:(unit -> unit) -> t
+end
+
 module QuickPickItem : sig
   include Js.T
 
@@ -1702,10 +1716,24 @@ module TextDocumentContentProvider : sig
     -> t
 end
 
+module FileSystemWatcher : sig
+  include Js.T
+
+  val onDidChange : t -> Uri.t Event.t
+end
+
 module Workspace : sig
   val workspaceFolders : unit -> WorkspaceFolder.t list
 
   val name : unit -> string option
+
+  val createFileSystemWatcher :
+       GlobPattern.t
+    -> ?ignoreCreateEvents:bool
+    -> ?ignoreChangeEvents:bool
+    -> ?ignoreDeleteEvents:bool
+    -> unit
+    -> FileSystemWatcher.t
 
   val workspaceFile : unit -> Uri.t option
 
@@ -2168,6 +2196,55 @@ module CustomTextEditorProvider : sig
     -> t
 end
 
+module CustomDocumentOpenContext : sig
+  include Js.T
+
+  val backupId : t -> string or_undefined
+end
+
+module CustomReadonlyEditorProvider : sig
+  type 'a t
+
+  module Make (T : CustomDocument.T) : sig
+    type nonrec t = T.t t
+
+    val openCustomDocument :
+         t
+      -> uri:Uri.t
+      -> openContext:CustomDocumentOpenContext.t
+      -> token:CancellationToken.t
+      -> T.t Promise.t
+
+    val resolveCustomEditor :
+         t
+      -> document:T.t
+      -> webviewPanel:WebviewPanel.t
+      -> token:CancellationToken.t
+      -> unit Promise.t
+
+    val create :
+         resolveCustomEditor:
+           (   document:T.t
+            -> webviewPanel:WebviewPanel.t
+            -> token:CancellationToken.t
+            -> unit Promise.t)
+      -> openCustomDocument:
+           (   uri:Uri.t
+            -> openContext:CustomDocumentOpenContext.t
+            -> token:CancellationToken.t
+            -> T.t Promise.t)
+      -> t
+  end
+end
+
+module RegisterCustomEditorProviderOptions : sig
+  include Js.T
+
+  val supportsMultipleEditorsPerDocument : t -> bool or_undefined
+
+  val create : ?supportsMultipleEditorsPerDocument:bool -> unit -> t
+end
+
 module Window : sig
   val activeTextEditor : unit -> TextEditor.t option
 
@@ -2278,13 +2355,19 @@ module Window : sig
     -> showOptions:ViewColumn.t
     -> WebviewPanel.t
 
-  val registerCustomEditorProvider :
+  val registerCustomTextEditorProvider :
        viewType:string
-    -> provider:
-         [ `CustomTextEditorProvider of CustomTextEditorProvider.t
-         | `CustomReadonlyEditorProvider of CustomTextEditorProvider.t (*TODO*)
-         | `CustomEditorProvider of CustomTextEditorProvider.t (*TODO*)
-         ]
+    -> provider:CustomTextEditorProvider.t
+    -> ?options:RegisterCustomEditorProviderOptions.t
+    -> unit
+    -> Disposable.t
+
+  val registerCustomReadonlyEditorProvider :
+       (module CustomDocument.T with type t = 'a)
+    -> viewType:string
+    -> provider:'a CustomReadonlyEditorProvider.t
+    -> ?options:RegisterCustomEditorProviderOptions.t
+    -> unit
     -> Disposable.t
 end
 

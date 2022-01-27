@@ -4,6 +4,14 @@
 
 - Fix the detection of opam's root directory when no switch is detected (#831)
 
+- Add support for opening compilation artifacts in human-readable form in the
+  editor (#798)
+
+  Currently supported artifacts include `.cmi`, `.cmt(i)`, `.cmo`, `.cma`,
+  `.cmx(a/s)`, and `.bc` files.
+
+  To learn more about these files, see: https://ocaml.org/manual/comp.html
+
 - Warn if the extension sees not the latest OCaml-LSP version compatible with
   the OCaml distribution installed in the current sandbox.
 

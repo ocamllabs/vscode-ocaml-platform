@@ -599,13 +599,12 @@ let register extension instance =
   Vscode.ExtensionContext.subscribe extension ~disposable;
   (*Register custom editor provider that is the AST explorer. *)
   let editorProvider =
-    `CustomEditorProvider
-      (CustomTextEditorProvider.create
-         ~resolveCustomTextEditor:(resolveCustomTextEditor instance))
+    CustomTextEditorProvider.create
+      ~resolveCustomTextEditor:(resolveCustomTextEditor instance)
   in
   let disposable =
-    Vscode.Window.registerCustomEditorProvider ~viewType:"ast-editor"
-      ~provider:editorProvider
+    Vscode.Window.registerCustomTextEditorProvider ~viewType:"ast-editor"
+      ~provider:editorProvider ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable;
   (*Register listener that monitors closing documents. *)
