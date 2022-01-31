@@ -117,8 +117,10 @@ The new ReScript syntax (`res` and `resi` files) is not supported, you should
 use [rescript-vscode](https://github.com/rescript-lang/rescript-vscode) instead.
 
 If you're looking for a way to use OCaml or ReasonML syntax in a ReScript
-project, you'll need to install `ocaml-lsp` in your environment. We recommend
-using Esy for this:
+project, it is no longer supported by this extension.
+
+If you need to compile existing OCaml or ReasonML syntax to JS and use
+ocaml-lsp-server, you can use [Melange](https://github.com/melange-re/melange):
 
 1. Install esy
 
@@ -126,15 +128,15 @@ using Esy for this:
 npm install esy --global
 ```
 
-2. Add `esy.json` to the project root with following content:
+2. You can use the
+   [Melange basic template](https://github.com/melange-re/melange-basic-template)
+   to add OCaml LSP support. . Then modify esy.json to pin ocaml-lsp-server to
+   version 1.8.3 due to lack of Merlin support in newer versions.
 
 ```json
 {
   "dependencies": {
-    "@opam/ocaml-lsp-server": "*",
-    "@opam/ocamlfind-secondary": "*",
-    "@opam/reason": "*",
-    "ocaml": "4.6.x"
+    "@opam/ocaml-lsp-server": "1.8.3"
   }
 }
 ```
