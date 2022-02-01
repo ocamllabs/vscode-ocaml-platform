@@ -4,8 +4,8 @@
 
 - Dune syntax highlighting fix (#742)
 
-  The syntax for dune file has been re-written from scratch to implement a more correct syntax.
-  Every dune stanza is now supported, and only the correct fields in each of the stanza is recognized.
+  The syntax for dune files has been re-written from scratch for a more correct implementation.
+  Every dune stanza documented by Dune is now supported, and only the correct fields in each stanza are recognized.
 
 - Fix the detection of opam's root directory when no switch is detected (#831)
 
