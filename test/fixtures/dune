@@ -1,0 +1,461 @@
+; This is a file to test the dune syntax.
+; It contains most of the dune syntax supported
+; Update this file if you find a bug.
+
+(jbuild_version 1.0)
+
+(library
+ ;; Test inner comment
+ (public_name
+  ; Test inner comment
+  name)
+ (package package)
+ (synopsis "string")
+ (modules modules)
+ (libraries library_dependencies)
+ (wrapped boolean)
+ (wrapped
+  (transition message))
+ (preprocess preprocess_spec)
+ (deps c)
+ (preprocessor_deps
+  (deps_conf list))
+ (optional)
+ (foreign_stubs
+  (language c)
+  (names fsevents))
+ (foreign_archives arch1 some/dir/arch2)
+ (install_c_headers (names))
+ (modes modes)
+ (no_dynlink)
+ (kind kind)
+ (ppx_runtime_libraries (library_names))
+ (virtual_deps (opam_packages))
+ (js_of_ocaml
+  (flags flags)
+  (javascript_files (files_list)))
+ (flags -ocaml-option)
+ (ocamlc_flags (flags))
+ (ocamlopt_flags (flags))
+ (library_flags (flags))
+ (c_library_flags flags)
+ (modules_without_implementation modules)
+ (private_modules modules)
+ (allow_overlapping_dependencies)
+ (enabled_if
+  (and
+   %{ocamlc-config:flambda}
+   (= %{ocamlc-config:system} macosx)))
+ (root_module module)
+ (inline_tests
+  (backend backend_foo)
+  (executable (flags))))
+
+(executable
+ (public_name name)
+ (package package)
+ (synopsis "string")
+ (modules modules)
+ (libraries library_dependencies)
+ (wrapped true)
+ (wrapped
+  (transition message))
+ (preprocess preprocess_spec)
+ (deps c)
+ (preprocessor_deps
+  (deps_conf list))
+ (optional)
+ (foreign_archives arch1 some/dir/arch2)
+ (install_c_headers (names))
+ (modes modes)
+ (no_dynlink)
+ (kind kind)
+ (ppx_runtime_libraries (library_names))
+ (virtual_deps (opam_packages))
+ (js_of_ocaml
+  (flags flags)
+  (javascript_files (files_list)))
+ (flags (flags))
+ (ocamlc_flags (flags))
+ (ocamlopt_flags (flags))
+ (library_flags
+  (:include flags/sexp))
+ (foreign_stubs
+  (language c)
+  (names fsevents_stubs))
+ (c_library_flags flags)
+ (modules_without_implementation modules)
+ (private_modules modules)
+ (allow_overlapping_dependencies)
+ (enabled_if
+  (and
+   %{ocamlc-config:flambda}
+   (= %{ocamlc-config:system} macosx)))
+ (root_module module)
+ (inline_tests
+  (backend backend_foo)
+  (executable (flags))))
+
+(executables
+ (names name)
+ (package package)
+ (synopsis "string")
+ (modules modules)
+ (libraries library_dependencies)
+ (wrapped boolean)
+ (wrapped
+  (transition message))
+ (preprocess preprocess_spec)
+ (deps c)
+ (preprocessor_deps
+  (deps_conf list))
+ (optional)
+ (foreign_archives arch1 some/dir/arch2)
+ (install_c_headers (names))
+ (modes modes)
+ (no_dynlink)
+ (kind kind)
+ (ppx_runtime_libraries (library_names))
+ (virtual_deps (opam_packages))
+ (js_of_ocaml
+  (flags flags)
+  (javascript_files (files_list)))
+ (flags (flags))
+ (ocamlc_flags (flags))
+ (ocamlopt_flags (flags))
+ (library_flags
+  (:include flags/sexp))
+ (foreign_stubs
+  (language c)
+  (names fsevents_stubs))
+ (c_library_flags flags)
+ (modules_without_implementation modules)
+ (private_modules modules)
+ (allow_overlapping_dependencies)
+ (enabled_if
+  (and
+   %{ocamlc-config:flambda}
+   (= %{ocamlc-config:system} macosx)))
+ (root_module module)
+ (inline_tests
+  (backend backend_foo)
+  (executable (flags))))
+
+(test
+ (public_name name)
+ (package package)
+ (synopsis "string")
+ (modules modules)
+ (libraries library_dependencies)
+ (wrapped boolean)
+ (wrapped
+  (transition message))
+ (preprocess preprocess_spec)
+ (deps c)
+ (preprocessor_deps
+  (deps_conf list))
+ (optional)
+ (foreign_archives arch1 some/dir/arch2)
+ (install_c_headers (names))
+ (modes modes)
+ (no_dynlink)
+ (kind kind)
+ (ppx_runtime_libraries (library_names))
+ (virtual_deps (opam_packages))
+ (js_of_ocaml
+  (flags flags)
+  (javascript_files (files_list)))
+ (flags (flags))
+ (ocamlc_flags (flags))
+ (ocamlopt_flags (flags))
+ (library_flags
+  (:include flags/sexp))
+ (foreign_stubs
+  (language c)
+  (names fsevents_stubs))
+ (c_library_flags flags)
+ (modules_without_implementation modules)
+ (private_modules modules)
+ (allow_overlapping_dependencies)
+ (enabled_if
+  (and
+   %{ocamlc-config:flambda}
+   (= %{ocamlc-config:system} macosx)))
+ (root_module module)
+ (inline_tests
+  (backend backend_foo)
+  (executable (flags))))
+
+(foreign_library
+ (archive_name arch1)
+ (language c)
+ (names src4 src5)
+ (include_dir headers))
+
+(deprecated_library_name
+ (old_public_name name)
+ (new_public_name name))
+
+(rule
+ (target foo.ml)
+ (action
+  (run %{deps} _o %{target}))
+ (deps generator/gen.exe)
+ (mode
+  (promote
+   (until_clean)
+   (into dir)))
+ (fallback)
+ (locks (lock_names))
+ (alias alias_name)
+ (package package)
+ (enabled_if
+  (and
+   %{ocamlc-config:flambda}
+   (= %{ocamlc-config:system} macosx))))
+
+(rule
+ (target b)
+ (deps a)
+ (action
+  (copy
+   ; Listing all the variables supported by dune   
+   %{project_root}
+   %{workspace_root}
+   %{CC}
+   %{CXX}
+   %{ocaml_bin}
+   %{ocaml}
+   %{ocamlc}
+   %{ocamlopt}
+   %{ocaml_version}
+   %{ocaml_where}
+   %{arch_sixtyfour}
+   %{null}
+   %{ext_obj}
+   %{ext_asm}
+   %{ext_lib}
+   %{ext_dll}
+   %{ext_exe}
+   %{ext_plugin}
+   %{ocaml-config:v}
+   %{profile}
+   %{context_name}
+   %{os_type}
+   %{architecture}
+   %{model}
+   %{system}
+   %{ignoring_promoted_rule}
+   %{cmo:/path}
+   %{cmi:/path}
+   %{cma:/path}
+   %{cmx:/path}
+   %{cmxa:/path}
+   ; These are only supported by action
+   targets
+   %{deps}
+   %{^}
+   %{dep:<path>}
+   %{exe:<path>}
+   %{bin:<program>}
+   %{lib:<public-library-name>:<file>}
+   %{lib-private:<library-name>:<file>}
+   %{libexec:<public-library-name>:<file>}
+   %{libexec-private:<library-name>:<file>}
+   %{lib-available:<library-name>}
+   %{version:<package>}
+   %{read:<path>}
+   %{read-lines:<path>}
+   %{read-strings:<path>}
+   ; These don't exist
+   %{test}
+   %{error})))
+
+(ocamllex
+ (modules names)
+ (mode mode))
+
+(ocamlyacc
+ (modules names)
+ (mode mode))
+
+(menhir
+ (modules parser1 parser2 ...)
+ (merge_into base_name)
+ (flags option1 option2 ...)
+ (infer bool))
+
+(cinaps
+ (files f1.mli f2.ml)
+ (libraries lsp_gen))
+
+(documentation
+ (package name)
+ (mld_files f1.mld f2.mld))
+
+(alias
+ (name alias_name)
+ (deps deps_conf list)
+ (action
+  (run %{exe:my_test_program.exe} blah))
+ (package name)
+ (locks (lock_names))
+ (enabled_if
+  (and
+   %{ocamlc-config:flambda}
+   (= %{ocamlc-config:system} macosx))))
+
+(install
+ (lib file)
+ (lib_root file)
+ (libexec file)
+ (libexec_root file)
+ (bin file)
+ (sbin file)
+ (toplevel file)
+ (share file)
+ (share_root file)
+ (etc file)
+ (doc file)
+ (stublibs file)
+ (man file)
+ (misc file)
+ (site
+  (<package> <site>))
+ (files
+  (mylib.el as emacs/site-lisp/mylib.el)))
+
+(copy_files
+ (alias <alias-name>)
+ (mode <mode>)
+ (enabled_if
+  <
+  (and
+   %{ocamlc-config:flambda}
+   (= %{ocamlc-config:system} macosx))
+  >)
+ (files glob))
+
+(include dune.inc)
+
+(rule
+ (with-stdout-to
+  dune.inc.gen
+  (run %{bin:dune} help config --man-format=groff)))
+
+(rule
+ (alias runtest)
+ (action
+  (diff dune.inc dune.inc.gen)))
+
+(tests
+ (names mytest)
+ (libraries alcotest mylib)
+ (action
+  (run %{test} _e)))
+
+(test
+ (name foo)
+ (libraries alcotest mylib)
+ (action
+  (run %{test} _e)))
+
+(env
+ (profile1
+  (flags <flags>)
+  (ocamlc_flags <flags>)
+  (ocamlopt_flags <flags>)
+  (c_flags <flags>)
+  (cxx_flags <flags>)
+  (env-vars
+   (<var1> <val1>)
+   (<varN> <valN>))
+  (menhir_flags <flags>)
+  (binaries
+   bin/foo.exe
+   (bin/main.exe as bar))
+  (inline_tests enabled)
+  (odoc <fields>)
+  (coq
+   (flags <flags>))
+  (formatting
+   disabled
+   (enabled_for ocaml))))
+
+(dirs *)
+
+(dirs :standard \ ocaml test*)
+
+(data_only_dirs fixtures_*)
+
+(ignored_subdirs
+ (sub_dir1 sub_dir2 ...))
+
+(vendored_dirs vendor)
+
+(include_subdirs qualified)
+
+(include_subdirs unqualified)
+
+(include_subdirs
+ ; This qualified does not exist
+ error)
+
+(toplevel
+ (name tt)
+ (libraries str))
+
+(subdir
+ foo
+ (rule
+  (with-stdout-to
+   bar
+   (echo baz))))
+
+(using coq 0.2)
+
+(coq.theory
+ (name module_prefix)
+ (package package)
+ (synopsis text)
+ (modules ordered_set_lang)
+ (libraries ocaml_libraries)
+ (flags coq_flags)
+ (mode coq_native_mode)
+ (theories coq_theories))
+
+(coq.pp
+ (modules mlg_list))
+
+(coq.extraction
+ (prelude name)
+ (extracted_modules names)
+ (flags test)
+ (theories test)
+ (libraries test)
+ ; Does not exist
+ (mode coq_native_mode)
+ (public_name name))
+
+(using mdx 0.1)
+
+(mdx
+ (files test)
+ (packages test)
+ (preludes test))
+
+(plugin
+ (name name)
+ (libraries libaries)
+ (site
+  (package site name))
+ (package test)
+ (optional))
+
+(generate_sites_module
+ (module name)
+ (sourceroot)
+ (relocatable)
+ (sites)
+ (plugins
+  (package site)))

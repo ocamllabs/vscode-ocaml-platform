@@ -24,3 +24,6 @@ node_modules/
 dist/
 .vscode-test/
 *.vsix
+
+# DS_Store
+.DS_Store

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Dune syntax highlighting fix (#742)
+
+  The syntax for dune files has been re-written from scratch for a more correct implementation.
+  Every dune stanza documented by Dune is now supported, and only the correct fields in each stanza are recognized.
+
 - Fix the detection of opam's root directory when no switch is detected (#831)
 
 - Add support for opening compilation artifacts in human-readable form in the
