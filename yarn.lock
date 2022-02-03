@@ -7,10 +7,10 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
   integrity sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==
 
-"@types/vscode@1.57.0":
-  version "1.57.0"
-  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.57.0.tgz#cc648e0573b92f725cd1baf2621f8da9f8bc689f"
-  integrity sha512-FeznBFtIDCWRluojTsi9c3LLcCHOXP5etQfBK42+ixo1CoEAchkw39tuui9zomjZuKfUVL33KZUDIwHZ/xvOkQ==
+"@types/vscode@1.63.2":
+  version "1.63.2"
+  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.63.2.tgz#1ee18eb7b1c1075b28a08afeb0910db915271613"
+  integrity sha512-awvdx4vX7SkMKyvWIlRjycjb4blYRSQI3Bav0YMn+lJLGN6gJgb20urN/dQCv/2ejDu5S6ADEBt6O15DOpIAkg==
 
 "@ungap/promise-all-settled@1.1.2":
   version "1.1.2"
