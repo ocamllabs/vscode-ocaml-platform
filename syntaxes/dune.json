@@ -253,7 +253,7 @@
                       "name": "keyword.language.dune"
                     }
                   },
-                  "patterns":[
+                  "patterns": [
                     {
                       "include": "#general"
                     }
@@ -278,7 +278,7 @@
                           "name": "keyword.language.dune"
                         }
                       },
-                      "patterns":[
+                      "patterns": [
                         {
                           "include": "#general"
                         }
@@ -318,7 +318,7 @@
                   "name": "keyword.language.dune"
                 }
               },
-              "patterns":[
+              "patterns": [
                 {
                   "include": "#general"
                 }
@@ -1898,7 +1898,7 @@
               "name": "keyword.language.dune"
             }
           },
-          "patterns":[
+          "patterns": [
             {
               "include": "#general"
             }
@@ -1914,7 +1914,7 @@
             }
           },
           "contentName": "variable.declaration.other.dune",
-          "patterns":[
+          "patterns": [
             {
               "include": "#general"
             }
@@ -1929,7 +1929,7 @@
               "name": "keyword.language.dune"
             }
           },
-          "patterns":[
+          "patterns": [
             {
               "include": "#general"
             }
@@ -2831,7 +2831,7 @@
               "match": "\\b(select|from)\\b",
               "name": "constant.language.dune",
               "contentName": "variable.declaration.other.dune",
-              "patterns":[
+              "patterns": [
                 {
                   "include": "#general"
                 }
@@ -2879,7 +2879,7 @@
           "comment": "preprocess/no_preprocessing",
           "match": "\\b(no_preprocessing)\\b",
           "name": "constant.language.dune",
-          "patterns":[
+          "patterns": [
             {
               "include": "#general"
             }
@@ -2889,7 +2889,7 @@
           "comment": "preprocess/future_syntax",
           "match": "\\b(future_syntax)\\b",
           "name": "constant.language.dune",
-          "patterns":[
+          "patterns": [
             {
               "include": "#general"
             }
