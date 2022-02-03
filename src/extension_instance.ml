@@ -79,6 +79,19 @@ end = struct
            "Sandbox initialization failed: `ocaml-lsp-server` is not installed \
             in the current sandbox.")
 
+  let client_capabilities =
+    let fillClientCapabilities ~capabilities =
+      let experimental =
+        Jsonoo.Encode.(object_ [ ("jumpToNextHole", bool true) ])
+      in
+      LanguageClient.ClientCapabilities.set_experimental capabilities
+        (Some experimental)
+    in
+    let initialize ~capabilities:_ ~documentSelector:_ = () in
+    let dispose () = () in
+    LanguageClient.StaticFeature.make ~fillClientCapabilities ~initialize
+      ~dispose ()
+
   let start_language_server t =
     stop_server t;
     let open Promise.Syntax in
@@ -91,6 +104,7 @@ end = struct
         LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
           ~serverOptions ~clientOptions ()
       in
+      LanguageClient.registerFeature client ~feature:client_capabilities;
       LanguageClient.start client;
       let open Promise.Syntax in
       let+ initialize_result = LanguageClient.ready_initialize_result client in
