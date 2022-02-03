@@ -143,6 +143,38 @@ end
 
 module ServerOptions = Executable
 
+module ClientCapabilities = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val experimental : t -> Jsonoo.t or_undefined [@@js.get]
+
+    val set_experimental : t -> Jsonoo.t or_undefined -> unit [@@js.set]]
+end
+
+module InitializeParams = struct
+  include Interface.Make ()
+end
+
+module StaticFeature = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val make :
+         ?fillInitializeParams:(params:InitializeParams.t -> unit)
+      -> fillClientCapabilities:(capabilities:ClientCapabilities.t -> unit)
+      -> initialize:
+           (   capabilities:ServerCapabilities.t
+            -> documentSelector:DocumentSelector.t or_undefined
+            -> unit)
+      -> dispose:(unit -> unit)
+      -> unit
+      -> t
+      [@@js.builder]]
+end
+
 module LanguageClient = struct
   include Class.Make ()
 
@@ -173,7 +205,9 @@ module LanguageClient = struct
       -> ?token:Vscode.CancellationToken.t
       -> unit
       -> Jsonoo.t Promise.t
-      [@@js.call]]
+      [@@js.call]
+
+    val registerFeature : t -> feature:StaticFeature.t -> unit [@@js.call]]
 
   let ready_initialize_result t =
     let open Promise.Syntax in
