@@ -67,6 +67,9 @@
 - Show a different icon for the currently active OPAM switch in the "OPAM
   Switches" tree view (#751)
 
+- Formatting dune-related files may be disabled using the `ocaml.dune.format`
+  setting.
+
 ## 1.8.4
 
 - Fix inclusion of files in extension package
