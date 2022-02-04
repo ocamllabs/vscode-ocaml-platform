@@ -1,6 +1,11 @@
 open Import
 
-let get_formatter instance ~document ~options:_ ~token:_ =
+(** Controls whether to format dune files or not. *)
+let format_setting =
+  Settings.create_setting ~scope:Workspace ~key:"dune.format"
+    ~of_json:Jsonoo.Decode.bool ~to_json:Jsonoo.Encode.bool
+
+let get_formatter_unconditionally instance ~document =
   let endLine = TextDocument.lineCount document - 1 in
   let endCharacter =
     TextDocument.lineAt document ~line:endLine |> TextLine.text |> String.length
@@ -30,6 +35,15 @@ let get_formatter instance ~document ~options:_ ~token:_ =
       Some []
   in
   `Promise promise
+
+let get_formatter instance ~document ~options:_ ~token:_ =
+  let should_format =
+    Option.value ~default:true (Settings.get ~section:"ocaml" format_setting)
+  in
+  if should_format then
+    get_formatter_unconditionally instance ~document
+  else
+    `Promise (Promise.return None)
 
 let register extension instance =
   [ "dune"; "dune-project"; "dune-workspace" ]
