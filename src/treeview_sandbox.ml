@@ -86,9 +86,7 @@ module Command = struct
         let* odig = Odig.of_sandbox sandbox in
         match odig with
         | Error error ->
-          let (_ : 'a option Promise.t) =
-            Window.showErrorMessage ~message:error ()
-          in
+          show_message `Error "%s" error;
           Promise.resolve ()
         | Ok odig -> (
           let arg = List.hd_exn args in
@@ -108,13 +106,8 @@ module Command = struct
           in
           match result with
           | Error _ ->
-            let (_ : 'a option Promise.t) =
-              Window.showErrorMessage
-                ~message:
-                  (Printf.sprintf "Error while generating documentation for %s"
-                     package_name)
-                ()
-            in
+            show_message `Error "Error while generating documentation for %s"
+              package_name;
             Promise.resolve ()
           | Ok _ -> (
             let start_server () =
@@ -140,9 +133,7 @@ module Command = struct
             let+ port = start_server () in
             match port with
             | Error e ->
-              let (_ : 'a option Promise.t) =
-                Window.showErrorMessage ~message:e ()
-              in
+              show_message `Error "%s" e;
               ()
             | Ok port ->
               let (_ : Ojs.t option Promise.t) =
