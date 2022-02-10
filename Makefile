@@ -2,7 +2,7 @@
 
 .PHONY: all
 all:
-	opam exec -- dune build --root .
+	dune build --root .
 
 .PHONY: deps
 deps: ## Install development dependencies
@@ -20,7 +20,7 @@ switch: create_switch deps ## Create an opam switch and install development depe
 
 .PHONY: build
 build: ## Build the project
-	opam exec -- dune build src/vscode_ocaml_platform.bc.js
+	dune build src/vscode_ocaml_platform.bc.js
 	yarn --cwd astexplorer start
 	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
@@ -32,7 +32,7 @@ build: ## Build the project
 
 .PHONY: build-release
 build-release:
-	opam exec -- dune build src/vscode_ocaml_platform.bc.js --profile=release
+	dune build src/vscode_ocaml_platform.bc.js --profile=release
 	yarn --cwd astexplorer build
 	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
@@ -47,26 +47,26 @@ build-release:
 
 .PHONY: test
 test: ## Run the unit tests
-	opam exec -- dune build --root . @runtest
+	dune build --root . @runtest
 	yarn test
 
 .PHONY: clean
 clean: ## Clean build artifacts and other generated files
-	opam exec -- dune clean --root .
+	dune clean --root .
 	rm -r dist/
 
 .PHONY: doc
 doc: ## Generate odoc documentation
-	opam exec -- dune build --root . @doc
+	dune build --root . @doc
 
 .PHONY: fmt
 fmt: ## Format the codebase with ocamlformat
-	opam exec -- dune build --root . --auto-promote @fmt
+	dune build --root . --auto-promote @fmt
 	yarn fmt
 
 .PHONY: watch
 watch: ## Watch for the filesystem and rebuild on every change
-	opam exec -- dune build @all -w --terminal-persistence=clear-on-rebuild
+	dune build @all -w --terminal-persistence=clear-on-rebuild
 
 .PHONY: pkg
 pkg: build # Builds and packages the extension for installment
