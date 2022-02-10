@@ -8,7 +8,7 @@ let
     sha256 = "z/Ly7GpHjJVNBDyoFWmahcRrrx8fKNB9xflARkNcNb0=";
   };
   args = {
-    inherit (pkgs.ocaml-ng.ocamlPackages_4_12) ocaml;
+    inherit (pkgs.ocaml-ng.ocamlPackages_4_13) ocaml;
     selection = ./opam-selection.nix;
     src =
       let

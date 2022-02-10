@@ -13,6 +13,6 @@ pkgs.mkShell {
     nodejs-14_x
     gnumake
     ocamlformat_0_19_0
-    ocamlPackages.ocaml-lsp
+    ocaml-ng.ocamlPackages_4_13.ocaml-lsp
   ]);
 }
