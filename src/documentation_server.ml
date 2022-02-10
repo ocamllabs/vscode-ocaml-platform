@@ -2,33 +2,32 @@ open Import
 
 type t = Polka.Server.t
 
+(** [debouncing_middleware ~timeout_in_ms f] on every request schedules [f] to
+    be run in [timeout_in_ms] milliseconds; on every new request the last
+    scheduled timeout is overridden *)
+let debouncing_middleware ~timeout_in_ms f =
+  let timeout = ref None in
+  fun ~request:_ ~response:_ ~next ->
+    (* on every request, we clear previous timeout and set a new one *)
+    Option.iter !timeout ~f:Node.clearTimeout;
+    timeout := Some (Node.setTimeout f timeout_in_ms);
+    next ()
+
 let start ~path ?(port = 0) () =
   Promise.make @@ fun ~resolve ~reject:_ ->
   let polka = Polka.create () in
-
-  let timeout_ref = ref None in
-
-  let timeout_middleware ~request:_ ~response:_ ~next =
-    let () =
-      Option.iter !timeout_ref ~f:Node.clearTimeout;
-      timeout_ref :=
-        Some
-          (Node.setTimeout
-             (fun () ->
-               let (_ : Polka.Server.t) =
-                 Polka.Server.close (Polka.server polka)
-               in
-               ())
-             (* 10 minutes (in ms) *)
-             (60 * 10 * 1000))
-    in
-    next ()
+  let debouncing_server_termination_mdlw =
+    debouncing_middleware
+      ~timeout_in_ms:(60 * 10 * 1000)
+      (fun () ->
+        ignore @@ (Polka.Server.close (Polka.server polka) : Polka.Server.t))
   in
-
   let serve =
     polka
     |> Polka.use
-         [ timeout_middleware; Polka.Sirv.serve (path |> Path.to_string) ]
+         [ debouncing_server_termination_mdlw
+         ; Polka.Sirv.serve (path |> Path.to_string)
+         ]
     |> Polka.listen port ~callback:(fun () ->
            let server = Polka.server polka in
            resolve (Ok server))
