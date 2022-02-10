@@ -79,3 +79,7 @@ install: pkg # Builds, packages, and installs the extension to your VS Code
 .PHONY: nix/opam-selection.nix
 nix/opam-selection.nix:
 	nix-shell -A resolve default.nix
+
+.PHONY:
+nix-tests:
+	dune build @runtest @all
