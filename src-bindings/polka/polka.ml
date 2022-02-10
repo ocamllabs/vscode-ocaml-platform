@@ -13,7 +13,7 @@ module Server = struct
     [%js:
     val close : t -> t [@@js.call]
 
-    val address : t -> Address.t [@@js.call]
+    val address : t -> Address.t or_undefined [@@js.call]
 
     val on : t -> string -> Ojs.t -> unit [@@js.call]]
 

@@ -11,7 +11,9 @@ module Server : sig
 
   val close : t -> t
 
-  val address : t -> Address.t
+  val address : t -> Address.t or_undefined
+  (* TODO: the return type can also be a string in case the server uses a pipe
+     or Unix Domain Socket, but we don't handle that case *)
 
   val on :
        t
