@@ -170,8 +170,7 @@ end = struct
           "The extension requires a newer version of `ocamllsp`, which needs a \
            new version of OCaml. Please, consider upgrading the OCaml version \
            used in this sandbox."
-        else
-          "Consider upgrading the package `ocaml-lsp-server`."
+        else "Consider upgrading the package `ocaml-lsp-server`."
       | Error (`Msg m) ->
         sprintf "There is something wrong with your `ocamllsp`. Error: %s" m
     in
@@ -243,8 +242,7 @@ end = struct
             | [] -> prev_range
             | range :: rest -> (
               if Range.contains range ~positionOrRange:(`Position current_pos)
-              then
-                prev_range
+              then prev_range
               else
                 let start = Range.start range in
                 match Position.compare current_pos start with
@@ -322,8 +320,7 @@ end = struct
       | [] -> Ok default_args
       | [ params_obj ] ->
         let json = Jsonoo.t_of_js params_obj in
-        if args_use_old_protocol json then
-          Error `Outdated_protocol
+        if args_use_old_protocol json then Error `Outdated_protocol
         else
           let in_range =
             Jsonoo.Decode.(try_optional (field "inRange" Range.t_of_json)) json

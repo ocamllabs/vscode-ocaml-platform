@@ -343,8 +343,7 @@ module TextEditorEdit = struct
       `Position ([%js.to: Position.t] js_val)
     else if Ojs.has_property js_val "start" then
       `Range ([%js.to: Range.t] js_val)
-    else
-      `Selection ([%js.to: Selection.t] js_val)
+    else `Selection ([%js.to: Selection.t] js_val)
 
   type deleteLocation =
     ([ `Range of Range.t
@@ -356,8 +355,7 @@ module TextEditorEdit = struct
   let deleteLocation_of_js js_val =
     if Ojs.has_property js_val "anchor" then
       `Selection ([%js.to: Selection.t] js_val)
-    else
-      `Range ([%js.to: Range.t] js_val)
+    else `Range ([%js.to: Range.t] js_val)
 
   include
     [%js:
@@ -620,8 +618,7 @@ module DecorationOptions = struct
   let hoverMessage_of_js js_val =
     if Ojs.has_property js_val "value" then
       `MarkdownString ([%js.to: MarkdownString.t] js_val)
-    else
-      `MarkdownStrings ([%js.to: MarkdownString.t list] js_val)
+    else `MarkdownStrings ([%js.to: MarkdownString.t list] js_val)
 
   include
     [%js:
@@ -1096,8 +1093,7 @@ module ProviderResult = struct
   let t_of_js ml_of_js js_val =
     if Ojs.has_property js_val "then" then
       `Promise (Promise.t_of_js (or_undefined_of_js ml_of_js) js_val)
-    else
-      `Value (or_undefined_of_js ml_of_js js_val)
+    else `Value (or_undefined_of_js ml_of_js js_val)
 end
 
 module InputBoxOptions = struct
@@ -1452,8 +1448,7 @@ module Terminal = struct
   let creationOptions_of_js js_val =
     if Ojs.has_property js_val "pty" then
       `ExtensionTerminalOptions ([%js.to: ExtensionTerminalOptions.t] js_val)
-    else
-      `TerminalOptions ([%js.to: TerminalOptions.t] js_val)
+    else `TerminalOptions ([%js.to: TerminalOptions.t] js_val)
 
   include
     [%js:
@@ -1887,12 +1882,10 @@ module DocumentSelector = struct
   [@@js]
 
   let t_of_js js_val =
-    if Ojs.type_of js_val = "string" then
-      `String ([%js.to: string] js_val)
+    if Ojs.type_of js_val = "string" then `String ([%js.to: string] js_val)
     else if Ojs.has_property js_val "length" then
       `List ([%js.to: selector list] js_val)
-    else
-      `Filter ([%js.to: DocumentFilter.t] js_val)
+    else `Filter ([%js.to: DocumentFilter.t] js_val)
 end
 
 module DocumentFormattingEditProvider = struct
@@ -2063,8 +2056,7 @@ module Task = struct
       `ProcessExecution ([%js.to: ProcessExecution.t] js_val)
     else if Ojs.has_property js_val "command" then
       `ShellExecution ([%js.to: ShellExecution.t] js_val)
-    else
-      `CustomExecution ([%js.to: CustomExecution.t] js_val)
+    else `CustomExecution ([%js.to: CustomExecution.t] js_val)
 
   include
     [%js:
@@ -2139,12 +2131,10 @@ module ConfigurationScope = struct
   [@@js]
 
   let t_of_js js_val =
-    if Ojs.has_property js_val "path" then
-      `Uri ([%js.to: Uri.t] js_val)
+    if Ojs.has_property js_val "path" then `Uri ([%js.to: Uri.t] js_val)
     else if Ojs.has_property js_val "index" then
       `WorkspaceFolder ([%js.to: WorkspaceFolder.t] js_val)
-    else
-      `TextDocument ([%js.to: TextDocument.t] js_val)
+    else `TextDocument ([%js.to: TextDocument.t] js_val)
 end
 
 module MessageOptions = struct
@@ -2388,12 +2378,10 @@ module TreeItem = struct
   [@@js]
 
   let label_of_js js_val =
-    if Ojs.type_of js_val = "string" then
-      `String ([%js.to: string] js_val)
+    if Ojs.type_of js_val = "string" then `String ([%js.to: string] js_val)
     else if Ojs.has_property js_val "label" then
       `TreeItemLabel ([%js.to: TreeItemLabel.t] js_val)
-    else
-      assert false
+    else assert false
 
   module LightDarkIcon = struct
     type t =
@@ -2408,14 +2396,11 @@ module TreeItem = struct
       let light =
         if Ojs.has_property light_js "parse" then
           `Uri ([%js.to: Uri.t] light_js)
-        else
-          `String ([%js.to: string] light_js)
+        else `String ([%js.to: string] light_js)
       in
       let dark =
-        if Ojs.has_property dark_js "parse" then
-          `Uri ([%js.to: Uri.t] dark_js)
-        else
-          `String ([%js.to: string] dark_js)
+        if Ojs.has_property dark_js "parse" then `Uri ([%js.to: Uri.t] dark_js)
+        else `String ([%js.to: string] dark_js)
       in
       { light; dark }
   end
@@ -2430,16 +2415,13 @@ module TreeItem = struct
   [@@js]
 
   let iconPath_of_js js_val =
-    if Ojs.has_property js_val "path" then
-      `Uri ([%js.to: Uri.t] js_val)
+    if Ojs.has_property js_val "path" then `Uri ([%js.to: Uri.t] js_val)
     else if Ojs.has_property js_val "id" then
       `ThemeIcon ([%js.to: ThemeIcon.t] js_val)
-    else if Ojs.type_of js_val = "string" then
-      `String ([%js.to: string] js_val)
+    else if Ojs.type_of js_val = "string" then `String ([%js.to: string] js_val)
     else if Ojs.has_property js_val "light" then
       `LightDark ([%js.to: LightDarkIcon.t] js_val)
-    else
-      assert false
+    else assert false
 
   type description =
     ([ `String of string
@@ -2463,14 +2445,11 @@ module TreeItem = struct
   [@@js]
 
   let tooltip_of_js js_val =
-    if Ojs.type_of js_val = "string" then
-      `String ([%js.to: string] js_val)
-    else if Ojs.type_of js_val = "undefined" then
-      `Undefined
+    if Ojs.type_of js_val = "string" then `String ([%js.to: string] js_val)
+    else if Ojs.type_of js_val = "undefined" then `Undefined
     else if Ojs.has_property js_val "value" then
       `MarkdownString ([%js.to: MarkdownString.t] js_val)
-    else
-      assert false
+    else assert false
 
   include
     [%js:
@@ -2550,8 +2529,7 @@ module TreeDataProvider = struct
     let getTreeItemResult_of_js js_val =
       if Ojs.has_property js_val "then" then
         `Promise ([%js.to: TreeItem.t Promise.t] js_val)
-      else
-        `Value ([%js.to: TreeItem.t] js_val)
+      else `Value ([%js.to: TreeItem.t] js_val)
 
     include
       [%js:
@@ -2857,10 +2835,8 @@ module CustomTextEditorProvider = struct
     [@@js]
 
     let t_of_js js_val =
-      if Ojs.is_null js_val then
-        `Unit ([%js.to: Js.Unit.t] js_val)
-      else
-        `Promise ([%js.to: Promise.void] js_val)
+      if Ojs.is_null js_val then `Unit ([%js.to: Js.Unit.t] js_val)
+      else `Promise ([%js.to: Promise.void] js_val)
 
     let t_to_js = function
       | `Unit v -> Js.Unit.t_to_js v

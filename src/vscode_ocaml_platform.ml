@@ -39,7 +39,7 @@ let activate (extension : ExtensionContext.t) =
   Repl.register extension instance;
   let sandbox_opt = Sandbox.of_settings_or_detect () in
   let (_ : unit Promise.t) =
-    let* sandbox_opt = sandbox_opt in
+    let* sandbox_opt in
     let is_fallback = Option.is_none sandbox_opt in
     if
       is_fallback
@@ -50,13 +50,11 @@ let activate (extension : ExtensionContext.t) =
          pick a sandbox: they may ignore the pop-up leaving the extension
          hanging, so we use fallback; w/ a proper detection mechanism, we would
          redo work in rare cases *)
-    then
-      suggest_to_pick_sandbox ()
-    else
-      Promise.return ()
+    then suggest_to_pick_sandbox ()
+    else Promise.return ()
   in
   let (_ : unit Promise.t) =
-    let* sandbox_opt = sandbox_opt in
+    let* sandbox_opt in
     let sandbox = Option.value sandbox_opt ~default:Sandbox.Global in
     Extension_instance.set_sandbox instance sandbox;
     let* () = Extension_instance.update_ocaml_info instance in

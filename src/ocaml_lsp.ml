@@ -32,8 +32,7 @@ module Experimental_capabilities = struct
       ; handleInferIntf
       ; handleTypedHoles
       }
-    with
-    | Jsonoo.Decode_error err ->
+    with Jsonoo.Decode_error err ->
       show_message `Warn
         "Unexpected experimental capabilities from the language server. \
          Falling back to default: no experimental capabilities set.";
@@ -64,8 +63,7 @@ let get_version_from_serverInfo { serverInfo; experimental_capabilities = _ } =
       log_chan ~section:"Ocaml_lsp.get_version" `Warn
         "the language server is not ocamllsp";
       (* practically impossible but let's be defensive *)
-      Error `Language_server_isn't_ocamllsp
-    )
+      Error `Language_server_isn't_ocamllsp)
 
 let get_version_semver t =
   match get_version_from_serverInfo t with

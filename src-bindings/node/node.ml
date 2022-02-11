@@ -55,8 +55,7 @@ module JsError = struct
     let js_error = [%js.of: Promise.error] error in
     if Ojs.has_property js_error "message" then
       [%js.to: string] (Ojs.get_prop_ascii js_error "message")
-    else
-      "Unknown error"
+    else "Unknown error"
 end
 
 module Buffer = struct

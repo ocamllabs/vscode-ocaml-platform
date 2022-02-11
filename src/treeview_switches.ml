@@ -41,12 +41,7 @@ module Dependency = struct
   let icon dependency is_current_sandbox =
     match dependency with
     | Switch _ ->
-      let selected =
-        if is_current_sandbox then
-          "-selected"
-        else
-          ""
-      in
+      let selected = if is_current_sandbox then "-selected" else "" in
       TreeItem.LightDarkIcon.
         { light =
             `String
@@ -68,8 +63,7 @@ module Dependency = struct
     | Package dep ->
       if Opam.Package.has_dependencies dep then
         TreeItemCollapsibleState.Collapsed
-      else
-        TreeItemCollapsibleState.None
+      else TreeItemCollapsibleState.None
 
   let to_treeitem instance dependency =
     let open Promise.Syntax in
