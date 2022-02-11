@@ -41,21 +41,15 @@ end
 module Ordering = struct
   let is_less = function
     | Ordering.Less -> true
-    | Greater
-    | Equal ->
-      false
+    | Greater | Equal -> false
 
   let is_greater = function
     | Ordering.Greater -> true
-    | Less
-    | Equal ->
-      false
+    | Less | Equal -> false
 
   let is_equal = function
     | Ordering.Equal -> true
-    | Less
-    | Greater ->
-      false
+    | Less | Greater -> false
 
   include Ordering
 end
@@ -125,12 +119,7 @@ let with_confirmation message ~yes ?(no = "Cancel") f =
 module Position = struct
   let compare p1 p2 =
     let r = Position.compareTo p1 ~other:p2 in
-    if r < 0 then
-      Ordering.Less
-    else if r = 0 then
-      Equal
-    else
-      Greater
+    if r < 0 then Ordering.Less else if r = 0 then Equal else Greater
 
   let t_of_json json =
     let line = Jsonoo.Decode.(field "line" int) json in

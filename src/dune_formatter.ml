@@ -22,7 +22,7 @@ let get_formatter instance ~document ~options:_ ~token:_ =
   in
   let promise =
     let open Promise.Syntax in
-    let+ output = output in
+    let+ output in
     match output with
     | Ok newText -> Some [ TextEdit.replace ~range ~newText ]
     | Error msg ->

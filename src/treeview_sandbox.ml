@@ -27,8 +27,7 @@ module Dependency = struct
   let collapsible_state t =
     if Sandbox.Package.has_dependencies t then
       TreeItemCollapsibleState.Collapsed
-    else
-      TreeItemCollapsibleState.None
+    else TreeItemCollapsibleState.None
 
   let to_treeitem dependency =
     let open Promise.Syntax in

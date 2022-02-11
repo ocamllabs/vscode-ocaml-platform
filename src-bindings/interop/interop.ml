@@ -7,10 +7,8 @@ let undefined = Ojs.variable "undefined"
 type 'a or_undefined = 'a option
 
 let or_undefined_of_js ml_of_js js_val =
-  if js_val != undefined && js_val != Ojs.null then
-    Some (ml_of_js js_val)
-  else
-    None
+  if js_val != undefined && js_val != Ojs.null then Some (ml_of_js js_val)
+  else None
 
 let or_undefined_to_js ml_to_js = function
   | Some ml_val -> ml_to_js ml_val
@@ -21,8 +19,7 @@ type 'a maybe_list = 'a list
 let maybe_list_of_js ml_of_js js_val =
   if js_val != undefined && js_val != Ojs.null then
     Ojs.list_of_js ml_of_js js_val
-  else
-    []
+  else []
 
 let maybe_list_to_js ml_to_js = function
   | [] -> undefined

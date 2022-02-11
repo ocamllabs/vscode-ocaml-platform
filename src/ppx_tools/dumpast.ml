@@ -111,11 +111,10 @@ let reparse_ast =
         (Jsonoo.Encode.list
            (fun x -> x)
            (if l_length > l_length' then
-             List.map2 (fun x x' -> Result.get_ok (f x x')) l l
+            List.map2 (fun x x' -> Result.get_ok (f x x')) l l
            else if l_length < l_length' then
              List.map2 (fun x x' -> Result.get_ok (f x x')) l' l'
-           else
-             List.map2 (fun x x' -> Result.get_ok (f x x')) l l'))
+           else List.map2 (fun x x' -> Result.get_ok (f x x')) l l'))
 
     method option f o o' =
       match (o, o') with
@@ -335,16 +334,15 @@ let transform source kind =
       | `Intf ->
         let v = Parse.interface (Lexing.from_string source) in
         parse_ast#signature v)
-  with
-  | Syntaxerr.Error e ->
+  with Syntaxerr.Error e ->
     Error
       ("Syntax error at : "
       ^ Caml.Format.asprintf "%a" Location.print (Syntaxerr.location_of_error e)
       )
 
 let from_structure (structure : Parsetree.structure) =
-  try Ok (parse_ast#structure structure) with
-  | Syntaxerr.Error e ->
+  try Ok (parse_ast#structure structure)
+  with Syntaxerr.Error e ->
     Error
       ("Syntax error at : "
       ^ Caml.Format.asprintf "%a" Location.print (Syntaxerr.location_of_error e)

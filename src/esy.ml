@@ -149,10 +149,7 @@ let state t manifest =
         |> Jsonoo.Decode.field "isProjectReadyForDev" Jsonoo.Decode.bool
         |> Result.return)
   in
-  if is_project_ready_for_dev then
-    State.Ready
-  else
-    Pending
+  if is_project_ready_for_dev then State.Ready else Pending
 
 let setup_sandbox t manifest =
   let open Promise.Result.Syntax in
