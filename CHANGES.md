@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.9.1
+
+- Fix: support latest version of OCaml LSP 1.10.1
+
 ## 1.9.0
 
 - Dune syntax highlighting fix (#742)
