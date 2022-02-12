@@ -639,8 +639,8 @@ in
       src = self.directSrc "vscode";
       opamInputs = 
       {
-        inherit (selection) promise_jsoo ppxlib ocaml jsonoo js_of_ocaml
-        gen_js_api dune;
+        inherit (selection) promise_jsoo ocaml jsonoo js_of_ocaml gen_js_api
+        dune;
       };
       opamSrc = "vscode.opam";
     };
@@ -651,7 +651,7 @@ in
       src = self.directSrc "vscode-ocaml-platform";
       opamInputs = 
       {
-        inherit (selection) vscode promise_jsoo opam-file-format
+        inherit (selection) vscode promise_jsoo ppxlib opam-file-format
         ocaml-version ocaml jsonoo js_of_ocaml gen_js_api dune base;
       };
       opamSrc = "vscode-ocaml-platform.opam";
