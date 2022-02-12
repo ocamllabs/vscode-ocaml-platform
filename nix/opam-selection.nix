@@ -14,8 +14,8 @@ let
         {
           owner = "ocaml";
           repo = "opam-repository";
-          rev = "dd31bfa892e6408a76cefd5a446edb1a757fe009";
-          sha256 = "108839q0fmjvvd5yik78vhpr2495pl5xbr6b8h5krp9fhakvpaik";
+          rev = "ae6aff50030492f9b7eed0cf952fdca40f4cf125";
+          sha256 = "0xya6x3b7d5ssz8dly1yc4lj2nyrln033g3gnjf2fx67nggjdxmr";
         };
         src = (pkgs.fetchFromGitHub) fetch;
       };
@@ -261,7 +261,7 @@ in
       opamSrc = repoPath (repos.opam-repository.src) 
       {
         package = "packages/js_of_ocaml-compiler/js_of_ocaml-compiler.4.0.0";
-        hash = "sha256:0pdmsy0qy6v47amfxw84c2v41g8rh6q6zs80s5994gxg5wxvx6b5";
+        hash = "sha256:168fq44ndm268374152w39x9pa351h8ddz3xgada46s9sw0qa2n6";
       };
     };
     js_of_ocaml-ppx = 
@@ -467,19 +467,20 @@ in
     ojs = 
     {
       pname = "ojs";
-      version = "1.0.9";
+      version = "1.1.0";
       src = pkgs.fetchurl 
       {
-        url = "https://github.com/LexiFi/gen_js_api/archive/v1.0.9.tar.gz";
-        sha256 = "1irdzvdxlzisyq681mh4aylfvn83rjzzfszcxk9278lz0iswrpxp";
+        url = "https://github.com/LexiFi/gen_js_api/archive/v1.1.0.tar.gz";
+        sha256 = "148axiwjd1jd74vb0467vzy61z5rq3v37w9m7y2h8rl3rgfpnmkq";
       };
-      opamInputs = {
-                     inherit (selection) ocaml dune;
+      opamInputs = 
+      {
+        inherit (selection) ocaml js_of_ocaml-compiler dune;
       };
       opamSrc = repoPath (repos.opam-repository.src) 
       {
-        package = "packages/ojs/ojs.1.0.9";
-        hash = "sha256:1icpjiiaykhl08frzq82jvrbvpfqn3rlazyimd0pz1fsvhbzcph6";
+        package = "packages/ojs/ojs.1.1.0";
+        hash = "sha256:0isl3fc37986670a1y1in13mx66nyqslk16m714qcq667735hfz1";
       };
     };
     opam-file-format = 
