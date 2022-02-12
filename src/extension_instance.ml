@@ -113,12 +113,7 @@ end = struct
       (match
          Ocaml_lsp.is_version_up_to_date ocaml_lsp (ocaml_version_exn t)
        with
-      | Ok is_up_to_date ->
-        if not is_up_to_date then
-          show_message `Warn
-            "The installed version of `ocamllsp` is out of date. You may be \
-             missing out on cool features or important bug fixes. Consider \
-             upgrading the package `ocaml-lsp-server`."
+      | Ok () -> ()
       | Error (`Msg m) -> show_message `Warn "%s" m);
       Ok ()
     in

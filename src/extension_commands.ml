@@ -158,25 +158,15 @@ end = struct
   (** Shows appropriate message for when the [ocaml-lsp] in use by the extension
       doesn't support jumping to holes. *)
   let ocaml_lsp_doesn't_support_holes instance ocaml_lsp =
-    let suggestion =
-      match
-        Ocaml_lsp.is_version_up_to_date ocaml_lsp
-          (Extension_instance.ocaml_version_exn instance)
-      with
-      | Ok is_up_to_date ->
-        if is_up_to_date then
-          (* ocamllsp is "up-to-date", so user needs newer ocaml to get newer
-             ocamllsp, which supports typed holes *)
-          "The extension requires a newer version of `ocamllsp`, which needs a \
-           new version of OCaml. Please, consider upgrading the OCaml version \
-           used in this sandbox."
-        else "Consider upgrading the package `ocaml-lsp-server`."
-      | Error (`Msg m) ->
-        sprintf "There is something wrong with your `ocamllsp`. Error: %s" m
-    in
-    show_message `Warn
-      "The installed version of `ocamllsp` does not support typed holes. %s"
-      suggestion
+    match
+      Ocaml_lsp.is_version_up_to_date ocaml_lsp
+        (Extension_instance.ocaml_version_exn instance)
+    with
+    | Ok () -> ()
+    | Error (`Msg msg) ->
+      show_message `Warn
+        "The installed version of `ocamllsp` does not support typed holes. %s"
+        msg
 
   let current_cursor_pos text_editor =
     let selection = TextEditor.selection text_editor in

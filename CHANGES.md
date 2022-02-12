@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.9.1
+
+- Make the check for out of date ocamllsp more conservative. It will no longer
+  alert the user unless the extension is certain an upgrade is possible (#859)
+
 ## 1.9.0
 
 - Dune syntax highlighting fix (#742)
