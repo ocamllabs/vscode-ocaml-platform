@@ -1,4 +1,3 @@
-# when updating ocamlformat version, update the version in Makefile `deps` target
 version=0.20.1
 profile=conventional
 ocaml-version=4.13.1
