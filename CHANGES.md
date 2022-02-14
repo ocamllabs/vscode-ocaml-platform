@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Rule stanza highlighted properly in dune syntax (#870)
+
 - Dune syntax highlighting fix (#742)
 
   The syntax for dune files has been re-written from scratch for a more correct
