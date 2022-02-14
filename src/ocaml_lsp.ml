@@ -63,6 +63,9 @@ let get_version_from_serverInfo { serverInfo; experimental_capabilities = _ } =
       None)
 
 let lsp_versions =
+  (* We define a mapping from OCaml version prefixes e.g. (4, 11, x) to
+     available versions of ocamllsp for this prefix. The last element in the
+     array of lsp versions is the latest version of ocamllsp for that prefix *)
   let main =
     [ ( (4, 12)
       , [| "1.5.0"
