@@ -47,5 +47,11 @@ val use : Middleware.t list -> polka -> polka
 val server : polka -> Server.t
 
 module Sirv : sig
-  val serve : string -> Middleware.t
+  module Options : sig
+    type t
+
+    val create : dev:bool -> t
+  end
+
+  val serve : string -> ?options:Options.t -> unit -> Middleware.t
 end

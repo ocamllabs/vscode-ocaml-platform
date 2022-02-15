@@ -59,7 +59,15 @@ let listen port ?callback t = listen_ t port ?callback
 let use middlewares t = use_ t middlewares
 
 module Sirv = struct
+  module Options = struct
+    include Interface.Make ()
+
+    include [%js: val create : dev:bool -> t [@@js.builder]]
+  end
+
   include
     [%js:
-    val serve : string -> (Middleware.t[@js.dummy]) [@@js.global "sirv"]]
+    val serve :
+      string -> ?options:Options.t -> unit -> (Middleware.t[@js.dummy])
+      [@@js.global "sirv"]]
 end

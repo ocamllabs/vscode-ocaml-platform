@@ -22,11 +22,12 @@ let start ~path ?(port = 0) () =
       (fun () ->
         ignore @@ (Polka.Server.close (Polka.server polka) : Polka.Server.t))
   in
+  let options = Polka.Sirv.Options.create ~dev:true in
   let serve =
     polka
     |> Polka.use
          [ debouncing_server_termination_mdlw
-         ; Polka.Sirv.serve (path |> Path.to_string)
+         ; Polka.Sirv.serve (path |> Path.to_string) ~options ()
          ]
     |> Polka.listen port ~callback:(fun () ->
            let server = Polka.server polka in
