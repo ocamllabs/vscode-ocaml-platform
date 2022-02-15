@@ -389,9 +389,6 @@
               "include": "#action"
             },
             {
-              "include": "#variables"
-            },
-            {
               "include": "#general"
             }
           ]
@@ -1225,6 +1222,9 @@
             }
           },
           "patterns": [
+            { 
+              "include": "$self" 
+            },
             {
               "comment": "rule",
               "begin": "\\([[:space:]]*(rule)\\b",
@@ -1439,9 +1439,6 @@
                 },
                 {
                   "include": "#action"
-                },
-                {
-                  "include": "#variables"
                 },
                 {
                   "include": "#general"
