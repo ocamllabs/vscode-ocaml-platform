@@ -7,11 +7,11 @@ type t = Polka.Server.t
     scheduled timeout is overridden *)
 let debouncing_middleware ~timeout_in_ms f =
   let timeout = ref None in
-  fun ~request:_ ~response:_ ~next ->
-    (* on every request, we clear previous timeout and set a new one *)
-    Option.iter !timeout ~f:Node.clearTimeout;
-    timeout := Some (Node.setTimeout f timeout_in_ms);
-    next ()
+  Staged.stage (fun ~request:_ ~response:_ ~next ->
+      (* on every request, we clear previous timeout and set a new one *)
+      Option.iter !timeout ~f:Node.clearTimeout;
+      timeout := Some (Node.setTimeout f timeout_in_ms);
+      next ())
 
 let start ~path ?(port = 0) () =
   Promise.make @@ fun ~resolve ~reject:_ ->
@@ -26,7 +26,7 @@ let start ~path ?(port = 0) () =
   let serve =
     polka
     |> Polka.use
-         [ debouncing_server_termination_mdlw
+         [ Staged.unstage debouncing_server_termination_mdlw
          ; Polka.Sirv.serve (path |> Path.to_string) ~options ()
          ]
     |> Polka.listen port ~callback:(fun () ->
