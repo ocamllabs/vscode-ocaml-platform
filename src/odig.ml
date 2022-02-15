@@ -38,7 +38,7 @@ let odoc_exec t ~package_name =
     | Error _ as e -> Promise.resolve e
     | Ok _ as ok ->
       let html_dir = html_dir t in
-      let package_html_dir = Path.to_string html_dir ^ package_name in
+      let package_html_dir = Path.(html_dir / package_name) |> Path.to_string in
       let open Promise.Syntax in
       let+ dir_exists = Fs.exists package_html_dir in
       if dir_exists then ok
