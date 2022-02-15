@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.9.2
 
 - Improve dune variable syntax highlighting. Add highlighting for `env` and
   `bin-available` variables. (#872)
