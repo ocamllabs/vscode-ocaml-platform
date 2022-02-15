@@ -2,7 +2,7 @@
   "name": "dune-project",
   "scopeName": "source.dune-project",
   "fileTypes": ["dune-project"],
-  "patterns": [{ "include": "#stanzas" }, { "include": "#general" }],
+  "patterns": [{ "include": "#stanzas" }, { "include": "source.dune#general" }],
   "repository": {
     "stanzas": {
       "patterns": [
@@ -14,7 +14,7 @@
             "1": { "name": "keyword.language.dune-project" },
             "2": { "name": "keyword.language.dune-project" }
           },
-          "patterns": [{ "include": "#general" }]
+          "patterns": [{ "include": "source.dune#general" }]
         },
 
         {
@@ -25,7 +25,7 @@
             "1": { "name": "keyword.language.dune-project" }
           },
           "contentName": "variable.other.declaration.dune-project",
-          "patterns": [{ "include": "#general" }]
+          "patterns": [{ "include": "source.dune#general" }]
         },
 
         {
@@ -36,7 +36,7 @@
             "1": { "name": "keyword.language.dune-project" }
           },
           "contentName": "constant.language.dune-project",
-          "patterns": [{ "include": "#general" }]
+          "patterns": [{ "include": "source.dune#general" }]
         },
 
         {
@@ -46,7 +46,7 @@
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
           },
-          "patterns": [{ "include": "#general" }]
+          "patterns": [{ "include": "source.dune#general" }]
         },
 
         {
@@ -56,7 +56,7 @@
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
           },
-          "patterns": [{ "include": "#general" }]
+          "patterns": [{ "include": "source.dune#general" }]
         },
 
         {
@@ -83,7 +83,7 @@
                 "1": { "name": "keyword.language.dune-project" }
               },
               "contentName": "variable.other.declaration.dune-project",
-              "patterns": [{ "include": "#general" }]
+              "patterns": [{ "include": "source.dune#general" }]
             },
 
             {
@@ -101,12 +101,12 @@
                   "beginCaptures": {
                     "1": { "name": "keyword.language.dune-project" }
                   },
-                  "patterns": [{ "include": "#general" }]
+                  "patterns": [{ "include": "source.dune#general" }]
                 }
               ]
             },
 
-            { "include": "#general" }
+            { "include": "source.dune#general" }
           ]
         },
 
@@ -128,9 +128,9 @@
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
               },
-              "patterns": [{ "include": "#general" }]
+              "patterns": [{ "include": "source.dune#general" }]
             },
-            { "include": "#general" }
+            { "include": "source.dune#general" }
           ]
         },
 
@@ -141,7 +141,7 @@
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
           },
-          "patterns": [{ "include": "#general" }]
+          "patterns": [{ "include": "source.dune#general" }]
         },
 
         {
@@ -160,7 +160,7 @@
                 "1": { "name": "keyword.language.dune-project" }
               },
               "contentName": "variable.other.declaration.dune-project",
-              "patterns": [{ "include": "#general" }]
+              "patterns": [{ "include": "source.dune#general" }]
             },
 
             {
@@ -170,7 +170,7 @@
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
               },
-              "patterns": [{ "include": "#general" }]
+              "patterns": [{ "include": "source.dune#general" }]
             },
 
             {
@@ -193,9 +193,9 @@
                   "beginCaptures": {
                     "1": { "name": "variable.other.declaration.dune-project" }
                   },
-                  "patterns": [{ "include": "#general" }]
+                  "patterns": [{ "include": "source.dune#general" }]
                 },
-                { "include": "#general" }
+                { "include": "source.dune#general" }
               ]
             },
 
@@ -207,7 +207,7 @@
                 "1": { "name": "keyword.language.dune-project" }
               },
               "contentName": "variable.other.declaration.dune-project",
-              "patterns": [{ "include": "#general" }]
+              "patterns": [{ "include": "source.dune#general" }]
             },
 
             {
@@ -217,11 +217,11 @@
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
               },
-              "patterns": [{ "include": "#general" }]
+              "patterns": [{ "include": "source.dune#general" }]
             },
 
             { "include": "#opam-metadata" },
-            { "include": "#general" }
+            { "include": "source.dune#general" }
           ]
         },
 
@@ -233,7 +233,7 @@
             "1": { "name": "keyword.language.dune-project" },
             "2": { "name": "variable.other.declaration.dune-project" }
           },
-          "patterns": [{ "include": "#general" }]
+          "patterns": [{ "include": "source.dune#general" }]
         },
 
         {
@@ -244,7 +244,7 @@
             "1": { "name": "keyword.language.dune-project" }
           },
           "contentName": "variable.other.declaration.dune-project",
-          "patterns": [{ "include": "#general" }]
+          "patterns": [{ "include": "source.dune#general" }]
         },
 
         { "include": "#opam-metadata" }
@@ -261,7 +261,7 @@
             "1": { "name": "keyword.language.dune-project" }
           },
           "contentName": "constant.language.dune-project",
-          "patterns": [{ "include": "#general" }]
+          "patterns": [{ "include": "source.dune#general" }]
         },
 
         {
@@ -271,7 +271,7 @@
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
           },
-          "patterns": [{ "include": "#general" }]
+          "patterns": [{ "include": "source.dune#general" }]
         },
 
         {
@@ -294,7 +294,7 @@
                   "name": "keyword.language.dune-project",
                   "match": "/"
                 },
-                { "include": "#general" }
+                { "include": "source.dune#general" }
               ],
               "contentName": "string.other.line.dune-project"
             },
@@ -305,9 +305,9 @@
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
               },
-              "patterns": [{ "include": "#general" }]
+              "patterns": [{ "include": "source.dune#general" }]
             },
-            { "include": "#general" }
+            { "include": "source.dune#general" }
           ]
         },
 
@@ -318,166 +318,7 @@
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
           },
-          "patterns": [{ "include": "#general" }]
-        }
-      ]
-    },
-
-    "general": {
-      "patterns": [
-        {
-          "name": "comment.line.dune",
-          "begin": ";",
-          "end": "$"
-        },
-        {
-          "name": "string.quoted.line.dune",
-          "begin": "\"\\\\\\|",
-          "end": "$",
-          "patterns": [{ "include": "#escape-characters" }]
-        },
-        {
-          "name": "string.quoted.line.dune",
-          "begin": "\"\\\\>",
-          "end": "$"
-        },
-        {
-          "name": "string.quoted.double.dune",
-          "begin": "\"",
-          "end": "\"",
-          "patterns": [{ "include": "#escape-characters" }]
-        },
-        {
-          "comment": "symbol",
-          "name": "constant.symbol.dune",
-          "match": "(:[[:alpha:]-]+)\\b"
-        },
-        {
-          "comment": "number or version",
-          "name": "constant.numeric.dune",
-          "match": "\\b([[:digit:]](\\.[[:digit:]]+)+)\\b"
-        },
-        {
-          "comment": "true or false",
-          "name": "constant.language.dune",
-          "match": "\\b(true|false)\\b"
-        },
-        {
-          "comment": "variable",
-          "begin": "%\\{",
-          "end": "\\}",
-          "beginCaptures": [{ "name": "keyword.operator.dune" }],
-          "endCaptures": [{ "name": "keyword.operator.dune" }],
-          "patterns": [{ "include": "#variables" }]
-        },
-        {
-          "comment": "boolean/predicate language",
-          "begin": "\\([[:space:]]*(=|<>|>=|<=|<|>)",
-          "end": "\\)",
-          "beginCaptures": { "1": { "name": "keyword.operator.dune" } },
-          "patterns": [{ "include": "#general" }]
-        },
-        {
-          "comment": "boolean/predicate language",
-          "begin": "\\([[:space:]]*(and|or|not)\\b",
-          "end": "\\)",
-          "beginCaptures": { "1": { "name": "keyword.operator.dune" } },
-          "patterns": [{ "include": "#general" }]
-        },
-        {
-          "comment": "ordered set language",
-          "begin": "\\(",
-          "end": "\\)",
-          "patterns": [
-            { "name": "keyword.operator.dune", "match": "/" },
-            { "include": "#general" }
-          ]
-        }
-      ]
-    },
-
-    "escape-characters": {
-      "patterns": [
-        {
-          "comment": "escaped newline",
-          "name": "constant.character.escape.dune",
-          "match": "\\\\$"
-        },
-        {
-          "comment": "escaped character",
-          "name": "constant.character.escape.dune",
-          "match": "\\\\(n|r|b|t|\\\\|\")"
-        },
-        {
-          "comment": "character from decimal ASCII code",
-          "name": "constant.character.escape.dune",
-          "match": "\\\\[[:digit:]]{3}"
-        },
-        {
-          "comment": "character from hexadecimal ASCII code",
-          "name": "constant.character.escape.dune",
-          "match": "\\\\x[[:xdigit:]]{2}"
-        },
-        {
-          "comment": "escaped variable",
-          "begin": "(\\%\\{)",
-          "end": "(\\})",
-          "beginCaptures": [{ "name": "constant.character.escape.dune" }],
-          "endCaptures": [{ "name": "constant.character.escape.dune" }],
-          "patterns": [{ "include": "#variables" }]
-        }
-      ]
-    },
-
-    "variables": {
-      "patterns": [
-        {
-          "name": "keyword.operator.variable.dune",
-          "match": ":"
-        },
-        {
-          "name": "constant.language.variable.dune",
-          "match": "\\b(project_root|workspace_root)\\b"
-        },
-        {
-          "name": "constant.language.variable.dune",
-          "match": "\\b(CC|CXX)\\b"
-        },
-        {
-          "name": "constant.language.variable.dune",
-          "match": "\\b(ocaml_bin|ocaml|ocamlc|ocamlopt|ocaml_version|ocaml_where|ocaml-config)\\b"
-        },
-        {
-          "name": "constant.language.variable.dune",
-          "match": "\\b(profile|null|context_name|ignoring_promoted_rule)\\b"
-        },
-        {
-          "name": "constant.language.variable.dune",
-          "match": "\\b(ext_obj|ext_asm|ext_lib|ext_dll|ext_exe|ext_plugin)\\b"
-        },
-        {
-          "name": "constant.language.variable.dune",
-          "match": "\\b(arch_sixtyfour|architecture|os_type|model|system)\\b"
-        },
-        {
-          "name": "constant.language.variable.dune",
-          "match": "\\b(cmo|cmi|cma|cmx|cmxa)\\b"
-        },
-        {
-          "name": "constant.language.variable.action.dune",
-          "match": "\\^"
-        },
-        {
-          "name": "constant.language.variable.action.dune",
-          "match": "\\b(targets|target|deps|dep|exe|bin|version)\\b"
-        },
-        {
-          "name": "constant.language.variable.action.dune",
-          "match": "\\b(lib-available|lib-private|libexec-private|libexec|lib)\\b"
-        },
-        {
-          "name": "constant.language.variable.action.dune",
-          "match": "\\b(read-lines|read-strings|read)\\b"
+          "patterns": [{ "include": "source.dune#general" }]
         }
       ]
     }
