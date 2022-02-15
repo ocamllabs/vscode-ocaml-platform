@@ -2891,6 +2891,10 @@
               "match": ":"
             },
             {
+              "name": "keyword.operator.variable.dune",
+              "match": "="
+            },
+            {
               "name": "constant.language.variable.action.dune",
               "match": "\\^"
             },
@@ -2934,6 +2938,10 @@
             },
             {
               "name": "constant.language.variable.dune",
+              "match": "(?<=\\{)(env)(?=:)"
+            },
+            {
+              "name": "constant.language.variable.dune",
               "match": "(?<=\\{)(version)(?=:)"
             },
             {
@@ -2942,7 +2950,7 @@
             },
             {
               "name": "constant.language.variable.action.dune",
-              "match": "(?<=\\{)(dep|exe|bin|lib|lib-private|libexec|libexec-private|lib-available)(?=:)"
+              "match": "(?<=\\{)(dep|exe|bin|bin-available|lib|lib-private|libexec|libexec-private|lib-available)(?=:)"
             },
             {
               "name": "constant.language.variable.action.dune",

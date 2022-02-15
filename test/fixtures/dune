@@ -258,6 +258,7 @@
    %{dep:<path>}
    %{exe:<path>}
    %{bin:<program>}
+   %{bin-available:<program-name>}
    %{lib:<public-library-name>:<file>}
    %{lib-private:<library-name>:<file>}
    %{libexec:<public-library-name>:<file>}
@@ -267,6 +268,7 @@
    %{read:<path>}
    %{read-lines:<path>}
    %{read-strings:<path>}
+   %{env:BIN=/usr/bin}
    ; These don't exist
    %{test}
    %{error})))
