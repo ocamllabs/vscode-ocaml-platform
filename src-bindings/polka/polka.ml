@@ -22,11 +22,7 @@ module Server = struct
     | `Error f -> on t "error" @@ [%js.of: err:Node.JsError.t -> unit] f
 end
 
-type polka = Ojs.t
-
-let polka_of_js = Ojs.t_of_js
-
-let polka_to_js = Ojs.t_to_js
+type polka = Ojs.t [@@js]
 
 module Middleware = struct
   module Request = struct
