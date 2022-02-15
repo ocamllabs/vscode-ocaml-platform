@@ -8,17 +8,17 @@ type t =
 (** TODO: propose to install odig. See
     https://github.com/ocamllabs/vscode-ocaml-platform/pull/771#discussion_r765297112 *)
 let of_sandbox (sandbox : Sandbox.t) =
-  let cmd = Sandbox.get_command sandbox "which" [ "odig" ] in
+  let make_odig_cmd = Sandbox.get_command sandbox "odig" in
+  let odig_version = make_odig_cmd [ "--version" ] in
   let open Promise.Syntax in
-  let* output = Cmd.output cmd in
+  let* output = Cmd.output odig_version in
   match output with
   | Ok _ -> (
-    let make_cmd = Sandbox.get_command sandbox "odig" in
-    let+ cache_dir = Cmd.output (make_cmd [ "cache"; "path" ]) in
+    let+ cache_dir = Cmd.output (make_odig_cmd [ "cache"; "path" ]) in
     match cache_dir with
     | Ok cache_dir ->
       let cache_dir = cache_dir |> String.strip |> Path.of_string in
-      Ok { make_cmd; cache_dir }
+      Ok { make_cmd = make_odig_cmd; cache_dir }
     | Error _ -> Error "OCaml: Failed to retrieve odig cache_dir")
   | Error _ ->
     Promise.resolve
