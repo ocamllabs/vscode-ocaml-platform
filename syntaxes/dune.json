@@ -389,9 +389,6 @@
               "include": "#action"
             },
             {
-              "include": "#variables"
-            },
-            {
               "include": "#general"
             }
           ]
@@ -2108,9 +2105,6 @@
         },
         {
           "include": "#general"
-        },
-        {
-          "include": "#variables"
         }
       ]
     },
@@ -2408,9 +2402,6 @@
                     }
                   },
                   "patterns": [
-                    {
-                      "include": "#variables"
-                    },
                     {
                       "include": "#general"
                     }
