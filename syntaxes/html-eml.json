@@ -1,7 +1,7 @@
 {
   "fileTypes": ["html.eml"],
-  "foldingStartMarker": "(?x)\n\t\t(<(?i:head|body|table|thead|tbody|tfoot|tr|div|select|fieldset|style|script|ul|ol|li|form|dl|span|img|h1|h2|h3|h4|h5|h6|rect|a|p|nav|header|footer)\\b.*?>\n\t\t|<!--(?!.*-->)\n\t\t|\\{\\s*($|\\?>\\s*$|//|/\\*(.*\\*/\\s*$|(?!.*?\\*/)))\n\t\t)",
-  "foldingStopMarker": "(?x)\n\t\t(</(?i:head|body|table|thead|tbody|tfoot|tr|div|select|fieldset|style|script|ul|ol|li|form|dl|span|img|h1|h2|h3|h4|h5|h6|rect|a|p|nav|header|footer)>\n\t\t|^\\s*-->\n\t\t|(^|\\s)\\}\n\t\t)",
+  "foldingStartMarker": "(?x)\n\t\t(<(?i:head|body|table|thead|tbody|tfoot|tr|div|select|fieldset|style|script|ul|ol|li|form|dl|span|img|h1|h2|h3|h4|h5|h6|rect|a|p|nav|header|footer|svg|path)\\b.*?>\n\t\t|<!--(?!.*-->)\n\t\t|\\{\\s*($|\\?>\\s*$|//|/\\*(.*\\*/\\s*$|(?!.*?\\*/)))\n\t\t)",
+  "foldingStopMarker": "(?x)\n\t\t(</(?i:head|body|table|thead|tbody|tfoot|tr|div|select|fieldset|style|script|ul|ol|li|form|dl|span|img|h1|h2|h3|h4|h5|h6|rect|a|p|nav|header|footer|svg|path)>\n\t\t|^\\s*-->\n\t\t|(^|\\s)\\}\n\t\t)",
   "injections": {
     "R:text.html.ocaml meta.tag meta.attribute string.quoted": {
       "comment": "Uses R: to ensure this matches after any other injections.",
@@ -55,7 +55,7 @@
 					"name": "comment.block.html"
 				},
 				{
-					"begin": "(?i)(^|\\G)\\s*(?=<(script|style|pre)(\\s|$|>)(?!.*?</(script|style|pre)>))",
+					"begin": "(?i)(^|\\G)\\s*(?=<(script|style|pre|svg|path)(\\s|$|>)(?!.*?</(script|style|pre|svg|path)>))",
 					"end": "(?i)(.*)((</)(script|style|pre)(>))",
 					"endCaptures": {
 						"1": {
@@ -76,6 +76,9 @@
 						},
 						"5": {
 							"name": "punctuation.definition.tag.end.html"
+						},
+						"6": {
+							"name": "punctuation.definition.tag.svg"
 						}
 					},
 					"patterns": [

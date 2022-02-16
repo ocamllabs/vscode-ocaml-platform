@@ -1,0 +1,383 @@
+{
+	"scopeName": "text.xml.svg",
+	"name": "SVG",
+	"fileTypes": [
+		"atom"
+	],
+	"patterns": [
+		{
+			"begin": "(<\\?)\\s*([-_a-zA-Z0-9]+)",
+			"captures": {
+				"1": {
+					"name": "punctuation.definition.tag.svg"
+				},
+				"2": {
+					"name": "entity.name.tag.svg"
+				}
+			},
+			"end": "(\\?>)",
+			"name": "meta.tag.preprocessor.svg",
+			"patterns": [
+				{
+					"match": " ([a-zA-Z-]+)",
+					"name": "entity.other.attribute-name.svg"
+				},
+				{
+					"include": "#doublequotedString"
+				},
+				{
+					"include": "#singlequotedString"
+				}
+			]
+		},
+		{
+			"begin": "(<!)(DOCTYPE)\\s+([:a-zA-Z_][:a-zA-Z0-9_.-]*)",
+			"captures": {
+				"1": {
+					"name": "punctuation.definition.tag.svg"
+				},
+				"2": {
+					"name": "keyword.other.doctype.svg"
+				},
+				"3": {
+					"name": "variable.language.documentroot.svg"
+				}
+			},
+			"end": "\\s*(>)",
+			"name": "meta.tag.sgml.doctype.svg",
+			"patterns": [
+				{
+					"include": "#internalSubset"
+				}
+			]
+		},
+		{
+			"include": "#comments"
+		},
+		{
+			"begin": "(<)((?:([-_a-zA-Z0-9]+)(:))?([-_a-zA-Z0-9:]+))(?=(\\s[^>]*)?></\\2>)",
+			"beginCaptures": {
+				"1": {
+					"name": "punctuation.definition.tag.svg"
+				},
+				"2": {
+					"name": "entity.name.tag.svg"
+				},
+				"3": {
+					"name": "entity.name.tag.namespace.svg"
+				},
+				"4": {
+					"name": "punctuation.separator.namespace.svg"
+				},
+				"5": {
+					"name": "entity.name.tag.localname.svg"
+				}
+			},
+			"end": "(>)(</)((?:([-_a-zA-Z0-9]+)(:))?([-_a-zA-Z0-9:]+))(>)",
+			"endCaptures": {
+				"1": {
+					"name": "punctuation.definition.tag.svg"
+				},
+				"2": {
+					"name": "punctuation.definition.tag.svg"
+				},
+				"3": {
+					"name": "entity.name.tag.svg"
+				},
+				"4": {
+					"name": "entity.name.tag.namespace.svg"
+				},
+				"5": {
+					"name": "punctuation.separator.namespace.svg"
+				},
+				"6": {
+					"name": "entity.name.tag.localname.svg"
+				},
+				"7": {
+					"name": "punctuation.definition.tag.svg"
+				}
+			},
+			"name": "meta.tag.no-content.svg",
+			"patterns": [
+				{
+					"include": "#tagStuff"
+				}
+			]
+		},
+		{
+			"begin": "(<)(style)([^>]*)(>)",
+			"captures": {
+				"1": {
+					"name": "punctuation.definition.tag.svg"
+				},
+				"2": {
+					"name": "entity.name.tag.svg"
+				},
+				"4": {
+					"name": "punctuation.definition.tag.svg"
+				}
+			},
+			"end": "(</)(style)(>)",
+			"name": "meta.tag.style",
+			"contentName": "meta.embedded.block.css",
+			"patterns": [
+				{
+					"name":"meta.embedded.block.css",
+					"include":"source.css"
+				}
+			]
+		},
+		{
+			"begin": "(</?)(?:([-\\w\\.]+)((:)))?([-\\w\\.:]+)",
+			"captures": {
+				"1": {
+					"name": "punctuation.definition.tag.svg"
+				},
+				"2": {
+					"name": "entity.name.tag.namespace.svg"
+				},
+				"3": {
+					"name": "entity.name.tag.svg"
+				},
+				"4": {
+					"name": "punctuation.separator.namespace.svg"
+				},
+				"5": {
+					"name": "entity.name.tag.localname.svg"
+				}
+			},
+			"end": "(/?>)",
+			"name": "meta.tag.svg",
+			"patterns": [
+				{
+					"include": "#tagStuff"
+				}
+			]
+		},
+		{
+			"include": "#entity"
+		},
+		{
+			"include": "#bare-ampersand"
+		},
+		{
+			"begin": "<%@",
+			"beginCaptures": {
+				"0": {
+					"name": "punctuation.section.embedded.begin.svg"
+				}
+			},
+			"end": "%>",
+			"endCaptures": {
+				"0": {
+					"name": "punctuation.section.embedded.end.svg"
+				}
+			},
+			"name": "source.java-props.embedded.svg",
+			"patterns": [
+				{
+					"match": "page|include|taglib",
+					"name": "keyword.other.page-props.svg"
+				}
+			]
+		},
+		{
+			"begin": "<%[!=]?(?!--)",
+			"beginCaptures": {
+				"0": {
+					"name": "punctuation.section.embedded.begin.svg"
+				}
+			},
+			"end": "(?!--)%>",
+			"endCaptures": {
+				"0": {
+					"name": "punctuation.section.embedded.end.svg"
+				}
+			},
+			"name": "source.java.embedded.svg",
+			"patterns": [
+				{
+					"include": "source.java"
+				}
+			]
+		},
+		{
+			"begin": "<!\\[CDATA\\[",
+			"beginCaptures": {
+				"0": {
+					"name": "punctuation.definition.string.begin.svg"
+				}
+			},
+			"end": "]]>",
+			"endCaptures": {
+				"0": {
+					"name": "punctuation.definition.string.end.svg"
+				}
+			},
+			"name": "string.unquoted.cdata.svg"
+		}
+	],
+	"repository": {
+		"EntityDecl": {
+			"begin": "(<!)(ENTITY)\\s+(%\\s+)?([:a-zA-Z_][:a-zA-Z0-9_.-]*)(\\s+(?:SYSTEM|PUBLIC)\\s+)?",
+			"captures": {
+				"1": {
+					"name": "punctuation.definition.tag.svg"
+				},
+				"2": {
+					"name": "keyword.other.entity.svg"
+				},
+				"3": {
+					"name": "punctuation.definition.entity.svg"
+				},
+				"4": {
+					"name": "variable.language.entity.svg"
+				},
+				"5": {
+					"name": "keyword.other.entitytype.svg"
+				}
+			},
+			"end": "(>)",
+			"patterns": [
+				{
+					"include": "#doublequotedString"
+				},
+				{
+					"include": "#singlequotedString"
+				}
+			]
+		},
+		"bare-ampersand": {
+			"match": "&",
+			"name": "invalid.illegal.bad-ampersand.svg"
+		},
+		"doublequotedString": {
+			"begin": "\"",
+			"beginCaptures": {
+				"0": {
+					"name": "punctuation.definition.string.begin.svg"
+				}
+			},
+			"end": "\"",
+			"endCaptures": {
+				"0": {
+					"name": "punctuation.definition.string.end.svg"
+				}
+			},
+			"name": "string.quoted.double.svg",
+			"patterns": [
+				{
+					"include": "#entity"
+				},
+				{
+					"include": "#bare-ampersand"
+				}
+			]
+		},
+		"entity": {
+			"captures": {
+				"1": {
+					"name": "punctuation.definition.constant.svg"
+				},
+				"3": {
+					"name": "punctuation.definition.constant.svg"
+				}
+			},
+			"match": "(&)([:a-zA-Z_][:a-zA-Z0-9_.-]*|#[0-9]+|#x[0-9a-fA-F]+)(;)",
+			"name": "constant.character.entity.svg"
+		},
+		"internalSubset": {
+			"begin": "(\\[)",
+			"captures": {
+				"1": {
+					"name": "punctuation.definition.constant.svg"
+				}
+			},
+			"end": "(\\])",
+			"name": "meta.internalsubset.svg",
+			"patterns": [
+				{
+					"include": "#EntityDecl"
+				},
+				{
+					"include": "#parameterEntity"
+				},
+				{
+					"include": "#comments"
+				}
+			]
+		},
+		"parameterEntity": {
+			"captures": {
+				"1": {
+					"name": "punctuation.definition.constant.svg"
+				},
+				"3": {
+					"name": "punctuation.definition.constant.svg"
+				}
+			},
+			"match": "(%)([:a-zA-Z_][:a-zA-Z0-9_.-]*)(;)",
+			"name": "constant.character.parameter-entity.svg"
+		},
+		"singlequotedString": {
+			"begin": "'",
+			"beginCaptures": {
+				"0": {
+					"name": "punctuation.definition.string.begin.svg"
+				}
+			},
+			"end": "'",
+			"endCaptures": {
+				"0": {
+					"name": "punctuation.definition.string.end.svg"
+				}
+			},
+			"name": "string.quoted.single.svg",
+			"patterns": [
+				{
+					"include": "#entity"
+				},
+				{
+					"include": "#bare-ampersand"
+				}
+			]
+		},
+		"tagStuff": {
+			"patterns": [
+				{
+					"captures": {
+						"1": {
+							"name": "entity.other.attribute-name.namespace.svg"
+						},
+						"2": {
+							"name": "entity.other.attribute-name.svg"
+						},
+						"3": {
+							"name": "punctuation.separator.namespace.svg"
+						},
+						"4": {
+							"name": "entity.other.attribute-name.localname.svg"
+						}
+					},
+					"match": "(?:^|\\s+)(?:([-\\w.]+)((:)))?([-\\w.:]+)="
+				},
+				{
+					"include": "#doublequotedString"
+				},
+				{
+					"include": "#singlequotedString"
+				}
+			]
+		},
+		"comments": {
+			"begin": "<[!%]--",
+			"captures": {
+				"0": {
+					"name": "punctuation.definition.comment.svg"
+				}
+			},
+			"end": "--%?>",
+			"name": "comment.block.svg"
+		}
+	}
+}

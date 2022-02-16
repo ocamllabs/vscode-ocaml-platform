@@ -595,6 +595,18 @@
         "configuration": "./languages/eml.json"
       },
       {
+        "id": "svg",
+        "aliases": [
+          "Embedded OCaml",
+          "Eml",
+          "eml"
+        ],
+        "extensions": [
+          ".html.eml", ".eml"
+        ],
+        "configuration": "./languages/html-svg.json"
+      },
+      {
         "id": "html-eml",
         "aliases": [
           "HTML (Embedded OCaml)",
@@ -924,8 +936,13 @@
       },
       {
         "language": "eml",
-        "scopeName": "text.ocaml",
-        "path": "./syntaxes/eml.json"
+        "scopeName": "text.ocaml", 
+        "path": "./syntaxes/html-svg.json"
+      },
+      {
+        "language": "eml",
+        "scopeName": "text.html.ocaml",
+        "path": "./syntaxes/html-svg.json"
       },
       {
         "language": "html-eml",
