@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Fix dune subdir stanza syntax highlighting (#870)
+
 ## 1.9.2
 
 - Improve dune variable syntax highlighting. Add highlighting for `env` and

@@ -1222,23 +1222,8 @@
             }
           },
           "patterns": [
-            {
-              "comment": "rule",
-              "begin": "\\([[:space:]]*(rule)\\b",
-              "end": "\\)",
-              "beginCaptures": {
-                "1": {
-                  "name": "keyword.language.dune"
-                }
-              },
-              "patterns": [
-                {
-                  "include": "#action"
-                },
-                {
-                  "include": "#general"
-                }
-              ]
+            { 
+              "include": "$self" 
             },
             {
               "include": "#general"
