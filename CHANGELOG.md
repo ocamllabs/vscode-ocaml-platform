@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.9.3
 
 - Fix dune subdir stanza syntax highlighting (#870)
 
