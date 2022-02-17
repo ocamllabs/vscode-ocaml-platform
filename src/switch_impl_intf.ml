@@ -31,8 +31,7 @@ let request_switch client document =
     let is_empty_doc doc = TextDocument.getText doc () |> String.is_empty in
     if TextDocument.isUntitled doc && is_empty_doc doc then
       insert_inferred_intf ~source_uri client text_editor
-    else
-      Promise.return ()
+    else Promise.return ()
   in
   let* arr =
     Custom_requests.send_request client Custom_requests.switchImplIntf

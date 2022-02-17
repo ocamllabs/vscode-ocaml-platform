@@ -108,10 +108,8 @@ let pp_status t uri =
         match find_original_doc_by_pp_uri t uri with
         | Some uri -> String.equal el uri
         | None -> false)
-  then
-    `Original
-  else
-    `Absent_or_pped
+  then `Original
+  else `Absent_or_pped
 
 let remove_dirty_original_doc t ~pp_uri =
   match find_original_doc_by_pp_uri t pp_uri with

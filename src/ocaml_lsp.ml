@@ -32,8 +32,7 @@ module Experimental_capabilities = struct
       ; handleInferIntf
       ; handleTypedHoles
       }
-    with
-    | Jsonoo.Decode_error err ->
+    with Jsonoo.Decode_error err ->
       show_message `Warn
         "Unexpected experimental capabilities from the language server. \
          Falling back to default: no experimental capabilities set.";
@@ -54,65 +53,79 @@ type t =
 
 let get_version_from_serverInfo { serverInfo; experimental_capabilities = _ } =
   match serverInfo with
-  | None -> Error `Missing_serverInfo (* ocamllsp should have [serverInfo] *)
+  | None -> None
   | Some { name; version } ->
-    if String.equal name "ocamllsp" then
-      match version with
-      | None -> Error `ServerInfo_version_missing
-      | Some v -> Ok v
+    if String.equal name "ocamllsp" then version
     else (
       log_chan ~section:"Ocaml_lsp.get_version" `Warn
         "the language server is not ocamllsp";
       (* practically impossible but let's be defensive *)
-      Error `Language_server_isn't_ocamllsp
-    )
+      None)
 
-let get_version_semver t =
-  match get_version_from_serverInfo t with
-  | Ok v -> (
-    match String.split v ~on:'-' |> List.hd with
-    | Some v -> Ok v
-    | None -> Error `Unable_to_parse_version)
-  | Error _ as err -> err
+let lsp_versions =
+  (* We define a mapping from OCaml version prefixes e.g. (4, 11, x) to
+     available versions of ocamllsp for this prefix. The last element in the
+     array of lsp versions is the latest version of ocamllsp for that prefix *)
+  let main =
+    [ ( (4, 12)
+      , [| "1.5.0"
+         ; "1.6.0"
+         ; "1.6.1"
+         ; "1.7.0"
+         ; "1.8.0"
+         ; "1.8.1"
+         ; "1.8.2"
+         ; "1.8.3"
+         ; "1.9.0"
+        |] )
+    ; ((4, 13), [| "1.9.1"; "1.10.0"; "1.10.1" |])
+    ]
+  in
+  let rest =
+    let lsp = [| "1.0.0"; "1.1.0"; "1.2.0"; "1.3.0"; "1.4.0"; "1.4.1" |] in
+    List.range ~start:`inclusive ~stop:`inclusive 6 11
+    |> List.map ~f:(fun minor -> ((4, minor), lsp))
+  in
+  main @ rest
+
+let available_versions version =
+  let prefix = (Ocaml_version.major version, Ocaml_version.minor version) in
+  List.Assoc.find lsp_versions ~equal:Poly.equal prefix
 
 let is_version_up_to_date t ocaml_v =
-  let ocamllsp_version = get_version_semver t in
+  let ocamllsp_version = get_version_from_serverInfo t in
   let res =
+    (* if the server doesn't have a version, we assume it's ancient and we can
+       offer an upgrade *)
     match ocamllsp_version with
-    | Ok v -> (
-      match ocaml_v with
-      | _ when Ocaml_version.(ocaml_v < Releases.v4_06_0) ->
-        Error (`Ocaml_version_not_supported ocaml_v)
-      | _ when Ocaml_version.(ocaml_v < Releases.v4_12_0) ->
-        Ok (String.equal v "1.4.1")
-      | _ when Ocaml_version.(ocaml_v < Releases.v4_13_0) ->
-        Ok (String.equal v "1.9.0")
-      | _ when Ocaml_version.(ocaml_v < Releases.v4_14_0) ->
-        Ok (String.equal v "1.9.1")
-      | _ -> Error (`Ocaml_version_not_supported ocaml_v))
-    | Error e -> Error (`Unexpected e)
+    | None -> (
+      match available_versions ocaml_v with
+      | Some v -> Error (`Newer_available (None, Array.last v))
+      | None -> Ok ())
+    | Some v -> (
+      match available_versions ocaml_v with
+      | None -> Ok ()
+      | Some available -> (
+        match Array.findi available ~f:(fun _ -> String.equal v) with
+        | None -> Ok ()
+        | Some (pos, _) ->
+          let last = Array.length available - 1 in
+          if Int.equal pos last then Ok ()
+          else Error (`Newer_available (Some v, available.(last)))))
   in
   Result.map_error res ~f:(fun err ->
       let msg =
         match err with
-        | `Ocaml_version_not_supported v ->
+        | `Newer_available (old, new_) ->
+          let upgrade =
+            match old with
+            | None -> sprintf "to %s" new_
+            | Some old -> sprintf "%s to %s" old new_
+          in
           sprintf
-            "The installed version of OCaml is not supported by `ocamllsp`: \
-             %s. Consider upgrading OCaml version used in the current sandbox."
-            (Ocaml_version.to_string v)
-        | `Unexpected `Language_server_isn't_ocamllsp ->
-          "Using a language server besides `ocamllsp` isn't expected by this \
-           extension. Please, switch to using `ocamllsp` by installing the \
-           package `ocaml-lsp-server` in your current sandbox."
-        | `Unexpected `Missing_serverInfo
-        | `Unexpected `ServerInfo_version_missing ->
-          "The extension expected the server version to be sent by `ocamllsp`. \
-           It is missing. Please, consider upgrading the package \
-           `ocaml-lsp-server`."
-        | `Unexpected `Unable_to_parse_version ->
-          "The extension was unable to parse `ocamllsp` version. That's \
-           strange. Consider filing an issue on the project GitHub with the \
-           version of your `ocamllsp`."
+            "The is a newer version of ocamllsp available. Consider upgrading \
+             %s"
+            upgrade
       in
       `Msg msg)
 

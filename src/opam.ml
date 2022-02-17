@@ -11,8 +11,7 @@ let make ?root () =
   let spawn =
     if Ocaml_windows.use_ocaml_env () then
       Ocaml_windows.spawn_ocaml_env [ "opam" ]
-    else
-      { Cmd.bin = opam_binary; args = [] }
+    else { Cmd.bin = opam_binary; args = [] }
   in
   let open Promise.Syntax in
   let* spawn = Cmd.check_spawn spawn in
@@ -43,8 +42,7 @@ module Opam_parser = struct
   let rec string name = function
     | [] -> None
     | OpamParserTypes.Variable (_, s, String (_, v)) :: _
-      when String.equal s name ->
-      Some v
+      when String.equal s name -> Some v
     | _ :: rest -> string name rest
 
   let rec list name = function
@@ -77,8 +75,7 @@ module Switch = struct
       let switch_name = String.strip switch_name in
       if Path.is_absolute (Path.of_string switch_name) then
         Some (Local (Path.of_string switch_name))
-      else
-        Some (Named switch_name)
+      else Some (Named switch_name)
 
   let name = function
     | Named s -> s
@@ -146,8 +143,7 @@ module Package = struct
       let open Promise.Syntax in
       let opam_filepath = Path.(path / "opam") |> Path.to_string in
       let* file_exists = Fs.exists opam_filepath in
-      if not file_exists then
-        Promise.return None
+      if not file_exists then Promise.return None
       else
         let+ file_content = Fs.readFile opam_filepath in
         let { OpamParserTypes.file_contents; _ } =
@@ -184,9 +180,7 @@ module Package = struct
 
   let has_dependencies t =
     match depends t with
-    | None
-    | Some [] ->
-      false
+    | None | Some [] -> false
     | _ -> true
 
   let get_switch_package name ~package_path =
@@ -200,8 +194,7 @@ module Package = struct
           let basename = Stdlib.Filename.basename fpath in
           if String.is_prefix basename ~prefix:name then
             of_path Path.(package_path / fpath)
-          else
-            Promise.return None)
+          else Promise.return None)
         l
 
   let dependencies package =

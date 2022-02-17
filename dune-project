@@ -41,6 +41,8 @@
    (>= 0.2.1))
   (ocaml-version
    (>= 3.4.0))
+  (ppxlib
+   (>= 0.23.0))
   (opam-file-format
    (>= 2.1.2))))
 
@@ -56,7 +58,5 @@
    (= 1.0.8))
   (promise_jsoo
    (>= 0.3.1))
-  (ppxlib
-   (>= 0.23.0))
   (jsonoo
    (>= 0.2.1))))

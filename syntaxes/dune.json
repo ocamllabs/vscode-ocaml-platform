@@ -1585,215 +1585,6 @@
         }
       ]
     },
-    "general": {
-      "patterns": [
-        {
-          "name": "comment.line.dune",
-          "begin": ";",
-          "end": "$"
-        },
-        {
-          "name": "string.quoted.line.dune",
-          "begin": "\"\\\\\\|",
-          "end": "$",
-          "patterns": [
-            {
-              "include": "#escape-characters"
-            }
-          ]
-        },
-        {
-          "name": "string.quoted.line.dune",
-          "begin": "\"\\\\>",
-          "end": "$"
-        },
-        {
-          "name": "string.quoted.double.dune",
-          "begin": "\"",
-          "end": "\"",
-          "patterns": [
-            {
-              "include": "#escape-characters"
-            }
-          ]
-        },
-        {
-          "comment": "symbol",
-          "name": "entity.name.function.action.dune",
-          "match": "(:[[:alpha:]-]+)\\b"
-        },
-        {
-          "comment": "number or version",
-          "name": "constant.numeric.dune",
-          "match": "\\b([[:digit:]](\\.[[:digit:]]+)+)\\b"
-        },
-        {
-          "comment": "true or false",
-          "name": "constant.language.dune",
-          "match": "\\b(true|false)\\b"
-        },
-        {
-          "comment": "variable",
-          "begin": "%\\{",
-          "end": "\\}",
-          "beginCaptures": [
-            {
-              "name": "keyword.operator.dune"
-            }
-          ],
-          "endCaptures": [
-            {
-              "name": "keyword.operator.dune"
-            }
-          ],
-          "patterns": [
-            {
-              "include": "#variables"
-            }
-          ]
-        },
-        {
-          "comment": "boolean/predicate language",
-          "begin": "\\([[:space:]]*(=|<>|>=|<=|<|>)",
-          "end": "\\)",
-          "beginCaptures": {
-            "1": {
-              "name": "keyword.operator.dune"
-            }
-          },
-          "patterns": [
-            {
-              "include": "#general"
-            }
-          ]
-        },
-        {
-          "comment": "boolean/predicate language",
-          "begin": "\\([[:space:]]*(and|or|not)\\b",
-          "end": "\\)",
-          "beginCaptures": {
-            "1": {
-              "name": "entity.name.function.action.dune"
-            }
-          },
-          "patterns": [
-            {
-              "include": "#general"
-            }
-          ]
-        },
-        {
-          "comment": "ordered set language",
-          "begin": "\\(",
-          "end": "\\)",
-          "patterns": [
-            {
-              "name": "keyword.operator.dune",
-              "match": "/"
-            },
-            {
-              "include": "#general"
-            }
-          ]
-        }
-      ]
-    },
-    "escape-characters": {
-      "patterns": [
-        {
-          "comment": "escaped newline",
-          "name": "constant.character.escape.dune",
-          "match": "\\\\$"
-        },
-        {
-          "comment": "escaped character",
-          "name": "constant.character.escape.dune",
-          "match": "\\\\(n|r|b|t|\\\\|\")"
-        },
-        {
-          "comment": "character from decimal ASCII code",
-          "name": "constant.character.escape.dune",
-          "match": "\\\\[[:digit:]]{3}"
-        },
-        {
-          "comment": "character from hexadecimal ASCII code",
-          "name": "constant.character.escape.dune",
-          "match": "\\\\x[[:xdigit:]]{2}"
-        },
-        {
-          "comment": "escaped variable",
-          "begin": "(\\%\\{)",
-          "end": "(\\})",
-          "beginCaptures": [
-            {
-              "name": "constant.character.escape.dune"
-            }
-          ],
-          "endCaptures": [
-            {
-              "name": "constant.character.escape.dune"
-            }
-          ],
-          "patterns": [
-            {
-              "include": "#variables"
-            }
-          ]
-        }
-      ]
-    },
-    "variables": {
-      "patterns": [
-        {
-          "name": "keyword.operator.variable.dune",
-          "match": ":"
-        },
-        {
-          "name": "constant.language.variable.dune",
-          "match": "\\b(project_root|workspace_root)\\b"
-        },
-        {
-          "name": "constant.language.variable.dune",
-          "match": "\\b(CC|CXX)\\b"
-        },
-        {
-          "name": "constant.language.variable.dune",
-          "match": "\\b(ocaml_bin|ocaml|ocamlc|ocamlopt|ocaml_version|ocaml_where|ocaml-config)\\b"
-        },
-        {
-          "name": "constant.language.variable.dune",
-          "match": "\\b(profile|null|context_name|ignoring_promoted_rule)\\b"
-        },
-        {
-          "name": "constant.language.variable.dune",
-          "match": "\\b(ext_obj|ext_asm|ext_lib|ext_dll|ext_exe|ext_plugin)\\b"
-        },
-        {
-          "name": "constant.language.variable.dune",
-          "match": "\\b(arch_sixtyfour|architecture|os_type|model|system)\\b"
-        },
-        {
-          "name": "constant.language.variable.dune",
-          "match": "\\b(cmo|cmi|cma|cmx|cmxa)\\b"
-        },
-        {
-          "name": "constant.language.variable.action.dune",
-          "match": "\\^"
-        },
-        {
-          "name": "constant.language.variable.action.dune",
-          "match": "\\b(targets|target|deps|dep|exe|bin|version)\\b"
-        },
-        {
-          "name": "constant.language.variable.action.dune",
-          "match": "\\b(lib-available|lib-private|libexec-private|libexec|lib)\\b"
-        },
-        {
-          "name": "constant.language.variable.action.dune",
-          "match": "\\b(read-lines|read-strings|read)\\b"
-        }
-      ]
-    },
     "dependencies": {
       "patterns": [
         {
@@ -2090,9 +1881,6 @@
         },
         {
           "include": "#general"
-        },
-        {
-          "include": "#variables"
         }
       ]
     },
@@ -2390,9 +2178,6 @@
                     }
                   },
                   "patterns": [
-                    {
-                      "include": "#variables"
-                    },
                     {
                       "include": "#general"
                     }
@@ -2926,6 +2711,239 @@
           ]
         }
       ]
+    },
+    "general": {
+      "patterns": [
+        {
+          "name": "comment.line.dune",
+          "begin": ";",
+          "end": "$"
+        },
+        {
+          "name": "string.quoted.line.dune",
+          "begin": "\"\\\\\\|",
+          "end": "$",
+          "patterns": [
+            {
+              "include": "#escape-characters"
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.line.dune",
+          "begin": "\"\\\\>",
+          "end": "$"
+        },
+        {
+          "name": "string.quoted.double.dune",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "include": "#escape-characters"
+            }
+          ]
+        },
+        {
+          "comment": "symbol",
+          "name": "entity.name.function.action.dune",
+          "match": "(:[[:alpha:]-]+)\\b"
+        },
+        {
+          "comment": "number or version",
+          "name": "constant.numeric.dune",
+          "match": "\\b([[:digit:]](\\.[[:digit:]]+)+)\\b"
+        },
+        {
+          "comment": "true or false",
+          "name": "constant.language.dune",
+          "match": "\\b(true|false)\\b"
+        },
+        {
+          "comment": "variable",
+          "begin": "%\\{",
+          "end": "\\}",
+          "beginCaptures": [
+            {
+              "name": "keyword.operator.dune"
+            }
+          ],
+          "endCaptures": [
+            {
+              "name": "keyword.operator.dune"
+            }
+          ],
+          "patterns": [
+            {
+              "include": "#variables"
+            }
+          ]
+        },
+        {
+          "comment": "boolean/predicate language",
+          "begin": "\\([[:space:]]*(=|<>|>=|<=|<|>)",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.operator.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "boolean/predicate language",
+          "begin": "\\([[:space:]]*(and|or|not)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.function.action.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "ordered set language",
+          "begin": "\\(",
+          "end": "\\)",
+          "patterns": [
+            {
+              "name": "keyword.operator.dune",
+              "match": "/"
+            },
+            {
+              "include": "#general"
+            }
+          ]
+        }
+      ],
+      "repository": {
+        "escape-characters": {
+          "patterns": [
+            {
+              "comment": "escaped newline",
+              "name": "constant.character.escape.dune",
+              "match": "\\\\$"
+            },
+            {
+              "comment": "escaped character",
+              "name": "constant.character.escape.dune",
+              "match": "\\\\(n|r|b|t|\\\\|\")"
+            },
+            {
+              "comment": "character from decimal ASCII code",
+              "name": "constant.character.escape.dune",
+              "match": "\\\\[[:digit:]]{3}"
+            },
+            {
+              "comment": "character from hexadecimal ASCII code",
+              "name": "constant.character.escape.dune",
+              "match": "\\\\x[[:xdigit:]]{2}"
+            },
+            {
+              "comment": "escaped variable",
+              "begin": "(\\%\\{)",
+              "end": "(\\})",
+              "beginCaptures": [
+                {
+                  "name": "constant.character.escape.dune"
+                }
+              ],
+              "endCaptures": [
+                {
+                  "name": "constant.character.escape.dune"
+                }
+              ],
+              "patterns": [
+                {
+                  "include": "#variables"
+                }
+              ]
+            }
+          ]
+        },
+        "variables": {
+          "patterns": [
+            {
+              "name": "keyword.operator.variable.dune",
+              "match": ":"
+            },
+            {
+              "name": "keyword.operator.variable.dune",
+              "match": "="
+            },
+            {
+              "name": "constant.language.variable.action.dune",
+              "match": "\\^"
+            },
+
+            {
+              "name": "constant.language.variable.dune",
+              "match": "(?<=\\{)(project_root|workspace_root|profile|context_name)(?=\\})"
+            },
+            {
+              "name": "constant.language.variable.dune",
+              "match": "(?<=\\{)(CC|CXX)(?=\\})"
+            },
+            {
+              "name": "constant.language.variable.dune",
+              "match": "(?<=\\{)(ocaml_bin|ocaml|ocamlc|ocamlopt|ocaml_version|ocaml_where)(?=\\})"
+            },
+            {
+              "name": "constant.language.variable.dune",
+              "match": "(?<=\\{)(ext_obj|ext_asm|ext_lib|ext_dll|ext_exe|ext_plugin)(?=\\})"
+            },
+            {
+              "name": "constant.language.variable.dune",
+              "match": "(?<=\\{)(arch_sixtyfour|architecture|os_type|model|system)(?=\\})"
+            },
+            {
+              "name": "constant.language.variable.action.dune",
+              "match": "(?<=\\{)(target|targets|deps)(?=\\})"
+            },
+            {
+              "name": "constant.language.variable.dune",
+              "match": "(?<=\\{)(null)(?=\\})"
+            },
+            {
+              "name": "constant.language.variable.dune",
+              "match": "(?<=\\{)(ignoring_promoted_rule)(?=\\})"
+            },
+
+            {
+              "name": "constant.language.variable.dune",
+              "match": "(?<=\\{)(ocaml-config)(?=:)"
+            },
+            {
+              "name": "constant.language.variable.dune",
+              "match": "(?<=\\{)(env)(?=:)"
+            },
+            {
+              "name": "constant.language.variable.dune",
+              "match": "(?<=\\{)(version)(?=:)"
+            },
+            {
+              "name": "constant.language.variable.dune",
+              "match": "(?<=\\{)(cmo|cmi|cma|cmx|cmxa)(?=:)"
+            },
+            {
+              "name": "constant.language.variable.action.dune",
+              "match": "(?<=\\{)(dep|exe|bin|bin-available|lib|lib-private|libexec|libexec-private|lib-available)(?=:)"
+            },
+            {
+              "name": "constant.language.variable.action.dune",
+              "match": "(?<=\\{)(read|read-lines|read-strings)(?=:)"
+            }
+          ]
+        }
+      }
     }
   }
 }

@@ -7,15 +7,11 @@ module Handlers = struct
     | `Ok () -> ()
     | `Error err_msg -> show_message `Error "%s" err_msg
 
-  let w1 f x =
-    try `Ok (f x) with
-    | User_error e -> `Error e
+  let w1 f x = try `Ok (f x) with User_error e -> `Error e
 
   let ws f x y =
     match f x with
-    | `Ok f' -> (
-      try `Ok (f' y) with
-      | User_error e -> `Error e)
+    | `Ok f' -> ( try `Ok (f' y) with User_error e -> `Error e)
     | `Error e -> `Error e
 
   let w2 f = ws (w1 f)
@@ -150,13 +146,13 @@ let transform_to_ast instance ~document ~webview =
 let onDidChangeTextDocument_listener instance document webview event =
   let changed_document = TextDocumentChangeEvent.document event in
   if document_eq document changed_document then
-    try transform_to_ast instance ~document ~webview with
-    | User_error err_msg ->
+    try transform_to_ast instance ~document ~webview
+    with User_error err_msg ->
       send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview
 
 let update_ast instance ~document ~webview =
-  try transform_to_ast instance ~document ~webview with
-  | User_error err_msg ->
+  try transform_to_ast instance ~document ~webview
+  with User_error err_msg ->
     send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview
 
 let onDidReceiveMessage_listener instance webview document msg =
@@ -164,17 +160,13 @@ let onDidReceiveMessage_listener instance webview document msg =
   let int_prop name =
     if Ojs.has_property msg name then
       Some (Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg name)))
-    else
-      None
+    else None
   in
 
   match int_prop "selectedOutput" with
   | Some i ->
     Ast_editor_state.set_current_ast_mode ast_editor_state
-      (if i = 0 then
-        Ast_editor_state.Original_ast
-      else
-        Preprocessed_ast);
+      (if i = 0 then Ast_editor_state.Original_ast else Preprocessed_ast);
     update_ast instance ~document ~webview
   | None -> (
     match Option.both (int_prop "begin") (int_prop "end") with
@@ -271,9 +263,9 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
         Disposable.dispose onDidChangeTextDocument_disposable)
       ()
   in
-  (try transform_to_ast instance ~document ~webview with
-  | User_error err_msg ->
-    send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview);
+  (try transform_to_ast instance ~document ~webview
+   with User_error err_msg ->
+     send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview);
   let options = WebView.options webview in
   WebviewOptions.set_enableScripts options true;
   WebView.set_options webview options;
@@ -363,8 +355,7 @@ let reload_pp_doc instance ~document =
 let rec manage_choice instance choice ~document =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   match choice with
-  | Some `Update
-  | Some `Retry ->
+  | Some `Update | Some `Retry ->
     let res =
       (match
          (Ast_editor_state.pp_status ast_editor_state)
@@ -400,8 +391,7 @@ let rec manage_choice instance choice ~document =
       ()
     | None -> reload webview_opt ~document);
     res
-  | Some `Abandon
-  | None ->
+  | Some `Abandon | None ->
     Promise.return (Error "Operation has been abandoned.")
 
 and manage_open_failure err_msg instance ~document =

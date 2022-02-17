@@ -217,15 +217,13 @@ let of_settings () : t option Promise.t =
       Promise.return None
     | Some opam ->
       let+ exists = Opam.switch_exists opam switch in
-      if exists then
-        Some (Opam (opam, switch))
+      if exists then Some (Opam (opam, switch))
       else (
         show_message `Warn
           "Workspace is configured to use the switch %s. This switch does not \
            exist."
           (Opam.Switch.name switch);
-        None
-      ))
+        None))
   | Some Global -> Promise.return (Some Global)
   | Some (Custom template) -> Promise.return (Some (Custom template))
 
@@ -242,7 +240,7 @@ let workspace_root () =
 
 let detect_esy_sandbox ~project_root esy () =
   let open Promise.Option.Syntax in
-  let* esy = esy in
+  let* esy in
   let open Promise.Syntax in
   let+ esy_build_dir_exists, manifest =
     Promise.all2
@@ -262,7 +260,7 @@ let detect_esy_sandbox ~project_root esy () =
 
 let detect_opam_local_switch ~project_root opam () =
   let open Promise.Option.Syntax in
-  let* opam = opam in
+  let* opam in
   let* switch = Opam.switch_show ~cwd:project_root opam in
   match switch with
   | Local _ as switch -> Promise.Option.return (Opam (opam, switch))
@@ -270,7 +268,7 @@ let detect_opam_local_switch ~project_root opam () =
 
 let detect_opam_sandbox ~project_root opam () =
   let open Promise.Option.Syntax in
-  let* opam = opam in
+  let* opam in
   let+ switch = Opam.switch_show ~cwd:project_root opam in
   Opam (opam, switch)
 
@@ -322,12 +320,9 @@ module Candidate = struct
           in
           if Option.exists current_switch ~f:(Opam.Switch.equal switch) then
             Some (switch_kind_s ^ " | Currently active switch in project root")
-          else
-            Some switch_kind_s
+          else Some switch_kind_s
         | Esy (_, _) -> Some "Esy"
-        | Global
-        | Custom _ ->
-          None)
+        | Global | Custom _ -> None)
     in
     match sandbox with
     | Opam (_, Named name) -> create ~label:name ?description ()
@@ -414,10 +409,8 @@ let sandbox_candidates ~workspace_folders =
       | Some current_switch ->
         let f sw =
           let sandbox = Opam (opam, sw) in
-          if Opam.Switch.equal current_switch sw then
-            None
-          else
-            Some { Candidate.sandbox; status = Ok () }
+          if Opam.Switch.equal current_switch sw then None
+          else Some { Candidate.sandbox; status = Ok () }
         in
         let sandboxes = List.filter_map switches ~f
         and current_switch_sandbox =
@@ -450,10 +443,8 @@ let select_sandbox () =
       if
         String.is_substring value ~substring:"$prog"
         && String.is_substring value ~substring:"$args"
-      then
-        Promise.return None
-      else
-        Promise.Option.return "Command template must include $prog and $args"
+      then Promise.return None
+      else Promise.Option.return "Command template must include $prog and $args"
     in
     let options =
       InputBoxOptions.create ~prompt:"Input a custom command template"
@@ -657,8 +648,7 @@ let upgrade_packages t =
 
 let focus_on_package_command ?sandbox () =
   match sandbox with
-  | None
-  | Some (Opam _) ->
+  | None | Some (Opam _) ->
     let (lazy output) = Output.command_output_channel in
     Vscode.OutputChannel.show output ()
   | _ -> ()

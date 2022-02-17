@@ -38,10 +38,6 @@ let is_root = function
   | "" -> true
   | x -> equal (dirname x) x
 
-let parent x =
-  if is_root x then
-    None
-  else
-    Some (dirname x)
+let parent x = if is_root x then None else Some (dirname x)
 
 let asset name = of_string (Node.__filename () ^ "/../../assets/" ^ name)

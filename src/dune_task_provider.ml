@@ -82,9 +82,7 @@ let compute_tasks token sandbox =
 
 let provide_tasks instance ~token =
   match Settings.get ~section:"ocaml" Setting.t with
-  | None
-  | Some false ->
-    `Promise (Promise.return None)
+  | None | Some false -> `Promise (Promise.return None)
   | Some true ->
     let sandbox = Extension_instance.sandbox instance in
     `Promise (compute_tasks token sandbox)

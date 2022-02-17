@@ -1,6 +1,16 @@
 # Change Log
 
-## Unreleased
+## 1.9.2
+
+- Improve dune variable syntax highlighting. Add highlighting for `env` and
+  `bin-available` variables. (#872)
+
+## 1.9.1
+
+- Make the check for out of date ocamllsp more conservative. It will no longer
+  alert the user unless the extension is certain an upgrade is possible (#859)
+
+## 1.9.0
 
 - Rule stanza highlighted properly in dune syntax (#870)
 

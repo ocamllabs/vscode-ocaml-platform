@@ -79,6 +79,19 @@ end = struct
            "Sandbox initialization failed: `ocaml-lsp-server` is not installed \
             in the current sandbox.")
 
+  let client_capabilities =
+    let fillClientCapabilities ~capabilities =
+      let experimental =
+        Jsonoo.Encode.(object_ [ ("jumpToNextHole", bool true) ])
+      in
+      LanguageClient.ClientCapabilities.set_experimental capabilities
+        (Some experimental)
+    in
+    let initialize ~capabilities:_ ~documentSelector:_ = () in
+    let dispose () = () in
+    LanguageClient.StaticFeature.make ~fillClientCapabilities ~initialize
+      ~dispose ()
+
   let start_language_server t =
     stop_server t;
     let open Promise.Syntax in
@@ -91,6 +104,7 @@ end = struct
         LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
           ~serverOptions ~clientOptions ()
       in
+      LanguageClient.registerFeature client ~feature:client_capabilities;
       LanguageClient.start client;
       let open Promise.Syntax in
       let+ initialize_result = LanguageClient.ready_initialize_result client in
@@ -99,12 +113,7 @@ end = struct
       (match
          Ocaml_lsp.is_version_up_to_date ocaml_lsp (ocaml_version_exn t)
        with
-      | Ok is_up_to_date ->
-        if not is_up_to_date then
-          show_message `Warn
-            "The installed version of `ocamllsp` is out of date. You may be \
-             missing out on cool features or important bug fixes. Consider \
-             upgrading the package `ocaml-lsp-server`."
+      | Ok () -> ()
       | Error (`Msg m) -> show_message `Warn "%s" m);
       Ok ()
     in

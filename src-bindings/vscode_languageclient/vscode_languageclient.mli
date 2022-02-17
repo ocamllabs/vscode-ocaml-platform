@@ -119,6 +119,33 @@ end
 
 module ServerOptions = Executable
 
+module InitializeParams : sig
+  include Js.T
+end
+
+module ClientCapabilities : sig
+  include Js.T
+
+  val experimental : t -> Jsonoo.t or_undefined
+
+  val set_experimental : t -> Jsonoo.t or_undefined -> unit
+end
+
+module StaticFeature : sig
+  include Js.T
+
+  val make :
+       ?fillInitializeParams:(params:InitializeParams.t -> unit)
+    -> fillClientCapabilities:(capabilities:ClientCapabilities.t -> unit)
+    -> initialize:
+         (   capabilities:ServerCapabilities.t
+          -> documentSelector:DocumentSelector.t or_undefined
+          -> unit)
+    -> dispose:(unit -> unit)
+    -> unit
+    -> t
+end
+
 module LanguageClient : sig
   include Js.T
 
@@ -148,4 +175,6 @@ module LanguageClient : sig
     -> ?token:Vscode.CancellationToken.t
     -> unit
     -> Jsonoo.t Promise.t
+
+  val registerFeature : t -> feature:StaticFeature.t -> unit
 end

@@ -13,11 +13,7 @@ type stdout = string
 
 type stderr = string
 
-let quote str =
-  if String.contains str ' ' then
-    "\"" ^ str ^ "\""
-  else
-    str
+let quote str = if String.contains str ' ' then "\"" ^ str ^ "\"" else str
 
 let to_string = function
   | Shell cmd -> cmd
@@ -43,14 +39,10 @@ let which path_env_var bin =
          |> Promise.List.find_map (fun p ->
                 let open Promise.Syntax in
                 let+ exists = Fs.exists (Path.to_string p) in
-                if exists then
-                  Some p
-                else
-                  None))
+                if exists then Some p else None))
 
 let check_spawn ?env { bin; args } =
-  if Path.is_absolute bin then
-    Promise.Result.return { bin; args }
+  if Path.is_absolute bin then Promise.Result.return { bin; args }
   else
     let path =
       match env with
@@ -82,8 +74,7 @@ let run ?cwd ?env ?stdin cmd =
     match event with
     | ChildProcess.Spawned ->
       Vscode.OutputChannel.appendLine output ~value:("$ " ^ to_string cmd)
-    | Stdout data
-    | Stderr data ->
+    | Stdout data | Stderr data ->
       Vscode.OutputChannel.append output ~value:data
     | Closed -> Vscode.OutputChannel.appendLine output ~value:""
     | ProcessError err -> log_value "process error" (Node.JsError.t_to_js err)
@@ -126,10 +117,8 @@ let output ?cwd ?env ?stdin (t : t) =
   log t;
   let+ (result : ChildProcess.return) = run ?stdin ?cwd ?env t in
   log ~result t;
-  if result.exitCode = 0 then
-    Ok result.stdout
-  else
-    Error (Printf.sprintf "Command failed with error: \n%s" result.stderr)
+  if result.exitCode = 0 then Ok result.stdout
+  else Error (Printf.sprintf "Command failed with error: \n%s" result.stderr)
 
 let equal_spawn s1 s2 =
   Path.equal s1.bin s2.bin && List.equal String.equal s1.args s2.args
