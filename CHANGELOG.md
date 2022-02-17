@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Fix dune subdir stanza syntax highlighting (#870)
+
 ## 1.9.2
 
 - Improve dune variable syntax highlighting. Add highlighting for `env` and
@@ -11,8 +15,6 @@
   alert the user unless the extension is certain an upgrade is possible (#859)
 
 ## 1.9.0
-
-- Rule stanza highlighted properly in dune syntax (#870)
 
 - Dune syntax highlighting fix (#742)
 
