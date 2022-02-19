@@ -4,11 +4,12 @@
 
 Visual Studio Code extension for OCaml and relevant tools.
 
-> You are strongly encouraged to read the "Getting Started" section below
-> because the rest of the document assumes you have read it.
+> You are strongly encouraged to read the "Getting Started" section below because it
+> explains concepts to effectively use the extension. The rest of the document assumes you
+> have read it.
 
-> If you have read "Getting Started" section in full and have issues, please
-> read FAQ at the end of this document.
+> If you have issues with extension and you have read the "Getting Started" section, see
+> FAQ below. 
 
 ## Getting started
 
@@ -37,8 +38,8 @@ Visual Studio Code extension for OCaml and relevant tools.
      [ocamlformat](https://github.com/ocaml-ppx/ocamlformat#installation)
      package if you want source file formatting support.
 
-     Note: Formatting support also requires having `.ocamlformat` file in your
-     project root directory.
+     Note: Formatting support requires having `.ocamlformat` file in your project root
+     directory.
 
 2. Install this extension from the VSCode
    [Marketplace](https://marketplace.visualstudio.com/items?itemName=ocamllabs.ocaml-platform).
@@ -63,9 +64,9 @@ writing code.
 
      ![pick sandbox](./doc/pick_sandbox.png)
 
-   > _What's a sandbox?_ A sandbox is like an isolated environment for your
-   > project, so everything you install is just installed inside this
-   > environment and not globally on your system.
+   > _What's a sandbox?_ In short, the main purpose of a sandbox is to specify how this
+   > extension should invoke its dependencies such as `ocaml-lsp-server` or `ocamlformat`.
+   > For more information on what a sandbox is, see "Sandbox" subsection.
 
 3. Build your project with [Dune](https://github.com/ocaml/dune) to get
    go-to-definition, auto-completion, etc.
@@ -89,18 +90,6 @@ writing code.
 
 By this point, you should have a working OCaml development editor ready. If
 you're on Windows or use ReasonML/ReScript/BuckleScript, see subsections below.
-
-_In case of problems:_ Look at FAQ at the end of the document. If that doesn't
-help:
-
-- if you don't understand how to the extension works or how to make it work
-  correctly, create a new discussion in the repository Discussions
-  [tab](https://github.com/ocamllabs/vscode-ocaml-platform/discussions).
-- if the extension seems to misbehave:
-  - see [Debugging](#debugging) section to see if you can see any reported
-    errors
-  - file an issue in the repository Issues
-    [tab](https://github.com/ocamllabs/vscode-ocaml-platform/issues).
 
 ### Windows
 
@@ -146,6 +135,48 @@ npm install esy --global
 ```bash
 esy
 ```
+
+## In case of problems
+
+Look at FAQ at the end of the document. If that doesn't help:
+
+- if you don't understand how to the extension works or how to make it work
+  correctly, create a new discussion in the repository Discussions
+  [tab](https://github.com/ocamllabs/vscode-ocaml-platform/discussions).
+- if the extension seems to misbehave:
+  - see [Debugging](#debugging) section to see if you can see any reported
+    errors
+  - file an issue in the repository Issues
+    [tab](https://github.com/ocamllabs/vscode-ocaml-platform/issues).
+
+## Important Concepts
+
+### Sandbox
+
+Sandbox defines environment that the extension sees to, for example, launch `ocaml-lsp-server`, detect OCaml compiler version, or use `ocamlformat`. Selecting a sandbox is equivalent to setting this environment for the extension dynamically.
+
+The extension supports 4 kinds of sandboxes: 
+
+1. Global
+
+The extension uses the environment that VS Code was opened in.
+
+2. OPAM Sandbox
+
+The extension uses the environment defined by the OPAM switch that the user picks. Both global and local OPAM switches are supported.
+
+3. Esy Sandbox
+
+The extension uses the environment defined by the Esy sandbox that the user picks.
+
+4. Custom
+
+User can define how they would like to run commands using a (templated) command where
+`$prog` and `$args` strings need to be used to denote how to run an extension dependency
+and how arguments can be passed. One can imitate an OPAM sandbox using a custom sandbox by
+passing a command `opam exec --switch=4.13.1 --set-switch -- $prog $args` -- the extension
+can replace `$prog` with `ocamllsp` and `$args` with arguments to pass to
+`ocaml-lsp-server` as it sees fit. 
 
 ## Features
 
