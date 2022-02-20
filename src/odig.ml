@@ -1,14 +1,16 @@
 open Import
 
 type t =
-  { make_cmd : string list -> Cmd.t
+  { sandbox : Sandbox.t
   ; cache_dir : Path.t
   }
+
+let make_odig_cmd sandbox = Sandbox.get_command sandbox "odig"
 
 (** TODO: propose to install odig. See
     https://github.com/ocamllabs/vscode-ocaml-platform/pull/771#discussion_r765297112 *)
 let of_sandbox (sandbox : Sandbox.t) =
-  let make_odig_cmd = Sandbox.get_command sandbox "odig" in
+  let make_odig_cmd = make_odig_cmd sandbox in
   let odig_version = make_odig_cmd [ "--version" ] in
   let open Promise.Syntax in
   let* output = Cmd.output odig_version in
@@ -18,7 +20,7 @@ let of_sandbox (sandbox : Sandbox.t) =
     match cache_dir with
     | Ok cache_dir ->
       let cache_dir = cache_dir |> String.strip |> Path.of_string in
-      Ok { make_cmd = make_odig_cmd; cache_dir }
+      Ok { sandbox; cache_dir }
     | Error _ -> Error "OCaml: Failed to retrieve odig cache_dir")
   | Error _ ->
     Promise.resolve
@@ -26,7 +28,7 @@ let of_sandbox (sandbox : Sandbox.t) =
          "OCaml: the \"odig\" binary must be available in the current sandbox \
           to generate documentation.")
 
-let cmd_output { make_cmd; _ } ~args = Cmd.output (make_cmd args)
+let cmd_output { sandbox; _ } ~args = Cmd.output (make_odig_cmd sandbox args)
 
 let html_dir t = Path.(t.cache_dir / "/html/")
 
