@@ -38,12 +38,12 @@ let odoc_exec t ~package_name =
   let+ result =
     match ouput with
     | Error _ as e -> Promise.resolve e
-    | Ok _ as ok ->
+    | Ok _ ->
       let html_dir = html_dir t in
       let package_html_dir = Path.(html_dir / package_name) |> Path.to_string in
       let open Promise.Syntax in
       let+ dir_exists = Fs.exists package_html_dir in
-      if dir_exists then ok
+      if dir_exists then Ok ()
       else
         Error
           (Printf.sprintf
