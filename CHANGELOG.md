@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.9.4
+
+- Restore compatibility with opam 2.1.x (#884)
+
 ## 1.9.3
 
 - Fix dune subdir stanza syntax highlighting (#870)
