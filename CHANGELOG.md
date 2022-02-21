@@ -2,7 +2,7 @@
 
 ## 1.9.4
 
-- Restore compatibility with opam 2.1.x (#884)
+- Restore compatibility with opam 2.0.x (#884)
 
 ## 1.9.3
 
