@@ -16,6 +16,7 @@ let debouncing_middleware ~timeout_in_ms f =
 let start ~path ?(port = 0) () =
   Promise.make @@ fun ~resolve ~reject:_ ->
   let polka = Polka.create () in
+  (* Closes the server after some idle time *)
   let debouncing_server_termination_mdlw =
     debouncing_middleware
       ~timeout_in_ms:(60 * 10 * 1000)
