@@ -106,7 +106,9 @@ module Command = struct
           in
           match result with
           | Error _ ->
-            show_message `Error "Error while generating documentation for %s"
+            show_message `Error
+              "Documentation could not be generated for %s. It might be \
+               because this package has no documentation."
               package_name;
             Promise.resolve ()
           | Ok _ -> (
