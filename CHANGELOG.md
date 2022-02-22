@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Fix automatic closing of files without an extension (#887)
+
 ## 1.9.4
 
 - Restore compatibility with opam 2.0.x (#884)
