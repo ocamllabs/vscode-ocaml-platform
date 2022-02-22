@@ -98,7 +98,9 @@ module Command = struct
                 (Printf.sprintf "Generating documentation for %s" package_name)
               ~cancellable:false ()
           in
-          let task ~progress:_ ~token:_ = Odig.odoc_exec odig ~package_name in
+          let task ~progress:_ ~token:_ =
+            Odig.odoc_exec odig ~sandbox ~package_name
+          in
           let* result =
             Vscode.Window.withProgress
               (module Interop.Js.Result (Interop.Js.Unit) (Interop.Js.String))

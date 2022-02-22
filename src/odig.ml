@@ -1,9 +1,6 @@
 open Import
 
-type t =
-  { sandbox : Sandbox.t
-  ; cache_dir : Path.t
-  }
+type t = { cache_dir : Path.t }
 
 let make_odig_cmd sandbox = Sandbox.get_command sandbox "odig"
 
@@ -20,7 +17,7 @@ let of_sandbox (sandbox : Sandbox.t) =
     match cache_dir with
     | Ok cache_dir ->
       let cache_dir = cache_dir |> String.strip |> Path.of_string in
-      Ok { sandbox; cache_dir }
+      Ok { cache_dir }
     | Error _ -> Error "OCaml: Failed to retrieve odig cache_dir")
   | Error _ ->
     Promise.resolve
@@ -28,13 +25,13 @@ let of_sandbox (sandbox : Sandbox.t) =
          "OCaml: the \"odig\" binary must be available in the current sandbox \
           to generate documentation.")
 
-let cmd_output { sandbox; _ } ~args = Cmd.output (make_odig_cmd sandbox args)
+let cmd_output ~sandbox ~args = Cmd.output (make_odig_cmd sandbox args)
 
 let html_dir t = Path.(t.cache_dir / "/html/")
 
-let odoc_exec t ~package_name =
+let odoc_exec t ~sandbox ~package_name =
   let open Promise.Syntax in
-  let* ouput = cmd_output t ~args:[ "odoc"; package_name ] in
+  let* ouput = cmd_output ~sandbox ~args:[ "odoc"; package_name ] in
   let+ result =
     match ouput with
     | Error _ as e -> Promise.resolve e
