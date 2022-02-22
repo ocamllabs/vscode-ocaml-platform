@@ -3,7 +3,7 @@
   "displayName": "OCaml Platform",
   "description": "Official OCaml language extension for VSCode",
   "license": "MIT",
-  "version": "1.9.3",
+  "version": "1.9.5",
   "publisher": "ocamllabs",
   "repository": {
     "type": "git",

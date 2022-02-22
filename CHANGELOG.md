@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.9.5
 
 - Fix automatic closing of files without an extension (#887)
 
