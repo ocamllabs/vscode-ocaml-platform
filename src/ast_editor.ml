@@ -556,28 +556,10 @@ let onDidChangeActiveTextEditor_listener instance e =
       in
       ()
 
-let close_visible_editors_by_uri uri =
-  let f e =
-    let visibleDocument = TextEditor.document e in
-    let open Promise.Syntax in
-    if String.equal uri (Uri.toString (TextDocument.uri visibleDocument) ())
-    then
-      let (_ : Ojs.t option Promise.t) =
-        let* (_ : TextEditor.t) =
-          Window.showTextDocument ~document:(`TextDocument visibleDocument) ()
-        in
-        Vscode.Commands.executeCommand
-          ~command:"workbench.action.closeActiveEditor" ~args:[]
-      in
-      ()
-  in
-  Window.visibleTextEditors () |> List.iter ~f
-
 let onDidCloseTextDocument_listener instance (document : TextDocument.t) =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   Ast_editor_state.remove_doc_entries ast_editor_state
-    (TextDocument.uri document);
-  close_visible_editors_by_uri (Uri.toString (TextDocument.uri document) ())
+    (TextDocument.uri document)
 
 let register extension instance =
   (*Register listener that monitors active editor change. *)
