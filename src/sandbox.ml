@@ -666,12 +666,6 @@ module Dune_release = struct
 
   let distrib_output ~cwd t = Cmd.output (distrib_cmd ~cwd t)
 
-  let publish_cmd ~cwd t = 
-    get_command t "dune-release"
-      ["publish"; "--pkg-dir"; cwd]
-
-  let publish_output ~cwd t = Cmd.output (publish_cmd ~cwd t)
-
   let run ~cwd t =
     run_with_progress ~title:"Dune Release: Publishing opam packages"
       (fun ~progress:_ ~token:_ ->
