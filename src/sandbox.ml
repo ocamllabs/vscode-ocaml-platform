@@ -646,6 +646,84 @@ let upgrade_packages t =
     let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
     ()
 
+module Dune_release = struct
+  let has_dune_release t =
+    let cmd = get_command t "dune-release" [ "--version" ] in
+    let open Promise.Syntax in
+    let+ result = Cmd.output cmd in
+    match result with
+    | Error _ -> false
+    | Ok _ -> true
+
+  let tag_cmd ~cwd t =
+    get_command t "dune-release" [ "tag"; "-yf"; "--pkg-dir"; cwd ]
+
+  let tag_output ~cwd t = Cmd.output (tag_cmd ~cwd t)
+
+  let distrib_cmd ~cwd t =
+    get_command t "dune-release"
+      [ "distrib"; "--pkg-dir"; cwd; "--skip-lint"; "--skip-build" ]
+
+  let distrib_output ~cwd t = Cmd.output (distrib_cmd ~cwd t)
+
+  let publish_cmd ~cwd t = 
+    get_command t "dune-release"
+      ["publish"; "--pkg-dir"; cwd]
+
+  let publish_output ~cwd t = Cmd.output (publish_cmd ~cwd t)
+
+  let run ~cwd t =
+    run_with_progress ~title:"Dune Release: Publishing opam packages"
+      (fun ~progress:_ ~token:_ ->
+        let open Promise.Syntax in
+        let* res =
+          with_confirmation "Dune Release: Create the git tag?"
+            ~yes:"Create tag" (fun () -> tag_output ~cwd t)
+        in
+        match res with
+        | None -> Promise.return (Ok ())
+        | Some (Error err) ->
+          show_message `Error
+            "An error occured while creating the tag for your release: %s" err;
+          Promise.return (Error err)
+        | Some (Ok _) -> (
+          show_message `Info
+            "Dune Release: The tag has been created successfully.";
+          let* res =
+            with_confirmation "Dune Release: Create distribution archive?"
+              ~yes:"Create archive" (fun () -> distrib_output ~cwd t)
+          in
+          match res with
+          | None -> Promise.return (Ok ())
+          | Some (Error err) ->
+            show_message `Error
+              "An error occured while creating the distribution archive for \
+               your release: %s"
+              err;
+            Promise.return (Error err)
+          | Some (Ok _) ->
+            show_message `Info
+              "Dune Release: The archive for your release has been created \
+               successfully.";
+            Promise.return (Ok ())))
+end
+
+let publish_packages t =
+  let open Promise.Syntax in
+  let* has_dune_release = Dune_release.has_dune_release t in
+  if not has_dune_release then (
+    show_message `Error
+      "dune-release is not available in your sandbox. Install it first.";
+    Promise.return ()
+  ) else
+    let* project_root_opt = workspace_root () |> Promise.return in
+    match project_root_opt with
+    | Some path -> Dune_release.run ~cwd:(Path.to_string path) t
+    | None ->
+      show_message `Error
+        "dune-release does not support multiple workspace root.";
+      Promise.return ()
+
 let focus_on_package_command ?sandbox () =
   match sandbox with
   | None | Some (Opam _) ->

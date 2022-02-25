@@ -29,9 +29,9 @@ let commands = ref []
 
 (** creates a new command and stores in a mutable [commands] list *)
 let command id handler =
-  let command = Command { id; handler } in
-  commands := command :: !commands;
-  command
+  let t = Command { id; handler } in
+  commands := t :: !commands;
+  t
 
 let text_editor_command id handler =
   let command = Text_editor_command { id; handler } in
@@ -50,10 +50,30 @@ let _select_sandbox =
         let* () = Sandbox.save_to_settings new_sandbox in
         let* () = Extension_instance.update_ocaml_info instance in
         Extension_instance.start_language_server instance
+      (* Equals *)
+      (* let sandbox = Sandbox.select_sandbox () in
+      Promise.bind (fun sandbox ->
+        match sandbox with
+        | None (* sandbox selection cancelled *) -> Promise.return ()
+        | Some new_sandbox ->
+          Extension_instance.set_sandbox instance new_sandbox;
+          let (_ : unit Promise.t) = Sandbox.save_to_settings new_sandbox in
+          Extension_instance.start_language_server instance
+        ) sandbox *)
     in
     ()
   in
   command Extension_consts.Commands.select_sandbox handler
+
+let _publish_package =
+  let handler (instance : Extension_instance.t) ~args:_ =
+    let (_ : unit Promise.t) =
+      let sandbox = Extension_instance.sandbox instance in
+      Sandbox.publish_packages sandbox
+    in
+    ()
+  in
+  command Extension_consts.Commands.publish_package handler
 
 let _restart_language_server =
   let handler (instance : Extension_instance.t) ~args:_ =

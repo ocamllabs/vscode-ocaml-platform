@@ -3,6 +3,8 @@ let ocaml_prefixed key = "ocaml." ^ key
 module Commands = struct
   let select_sandbox = ocaml_prefixed "select-sandbox"
 
+  let publish_package = ocaml_prefixed "publish-package"
+
   let restart_language_server = ocaml_prefixed "server.restart"
 
   let select_sandbox_and_open_terminal = ocaml_prefixed "open-terminal-select"

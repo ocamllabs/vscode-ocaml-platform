@@ -93,6 +93,11 @@
         "title": "Select a Sandbox for this Workspace"
       },
       {
+        "command": "ocaml.publish-package",
+        "category": "OCaml",
+        "title": "Publish packages on opam"
+      },
+      {
         "command": "ocaml.server.restart",
         "category": "OCaml",
         "title": "Restart Language Server"

@@ -63,7 +63,7 @@ let show_message kind fmt =
     match kind with
     | `Warn -> Window.showWarningMessage ~message ()
     | `Info -> Window.showInformationMessage ~message ()
-    | `Error -> Window.showInformationMessage ~message ()
+    | `Error -> Window.showErrorMessage ~message ()
   in
   Printf.ksprintf
     (fun x ->
@@ -112,8 +112,26 @@ let with_confirmation message ~yes ?(no = "Cancel") f =
       ()
   in
   match choice with
-  | Some true -> f ()
-  | _ -> Promise.return ()
+  | Some true ->
+    let+ x = f () in
+    Some x
+  | _ -> Promise.return None
+
+let run_with_progress ~title f =
+  let options =
+    ProgressOptions.create ~location:(`ProgressLocation Notification) ~title
+      ~cancellable:false ()
+  in
+  let task ~progress ~token =
+    let open Promise.Syntax in
+    let+ result = f ~progress ~token in
+    match result with
+    | Ok () -> Ojs.null
+    | Error _ -> Ojs.null
+  in
+  let open Promise.Syntax in
+  let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+  ()
 
 (** Builds application-specific functionality around [Vscode.Position] *)
 module Position = struct

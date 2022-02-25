@@ -86,6 +86,9 @@ val install_packages : t -> string list -> unit Promise.t
 (** Upgrade packages in the sandbox *)
 val upgrade_packages : t -> unit Promise.t
 
+(** Publish the current opam project with dune-release *)
+val publish_packages : t -> unit Promise.t
+
 (** [ocaml_version] returns the version of the ocaml compiler installed in given
     sandbox. *)
 val ocaml_version : t -> (string, string) result Promise.t

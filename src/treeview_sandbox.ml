@@ -87,20 +87,23 @@ module Command = struct
           Printf.sprintf "Are you sure you want to uninstall package %s?"
             (Dependency.label dep)
         in
-        with_confirmation message ~yes:"Uninstall package" @@ fun () ->
-        let open Promise.Syntax in
-        let sandbox = Extension_instance.sandbox instance in
-        Sandbox.focus_on_package_command ~sandbox ();
-        let+ () = Sandbox.uninstall_packages sandbox [ dep ] in
-        let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_switches ~args:[]
+        let _ =
+          with_confirmation message ~yes:"Uninstall package" @@ fun () ->
+          let open Promise.Syntax in
+          let sandbox = Extension_instance.sandbox instance in
+          Sandbox.focus_on_package_command ~sandbox ();
+          let+ () = Sandbox.uninstall_packages sandbox [ dep ] in
+          let (_ : Ojs.t option Promise.t) =
+            Vscode.Commands.executeCommand
+              ~command:Extension_consts.Commands.refresh_switches ~args:[]
+          in
+          let (_ : Ojs.t option Promise.t) =
+            Vscode.Commands.executeCommand
+              ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
+          in
+          ()
         in
-        let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
-        in
-        ()
+        Promise.return ()
       in
       ()
     in
