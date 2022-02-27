@@ -194,10 +194,16 @@ let make () =
   ; documentation_server = None
   }
 
+let document_server_on = "ocaml.documentation-server-on"
+
 let stop_documentation_server t =
   Option.iter t.documentation_server ~f:(fun server ->
       t.documentation_server <- None;
       Documentation_server.stop server);
+  let (_ : Ojs.t option Promise.t) =
+    Vscode.Commands.executeCommand ~command:"setContext"
+      ~args:[ Ojs.string_to_js document_server_on; Ojs.bool_to_js false ]
+  in
   StatusBarItem.hide t.documentation_server_info
 
 let set_sandbox t new_sandbox =
@@ -225,6 +231,10 @@ let start_documentation_server t ~path =
     t.documentation_server <- Some server;
     let port = Documentation_server.port server in
     Documentation_server_info.update t.documentation_server_info ~port;
+    let (_ : Ojs.t option Promise.t) =
+      Vscode.Commands.executeCommand ~command:"setContext"
+        ~args:[ Ojs.string_to_js document_server_on; Ojs.bool_to_js true ]
+    in
     Documentation_server.on_close server ~f:(fun () ->
         stop_documentation_server t);
     Ok server

@@ -368,6 +368,10 @@
           "when": "false"
         },
         {
+          "command": "ocaml.stop-documentation-server",
+          "when": "ocaml.documentation-server-on"
+        },
+        {
           "command": "ocaml.upgrade-sandbox",
           "when": "false"
         },
