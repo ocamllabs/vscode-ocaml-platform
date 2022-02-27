@@ -81,6 +81,12 @@ let _open_terminal =
   in
   command Extension_consts.Commands.open_terminal handler
 
+let _stop_documentation_server =
+  let handler instance ~args:_ =
+    Extension_instance.stop_documentation_server instance
+  in
+  command Extension_consts.Commands.stop_documentation_server handler
+
 let _switch_impl_intf =
   let handler (instance : Extension_instance.t) ~args:_ =
     let try_switching () =

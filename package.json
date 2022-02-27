@@ -36,6 +36,7 @@
     "onCommand:ocaml.open-ast-explorer-to-the-side",
     "onCommand:ocaml.show-preprocessed-document",
     "onCommand:ocaml.open-pp-editor-and-ast-explorer",
+    "onCommand:ocaml.stop-documentation-server",
     "onCustomEditor:ast-editor",
     "onCustomEditor:cm-files-editor",
     "workspaceContains:**/dune-workspace",
@@ -196,6 +197,11 @@
           "light": "assets/document-search-light.svg",
           "dark": "assets/document-search-dark.svg"
         }
+      },
+      {
+        "command": "ocaml.stop-documentation-server",
+        "category": "OCaml",
+        "title": "Stop Documentation Server"
       },
       {
         "command": "ocaml.next-hole",

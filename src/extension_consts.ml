@@ -27,6 +27,8 @@ module Commands = struct
 
   let open_sandbox_documentation = ocaml_prefixed "open-sandbox-documentation"
 
+  let stop_documentation_server = ocaml_prefixed "stop-documentation-server"
+
   let generate_sandbox_documentation =
     ocaml_prefixed "generate-sandbox-documentation"
 
