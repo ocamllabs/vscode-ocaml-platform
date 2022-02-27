@@ -19,8 +19,23 @@ let make ?root () =
   | Error _, _ -> Promise.return None
   | Ok bin, Some root -> Promise.return (Some { bin; root })
   | Ok bin, None -> (
-    let var_root_cmd =
-      Cmd.Spawn (Cmd.append bin [ "var"; "--global"; "root" ])
+    let* var_root_cmd =
+      let+ args =
+        let+ version = Cmd.output (Spawn { bin with args = [ "--version" ] }) in
+        let global =
+          match version with
+          | Error _ -> []
+          | Ok v -> (
+            match Stdlib.Scanf.sscanf v "%d.%d" (fun x y -> (x, y)) with
+            | (exception End_of_file)
+            | (exception Failure _)
+            | (exception Stdlib.Scanf.Scan_failure _) -> []
+            | major, minor ->
+              if Poly.((major, minor) >= (2, 1)) then [ "--global" ] else [])
+        in
+        ("var" :: global) @ [ "root" ]
+      in
+      Cmd.Spawn (Cmd.append bin args)
     in
     let+ var_root_output = Cmd.output var_root_cmd in
     match var_root_output with
