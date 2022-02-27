@@ -8,6 +8,7 @@ type t =
             the lang server initialization needs the ocaml version *)
   ; mutable lsp_client : (LanguageClient.t * Ocaml_lsp.t) option
   ; mutable documentation_server : Documentation_server.t option
+  ; documentation_server_info : StatusBarItem.t
   ; sandbox_info : StatusBarItem.t
   ; ast_editor_state : Ast_editor_state.t
   }
@@ -28,25 +29,6 @@ let stop_server t =
   Option.iter t.lsp_client ~f:(fun (client, _) ->
       t.lsp_client <- None;
       LanguageClient.stop client)
-
-let stop_documentation_server t =
-  Option.iter t.documentation_server ~f:(fun server ->
-      t.documentation_server <- None;
-      Documentation_server.stop server)
-
-let start_documentation_server t ~path =
-  stop_documentation_server t;
-  let open Promise.Syntax in
-  let+ server = Documentation_server.start ~path () in
-  match server with
-  | Ok server ->
-    t.documentation_server <- Some server;
-    Documentation_server.on_close server ~f:(fun () ->
-        t.documentation_server <- None);
-    Ok server
-  | Error e ->
-    t.documentation_server <- None;
-    Error e
 
 module Language_server_init : sig
   val start_language_server : t -> unit Promise.t
@@ -148,6 +130,31 @@ end
 
 include Language_server_init
 
+module Documentation_server_info : sig
+  val make : unit -> StatusBarItem.t
+
+  val update : StatusBarItem.t -> port:int -> unit
+end = struct
+  let make () =
+    let status_bar =
+      Vscode.Window.createStatusBarItem ~alignment:StatusBarAlignment.Right
+        ~priority:100 ()
+    in
+    let command =
+      Command.create ~title:"Open Command Palette"
+        ~command:"workbench.action.quickOpen"
+        ~arguments:[ Ojs.string_to_js ">OCaml: Stop Documentation server" ]
+        ()
+    in
+    StatusBarItem.set_command status_bar (`Command command);
+    status_bar
+
+  let update status_bar ~port =
+    StatusBarItem.set_text status_bar
+      (Printf.sprintf "$(radio-tower) Port: %i" port);
+    StatusBarItem.show status_bar
+end
+
 module Sandbox_info : sig
   val make : Sandbox.t -> StatusBarItem.t
 
@@ -175,15 +182,23 @@ end
 let make () =
   let sandbox = Sandbox.Global in
   let sandbox_info = Sandbox_info.make sandbox in
+  let documentation_server_info = Documentation_server_info.make () in
   let ast_editor_state = Ast_editor_state.make () in
   { sandbox
   ; lsp_client = None
   ; sandbox_info
+  ; documentation_server_info
   ; repl = None
   ; ocaml_version = None
   ; ast_editor_state
   ; documentation_server = None
   }
+
+let stop_documentation_server t =
+  Option.iter t.documentation_server ~f:(fun server ->
+      t.documentation_server <- None;
+      Documentation_server.stop server);
+  StatusBarItem.hide t.documentation_server_info
 
 let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
@@ -200,6 +215,22 @@ let set_sandbox t new_sandbox =
       ~command:Extension_consts.Commands.refresh_switches ~args:[]
   in
   ()
+
+let start_documentation_server t ~path =
+  stop_documentation_server t;
+  let open Promise.Syntax in
+  let+ server = Documentation_server.start ~path () in
+  match server with
+  | Ok server ->
+    t.documentation_server <- Some server;
+    let port = Documentation_server.port server in
+    Documentation_server_info.update t.documentation_server_info ~port;
+    Documentation_server.on_close server ~f:(fun () ->
+        stop_documentation_server t);
+    Ok server
+  | Error e ->
+    t.documentation_server <- None;
+    Error e
 
 let repl t = t.repl
 
