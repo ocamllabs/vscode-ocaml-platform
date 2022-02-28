@@ -666,6 +666,12 @@ module Dune_release = struct
 
   let distrib_output ~cwd t = Cmd.output (distrib_cmd ~cwd t)
 
+  let publish_cmd ~cwd t = 
+    get_command t "dune-release"
+      ["publish"; "--pkg-dir"; cwd]
+
+  let publish_output ~cwd t = Cmd.output (publish_cmd ~cwd t)
+
   let run ~cwd t =
     run_with_progress ~title:"Dune Release: Publishing opam packages"
       (fun ~progress:_ ~token:_ ->
@@ -699,6 +705,22 @@ module Dune_release = struct
             show_message `Info
               "Dune Release: The archive for your release has been created \
                successfully.";
+          let* res = 
+            with_confirmation "Dune Release: Publish distribution archive?"
+              ~yes:"Publish archive" (fun () -> publish_output ~cwd t)
+          in 
+          match res with 
+          | None -> Promise.return (Ok ())
+          | Some (Error err) -> 
+            show_message `Error
+            "An error has occured while publishing the distribution archive for \
+            your release: %s"
+            err;
+            Promise.return (Error err)
+          | Some (Ok _) -> 
+            show_message `Info 
+            "Dune Release: The archive for your release has been published \
+            successfully.";
             Promise.return (Ok ())))
 end
 
