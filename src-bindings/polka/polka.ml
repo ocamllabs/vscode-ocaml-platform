@@ -11,7 +11,9 @@ module Server = struct
 
   include
     [%js:
-    val close : t -> t [@@js.call]
+    val close :
+      t -> ?callback:(Node.JsError.t or_undefined -> unit) -> unit -> t
+      [@@js.call "close"]
 
     val address : t -> Address.t or_undefined [@@js.call]
 

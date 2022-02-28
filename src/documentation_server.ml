@@ -28,5 +28,13 @@ let port t =
 let on_close t ~f = Polka.Server.on t (`Close f)
 
 let stop t =
-  let (_ : Polka.Server.t) = Polka.Server.close t in
+  Promise.make @@ fun ~resolve ~reject:_ ->
+  let (_ : Polka.Server.t) =
+    Polka.Server.close t
+      ~callback:(fun error ->
+        match error with
+        | None -> resolve (Ok ())
+        | Some error -> resolve (Error error))
+      ()
+  in
   ()

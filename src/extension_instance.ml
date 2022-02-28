@@ -197,8 +197,18 @@ let make () =
 let document_server_on = "ocaml.documentation-server-on"
 
 let stop_documentation_server t =
-  Option.iter t.documentation_server ~f:(fun server ->
-      Documentation_server.stop server)
+  Option.value_map ~default:(Promise.resolve ()) t.documentation_server
+    ~f:(fun server ->
+      let open Promise.Syntax in
+      let+ (_ : (unit, Promise.error) result) =
+        Documentation_server.stop server
+      in
+      t.documentation_server <- None;
+      let (_ : Ojs.t option Promise.t) =
+        Vscode.Commands.executeCommand ~command:"setContext"
+          ~args:[ Ojs.string_to_js document_server_on; Ojs.bool_to_js false ]
+      in
+      StatusBarItem.hide t.documentation_server_info)
 
 let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
@@ -206,7 +216,7 @@ let set_sandbox t new_sandbox =
   (* Makes sure that a new instance of the documentation server is created next
      time we show documentation for a package. It avoids reusing an existing
      server instance that serves the old sandbox packages folder.*)
-  stop_documentation_server t;
+  let (_ : unit Promise.t) = stop_documentation_server t in
   let (_ : Ojs.t option Promise.t) =
     Vscode.Commands.executeCommand
       ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
@@ -217,7 +227,8 @@ let set_sandbox t new_sandbox =
   ()
 
 let start_documentation_server t ~path =
-  stop_documentation_server t;
+  let open Promise.Syntax in
+  let* () = stop_documentation_server t in
   let open Promise.Syntax in
   let+ server = Documentation_server.start ~path () in
   match server with
@@ -229,13 +240,6 @@ let start_documentation_server t ~path =
       Vscode.Commands.executeCommand ~command:"setContext"
         ~args:[ Ojs.string_to_js document_server_on; Ojs.bool_to_js true ]
     in
-    Documentation_server.on_close server ~f:(fun () ->
-        t.documentation_server <- None;
-        let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand ~command:"setContext"
-            ~args:[ Ojs.string_to_js document_server_on; Ojs.bool_to_js false ]
-        in
-        StatusBarItem.hide t.documentation_server_info);
     Ok server
   | Error e ->
     t.documentation_server <- None;
@@ -308,4 +312,5 @@ let disposable t =
   Disposable.make ~dispose:(fun () ->
       StatusBarItem.dispose t.sandbox_info;
       stop_server t;
-      stop_documentation_server t)
+      let (_ : unit Promise.t) = stop_documentation_server t in
+      ())

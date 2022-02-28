@@ -5,6 +5,6 @@ val start :
 
 val port : t -> int
 
-val stop : t -> unit
+val stop : t -> (unit, Promise.error) result Promise.t
 
 val on_close : t -> f:(unit -> unit) -> unit

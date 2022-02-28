@@ -83,7 +83,10 @@ let _open_terminal =
 
 let _stop_documentation_server =
   let handler instance ~args:_ =
-    Extension_instance.stop_documentation_server instance
+    let (_ : unit Promise.t) =
+      Extension_instance.stop_documentation_server instance
+    in
+    ()
   in
   command Extension_consts.Commands.stop_documentation_server handler
 

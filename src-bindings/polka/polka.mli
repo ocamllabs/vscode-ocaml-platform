@@ -9,7 +9,7 @@ module Server : sig
 
   type t
 
-  val close : t -> t
+  val close : t -> ?callback:(Node.JsError.t or_undefined -> unit) -> unit -> t
 
   val address : t -> Address.t or_undefined
   (* TODO: the return type can also be a string in case the server uses a pipe
