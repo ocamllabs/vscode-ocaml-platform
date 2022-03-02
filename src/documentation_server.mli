@@ -1,7 +1,6 @@
 type t
 
-val start :
-  path:Path.t -> ?port:int -> unit -> (t, Node.JsError.t) result Promise.t
+val start : path:Path.t -> (t, Node.JsError.t) result Promise.t
 
 val port : t -> int
 

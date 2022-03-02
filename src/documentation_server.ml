@@ -2,14 +2,14 @@ open Import
 
 type t = Polka.Server.t
 
-let start ~path ?(port = 0) () =
+let start ~path =
   Promise.make @@ fun ~resolve ~reject:_ ->
   let polka = Polka.create () in
   let options = Polka.Sirv.Options.create ~dev:true in
   let serve =
     polka
     |> Polka.use [ Polka.Sirv.serve (path |> Path.to_string) ~options () ]
-    |> Polka.listen port ~callback:(fun () ->
+    |> Polka.listen 0 ~callback:(fun () ->
            let server = Polka.server polka in
            resolve (Ok server))
   in

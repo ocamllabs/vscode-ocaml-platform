@@ -230,7 +230,7 @@ let start_documentation_server t ~path =
   let open Promise.Syntax in
   let* () = stop_documentation_server t in
   let open Promise.Syntax in
-  let+ server = Documentation_server.start ~path () in
+  let+ server = Documentation_server.start ~path in
   match server with
   | Ok server ->
     t.documentation_server <- Some server;
