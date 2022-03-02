@@ -194,7 +194,23 @@ let make () =
   ; documentation_server = None
   }
 
-let document_server_on = "ocaml.documentation-server-on"
+let set_documentation_server t ~status =
+  let document_server_on = "ocaml.documentation-server-on" in
+  let set_context ~running =
+    Vscode.Commands.executeCommand ~command:"setContext"
+      ~args:[ Ojs.string_to_js document_server_on; Ojs.bool_to_js running ]
+  in
+  match status with
+  | `Running server ->
+    t.documentation_server <- Some server;
+    let port = Documentation_server.port server in
+    Documentation_server_info.update t.documentation_server_info ~port;
+    let (_ : Ojs.t option Promise.t) = set_context ~running:true in
+    ()
+  | `Stopped ->
+    t.documentation_server <- None;
+    let (_ : Ojs.t option Promise.t) = set_context ~running:false in
+    StatusBarItem.hide t.documentation_server_info
 
 let stop_documentation_server t =
   Option.value_map ~default:(Promise.resolve ()) t.documentation_server
@@ -203,12 +219,7 @@ let stop_documentation_server t =
       let+ (_ : (unit, Promise.error) result) =
         Documentation_server.stop server
       in
-      t.documentation_server <- None;
-      let (_ : Ojs.t option Promise.t) =
-        Vscode.Commands.executeCommand ~command:"setContext"
-          ~args:[ Ojs.string_to_js document_server_on; Ojs.bool_to_js false ]
-      in
-      StatusBarItem.hide t.documentation_server_info)
+      set_documentation_server t ~status:`Stopped)
 
 let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
@@ -233,13 +244,7 @@ let start_documentation_server t ~path =
   let+ server = Documentation_server.start ~path in
   match server with
   | Ok server ->
-    t.documentation_server <- Some server;
-    let port = Documentation_server.port server in
-    Documentation_server_info.update t.documentation_server_info ~port;
-    let (_ : Ojs.t option Promise.t) =
-      Vscode.Commands.executeCommand ~command:"setContext"
-        ~args:[ Ojs.string_to_js document_server_on; Ojs.bool_to_js true ]
-    in
+    set_documentation_server t ~status:(`Running server);
     Ok server
   | Error e ->
     t.documentation_server <- None;
