@@ -240,7 +240,7 @@ let workspace_root () =
 
 let detect_esy_sandbox ~project_root esy () =
   let open Promise.Option.Syntax in
-  let* esy in
+  let* esy = esy in
   let open Promise.Syntax in
   let+ esy_build_dir_exists, manifest =
     Promise.all2
@@ -668,7 +668,7 @@ module Dune_release = struct
 
   let publish_cmd ~cwd t = 
     get_command t "dune-release"
-      ["publish"; "--pkg-dir"; cwd]
+      ["publish"; "--delegate"; "ipc"; "distrib"; "--dist-uri"; "--pkg-dir"; cwd]
 
   let publish_output ~cwd t = Cmd.output (publish_cmd ~cwd t)
 
