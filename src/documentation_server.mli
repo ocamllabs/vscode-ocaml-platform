@@ -6,4 +6,4 @@ val port : t -> int
 
 val host : t -> string
 
-val stop : t -> (unit, Promise.error) result Promise.t
+val dispose : t -> Vscode.Disposable.t

@@ -211,13 +211,11 @@ let set_documentation_server t ~status =
     StatusBarItem.hide t.documentation_server_info
 
 let stop_documentation_server t =
-  Option.value_map ~default:(Promise.resolve ()) t.documentation_server
-    ~f:(fun server ->
-      let open Promise.Syntax in
-      let+ (_ : (unit, Promise.error) result) =
-        Documentation_server.stop server
-      in
-      set_documentation_server t ~status:`Stopped)
+  match t.documentation_server with
+  | None -> ()
+  | Some server ->
+    Documentation_server.dispose server |> Disposable.dispose;
+    set_documentation_server t ~status:`Stopped
 
 let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
@@ -225,7 +223,7 @@ let set_sandbox t new_sandbox =
   (* Makes sure that a new instance of the documentation server is created next
      time we show documentation for a package. It avoids reusing an existing
      server instance that serves the old sandbox packages folder.*)
-  let (_ : unit Promise.t) = stop_documentation_server t in
+  stop_documentation_server t;
   let (_ : Ojs.t option Promise.t) =
     Vscode.Commands.executeCommand
       ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
@@ -236,8 +234,7 @@ let set_sandbox t new_sandbox =
   ()
 
 let start_documentation_server t ~path =
-  let open Promise.Syntax in
-  let* () = stop_documentation_server t in
+  stop_documentation_server t;
   let open Promise.Syntax in
   let+ server = Documentation_server.start ~path in
   match server with
@@ -316,5 +313,5 @@ let disposable t =
       StatusBarItem.dispose t.sandbox_info;
       StatusBarItem.dispose t.documentation_server_info;
       stop_server t;
-      let (_ : unit Promise.t) = stop_documentation_server t in
-      ())
+      stop_documentation_server t)
+

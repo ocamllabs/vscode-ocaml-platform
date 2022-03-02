@@ -28,14 +28,16 @@ let port t =
 (* TODO extract this from the server somehow *)
 let host _ = "localhost"
 
-let stop t =
-  Promise.make @@ fun ~resolve ~reject:_ ->
-  let (_ : Polka.Server.t) =
-    Polka.Server.close t
-      ~callback:(fun error ->
-        match error with
-        | None -> resolve (Ok ())
-        | Some error -> resolve (Error error))
-      ()
-  in
-  ()
+let dispose t =
+  Disposable.make ~dispose:(fun () ->
+      let (_ : Polka.Server.t) =
+        Polka.Server.close t
+          ~callback:(fun error ->
+            match error with
+            | None -> ()
+            | Some error ->
+              show_message `Warn "Error closing server: %s"
+                (Ojs.string_of_js (Promise.error_to_js error)))
+          ()
+      in
+      ())
