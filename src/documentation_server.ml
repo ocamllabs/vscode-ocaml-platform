@@ -1,6 +1,11 @@
 open Import
 
-type t = Polka.Server.t option ref
+type t' =
+  { server : Polka.Server.t
+  ; path : Path.t
+  }
+
+type t = t' option ref
 
 let start ~path =
   Promise.make @@ fun ~resolve ~reject:_ ->
@@ -11,19 +16,21 @@ let start ~path =
     |> Polka.use [ Polka.Sirv.serve (path |> Path.to_string) ~options () ]
     |> Polka.listen 0 ~callback:(fun () ->
            let server = Polka.server polka in
-           resolve (Ok (ref (Some server))))
+           resolve (Ok (ref (Some { server; path }))))
   in
   let polka = serve () in
   let server = Polka.server polka in
   Polka.Server.on server (`Error (fun ~err -> resolve (Error err)))
 
-let get t =
+let get (t : t) =
   match !t with
   | None -> failwith "document server: already disposed"
   | Some t -> t
 
+let path (t : t) = (get t).path
+
 let port t =
-  match Polka.Server.address (get t) with
+  match Polka.Server.address (get t).server with
   | None ->
     (* if it's [None], server must not be listening, but we aim to have server
        only if it's listening *)
@@ -32,17 +39,17 @@ let port t =
 
 (* TODO extract this from the server somehow *)
 let host t =
-  ignore (get t : Polka.Server.t);
+  ignore (get t : t');
   "localhost"
 
-let dispose t =
+let dispose (t : t) =
   match !t with
   | None -> Disposable.make ~dispose:(fun () -> ())
   | Some server ->
     t := None;
     Disposable.make ~dispose:(fun () ->
         let (_ : Polka.Server.t) =
-          Polka.Server.close server
+          Polka.Server.close server.server
             ~callback:(fun error ->
               match error with
               | None -> ()

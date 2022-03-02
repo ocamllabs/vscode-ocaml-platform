@@ -19,8 +19,6 @@ let language_client t = Option.map ~f:fst t.lsp_client
 
 let ocaml_lsp t = Option.map ~f:snd t.lsp_client
 
-let documentation_server t = t.documentation_server
-
 let lsp_client t = t.lsp_client
 
 let ocaml_version_exn t = Option.value_exn t.ocaml_version
@@ -234,18 +232,27 @@ let set_sandbox t new_sandbox =
   ()
 
 let start_documentation_server t ~path =
-  stop_documentation_server t;
-  let open Promise.Syntax in
-  let+ server = Documentation_server.start ~path in
-  match server with
-  | Ok server ->
-    set_documentation_server t ~status:(`Running server);
-    Ok server
-  | Error e ->
-    t.documentation_server <- None;
-    log "Error while starting the documentation server: %s"
-      (Node.JsError.message e);
-    Error ()
+  match
+    match t.documentation_server with
+    | None -> `Create
+    | Some ds ->
+      if Path.equal (Documentation_server.path ds) path then `Keep ds
+      else `Create
+  with
+  | `Keep ds -> Promise.return (Ok ds)
+  | `Create -> (
+    stop_documentation_server t;
+    let open Promise.Syntax in
+    let+ server = Documentation_server.start ~path in
+    match server with
+    | Ok server ->
+      set_documentation_server t ~status:(`Running server);
+      Ok server
+    | Error e ->
+      t.documentation_server <- None;
+      log "Error while starting the documentation server: %s"
+        (Node.JsError.message e);
+      Error ())
 
 let repl t = t.repl
 

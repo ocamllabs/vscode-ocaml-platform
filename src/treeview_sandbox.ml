@@ -114,18 +114,11 @@ module Command = struct
               package_name;
             Promise.resolve ()
           | Ok _ -> (
-            let start_server () =
-              let documentation_server =
-                Extension_instance.documentation_server instance
-              in
-              match documentation_server with
-              | Some server -> Promise.resolve (Ok server)
-              | None ->
-                let html_dir = Odig.html_dir odig in
-                Extension_instance.start_documentation_server instance
-                  ~path:html_dir
+            let+ server =
+              let html_dir = Odig.html_dir odig in
+              Extension_instance.start_documentation_server instance
+                ~path:html_dir
             in
-            let+ server = start_server () in
             match server with
             | Error () -> ()
             | Ok server ->
