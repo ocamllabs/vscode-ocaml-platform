@@ -314,4 +314,3 @@ let disposable t =
       StatusBarItem.dispose t.documentation_server_info;
       stop_server t;
       stop_documentation_server t)
-
