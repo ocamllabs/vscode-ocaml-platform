@@ -311,6 +311,7 @@ let ast_editor_state t = t.ast_editor_state
 let disposable t =
   Disposable.make ~dispose:(fun () ->
       StatusBarItem.dispose t.sandbox_info;
+      StatusBarItem.dispose t.documentation_server_info;
       stop_server t;
       let (_ : unit Promise.t) = stop_documentation_server t in
       ())
