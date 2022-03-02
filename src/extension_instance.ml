@@ -128,29 +128,20 @@ end
 
 include Language_server_init
 
-module Documentation_server_info : sig
-  val make : unit -> StatusBarItem.t
-
-  val update : StatusBarItem.t -> unit
-end = struct
-  let make () =
-    let status_bar =
-      Vscode.Window.createStatusBarItem ~alignment:StatusBarAlignment.Right
-        ~priority:100 ()
-    in
-    let command =
-      Command.create ~title:"Open Command Palette"
-        ~command:"workbench.action.quickOpen"
-        ~arguments:[ Ojs.string_to_js ">OCaml: Stop Documentation server" ]
-        ()
-    in
-    StatusBarItem.set_command status_bar (`Command command);
-    status_bar
-
-  let update status_bar =
-    StatusBarItem.set_text status_bar "$(radio-tower) OCaml Documentation";
-    StatusBarItem.show status_bar
-end
+let documentation_server_info () =
+  let status_bar =
+    Vscode.Window.createStatusBarItem ~alignment:StatusBarAlignment.Right
+      ~priority:100 ()
+  in
+  let command =
+    Command.create ~title:"Open Command Palette"
+      ~command:"workbench.action.quickOpen"
+      ~arguments:[ Ojs.string_to_js ">OCaml: Stop Documentation server" ]
+      ()
+  in
+  StatusBarItem.set_command status_bar (`Command command);
+  StatusBarItem.set_text status_bar "$(radio-tower) OCaml Documentation";
+  status_bar
 
 module Sandbox_info : sig
   val make : Sandbox.t -> StatusBarItem.t
@@ -179,7 +170,7 @@ end
 let make () =
   let sandbox = Sandbox.Global in
   let sandbox_info = Sandbox_info.make sandbox in
-  let documentation_server_info = Documentation_server_info.make () in
+  let documentation_server_info = documentation_server_info () in
   let ast_editor_state = Ast_editor_state.make () in
   { sandbox
   ; lsp_client = None
@@ -191,28 +182,22 @@ let make () =
   ; documentation_server = None
   }
 
-let set_documentation_context t ~status =
+let set_documentation_context ~running =
   let document_server_on = "ocaml.documentation-server-on" in
-  let set_context ~running =
+  let (_ : Ojs.t option Promise.t) =
     Vscode.Commands.executeCommand ~command:"setContext"
       ~args:[ Ojs.string_to_js document_server_on; Ojs.bool_to_js running ]
   in
-  match status with
-  | `Running ->
-    Documentation_server_info.update t.documentation_server_info;
-    let (_ : Ojs.t option Promise.t) = set_context ~running:true in
-    ()
-  | `Stopped ->
-    let (_ : Ojs.t option Promise.t) = set_context ~running:false in
-    StatusBarItem.hide t.documentation_server_info
+  ()
 
 let stop_documentation_server t =
   match t.documentation_server with
   | None -> ()
   | Some server ->
+    StatusBarItem.hide t.documentation_server_info;
     t.documentation_server <- None;
     Documentation_server.dispose server |> Disposable.dispose;
-    set_documentation_context t ~status:`Stopped
+    set_documentation_context ~running:false
 
 let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
@@ -245,8 +230,9 @@ let start_documentation_server t ~path =
     let+ server = Documentation_server.start ~path in
     match server with
     | Ok server ->
+      StatusBarItem.show t.documentation_server_info;
       t.documentation_server <- Some server;
-      set_documentation_context t ~status:`Running;
+      set_documentation_context ~running:true;
       Ok server
     | Error e ->
       log "Error while starting the documentation server: %s"
