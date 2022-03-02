@@ -4,4 +4,6 @@ val start : path:Path.t -> (t, Node.JsError.t) result Promise.t
 
 val port : t -> int
 
+val host : t -> string
+
 val stop : t -> (unit, Promise.error) result Promise.t

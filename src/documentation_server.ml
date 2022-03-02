@@ -25,6 +25,9 @@ let port t =
     assert false
   | Some a -> Polka.Server.Address.port a
 
+(* TODO extract this from the server somehow *)
+let host _ = "localhost"
+
 let stop t =
   Promise.make @@ fun ~resolve ~reject:_ ->
   let (_ : Polka.Server.t) =

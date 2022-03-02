@@ -119,8 +119,7 @@ module Command = struct
                 Extension_instance.documentation_server instance
               in
               match documentation_server with
-              | Some server ->
-                Promise.resolve (Ok (Documentation_server.port server))
+              | Some server -> Promise.resolve (Ok server)
               | None -> (
                 let html_dir = Odig.html_dir odig in
                 let+ result =
@@ -132,19 +131,21 @@ module Command = struct
                   log "Error while starting the documentation server: %s"
                     (Node.JsError.message e);
                   Error "OCaml: Error while starting the documentation server"
-                | Ok server -> Ok (Documentation_server.port server))
+                | Ok server -> Ok server)
             in
-            let+ port = start_server () in
-            match port with
+            let+ server = start_server () in
+            match server with
             | Error e ->
               show_message `Error "%s" e;
               ()
-            | Ok port ->
+            | Ok server ->
               let (_ : Ojs.t option Promise.t) =
+                let port = Documentation_server.port server in
+                let host = Documentation_server.host server in
                 Vscode.Commands.executeCommand ~command:"simpleBrowser.show"
                   ~args:
                     [ Ojs.string_to_js
-                        (Printf.sprintf "http://localhost:%i/%s/index.html" port
+                        (Printf.sprintf "http://%s:%i/%s/index.html" host port
                            package_name)
                     ]
               in
