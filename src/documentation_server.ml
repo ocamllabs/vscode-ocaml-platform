@@ -25,8 +25,6 @@ let port t =
     assert false
   | Some a -> Polka.Server.Address.port a
 
-let on_close t ~f = Polka.Server.on t (`Close f)
-
 let stop t =
   Promise.make @@ fun ~resolve ~reject:_ ->
   let (_ : Polka.Server.t) =
