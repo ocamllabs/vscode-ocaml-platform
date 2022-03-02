@@ -191,20 +191,18 @@ let make () =
   ; documentation_server = None
   }
 
-let set_documentation_server t ~status =
+let set_documentation_context t ~status =
   let document_server_on = "ocaml.documentation-server-on" in
   let set_context ~running =
     Vscode.Commands.executeCommand ~command:"setContext"
       ~args:[ Ojs.string_to_js document_server_on; Ojs.bool_to_js running ]
   in
   match status with
-  | `Running server ->
-    t.documentation_server <- Some server;
+  | `Running ->
     Documentation_server_info.update t.documentation_server_info;
     let (_ : Ojs.t option Promise.t) = set_context ~running:true in
     ()
   | `Stopped ->
-    t.documentation_server <- None;
     let (_ : Ojs.t option Promise.t) = set_context ~running:false in
     StatusBarItem.hide t.documentation_server_info
 
@@ -212,8 +210,9 @@ let stop_documentation_server t =
   match t.documentation_server with
   | None -> ()
   | Some server ->
+    t.documentation_server <- None;
     Documentation_server.dispose server |> Disposable.dispose;
-    set_documentation_server t ~status:`Stopped
+    set_documentation_context t ~status:`Stopped
 
 let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
@@ -246,10 +245,10 @@ let start_documentation_server t ~path =
     let+ server = Documentation_server.start ~path in
     match server with
     | Ok server ->
-      set_documentation_server t ~status:(`Running server);
+      t.documentation_server <- Some server;
+      set_documentation_context t ~status:`Running;
       Ok server
     | Error e ->
-      t.documentation_server <- None;
       log "Error while starting the documentation server: %s"
         (Node.JsError.message e);
       Error ())
