@@ -133,7 +133,7 @@ include Language_server_init
 module Documentation_server_info : sig
   val make : unit -> StatusBarItem.t
 
-  val update : StatusBarItem.t -> port:int -> unit
+  val update : StatusBarItem.t -> unit
 end = struct
   let make () =
     let status_bar =
@@ -149,9 +149,8 @@ end = struct
     StatusBarItem.set_command status_bar (`Command command);
     status_bar
 
-  let update status_bar ~port =
-    StatusBarItem.set_text status_bar
-      (Printf.sprintf "$(radio-tower) Port: %i" port);
+  let update status_bar =
+    StatusBarItem.set_text status_bar "$(radio-tower) OCaml Documentation";
     StatusBarItem.show status_bar
 end
 
@@ -203,8 +202,7 @@ let set_documentation_server t ~status =
   match status with
   | `Running server ->
     t.documentation_server <- Some server;
-    let port = Documentation_server.port server in
-    Documentation_server_info.update t.documentation_server_info ~port;
+    Documentation_server_info.update t.documentation_server_info;
     let (_ : Ojs.t option Promise.t) = set_context ~running:true in
     ()
   | `Stopped ->
