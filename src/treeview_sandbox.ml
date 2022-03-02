@@ -120,24 +120,14 @@ module Command = struct
               in
               match documentation_server with
               | Some server -> Promise.resolve (Ok server)
-              | None -> (
+              | None ->
                 let html_dir = Odig.html_dir odig in
-                let+ result =
-                  Extension_instance.start_documentation_server instance
-                    ~path:html_dir
-                in
-                match result with
-                | Error e ->
-                  log "Error while starting the documentation server: %s"
-                    (Node.JsError.message e);
-                  Error "OCaml: Error while starting the documentation server"
-                | Ok server -> Ok server)
+                Extension_instance.start_documentation_server instance
+                  ~path:html_dir
             in
             let+ server = start_server () in
             match server with
-            | Error e ->
-              show_message `Error "%s" e;
-              ()
+            | Error () -> ()
             | Ok server ->
               let (_ : Ojs.t option Promise.t) =
                 let port = Documentation_server.port server in

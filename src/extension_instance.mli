@@ -15,7 +15,7 @@ val ocaml_lsp : t -> Ocaml_lsp.t option
 val documentation_server : t -> Documentation_server.t option
 
 val start_documentation_server :
-  t -> path:Path.t -> (Documentation_server.t, Promise.error) result Promise.t
+  t -> path:Path.t -> (Documentation_server.t, unit) result Promise.t
 
 val stop_documentation_server : t -> unit
 

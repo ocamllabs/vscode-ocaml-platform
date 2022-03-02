@@ -243,7 +243,9 @@ let start_documentation_server t ~path =
     Ok server
   | Error e ->
     t.documentation_server <- None;
-    Error e
+    log "Error while starting the documentation server: %s"
+      (Node.JsError.message e);
+    Error ()
 
 let repl t = t.repl
 
