@@ -1,171 +1,474 @@
 {
-  "scopeName": "source.ocaml.odoc",
-  "name": "comment.other.odoc",
+  "name": "Odoc",
+	"scopeName": "source.ocaml.odoc",
   "fileTypes": ["mld"],
-  "patterns": [
-    {
-      "name": "comment.other.odoc",
-      "begin": "",
-      "end": "",
-      "patterns": [{ "include": "#markup" }]
-    },
-    {
-      "comment": "odoc documentation tag",
-      "name": "keyword.doc-tag.odoc",
-      "match": "\\@[[:lower:]]+"
-    }
-  ],
-  "repository": {
-    "markup": {
+	"patterns": [
+		{
+			"include": "#block"
+		}
+	],
+	"repository": {
+		"block": {
+			"patterns": [
+				{
+					"include": "#separator"
+				},
+				{
+					"include": "#heading"
+				},
+				{
+					"include": "#blockquote"
+				},
+				{
+					"include": "#lists"
+				},
+				{
+					"include": "#fenced_code_block"
+				},
+				{
+					"include": "#raw_block"
+				},
+				{
+					"include": "#link-def"
+				},
+				{
+					"include": "#html"
+				},
+				{
+					"include": "#paragraph"
+				}
+			]
+		},
+		"blockquote": {
+			"begin": "(^|\\G)[ ]{0,3}(>) ?",
+			"captures": {
+				"2": {
+					"name": "punctuation.definition.quote.begin.odoc"
+				}
+			},
+			"name": "markup.quote.odoc",
+			"patterns": [
+				{
+					"include": "#block"
+				}
+			],
+			"while": "(^|\\G)\\s*(>) ?"
+		},
+		"fenced_code_block": {
+			"patterns": [
+				{
+					"include": "#fenced_code_block_ocaml"
+				}
+			]
+		},
+		"fenced_code_block_ocaml": {
+			"begin": "\\{(?<!\\\\)\\[",
+			"end": "(?<!\\\\)\\]\\}",
+			"name": "markup.fenced_code.block.odoc",
       "patterns": [
         {
-          "comment": "embedded ocaml source",
-          "begin": "(?<!\\\\)\\[",
-          "end": "(?<!\\\\)\\]",
-          "contentName": "source.embedded.odoc",
-          "patterns": [{ "include": "source.ocaml" }]
-        },
-        {
-          "comment": "label",
-          "begin": "\\{([[:digit:]]+)\\:[[:space:]]?[a-z]+",
-          "end": "\\}",
-          "beginCaptures": {
-            "1": { "name": "variable.other.declaration.odoc" }
-          },
-          "patterns": [{ "include": "#markup" }]
-        },
-        {
-          "comment": "section header",
-          "begin": "\\{([[:digit:]]+)",
-          "end": "\\}",
-          "beginCaptures": {
-            "1": { "name": "constant.language.odoc" }
-          },
-          "patterns": [{ "include": "#markup" }]
-        },
-        {
-          "comment": "text in bold",
-          "begin": "\\{b\\b",
-          "end": "\\}",
-          "contentName": "strong",
-          "patterns": [{ "include": "#markup" }]
-        },
-        {
-          "comment": "emphasize text",
-          "begin": "\\{e\\b",
-          "end": "\\}",
-          "contentName": "emphasis",
-          "patterns": [{ "include": "#markup" }]
-        },
-        {
-          "comment": "text in italic",
-          "begin": "\\{i\\b",
-          "end": "\\}",
-          "contentName": "emphasis",
-          "patterns": [{ "include": "#markup" }]
-        },
-        {
-          "comment": "center text",
-          "begin": "\\{C\\b",
-          "end": "\\}",
-          "patterns": [{ "include": "#markup" }]
-        },
-        {
-          "comment": "left align text",
-          "begin": "\\{L\\b",
-          "end": "\\}",
-          "patterns": [{ "include": "#markup" }]
-        },
-        {
-          "comment": "right align text",
-          "begin": "\\{R\\b",
-          "end": "\\}",
-          "patterns": [{ "include": "#markup" }]
-        },
-        {
-          "comment": "unordered list",
-          "begin": "\\{ul\\b",
-          "end": "\\}",
-          "patterns": [{ "include": "#markup" }]
-        },
-        {
-          "comment": "ordered list",
-          "begin": "\\{ol\\b",
-          "end": "\\}",
-          "patterns": [{ "include": "#markup" }]
-        },
-        {
-          "comment": "link address text",
-          "begin": "\\{(?=\\{\\:)",
-          "end": "\\}",
-          "contentName": "string.other.odoc",
-          "patterns": [{
-            "begin": "\\{\\:",
-            "end": "\\}"
-        },
-        { "include":" #markup" }]
-        },
-        {
-        "comment": "string in source code",
-        "begin": "\\[",
-        "end": "\\]",
-        "contentName": "string.other.odoc",
-        "patterns": [{ "include": "#markup" }]
-      },
-      {
-        "comment": "string in preformatted source code",
-        "begin": "\\{\\[",
-        "end": "\\]\\}",
-        "contentName": "string.other.odoc",
-        "patterns": [{ "include": "#markup" }]
-      },
-      {
-        "comment": "string in verbatim",
-        "begin": "\\{v\\b",
-        "end": "v\\}",
-        "contentName": "string.other.odoc",
-        "patterns": [{ "include": "#markup" }]
-      },
-      {
-        "comment": "target-specific content",
-        "begin": "\\{\\%",
-        "end": "\\%\\}",
-        "contentName": "string.other.odoc",
-        "patterns": [{ "include": "#markup" }]
-      },
-      {
-        "comment": "cross-reference to an element",
-        "begin": "\\{\\!",
-        "end": "\\}",
-        "contentName": "string.other.odoc",
-        "patterns": [{ "include": "#markup" }]
-      },
-      {
-        "comment": "index table for given modules",
-        "begin": "\\{\\![a-z]+\\:",
-        "end": "\\]",
-        "contentName": "string.other.odoc",
-        "patterns": [{ "include": "#markup" }]
-      },
-      {
-        "comment": "insert a table of links",
-        "begin": "\\{\\!",
-        "end": "\\}",
-        "patterns": [{ "include": "#markup" }]
-      },
-      {
-        "comment": "text in superscript",
-        "begin": "\\{\\^",
-        "end": "\\}",
-        "patterns": [{ "include": "#markup" }]
-      },
-      {
-        "comment": "text in subscript",
-        "begin": "\\{\\_",
-        "end": "\\}",
-        "patterns": [{ "include": "#markup" }]
-      }
+          "contentName": "meta.embedded.block.ocaml",
+          "include": "source.ocaml"
+        }
       ]
-    }
-  }
+	},
+			"heading":{
+			"comment": "section header",
+			"begin": "\\{([[:digit:]]+)",
+			"end": "\\}",
+			"beginCaptures": {
+			  "1": { "name": "punctuation.definition.heading.odoc" }
+			},
+			"patterns": [{ "include": "#markup" }]
+		  },
+		"html": {
+			"patterns": [
+				{
+					"begin": "(^|\\G)\\s*(<!--)",
+					"captures": {
+						"1": {
+							"name": "punctuation.definition.comment.html"
+						},
+						"2": {
+							"name": "punctuation.definition.comment.html"
+						}
+					},
+					"end": "(-->)",
+					"name": "comment.block.html"
+				},
+				{
+					"begin": "(?i)(^|\\G)\\s*(?=<(script|style|pre)(\\s|$|>)(?!.*?</(script|style|pre)>))",
+					"end": "(?i)(.*)((</)(script|style|pre)(>))",
+					"endCaptures": {
+						"1": {
+							"patterns": [
+								{
+									"include": "text.html.derivative"
+								}
+							]
+						},
+						"2": {
+							"name": "meta.tag.structure.$4.end.html"
+						},
+						"3": {
+							"name": "punctuation.definition.tag.begin.html"
+						},
+						"4": {
+							"name": "entity.name.tag.html"
+						},
+						"5": {
+							"name": "punctuation.definition.tag.end.html"
+						}
+					},
+					"patterns": [
+						{
+							"begin": "(\\s*|$)",
+							"patterns": [
+								{
+									"include": "text.html.derivative"
+								}
+							],
+							"while": "(?i)^(?!.*</(script|style|pre)>)"
+						}
+					]
+				},
+				{
+					"begin": "(?i)(^|\\G)\\s*(?=</?[a-zA-Z]+[^\\s/&gt;]*(\\s|$|/?>))",
+					"patterns": [
+						{
+							"include": "text.html.derivative"
+						}
+					],
+					"while": "^(?!\\s*$)"
+				},
+				{
+					"begin": "(^|\\G)\\s*(?=(<[a-zA-Z0-9\\-](/?>|\\s.*?>)|</[a-zA-Z0-9\\-]>)\\s*$)",
+					"patterns": [
+						{
+							"include": "text.html.derivative"
+						}
+					],
+					"while": "^(?!\\s*$)"
+				}
+			]
+		},
+		"link-def": {
+			"captures": {
+				"1": {
+					"name": "punctuation.definition.constant.odoc"
+				},
+				"2": {
+					"name": "constant.other.reference.link.odoc"
+				},
+				"3": {
+					"name": "punctuation.definition.constant.odoc"
+				},
+				"4": {
+					"name": "punctuation.separator.key-value.odoc"
+				},
+				"5": {
+					"name": "punctuation.definition.link.odoc"
+				},
+				"6": {
+					"name": "markup.underline.link.odoc"
+				},
+				"7": {
+					"name": "punctuation.definition.link.odoc"
+				},
+				"8": {
+					"name": "markup.underline.link.odoc"
+				},
+				"9": {
+					"name": "string.other.link.description.title.odoc"
+				},
+				"10": {
+					"name": "punctuation.definition.string.begin.odoc"
+				},
+				"11": {
+					"name": "punctuation.definition.string.end.odoc"
+				},
+				"12": {
+					"name": "string.other.link.description.title.odoc"
+				},
+				"13": {
+					"name": "punctuation.definition.string.begin.odoc"
+				},
+				"14": {
+					"name": "punctuation.definition.string.end.odoc"
+				},
+				"15": {
+					"name": "string.other.link.description.title.odoc"
+				},
+				"16": {
+					"name": "punctuation.definition.string.begin.odoc"
+				},
+				"17": {
+					"name": "punctuation.definition.string.end.odoc"
+				}
+			},
+			"match": "(?x)\n  \\s*            # Leading whitespace\n  (\\[)([^]]+?)(\\])(:)    # Reference name\n  [ \\t]*          # Optional whitespace\n  (?:(<)([^\\>]+?)(>)|(\\S+?))      # The url\n  [ \\t]*          # Optional whitespace\n  (?:\n      ((\\().+?(\\)))    # Match title in parens…\n    | ((\").+?(\"))    # or in double quotes…\n    | ((').+?('))    # or in single quotes.\n  )?            # Title is optional\n  \\s*            # Optional whitespace\n  $\n",
+			"name": "meta.link.reference.def.odoc"
+		},
+		"list_paragraph": {
+			"begin": "(^|\\G)(?=\\S)(?![*+->]\\s|[0-9]+\\.\\s)",
+			"name": "meta.paragraph.odoc",
+			"patterns": [
+				{
+					"include": "#inline"
+				},
+				{
+					"include": "text.html.derivative"
+				},
+				{
+					"include": "#heading-setext"
+				}
+			],
+			"while": "(^|\\G)(?!\\s*$|#|[ ]{0,3}([-*_>][ ]{2,}){3,}[ \\t]*$\\n?|[ ]{0,3}[*+->]|[ ]{0,3}[0-9]+\\.)"
+		},
+		"lists": {
+			"patterns": [
+				{
+					"begin": "(^|\\G)([ ]{0,3})([*+-])([ \\t])",
+					"beginCaptures": {
+						"3": {
+							"name": "punctuation.definition.list.begin.odoc"
+						}
+					},
+					"comment": "Currently does not support un-indented second lines.",
+					"name": "markup.list.unnumbered.odoc",
+					"patterns": [
+						{
+							"include": "#block"
+						},
+						{
+							"include": "#list_paragraph"
+						}
+					],
+					"while": "((^|\\G)([ ]{2,4}|\\t))|(^[ \\t]*$)"
+				},
+				{
+					"begin": "(^|\\G)([ ]{0,3})([0-9]+\\.)([ \\t])",
+					"beginCaptures": {
+						"3": {
+							"name": "punctuation.definition.list.begin.odoc"
+						}
+					},
+					"name": "markup.list.numbered.odoc",
+					"patterns": [
+						{
+							"include": "#block"
+						},
+						{
+							"include": "#list_paragraph"
+						}
+					],
+					"while": "((^|\\G)([ ]{2,4}|\\t))|(^[ \\t]*$)"
+				}
+			]
+		},
+		"paragraph": {
+			"begin": "(^|\\G)[ ]{0,3}(?=\\S)",
+			"name": "meta.paragraph.odoc",
+			"patterns": [
+				{
+					"include": "#inline"
+				},
+				{
+					"include": "text.html.derivative"
+				},
+				{
+					"include": "#heading-setext"
+				}
+			],
+			"while": "(^|\\G)((?=\\s*[-=]{3,}\\s*$)|[ ]{4,}(?=\\S))"
+		},
+		"raw_block": {
+			"begin": "(^|\\G)([ ]{4}|\\t)",
+			"name": "markup.raw.block.odoc",
+			"while": "(^|\\G)([ ]{4}|\\t)"
+		},
+		"separator": {
+			"match": "(^|\\G)[ ]{0,3}([\\*\\-\\_])([ ]{0,2}\\2){2,}[ \\t]*$\\n?",
+			"name": "meta.separator.odoc"
+		},
+    "odoc_inline" : {
+			"patterns": [
+        {
+          "include": "#center"
+        }
+      ]
+    },
+		"center": {
+			"comment": "center text",
+      "begin": "\\{C\\b",
+      "end": "\\}",
+			"name": "meta.other.valid-ampersand.odoc",
+			"patterns": [
+				{
+          "include": "#odoc_inline"
+        } 
+      ]
+		},
+		"inline": {
+			"patterns": [
+				{
+					"include": "#ampersand"
+				},
+				{
+					"include": "#bracket"
+				},
+				{
+					"include": "#bold"
+				},
+				{
+					"include": "#italic"
+				},
+				{
+					"include": "#raw"
+				},
+				{
+					"include": "#escape"
+				},
+				{
+					"include": "#link"
+				}
+			]
+		},
+		"ampersand": {
+			"comment": "odoc will convert this for us. We match it so that the HTML grammar will not mark it up as invalid.",
+			"match": "&(?!([a-zA-Z0-9]+|#[0-9]+|#x[0-9a-fA-F]+);)",
+			"name": "meta.other.valid-ampersand.odoc"
+		},
+		"bold": {
+			"begin": "\\{[b|e]\\b",
+			"captures": {
+				"1": {
+					"name": "punctuation.definition.bold.odoc"
+				}
+			},
+			"end": "\\}",
+			"name": "markup.bold.odoc",
+			"patterns": [
+				{
+					"applyEndPatternLast": 1,
+					"begin": "(?=<[^>]*?>)",
+					"end": "(?<=>)",
+					"patterns": [
+						{
+							"include": "text.html.derivative"
+						}
+					]
+				},
+				{
+					"include": "#escape"
+				},
+				{
+					"include": "#ampersand"
+				},
+				{
+					"include": "#bracket"
+				},
+				{
+					"include": "#raw"
+				},
+				{
+					"include": "#bold"
+				},
+				{
+					"include": "#italic"
+				},
+				{
+					"include": "#link"
+				}
+			]
+		},
+		"bracket": {
+			"comment": "odoc will convert this for us. We match it so that the HTML grammar will not mark it up as invalid.",
+			"match": "<(?![a-zA-Z/?\\$!])",
+			"name": "meta.other.valid-bracket.odoc"
+		},
+		"escape": {
+			"match": "\\\\[-`*_#+.!(){}\\[\\]\\\\>]",
+			"name": "constant.character.escape.odoc"
+		},
+		"italic": {
+			"begin": "\\{i\\b",
+			"captures": {
+				"1": {
+					"name": "punctuation.definition.italic.odoc"
+				}
+			},
+			"end": "\\}",
+			"name": "markup.italic.odoc",
+			"patterns": [
+				{
+					"applyEndPatternLast": 1,
+					"begin": "(?=<[^>]*?>)",
+					"end": "(?<=>)",
+					"patterns": [
+						{
+							"include": "text.html.derivative"
+						}
+					]
+				},
+				{
+					"include": "#escape"
+				},
+				{
+					"include": "#ampersand"
+				},
+				{
+					"include": "#bracket"
+				},
+				{
+					"include": "#raw"
+				},
+				{
+					"include": "#bold"
+				},
+				{
+					"include": "#link"
+				}
+			]
+		},
+		"link": {
+			"captures": {
+				"1": {
+					"name": "punctuation.definition.string.begin.odoc"
+				},
+				"2": {
+					"name": "string.other.link.title.odoc"
+				},
+				"4": {
+					"name": "punctuation.definition.string.end.odoc"
+				},
+				"5": {
+					"name": "punctuation.definition.constant.begin.odoc"
+				},
+				"6": {
+					"name": "punctuation.definition.constant.end.odoc"
+				}
+			},
+			"begin": "\\{(?=\\{\\:)",
+			"end": "\\}",
+			"patterns": [{
+				"begin": "\\{\\:",
+				"end": "\\}"
+			}],
+			"match": "(\\[)((?<square>[^\\[\\]\\\\]|\\\\.|\\[\\g<square>*+\\])*+)(\\])[ ]?(\\[)(\\])",
+			"name": "meta.link.reference.literal.odoc"
+		},
+		"raw": {
+			"captures": {
+				"1": {
+					"name": "punctuation.definition.raw.odoc"
+				},
+				"3": {
+					"name": "punctuation.definition.raw.odoc"
+				}
+			},
+			"match": "(`+)([^`]|(?!(?<!`)\\1(?!`))`)*+(\\1)",
+			"name": "markup.inline.raw.string.odoc"
+		}
+	}
 }

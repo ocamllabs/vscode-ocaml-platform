@@ -1,0 +1,171 @@
+{
+  "scopeName": "source.ocaml.odoc",
+  "name": "comment.other.odoc",
+  "fileTypes": ["mld"],
+  "patterns": [
+    {
+      "name": "comment.other.odoc",
+      "begin": "",
+      "end": "",
+      "patterns": [{ "include": "#markup" }]
+    },
+    {
+      "comment": "odoc documentation tag",
+      "name": "keyword.doc-tag.odoc",
+      "match": "\\@[[:lower:]]+"
+    }
+  ],
+  "repository": {
+    "markup": {
+      "patterns": [
+        {
+          "comment": "embedded ocaml source",
+          "begin": "(?<!\\\\)\\[",
+          "end": "(?<!\\\\)\\]",
+          "contentName": "source.embedded.odoc",
+          "patterns": [{ "include": "source.ocaml" }]
+        },
+        {
+          "comment": "label",
+          "begin": "\\{([[:digit:]]+)\\:[[:space:]]?[a-z]+",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": { "name": "variable.other.declaration.odoc" }
+          },
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "section header",
+          "begin": "\\{([[:digit:]]+)",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": { "name": "constant.language.odoc" }
+          },
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "text in bold",
+          "begin": "\\{b\\b",
+          "end": "\\}",
+          "contentName": "strong",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "emphasize text",
+          "begin": "\\{e\\b",
+          "end": "\\}",
+          "contentName": "emphasis",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "text in italic",
+          "begin": "\\{i\\b",
+          "end": "\\}",
+          "contentName": "emphasis",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "center text",
+          "begin": "\\{C\\b",
+          "end": "\\}",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "left align text",
+          "begin": "\\{L\\b",
+          "end": "\\}",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "right align text",
+          "begin": "\\{R\\b",
+          "end": "\\}",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "unordered list",
+          "begin": "\\{ul\\b",
+          "end": "\\}",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "ordered list",
+          "begin": "\\{ol\\b",
+          "end": "\\}",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "link address text",
+          "begin": "\\{(?=\\{\\:)",
+          "end": "\\}",
+          "contentName": "string.other.odoc",
+          "patterns": [{
+            "begin": "\\{\\:",
+            "end": "\\}"
+        },
+        { "include":" #markup" }]
+        },
+        {
+        "comment": "string in source code",
+        "begin": "\\[",
+        "end": "\\]",
+        "contentName": "string.other.odoc",
+        "patterns": [{ "include": "#markup" }]
+      },
+      {
+        "comment": "string in preformatted source code",
+        "begin": "\\{\\[",
+        "end": "\\]\\}",
+        "contentName": "string.other.odoc",
+        "patterns": [{ "include": "#markup" }]
+      },
+      {
+        "comment": "string in verbatim",
+        "begin": "\\{v\\b",
+        "end": "v\\}",
+        "contentName": "string.other.odoc",
+        "patterns": [{ "include": "#markup" }]
+      },
+      {
+        "comment": "target-specific content",
+        "begin": "\\{\\%",
+        "end": "\\%\\}",
+        "contentName": "string.other.odoc",
+        "patterns": [{ "include": "#markup" }]
+      },
+      {
+        "comment": "cross-reference to an element",
+        "begin": "\\{\\!",
+        "end": "\\}",
+        "contentName": "string.other.odoc",
+        "patterns": [{ "include": "#markup" }]
+      },
+      {
+        "comment": "index table for given modules",
+        "begin": "\\{\\![a-z]+\\:",
+        "end": "\\]",
+        "contentName": "string.other.odoc",
+        "patterns": [{ "include": "#markup" }]
+      },
+      {
+        "comment": "insert a table of links",
+        "begin": "\\{\\!",
+        "end": "\\}",
+        "patterns": [{ "include": "#markup" }]
+      },
+      {
+        "comment": "text in superscript",
+        "begin": "\\{\\^",
+        "end": "\\}",
+        "patterns": [{ "include": "#markup" }]
+      },
+      {
+        "comment": "text in subscript",
+        "begin": "\\{\\_",
+        "end": "\\}",
+        "patterns": [{ "include": "#markup" }]
+      }
+      ]
+    }
+  }
+}
