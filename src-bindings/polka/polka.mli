@@ -5,6 +5,8 @@ module Server : sig
     include Js.T
 
     val port : t -> int
+
+    val address : t -> string
   end
 
   type t
@@ -38,7 +40,8 @@ end
 
 val create : unit -> polka
 
-val listen : int -> ?callback:(unit -> unit) -> polka -> unit -> polka
+val listen :
+  int -> ?hostname:string -> ?callback:(unit -> unit) -> polka -> unit -> polka
 
 val get : string -> (unit -> unit) -> polka -> polka
 

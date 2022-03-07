@@ -7,6 +7,8 @@ module Server = struct
     include Interface.Make ()
 
     include [%js: val port : t -> int [@@js.get]]
+
+    include [%js: val address : t -> string [@@js.get]]
   end
 
   include
@@ -44,7 +46,13 @@ include
   [%js:
   val create : unit -> polka [@@js.global "polka"]
 
-  val listen_ : polka -> int -> ?callback:(unit -> unit) -> unit -> polka
+  val listen_ :
+       polka
+    -> int
+    -> ?hostname:string
+    -> ?callback:(unit -> unit)
+    -> unit
+    -> polka
     [@@js.call "listen"]
 
   val get_ : polka -> string -> (unit -> unit) -> polka [@@js.call "get"]
@@ -56,7 +64,7 @@ include
 
 let get path callback t = get_ t path callback
 
-let listen port ?callback t = listen_ t port ?callback
+let listen port ?hostname ?callback t = listen_ t port ?hostname ?callback
 
 let use middlewares t = use_ t middlewares
 

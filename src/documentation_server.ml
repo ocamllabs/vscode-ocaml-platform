@@ -14,7 +14,7 @@ let start ~path =
   let serve =
     polka
     |> Polka.use [ Polka.Sirv.serve (path |> Path.to_string) ~options () ]
-    |> Polka.listen 0 ~callback:(fun () ->
+    |> Polka.listen 0 ~hostname:"localhost" ~callback:(fun () ->
            let server = Polka.server polka in
            resolve (Ok (ref (Some { server; path }))))
   in
@@ -29,18 +29,17 @@ let get (t : t) =
 
 let path (t : t) = (get t).path
 
-let port t =
+let address t =
   match Polka.Server.address (get t).server with
   | None ->
     (* if it's [None], server must not be listening, but we aim to have server
        only if it's listening *)
     assert false
-  | Some a -> Polka.Server.Address.port a
+  | Some a -> a
 
-(* TODO extract this from the server somehow *)
-let host t =
-  ignore (get t : t');
-  "localhost"
+let port t = Polka.Server.Address.port (address t)
+
+let host t = Polka.Server.Address.address (address t)
 
 let dispose (t : t) =
   match !t with
