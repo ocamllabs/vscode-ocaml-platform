@@ -202,9 +202,6 @@ let stop_documentation_server t =
 let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
   t.sandbox <- new_sandbox;
-  (* Makes sure that a new instance of the documentation server is created next
-     time we show documentation for a package. It avoids reusing an existing
-     server instance that serves the old sandbox packages folder.*)
   stop_documentation_server t;
   let (_ : Ojs.t option Promise.t) =
     Vscode.Commands.executeCommand
