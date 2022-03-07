@@ -15,7 +15,7 @@
   "homepage": "https://github.com/ocamllabs/vscode-ocaml-platform",
   "main": "./dist/vscode_ocaml_platform.bc.js",
   "engines": {
-    "vscode": "^1.57.0"
+    "vscode": "^1.64.0"
   },
   "categories": [
     "Programming Languages"
@@ -1028,7 +1028,7 @@
     "vscode-languageclient": "7.0.0"
   },
   "devDependencies": {
-    "@types/vscode": "1.57.0",
+    "@types/vscode": "1.64.0",
     "esbuild": "0.14.23",
     "fs-extra": "10.0.1",
     "mocha": "9.2.1",
