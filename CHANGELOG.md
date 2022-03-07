@@ -1,6 +1,6 @@
 # Change Log
 
-## 1.10.0 (Unreleased)
+## 1.10.0
 
 - Add the possibility to generate and show the documentation of an installed
   package right into VSCode. (#771)
