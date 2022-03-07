@@ -78,6 +78,67 @@ module Command = struct
     Extension_commands.register
       ~id:Extension_consts.Commands.open_sandbox_documentation handler
 
+  let _generate_documentation =
+    let handler (instance : Extension_instance.t) ~args =
+      let (_ : unit Promise.t) =
+        let open Promise.Syntax in
+        let sandbox = Extension_instance.sandbox instance in
+        let* odig = Odig.of_sandbox sandbox in
+        match odig with
+        | Error error ->
+          show_message `Error "%s" error;
+          Promise.resolve ()
+        | Ok odig -> (
+          let arg = List.hd_exn args in
+          let dep = Dependency.t_of_js arg in
+          let package_name = Sandbox.Package.name dep in
+          let options =
+            ProgressOptions.create ~location:(`ProgressLocation Notification)
+              ~title:
+                (Printf.sprintf "Generating documentation for %s" package_name)
+              ~cancellable:false ()
+          in
+          let task ~progress:_ ~token:_ =
+            Odig.odoc_exec odig ~sandbox ~package_name
+          in
+          let* result =
+            Vscode.Window.withProgress
+              (module Interop.Js.Result (Interop.Js.Unit) (Interop.Js.String))
+              ~options ~task
+          in
+          match result with
+          | Error _ ->
+            show_message `Error
+              "Documentation could not be generated for %s. It might be \
+               because this package has no documentation."
+              package_name;
+            Promise.resolve ()
+          | Ok _ -> (
+            let+ server =
+              let html_dir = Odig.html_dir odig in
+              Extension_instance.start_documentation_server instance
+                ~path:html_dir
+            in
+            match server with
+            | Error () -> ()
+            | Ok server ->
+              let (_ : Ojs.t option Promise.t) =
+                let port = Documentation_server.port server in
+                let host = Documentation_server.host server in
+                Vscode.Commands.executeCommand ~command:"simpleBrowser.show"
+                  ~args:
+                    [ Ojs.string_to_js
+                        (Printf.sprintf "http://%s:%i/%s/index.html" host port
+                           package_name)
+                    ]
+              in
+              ()))
+      in
+      ()
+    in
+    Extension_commands.register
+      ~id:Extension_consts.Commands.generate_sandbox_documentation handler
+
   let _uninstall =
     let handler (instance : Extension_instance.t) ~args =
       let (_ : unit Promise.t) =

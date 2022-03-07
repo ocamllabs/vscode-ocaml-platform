@@ -1425,6 +1425,17 @@ module ExtensionTerminalOptions = struct
     val create : name:string -> pty:Pseudoterminal.t -> t [@@js.builder]]
 end
 
+module Extension = struct
+  include Interface.Make ()
+end
+
+module Extensions = struct
+  include
+    [%js:
+    val getExtension : string -> Extension.t or_undefined
+      [@@js.global "vscode.extensions.getExtension"]]
+end
+
 module TerminalExitStatus = struct
   include Interface.Make ()
 
@@ -2226,6 +2237,12 @@ module Workspace = struct
     }
   [@@js]
 
+  type workspaceFolderToAdd =
+    { name : string
+    ; uri : Uri.t
+    }
+  [@@js]
+
   include
     [%js:
     val workspaceFolders : unit -> WorkspaceFolder.t maybe_list
@@ -2306,7 +2323,14 @@ module Workspace = struct
           ]
          [@js.union])
       -> TextDocument.t Promise.t
-      [@@js.global "vscode.workspace.openTextDocument"]]
+      [@@js.global "vscode.workspace.openTextDocument"]
+
+    val updateWorkspaceFolders :
+         start:int
+      -> deleteCount:int or_undefined
+      -> workspaceFoldersToAdd:(workspaceFolderToAdd list[@js.variadic])
+      -> bool
+      [@@js.global "vscode.workspace.updateWorkspaceFolders"]]
 end
 
 module TreeItemCollapsibleState = struct

@@ -20,6 +20,8 @@ val setInterval : (unit -> unit) -> int -> Timeout.t
 
 val setTimeout : (unit -> unit) -> int -> Timeout.t
 
+val clearTimeout : Timeout.t -> unit
+
 module Process : sig
   val cwd : unit -> string
 
@@ -131,6 +133,30 @@ module Fs : sig
   val readFile : string -> string Promise.t
 
   val exists : string -> bool Promise.t
+end
+
+module Net : sig
+  module Socket : sig
+    type t
+
+    val make : unit -> t
+
+    val isPaused : t -> bool
+
+    val destroy : t -> unit
+
+    val connect : t -> port:int -> host:string -> t
+
+    val setTimeout : t -> int -> t
+
+    val on :
+         t
+      -> [ `Connect of unit -> unit
+         | `Timeout of unit -> unit
+         | `Error of err:JsError.t -> unit
+         ]
+      -> unit
+  end
 end
 
 module ChildProcess : sig

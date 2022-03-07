@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.10.0 (Unreleased)
+
+- Add the possibility to generate and show the documentation of an installed
+  package right into VSCode. (#771)
+
 ## 1.9.5
 
 - Fix automatic closing of files without an extension (#887)
