@@ -16,7 +16,7 @@ jobs:
         ocaml-compiler:
           - 4.13.x
         node-version:
-          - 14.x
+          - 16.x
 
     runs-on: ${{ matrix.os }}
 
@@ -113,13 +113,55 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
+  lint-doc:
+    strategy:
+      matrix:
+        ocaml-compiler:
+          - 4.13.x
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          dune-cache: true
+
+      - name: Lint doc
+        uses: ocaml/setup-ocaml/lint-doc@v2
+
+  lint-fmt:
+    strategy:
+      matrix:
+        ocaml-compiler:
+          - 4.13.x
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          dune-cache: true
+
+      - name: Lint fmt
+        uses: ocaml/setup-ocaml/lint-fmt@v2
+
   lint-opam:
     strategy:
       matrix:
         ocaml-compiler:
           - 4.13.x
         node-version:
-          - 14.x
+          - 16.x
 
     runs-on: ubuntu-latest
 
@@ -143,32 +185,9 @@ jobs:
           yarn --frozen-lockfile --cwd astexplorer
           yarn --frozen-lockfile
 
-      - run: opam depext opam-dune-lint --install
-
       - run: opam install . --deps-only
 
       - run: opam exec -- make build-release
 
-      - run: opam exec -- opam-dune-lint
-
-  lint-fmt:
-    strategy:
-      matrix:
-        ocaml-compiler:
-          - 4.13.x
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Use OCaml ${{ matrix.ocaml-compiler }}
-        uses: ocaml/setup-ocaml@v2
-        with:
-          ocaml-compiler: ${{ matrix.ocaml-compiler }}
-          dune-cache: true
-
-      - run: opam depext --install ocamlformat=$(awk -F = '/^version=/{print $2}' .ocamlformat)
-
-      - run: opam exec -- dune build @fmt
+      - name: Lint opam
+        uses: ocaml/setup-ocaml/lint-opam@v2
