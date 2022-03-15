@@ -1,4 +1,4 @@
-(lang dune 2.7)
+(lang dune 3.0)
 
 (name vscode-ocaml-platform)
 
@@ -24,6 +24,7 @@
 (package
  (name vscode-ocaml-platform)
  (synopsis "Visual Studio Code extension for OCaml")
+ (allow_empty)
  (depends
   (vscode
    (= :version))
