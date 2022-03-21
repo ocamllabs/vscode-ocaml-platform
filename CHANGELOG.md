@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Fix external syntax highlighting for embedded ocaml source in comments (#906)
+
 ## 1.10.0
 
 - Add the possibility to generate and show the documentation of an installed
