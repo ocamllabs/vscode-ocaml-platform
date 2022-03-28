@@ -1029,7 +1029,7 @@
   },
   "devDependencies": {
     "@types/vscode": "1.64.0",
-    "esbuild": "0.14.27",
+    "esbuild": "0.14.28",
     "fs-extra": "10.0.1",
     "mocha": "9.2.2",
     "npm-run-all": "4.1.5",
