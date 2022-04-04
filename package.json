@@ -486,11 +486,6 @@
           "default": true,
           "description": "Controls whether to use ocaml-env for opam commands from OCaml for Windows."
         },
-        "ocaml.useUtop": {
-          "type": "boolean",
-          "default": true,
-          "description": "Allow the usage of utop if it is installed on the current switch."
-        },
         "ocaml.terminal.shell.linux": {
           "description": "The path of the shell that the sandbox terminal uses on Linux",
           "type": [
@@ -558,7 +553,12 @@
           ],
           "items": "string",
           "default": null
-        }
+        },
+        "ocaml.repl.useUtop": {
+          "type": "boolean",
+          "default": true,
+          "description": "Allow the usage of utop in REPL if it is installed on the current switch."
+        },
       }
     },
     "configurationDefaults": {
