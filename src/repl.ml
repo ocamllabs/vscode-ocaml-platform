@@ -16,6 +16,12 @@ module Repl_path = struct
   let t = Settings.create_setting ~scope:Global ~key ~of_json ~to_json
 end
 
+let ocaml_utop_setting =
+  Settings.create_setting ~scope:Global ~key:"ocaml.useUtop"
+    ~of_json:Jsonoo.Decode.bool ~to_json:Jsonoo.Encode.bool
+
+let use_utop () = Settings.get ocaml_utop_setting
+
 module Repl_args = struct
   type t = string list option
 
@@ -74,10 +80,10 @@ let default_repl sandbox =
   let open Promise.Syntax in
   let* has_utop = has_utop sandbox in
   let+ can_build = can_build sandbox in
-  match (has_utop, can_build) with
-  | true, true -> Sandbox.get_command sandbox "dune" [ "utop" ]
-  | true, false -> Sandbox.get_command sandbox "utop" []
-  | false, _ -> Sandbox.get_command sandbox "ocaml" []
+  match (has_utop, use_utop, can_build) with
+  | true, true, true -> Sandbox.get_command sandbox "dune" [ "utop" ]
+  | true, true, false -> Sandbox.get_command sandbox "utop" []
+  | _ -> Sandbox.get_command sandbox "ocaml" []
 
 let create_terminal instance sandbox =
   match Extension_instance.repl instance with
