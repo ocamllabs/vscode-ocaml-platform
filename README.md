@@ -4,41 +4,45 @@
 
 Visual Studio Code extension for OCaml and relevant tools.
 
-❗️ You are encouraged to read the [Getting started](#getting-started) section. The rest of
-the document assumes you have read it. You may also find [Important
-concepts](#important-concepts) useful.
+❗️ You are encouraged to read the [Getting started](#getting-started) section.
+The rest of the document assumes you have read it. You may also find
+[Important concepts](#important-concepts) useful.
 
-If you have issues with the extension and you have read the "Getting Started" section, see [Debugging the extension](#debugging-the-extension) and [FAQ](#faq) below. 
+If you have issues with the extension and you have read the "Getting Started"
+section, see [Debugging the extension](#debugging-the-extension) and [FAQ](#faq)
+below.
 
 ## Getting started
 
 ### Installation
 
-Below we first install the extension dependencies and then the extension itself. You can
-reverse the order; it's just that the extension will not work to its full without all of
-its dependencies.
+Below we first install the extension dependencies and then the extension itself.
+You can reverse the order; it's just that the extension will not work to its
+full without all of its dependencies.
 
 1. Installing extension dependencies
 
-   This VS Code for most of its OCaml language support functionality requires OCaml
-   Language Server (often called `ocaml-lsp` or `ocamllsp`). Install
-   [ocaml-lsp-server](https://github.com/ocaml/ocaml-lsp) package as usual with a package
-   manager of your choice: [OPAM](https://github.com/ocaml/opam) or
-   [esy](https://github.com/esy/esy). Installation instructions by package manager are
-   available [here](https://github.com/ocaml/ocaml-lsp#installation).
+   This VS Code for most of its OCaml language support functionality requires
+   OCaml Language Server (often called `ocaml-lsp` or `ocamllsp`). Install
+   [ocaml-lsp-server](https://github.com/ocaml/ocaml-lsp) package as usual with
+   a package manager of your choice: [OPAM](https://github.com/ocaml/opam) or
+   [esy](https://github.com/esy/esy). Installation instructions by package
+   manager are available
+   [here](https://github.com/ocaml/ocaml-lsp#installation).
 
    > Make sure to install the packages in the sandbox (usually, OPAM
    > [switch](https://opam.ocaml.org/doc/Usage.html#opam-switch) or esy
-   > [sandbox](https://esy.sh/docs/en/getting-started.html)) you use for compiling your
-   > project.
+   > [sandbox](https://esy.sh/docs/en/getting-started.html)) you use for
+   > compiling your project.
 
    Optionally:
 
-   - Install [ocamlformat](https://github.com/ocaml-ppx/ocamlformat#installation) package
-     if you want source file formatting support.
+   - Install
+     [ocamlformat](https://github.com/ocaml-ppx/ocamlformat#installation)
+     package if you want source file formatting support.
 
-     Note: Formatting support requires having `.ocamlformat` file in your project root
-     directory.
+     Note: Formatting support requires having `.ocamlformat` file in your
+     project root directory.
 
    - When you hover the cursor over OCaml code, the extension shows you the type
      of the code. To get nicely formatted types, install
@@ -50,21 +54,22 @@ its dependencies.
    VSCode extension installations instructions are available
    [here](https://code.visualstudio.com/docs/editor/extension-marketplace).
 
-If you're on Mac or Linux, now you should have everything necessary installed and ready.
-You can skip the sub-section below named "Windows" and proceed to "Setting up the extension for your project." 
+If you're on Mac or Linux, now you should have everything necessary installed
+and ready. You can skip the sub-section below named "Windows" and proceed to
+"Setting up the extension for your project."
 
 ### On Windows
 
-Install [OCaml for Windows](https://fdopen.github.io/opam-repository-mingw/) and make sure
-the `ocaml-env` program is accessible on the PATH (`ocaml-env` is in the `usr/local/bin`
-folder relative to the installation directory).
+Install [OCaml for Windows](https://fdopen.github.io/opam-repository-mingw/) and
+make sure the `ocaml-env` program is accessible on the PATH (`ocaml-env` is in
+the `usr/local/bin` folder relative to the installation directory).
 
 ### Setting up the extension for your project
 
 1. Open your OCaml/ReasonML project (`File > Add Folder to Workspace...`).
 
-2. Configure the extension to use the desired sandbox (usually, OPAM switch or esy
-   sandbox). You can pick it by
+2. Configure the extension to use the desired sandbox (usually, OPAM switch or
+   esy sandbox). You can pick it by
 
    - either calling VSCode command "OCaml: Select a Sandbox for this Workspace"
      (one can do this from VSCode Command Palette - <kbd>Ctrl</kbd>+<kbd>P</kbd>
@@ -74,9 +79,10 @@ folder relative to the installation directory).
 
      ![pick sandbox](./doc/pick_sandbox.png)
 
-   > _What's a sandbox?_ In short, the main purpose of a sandbox is to specify how this
-   > extension should invoke its dependencies such as `ocaml-lsp-server` or `ocamlformat`.
-   > For more information on what a sandbox is, see "Sandbox" subsection.
+   > _What's a sandbox?_ In short, the main purpose of a sandbox is to specify
+   > how this extension should invoke its dependencies such as
+   > `ocaml-lsp-server` or `ocamlformat`. For more information on what a sandbox
+   > is, see "Sandbox" subsection.
 
 3. Build your project with [Dune](https://github.com/ocaml/dune) to get
    go-to-definition, auto-completion, etc.
@@ -144,10 +150,10 @@ esy
 
 ### Sandbox
 
-Sandbox defines environment that the extension sees, for example, to launch `ocamllsp`,
-detect OCaml compiler version, or use `ocamlformat`. 
+Sandbox defines environment that the extension sees, for example, to launch
+`ocamllsp`, detect OCaml compiler version, or use `ocamlformat`.
 
-The extension supports 4 kinds of sandboxes: 
+The extension supports 4 kinds of sandboxes:
 
 1. Global
 
@@ -155,21 +161,23 @@ The extension uses the environment that VS Code was opened in.
 
 2. OPAM Sandbox
 
-The extension uses the environment defined by the OPAM switch that the user picks. Both
-global and local OPAM switches are supported.
+The extension uses the environment defined by the OPAM switch that the user
+picks. Both global and local OPAM switches are supported.
 
 3. Esy Sandbox
 
-The extension uses the environment defined by the Esy sandbox that the user picks.
+The extension uses the environment defined by the Esy sandbox that the user
+picks.
 
 4. Custom
 
-User can define how they would like to run commands using a (templated) command where
-`$prog` and `$args` strings need to be used to denote how to run an extension dependency
-and how arguments can be passed. One can imitate an OPAM sandbox using a custom sandbox by
-passing a command `opam exec --switch=4.13.1 --set-switch -- $prog $args` -- the extension
-can then replace `$prog` with `ocamllsp` and `$args` with arguments it wants to pass to
-`ocamllsp`.
+User can define how they would like to run commands using a (templated) command
+where `$prog` and `$args` strings need to be used to denote how to run an
+extension dependency and how arguments can be passed. One can imitate an OPAM
+sandbox using a custom sandbox by passing a command
+`opam exec --switch=4.13.1 --set-switch -- $prog $args` -- the extension can
+then replace `$prog` with `ocamllsp` and `$args` with arguments it wants to pass
+to `ocamllsp`.
 
 ## Features
 
@@ -354,31 +362,34 @@ the extension).
 
 In case you have a question or problem not listed above:
 
-- if you don't understand how to the extension works or how to make it work correctly,
-  create a new discussion in the repository Discussions
+- if you don't understand how to the extension works or how to make it work
+  correctly, create a new discussion in the repository Discussions
   [tab](https://github.com/ocamllabs/vscode-ocaml-platform/discussions).
 
 - if the extension seems to misbehave:
-  - see [Debugging](#debugging) section to see if you can see any reported errors
+  - see [Debugging](#debugging) section to see if you can see any reported
+    errors
   - file an issue in the repository Issues
     [tab](https://github.com/ocamllabs/vscode-ocaml-platform/issues).
 
-If this section doesn't contain the problem you managed to resolve, and you think this may
-help others, consider adding the problem and its solution here by creating a Pull Request.
+If this section doesn't contain the problem you managed to resolve, and you
+think this may help others, consider adding the problem and its solution here by
+creating a Pull Request.
 
 ## For advanced users
 
-This part of README is only for advanced users, who would like more customization.
+This part of README is only for advanced users, who would like more
+customization.
 
 ### Disable code lens
 
-Code lens are type information displayed over a symbol. In the screenshot below, code lens
-is grey text `t -> Sandbox.t`.
+Code lens are type information displayed over a symbol. In the screenshot below,
+code lens is grey text `t -> Sandbox.t`.
 
- ![how code lens look like in VSCode](./doc/code_lens.png)
+![how code lens look like in VSCode](./doc/code_lens.png)
 
-You can disable code lens for all extensions, i.e., in whole VS Code, set this settings in
-your `settings.json`:
+You can disable code lens for all extensions, i.e., in whole VS Code, set this
+settings in your `settings.json`:
 
 ```json
   "editor.codeLens": false
@@ -392,29 +403,30 @@ Or if you only want to disable it for OCaml:
 }
 ```
 
-You can also search for "code lens" in the VSCode settings tab and there will be a
-checkbox you can untick to disable it:
+You can also search for "code lens" in the VSCode settings tab and there will be
+a checkbox you can untick to disable it:
 
- ![disable code lens in
+![disable code lens in
  VSCode](https://user-images.githubusercontent.com/25037249/102419410-88664900-3fb4-11eb-9770-a2efc73c4a00.png)
 
 (Credit for this answer goes to @mnxn)
 
 ### Enable only syntax highlighting (No type-on-hover, go-to-definition, etc.)
 
-The extension does not offer such functionality because it is rarely necessary. A
-workaround is to _not_ install `ocamllsp`. As a result you will mostly have just syntax
-highlighting for OCaml source files but also a warning notification that `ocamllsp` wasn't
-found. See this [issue](https://github.com/ocamllabs/vscode-ocaml-platform/issues/889),
-feel free to upvote this issue by leaving a thumbs-up reaction. Pull requests are welcome
-as well. 
+The extension does not offer such functionality because it is rarely necessary.
+A workaround is to _not_ install `ocamllsp`. As a result you will mostly have
+just syntax highlighting for OCaml source files but also a warning notification
+that `ocamllsp` wasn't found. See this
+[issue](https://github.com/ocamllabs/vscode-ocaml-platform/issues/889), feel
+free to upvote this issue by leaving a thumbs-up reaction. Pull requests are
+welcome as well.
 
 ### Persisting sandbox information
 
-Sandbox information is persisted in `.vscode/settings.json`. Below we show how this
-settings file's content may look like with different sandbox options.
+Sandbox information is persisted in `.vscode/settings.json`. Below we show how
+this settings file's content may look like with different sandbox options.
 
-1. Global 
+1. Global
 
 ```json
 {
@@ -426,7 +438,7 @@ settings file's content may look like with different sandbox options.
 
 2. OPAM
 
-_Global switch_ 
+_Global switch_
 
 ```json
 {
