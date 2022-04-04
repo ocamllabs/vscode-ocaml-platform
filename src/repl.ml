@@ -80,7 +80,7 @@ let default_repl sandbox =
   let open Promise.Syntax in
   let* has_utop = has_utop sandbox in
   let+ can_build = can_build sandbox in
-  match (has_utop, use_utop, can_build) with
+  match (has_utop, use_utop (), can_build) with
   | true, true, true -> Sandbox.get_command sandbox "dune" [ "utop" ]
   | true, true, false -> Sandbox.get_command sandbox "utop" []
   | _ -> Sandbox.get_command sandbox "ocaml" []
