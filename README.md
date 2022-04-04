@@ -223,7 +223,7 @@ the settings under `File > Preferences > Settings`.
 | `ocaml.terminal.shellArgs.windows` | The command line arguments that the sandbox terminal uses on Window                                     | `null`  |
 | `ocaml.repl.path`                  | The path of the REPL that the extension uses                                                            | `null`  |
 | `ocaml.repl.args`                  | The REPL arguments that the extension uses                                                              | `null`  |
-| `ocaml.repl.useUtop`               | Controls whether to use utop in REPL if it is installed on the current switch.                          | `true`  |
+| `ocaml.repl.useUtop`               | Controls whether to use Utop for the REPL if it is installed in the current switch.                     | `true`  |
 
 If `ocaml.terminal.shell.*` or `ocaml.terminal.shellArgs.*` is `null`, the
 configured VSCode shell and shell arguments will be used instead.

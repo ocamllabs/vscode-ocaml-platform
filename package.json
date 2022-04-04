@@ -557,7 +557,7 @@
         "ocaml.repl.useUtop": {
           "type": "boolean",
           "default": true,
-          "description": "Controls whether to use utop in REPL if it is installed on the current switch."
+          "description": "Controls whether to use Utop for the REPL if it is installed in the current switch."
         }
       }
     },
