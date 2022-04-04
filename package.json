@@ -558,7 +558,7 @@
           "type": "boolean",
           "default": true,
           "description": "Allow the usage of utop in REPL if it is installed on the current switch."
-        },
+        }
       }
     },
     "configurationDefaults": {
