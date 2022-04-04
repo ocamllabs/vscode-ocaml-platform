@@ -20,7 +20,10 @@ let ocaml_utop_setting =
   Settings.create_setting ~scope:Global ~key:"ocaml.useUtop"
     ~of_json:Jsonoo.Decode.bool ~to_json:Jsonoo.Encode.bool
 
-let use_utop () = Settings.get ocaml_utop_setting
+let use_utop () = 
+  match (Settings.get ocaml_utop_setting) with
+  | Some x -> x
+  | None -> true
 
 module Repl_args = struct
   type t = string list option
