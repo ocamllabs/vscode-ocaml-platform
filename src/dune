@@ -7,4 +7,4 @@
    ppx_tools)
  (modes js)
  (js_of_ocaml
-  (flags --source-map --pretty)))
+  (flags --source-map)))

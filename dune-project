@@ -1,4 +1,4 @@
-(lang dune 2.7)
+(lang dune 3.0)
 
 (name vscode-ocaml-platform)
 
@@ -24,15 +24,17 @@
 (package
  (name vscode-ocaml-platform)
  (synopsis "Visual Studio Code extension for OCaml")
+ (allow_empty) ; without this line, dune complains "The package vscode-ocaml-platform does not have any user defined
+               ; stanzas attached to it.""
  (depends
   (vscode
    (= :version))
   (ocaml
    (>= 4.11))
   (js_of_ocaml
-   (>= 3.9.0))
+   (>= 4.0.0))
   (gen_js_api
-   (= 1.0.8))
+   (>= 1.1.0))
   (base
    (>= v0.14.1))
   (promise_jsoo
@@ -53,9 +55,9 @@
   (ocaml
    (>= 4.11))
   (js_of_ocaml
-   (>= 3.9.0))
+   (>= 4.0.0))
   (gen_js_api
-   (= 1.0.8))
+   (>= 1.1.0))
   (promise_jsoo
    (>= 0.3.1))
   (jsonoo
