@@ -1100,6 +1100,14 @@ module ExtensionTerminalOptions : sig
   val create : name:string -> pty:Pseudoterminal.t -> t
 end
 
+module Extension : sig
+  include Js.T
+end
+
+module Extensions : sig
+  val getExtension : string -> Extension.t or_undefined
+end
+
 module TerminalExitStatus : sig
   include Js.T
 
@@ -1789,6 +1797,17 @@ module Workspace : sig
 
   val registerTextDocumentContentProvider :
     scheme:string -> provider:TextDocumentContentProvider.t -> Disposable.t
+
+  type workspaceFolderToAdd =
+    { name : string
+    ; uri : Uri.t
+    }
+
+  val updateWorkspaceFolders :
+       start:int
+    -> deleteCount:int or_undefined
+    -> workspaceFoldersToAdd:(workspaceFolderToAdd list[@js.variadic])
+    -> bool
 end
 
 module TreeItemCollapsibleState : sig

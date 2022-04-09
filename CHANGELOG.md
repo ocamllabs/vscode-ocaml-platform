@@ -1,5 +1,16 @@
 # Change Log
 
+## Unreleased
+
+- Fix external syntax highlighting for embedded ocaml source in comments (#906)
+- Add `ocaml.repl.useUtop` setting to control whether to use Utop for the REPL
+  (#911)
+
+## 1.10.0
+
+- Add the possibility to generate and show the documentation of an installed
+  package right into VSCode. (#771)
+
 ## 1.9.5
 
 - Fix automatic closing of files without an extension (#887)

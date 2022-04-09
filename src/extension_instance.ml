@@ -7,6 +7,8 @@ type t =
         (** assumption: it must be set before initializing the language server;
             the lang server initialization needs the ocaml version *)
   ; mutable lsp_client : (LanguageClient.t * Ocaml_lsp.t) option
+  ; mutable documentation_server : Documentation_server.t option
+  ; documentation_server_info : StatusBarItem.t
   ; sandbox_info : StatusBarItem.t
   ; ast_editor_state : Ast_editor_state.t
   }
@@ -126,6 +128,21 @@ end
 
 include Language_server_init
 
+let documentation_server_info () =
+  let status_bar =
+    Vscode.Window.createStatusBarItem ~alignment:StatusBarAlignment.Right
+      ~priority:100 ()
+  in
+  let command =
+    Command.create ~title:"Open Command Palette"
+      ~command:"workbench.action.quickOpen"
+      ~arguments:[ Ojs.string_to_js ">OCaml: Stop Documentation server" ]
+      ()
+  in
+  StatusBarItem.set_command status_bar (`Command command);
+  StatusBarItem.set_text status_bar "$(radio-tower) OCaml Documentation";
+  status_bar
+
 module Sandbox_info : sig
   val make : Sandbox.t -> StatusBarItem.t
 
@@ -153,18 +170,39 @@ end
 let make () =
   let sandbox = Sandbox.Global in
   let sandbox_info = Sandbox_info.make sandbox in
+  let documentation_server_info = documentation_server_info () in
   let ast_editor_state = Ast_editor_state.make () in
   { sandbox
   ; lsp_client = None
   ; sandbox_info
+  ; documentation_server_info
   ; repl = None
   ; ocaml_version = None
   ; ast_editor_state
+  ; documentation_server = None
   }
+
+let set_documentation_context ~running =
+  let document_server_on = "ocaml.documentation-server-on" in
+  let (_ : Ojs.t option Promise.t) =
+    Vscode.Commands.executeCommand ~command:"setContext"
+      ~args:[ Ojs.string_to_js document_server_on; Ojs.bool_to_js running ]
+  in
+  ()
+
+let stop_documentation_server t =
+  match t.documentation_server with
+  | None -> ()
+  | Some server ->
+    StatusBarItem.hide t.documentation_server_info;
+    t.documentation_server <- None;
+    Documentation_server.dispose server |> Disposable.dispose;
+    set_documentation_context ~running:false
 
 let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
   t.sandbox <- new_sandbox;
+  stop_documentation_server t;
   let (_ : Ojs.t option Promise.t) =
     Vscode.Commands.executeCommand
       ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
@@ -173,6 +211,30 @@ let set_sandbox t new_sandbox =
       ~command:Extension_consts.Commands.refresh_switches ~args:[]
   in
   ()
+
+let start_documentation_server t ~path =
+  match
+    match t.documentation_server with
+    | None -> `Create
+    | Some ds ->
+      if Path.equal (Documentation_server.path ds) path then `Keep ds
+      else `Create
+  with
+  | `Keep ds -> Promise.return (Ok ds)
+  | `Create -> (
+    stop_documentation_server t;
+    let open Promise.Syntax in
+    let+ server = Documentation_server.start ~path in
+    match server with
+    | Ok server ->
+      StatusBarItem.show t.documentation_server_info;
+      t.documentation_server <- Some server;
+      set_documentation_context ~running:true;
+      Ok server
+    | Error e ->
+      log "Error while starting the documentation server: %s"
+        (Node.JsError.message e);
+      Error ())
 
 let repl t = t.repl
 
@@ -240,4 +302,6 @@ let ast_editor_state t = t.ast_editor_state
 let disposable t =
   Disposable.make ~dispose:(fun () ->
       StatusBarItem.dispose t.sandbox_info;
-      stop_server t)
+      StatusBarItem.dispose t.documentation_server_info;
+      stop_server t;
+      stop_documentation_server t)

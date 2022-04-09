@@ -3,7 +3,7 @@
   "displayName": "OCaml Platform",
   "description": "Official OCaml language extension for VSCode",
   "license": "MIT",
-  "version": "1.9.5",
+  "version": "1.10.0",
   "publisher": "ocamllabs",
   "repository": {
     "type": "git",
@@ -15,7 +15,7 @@
   "homepage": "https://github.com/ocamllabs/vscode-ocaml-platform",
   "main": "./dist/vscode_ocaml_platform.bc.js",
   "engines": {
-    "vscode": "^1.57.0"
+    "vscode": "^1.64.0"
   },
   "categories": [
     "Programming Languages"
@@ -36,6 +36,7 @@
     "onCommand:ocaml.open-ast-explorer-to-the-side",
     "onCommand:ocaml.show-preprocessed-document",
     "onCommand:ocaml.open-pp-editor-and-ast-explorer",
+    "onCommand:ocaml.stop-documentation-server",
     "onCustomEditor:ast-editor",
     "onCustomEditor:cm-files-editor",
     "workspaceContains:**/dune-workspace",
@@ -185,6 +186,15 @@
         }
       },
       {
+        "command": "ocaml.generate-sandbox-documentation",
+        "category": "OCaml",
+        "title": "Generate Documentation",
+        "icon": {
+          "light": "assets/book-open-light.svg",
+          "dark": "assets/book-open-dark.svg"
+        }
+      },
+      {
         "command": "ocaml.open-sandbox-documentation",
         "category": "OCaml",
         "title": "Open Documentation",
@@ -192,6 +202,11 @@
           "light": "assets/document-search-light.svg",
           "dark": "assets/document-search-dark.svg"
         }
+      },
+      {
+        "command": "ocaml.stop-documentation-server",
+        "category": "OCaml",
+        "title": "Stop Documentation Server"
       },
       {
         "command": "ocaml.next-hole",
@@ -358,6 +373,10 @@
           "when": "false"
         },
         {
+          "command": "ocaml.stop-documentation-server",
+          "when": "ocaml.documentation-server-on"
+        },
+        {
           "command": "ocaml.upgrade-sandbox",
           "when": "false"
         },
@@ -371,6 +390,10 @@
         },
         {
           "command": "ocaml.open-sandbox-documentation",
+          "when": "false"
+        },
+        {
+          "command": "ocaml.generate-sandbox-documentation",
           "when": "false"
         }
       ],
@@ -423,6 +446,11 @@
         {
           "command": "ocaml.open-sandbox-documentation",
           "when": "view == ocaml-sandbox && viewItem == package-with-doc",
+          "group": "inline"
+        },
+        {
+          "command": "ocaml.generate-sandbox-documentation",
+          "when": "view == ocaml-sandbox",
           "group": "inline"
         }
       ]
@@ -530,6 +558,11 @@
           ],
           "items": "string",
           "default": null
+        },
+        "ocaml.repl.useUtop": {
+          "type": "boolean",
+          "default": true,
+          "description": "Controls whether to use Utop for the REPL if it is installed in the current switch."
         }
       }
     },
@@ -1000,17 +1033,19 @@
     "fmt": "prettier . --write"
   },
   "dependencies": {
+    "polka": "^1.0.0-next.22",
+    "sirv": "^2.0.2",
     "vscode-languageclient": "7.0.0"
   },
   "devDependencies": {
-    "@types/vscode": "1.57.0",
-    "esbuild": "0.14.23",
+    "@types/vscode": "1.64.0",
+    "esbuild": "0.14.27",
     "fs-extra": "10.0.1",
-    "mocha": "9.2.1",
+    "mocha": "9.2.2",
     "npm-run-all": "4.1.5",
     "ovsx": "0.1.0-next.97d460c",
     "prettier": "2.5.1",
-    "vsce": "2.6.7",
+    "vsce": "2.7.0",
     "vscode-test": "1.6.1"
   },
   "prettier": {

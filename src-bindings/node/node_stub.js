@@ -12,3 +12,5 @@ joo_global_object.child_process = require("child_process");
 joo_global_object.path = require("path");
 
 joo_global_object.os = require("os");
+
+joo_global_object.net = require("net");
