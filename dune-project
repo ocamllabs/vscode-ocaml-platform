@@ -24,8 +24,9 @@
 (package
  (name vscode-ocaml-platform)
  (synopsis "Visual Studio Code extension for OCaml")
- (allow_empty) ; without this line, dune complains "The package vscode-ocaml-platform does not have any user defined
-               ; stanzas attached to it.""
+ (allow_empty) ; without this line, dune complains "The package 
+               ; vscode-ocaml-platform does not have any user defined stanzas 
+               ; attached to it."
  (depends
   (vscode
    (= :version))
