@@ -44,7 +44,7 @@
   (ocaml-version
    (>= 3.4.0))
   (ppxlib
-   (>= 0.23.0))
+   (>= 0.26.0))
   (opam-file-format
    (>= 2.1.2))))
 
