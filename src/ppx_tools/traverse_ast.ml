@@ -177,6 +177,13 @@ class virtual ['res] lift =
 
     method attributes : attributes -> 'res = self#list self#attribute
 
+    method str_loc_lst : string loc list -> 'res =
+      fun lst -> self#list (self#loc self#string) lst
+
+    method existentials = self#str_loc_lst
+
+    method type_vars = self#str_loc_lst
+
     method payload : payload -> 'res =
       fun x ->
         match x with
@@ -358,9 +365,15 @@ class virtual ['res] lift =
           self#constr "Ppat_tuple" [ ("pattern list", a) ]
         | Ppat_construct (a, b) ->
           let a = self#longident_loc a in
-          let b = self#option self#pattern b in
-          self#constr "Ppat_construct"
-            [ ("longident_loc", a); ("pattern option", b) ]
+          let b =
+            self#option
+              (fun (existentials, patt) ->
+                let existentials = self#existentials existentials in
+                let patt = self#pattern patt in
+                self#tuple [ ("existentials", existentials); ("pattern", patt) ])
+              b
+          in
+          self#constr "Ppat_construct" [ ("longident_loc", a); ("args", b) ]
         | Ppat_variant (a, b) ->
           let a = self#label a in
           let b = self#option self#pattern b in
@@ -732,14 +745,16 @@ class virtual ['res] lift =
           ]
 
     method constructor_declaration : constructor_declaration -> 'res =
-      fun { pcd_name; pcd_args; pcd_res; pcd_loc; pcd_attributes } ->
+      fun { pcd_name; pcd_vars; pcd_args; pcd_res; pcd_loc; pcd_attributes } ->
         let pcd_name = self#loc self#string pcd_name in
+        let pcd_vars = self#type_vars pcd_vars in
         let pcd_args = self#constructor_arguments pcd_args in
         let pcd_res = self#option self#core_type pcd_res in
         let pcd_loc = self#location pcd_loc in
         let pcd_attributes = self#attributes pcd_attributes in
         self#record "constructor_declaration"
           [ ("pcd_name", pcd_name)
+          ; ("pcd_vars", pcd_vars)
           ; ("pcd_args", pcd_args)
           ; ("pcd_res", pcd_res)
           ; ("pcd_loc", pcd_loc)
@@ -823,11 +838,15 @@ class virtual ['res] lift =
     method extension_constructor_kind : extension_constructor_kind -> 'res =
       fun x ->
         match x with
-        | Pext_decl (a, b) ->
-          let a = self#constructor_arguments a in
-          let b = self#option self#core_type b in
+        | Pext_decl (existentials, c_args, t_opt) ->
+          let existentials = self#existentials existentials in
+          let c_args = self#constructor_arguments c_args in
+          let t_opt = self#option self#core_type t_opt in
           self#constr "Pext_decl"
-            [ ("constructor_arguments", a); ("core_type option", b) ]
+            [ ("existentials", existentials)
+            ; ("constructor_arguments", c_args)
+            ; ("core_type option", t_opt)
+            ]
         | Pext_rebind a ->
           let a = self#longident_loc a in
           self#constr "Pext_rebind" [ ("longident_loc", a) ]
@@ -1222,6 +1241,9 @@ class virtual ['res] lift =
         | Psig_modtype a ->
           let a = self#module_type_declaration a in
           self#constr "Psig_modtype" [ ("module_type_declaration", a) ]
+        | Psig_modtypesubst a ->
+          let a = self#module_type_declaration a in
+          self#constr "Psig_modtypesubstr" [ ("module_type_declaration", a) ]
         | Psig_open a ->
           let a = self#open_description a in
           self#constr "Psig_open" [ ("open_description", a) ]
@@ -1330,6 +1352,16 @@ class virtual ['res] lift =
           let b = self#longident_loc b in
           self#constr "Pwith_module"
             [ ("longident_loc1", a); ("longident_loc2", b) ]
+        | Pwith_modtype (a, b) ->
+          let a = self#longident_loc a in
+          let b = self#module_type b in
+          self#constr "Pwith_modtype"
+            [ ("longident_loc", a); ("module_type", b) ]
+        | Pwith_modtypesubst (a, b) ->
+          let a = self#longident_loc a in
+          let b = self#module_type b in
+          self#constr "Pwith_modtypesubstr"
+            [ ("longident_loc", a); ("module_type", b) ]
         | Pwith_typesubst (a, b) ->
           let a = self#longident_loc a in
           let b = self#type_declaration b in

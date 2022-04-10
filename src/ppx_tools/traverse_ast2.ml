@@ -260,6 +260,14 @@ class virtual ['res] lift2 =
     method attributes : attributes -> attributes -> ('res, string) result =
       self#list self#attribute
 
+    method str_loc_lst
+        : string loc list -> string loc list -> ('res, string) result =
+      fun lst -> self#list (self#loc self#string) lst
+
+    method existentials = self#str_loc_lst
+
+    method type_vars = self#str_loc_lst
+
     method payload : payload -> payload -> ('res, string) result =
       fun x x' ->
         match (x, x') with
@@ -477,7 +485,16 @@ class virtual ['res] lift2 =
           self#constr "Ppat_tuple" [ ("pattern list", a) ]
         | Ppat_construct (a, b), Ppat_construct (a', b') ->
           let a = self#longident_loc a a' in
-          let b = self#option self#pattern b b' in
+          let b =
+            self#option
+              (fun (existentials, patt) (existentials', patt') ->
+                let existentials =
+                  self#existentials existentials existentials'
+                in
+                let patt = self#pattern patt patt' in
+                self#tuple [ ("existentials", existentials); ("pattern", patt) ])
+              b b'
+          in
           self#constr "Ppat_construct"
             [ ("longident_loc", a); ("pattern option", b) ]
         | Ppat_variant (a, b), Ppat_variant (a', b') ->
@@ -1045,20 +1062,23 @@ class virtual ['res] lift2 =
         :    constructor_declaration
           -> constructor_declaration
           -> ('res, string) result =
-      fun { pcd_name; pcd_args; pcd_res; pcd_loc; pcd_attributes }
+      fun { pcd_name; pcd_vars; pcd_args; pcd_res; pcd_loc; pcd_attributes }
           { pcd_name = pcd_name'
+          ; pcd_vars = pcd_vars'
           ; pcd_args = pcd_args'
           ; pcd_res = pcd_res'
           ; pcd_loc = pcd_loc'
           ; pcd_attributes = pcd_attributes'
           } ->
         let pcd_name = self#loc self#string pcd_name pcd_name' in
+        let pcd_vars = self#type_vars pcd_vars pcd_vars' in
         let pcd_args = self#constructor_arguments pcd_args pcd_args' in
         let pcd_res = self#option self#core_type pcd_res pcd_res' in
         let pcd_loc = self#location pcd_loc pcd_loc' in
         let pcd_attributes = self#attributes pcd_attributes pcd_attributes' in
         self#record "constructor_declaration"
           [ ("pcd_name", pcd_name)
+          ; ("pcd_vars", pcd_vars)
           ; ("pcd_args", pcd_args)
           ; ("pcd_res", pcd_res)
           ; ("pcd_loc", pcd_loc)
@@ -1178,11 +1198,16 @@ class virtual ['res] lift2 =
           -> ('res, string) result =
       fun x x' ->
         match (x, x') with
-        | Pext_decl (a, b), Pext_decl (a', b') ->
-          let a = self#constructor_arguments a a' in
-          let b = self#option self#core_type b b' in
+        | ( Pext_decl (existentials, c_args, t_opt)
+          , Pext_decl (existentials', c_args', t_opt') ) ->
+          let existentials = self#existentials existentials existentials' in
+          let c_args = self#constructor_arguments c_args c_args' in
+          let t_opt = self#option self#core_type t_opt t_opt' in
           self#constr "Pext_decl"
-            [ ("constructor_arguments", a); ("core_type option", b) ]
+            [ ("existentials", existentials)
+            ; ("constructor_arguments", c_args)
+            ; ("core_type option", t_opt)
+            ]
         | Pext_rebind a, Pext_rebind a' ->
           let a = self#longident_loc a a' in
           self#constr "Pext_rebind" [ ("longident_loc", a) ]
