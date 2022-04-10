@@ -27,8 +27,12 @@
  (depends
   (vscode
    (= :version))
+  (dune
+   (< 3.0.0))
   (ocaml
-   (>= 4.11))
+   (and
+    (>= 4.11)
+    (< 4.14.0)))
   (js_of_ocaml
    (>= 3.9.0))
   (gen_js_api
