@@ -138,7 +138,10 @@ let get_code text_editor =
   in
   let end_char = Vscode.Selection.end_ selection |> Vscode.Position.character in
   let document = Vscode.TextEditor.document text_editor in
-  let () = show_message `Error "uri : %s" (Vscode.Uri.path (Vscode.TextDocument.uri document)) in
+  let () =
+    show_message `Error "uri : %s"
+      (Vscode.Uri.path (Vscode.TextDocument.uri document))
+  in
   if start_line = end_line && start_char = end_char then
     let line = Vscode.TextDocument.lineAt document ~line:start_line in
     Vscode.TextLine.text line
@@ -146,9 +149,7 @@ let get_code text_editor =
     Vscode.TextDocument.getText document ~range:(selection :> Vscode.Range.t) ()
 
 let get_uri text_editor =
-  text_editor 
-  |> Vscode.TextEditor.document
-  |> Vscode.TextDocument.uri
+  text_editor |> Vscode.TextEditor.document |> Vscode.TextDocument.uri
   |> Vscode.Uri.path
 
 let prepare_code code =
@@ -190,6 +191,7 @@ module Command = struct
     in
     Extension_commands.register_text_editor
       ~id:Extension_consts.Commands.evaluate_selection handler
+
   let _evaluate_file =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
       let (_ : unit Promise.t) =
