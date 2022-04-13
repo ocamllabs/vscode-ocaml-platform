@@ -29,10 +29,18 @@
   },
   "onEnterRules": [
     {
+      "beforeText": "\\(\\*\\*",
+      "action": { 
+        "indent": "none",
+        "appendText": "    "
+      }
+    },
+    {
       "beforeText": "\\(\\*",
       "action": { 
         "indent": "none",
-        "appendText": "   "}
+        "appendText": "   "
+      }
     }
   ]
 }
