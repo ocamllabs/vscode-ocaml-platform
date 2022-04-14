@@ -46,14 +46,7 @@
       "beforeText": "\\*\\)",
       "action": {
         "indent": "outdent",
-        "removeText": 3
-      }
-    },
-    {
-      "beforeText": "\\*\\*\\)",
-      "action": {
-        "indent": "outdent",
-        "removeText": 4
+        "removeText": 2
       }
     }
   ]
