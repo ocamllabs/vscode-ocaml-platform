@@ -5,8 +5,8 @@
 - Fix external syntax highlighting for embedded ocaml source in comments (#906)
 - Add `ocaml.repl.useUtop` setting to control whether to use Utop for the REPL
   (#911)
-- Fix the indentation values for simple comments and documentation comments
-  (#182)
+- Add indentation rules for comments
+  (#928)
 
 ## 1.10.0
 
