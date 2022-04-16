@@ -1,8 +1,9 @@
 # Change Log
 
-## Unreleased
+## 1.10.1
 
 - Fix external syntax highlighting for embedded ocaml source in comments (#906)
+
 - Add `ocaml.repl.useUtop` setting to control whether to use Utop for the REPL
   (#911)
 
