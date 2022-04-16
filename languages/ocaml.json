@@ -29,21 +29,21 @@
   },
   "onEnterRules": [
     {
-      "beforeText": "\\(\\*\\*",
+      "beforeText": "\\(\\*\\*(?!.*\\*\\))",
       "action": {
         "indent": "none",
         "appendText": "    "
       }
     },
     {
-      "beforeText": "\\(\\*",
+      "beforeText": "\\(\\*(?!.*\\*\\))",
       "action": {
         "indent": "none",
         "appendText": "   "
       }
     },
     {
-      "beforeText": "\\*\\)",
+      "beforeText": "(?<!\\(\\*.*)\\*\\)",
       "action": {
         "indent": "outdent",
         "removeText": 2
