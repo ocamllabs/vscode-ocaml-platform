@@ -185,13 +185,13 @@ module Command = struct
           let code = get_code textEditor in
           if String.length code > 0 then
             let code = prepare_code code in
-            Terminal_sandbox.send ~preserveFocus:true term code
+            Terminal_sandbox.send term code
       in
       ()
     in
     Extension_commands.register_text_editor
       ~id:Extension_consts.Commands.evaluate_selection handler
-    
+
   let _evaluate_file =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
       let (_ : unit Promise.t) =
@@ -203,7 +203,7 @@ module Command = struct
         | Ok term ->
           let uri = get_uri textEditor in
           let use = "#use \"" ^ uri ^ "\";;" in
-          Terminal_sandbox.send ~preserveFocus:true term use
+          Terminal_sandbox.send term use
       in
       ()
     in
