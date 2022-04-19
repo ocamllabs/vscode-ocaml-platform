@@ -6,6 +6,7 @@
 
 - Add `ocaml.repl.useUtop` setting to control whether to use Utop for the REPL
   (#911)
+- Add indentation rules for comments (#928)
 
 ## 1.10.0
 
