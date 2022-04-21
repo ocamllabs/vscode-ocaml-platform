@@ -91,7 +91,7 @@ let default_repl sandbox =
 let create_terminal instance sandbox =
   match Extension_instance.repl instance with
   | Some term ->
-    Terminal_sandbox.show term;
+    Terminal_sandbox.show ~preserveFocus:true term;
     Promise.return (Ok term)
   | None -> (
     let open Promise.Syntax in
@@ -110,7 +110,7 @@ let create_terminal instance sandbox =
         (Error "Running a REPL from a Shell command is not supported")
     | Ok (Spawn cmd) -> (
       let term = Terminal_sandbox.create ~name ~command:cmd sandbox in
-      Terminal_sandbox.show term;
+      Terminal_sandbox.show ~preserveFocus:true term;
       (* Wait for UTop or OCaml REPL to be initialized before sending text to
          the terminal.
 
@@ -191,7 +191,7 @@ module Command = struct
     in
     Extension_commands.register_text_editor
       ~id:Extension_consts.Commands.evaluate_selection handler
-
+    
   let _evaluate_file =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
       let (_ : unit Promise.t) =
