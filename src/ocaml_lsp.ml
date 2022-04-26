@@ -29,8 +29,7 @@ module Experimental_capabilities = struct
       let handleSwitchImplIntf = has_capability "handleSwitchImplIntf" in
       let handleInferIntf = has_capability "handleInferIntf" in
       let handleTypedHoles = has_capability "handleTypedHoles" in
-      let handleWrappingAstNode = has_capability "handleWrappingAstNode"
-      in
+      let handleWrappingAstNode = has_capability "handleWrappingAstNode" in
       { interfaceSpecificLangId
       ; handleSwitchImplIntf
       ; handleInferIntf
@@ -165,4 +164,5 @@ let can_handle_infer_intf t = t.experimental_capabilities.handleSwitchImplIntf
 
 let can_handle_typed_holes t = t.experimental_capabilities.handleTypedHoles
 
-let can_handle_wrapping_ast_node t = t.experimental_capabilities.handleWrappingAstNode
+let can_handle_wrapping_ast_node t =
+  t.experimental_capabilities.handleWrappingAstNode

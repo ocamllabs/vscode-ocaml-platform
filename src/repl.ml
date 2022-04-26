@@ -132,8 +132,7 @@ let create_terminal instance sandbox =
 let get_code_selection text_editor =
   let selection = TextEditor.selection text_editor in
   let document = TextEditor.document text_editor in
-  if Selection.isEmpty selection then
-    None
+  if Selection.isEmpty selection then None
   else
     let selected_text =
       TextDocument.getText document ~range:(selection :> Range.t) ()
@@ -144,14 +143,13 @@ let get_uri text_editor =
   text_editor |> Vscode.TextEditor.document |> Vscode.TextDocument.uri
   |> Vscode.Uri.path
 
-  let preformat_code code =
-    let is_repl_ready s = String.is_suffix s ~suffix:";;" in
-    let trimmed_code = String.strip code in
-    if is_repl_ready code then
-      (* newline is for nicer look in REPL *)
-      "\n" ^ trimmed_code
-    else
-      Printf.sprintf "\n%s\n;;" trimmed_code
+let preformat_code code =
+  let is_repl_ready s = String.is_suffix s ~suffix:";;" in
+  let trimmed_code = String.strip code in
+  if is_repl_ready code then
+    (* newline is for nicer look in REPL *)
+    "\n" ^ trimmed_code
+  else Printf.sprintf "\n%s\n;;" trimmed_code
 
 module Command = struct
   let _open_repl =
@@ -178,9 +176,10 @@ module Command = struct
         let sandbox = Extension_instance.sandbox instance in
         let+ term = create_terminal instance sandbox in
         match term with
-        | Error err -> show_message `Error "Could not start the REPL: %s" err;
+        | Error err ->
+          show_message `Error "Could not start the REPL: %s" err;
           Promise.return ()
-        | Ok term ->
+        | Ok term -> (
           let code = get_code_selection textEditor in
           match code with
           | Some code ->
@@ -195,8 +194,8 @@ module Command = struct
               Promise.return ()
             | Some (_, ocaml_lsp)
               when not (Ocaml_lsp.can_handle_wrapping_ast_node ocaml_lsp) ->
-                Promise.return ()
-            | Some (client, _) ->
+              Promise.return ()
+            | Some (client, _) -> (
               let doc = TextEditor.document textEditor in
               let uri = TextDocument.uri doc in
               let position =
@@ -211,7 +210,7 @@ module Command = struct
               | None -> ()
               | Some range ->
                 let code = TextDocument.getText doc ~range () in
-                Terminal_sandbox.send term (preformat_code code))
+                Terminal_sandbox.send term (preformat_code code))))
       in
       ()
     in

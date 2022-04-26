@@ -21,12 +21,12 @@ val inferIntf : (string, string) custom_request
 
 val typedHoles : (Uri.t, Range.t list) custom_request
 
-module Wrapping_ast_node : sig 
+module Wrapping_ast_node : sig
   (** [send_request client ~for_doc] will fetch ranges of holes in the file at
       the URI [for_doc] *)
-      val send_request :
-      LanguageClient.t
-  -> doc:Uri.t
-  -> position:Position.t
-  -> Range.t option Promise.t
-end 
+  val send_request :
+       LanguageClient.t
+    -> doc:Uri.t
+    -> position:Position.t
+    -> Range.t option Promise.t
+end
