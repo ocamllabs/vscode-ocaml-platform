@@ -173,19 +173,45 @@ module Command = struct
 
   let _evaluate_selection =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
-      let (_ : unit Promise.t) =
+      let (_ : unit Promise.t Promise.t) =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
         let+ term = create_terminal instance sandbox in
         match term with
-        | Error err -> show_message `Error "Could not start the REPL: %s" err
+        | Error err -> show_message `Error "Could not start the REPL: %s" err;
+          Promise.return ()
         | Ok term ->
           let code = get_code_selection textEditor in
           match code with
           | Some code ->
             let code = preformat_code code in
-            Terminal_sandbox.send term code
-          | None -> ()
+            Terminal_sandbox.send term code;
+            Promise.return ()
+          | None -> (
+            let open Promise.Syntax in
+            match Extension_instance.lsp_client instance with
+            | None ->
+              show_message `Warn "ocamllsp is not running.";
+              Promise.return ()
+            | Some (_, ocaml_lsp)
+              when not (Ocaml_lsp.can_handle_wrapping_ast_node ocaml_lsp) ->
+                Promise.return ()
+            | Some (client, _) ->
+              let doc = TextEditor.document textEditor in
+              let uri = TextDocument.uri doc in
+              let position =
+                let selection = TextEditor.selection textEditor in
+                Selection.start selection
+              in
+              let+ range =
+                Custom_requests.Wrapping_ast_node.send_request client ~doc:uri
+                  ~position
+              in
+              match range with
+              | None -> ()
+              | Some range ->
+                let code = TextDocument.getText doc ~range () in
+                Terminal_sandbox.send term (preformat_code code))
       in
       ()
     in
