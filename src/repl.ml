@@ -191,7 +191,7 @@ module Command = struct
     in
     Extension_commands.register_text_editor
       ~id:Extension_consts.Commands.evaluate_selection handler
-    
+
   let _evaluate_file =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
       let (_ : unit Promise.t) =
