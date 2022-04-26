@@ -144,8 +144,14 @@ let get_uri text_editor =
   text_editor |> Vscode.TextEditor.document |> Vscode.TextDocument.uri
   |> Vscode.Uri.path
 
-let prepare_code code =
-  if String.is_suffix code ~suffix:";;" then code else code ^ ";;"
+  let preformat_code code =
+    let is_repl_ready s = String.is_suffix s ~suffix:";;" in
+    let trimmed_code = String.strip code in
+    if is_repl_ready code then
+      (* newline is for nicer look in REPL *)
+      "\n" ^ trimmed_code
+    else
+      Printf.sprintf "\n%s\n;;" trimmed_code
 
 module Command = struct
   let _open_repl =
@@ -177,7 +183,7 @@ module Command = struct
           let code = get_code_selection textEditor in
           match code with
           | Some code ->
-            let code = prepare_code code in
+            let code = preformat_code code in
             Terminal_sandbox.send term code
           | None -> ()
       in
