@@ -30,6 +30,7 @@
   "onEnterRules": [
     {
       "beforeText": "\\(\\*\\*",
+      "afterText": "\\*\\)",
       "action": {
         "indent": "none",
         "appendText": "    "
@@ -37,6 +38,7 @@
     },
     {
       "beforeText": "\\(\\*",
+      "afterText": "\\*\\)",
       "action": {
         "indent": "none",
         "appendText": "   "

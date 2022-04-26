@@ -1,7 +1,7 @@
 # upgrading the version, don't forget to update ocamlformat version for `deps` target in `Makefile` 
 version=0.21.0
 profile=conventional
-ocaml-version=4.13.1
+ocaml-version=4.14.0
 break-separators=before
 dock-collection-brackets=false
 break-sequences=true
