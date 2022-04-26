@@ -130,23 +130,15 @@ let create_terminal instance sandbox =
         Ok term))
 
 let get_code_selection text_editor =
-  let selection = Vscode.TextEditor.selection text_editor in
-  let start_line = Vscode.Selection.start selection |> Vscode.Position.line in
-  let end_line = Vscode.Selection.end_ selection |> Vscode.Position.line in
-  let start_char =
-    Vscode.Selection.start selection |> Vscode.Position.character
-  in
-  let end_char = Vscode.Selection.end_ selection |> Vscode.Position.character in
-  let document = Vscode.TextEditor.document text_editor in
-  let () =
-    show_message `Error "uri : %s"
-      (Vscode.Uri.path (Vscode.TextDocument.uri document))
-  in
-  if start_line = end_line && start_char = end_char then
-    let line = Vscode.TextDocument.lineAt document ~line:start_line in
-    Vscode.TextLine.text line
+  let selection = TextEditor.selection text_editor in
+  let document = TextEditor.document text_editor in
+  if Selection.isEmpty selection then
+    None
   else
-    Vscode.TextDocument.getText document ~range:(selection :> Vscode.Range.t) ()
+    let selected_text =
+      TextDocument.getText document ~range:(selection :> Range.t) ()
+    in
+    Some selected_text
 
 let get_uri text_editor =
   text_editor |> Vscode.TextEditor.document |> Vscode.TextDocument.uri
@@ -183,9 +175,11 @@ module Command = struct
         | Error err -> show_message `Error "Could not start the REPL: %s" err
         | Ok term ->
           let code = get_code_selection textEditor in
-          if String.length code > 0 then
+          match code with
+          | Some code ->
             let code = prepare_code code in
             Terminal_sandbox.send term code
+          | None -> ()
       in
       ()
     in
