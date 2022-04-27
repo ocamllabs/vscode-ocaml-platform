@@ -30,7 +30,7 @@
    (= :version))
   (ocaml
    (and
-    (>= 4.11)
+    (>= 4.13)
     (< 4.15.0)))
   (js_of_ocaml
    (>= 3.9.0))
@@ -54,7 +54,7 @@
  (synopsis "Visual Studio Code Bindings")
  (depends
   (ocaml
-   (>= 4.11))
+   (>= 4.13))
   (js_of_ocaml
    (>= 3.9.0))
   (gen_js_api
