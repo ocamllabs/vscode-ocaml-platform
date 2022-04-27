@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Add `[||]` to auto auto closing pairs (#946)
+
 ## 1.10.2
 
 - Add indentation rules for comments (#928)
