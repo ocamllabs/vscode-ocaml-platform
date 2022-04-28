@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Add `[||]` to auto auto closing pairs (#946)
+- Add arrays to auto closing pairs (#946)
 
 ## 1.10.2
 
