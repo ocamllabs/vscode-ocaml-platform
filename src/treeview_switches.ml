@@ -58,19 +58,26 @@ module Dependency = struct
         ; dark = `String (Path.asset "number-dark.svg" |> Path.to_string)
         }
 
-  let collapsible_state = function
-    | Switch _ -> Vscode.TreeItemCollapsibleState.Collapsed
+  let collapsible_state =
+    let open Promise.Syntax in
+    function
+    | Switch (opam, switch) -> (
+      let+ packages = Opam.switch_compiler opam switch in
+      match packages with
+      | None -> TreeItemCollapsibleState.None
+      | Some (_ : string) -> Collapsed)
     | Package dep ->
-      if Opam.Package.has_dependencies dep then
-        TreeItemCollapsibleState.Collapsed
-      else TreeItemCollapsibleState.None
+      Promise.return
+        (if Opam.Package.has_dependencies dep then
+         TreeItemCollapsibleState.Collapsed
+        else None)
 
   let to_treeitem instance dependency =
     let open Promise.Syntax in
     let current_sandbox = Extension_instance.sandbox instance in
     let is_current_sandbox = equals_opam_sandbox dependency current_sandbox in
     let icon = `LightDark (icon dependency is_current_sandbox) in
-    let collapsibleState = collapsible_state dependency in
+    let* collapsibleState = collapsible_state dependency in
     let label =
       `TreeItemLabel (Vscode.TreeItemLabel.create ~label:(label dependency) ())
     in
