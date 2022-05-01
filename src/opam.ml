@@ -138,8 +138,7 @@ end = struct
     match file_res with
     | Error e ->
       log "Error reading switch-state file at %s. Error: %s"
-        switch_state_filepath
-        (Promise.error_to_js e |> Ojs.string_of_js);
+        switch_state_filepath (Node.JsError.message e);
       None
     | Ok file_content -> (
       match
