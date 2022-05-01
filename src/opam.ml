@@ -115,7 +115,9 @@ module Switch_state : sig
 
   type t
 
-  val of_switch : opam -> Switch.t -> t Promise.t
+  (** may return [None] if, for example, the switch is empty, i.e., created with 
+      {opam switch create sw --empty} *)
+  val of_switch : opam -> Switch.t -> t option Promise.t
 
   val compilers : t -> string list option
 
@@ -127,14 +129,30 @@ end = struct
 
   let of_switch opam switch =
     let open Promise.Syntax in
-    let path = Switch.path opam switch in
-    let switch_state_filepath = Opam_path.switch_state path |> Path.to_string in
-    let+ file_content = Fs.readFile switch_state_filepath in
-    let { OpamParserTypes.file_contents; _ } =
-      OpamParser.FullPos.string file_content switch_state_filepath
-      |> OpamParser.FullPos.to_opamfile
+    let switch_state_filepath =
+      Switch.path opam switch |> Opam_path.switch_state |> Path.to_string
     in
-    file_contents
+    let+ file_res =
+      Promise.Result.from_catch (Fs.readFile switch_state_filepath)
+    in
+    match file_res with
+    | Error e ->
+      log "Error reading switch-state file at %s. Error: %s"
+        switch_state_filepath
+        (Promise.error_to_js e |> Ojs.string_of_js);
+      None
+    | Ok file_content -> (
+      match
+        OpamParser.FullPos.string file_content switch_state_filepath
+        |> OpamParser.FullPos.to_opamfile
+      with
+      | { OpamParserTypes.file_contents; _ } -> Some file_contents
+      | exception e ->
+        log
+          "Parsing error reading switch-state file at %s. Error: %s. File \
+           contents: %s"
+          switch_state_filepath (Exn.to_string e) file_content;
+        None)
 
   let compilers = Opam_parser.list "compiler"
 
@@ -288,23 +306,28 @@ let remove t switch packages =
 let switch_compiler t switch =
   let open Promise.Syntax in
   let+ switch_state = Switch_state.of_switch t switch in
-  let compilers = Switch_state.compilers switch_state in
-  Option.bind compilers ~f:List.hd
+  let open Option.O in
+  let* switch_state in
+  let* compilers = Switch_state.compilers switch_state in
+  List.hd compilers
 
 let packages_from_switch_state_field t switch callback =
   let open Promise.Syntax in
   let* switch_state = Switch_state.of_switch t switch in
-  match callback switch_state with
-  | None ->
-    Promise.return (Error "Could not get the packages from the switch state")
-  | Some l ->
-    let path = Switch.path t switch in
-    Promise.List.filter_map
-      (fun name ->
-        let package_path = Opam_path.package_dir path name in
-        Package.of_path package_path)
-      l
-    |> Promise.map Result.return
+  match switch_state with
+  | None -> Ok [] |> Promise.return
+  | Some switch_state -> (
+    match callback switch_state with
+    | None ->
+      Promise.return (Error "Could not get the packages from the switch state")
+    | Some l ->
+      let path = Switch.path t switch in
+      Promise.List.filter_map
+        (fun name ->
+          let package_path = Opam_path.package_dir path name in
+          Package.of_path package_path)
+        l
+      |> Promise.map Result.return)
 
 let packages t switch =
   packages_from_switch_state_field t switch Switch_state.installed
