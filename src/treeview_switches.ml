@@ -84,7 +84,7 @@ module Dependency = struct
     let item = Vscode.TreeItem.make_label ~label ~collapsibleState () in
     Vscode.TreeItem.set_iconPath item icon;
     TreeItem.set_contextValue item (context_value dependency);
-    let+ _ =
+    let+ () =
       Promise.Option.iter
         (fun desc -> TreeItem.set_description item (`String desc))
         (description dependency)
@@ -104,13 +104,18 @@ module Dependency = struct
         Promise.return (Some names)
       | Error err ->
         show_message `Info
-          "An error occured while reading the switch dependencies: %s" err;
+          "An error occurred while reading the switch dependencies: %s" err;
         Promise.return None)
     | Package pkg -> (
       let+ deps = Opam.Package.dependencies pkg in
       match deps with
-      | Error _ -> None
-      | Ok packages -> Some (List.map ~f:(fun x -> Package x) packages))
+      | Ok packages -> Some (List.map ~f:(fun x -> Package x) packages)
+      | Error e ->
+        log
+          "An error occurred while getting package dependencies. Package %s. \
+           Error %s"
+          (Opam.Package.name pkg) e;
+        None)
 end
 
 module Command = struct
@@ -165,7 +170,7 @@ module Command = struct
           match doc with
           | None -> Promise.return ()
           | Some doc ->
-            let+ _ =
+            let+ (_ : Ojs.t option) =
               Vscode.Commands.executeCommand ~command:"vscode.open"
                 ~args:[ Vscode.Uri.parse doc () |> Vscode.Uri.t_to_js ]
             in
