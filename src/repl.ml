@@ -129,7 +129,7 @@ let create_terminal instance sandbox =
         Extension_instance.set_repl instance term;
         Ok term))
 
-let get_code text_editor =
+let get_selected_code text_editor =
   let selection = Vscode.TextEditor.selection text_editor in
   let start_line = Vscode.Selection.start selection |> Vscode.Position.line in
   let end_line = Vscode.Selection.end_ selection |> Vscode.Position.line in
@@ -178,7 +178,7 @@ module Command = struct
         match term with
         | Error err -> show_message `Error "Could not start the REPL: %s" err
         | Ok term ->
-          let code = get_code textEditor in
+          let code = get_selected_code textEditor in
           if String.length code > 0 then
             let code = prepare_code code in
             Terminal_sandbox.send term code
