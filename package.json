@@ -224,9 +224,9 @@
         "title": "Open REPL"
       },
       {
-        "command": "ocaml.evaluate-selection",
+        "command": "ocaml.evaluate-expression",
         "category": "OCaml",
-        "title": "Evaluate Selection"
+        "title": "Evaluate Expression"
       },
       {
         "command": "ocaml.evaluate-file",
@@ -305,7 +305,7 @@
         "when": "editorLangId == ocaml.interface || editorLangId == reason"
       },
       {
-        "command": "ocaml.evaluate-selection",
+        "command": "ocaml.evaluate-expression",
         "key": "Shift+Enter",
         "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir"
       },
@@ -338,7 +338,7 @@
     "menus": {
       "editor/context": [
         {
-          "command": "ocaml.evaluate-selection",
+          "command": "ocaml.evaluate-expression",
           "group": "OCaml",
           "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir"
         },
