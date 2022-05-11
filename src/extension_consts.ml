@@ -36,6 +36,8 @@ module Commands = struct
 
   let evaluate_selection = ocaml_prefixed "evaluate-selection"
 
+  let evaluate_file = ocaml_prefixed "evaluate-file"
+
   let open_repl = ocaml_prefixed "open-repl"
 
   let next_hole = ocaml_prefixed "next-hole"
