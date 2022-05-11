@@ -138,10 +138,6 @@ let get_code text_editor =
   in
   let end_char = Vscode.Selection.end_ selection |> Vscode.Position.character in
   let document = Vscode.TextEditor.document text_editor in
-  let () =
-    show_message `Error "uri : %s"
-      (Vscode.Uri.path (Vscode.TextDocument.uri document))
-  in
   if start_line = end_line && start_char = end_char then
     let line = Vscode.TextDocument.lineAt document ~line:start_line in
     Vscode.TextLine.text line
