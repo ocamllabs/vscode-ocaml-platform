@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.10.3
 
 - Add arrays to auto closing pairs (#946)
 
