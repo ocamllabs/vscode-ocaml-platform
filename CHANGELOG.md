@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.10.4
+
+- Correctly handle empty switches (#940)
+
 ## 1.10.3
 
 - Add arrays to auto closing pairs (#946)
