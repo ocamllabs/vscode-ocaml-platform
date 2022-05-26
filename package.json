@@ -52,19 +52,24 @@
   ],
   "icon": "assets/logo.png",
   "contributes": {
-    "viewsWelcome": [{
-      "view": "ocaml-sandbox",
-      "contents": "In order to manage your sandbox, you can open a folder containing an Opam switch, or select an Opam switch as a sandbox.\n[Open Folder](command:vscode.openFolder)\n[Select Sandbox](command:ocaml.select-sandbox)"
-    }],
+    "viewsWelcome": [
+      {
+        "view": "ocaml-sandbox",
+        "contents": "In order to manage your sandbox, you can open a folder containing an Opam switch, or select an Opam switch as a sandbox.\n[Open Folder](command:vscode.openFolder)\n[Select Sandbox](command:ocaml.select-sandbox)"
+      }
+    ],
     "viewsContainers": {
-      "activitybar": [{
-        "id": "ocaml-explorer",
-        "title": "OCaml",
-        "icon": "assets/logo.svg"
-      }]
+      "activitybar": [
+        {
+          "id": "ocaml-explorer",
+          "title": "OCaml",
+          "icon": "assets/logo.svg"
+        }
+      ]
     },
     "views": {
-      "ocaml-explorer": [{
+      "ocaml-explorer": [
+        {
           "id": "ocaml-sandbox",
           "name": "Sandbox"
         },
@@ -82,7 +87,8 @@
         }
       ]
     },
-    "commands": [{
+    "commands": [
+      {
         "command": "ocaml.select-sandbox",
         "category": "OCaml",
         "title": "Select a Sandbox for this Workspace"
@@ -268,7 +274,8 @@
         "title": "Show OCaml Commands Output"
       }
     ],
-    "keybindings": [{
+    "keybindings": [
+      {
         "command": "ocaml.switch-impl-intf",
         "key": "Alt+O",
         "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir"
@@ -329,7 +336,8 @@
       }
     ],
     "menus": {
-      "editor/context": [{
+      "editor/context": [
+        {
           "command": "ocaml.evaluate-expression",
           "group": "OCaml",
           "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir"
@@ -340,7 +348,8 @@
           "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface"
         }
       ],
-      "commandPalette": [{
+      "commandPalette": [
+        {
           "command": "ocaml.current-dune-file",
           "when": "editorIsOpen"
         },
@@ -393,13 +402,16 @@
           "when": "false"
         }
       ],
-      "editor/title": [{
-        "command": "ocaml.switch-impl-intf",
-        "key": "Alt+O",
-        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir",
-        "group": "navigation"
-      }],
-      "view/title": [{
+      "editor/title": [
+        {
+          "command": "ocaml.switch-impl-intf",
+          "key": "Alt+O",
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir",
+          "group": "navigation"
+        }
+      ],
+      "view/title": [
+        {
           "command": "ocaml.refresh-switches",
           "when": "view == ocaml-switches",
           "group": "navigation"
@@ -420,7 +432,8 @@
           "group": "navigation"
         }
       ],
-      "view/item/context": [{
+      "view/item/context": [
+        {
           "command": "ocaml.remove-switch",
           "when": "view == ocaml-switches && viewItem == opam-switch",
           "group": "inline"
@@ -585,32 +598,38 @@
         "editor.insertSpaces": true
       }
     },
-    "problemMatchers": [{
-      "name": "ocamlc",
-      "fileLocation": [
-        "relative",
-        "${workspaceFolder}"
-      ],
-      "pattern": [{
-          "regexp": "^\\s*\\bFile\\b\\s*\"(.*)\",\\s*\\blines?\\b\\s*(\\d+)(?:-(\\d+))?(?:,\\s*\\bcharacters\\b\\s*(\\d+)-(\\d+)\\s*)?:\\s*$",
-          "file": 1,
-          "line": 2,
-          "endLine": 3,
-          "column": 4,
-          "endColumn": 5
-        },
-        {
-          "regexp": "^(?:\\s*\\bParse\\b\\s*)?\\s*\\b([Ee]rror|Warning)\\b\\s*(?:(?:\\(\\s*\\bwarning\\b\\s*)?(\\d+)\\)?)?\\s*:\\s*(.*)$",
-          "severity": 1,
-          "code": 2,
-          "message": 3
-        }
-      ]
-    }],
-    "taskDefinitions": [{
-      "type": "dune"
-    }],
-    "languages": [{
+    "problemMatchers": [
+      {
+        "name": "ocamlc",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": [
+          {
+            "regexp": "^\\s*\\bFile\\b\\s*\"(.*)\",\\s*\\blines?\\b\\s*(\\d+)(?:-(\\d+))?(?:,\\s*\\bcharacters\\b\\s*(\\d+)-(\\d+)\\s*)?:\\s*$",
+            "file": 1,
+            "line": 2,
+            "endLine": 3,
+            "column": 4,
+            "endColumn": 5
+          },
+          {
+            "regexp": "^(?:\\s*\\bParse\\b\\s*)?\\s*\\b([Ee]rror|Warning)\\b\\s*(?:(?:\\(\\s*\\bwarning\\b\\s*)?(\\d+)\\)?)?\\s*:\\s*(.*)$",
+            "severity": 1,
+            "code": 2,
+            "message": 3
+          }
+        ]
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "dune"
+      }
+    ],
+    "languages": [
+      {
         "id": "dune",
         "aliases": [
           "dune"
@@ -817,7 +836,8 @@
         ]
       }
     ],
-    "grammars": [{
+    "grammars": [
+      {
         "language": "dune",
         "scopeName": "source.dune",
         "path": "./syntaxes/dune.json"
@@ -938,7 +958,8 @@
         "path": "./syntaxes/cram.json"
       }
     ],
-    "snippets": [{
+    "snippets": [
+      {
         "language": "dune",
         "path": "./snippets/dune.json"
       },
@@ -955,15 +976,19 @@
         "path": "./snippets/ocamllex.json"
       }
     ],
-    "jsonValidation": [{
-      "fileMatch": "esy.json",
-      "url": "https://raw.githubusercontent.com/esy/esy-schema/master/esySchema.json"
-    }],
-    "customEditors": [{
+    "jsonValidation": [
+      {
+        "fileMatch": "esy.json",
+        "url": "https://raw.githubusercontent.com/esy/esy-schema/master/esySchema.json"
+      }
+    ],
+    "customEditors": [
+      {
         "viewType": "ast-editor",
         "displayName": "OCaml AST preview",
         "priority": "option",
-        "selector": [{
+        "selector": [
+          {
             "filenamePattern": "*.ml"
           },
           {
@@ -974,7 +999,8 @@
       {
         "viewType": "cm-files-editor",
         "displayName": "OCaml Compilation Artifact Viewer",
-        "selector": [{
+        "selector": [
+          {
             "filenamePattern": "*.cmi"
           },
           {
@@ -1035,11 +1061,13 @@
   "prettier": {
     "proseWrap": "always",
     "endOfLine": "auto",
-    "overrides": [{
-      "files": "*.yml",
-      "options": {
-        "proseWrap": "preserve"
+    "overrides": [
+      {
+        "files": "*.yml",
+        "options": {
+          "proseWrap": "preserve"
+        }
       }
-    }]
+    ]
   }
 }

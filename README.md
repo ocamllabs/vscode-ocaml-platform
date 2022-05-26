@@ -264,7 +264,8 @@ prefix `OCaml:`:
 | `ocaml.evaluate-file`        | Evaluate Selection                          | `Shift+Alt+Enter`  |
 
 Note: `ocaml.evaluate-expression` was previously named
-`ocaml.evaluate-selection`.
+`ocaml.evaluate-selection`. You can also disabe the new cursor jumps after this
+command execution with the `ocaml.repl.jumpToTheNextExpression` setting.
 
 ## Debugging the extension
 
