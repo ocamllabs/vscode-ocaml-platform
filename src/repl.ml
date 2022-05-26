@@ -141,7 +141,7 @@ let get_selected_code text_editor =
 
 let get_uri text_editor =
   text_editor |> Vscode.TextEditor.document |> Vscode.TextDocument.uri
-  |> Vscode.Uri.path
+  |> Vscode.Uri.fsPath
 
 let preformat_code code =
   let is_repl_ready s = String.is_suffix s ~suffix:";;" in
@@ -231,7 +231,7 @@ module Command = struct
         | Error err -> show_message `Error "Could not start the REPL: %s" err
         | Ok term ->
           let uri = get_uri textEditor in
-          let use = "#use \"" ^ uri ^ "\";;" in
+          let use = "#use {|" ^ uri ^ "|};;" in
           Terminal_sandbox.send term use
       in
       ()
