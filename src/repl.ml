@@ -229,7 +229,9 @@ module Command = struct
                     in
                     find_correct_position previous_line
                   else line |> TextLine.range |> Range.start
-                | text when String.compare text "" = 0 ->
+                | text
+                  when String.compare text "" = 0
+                       || String.is_prefix text ~prefix:"(*" ->
                   (* We choose to go for the previous expression but we could
                      instead evaluate the whole file *)
                   if TextLine.lineNumber line <> 0 then
