@@ -155,6 +155,16 @@ let preformat_code code =
     Printf.sprintf "\n%s\n;;" trimmed_code
   else trimmed_code ^ " ;;"
 
+let jump_to_the_next_expression_setting =
+  Settings.create_setting ~scope:Global
+    ~key:"ocaml.repl.jumpToTheNextExpression" ~of_json:Jsonoo.Decode.bool
+    ~to_json:Jsonoo.Encode.bool
+
+let jump_to_the_next_expression () =
+  match Settings.get jump_to_the_next_expression_setting with
+  | Some x -> x
+  | None -> true
+
 module Command = struct
   let _open_repl =
     let handler (instance : Extension_instance.t) ~args:_ =
@@ -255,7 +265,38 @@ module Command = struct
                 String.compare text_correct_position "" = 0
                 || String.is_prefix text_correct_position ~prefix:";;"
                 || String.is_prefix text_correct_position ~prefix:"(*"
-              then Promise.return ()
+              then (
+                (if jump_to_the_next_expression () then
+                 let rec new_position line =
+                   if TextDocument.lineCount doc - 1 = TextLine.lineNumber line
+                   then position
+                   else
+                     let next_line =
+                       TextDocument.lineAt doc
+                         ~line:(TextLine.lineNumber line + 1)
+                     in
+                     let stripped_line_text =
+                       String.strip (TextLine.text next_line)
+                     in
+                     match stripped_line_text with
+                     | text when String.compare text ";;" = 0 ->
+                       new_position next_line
+                     | text when String.compare text "" = 0 ->
+                       new_position next_line
+                     | text when String.is_prefix text ~prefix:"(*" ->
+                       new_position next_line
+                     | _ -> Range.start (TextLine.range next_line)
+                 in
+                 let new_selection =
+                   let position =
+                     new_position
+                       (TextDocument.lineAtPosition doc
+                          ~position:correct_position)
+                   in
+                   Selection.makePositions ~anchor:position ~active:position
+                 in
+                 TextEditor.set_selection textEditor new_selection);
+                Promise.return ())
               else
                 let+ range =
                   Custom_requests.Wrapping_ast_node.send_request client ~doc:uri
@@ -265,7 +306,39 @@ module Command = struct
                 | None -> ()
                 | Some range ->
                   let code = TextDocument.getText doc ~range () in
-                  Terminal_sandbox.send term (preformat_code code))))
+                  Terminal_sandbox.send term (preformat_code code);
+                  if jump_to_the_next_expression () then
+                    let rec new_position line =
+                      if
+                        TextDocument.lineCount doc - 1
+                        = TextLine.lineNumber line
+                      then Range.end_ range
+                      else
+                        let next_line =
+                          TextDocument.lineAt doc
+                            ~line:(TextLine.lineNumber line + 1)
+                        in
+                        let stripped_line_text =
+                          String.strip (TextLine.text next_line)
+                        in
+                        match stripped_line_text with
+                        | text when String.compare text ";;" = 0 ->
+                          new_position next_line
+                        | text when String.compare text "" = 0 ->
+                          new_position next_line
+                        | text when String.is_prefix text ~prefix:"(*" ->
+                          new_position next_line
+                        | _ -> Range.start (TextLine.range next_line)
+                    in
+                    let new_selection =
+                      let position =
+                        new_position
+                          (TextDocument.lineAtPosition doc
+                             ~position:(Range.end_ range))
+                      in
+                      Selection.makePositions ~anchor:position ~active:position
+                    in
+                    TextEditor.set_selection textEditor new_selection)))
       in
       ()
     in
