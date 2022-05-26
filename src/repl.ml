@@ -246,15 +246,26 @@ module Command = struct
                   line |> TextLine.range |> Range.start
               in
               let correct_position = find_correct_position line_of_position in
-              let+ range =
-                Custom_requests.Wrapping_ast_node.send_request client ~doc:uri
-                  ~position:correct_position
+              let text_correct_position =
+                String.strip
+                  (TextLine.text
+                     (TextDocument.lineAtPosition doc ~position:correct_position))
               in
-              match range with
-              | None -> ()
-              | Some range ->
-                let code = TextDocument.getText doc ~range () in
-                Terminal_sandbox.send term (preformat_code code))))
+              if
+                String.compare text_correct_position "" = 0
+                || String.is_prefix text_correct_position ~prefix:";;"
+                || String.is_prefix text_correct_position ~prefix:"(*"
+              then Promise.return ()
+              else
+                let+ range =
+                  Custom_requests.Wrapping_ast_node.send_request client ~doc:uri
+                    ~position:correct_position
+                in
+                match range with
+                | None -> ()
+                | Some range ->
+                  let code = TextDocument.getText doc ~range () in
+                  Terminal_sandbox.send term (preformat_code code))))
       in
       ()
     in
