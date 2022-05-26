@@ -17,7 +17,7 @@ module Repl_path = struct
 end
 
 let ocaml_utop_setting =
-  Settings.create_setting ~scope:Global ~key:"ocaml.useUtop"
+  Settings.create_setting ~scope:Global ~key:"ocaml.repl.useUtop"
     ~of_json:Jsonoo.Decode.bool ~to_json:Jsonoo.Encode.bool
 
 let use_utop () =
