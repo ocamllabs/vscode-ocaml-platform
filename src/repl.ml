@@ -206,9 +206,44 @@ module Command = struct
                 let selection = TextEditor.selection textEditor in
                 Selection.start selection
               in
+              let line_of_position =
+                TextDocument.lineAtPosition doc ~position
+              in
+              (* The lsp-server needs to have the good position to evaluate the
+                 right expression here we go up until we find an expression or
+                 stop at the top (on the line 0) *)
+              let rec find_correct_position line =
+                let line_text = TextLine.text line in
+                let stripped_line_text = String.strip line_text in
+                match stripped_line_text with
+                | text when String.is_suffix text ~suffix:";;" ->
+                  (* The cursor if after an expression *)
+                  if
+                    String.compare text ";;" = 0
+                    && TextLine.lineNumber line <> 0
+                  then
+                    (* The expression should in the previous line so we go up *)
+                    let previous_line =
+                      TextDocument.lineAt doc
+                        ~line:(TextLine.lineNumber line - 1)
+                    in
+                    find_correct_position previous_line
+                  else line |> TextLine.range |> Range.start
+                | text when String.compare text "" = 0 ->
+                  (* We choose to go for the previous expression but we could
+                     instead evaluate the whole file *)
+                  let previous_line =
+                    TextDocument.lineAt doc ~line:(TextLine.lineNumber line - 1)
+                  in
+                  find_correct_position previous_line
+                | _ ->
+                  (* The cursor is on line of an expression *)
+                  line |> TextLine.range |> Range.start
+              in
+              let correct_position = find_correct_position line_of_position in
               let+ range =
                 Custom_requests.Wrapping_ast_node.send_request client ~doc:uri
-                  ~position
+                  ~position:correct_position
               in
               match range with
               | None -> ()
