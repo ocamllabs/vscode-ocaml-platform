@@ -232,10 +232,13 @@ module Command = struct
                 | text when String.compare text "" = 0 ->
                   (* We choose to go for the previous expression but we could
                      instead evaluate the whole file *)
-                  let previous_line =
-                    TextDocument.lineAt doc ~line:(TextLine.lineNumber line - 1)
-                  in
-                  find_correct_position previous_line
+                  if TextLine.lineNumber line <> 0 then
+                    let previous_line =
+                      TextDocument.lineAt doc
+                        ~line:(TextLine.lineNumber line - 1)
+                    in
+                    find_correct_position previous_line
+                  else line |> TextLine.range |> Range.start
                 | _ ->
                   (* The cursor is on line of an expression *)
                   line |> TextLine.range |> Range.start
