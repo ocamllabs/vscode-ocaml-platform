@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Fix reading `ocaml.repl.useUtop` setting (#957)
+
 ## 1.10.4
 
 - Correctly handle empty switches (#940)
