@@ -328,18 +328,23 @@ module Command = struct
                           new_position next_line
                         | text when String.is_prefix text ~prefix:"(*" ->
                           let rec skip_comment comment_line =
-                            let next_comment_line =
-                              TextDocument.lineAt doc
-                                ~line:(TextLine.lineNumber comment_line + 1)
-                            in
-                            let stripped_comment_line =
-                              String.strip (TextLine.text comment_line)
-                            in
                             if
-                              String.is_suffix stripped_comment_line
-                                ~suffix:"*)"
-                            then new_position comment_line
-                            else skip_comment next_comment_line
+                              TextDocument.lineCount doc - 1
+                              = TextLine.lineNumber comment_line
+                            then Range.end_ range
+                            else
+                              let next_comment_line =
+                                TextDocument.lineAt doc
+                                  ~line:(TextLine.lineNumber comment_line + 1)
+                              in
+                              let stripped_comment_line =
+                                String.strip (TextLine.text comment_line)
+                              in
+                              if
+                                String.is_suffix stripped_comment_line
+                                  ~suffix:"*)"
+                              then new_position comment_line
+                              else skip_comment next_comment_line
                           in
                           skip_comment next_line
                         | _ -> Range.start (TextLine.range next_line)
