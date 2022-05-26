@@ -146,10 +146,14 @@ let get_uri text_editor =
 let preformat_code code =
   let is_repl_ready s = String.is_suffix s ~suffix:";;" in
   let trimmed_code = String.strip code in
-  if is_repl_ready code then
-    (* newline is for nicer look in REPL *)
-    "\n" ^ trimmed_code
-  else Printf.sprintf "\n%s\n;;" trimmed_code
+  if is_repl_ready trimmed_code then
+    if String.mem trimmed_code '\n' then
+      (* newline is for nicer look in REPL *)
+      "\n" ^ trimmed_code
+    else trimmed_code
+  else if String.mem trimmed_code '\n' then
+    Printf.sprintf "\n%s\n;;" trimmed_code
+  else trimmed_code ^ " ;;"
 
 module Command = struct
   let _open_repl =
