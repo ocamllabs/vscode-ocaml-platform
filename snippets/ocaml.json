@@ -50,5 +50,13 @@
   "type declaration": {
     "prefix": "type",
     "body": ["type ${1:name} = $0"]
+  },
+  "in": {
+    "prefix": "in",
+    "body": ["in"]
+  },
+  "do": {
+    "prefix": "do",
+    "body": ["do"]
   }
 }
