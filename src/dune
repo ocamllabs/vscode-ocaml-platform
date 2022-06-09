@@ -1,5 +1,6 @@
 (executable
  (name vscode_ocaml_platform)
+ (modules :standard \ vscode_ocaml_platform_web)
  (preprocess
   (pps gen_js_api.ppx))
  (libraries
@@ -16,6 +17,13 @@
   vscode_languageclient
   ppxlib
   ppx_tools)
+ (modes js)
+ (js_of_ocaml
+  (flags --source-map --pretty)))
+
+(executable
+ (name vscode_ocaml_platform_web)
+ (modules vscode_ocaml_platform_web)
  (modes js)
  (js_of_ocaml
   (flags --source-map --pretty)))
