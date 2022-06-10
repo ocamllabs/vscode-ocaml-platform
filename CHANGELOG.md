@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fix reading `ocaml.repl.useUtop` setting (#957)
+- Add minimal support as a Web Extension (#962)
 
 ## 1.10.4
 

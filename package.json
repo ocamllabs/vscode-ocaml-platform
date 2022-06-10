@@ -14,10 +14,10 @@
   },
   "homepage": "https://github.com/ocamllabs/vscode-ocaml-platform",
   "capabilities": {
-      "virtualWorkspaces": {
-          "supported": "limited",
-          "description": "Only syntax highlighting is provided."
-      }
+    "virtualWorkspaces": {
+      "supported": "limited",
+      "description": "Only syntax highlighting is provided."
+    }
   },
   "main": "./dist/vscode_ocaml_platform.bc.js",
   "browser": "./dist/vscode_ocaml_platform_web.bc.js",
@@ -1068,7 +1068,7 @@
     "deploy:ovsx": "ovsx publish --yarn",
     "fmt:check": "prettier . --check",
     "fmt": "prettier . --write",
-    "web": "npx @vscode/test-web --extensionDevelopmentPath=. ."
+    "run:web": "npx @vscode/test-web --extensionDevelopmentPath=. ."
   },
   "dependencies": {
     "polka": "^1.0.0-next.22",
