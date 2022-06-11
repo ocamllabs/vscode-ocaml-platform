@@ -419,12 +419,13 @@ let open_both_ppx_ast instance ~document =
   | Error e -> raise (User_error e)
 
 module Command = struct
+  let open_ast_explorer_handler textEditor =
+    let uri = TextEditor.document textEditor |> TextDocument.uri in
+    open_ast_explorer ~uri
+
   let _open_ast_explorer_to_the_side =
     let handler _ ~textEditor ~edit:_ ~args:_ =
-      let (_ : unit Promise.t) =
-        let uri = TextEditor.document textEditor |> TextDocument.uri in
-        open_ast_explorer ~uri
-      in
+      let (_ : unit Promise.t) = open_ast_explorer_handler textEditor in
       ()
     in
     let handler e ~textEditor ~edit ~args =
@@ -436,24 +437,34 @@ module Command = struct
   let _reveal_ast_node =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
       let document = TextEditor.document textEditor in
-      let webview_opt =
-        let ast_editor_state = Extension_instance.ast_editor_state instance in
-        Ast_editor_state.find_webview_by_doc ast_editor_state
-          (TextDocument.uri document)
+      let (_ : unit Promise.t) =
+        let open Promise.Syntax in
+        let+ webview =
+          let ast_editor_state = Extension_instance.ast_editor_state instance in
+          match
+            Ast_editor_state.find_webview_by_doc ast_editor_state
+              (TextDocument.uri document)
+          with
+          | Some _ as r -> Promise.return r
+          | None ->
+            let+ () = open_ast_explorer_handler textEditor in
+            Ast_editor_state.find_webview_by_doc ast_editor_state
+              (TextDocument.uri document)
+        in
+        let offset =
+          let selection = Vscode.TextEditor.selection textEditor in
+          let position = Vscode.Selection.start selection in
+          TextDocument.offsetAt document ~position
+        in
+        match webview with
+        | Some webview -> send_msg "focus" (Ojs.int_to_js offset) ~webview
+        | None ->
+          raise
+            (User_error
+               "Can't reveal node. Please check if AST explorer is open and \
+                right mode is chosen.")
       in
-      let offset =
-        let selection = Vscode.TextEditor.selection textEditor in
-        let position = Vscode.Selection.start selection in
-        TextDocument.offsetAt document ~position
-      in
-
-      match webview_opt with
-      | Some webview -> send_msg "focus" (Ojs.int_to_js offset) ~webview
-      | None ->
-        raise
-          (User_error
-             "Can't reveal node. Please check if AST explorer is open and \
-              right mode is chosen.")
+      ()
     in
     let handler e ~textEditor ~edit ~args =
       Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)

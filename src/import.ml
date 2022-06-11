@@ -9,6 +9,17 @@ module Process = Node.Process
 module ChildProcess = Node.ChildProcess
 module Fs = Node.Fs
 
+module Node = struct
+  include Node
+
+  let setTimeout' ~wait_ms =
+    Promise.make (fun ~resolve ~reject:_ ->
+        let (_ : Node.Timeout.t) =
+          Node.setTimeout (fun () -> resolve ()) wait_ms
+        in
+        ())
+end
+
 let property_exists json property =
   Ojs.has_property (Jsonoo.t_to_js json) property
 
