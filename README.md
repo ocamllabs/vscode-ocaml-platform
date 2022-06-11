@@ -224,7 +224,7 @@ the settings under `File > Preferences > Settings`.
 | `ocaml.repl.path`                    | The path of the REPL that the extension uses                                                            | `null`  |
 | `ocaml.repl.args`                    | The REPL arguments that the extension uses                                                              | `null`  |
 | `ocaml.repl.useUtop`                 | Controls whether to use Utop for the REPL if it is installed in the current switch.                     | `true`  |
-| `ocaml.repl.jumpToTheNextExpression` | Allow the cursor to jump after expression evaluation to the next expression.                            | `true`  |
+| `ocaml.repl.jumpToNextExpression` | Allow the cursor to jump after expression evaluation to the next expression.                            | `true`  |
 
 If `ocaml.terminal.shell.*` or `ocaml.terminal.shellArgs.*` is `null`, the
 configured VSCode shell and shell arguments will be used instead.
@@ -265,7 +265,7 @@ prefix `OCaml:`:
 
 Note: `ocaml.evaluate-expression` was previously named
 `ocaml.evaluate-selection`. You can also disabe the new cursor jumps after this
-command execution with the `ocaml.repl.jumpToTheNextExpression` setting.
+command execution with the `ocaml.repl.jumpToNextExpression` setting.
 
 ## Debugging the extension
 

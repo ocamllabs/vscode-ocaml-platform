@@ -155,13 +155,12 @@ let preformat_code code =
     Printf.sprintf "\n%s\n;;" trimmed_code
   else trimmed_code ^ " ;;"
 
-let jump_to_the_next_expression_setting =
-  Settings.create_setting ~scope:Global
-    ~key:"ocaml.repl.jumpToTheNextExpression" ~of_json:Jsonoo.Decode.bool
-    ~to_json:Jsonoo.Encode.bool
+let jump_to_next_expr_setting =
+  Settings.create_setting ~scope:Global ~key:"ocaml.repl.jumpToNextExpression"
+    ~of_json:Jsonoo.Decode.bool ~to_json:Jsonoo.Encode.bool
 
-let jump_to_the_next_expression () =
-  match Settings.get jump_to_the_next_expression_setting with
+let jump_to_next_expr () =
+  match Settings.get jump_to_next_expr_setting with
   | Some x -> x
   | None -> true
 
@@ -266,7 +265,7 @@ module Command = struct
                 || String.is_prefix text_correct_position ~prefix:";;"
                 || String.is_prefix text_correct_position ~prefix:"(*"
               then (
-                (if jump_to_the_next_expression () then
+                (if jump_to_next_expr () then
                  let rec new_position line =
                    if TextDocument.lineCount doc - 1 = TextLine.lineNumber line
                    then position
@@ -307,7 +306,7 @@ module Command = struct
                 | Some range ->
                   let code = TextDocument.getText doc ~range () in
                   Terminal_sandbox.send term (preformat_code code);
-                  if jump_to_the_next_expression () then
+                  if jump_to_next_expr () then
                     let rec new_position line =
                       if
                         TextDocument.lineCount doc - 1
