@@ -193,8 +193,7 @@ module Command = struct
           show_message `Error "Could not start the REPL: %s" err;
           Promise.return ()
         | Ok term -> (
-          let code = get_selected_code textEditor in
-          match code with
+          match get_selected_code textEditor with
           | Some code ->
             let code = preformat_code code in
             Terminal_sandbox.send term code;
@@ -211,12 +210,9 @@ module Command = struct
             | Some (client, _) -> (
               let doc = TextEditor.document textEditor in
               let uri = TextDocument.uri doc in
-              let position =
+              let selection_start =
                 let selection = TextEditor.selection textEditor in
                 Selection.start selection
-              in
-              let line_of_position =
-                TextDocument.lineAtPosition doc ~position
               in
               (* The lsp-server needs to have the good position to evaluate the
                  right expression here we go up until we find an expression or
@@ -254,7 +250,12 @@ module Command = struct
                   (* The cursor is on line of an expression *)
                   line |> TextLine.range |> Range.start
               in
-              let correct_position = find_correct_position line_of_position in
+              let correct_position =
+                let selection_line =
+                  TextDocument.lineAtPosition doc ~position:selection_start
+                in
+                find_correct_position selection_line
+              in
               let text_correct_position =
                 String.strip
                   (TextLine.text
@@ -268,7 +269,7 @@ module Command = struct
                 if jump_to_next_expr () then (
                   let rec new_position line =
                     if TextDocument.lineCount doc - 1 = TextLine.lineNumber line
-                    then position
+                    then selection_start
                     else
                       let next_line =
                         TextDocument.lineAt doc
@@ -293,7 +294,9 @@ module Command = struct
                   in
                   TextEditor.set_selection textEditor new_selection;
                   TextEditor.revealRange textEditor
-                    ~range:(Range.makePositions ~start:position ~end_:position)
+                    ~range:
+                      (Range.makePositions ~start:selection_start
+                         ~end_:selection_start)
                     ~revealType:TextEditorRevealType.AtTop ());
                 Promise.return ())
               else
@@ -357,7 +360,8 @@ module Command = struct
                     TextEditor.set_selection textEditor new_selection;
                     TextEditor.revealRange textEditor
                       ~range:
-                        (Range.makePositions ~start:position ~end_:position)
+                        (Range.makePositions ~start:selection_start
+                           ~end_:selection_start)
                       ~revealType:TextEditorRevealType.AtTop ()))))
       in
       ()
