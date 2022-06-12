@@ -226,12 +226,12 @@
       {
         "command": "ocaml.evaluate-expression",
         "category": "OCaml",
-        "title": "Evaluate Expression"
+        "title": "Evaluate Expression in REPL"
       },
       {
         "command": "ocaml.evaluate-file",
         "category": "OCaml",
-        "title": "Evaluate File"
+        "title": "Evaluate File in REPL"
       },
       {
         "command": "ocaml.open-ast-explorer-to-the-side",
