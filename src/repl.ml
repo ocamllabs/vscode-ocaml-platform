@@ -184,10 +184,10 @@ module Command = struct
 
   let _evaluate_expression =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
-      let (_ : unit Promise.t Promise.t) =
+      let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
-        let+ term = create_terminal instance sandbox in
+        let* term = create_terminal instance sandbox in
         match term with
         | Error err ->
           show_message `Error "Could not start the REPL: %s" err;
@@ -239,7 +239,7 @@ module Command = struct
                     find_correct_position previous_line
                   else line |> TextLine.range |> Range.start
                 | text
-                  when String.compare text "" = 0
+                  when String.is_empty text
                        || String.is_prefix text ~prefix:"(*" ->
                   (* We choose to go for the previous expression but we could
                      instead evaluate the whole file *)
@@ -261,40 +261,40 @@ module Command = struct
                      (TextDocument.lineAtPosition doc ~position:correct_position))
               in
               if
-                String.compare text_correct_position "" = 0
+                String.is_empty text_correct_position
                 || String.is_prefix text_correct_position ~prefix:";;"
                 || String.is_prefix text_correct_position ~prefix:"(*"
               then (
-                (if jump_to_next_expr () then
-                 let rec new_position line =
-                   if TextDocument.lineCount doc - 1 = TextLine.lineNumber line
-                   then position
-                   else
-                     let next_line =
-                       TextDocument.lineAt doc
-                         ~line:(TextLine.lineNumber line + 1)
-                     in
-                     let stripped_line_text =
-                       String.strip (TextLine.text next_line)
-                     in
-                     match stripped_line_text with
-                     | text when String.compare text ";;" = 0 ->
-                       new_position next_line
-                     | text when String.compare text "" = 0 ->
-                       new_position next_line
-                     | text when String.is_prefix text ~prefix:"(*" ->
-                       new_position next_line
-                     | _ -> Range.start (TextLine.range next_line)
-                 in
-                 let new_selection =
-                   let position =
-                     new_position
-                       (TextDocument.lineAtPosition doc
-                          ~position:correct_position)
-                   in
-                   Selection.makePositions ~anchor:position ~active:position
-                 in
-                 TextEditor.set_selection textEditor new_selection);
+                if jump_to_next_expr () then (
+                  let rec new_position line =
+                    if TextDocument.lineCount doc - 1 = TextLine.lineNumber line
+                    then position
+                    else
+                      let next_line =
+                        TextDocument.lineAt doc
+                          ~line:(TextLine.lineNumber line + 1)
+                      in
+                      let stripped_line_text =
+                        String.strip (TextLine.text next_line)
+                      in
+                      match stripped_line_text with
+                      | ";;" | "" -> new_position next_line
+                      | text when String.is_prefix text ~prefix:"(*" ->
+                        new_position next_line
+                      | _ -> Range.start (TextLine.range next_line)
+                  in
+                  let new_selection =
+                    let position =
+                      new_position
+                        (TextDocument.lineAtPosition doc
+                           ~position:correct_position)
+                    in
+                    Selection.makePositions ~anchor:position ~active:position
+                  in
+                  TextEditor.set_selection textEditor new_selection;
+                  TextEditor.revealRange textEditor
+                    ~range:(Range.makePositions ~start:position ~end_:position)
+                    ~revealType:TextEditorRevealType.AtTop ());
                 Promise.return ())
               else
                 let+ range =
@@ -306,7 +306,7 @@ module Command = struct
                 | Some range ->
                   let code = TextDocument.getText doc ~range () in
                   Terminal_sandbox.send term (preformat_code code);
-                  if jump_to_next_expr () then
+                  if jump_to_next_expr () then (
                     let rec new_position line =
                       if
                         TextDocument.lineCount doc - 1
@@ -321,10 +321,8 @@ module Command = struct
                           String.strip (TextLine.text next_line)
                         in
                         match stripped_line_text with
-                        | text when String.compare text ";;" = 0 ->
-                          new_position next_line
-                        | text when String.compare text "" = 0 ->
-                          new_position next_line
+                        | ";;" -> new_position next_line
+                        | "" -> new_position next_line
                         | text when String.is_prefix text ~prefix:"(*" ->
                           let rec skip_comment comment_line =
                             if
@@ -356,7 +354,11 @@ module Command = struct
                       in
                       Selection.makePositions ~anchor:position ~active:position
                     in
-                    TextEditor.set_selection textEditor new_selection)))
+                    TextEditor.set_selection textEditor new_selection;
+                    TextEditor.revealRange textEditor
+                      ~range:
+                        (Range.makePositions ~start:position ~end_:position)
+                      ~revealType:TextEditorRevealType.AtTop ()))))
       in
       ()
     in
