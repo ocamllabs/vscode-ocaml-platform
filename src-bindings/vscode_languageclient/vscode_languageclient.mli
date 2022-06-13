@@ -164,6 +164,7 @@ module LanguageClient : sig
 
   val stop : t -> unit Promise.t
 
+  (* TODO: the return type should be [InitializeResult.t option] *)
   val initializeResult : t -> InitializeResult.t
 
   val sendRequest :
