@@ -158,15 +158,13 @@ module LanguageClient : sig
     -> unit
     -> t
 
-  val start : t -> unit
+  val start : t -> unit Promise.t
 
-  val stop : t -> unit
+  val isRunning : t -> bool
 
-  val onReady : t -> Promise.void
+  val stop : t -> unit Promise.t
 
   val initializeResult : t -> InitializeResult.t
-
-  val ready_initialize_result : t -> InitializeResult.t Promise.t
 
   val sendRequest :
        t

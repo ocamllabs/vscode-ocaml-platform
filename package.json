@@ -1073,7 +1073,7 @@
   "dependencies": {
     "polka": "^1.0.0-next.22",
     "sirv": "^2.0.2",
-    "vscode-languageclient": "7.0.0"
+    "vscode-languageclient": "8.0.1"
   },
   "devDependencies": {
     "@types/vscode": "1.64.0",

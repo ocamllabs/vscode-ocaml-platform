@@ -24,9 +24,12 @@ let lsp_client t = t.lsp_client
 let ocaml_version_exn t = Option.value_exn t.ocaml_version
 
 let stop_server t =
-  Option.iter t.lsp_client ~f:(fun (client, _) ->
-      t.lsp_client <- None;
-      LanguageClient.stop client)
+  match t.lsp_client with
+  | None -> Promise.return ()
+  | Some (client, (_ : Ocaml_lsp.t)) ->
+    t.lsp_client <- None;
+    if LanguageClient.isRunning client then LanguageClient.stop client
+    else Promise.return ()
 
 module Language_server_init : sig
   val start_language_server : t -> unit Promise.t
@@ -95,8 +98,8 @@ end = struct
       ~dispose ()
 
   let start_language_server t =
-    stop_server t;
     let open Promise.Syntax in
+    let* () = stop_server t in
     let+ res =
       let open Promise.Result.Syntax in
       let* () = check_ocaml_lsp_available t.sandbox in
@@ -107,9 +110,9 @@ end = struct
           ~serverOptions ~clientOptions ()
       in
       LanguageClient.registerFeature client ~feature:client_capabilities;
-      LanguageClient.start client;
       let open Promise.Syntax in
-      let+ initialize_result = LanguageClient.ready_initialize_result client in
+      let+ () = LanguageClient.start client in
+      let initialize_result = LanguageClient.initializeResult client in
       let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
       t.lsp_client <- Some (client, ocaml_lsp);
       (match
@@ -303,5 +306,5 @@ let disposable t =
   Disposable.make ~dispose:(fun () ->
       StatusBarItem.dispose t.sandbox_info;
       StatusBarItem.dispose t.documentation_server_info;
-      stop_server t;
+      let (_ : unit Promise.t) = stop_server t in
       stop_documentation_server t)
