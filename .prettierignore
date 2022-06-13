@@ -11,4 +11,5 @@ test/fixtures/sample-esy/esy.lock/
 # Normal npm stuff
 node_modules/
 .vscode-test/
+.vscode-test-web/
 dist/

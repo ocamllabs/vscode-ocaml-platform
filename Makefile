@@ -21,6 +21,7 @@ switch: create_switch deps ## Create an opam switch and install development depe
 .PHONY: build
 build: ## Build the project
 	dune build src/vscode_ocaml_platform.bc.js
+	dune build src-browser/vscode_ocaml_platform_web.bc.js
 	yarn --cwd astexplorer start
 	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
@@ -29,16 +30,42 @@ build: ## Build the project
 		--platform=node \
 		--target=es6 \
 		--sourcemap
+	yarn esbuild _build/default/src-browser/vscode_ocaml_platform_web.bc.js \
+		--bundle \
+		--external:vscode \
+		--external:fs \
+		--external:tty \
+		--external:child_process \
+		--external:constants \
+		--outdir=dist \
+		--platform=browser \
+		--target=es6 \
+		--sourcemap
 
 .PHONY: build-release
 build-release:
 	dune build src/vscode_ocaml_platform.bc.js --profile=release
+	dune build src-browser/vscode_ocaml_platform_web.bc.js --profile=release
 	yarn --cwd astexplorer build
 	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
 		--external:vscode \
 		--outdir=dist \
 		--platform=node \
+		--target=es6 \
+		--minify-whitespace \
+		--minify-syntax \
+		--sourcemap \
+		--sources-content=false
+	yarn esbuild _build/default/src-browser/vscode_ocaml_platform_web.bc.js \
+		--bundle \
+		--external:vscode \
+		--external:fs \
+		--external:tty \
+		--external:child_process \
+		--external:constants \
+		--outdir=dist \
+		--platform=browser \
 		--target=es6 \
 		--minify-whitespace \
 		--minify-syntax \

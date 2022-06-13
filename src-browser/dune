@@ -1,0 +1,5 @@
+(executable
+ (name vscode_ocaml_platform_web)
+ (modes js)
+ (js_of_ocaml
+  (flags --source-map --pretty)))
