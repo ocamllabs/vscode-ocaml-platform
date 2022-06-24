@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.10.6
+
+- Update known ocamllsp versions (#972)
+
 ## 1.10.5
 
 - "Reveal AST Node" command now does not fail if the AST Explorer is not open 
