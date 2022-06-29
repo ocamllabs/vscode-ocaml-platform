@@ -115,8 +115,11 @@ module Switch_state : sig
 
   type t
 
-  (** may return [None] if, for example, the switch is empty, i.e., created with 
-      {opam switch create sw --empty} *)
+  (** may return [None] if, for example, the switch is empty, i.e., created with
+
+      {[
+        opam switch create sw -- empty
+      ]} *)
   val of_switch : opam -> Switch.t -> t option Promise.t
 
   val compilers : t -> string list option
