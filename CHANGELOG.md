@@ -6,7 +6,7 @@
 
 ## 1.10.5
 
-- "Reveal AST Node" command now does not fail if the AST Explorer is not open 
+- "Reveal AST Node" command now does not fail if the AST Explorer is not open
   but opens it and then reveals the node (#964)
 
 - Fix reading `ocaml.repl.useUtop` setting (#957)
