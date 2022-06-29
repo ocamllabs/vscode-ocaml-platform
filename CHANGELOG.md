@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased
+
+- Upgrade to `vscode-languageclient` v8.0.1. This may fix some stability
+  problems
+
 ## 1.10.6
 
 - Update known ocamllsp versions (#972)
