@@ -42,15 +42,6 @@ jobs:
       - name: Install opam packages
         run: opam install . --deps-only --with-test
 
-      - name: Use latest esy
-        run: npm install --global esy
-
-      - name: Install and build esy packages
-        uses: esy/github-action@v1
-        with:
-          working-directory: test/fixtures/sample-esy
-          cache-key: ${{ hashFiles('esy.lock/index.json') }}
-
       - name: Install npm packages
         run: |
           yarn --frozen-lockfile --cwd astexplorer
