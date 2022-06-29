@@ -190,11 +190,11 @@ module LanguageClient = struct
       -> t
       [@@js.new "vscode_languageclient.LanguageClient"]
 
-    val start : t -> unit [@@js.call]
+    val start : t -> unit Promise.t [@@js.call]
 
-    val stop : t -> unit [@@js.call]
+    val isRunning : t -> bool [@@js.call]
 
-    val onReady : t -> Promise.void [@@js.call]
+    val stop : t -> unit Promise.t [@@js.call]
 
     val initializeResult : t -> InitializeResult.t [@@js.get]
 
@@ -208,9 +208,4 @@ module LanguageClient = struct
       [@@js.call]
 
     val registerFeature : t -> feature:StaticFeature.t -> unit [@@js.call]]
-
-  let ready_initialize_result t =
-    let open Promise.Syntax in
-    let+ () = onReady t in
-    initializeResult t
 end
