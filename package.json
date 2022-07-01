@@ -13,14 +13,7 @@
     "url": "https://github.com/ocamllabs/vscode-ocaml-platform/issues"
   },
   "homepage": "https://github.com/ocamllabs/vscode-ocaml-platform",
-  "capabilities": {
-    "virtualWorkspaces": {
-      "supported": "limited",
-      "description": "Only syntax highlighting is provided."
-    }
-  },
   "main": "./dist/vscode_ocaml_platform.bc.js",
-  "browser": "./dist/vscode_ocaml_platform_web.bc.js",
   "engines": {
     "vscode": "^1.64.0"
   },
@@ -62,8 +55,7 @@
     "viewsWelcome": [
       {
         "view": "ocaml-sandbox",
-        "contents": "In order to manage your sandbox, you can open a folder containing an Opam switch, or select an Opam switch as a sandbox.\n[Open Folder](command:vscode.openFolder)\n[Select Sandbox](command:ocaml.select-sandbox)",
-        "when": "!virtualWorkspace"
+        "contents": "In order to manage your sandbox, you can open a folder containing an Opam switch, or select an Opam switch as a sandbox.\n[Open Folder](command:vscode.openFolder)\n[Select Sandbox](command:ocaml.select-sandbox)"
       }
     ],
     "viewsContainers": {
@@ -71,8 +63,7 @@
         {
           "id": "ocaml-explorer",
           "title": "OCaml",
-          "icon": "assets/logo.svg",
-          "when": "!virtualWorkspace"
+          "icon": "assets/logo.svg"
         }
       ]
     },
@@ -80,23 +71,19 @@
       "ocaml-explorer": [
         {
           "id": "ocaml-sandbox",
-          "name": "Sandbox",
-          "when": "!virtualWorkspace"
+          "name": "Sandbox"
         },
         {
           "id": "ocaml-switches",
-          "name": "Opam Switches",
-          "when": "!virtualWorkspace"
+          "name": "Opam Switches"
         },
         {
           "id": "ocaml-commands",
-          "name": "Commands",
-          "when": "!virtualWorkspace"
+          "name": "Commands"
         },
         {
           "id": "ocaml-help",
-          "name": "Help and feedback",
-          "when": "!virtualWorkspace"
+          "name": "Help and feedback"
         }
       ]
     },
@@ -104,26 +91,22 @@
       {
         "command": "ocaml.select-sandbox",
         "category": "OCaml",
-        "title": "Select a Sandbox for this Workspace",
-        "enablement": "!virtualWorkspace"
+        "title": "Select a Sandbox for this Workspace"
       },
       {
         "command": "ocaml.server.restart",
         "category": "OCaml",
-        "title": "Restart Language Server",
-        "enablement": "!virtualWorkspace"
+        "title": "Restart Language Server"
       },
       {
         "command": "ocaml.open-terminal",
         "category": "OCaml",
-        "title": "Create Terminal (Current Sandbox)",
-        "enablement": "!virtualWorkspace"
+        "title": "Create Terminal (Current Sandbox)"
       },
       {
         "command": "ocaml.open-terminal-select",
         "category": "OCaml",
-        "title": "Create Terminal (Select a Sandbox)",
-        "enablement": "!virtualWorkspace"
+        "title": "Create Terminal (Select a Sandbox)"
       },
       {
         "command": "ocaml.switch-impl-intf",
@@ -132,8 +115,7 @@
         "icon": {
           "light": "assets/switch-impl-intf.light.svg",
           "dark": "assets/switch-impl-intf.dark.svg"
-        },
-        "enablement": "!virtualWorkspace"
+        }
       },
       {
         "command": "ocaml.refresh-switches",
@@ -142,8 +124,7 @@
         "icon": {
           "light": "assets/refresh-light.svg",
           "dark": "assets/refresh-dark.svg"
-        },
-        "enablement": "!virtualWorkspace"
+        }
       },
       {
         "command": "ocaml.refresh-sandbox",
@@ -152,8 +133,7 @@
         "icon": {
           "light": "assets/refresh-light.svg",
           "dark": "assets/refresh-dark.svg"
-        },
-        "enablement": "!virtualWorkspace"
+        }
       },
       {
         "command": "ocaml.install-sandbox",
@@ -162,8 +142,7 @@
         "icon": {
           "light": "assets/plus-light.svg",
           "dark": "assets/plus-dark.svg"
-        },
-        "enablement": "!virtualWorkspace"
+        }
       },
       {
         "command": "ocaml.upgrade-sandbox",
@@ -172,8 +151,7 @@
         "icon": {
           "light": "assets/arrow-circle-up-light.svg",
           "dark": "assets/arrow-circle-up-dark.svg"
-        },
-        "enablement": "!virtualWorkspace"
+        }
       },
       {
         "command": "ocaml.remove-switch",
@@ -182,8 +160,7 @@
         "icon": {
           "light": "assets/x-light.svg",
           "dark": "assets/x-dark.svg"
-        },
-        "enablement": "!virtualWorkspace"
+        }
       },
       {
         "command": "ocaml.uninstall-sandbox-package",
@@ -192,8 +169,7 @@
         "icon": {
           "light": "assets/x-light.svg",
           "dark": "assets/x-dark.svg"
-        },
-        "enablement": "!virtualWorkspace"
+        }
       },
       {
         "command": "ocaml.open-switches-documentation",
@@ -202,8 +178,7 @@
         "icon": {
           "light": "assets/document-search-light.svg",
           "dark": "assets/document-search-dark.svg"
-        },
-        "enablement": "!virtualWorkspace"
+        }
       },
       {
         "command": "ocaml.generate-sandbox-documentation",
@@ -212,8 +187,7 @@
         "icon": {
           "light": "assets/book-open-light.svg",
           "dark": "assets/book-open-dark.svg"
-        },
-        "enablement": "!virtualWorkspace"
+        }
       },
       {
         "command": "ocaml.open-sandbox-documentation",
@@ -222,99 +196,84 @@
         "icon": {
           "light": "assets/document-search-light.svg",
           "dark": "assets/document-search-dark.svg"
-        },
-        "enablement": "!virtualWorkspace"
+        }
       },
       {
         "command": "ocaml.stop-documentation-server",
         "category": "OCaml",
-        "title": "Stop Documentation Server",
-        "enablement": "!virtualWorkspace"
+        "title": "Stop Documentation Server"
       },
       {
         "command": "ocaml.next-hole",
         "category": "OCaml",
-        "title": "Jump to Next Typed Hole",
-        "enablement": "!virtualWorkspace"
+        "title": "Jump to Next Typed Hole"
       },
       {
         "command": "ocaml.prev-hole",
         "category": "OCaml",
-        "title": "Jump to Previous Typed Hole",
-        "enablement": "!virtualWorkspace"
+        "title": "Jump to Previous Typed Hole"
       },
       {
         "command": "ocaml.current-dune-file",
         "category": "OCaml",
-        "title": "Open Dune File (located in the same folder)",
-        "enablement": "!virtualWorkspace"
+        "title": "Open Dune File (located in the same folder)"
       },
       {
         "command": "ocaml.open-repl",
         "category": "OCaml",
-        "title": "Open REPL",
-        "enablement": "!virtualWorkspace"
+        "title": "Open REPL"
       },
       {
         "command": "ocaml.evaluate-selection",
         "category": "OCaml",
-        "title": "Evaluate Selection",
-        "enablement": "!virtualWorkspace"
+        "title": "Evaluate Selection"
       },
       {
         "command": "ocaml.open-ast-explorer-to-the-side",
         "category": "OCaml",
-        "title": "Open AST explorer",
-        "enablement": "!virtualWorkspace"
+        "title": "Open AST explorer"
       },
       {
         "command": "ocaml.show-preprocessed-document",
         "category": "OCaml",
-        "title": "Show Preprocessed Document",
-        "enablement": "!virtualWorkspace"
+        "title": "Show Preprocessed Document"
       },
       {
         "command": "ocaml.reveal-ast-node",
         "category": "OCaml",
-        "title": "Reveal Ast Node",
-        "enablement": "!virtualWorkspace"
+        "title": "Reveal Ast Node"
       },
       {
         "command": "ocaml.switch-hover-mode",
         "category": "OCaml",
-        "title": "Switch to hover AST reveal mode",
-        "enablement": "!virtualWorkspace"
+        "title": "Switch to hover AST reveal mode"
       },
       {
         "command": "ocaml.open-pp-editor-and-ast-explorer",
         "category": "OCaml",
-        "title": "Open both Preprocessed Document and AST explorer to the side",
-        "enablement": "!virtualWorkspace"
+        "title": "Open both Preprocessed Document and AST explorer to the side"
       },
       {
         "command": "ocaml.open-ocamllsp-output",
         "category": "OCaml",
-        "title": "Show OCaml Language Server Output",
-        "enablement": "!virtualWorkspace"
+        "title": "Show OCaml Language Server Output"
       },
       {
         "command": "ocaml.open-ocaml-platform-ext-output",
         "category": "OCaml",
-        "title": "Show OCaml Platform Extension Output",
-        "enablement": "!virtualWorkspace"
+        "title": "Show OCaml Platform Extension Output"
       },
       {
         "command": "ocaml.open-ocaml-commands-output",
         "category": "OCaml",
-        "title": "Show OCaml Commands Output",
-        "enablement": "!virtualWorkspace"
+        "title": "Show OCaml Commands Output"
       }
     ],
     "keybindings": [
       {
         "command": "ocaml.switch-impl-intf",
         "key": "Alt+O",
-        "when": "(editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir) && !isWeb"
+        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir"
       },
       {
         "command": "editor.action.codeAction",
@@ -322,7 +281,7 @@
         "args": {
           "kind": "destruct"
         },
-        "when": "(editorLangId == ocaml || editorLangId == reason) && !isWeb"
+        "when": "editorLangId == ocaml || editorLangId == reason"
       },
       {
         "command": "editor.action.codeAction",
@@ -330,7 +289,7 @@
         "args": {
           "kind": "construct"
         },
-        "when": "(editorLangId == ocaml) && !isWeb"
+        "when": "editorLangId == ocaml"
       },
       {
         "command": "editor.action.codeAction",
@@ -338,32 +297,32 @@
         "args": {
           "kind": "inferred_intf"
         },
-        "when": "(editorLangId == ocaml.interface || editorLangId == reason) && !isWeb"
+        "when": "editorLangId == ocaml.interface || editorLangId == reason"
       },
       {
         "command": "ocaml.evaluate-selection",
         "key": "Shift+Enter",
-        "when": "(editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir) && !isWeb"
+        "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir"
       },
       {
         "command": "ocaml.next-hole",
         "key": "Alt+Y",
-        "when": "(editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex) && !isWeb"
+        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
       },
       {
         "command": "ocaml.prev-hole",
         "key": "Shift+Alt+Y",
-        "when": "(editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex) && !isWeb"
+        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
       },
       {
         "command": "ocaml.reveal-ast-node",
         "key": "Alt+N",
-        "when": "(editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface) && !isWeb"
+        "when": "editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface "
       },
       {
         "command": "ocaml.switch-hover-mode",
         "key": "Alt+H",
-        "when": "(editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface) && !isWeb"
+        "when": "editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface "
       }
     ],
     "menus": {
@@ -371,26 +330,26 @@
         {
           "command": "ocaml.evaluate-selection",
           "group": "OCaml",
-          "when": "(editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir) && !isWeb"
+          "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir"
         },
         {
           "command": "ocaml.reveal-ast-node",
           "group": "OCaml",
-          "when": "(editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface) && !isWeb"
+          "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface"
         }
       ],
       "commandPalette": [
         {
           "command": "ocaml.current-dune-file",
-          "when": "editorIsOpen && !isWeb"
+          "when": "editorIsOpen"
         },
         {
           "command": "ocaml.next-hole",
-          "when": "(editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex) && !isWeb"
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
         },
         {
           "command": "ocaml.prev-hole",
-          "when": "(editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex) && !isWeb"
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
         },
         {
           "command": "ocaml.refresh-switches",
@@ -410,7 +369,7 @@
         },
         {
           "command": "ocaml.stop-documentation-server",
-          "when": "ocaml.documentation-server-on && !isWeb"
+          "when": "ocaml.documentation-server-on"
         },
         {
           "command": "ocaml.upgrade-sandbox",
@@ -437,56 +396,56 @@
         {
           "command": "ocaml.switch-impl-intf",
           "key": "Alt+O",
-          "when": "(editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir) && !isWeb",
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir",
           "group": "navigation"
         }
       ],
       "view/title": [
         {
           "command": "ocaml.refresh-switches",
-          "when": "view == ocaml-switches && !isWeb",
+          "when": "view == ocaml-switches",
           "group": "navigation"
         },
         {
           "command": "ocaml.refresh-sandbox",
-          "when": "view == ocaml-sandbox && !isWeb",
+          "when": "view == ocaml-sandbox",
           "group": "navigation"
         },
         {
           "command": "ocaml.install-sandbox",
-          "when": "view == ocaml-sandbox && !isWeb",
+          "when": "view == ocaml-sandbox",
           "group": "navigation"
         },
         {
           "command": "ocaml.upgrade-sandbox",
-          "when": "view == ocaml-sandbox && !isWeb",
+          "when": "view == ocaml-sandbox",
           "group": "navigation"
         }
       ],
       "view/item/context": [
         {
           "command": "ocaml.remove-switch",
-          "when": "view == ocaml-switches && viewItem == opam-switch && !isWeb",
+          "when": "view == ocaml-switches && viewItem == opam-switch",
           "group": "inline"
         },
         {
           "command": "ocaml.uninstall-sandbox-package",
-          "when": "view == ocaml-sandbox && !isWeb",
+          "when": "view == ocaml-sandbox",
           "group": "inline"
         },
         {
           "command": "ocaml.open-switches-documentation",
-          "when": "view == ocaml-switches && viewItem == package-with-doc && !isWeb",
+          "when": "view == ocaml-switches && viewItem == package-with-doc",
           "group": "inline"
         },
         {
           "command": "ocaml.open-sandbox-documentation",
-          "when": "view == ocaml-sandbox && viewItem == package-with-doc && !isWeb",
+          "when": "view == ocaml-sandbox && viewItem == package-with-doc",
           "group": "inline"
         },
         {
           "command": "ocaml.generate-sandbox-documentation",
-          "when": "view == ocaml-sandbox && !isWeb",
+          "when": "view == ocaml-sandbox",
           "group": "inline"
         }
       ]
@@ -533,8 +492,7 @@
             "string",
             "null"
           ],
-          "default": null,
-          "when": "!virtualWorkspace"
+          "default": null
         },
         "ocaml.terminal.shell.osx": {
           "description": "The path of the shell that the sandbox terminal uses on macOS",
@@ -1067,8 +1025,7 @@
     "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --yarn",
     "deploy:ovsx": "ovsx publish --yarn",
     "fmt:check": "prettier . --check",
-    "fmt": "prettier . --write",
-    "run:web": "npx @vscode/test-web --extensionDevelopmentPath=. ."
+    "fmt": "prettier . --write"
   },
   "dependencies": {
     "polka": "^1.0.0-next.22",
