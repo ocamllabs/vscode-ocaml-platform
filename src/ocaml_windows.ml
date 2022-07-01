@@ -1,6 +1,6 @@
 open Import
 
-let ocaml_env_binary = Path.of_string "ocaml-env"
+let ocaml_env_command = { Cmd.bin = Path.of_string "ocaml-env"; args = [] }
 
 let ocaml_env_setting =
   Settings.create_setting
@@ -11,11 +11,14 @@ let ocaml_env_setting =
 
 let use_ocaml_env () =
   match (Platform.t, Settings.get ocaml_env_setting) with
-  | Win32, Some true -> true
-  | _ -> false
+  | Win32, Some true ->
+    let open Promise.Syntax in
+    let+ checked = Cmd.check_spawn ocaml_env_command in
+    Result.is_ok checked
+  | _ -> Promise.return false
 
 let spawn_ocaml_env args =
-  { Cmd.bin = ocaml_env_binary; args = "exec" :: "--" :: args }
+  { ocaml_env_command with args = "exec" :: "--" :: args }
 
 let cygwin_home () =
   let open Promise.Syntax in
