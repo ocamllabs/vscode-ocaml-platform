@@ -5,6 +5,8 @@
 - Upgrade to `vscode-languageclient` v8.0.1. This may fix some stability
   problems
 
+- Revert "Add minimal support as a Web Extension (#962)" because of regressions
+
 ## 1.10.6
 
 - Update known ocamllsp versions (#972)

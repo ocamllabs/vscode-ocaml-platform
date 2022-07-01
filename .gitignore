@@ -23,7 +23,6 @@ node_modules/
 # VSCode build artifacts
 dist/
 .vscode-test/
-.vscode-test-web/
 *.vsix
 
 # DS_Store
