@@ -122,7 +122,6 @@ jobs:
           - 16.x
 
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -133,31 +132,17 @@ jobs:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
           dune-cache: true
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Install npm packages
-        run: |
-          yarn --frozen-lockfile --cwd astexplorer
-          yarn --frozen-lockfile
-
-      - run: opam depext opam-dune-lint --install
-
-      - run: opam install . --deps-only
-
-      - run: opam exec -- make build-release
-
-      - run: opam exec -- opam-dune-lint
+      - name: Lint opam
+        uses: ocaml/setup-ocaml/lint-opam@v2
 
   lint-fmt:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         ocaml-compiler:
           - 4.14.x
-
-    runs-on: ubuntu-latest
+        node-version:
+          - 16.x
 
     steps:
       - name: Checkout code
@@ -169,6 +154,5 @@ jobs:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
           dune-cache: true
 
-      - run: opam depext --install ocamlformat=$(awk -F = '/^version=/{print $2}' .ocamlformat)
-
-      - run: opam exec -- dune build @fmt
+      - name: Lint fmt
+        uses: ocaml/setup-ocaml/lint-fmt@v2
