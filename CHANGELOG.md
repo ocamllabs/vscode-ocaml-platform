@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Encode URI when sending the `switchImplIntf` request (#983)
+
 ## 1.12.3
 
 - Reorder sandbox buttons (#1083)

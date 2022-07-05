@@ -25,9 +25,7 @@ let insert_inferred_intf ~source_uri client text_editor =
 
 let request_switch client document =
   let open Promise.Syntax in
-  let source_uri =
-    Uri.toString (TextDocument.uri document) ~skipEncoding:true ()
-  in
+  let source_uri = Uri.toString (TextDocument.uri document) () in
   let fill_intf_if_empty_untitled text_editor =
     let doc = TextEditor.document text_editor in
     let is_empty_doc doc = TextDocument.getText doc () |> String.is_empty in
