@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Fix syntax highlighting for let bindings with type annotations (#991)
+
 ## 1.10.8
 
 - Add more known versions of ocamllsp
