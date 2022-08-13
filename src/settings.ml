@@ -30,6 +30,8 @@ let set ?section setting v =
     WorkspaceConfiguration.update section ~section:setting.key ~value
       ~configurationTarget:(`ConfigurationTarget setting.scope) ()
 
+let first_workspace_folder_var = "${firstWorkspaceFolder}"
+
 let workspace_folder_var folder =
   Printf.sprintf "${workspaceFolder:%s}" (WorkspaceFolder.name folder)
 
@@ -50,7 +52,15 @@ let resolve_workspace_vars setting =
     | _ -> assert false
     (* name will always be captured *)
   in
-  Interop.Regexp.replace setting ~regexp ~replacer
+  let first_workspace_folder_path =
+    Workspace.workspaceFolders ()
+    |> List.hd
+    |> Option.value_map ~f:workspace_folder_path ~default:""
+  in
+  setting
+  |> Interop.Regexp.replace ~regexp ~replacer
+  |> String.substr_replace_all ~pattern:first_workspace_folder_var
+       ~with_:first_workspace_folder_path
 
 let substitute_workspace_vars setting =
   (* Windows paths are case-insensitive *)

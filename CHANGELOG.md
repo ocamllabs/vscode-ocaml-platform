@@ -4,6 +4,9 @@
 
 - Fix syntax highlighting for let bindings with type annotations (#991)
 
+- Add support for `${firstWorkspaceFolder}` as a placeholder variable in
+  configuration files (#1004)
+
 ## 1.10.8
 
 - Add more known versions of ocamllsp
