@@ -91,7 +91,7 @@ let create ?name ?command sandbox =
 
 let dispose = Terminal.dispose
 
-let show t = Terminal.show t ()
+let show ?preserveFocus t = Terminal.show ?preserveFocus t ()
 
 let send t text =
   let addNewLine = not (String.is_suffix text ~suffix:"\n") in

@@ -34,7 +34,9 @@ module Commands = struct
 
   let open_current_dune_file = ocaml_prefixed "current-dune-file"
 
-  let evaluate_selection = ocaml_prefixed "evaluate-selection"
+  let evaluate_expression = ocaml_prefixed "evaluate-expression"
+
+  let evaluate_file = ocaml_prefixed "evaluate-file"
 
   let open_repl = ocaml_prefixed "open-repl"
 

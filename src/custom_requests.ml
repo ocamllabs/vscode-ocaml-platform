@@ -33,3 +33,23 @@ let typedHoles =
         Jsonoo.Encode.(object_ [ ("uri", string @@ Uri.toString uri ()) ]))
   ; decode_response = Jsonoo.Decode.list Range.t_of_json
   }
+
+module Wrapping_ast_node = struct
+  let meth = ocamllsp_prefixed "wrappingAstNode"
+
+  let encode_params uri position =
+    (* TODO: these params exist as a defined type in LSP *)
+    Jsonoo.Encode.(
+      object_
+        [ ("uri", string @@ Uri.toString uri ())
+        ; ("position", Position.json_of_t position)
+        ])
+
+  let decode_response json = Jsonoo.Decode.try_optional Range.t_of_json json
+
+  let send_request client ~doc:uri ~position =
+    let data = encode_params uri position in
+    let open Promise.Syntax in
+    let+ response = LanguageClient.sendRequest client ~meth ~data () in
+    decode_response response
+end

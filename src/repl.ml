@@ -91,7 +91,7 @@ let default_repl sandbox =
 let create_terminal instance sandbox =
   match Extension_instance.repl instance with
   | Some term ->
-    Terminal_sandbox.show term;
+    Terminal_sandbox.show ~preserveFocus:true term;
     Promise.return (Ok term)
   | None -> (
     let open Promise.Syntax in
@@ -110,7 +110,7 @@ let create_terminal instance sandbox =
         (Error "Running a REPL from a Shell command is not supported")
     | Ok (Spawn cmd) -> (
       let term = Terminal_sandbox.create ~name ~command:cmd sandbox in
-      Terminal_sandbox.show term;
+      Terminal_sandbox.show ~preserveFocus:true term;
       (* Wait for UTop or OCaml REPL to be initialized before sending text to
          the terminal.
 
@@ -129,23 +129,40 @@ let create_terminal instance sandbox =
         Extension_instance.set_repl instance term;
         Ok term))
 
-let get_code text_editor =
-  let selection = Vscode.TextEditor.selection text_editor in
-  let start_line = Vscode.Selection.start selection |> Vscode.Position.line in
-  let end_line = Vscode.Selection.end_ selection |> Vscode.Position.line in
-  let start_char =
-    Vscode.Selection.start selection |> Vscode.Position.character
-  in
-  let end_char = Vscode.Selection.end_ selection |> Vscode.Position.character in
-  let document = Vscode.TextEditor.document text_editor in
-  if start_line = end_line && start_char = end_char then
-    let line = Vscode.TextDocument.lineAt document ~line:start_line in
-    Vscode.TextLine.text line
+let get_selected_code text_editor =
+  let selection = TextEditor.selection text_editor in
+  let document = TextEditor.document text_editor in
+  if Selection.isEmpty selection then None
   else
-    Vscode.TextDocument.getText document ~range:(selection :> Vscode.Range.t) ()
+    let selected_text =
+      TextDocument.getText document ~range:(selection :> Range.t) ()
+    in
+    Some selected_text
 
-let prepare_code code =
-  if String.is_suffix code ~suffix:";;" then code else code ^ ";;"
+let get_uri text_editor =
+  text_editor |> Vscode.TextEditor.document |> Vscode.TextDocument.uri
+  |> Vscode.Uri.fsPath
+
+let preformat_code code =
+  let is_repl_ready s = String.is_suffix s ~suffix:";;" in
+  let trimmed_code = String.strip code in
+  if is_repl_ready trimmed_code then
+    if String.mem trimmed_code '\n' then
+      (* newline is for nicer look in REPL *)
+      "\n" ^ trimmed_code
+    else trimmed_code
+  else if String.mem trimmed_code '\n' then
+    Printf.sprintf "\n%s\n;;" trimmed_code
+  else trimmed_code ^ " ;;"
+
+let jump_to_next_expr_setting =
+  Settings.create_setting ~scope:Global ~key:"ocaml.repl.jumpToNextExpression"
+    ~of_json:Jsonoo.Decode.bool ~to_json:Jsonoo.Encode.bool
+
+let jump_to_next_expr () =
+  match Settings.get jump_to_next_expr_setting with
+  | Some x -> x
+  | None -> true
 
 module Command = struct
   let _open_repl =
@@ -165,7 +182,194 @@ module Command = struct
     in
     Extension_commands.register ~id:Extension_consts.Commands.open_repl handler
 
-  let _evaluate_selection =
+  let _evaluate_expression =
+    let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
+      let (_ : unit Promise.t) =
+        let open Promise.Syntax in
+        let sandbox = Extension_instance.sandbox instance in
+        let* term = create_terminal instance sandbox in
+        match term with
+        | Error err ->
+          show_message `Error "Could not start the REPL: %s" err;
+          Promise.return ()
+        | Ok term -> (
+          match get_selected_code textEditor with
+          | Some code ->
+            let code = preformat_code code in
+            Terminal_sandbox.send term code;
+            Promise.return ()
+          | None -> (
+            let open Promise.Syntax in
+            match Extension_instance.lsp_client instance with
+            | None ->
+              show_message `Warn "ocamllsp is not running.";
+              Promise.return ()
+            | Some (_, ocaml_lsp)
+              when not (Ocaml_lsp.can_handle_wrapping_ast_node ocaml_lsp) ->
+              Promise.return ()
+            | Some (client, _) -> (
+              let doc = TextEditor.document textEditor in
+              let uri = TextDocument.uri doc in
+              let selection_start =
+                let selection = TextEditor.selection textEditor in
+                Selection.start selection
+              in
+              (* The lsp-server needs to have the good position to evaluate the
+                 right expression here we go up until we find an expression or
+                 stop at the top (on the line 0) *)
+              let rec find_correct_position line =
+                let line_text = TextLine.text line in
+                let stripped_line_text = String.strip line_text in
+                match stripped_line_text with
+                | text when String.is_suffix text ~suffix:";;" ->
+                  (* The cursor if after an expression *)
+                  if
+                    String.compare text ";;" = 0
+                    && TextLine.lineNumber line <> 0
+                  then
+                    (* The expression should in the previous line so we go up *)
+                    let previous_line =
+                      TextDocument.lineAt doc
+                        ~line:(TextLine.lineNumber line - 1)
+                    in
+                    find_correct_position previous_line
+                  else line |> TextLine.range |> Range.start
+                | text
+                  when String.is_empty text
+                       || String.is_prefix text ~prefix:"(*" ->
+                  (* We choose to go for the previous expression but we could
+                     instead evaluate the whole file *)
+                  if TextLine.lineNumber line <> 0 then
+                    let previous_line =
+                      TextDocument.lineAt doc
+                        ~line:(TextLine.lineNumber line - 1)
+                    in
+                    find_correct_position previous_line
+                  else line |> TextLine.range |> Range.start
+                | _ ->
+                  (* The cursor is on line of an expression *)
+                  line |> TextLine.range |> Range.start
+              in
+              let correct_position =
+                let selection_line =
+                  TextDocument.lineAtPosition doc ~position:selection_start
+                in
+                find_correct_position selection_line
+              in
+              let text_correct_position =
+                String.strip
+                  (TextLine.text
+                     (TextDocument.lineAtPosition doc ~position:correct_position))
+              in
+              if
+                String.is_empty text_correct_position
+                || String.is_prefix text_correct_position ~prefix:";;"
+                || String.is_prefix text_correct_position ~prefix:"(*"
+              then (
+                if jump_to_next_expr () then (
+                  let rec new_position line =
+                    if TextDocument.lineCount doc - 1 = TextLine.lineNumber line
+                    then selection_start
+                    else
+                      let next_line =
+                        TextDocument.lineAt doc
+                          ~line:(TextLine.lineNumber line + 1)
+                      in
+                      let stripped_line_text =
+                        String.strip (TextLine.text next_line)
+                      in
+                      match stripped_line_text with
+                      | ";;" | "" -> new_position next_line
+                      | text when String.is_prefix text ~prefix:"(*" ->
+                        new_position next_line
+                      | _ -> Range.start (TextLine.range next_line)
+                  in
+                  let new_selection =
+                    let position =
+                      new_position
+                        (TextDocument.lineAtPosition doc
+                           ~position:correct_position)
+                    in
+                    Selection.makePositions ~anchor:position ~active:position
+                  in
+                  TextEditor.set_selection textEditor new_selection;
+                  TextEditor.revealRange textEditor
+                    ~range:
+                      (Range.makePositions ~start:selection_start
+                         ~end_:selection_start)
+                    ~revealType:TextEditorRevealType.AtTop ());
+                Promise.return ())
+              else
+                let+ range =
+                  Custom_requests.Wrapping_ast_node.send_request client ~doc:uri
+                    ~position:correct_position
+                in
+                match range with
+                | None -> ()
+                | Some range ->
+                  let code = TextDocument.getText doc ~range () in
+                  Terminal_sandbox.send term (preformat_code code);
+                  if jump_to_next_expr () then (
+                    let rec new_position line =
+                      if
+                        TextDocument.lineCount doc - 1
+                        = TextLine.lineNumber line
+                      then Range.end_ range
+                      else
+                        let next_line =
+                          TextDocument.lineAt doc
+                            ~line:(TextLine.lineNumber line + 1)
+                        in
+                        let stripped_line_text =
+                          String.strip (TextLine.text next_line)
+                        in
+                        match stripped_line_text with
+                        | ";;" -> new_position next_line
+                        | "" -> new_position next_line
+                        | text when String.is_prefix text ~prefix:"(*" ->
+                          let rec skip_comment comment_line =
+                            if
+                              TextDocument.lineCount doc - 1
+                              = TextLine.lineNumber comment_line
+                            then Range.end_ range
+                            else
+                              let next_comment_line =
+                                TextDocument.lineAt doc
+                                  ~line:(TextLine.lineNumber comment_line + 1)
+                              in
+                              let stripped_comment_line =
+                                String.strip (TextLine.text comment_line)
+                              in
+                              if
+                                String.is_suffix stripped_comment_line
+                                  ~suffix:"*)"
+                              then new_position comment_line
+                              else skip_comment next_comment_line
+                          in
+                          skip_comment next_line
+                        | _ -> Range.start (TextLine.range next_line)
+                    in
+                    let new_selection =
+                      let position =
+                        new_position
+                          (TextDocument.lineAtPosition doc
+                             ~position:(Range.end_ range))
+                      in
+                      Selection.makePositions ~anchor:position ~active:position
+                    in
+                    TextEditor.set_selection textEditor new_selection;
+                    TextEditor.revealRange textEditor
+                      ~range:
+                        (Range.makePositions ~start:selection_start
+                           ~end_:selection_start)
+                      ~revealType:TextEditorRevealType.AtTop ()))))
+      in
+      ()
+    in
+    Extension_commands.register_text_editor
+      ~id:Extension_consts.Commands.evaluate_expression handler
+
+  let _evaluate_file =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
@@ -174,15 +378,14 @@ module Command = struct
         match term with
         | Error err -> show_message `Error "Could not start the REPL: %s" err
         | Ok term ->
-          let code = get_code textEditor in
-          if String.length code > 0 then
-            let code = prepare_code code in
-            Terminal_sandbox.send term code
+          let uri = get_uri textEditor in
+          let use = "#use {|" ^ uri ^ "|};;" in
+          Terminal_sandbox.send term use
       in
       ()
     in
     Extension_commands.register_text_editor
-      ~id:Extension_consts.Commands.evaluate_selection handler
+      ~id:Extension_consts.Commands.evaluate_file handler
 end
 
 let register extension instance =

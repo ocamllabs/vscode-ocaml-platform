@@ -224,9 +224,14 @@
         "title": "Open REPL"
       },
       {
-        "command": "ocaml.evaluate-selection",
+        "command": "ocaml.evaluate-expression",
         "category": "OCaml",
-        "title": "Evaluate Selection"
+        "title": "Evaluate Expression in REPL"
+      },
+      {
+        "command": "ocaml.evaluate-file",
+        "category": "OCaml",
+        "title": "Evaluate File in REPL"
       },
       {
         "command": "ocaml.open-ast-explorer-to-the-side",
@@ -300,8 +305,13 @@
         "when": "editorLangId == ocaml.interface || editorLangId == reason"
       },
       {
-        "command": "ocaml.evaluate-selection",
+        "command": "ocaml.evaluate-expression",
         "key": "Shift+Enter",
+        "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir"
+      },
+      {
+        "command": "ocaml.evaluate-file",
+        "key": "Shift+Alt+Enter",
         "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir"
       },
       {
@@ -328,7 +338,7 @@
     "menus": {
       "editor/context": [
         {
-          "command": "ocaml.evaluate-selection",
+          "command": "ocaml.evaluate-expression",
           "group": "OCaml",
           "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir"
         },
@@ -558,6 +568,11 @@
           "type": "boolean",
           "default": true,
           "description": "Controls whether to use Utop for the REPL if it is installed in the current switch."
+        },
+        "ocaml.repl.jumpToNextExpression": {
+          "type": "boolean",
+          "default": true,
+          "description": "Cursor jumps to next expression after current expression is evaluated in REPL"
         }
       }
     },
