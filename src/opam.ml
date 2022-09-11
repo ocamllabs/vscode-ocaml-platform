@@ -140,8 +140,10 @@ end = struct
     in
     match file_res with
     | Error e ->
-      log "Error reading switch-state file at %s. Error: %s"
-        switch_state_filepath (Node.JsError.message e);
+      log
+        "Error reading switch-state file at %s. Error: %s"
+        switch_state_filepath
+        (Node.JsError.message e);
       None
     | Ok file_content -> (
       match
@@ -153,7 +155,9 @@ end = struct
         log
           "Parsing error reading switch-state file at %s. Error: %s. File \
            contents: %s"
-          switch_state_filepath (Exn.to_string e) file_content;
+          switch_state_filepath
+          (Exn.to_string e)
+          file_content;
         None)
 
   let compilers = Opam_parser.list "compiler"

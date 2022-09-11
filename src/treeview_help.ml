@@ -11,7 +11,9 @@ let discord_item =
   in
   let item = Vscode.TreeItem.make_label ~label () in
   let command =
-    Vscode.Command.create ~title:"Open" ~command:"vscode.open"
+    Vscode.Command.create
+      ~title:"Open"
+      ~command:"vscode.open"
       ~arguments:
         [ Vscode.Uri.parse "https://discord.gg/cCYQbqN" () |> Vscode.Uri.t_to_js
         ]
@@ -35,7 +37,9 @@ let discuss_item =
   in
   let item = Vscode.TreeItem.make_label ~label () in
   let command =
-    Vscode.Command.create ~title:"Open" ~command:"vscode.open"
+    Vscode.Command.create
+      ~title:"Open"
+      ~command:"vscode.open"
       ~arguments:
         [ Vscode.Uri.parse "https://discuss.ocaml.org/" () |> Vscode.Uri.t_to_js
         ]
@@ -59,9 +63,12 @@ let github_item =
   in
   let item = Vscode.TreeItem.make_label ~label () in
   let command =
-    Vscode.Command.create ~title:"Open" ~command:"vscode.open"
+    Vscode.Command.create
+      ~title:"Open"
+      ~command:"vscode.open"
       ~arguments:
-        [ Vscode.Uri.parse "https://github.com/ocamllabs/vscode-ocaml-platform"
+        [ Vscode.Uri.parse
+            "https://github.com/ocamllabs/vscode-ocaml-platform"
             ()
           |> Vscode.Uri.t_to_js
         ]
@@ -86,6 +93,7 @@ let register extension =
   let disposable =
     Vscode.Window.registerTreeDataProvider
       (module Vscode.TreeItem)
-      ~viewId:"ocaml-help" ~treeDataProvider
+      ~viewId:"ocaml-help"
+      ~treeDataProvider
   in
   Vscode.ExtensionContext.subscribe extension ~disposable

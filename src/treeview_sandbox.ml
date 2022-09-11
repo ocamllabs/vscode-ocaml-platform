@@ -68,7 +68,8 @@ module Command = struct
         | None -> Promise.return ()
         | Some doc ->
           let+ _ =
-            Vscode.Commands.executeCommand ~command:"vscode.open"
+            Vscode.Commands.executeCommand
+              ~command:"vscode.open"
               ~args:[ Vscode.Uri.parse doc () |> Vscode.Uri.t_to_js ]
           in
           ()
@@ -76,7 +77,8 @@ module Command = struct
       ()
     in
     Extension_commands.register
-      ~id:Extension_consts.Commands.open_sandbox_documentation handler
+      ~id:Extension_consts.Commands.open_sandbox_documentation
+      handler
 
   let _generate_documentation =
     let handler (instance : Extension_instance.t) ~args =
@@ -93,10 +95,12 @@ module Command = struct
           let dep = Dependency.t_of_js arg in
           let package_name = Sandbox.Package.name dep in
           let options =
-            ProgressOptions.create ~location:(`ProgressLocation Notification)
+            ProgressOptions.create
+              ~location:(`ProgressLocation Notification)
               ~title:
                 (Printf.sprintf "Generating documentation for %s" package_name)
-              ~cancellable:false ()
+              ~cancellable:false
+              ()
           in
           let task ~progress:_ ~token:_ =
             Odig.odoc_exec odig ~sandbox ~package_name
@@ -104,11 +108,13 @@ module Command = struct
           let* result =
             Vscode.Window.withProgress
               (module Interop.Js.Result (Interop.Js.Unit) (Interop.Js.String))
-              ~options ~task
+              ~options
+              ~task
           in
           match result with
           | Error _ ->
-            show_message `Error
+            show_message
+              `Error
               "Documentation could not be generated for %s. It might be \
                because this package has no documentation."
               package_name;
@@ -116,7 +122,8 @@ module Command = struct
           | Ok _ -> (
             let+ server =
               let html_dir = Odig.html_dir odig in
-              Extension_instance.start_documentation_server instance
+              Extension_instance.start_documentation_server
+                instance
                 ~path:html_dir
             in
             match server with
@@ -125,10 +132,14 @@ module Command = struct
               let (_ : Ojs.t option Promise.t) =
                 let port = Documentation_server.port server in
                 let host = Documentation_server.host server in
-                Vscode.Commands.executeCommand ~command:"simpleBrowser.show"
+                Vscode.Commands.executeCommand
+                  ~command:"simpleBrowser.show"
                   ~args:
                     [ Ojs.string_to_js
-                        (Printf.sprintf "http://%s:%i/%s/index.html" host port
+                        (Printf.sprintf
+                           "http://%s:%i/%s/index.html"
+                           host
+                           port
                            package_name)
                     ]
               in
@@ -137,7 +148,8 @@ module Command = struct
       ()
     in
     Extension_commands.register
-      ~id:Extension_consts.Commands.generate_sandbox_documentation handler
+      ~id:Extension_consts.Commands.generate_sandbox_documentation
+      handler
 
   let _uninstall =
     let handler (instance : Extension_instance.t) ~args =
@@ -145,7 +157,8 @@ module Command = struct
         let arg = List.hd_exn args in
         let dep = Dependency.t_of_js arg in
         let message =
-          Printf.sprintf "Are you sure you want to uninstall package %s?"
+          Printf.sprintf
+            "Are you sure you want to uninstall package %s?"
             (Dependency.label dep)
         in
         with_confirmation message ~yes:"Uninstall package" @@ fun () ->
@@ -155,18 +168,21 @@ module Command = struct
         let+ () = Sandbox.uninstall_packages sandbox [ dep ] in
         let (_ : Ojs.t option Promise.t) =
           Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_switches ~args:[]
+            ~command:Extension_consts.Commands.refresh_switches
+            ~args:[]
         in
         let (_ : Ojs.t option Promise.t) =
           Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
+            ~command:Extension_consts.Commands.refresh_sandbox
+            ~args:[]
         in
         ()
       in
       ()
     in
     Extension_commands.register
-      ~id:Extension_consts.Commands.uninstall_sandbox_package handler
+      ~id:Extension_consts.Commands.uninstall_sandbox_package
+      handler
 
   let _upgrade =
     let handler (instance : Extension_instance.t) ~args:_ =
@@ -177,23 +193,28 @@ module Command = struct
         let+ () = Sandbox.upgrade_packages sandbox in
         let (_ : Ojs.t option Promise.t) =
           Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_switches ~args:[]
+            ~command:Extension_consts.Commands.refresh_switches
+            ~args:[]
         in
         let (_ : Ojs.t option Promise.t) =
           Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
+            ~command:Extension_consts.Commands.refresh_sandbox
+            ~args:[]
         in
         ()
       in
       ()
     in
-    Extension_commands.register ~id:Extension_consts.Commands.upgrade_sandbox
+    Extension_commands.register
+      ~id:Extension_consts.Commands.upgrade_sandbox
       handler
 
   let ask_packages () =
     let options =
-      InputBoxOptions.create ~prompt:"Install Packages"
-        ~placeHolder:"Type the packages names, separated with a space" ()
+      InputBoxOptions.create
+        ~prompt:"Install Packages"
+        ~placeHolder:"Type the packages names, separated with a space"
+        ()
     in
     Window.showInputBox ~options ()
 
@@ -211,17 +232,20 @@ module Command = struct
           let+ () = Sandbox.install_packages sandbox packages in
           let (_ : Ojs.t option Promise.t) =
             Vscode.Commands.executeCommand
-              ~command:Extension_consts.Commands.refresh_switches ~args:[]
+              ~command:Extension_consts.Commands.refresh_switches
+              ~args:[]
           in
           let (_ : Ojs.t option Promise.t) =
             Vscode.Commands.executeCommand
-              ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
+              ~command:Extension_consts.Commands.refresh_sandbox
+              ~args:[]
           in
           ()
       in
       ()
     in
-    Extension_commands.register ~id:Extension_consts.Commands.install_sandbox
+    Extension_commands.register
+      ~id:Extension_consts.Commands.install_sandbox
       handler
 end
 
@@ -249,18 +273,23 @@ let register extension instance =
   let event = EventEmitter.event event_emitter in
   let module TreeDataProvider = Vscode.TreeDataProvider.Make (Dependency) in
   let treeDataProvider =
-    TreeDataProvider.create ~getTreeItem ~getChildren ~onDidChangeTreeData:event
+    TreeDataProvider.create
+      ~getTreeItem
+      ~getChildren
+      ~onDidChangeTreeData:event
       ()
   in
   let disposable =
     Vscode.Window.registerTreeDataProvider
       (module Dependency)
-      ~viewId:"ocaml-sandbox" ~treeDataProvider
+      ~viewId:"ocaml-sandbox"
+      ~treeDataProvider
   in
   ExtensionContext.subscribe extension ~disposable;
 
   let disposable =
-    Commands.registerCommand ~command:Extension_consts.Commands.refresh_sandbox
+    Commands.registerCommand
+      ~command:Extension_consts.Commands.refresh_sandbox
       ~callback:(fun ~args:_ -> EventEmitter.fire event_emitter None)
   in
   ExtensionContext.subscribe extension ~disposable

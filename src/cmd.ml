@@ -82,7 +82,11 @@ let run ?cwd ?env ?stdin cmd =
   let options = ChildProcess.Options.create ?cwd ?env () in
   match cmd with
   | Spawn { bin; args } ->
-    ChildProcess.spawn (Path.to_string bin) (Array.of_list args) ~logger ?stdin
+    ChildProcess.spawn
+      (Path.to_string bin)
+      (Array.of_list args)
+      ~logger
+      ?stdin
       ~options
   | Shell command_line -> ChildProcess.exec command_line ~logger ?stdin ~options
 

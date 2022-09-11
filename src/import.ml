@@ -118,7 +118,8 @@ let open_file_in_text_editor target_uri =
 let with_confirmation message ~yes ?(no = "Cancel") f =
   let open Promise.Syntax in
   let* choice =
-    Vscode.Window.showInformationMessage ~message
+    Vscode.Window.showInformationMessage
+      ~message
       ~choices:[ (yes, true); (no, false) ]
       ()
   in

@@ -103,8 +103,10 @@ module Dependency = struct
         let names = packages |> List.map ~f:(fun n -> Package n) in
         Promise.return (Some names)
       | Error err ->
-        show_message `Info
-          "An error occurred while reading the switch dependencies: %s" err;
+        show_message
+          `Info
+          "An error occurred while reading the switch dependencies: %s"
+          err;
         Promise.return None)
     | Package pkg -> (
       let+ deps = Opam.Package.dependencies pkg in
@@ -114,7 +116,8 @@ module Dependency = struct
         log
           "An error occurred while getting package dependencies. Package %s. \
            Error %s"
-          (Opam.Package.name pkg) e;
+          (Opam.Package.name pkg)
+          e;
         None)
 end
 
@@ -130,7 +133,8 @@ module Command = struct
           @@ show_message `Warn "The selected item is not an opam switch."
         | Switch (opam, switch) -> (
           let message =
-            Printf.sprintf "Are you sure you want to remove switch %s?"
+            Printf.sprintf
+              "Are you sure you want to remove switch %s?"
               (Dependency.label dep)
           in
           with_confirmation message ~yes:"Remove switch" @@ fun () ->
@@ -142,17 +146,20 @@ module Command = struct
           | Ok _ ->
             let (_ : Ojs.t option Promise.t) =
               Vscode.Commands.executeCommand
-                ~command:Extension_consts.Commands.refresh_switches ~args:[]
+                ~command:Extension_consts.Commands.refresh_switches
+                ~args:[]
             in
             let (_ : Ojs.t option Promise.t) =
               Vscode.Commands.executeCommand
-                ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
+                ~command:Extension_consts.Commands.refresh_sandbox
+                ~args:[]
             in
             show_message `Info "The switch has been removed successfully.")
       in
       ()
     in
-    Extension_commands.register ~id:Extension_consts.Commands.remove_switch
+    Extension_commands.register
+      ~id:Extension_consts.Commands.remove_switch
       handler
 
   let _open_documentation =
@@ -171,7 +178,8 @@ module Command = struct
           | None -> Promise.return ()
           | Some doc ->
             let+ (_ : Ojs.t option) =
-              Vscode.Commands.executeCommand ~command:"vscode.open"
+              Vscode.Commands.executeCommand
+                ~command:"vscode.open"
                 ~args:[ Vscode.Uri.parse doc () |> Vscode.Uri.t_to_js ]
             in
             ())
@@ -179,7 +187,8 @@ module Command = struct
       ()
     in
     Extension_commands.register
-      ~id:Extension_consts.Commands.open_switches_documentation handler
+      ~id:Extension_consts.Commands.open_switches_documentation
+      handler
 end
 
 let getTreeItem instance ~element =
@@ -212,14 +221,18 @@ let register extension instance =
     let event = EventEmitter.event event_emitter in
     let module TreeDataProvider = Vscode.TreeDataProvider.Make (Dependency) in
     let treeDataProvider =
-      TreeDataProvider.create ~getTreeItem ~getChildren
-        ~onDidChangeTreeData:event ()
+      TreeDataProvider.create
+        ~getTreeItem
+        ~getChildren
+        ~onDidChangeTreeData:event
+        ()
     in
 
     let disposable =
       Vscode.Window.registerTreeDataProvider
         (module Dependency)
-        ~viewId:"ocaml-switches" ~treeDataProvider
+        ~viewId:"ocaml-switches"
+        ~treeDataProvider
     in
     ExtensionContext.subscribe extension ~disposable;
 

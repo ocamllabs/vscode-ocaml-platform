@@ -145,7 +145,8 @@ let reparse_ast =
         let loc_end = super#position loc_end loc_end in
         let real_loc_end = super#position loc_end' loc_end' in
         let loc_ghost = self#bool loc_ghost loc_ghost' in
-        self#record "Location.t"
+        self#record
+          "Location.t"
           [ ("loc_start", real_loc_start)
           ; ("origin_loc_start", loc_start)
           ; ("loc_end", real_loc_end)

@@ -67,7 +67,8 @@ module Command_errors = struct
     Printf.sprintf
       "The command \"OCaml: %s\" should be run only with a file open in the \
        editor. %s"
-      cmd_name expl
+      cmd_name
+      expl
 end
 
 (* TODO: Refactor the code so that we don't need any "constants" module *)

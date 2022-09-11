@@ -15,7 +15,8 @@ let suggest_to_pick_sandbox () =
   Option.iter selection ~f:(fun () ->
       let (_ : Ojs.t option Promise.t) =
         Vscode.Commands.executeCommand
-          ~command:Extension_consts.Commands.select_sandbox ~args:[]
+          ~command:Extension_consts.Commands.select_sandbox
+          ~args:[]
       in
       ())
 
@@ -25,7 +26,8 @@ let activate (extension : ExtensionContext.t) =
   Process.Env.set "OCAML_LSP_SERVER_LOG" "-";
   let open Promise.Syntax in
   let instance = Extension_instance.make () in
-  ExtensionContext.subscribe extension
+  ExtensionContext.subscribe
+    extension
     ~disposable:(Extension_instance.disposable instance);
   Dune_formatter.register extension instance;
   Dune_task_provider.register extension instance;

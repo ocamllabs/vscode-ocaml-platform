@@ -11,8 +11,10 @@ let select_sandbox_item =
   in
   let item = Vscode.TreeItem.make_label ~label () in
   let command =
-    Vscode.Command.create ~title:"Select a Sandbox"
-      ~command:"ocaml.select-sandbox" ()
+    Vscode.Command.create
+      ~title:"Select a Sandbox"
+      ~command:"ocaml.select-sandbox"
+      ()
   in
   Vscode.TreeItem.set_iconPath item icon;
   Vscode.TreeItem.set_command item command;
@@ -32,8 +34,10 @@ let terminal_item =
   in
   let item = Vscode.TreeItem.make_label ~label () in
   let command =
-    Vscode.Command.create ~title:"Open a sandboxed terminal"
-      ~command:"ocaml.open-terminal" ()
+    Vscode.Command.create
+      ~title:"Open a sandboxed terminal"
+      ~command:"ocaml.open-terminal"
+      ()
   in
   Vscode.TreeItem.set_iconPath item icon;
   Vscode.TreeItem.set_command item command;
@@ -54,6 +58,7 @@ let register extension =
   let disposable =
     Vscode.Window.registerTreeDataProvider
       (module Vscode.TreeItem)
-      ~viewId:"ocaml-commands" ~treeDataProvider
+      ~viewId:"ocaml-commands"
+      ~treeDataProvider
   in
   Vscode.ExtensionContext.subscribe extension ~disposable
