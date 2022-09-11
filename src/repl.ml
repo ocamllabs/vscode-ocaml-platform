@@ -17,8 +17,11 @@ module Repl_path = struct
 end
 
 let ocaml_utop_setting =
-  Settings.create_setting ~scope:Global ~key:"ocaml.repl.useUtop"
-    ~of_json:Jsonoo.Decode.bool ~to_json:Jsonoo.Encode.bool
+  Settings.create_setting
+    ~scope:Global
+    ~key:"ocaml.repl.useUtop"
+    ~of_json:Jsonoo.Decode.bool
+    ~to_json:Jsonoo.Encode.bool
 
 let use_utop () =
   match Settings.get ocaml_utop_setting with
@@ -182,12 +185,14 @@ module Command = struct
       ()
     in
     Extension_commands.register_text_editor
-      ~id:Extension_consts.Commands.evaluate_selection handler
+      ~id:Extension_consts.Commands.evaluate_selection
+      handler
 end
 
 let register extension instance =
   let disposable =
-    Vscode.Window.onDidCloseTerminal ()
+    Vscode.Window.onDidCloseTerminal
+      ()
       ~listener:(fun terminal ->
         if String.equal (Vscode.Terminal.name terminal) name then
           Extension_instance.close_repl instance)

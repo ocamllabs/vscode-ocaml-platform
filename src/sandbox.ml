@@ -194,10 +194,12 @@ let of_settings () : t option Promise.t =
       | `Esy -> "esy"
       | `Opam -> "opam"
     in
-    show_message `Warn
+    show_message
+      `Warn
       "This workspace is configured to use an %s sandbox, but %s isn't \
        available"
-      this_ this_
+      this_
+      this_
   in
   match (Settings.get ~section:"ocaml" Setting.t : Setting.t option) with
   | None -> Promise.return None
@@ -219,7 +221,8 @@ let of_settings () : t option Promise.t =
       let+ exists = Opam.switch_exists opam switch in
       if exists then Some (Opam (opam, switch))
       else (
-        show_message `Warn
+        show_message
+          `Warn
           "Workspace is configured to use the switch %s. This switch does not \
            exist."
           (Opam.Switch.name switch);
@@ -336,11 +339,17 @@ module Candidate = struct
       let project_path = Path.to_string p in
       create ~detail:project_path ~label:project_name ?description ()
     | Global ->
-      create ~label:"Global" ?description
-        ~detail:"Global sandbox inherited from the environment" ()
+      create
+        ~label:"Global"
+        ?description
+        ~detail:"Global sandbox inherited from the environment"
+        ()
     | Custom _ ->
-      create ?description ~label:"Custom"
-        ~detail:"Custom sandbox using a command template" ()
+      create
+        ?description
+        ~label:"Custom"
+        ~detail:"Custom sandbox using a command template"
+        ()
 
   let ok sandbox = { sandbox; status = Ok () }
 end
@@ -447,8 +456,11 @@ let select_sandbox () =
       else Promise.Option.return "Command template must include $prog and $args"
     in
     let options =
-      InputBoxOptions.create ~prompt:"Input a custom command template"
-        ~value:"$prog $args" ~validateInput ()
+      InputBoxOptions.create
+        ~prompt:"Input a custom command template"
+        ~value:"$prog $args"
+        ~validateInput
+        ()
     in
     let* input = Window.showInputBox ~options () in
     let template = String.strip input in
@@ -476,7 +488,8 @@ let get_command sandbox bin args : Cmd.t =
     let command =
       template
       |> String.substr_replace_all ~pattern:"$prog" ~with_:(Cmd.quote bin)
-      |> String.substr_replace_all ~pattern:"$args"
+      |> String.substr_replace_all
+           ~pattern:"$args"
            ~with_:(String.concat ~sep:" " args)
       |> String.strip
     in
@@ -527,21 +540,27 @@ let root_packages t =
 
 let uninstall_packages t packages =
   let options =
-    ProgressOptions.create ~location:(`ProgressLocation Notification)
-      ~title:"Uninstalling sandbox packages" ~cancellable:false ()
+    ProgressOptions.create
+      ~location:(`ProgressLocation Notification)
+      ~title:"Uninstalling sandbox packages"
+      ~cancellable:false
+      ()
   in
   match t with
   | Global ->
-    show_message `Error
+    show_message
+      `Error
       "Uninstalling packages is not supported for Global sandboxes";
     Promise.return ()
   | Custom _ ->
-    show_message `Error
+    show_message
+      `Error
       "Uninstalling packages is not supported for Custom sandboxes";
     Promise.return ()
   | Esy (_esy, _manifest) ->
     (* TODO: Implement Esy sandbox inspection *)
-    show_message `Error
+    show_message
+      `Error
       "Uninstalling packages is not supported for Esy sandboxes";
     Promise.return ()
   | Opam (opam, switch) ->
@@ -562,8 +581,10 @@ let uninstall_packages t packages =
       match result with
       | Ok () -> Ojs.null
       | Error err ->
-        show_message `Error
-          "An error occured while uninstalling the packages: %s" err;
+        show_message
+          `Error
+          "An error occured while uninstalling the packages: %s"
+          err;
         Ojs.null
     in
     let open Promise.Syntax in
@@ -572,16 +593,21 @@ let uninstall_packages t packages =
 
 let install_packages t packages =
   let options =
-    ProgressOptions.create ~location:(`ProgressLocation Notification)
-      ~title:"Installing sandbox packages" ~cancellable:false ()
+    ProgressOptions.create
+      ~location:(`ProgressLocation Notification)
+      ~title:"Installing sandbox packages"
+      ~cancellable:false
+      ()
   in
   match t with
   | Global ->
-    show_message `Error
+    show_message
+      `Error
       "Installing packages is not supported for Global sandboxes";
     Promise.return ()
   | Custom _ ->
-    show_message `Error
+    show_message
+      `Error
       "Installing packages is not supported for Custom sandboxes";
     Promise.return ()
   | Esy (_esy, _manifest) ->
@@ -600,7 +626,9 @@ let install_packages t packages =
       match result with
       | Ok () -> Ojs.null
       | Error err ->
-        show_message `Error "An error occured while installing the packages: %s"
+        show_message
+          `Error
+          "An error occured while installing the packages: %s"
           err;
         Ojs.null
     in
@@ -610,16 +638,21 @@ let install_packages t packages =
 
 let upgrade_packages t =
   let options =
-    ProgressOptions.create ~location:(`ProgressLocation Notification)
-      ~title:"Upgrading sandbox packages" ~cancellable:false ()
+    ProgressOptions.create
+      ~location:(`ProgressLocation Notification)
+      ~title:"Upgrading sandbox packages"
+      ~cancellable:false
+      ()
   in
   match t with
   | Global ->
-    show_message `Error
+    show_message
+      `Error
       "Upgrading packages is not supported for Global sandboxes";
     Promise.return ()
   | Custom _ ->
-    show_message `Error
+    show_message
+      `Error
       "Upgrading packages is not supported for Custom sandboxes";
     Promise.return ()
   | Esy (_esy, _manifest) ->
@@ -638,7 +671,9 @@ let upgrade_packages t =
       match result with
       | Ok () -> Ojs.null
       | Error err ->
-        show_message `Error "An error occured while upgrading the packages: %s"
+        show_message
+          `Error
+          "An error occured while upgrading the packages: %s"
           err;
         Ojs.null
     in

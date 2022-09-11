@@ -24,7 +24,10 @@ module Setting = struct
     bool t
 
   let t =
-    Settings.create_setting ~scope:Workspace ~key:"dune.autoDetect" ~of_json
+    Settings.create_setting
+      ~scope:Workspace
+      ~key:"dune.autoDetect"
+      ~of_json
       ~to_json
 end
 
@@ -72,8 +75,14 @@ let compute_tasks token sandbox =
           get_shell_execution sandbox options
         in
         let task =
-          Task.make ~definition ~scope ~source ~name ~problemMatchers
-            ~execution:(`ShellExecution execution) ()
+          Task.make
+            ~definition
+            ~scope
+            ~source
+            ~name
+            ~problemMatchers
+            ~execution:(`ShellExecution execution)
+            ()
         in
         Task.set_group task TaskGroup.build;
         task)

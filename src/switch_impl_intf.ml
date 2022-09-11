@@ -11,9 +11,11 @@ let insert_inferred_intf ~source_uri client text_editor =
       Custom_requests.send_request client Custom_requests.inferIntf source_uri
     in
     let+ edit_applied =
-      TextEditor.edit text_editor
+      TextEditor.edit
+        text_editor
         ~callback:(fun ~editBuilder ->
-          TextEditorEdit.insert editBuilder
+          TextEditorEdit.insert
+            editBuilder
             ~location:(Position.make ~line:1 ~character:1)
             ~value:inferred_intf)
         ()
@@ -34,7 +36,9 @@ let request_switch client document =
     else Promise.return ()
   in
   let* arr =
-    Custom_requests.send_request client Custom_requests.switchImplIntf
+    Custom_requests.send_request
+      client
+      Custom_requests.switchImplIntf
       source_uri
   in
   match Array.to_list arr with
@@ -48,7 +52,8 @@ let request_switch client document =
     let first_candidate_item =
       QuickPickItem.create
         ~label:(Stdlib.Filename.basename first_candidate)
-        ~picked:true ()
+        ~picked:true
+        ()
     in
 
     let rest_candidate_items =
@@ -63,14 +68,18 @@ let request_switch client document =
     in
 
     let file_options =
-      QuickPickOptions.create ~canPickMany:false ~placeHolder:"Open a file..."
+      QuickPickOptions.create
+        ~canPickMany:false
+        ~placeHolder:"Open a file..."
         ()
     in
 
     let open Promise.Syntax in
     let* choice =
-      Window.showQuickPickItems ~choices:candidate_items_with_names
-        ~options:file_options ()
+      Window.showQuickPickItems
+        ~choices:candidate_items_with_names
+        ~options:file_options
+        ()
     in
     match choice with
     | None -> Promise.return ()

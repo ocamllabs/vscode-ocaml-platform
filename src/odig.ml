@@ -49,7 +49,9 @@ let odoc_exec t ~sandbox ~package_name =
   in
   Result.map_error result ~f:(fun error ->
       let () =
-        log "Failed to generate documentation for package %s. Error: %s"
-          package_name error
+        log
+          "Failed to generate documentation for package %s. Error: %s"
+          package_name
+          error
       in
       error)

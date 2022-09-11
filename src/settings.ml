@@ -27,8 +27,12 @@ let set ?section setting v =
   | None -> Promise.return ()
   | Some _ ->
     let value = Jsonoo.t_to_js (setting.to_json v) in
-    WorkspaceConfiguration.update section ~section:setting.key ~value
-      ~configurationTarget:(`ConfigurationTarget setting.scope) ()
+    WorkspaceConfiguration.update
+      section
+      ~section:setting.key
+      ~value
+      ~configurationTarget:(`ConfigurationTarget setting.scope)
+      ()
 
 let first_workspace_folder_var = "${firstWorkspaceFolder}"
 
@@ -59,7 +63,8 @@ let resolve_workspace_vars setting =
   in
   setting
   |> Interop.Regexp.replace ~regexp ~replacer
-  |> String.substr_replace_all ~pattern:first_workspace_folder_var
+  |> String.substr_replace_all
+       ~pattern:first_workspace_folder_var
        ~with_:first_workspace_folder_path
 
 let substitute_workspace_vars setting =
@@ -70,7 +75,8 @@ let substitute_workspace_vars setting =
     | _ -> String.substr_replace_all
   in
   List.fold (Workspace.workspaceFolders ()) ~init:setting ~f:(fun acc folder ->
-      folder_replace_all acc
+      folder_replace_all
+        acc
         ~pattern:(workspace_folder_path folder)
         ~with_:(workspace_folder_var folder))
 
@@ -90,8 +96,11 @@ module ExtraEnv = struct
       Jsonoo.Encode.nullable (fun json ->
           hashtbl_of_dict json |> Jsonoo.Encode.(dict string))
     in
-    create_setting ~scope:ConfigurationTarget.Workspace
-      ~key:"ocaml.server.extraEnv" ~of_json ~to_json
+    create_setting
+      ~scope:ConfigurationTarget.Workspace
+      ~key:"ocaml.server.extraEnv"
+      ~of_json
+      ~to_json
 
   let get () = get setting |> Option.join
 end

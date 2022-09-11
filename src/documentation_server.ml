@@ -48,12 +48,15 @@ let dispose (t : t) =
     t := None;
     Disposable.make ~dispose:(fun () ->
         let (_ : Polka.Server.t) =
-          Polka.Server.close server.server
+          Polka.Server.close
+            server.server
             ~callback:(fun error ->
               match error with
               | None -> ()
               | Some error ->
-                show_message `Warn "Error closing server: %s"
+                show_message
+                  `Warn
+                  "Error closing server: %s"
                   (Ojs.string_of_js (Promise.error_to_js error)))
             ()
         in

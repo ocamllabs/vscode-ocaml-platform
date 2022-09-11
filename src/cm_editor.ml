@@ -38,10 +38,13 @@ end = struct
     let watcher =
       Workspace.createFileSystemWatcher
         (`String (Uri.fsPath uri))
-        ~ignoreCreateEvents:true ~ignoreDeleteEvents:true ()
+        ~ignoreCreateEvents:true
+        ~ignoreDeleteEvents:true
+        ()
     in
     let disposable =
-      FileSystemWatcher.onDidChange watcher
+      FileSystemWatcher.onDidChange
+        watcher
         ~listener:(fun _ -> EventEmitter.fire onDidChange_event_emitter ())
         ()
     in
@@ -67,13 +70,16 @@ let resolveCustomEditor instance ~document ~webviewPanel ~token:_ :
         Window.showErrorMessage
           ~message:
             (Printf.sprintf
-               "Error while trying to read content from %s file. %s" file_name e)
+               "Error while trying to read content from %s file. %s"
+               file_name
+               e)
           ()
       in
       ()
   in
   let (_ : unit) =
-    Cm_document.onDidChange document
+    Cm_document.onDidChange
+      document
       ~listener:(fun () ->
         let (_ : unit Promise.t) = update_content document in
         ())
@@ -81,7 +87,8 @@ let resolveCustomEditor instance ~document ~webviewPanel ~token:_ :
     |> Stack.push disposables
   in
   let (_ : unit) =
-    WebviewPanel.onDidDispose webviewPanel
+    WebviewPanel.onDidDispose
+      webviewPanel
       ~listener:(fun () ->
         Disposable.from (Stack.to_list disposables) |> Disposable.dispose)
       ()
@@ -106,10 +113,12 @@ let register (extension : ExtensionContext.t) (instance : Extension_instance.t)
   let disposable =
     Vscode.Window.registerCustomReadonlyEditorProvider
       (module Cm_document)
-      ~viewType:"cm-files-editor" ~provider:editorProvider
+      ~viewType:"cm-files-editor"
+      ~provider:editorProvider
       ~options:
         (Vscode.RegisterCustomEditorProviderOptions.create
-           ~supportsMultipleEditorsPerDocument:true ())
+           ~supportsMultipleEditorsPerDocument:true
+           ())
       ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable

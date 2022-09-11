@@ -72,7 +72,8 @@ class virtual ['res] lift2 =
         (* print_endline ("Locs are : " ^ Int.to_string pos_cnum ^ " - " ^
            Int.to_string pos_cnum'); *)
         (*TODO double locs*)
-        self#record "Lexing.position"
+        self#record
+          "Lexing.position"
           [ ("pos_fname", pos_fname)
           ; ("pos_lnum", pos_lnum)
           ; ("pos_bol", pos_bol)
@@ -85,7 +86,8 @@ class virtual ['res] lift2 =
         let loc_start = self#position loc_start loc_start' in
         let loc_end = self#position loc_end loc_end' in
         let loc_ghost = self#bool loc_ghost loc_ghost' in
-        self#record "Location.t"
+        self#record
+          "Location.t"
           [ ("loc_start", loc_start)
           ; ("loc_end", loc_end)
           ; ("loc_ghost", loc_ghost)
@@ -228,7 +230,8 @@ class virtual ['res] lift2 =
           let a = self#string a a' in
           let b = self#location b b' in
           let c = self#option self#string c c' in
-          self#constr "Pconst_string"
+          self#constr
+            "Pconst_string"
             [ ("label", a); ("location", b); ("label option", c) ]
         | Pconst_float (a, b), Pconst_float (a', b') ->
           let a = self#string a a' in
@@ -245,7 +248,8 @@ class virtual ['res] lift2 =
         let attr_name = self#loc self#string attr_name attr_name' in
         let attr_payload = self#payload attr_payload attr_payload' in
         let attr_loc = self#location attr_loc attr_loc' in
-        self#record "attribute"
+        self#record
+          "attribute"
           [ ("attr_name", attr_name)
           ; ("attr_payload", attr_payload)
           ; ("attr_loc", attr_loc)
@@ -301,7 +305,8 @@ class virtual ['res] lift2 =
         let ptyp_attributes =
           self#attributes ptyp_attributes ptyp_attributes'
         in
-        self#record "core_type"
+        self#record
+          "core_type"
           [ ("ptyp_desc", ptyp_desc)
           ; ("ptyp_loc", ptyp_loc)
           ; ("ptyp_loc_stack", ptyp_loc_stack)
@@ -320,7 +325,8 @@ class virtual ['res] lift2 =
           let a = self#arg_label a a' in
           let b = self#core_type b b' in
           let c = self#core_type c c' in
-          self#constr "Ptyp_arrow"
+          self#constr
+            "Ptyp_arrow"
             [ ("arg_label", a); ("core_type1", b); ("core_type2", c) ]
         | Ptyp_tuple a, Ptyp_tuple a' ->
           let a = self#list self#core_type a a' in
@@ -328,17 +334,20 @@ class virtual ['res] lift2 =
         | Ptyp_constr (a, b), Ptyp_constr (a', b') ->
           let a = self#longident_loc a a' in
           let b = self#list self#core_type b b' in
-          self#constr "Ptyp_constr"
+          self#constr
+            "Ptyp_constr"
             [ ("longident_loc", a); ("core_type list", b) ]
         | Ptyp_object (a, b), Ptyp_object (a', b') ->
           let a = self#list self#object_field a a' in
           let b = self#closed_flag b b' in
-          self#constr "Ptyp_object"
+          self#constr
+            "Ptyp_object"
             [ ("object_field list", a); ("closed_flag", b) ]
         | Ptyp_class (a, b), Ptyp_class (a', b') ->
           let a = self#longident_loc a a' in
           let b = self#list self#core_type b b' in
-          self#constr "Ptyp_class"
+          self#constr
+            "Ptyp_class"
             [ ("longident_loc", a); ("core_type list", b) ]
         | Ptyp_alias (a, b), Ptyp_alias (a', b') ->
           let a = self#core_type a a' in
@@ -348,7 +357,8 @@ class virtual ['res] lift2 =
           let a = self#list self#row_field a a' in
           let b = self#closed_flag b b' in
           let c = self#option (self#list self#label) c c' in
-          self#constr "Ptyp_variant"
+          self#constr
+            "Ptyp_variant"
             [ ("row_field list", a)
             ; ("closed_flag", b)
             ; ("label list option", c)
@@ -389,7 +399,8 @@ class virtual ['res] lift2 =
         let prf_desc = self#row_field_desc prf_desc prf_desc' in
         let prf_loc = self#location prf_loc prf_loc' in
         let prf_attributes = self#attributes prf_attributes prf_attributes' in
-        self#record "row_field"
+        self#record
+          "row_field"
           [ ("prf_desc", prf_desc)
           ; ("prf_loc", prf_loc)
           ; ("prf_attributes", prf_attributes)
@@ -403,7 +414,8 @@ class virtual ['res] lift2 =
           let a = self#loc self#label a a' in
           let b = self#bool b b' in
           let c = self#list self#core_type c c' in
-          self#constr "Rtag"
+          self#constr
+            "Rtag"
             [ ("label loc", a); ("bool", b); ("core_type list", c) ]
         | Rinherit a, Rinherit a' ->
           let a = self#core_type a a' in
@@ -420,7 +432,8 @@ class virtual ['res] lift2 =
         let pof_desc = self#object_field_desc pof_desc pof_desc' in
         let pof_loc = self#location pof_loc pof_loc' in
         let pof_attributes = self#attributes pof_attributes pof_attributes' in
-        self#record "object_field"
+        self#record
+          "object_field"
           [ ("pof_desc", pof_desc)
           ; ("pof_loc", pof_loc)
           ; ("pof_attributes", pof_attributes)
@@ -454,7 +467,8 @@ class virtual ['res] lift2 =
         let ppat_attributes =
           self#attributes ppat_attributes ppat_attributes'
         in
-        self#record "pattern"
+        self#record
+          "pattern"
           [ ("ppat_desc", ppat_desc)
           ; ("ppat_loc", ppat_loc)
           ; ("ppat_loc_stack", ppat_loc_stack)
@@ -493,9 +507,11 @@ class virtual ['res] lift2 =
                 in
                 let patt = self#pattern patt patt' in
                 self#tuple [ ("existentials", existentials); ("pattern", patt) ])
-              b b'
+              b
+              b'
           in
-          self#constr "Ppat_construct"
+          self#constr
+            "Ppat_construct"
             [ ("longident_loc", a); ("pattern option", b) ]
         | Ppat_variant (a, b), Ppat_variant (a', b') ->
           let a = self#label a a' in
@@ -511,7 +527,8 @@ class virtual ['res] lift2 =
               a
           in
           let b = self#closed_flag b b' in
-          self#constr "Ppat_record"
+          self#constr
+            "Ppat_record"
             [ ("(longident_loc * pattern) list", a a'); ("closed_flag", b) ]
         | Ppat_array a, Ppat_array a' ->
           let a = self#list self#pattern a a' in
@@ -546,7 +563,8 @@ class virtual ['res] lift2 =
           (*BEGIN SPECIAL PATTERN CASES*)
         | Ppat_var _, Ppat_any -> self#pattern_desc x x
         | Ppat_tuple [ exp1 ], ppat_desc' ->
-          self#pattern_desc x
+          self#pattern_desc
+            x
             (Ppat_tuple [ { exp1 with ppat_desc = ppat_desc' } ])
         | _ -> Error "pattern_desc"
 
@@ -565,7 +583,8 @@ class virtual ['res] lift2 =
         let pexp_attributes =
           self#attributes pexp_attributes pexp_attributes'
         in
-        self#record "expression"
+        self#record
+          "expression"
           [ ("pexp_desc", pexp_desc)
           ; ("pexp_loc", pexp_loc)
           ; ("pexp_loc_stack", pexp_loc_stack)
@@ -586,7 +605,8 @@ class virtual ['res] lift2 =
           let a = self#rec_flag a a' in
           let b = self#list self#value_binding b b' in
           let c = self#expression c c' in
-          self#constr "Pexp_let"
+          self#constr
+            "Pexp_let"
             [ ("rec_flag", a); ("value_binding list", b); ("expression", c) ]
         | Pexp_function a, Pexp_function a' ->
           let a = self#cases a a' in
@@ -596,7 +616,8 @@ class virtual ['res] lift2 =
           let b = self#option self#expression b b' in
           let c = self#pattern c c' in
           let d = self#expression d d' in
-          self#constr "Pexp_fun"
+          self#constr
+            "Pexp_fun"
             [ ("arg_label", a)
             ; ("expression option", b)
             ; ("pattern", c)
@@ -612,7 +633,8 @@ class virtual ['res] lift2 =
                 self#tuple [ ("arg_label", a); ("expression", b) ])
               b
           in
-          self#constr "Pexp_apply"
+          self#constr
+            "Pexp_apply"
             [ ("expression", a); ("(arg_label * expression) list", b b') ]
         | Pexp_match (a, b), Pexp_match (a', b') ->
           let a = self#expression a a' in
@@ -628,7 +650,8 @@ class virtual ['res] lift2 =
         | Pexp_construct (a, b), Pexp_construct (a', b') ->
           let a = self#longident_loc a a' in
           let b = self#option self#expression b b' in
-          self#constr "Pexp_construct"
+          self#constr
+            "Pexp_construct"
             [ ("longident_loc", a); ("expression option", b) ]
         | Pexp_variant (a, b), Pexp_variant (a', b') ->
           let a = self#label a a' in
@@ -644,7 +667,8 @@ class virtual ['res] lift2 =
               a
           in
           let b = self#option self#expression b b' in
-          self#constr "Pexp_record"
+          self#constr
+            "Pexp_record"
             [ ("(longident_loc * expression) list", a a')
             ; ("expression option", b)
             ]
@@ -656,7 +680,8 @@ class virtual ['res] lift2 =
           let a = self#expression a a' in
           let b = self#longident_loc b b' in
           let c = self#expression c c' in
-          self#constr "Pexp_setfield"
+          self#constr
+            "Pexp_setfield"
             [ ("expression1", a); ("longident_loc", b); ("expression2", c) ]
         | Pexp_array a, Pexp_array a' ->
           let a = self#list self#expression a a' in
@@ -665,7 +690,8 @@ class virtual ['res] lift2 =
           let a = self#expression a a' in
           let b = self#expression b b' in
           let c = self#option self#expression c c' in
-          self#constr "Pexp_ifthenelse"
+          self#constr
+            "Pexp_ifthenelse"
             [ ("expression1", a); ("expression2", b); ("expression option", c) ]
         | Pexp_sequence (a, b), Pexp_sequence (a', b') ->
           let a = self#expression a a' in
@@ -681,7 +707,8 @@ class virtual ['res] lift2 =
           let c = self#expression c c' in
           let d = self#direction_flag d d' in
           let e = self#expression e e' in
-          self#constr "Pexp_for"
+          self#constr
+            "Pexp_for"
             [ ("pattern", a)
             ; ("expression1", b)
             ; ("expression2", c)
@@ -696,7 +723,8 @@ class virtual ['res] lift2 =
           let a = self#expression a a' in
           let b = self#option self#core_type b b' in
           let c = self#core_type c c' in
-          self#constr "Pexp_coerce"
+          self#constr
+            "Pexp_coerce"
             [ ("expression", a); ("core_type option", b); ("core_type", c) ]
         | Pexp_send (a, b), Pexp_send (a', b') ->
           let a = self#expression a a' in
@@ -718,13 +746,15 @@ class virtual ['res] lift2 =
                 self#tuple [ ("label loc", a); ("expression", b) ])
               a
           in
-          self#constr "Pexp_override"
+          self#constr
+            "Pexp_override"
             [ ("(label loc * expression) list", a a') ]
         | Pexp_letmodule (a, b, c), Pexp_letmodule (a', b', c') ->
           let a = self#loc (self#option self#string) a in
           let b = self#module_expr b b' in
           let c = self#expression c c' in
-          self#constr "Pexp_letmodule"
+          self#constr
+            "Pexp_letmodule"
             [ ("label option loc", a a')
             ; ("module_expr", b)
             ; ("expression", c)
@@ -732,7 +762,8 @@ class virtual ['res] lift2 =
         | Pexp_letexception (a, b), Pexp_letexception (a', b') ->
           let a = self#extension_constructor a a' in
           let b = self#expression b b' in
-          self#constr "Pexp_letexception"
+          self#constr
+            "Pexp_letexception"
             [ ("Parsetree.extension_constructor", a); ("expression", b) ]
         | Pexp_assert a, Pexp_assert a' ->
           let a = self#expression a a' in
@@ -773,7 +804,8 @@ class virtual ['res] lift2 =
            ]} *)
         | ( Pexp_apply (({ pexp_desc = Pexp_newtype _; _ } as exp1), al_exp_list)
           , Pexp_newtype _ ) ->
-          self#expression_desc x
+          self#expression_desc
+            x
             (Pexp_apply ({ exp1 with pexp_desc = x' }, al_exp_list))
         (*Unknown for now.*)
         | ( Pexp_newtype (a, b)
@@ -802,7 +834,8 @@ class virtual ['res] lift2 =
           let a = self#rec_flag a a' in
           let b = self#list self#value_binding b b' in
           let c = self#expression c c' in
-          self#constr "Pexp_let"
+          self#constr
+            "Pexp_let"
             [ ("rec_flag", a); ("value_binding list", b); ("expression", c) ]
         (*Caused by: [fun (t39 : t39 Js_of_ocaml.Js.t) -> ...] *)
         | ( Pexp_fun (a, b, c, d)
@@ -811,7 +844,8 @@ class virtual ['res] lift2 =
           let b = self#option self#expression b b' in
           let c = self#pattern c c' in
           let d = self#expression d d' in
-          self#constr "Pexp_fun"
+          self#constr
+            "Pexp_fun"
             [ ("arg_label", a)
             ; ("expression option", b)
             ; ("pattern", c)
@@ -826,7 +860,8 @@ class virtual ['res] lift2 =
           let b = self#option self#expression b b' in
           let c = self#pattern c c' in
           let d = self#expression d d' in
-          self#constr "Pexp_fun"
+          self#constr
+            "Pexp_fun"
             [ ("arg_label", a)
             ; ("expression option", b)
             ; ("pattern", c)
@@ -840,7 +875,8 @@ class virtual ['res] lift2 =
           let b = self#option self#expression b b' in
           let c = self#pattern c c' in
           let d = self#expression d d' in
-          self#constr "Pexp_fun"
+          self#constr
+            "Pexp_fun"
             [ ("arg_label", a)
             ; ("expression option", b)
             ; ("pattern", c)
@@ -895,7 +931,8 @@ class virtual ['res] lift2 =
           self#expression_desc oexpr_desc normalized_pexp_desc2
         (*Same as Ppat_tuple, unwrapping singleton*)
         | Pexp_tuple [ exp1 ], pexp_desc' ->
-          self#expression_desc x
+          self#expression_desc
+            x
             (Pexp_tuple [ { exp1 with pexp_desc = pexp_desc' } ])
         | _ -> Error "expression_desc"
 
@@ -905,7 +942,8 @@ class virtual ['res] lift2 =
         let pc_lhs = self#pattern pc_lhs pc_lhs' in
         let pc_guard = self#option self#expression pc_guard pc_guard' in
         let pc_rhs = self#expression pc_rhs pc_rhs' in
-        self#record "case"
+        self#record
+          "case"
           [ ("pc_lhs", pc_lhs); ("pc_guard", pc_guard); ("pc_rhs", pc_rhs) ]
 
     method letop : letop -> letop -> ('res, string) result =
@@ -926,7 +964,8 @@ class virtual ['res] lift2 =
         let pbop_pat = self#pattern pbop_pat pbop_pat' in
         let pbop_exp = self#expression pbop_exp pbop_exp' in
         let pbop_loc = self#location pbop_loc pbop_loc' in
-        self#record "binding_op"
+        self#record
+          "binding_op"
           [ ("pbop_op", pbop_op)
           ; ("pbop_pat", pbop_pat)
           ; ("pbop_exp", pbop_exp)
@@ -949,7 +988,8 @@ class virtual ['res] lift2 =
           self#attributes pval_attributes pval_attributes'
         in
         let pval_loc = self#location pval_loc pval_loc' in
-        self#record "value_description"
+        self#record
+          "value_description"
           [ ("pval_name", pval_name)
           ; ("pval_type", pval_type)
           ; ("pval_prim", pval_prim)
@@ -991,7 +1031,8 @@ class virtual ['res] lift2 =
               in
               self#tuple
                 [ ("core_type", a); ("(variance * injectivity)", b b') ])
-            ptype_params ptype_params'
+            ptype_params
+            ptype_params'
         in
         let ptype_cstrs =
           self#list
@@ -1001,7 +1042,8 @@ class virtual ['res] lift2 =
               let c = self#location c c' in
               self#tuple
                 [ ("core_type1", a); ("core_type2", b); ("location", c) ])
-            ptype_cstrs ptype_cstrs'
+            ptype_cstrs
+            ptype_cstrs'
         in
         let ptype_kind = self#type_kind ptype_kind ptype_kind' in
         let ptype_private = self#private_flag ptype_private ptype_private' in
@@ -1012,7 +1054,8 @@ class virtual ['res] lift2 =
           self#attributes ptype_attributes ptype_attributes'
         in
         let ptype_loc = self#location ptype_loc ptype_loc' in
-        self#record "type_declaration"
+        self#record
+          "type_declaration"
           [ ("ptype_name", ptype_name)
           ; ("ptype_params", ptype_params)
           ; ("ptype_cstrs", ptype_cstrs)
@@ -1050,7 +1093,8 @@ class virtual ['res] lift2 =
         let pld_type = self#core_type pld_type pld_type' in
         let pld_loc = self#location pld_loc pld_loc' in
         let pld_attributes = self#attributes pld_attributes pld_attributes' in
-        self#record "label_declaration"
+        self#record
+          "label_declaration"
           [ ("pld_name", pld_name)
           ; ("pld_mutable", pld_mutable)
           ; ("pld_type", pld_type)
@@ -1076,7 +1120,8 @@ class virtual ['res] lift2 =
         let pcd_res = self#option self#core_type pcd_res pcd_res' in
         let pcd_loc = self#location pcd_loc pcd_loc' in
         let pcd_attributes = self#attributes pcd_attributes pcd_attributes' in
-        self#record "constructor_declaration"
+        self#record
+          "constructor_declaration"
           [ ("pcd_name", pcd_name)
           ; ("pcd_vars", pcd_vars)
           ; ("pcd_args", pcd_args)
@@ -1129,10 +1174,13 @@ class virtual ['res] lift2 =
               in
               self#tuple
                 [ ("core_type", a); ("(variance * injectivity)", b b') ])
-            ptyext_params ptyext_params'
+            ptyext_params
+            ptyext_params'
         in
         let ptyext_constructors =
-          self#list self#extension_constructor ptyext_constructors
+          self#list
+            self#extension_constructor
+            ptyext_constructors
             ptyext_constructors'
         in
         let ptyext_private = self#private_flag ptyext_private ptyext_private' in
@@ -1140,7 +1188,8 @@ class virtual ['res] lift2 =
         let ptyext_attributes =
           self#attributes ptyext_attributes ptyext_attributes'
         in
-        self#record "type_extension"
+        self#record
+          "type_extension"
           [ ("ptyext_path", ptyext_path)
           ; ("ptyext_params", ptyext_params)
           ; ("ptyext_constructors", ptyext_constructors)
@@ -1165,7 +1214,8 @@ class virtual ['res] lift2 =
         let pext_attributes =
           self#attributes pext_attributes pext_attributes'
         in
-        self#record "extension_constructor"
+        self#record
+          "extension_constructor"
           [ ("pext_name", pext_name)
           ; ("pext_kind", pext_kind)
           ; ("pext_loc", pext_loc)
@@ -1186,7 +1236,8 @@ class virtual ['res] lift2 =
         let ptyexn_attributes =
           self#attributes ptyexn_attributes ptyexn_attributes'
         in
-        self#record "type_exception"
+        self#record
+          "type_exception"
           [ ("ptyexn_constructor", ptyexn_constructor)
           ; ("ptyexn_loc", ptyexn_loc)
           ; ("ptyexn_attributes", ptyexn_attributes)
@@ -1203,7 +1254,8 @@ class virtual ['res] lift2 =
           let existentials = self#existentials existentials existentials' in
           let c_args = self#constructor_arguments c_args c_args' in
           let t_opt = self#option self#core_type t_opt t_opt' in
-          self#constr "Pext_decl"
+          self#constr
+            "Pext_decl"
             [ ("existentials", existentials)
             ; ("constructor_arguments", c_args)
             ; ("core_type option", t_opt)
@@ -1224,7 +1276,8 @@ class virtual ['res] lift2 =
         let pcty_attributes =
           self#attributes pcty_attributes pcty_attributes'
         in
-        self#record "class_type"
+        self#record
+          "class_type"
           [ ("pcty_desc", pcty_desc)
           ; ("pcty_loc", pcty_loc)
           ; ("pcty_attributes", pcty_attributes)
@@ -1237,7 +1290,8 @@ class virtual ['res] lift2 =
         | Pcty_constr (a, b), Pcty_constr (a', b') ->
           let a = self#longident_loc a a' in
           let b = self#list self#core_type b b' in
-          self#constr "Pcty_constr"
+          self#constr
+            "Pcty_constr"
             [ ("longident_loc", a); ("core_type list", b) ]
         | Pcty_signature a, Pcty_signature a' ->
           let a = self#class_signature a a' in
@@ -1246,7 +1300,8 @@ class virtual ['res] lift2 =
           let a = self#arg_label a a' in
           let b = self#core_type b b' in
           let c = self#class_type c c' in
-          self#constr "Pcty_arrow"
+          self#constr
+            "Pcty_arrow"
             [ ("arg_label", a); ("core_type", b); ("class_type", c) ]
         | Pcty_extension a, Pcty_extension a' ->
           let a = self#extension a a' in
@@ -1265,7 +1320,8 @@ class virtual ['res] lift2 =
         let pcsig_fields =
           self#list self#class_type_field pcsig_fields pcsig_fields'
         in
-        self#record "class_signature"
+        self#record
+          "class_signature"
           [ ("pcsig_self", pcsig_self); ("pcsig_fields", pcsig_fields) ]
 
     method class_type_field
@@ -1280,7 +1336,8 @@ class virtual ['res] lift2 =
         let pctf_attributes =
           self#attributes pctf_attributes pctf_attributes'
         in
-        self#record "class_type_field"
+        self#record
+          "class_type_field"
           [ ("pctf_desc", pctf_desc)
           ; ("pctf_loc", pctf_loc)
           ; ("pctf_attributes", pctf_attributes)
@@ -1310,7 +1367,8 @@ class virtual ['res] lift2 =
                 ])
               a
           in
-          self#constr "Pctf_val"
+          self#constr
+            "Pctf_val"
             [ ("(label loc * mutable_flag * virtual_flag * core_type)", a a') ]
         | Pctf_method a, Pctf_method a' ->
           let a =
@@ -1327,7 +1385,8 @@ class virtual ['res] lift2 =
                 ])
               a
           in
-          self#constr "Pctf_method"
+          self#constr
+            "Pctf_method"
             [ ("(label loc * private_flag * virtual_flag * core_type)", a a') ]
         | Pctf_constraint a, Pctf_constraint a' ->
           let a =
@@ -1375,13 +1434,15 @@ class virtual ['res] lift2 =
               in
               self#tuple
                 [ ("core_type", a); ("(variance * injectivity)", b b') ])
-            pci_params pci_params'
+            pci_params
+            pci_params'
         in
         let pci_name = self#loc self#string pci_name pci_name' in
         let pci_expr = _a pci_expr pci_expr' in
         let pci_loc = self#location pci_loc pci_loc' in
         let pci_attributes = self#attributes pci_attributes pci_attributes' in
-        self#record "class_infos"
+        self#record
+          "class_infos"
           [ ("pci_virt", pci_virt)
           ; ("pci_params", pci_params)
           ; ("pci_name", pci_name)
@@ -1409,7 +1470,8 @@ class virtual ['res] lift2 =
         let pcl_desc = self#class_expr_desc pcl_desc pcl_desc' in
         let pcl_loc = self#location pcl_loc pcl_loc' in
         let pcl_attributes = self#attributes pcl_attributes pcl_attributes' in
-        self#record "class_expr"
+        self#record
+          "class_expr"
           [ ("pcl_desc", pcl_desc)
           ; ("pcl_loc", pcl_loc)
           ; ("pcl_attributes", pcl_attributes)
@@ -1422,7 +1484,8 @@ class virtual ['res] lift2 =
         | Pcl_constr (a, b), Pcl_constr (a', b') ->
           let a = self#longident_loc a a' in
           let b = self#list self#core_type b b' in
-          self#constr "Pcl_constr"
+          self#constr
+            "Pcl_constr"
             [ ("longident_loc", a); ("core_type list", b) ]
         | Pcl_structure a, Pcl_structure a' ->
           let a = self#class_structure a a' in
@@ -1432,7 +1495,8 @@ class virtual ['res] lift2 =
           let b = self#option self#expression b b' in
           let c = self#pattern c c' in
           let d = self#class_expr d d' in
-          self#constr "Pcl_fun"
+          self#constr
+            "Pcl_fun"
             [ ("arg_label", a)
             ; ("expression option", b)
             ; ("pattern", c)
@@ -1448,13 +1512,15 @@ class virtual ['res] lift2 =
                 self#tuple [ ("arg_label", a); ("expression", b) ])
               b
           in
-          self#constr "Pcl_apply"
+          self#constr
+            "Pcl_apply"
             [ ("class_expr", a); ("(arg_label * expression) list", b b') ]
         | Pcl_let (a, b, c), Pcl_let (a', b', c') ->
           let a = self#rec_flag a a' in
           let b = self#list self#value_binding b b' in
           let c = self#class_expr c c' in
-          self#constr "Pcl_let"
+          self#constr
+            "Pcl_let"
             [ ("rec_flag", a); ("value_binding list", b); ("class_expr", c) ]
         | Pcl_constraint (a, b), Pcl_constraint (a', b') ->
           let a = self#class_expr a a' in
@@ -1477,7 +1543,8 @@ class virtual ['res] lift2 =
         let pcstr_fields =
           self#list self#class_field pcstr_fields pcstr_fields'
         in
-        self#record "class_structure"
+        self#record
+          "class_structure"
           [ ("pcstr_self", pcstr_self); ("pcstr_fields", pcstr_fields) ]
 
     method class_field : class_field -> class_field -> ('res, string) result =
@@ -1489,7 +1556,8 @@ class virtual ['res] lift2 =
         let pcf_desc = self#class_field_desc pcf_desc pcf_desc' in
         let pcf_loc = self#location pcf_loc pcf_loc' in
         let pcf_attributes = self#attributes pcf_attributes pcf_attributes' in
-        self#record "class_field"
+        self#record
+          "class_field"
           [ ("pcf_desc", pcf_desc)
           ; ("pcf_loc", pcf_loc)
           ; ("pcf_attributes", pcf_attributes)
@@ -1503,7 +1571,8 @@ class virtual ['res] lift2 =
           let a = self#override_flag a a' in
           let b = self#class_expr b b' in
           let c = self#option (self#loc self#string) c c' in
-          self#constr "Pcf_inherit"
+          self#constr
+            "Pcf_inherit"
             [ ("override_flag", a); ("class_expr", b); ("label loc option", c) ]
         | Pcf_val a, Pcf_val a' ->
           let a =
@@ -1518,7 +1587,8 @@ class virtual ['res] lift2 =
                 ])
               a
           in
-          self#constr "Pcf_val"
+          self#constr
+            "Pcf_val"
             [ ("(label loc * mutable_flag * class_field_kind)", a a') ]
         | Pcf_method a, Pcf_method a' ->
           let a =
@@ -1533,7 +1603,8 @@ class virtual ['res] lift2 =
                 ])
               a
           in
-          self#constr "Pcf_method"
+          self#constr
+            "Pcf_method"
             [ ("(label loc * private_flag * class_field_kind)", a a') ]
         | Pcf_constraint a, Pcf_constraint a' ->
           let a =
@@ -1583,7 +1654,8 @@ class virtual ['res] lift2 =
         let pmty_attributes =
           self#attributes pmty_attributes pmty_attributes'
         in
-        self#record "module_type"
+        self#record
+          "module_type"
           [ ("pmty_desc", pmty_desc)
           ; ("pmty_loc", pmty_loc)
           ; ("pmty_attributes", pmty_attributes)
@@ -1602,12 +1674,14 @@ class virtual ['res] lift2 =
         | Pmty_functor (a, b), Pmty_functor (a', b') ->
           let a = self#functor_parameter a a' in
           let b = self#module_type b b' in
-          self#constr "Pmty_functor"
+          self#constr
+            "Pmty_functor"
             [ ("functor_parameter", a); ("module_type", b) ]
         | Pmty_with (a, b), Pmty_with (a', b') ->
           let a = self#module_type a a' in
           let b = self#list self#with_constraint b b' in
-          self#constr "Pmty_with"
+          self#constr
+            "Pmty_with"
             [ ("module_type", a); ("with_constraint list", b) ]
         | Pmty_typeof a, Pmty_typeof a' ->
           let a = self#module_expr a a' in
@@ -1640,7 +1714,8 @@ class virtual ['res] lift2 =
           { psig_desc = psig_desc'; psig_loc = psig_loc' } ->
         let psig_desc = self#signature_item_desc psig_desc psig_desc' in
         let psig_loc = self#location psig_loc psig_loc' in
-        self#record "signature_item"
+        self#record
+          "signature_item"
           [ ("psig_desc", psig_desc); ("psig_loc", psig_loc) ]
 
     method signature_item_desc
@@ -1653,7 +1728,8 @@ class virtual ['res] lift2 =
         | Psig_type (a, b), Psig_type (a', b') ->
           let a = self#rec_flag a a' in
           let b = self#list self#type_declaration b b' in
-          self#constr "Psig_type"
+          self#constr
+            "Psig_type"
             [ ("rec_flag", a); ("type_declaration list", b) ]
         | Psig_typesubst a, Psig_typesubst a' ->
           let a = self#list self#type_declaration a a' in
@@ -1709,7 +1785,8 @@ class virtual ['res] lift2 =
         let pmd_type = self#module_type pmd_type pmd_type' in
         let pmd_attributes = self#attributes pmd_attributes pmd_attributes' in
         let pmd_loc = self#location pmd_loc pmd_loc' in
-        self#record "module_declaration"
+        self#record
+          "module_declaration"
           [ ("pmd_name", pmd_name)
           ; ("pmd_type", pmd_type)
           ; ("pmd_attributes", pmd_attributes)
@@ -1728,7 +1805,8 @@ class virtual ['res] lift2 =
         let pms_manifest = self#longident_loc pms_manifest pms_manifest' in
         let pms_attributes = self#attributes pms_attributes pms_attributes' in
         let pms_loc = self#location pms_loc pms_loc' in
-        self#record "module_substitution"
+        self#record
+          "module_substitution"
           [ ("pms_name", pms_name)
           ; ("pms_manifest", pms_manifest)
           ; ("pms_attributes", pms_attributes)
@@ -1751,7 +1829,8 @@ class virtual ['res] lift2 =
           self#attributes pmtd_attributes pmtd_attributes'
         in
         let pmtd_loc = self#location pmtd_loc pmtd_loc' in
-        self#record "module_type_declaration"
+        self#record
+          "module_type_declaration"
           [ ("pmtd_name", pmtd_name)
           ; ("pmtd_type", pmtd_type)
           ; ("pmtd_attributes", pmtd_attributes)
@@ -1764,7 +1843,8 @@ class virtual ['res] lift2 =
           -> 'a open_infos
           -> 'a open_infos
           -> ('res, string) result =
-      fun _a { popen_expr; popen_override; popen_loc; popen_attributes }
+      fun _a
+          { popen_expr; popen_override; popen_loc; popen_attributes }
           { popen_expr = popen_expr'
           ; popen_override = popen_override'
           ; popen_loc = popen_loc'
@@ -1778,7 +1858,8 @@ class virtual ['res] lift2 =
         let popen_attributes =
           self#attributes popen_attributes popen_attributes'
         in
-        self#record "open_infos"
+        self#record
+          "open_infos"
           [ ("popen_expr", popen_expr)
           ; ("popen_override", popen_override)
           ; ("popen_loc", popen_loc)
@@ -1799,7 +1880,8 @@ class virtual ['res] lift2 =
           -> 'a include_infos
           -> 'a include_infos
           -> ('res, string) result =
-      fun _a { pincl_mod; pincl_loc; pincl_attributes }
+      fun _a
+          { pincl_mod; pincl_loc; pincl_attributes }
           { pincl_mod = pincl_mod'
           ; pincl_loc = pincl_loc'
           ; pincl_attributes = pincl_attributes'
@@ -1809,7 +1891,8 @@ class virtual ['res] lift2 =
         let pincl_attributes =
           self#attributes pincl_attributes pincl_attributes'
         in
-        self#record "include_infos"
+        self#record
+          "include_infos"
           [ ("pincl_mod", pincl_mod)
           ; ("pincl_loc", pincl_loc)
           ; ("pincl_attributes", pincl_attributes)
@@ -1830,22 +1913,26 @@ class virtual ['res] lift2 =
         | Pwith_type (a, b), Pwith_type (a', b') ->
           let a = self#longident_loc a a' in
           let b = self#type_declaration b b' in
-          self#constr "Pwith_type"
+          self#constr
+            "Pwith_type"
             [ ("longident_loc", a); ("type_declaration", b) ]
         | Pwith_module (a, b), Pwith_module (a', b') ->
           let a = self#longident_loc a a' in
           let b = self#longident_loc b b' in
-          self#constr "Pwith_module"
+          self#constr
+            "Pwith_module"
             [ ("longident_loc1", a); ("longident_loc2", b) ]
         | Pwith_typesubst (a, b), Pwith_typesubst (a', b') ->
           let a = self#longident_loc a a' in
           let b = self#type_declaration b b' in
-          self#constr "Pwith_typesubst"
+          self#constr
+            "Pwith_typesubst"
             [ ("longident_loc", a); ("type_declaration", b) ]
         | Pwith_modsubst (a, b), Pwith_modsubst (a', b') ->
           let a = self#longident_loc a a' in
           let b = self#longident_loc b b' in
-          self#constr "Pwith_modsubst"
+          self#constr
+            "Pwith_modsubst"
             [ ("longident_loc1", a); ("longident_loc2", b) ]
         | _ -> Error "with_constraint"
 
@@ -1860,7 +1947,8 @@ class virtual ['res] lift2 =
         let pmod_attributes =
           self#attributes pmod_attributes pmod_attributes'
         in
-        self#record "module_expr"
+        self#record
+          "module_expr"
           [ ("pmod_desc", pmod_desc)
           ; ("pmod_loc", pmod_loc)
           ; ("pmod_attributes", pmod_attributes)
@@ -1879,7 +1967,8 @@ class virtual ['res] lift2 =
         | Pmod_functor (a, b), Pmod_functor (a', b') ->
           let a = self#functor_parameter a a' in
           let b = self#module_expr b b' in
-          self#constr "Pmod_functor"
+          self#constr
+            "Pmod_functor"
             [ ("functor_parameter", a); ("module_expr", b) ]
         | Pmod_apply (a, b), Pmod_apply (a', b') ->
           let a = self#module_expr a a' in
@@ -1888,7 +1977,8 @@ class virtual ['res] lift2 =
         | Pmod_constraint (a, b), Pmod_constraint (a', b') ->
           let a = self#module_expr a a' in
           let b = self#module_type b b' in
-          self#constr "Pmod_constraint"
+          self#constr
+            "Pmod_constraint"
             [ ("module_expr", a); ("module_type", b) ]
         | Pmod_unpack a, Pmod_unpack a' ->
           let a = self#expression a a' in
@@ -1907,7 +1997,8 @@ class virtual ['res] lift2 =
           { pstr_desc = pstr_desc'; pstr_loc = pstr_loc' } ->
         let pstr_desc = self#structure_item_desc pstr_desc pstr_desc' in
         let pstr_loc = self#location pstr_loc pstr_loc' in
-        self#record "structure_item"
+        self#record
+          "structure_item"
           [ ("pstr_desc", pstr_desc); ("pstr_loc", pstr_loc) ]
 
     method structure_item_desc
@@ -1921,7 +2012,8 @@ class virtual ['res] lift2 =
         | Pstr_value (a, b), Pstr_value (a', b') ->
           let a = self#rec_flag a a' in
           let b = self#list self#value_binding b b' in
-          self#constr "Pstr_value"
+          self#constr
+            "Pstr_value"
             [ ("rec_flag", a); ("value_binding list", b) ]
         | Pstr_primitive a, Pstr_primitive a' ->
           let a = self#value_description a a' in
@@ -1929,7 +2021,8 @@ class virtual ['res] lift2 =
         | Pstr_type (a, b), Pstr_type (a', b') ->
           let a = self#rec_flag a a' in
           let b = self#list self#type_declaration b b' in
-          self#constr "Pstr_type"
+          self#constr
+            "Pstr_type"
             [ ("rec_flag", a); ("type_declaration list", b) ]
         | Pstr_typext a, Pstr_typext a' ->
           let a = self#type_extension a a' in
@@ -1979,7 +2072,8 @@ class virtual ['res] lift2 =
         let pvb_expr = self#expression pvb_expr pvb_expr' in
         let pvb_attributes = self#attributes pvb_attributes pvb_attributes' in
         let pvb_loc = self#location pvb_loc pvb_loc' in
-        self#record "value_binding"
+        self#record
+          "value_binding"
           [ ("pvb_pat", pvb_pat)
           ; ("pvb_expr", pvb_expr)
           ; ("pvb_attributes", pvb_attributes)
@@ -1998,7 +2092,8 @@ class virtual ['res] lift2 =
         let pmb_expr = self#module_expr pmb_expr pmb_expr' in
         let pmb_attributes = self#attributes pmb_attributes pmb_attributes' in
         let pmb_loc = self#location pmb_loc pmb_loc' in
-        self#record "module_binding"
+        self#record
+          "module_binding"
           [ ("pmb_name", pmb_name)
           ; ("pmb_expr", pmb_expr)
           ; ("pmb_attributes", pmb_attributes)
@@ -2024,7 +2119,8 @@ class virtual ['res] lift2 =
         let pdir_name = self#loc self#string pdir_name pdir_name' in
         let pdir_arg = self#option self#directive_argument pdir_arg pdir_arg' in
         let pdir_loc = self#location pdir_loc pdir_loc' in
-        self#record "toplevel_directive"
+        self#record
+          "toplevel_directive"
           [ ("pdir_name", pdir_name)
           ; ("pdir_arg", pdir_arg)
           ; ("pdir_loc", pdir_loc)
@@ -2036,7 +2132,8 @@ class virtual ['res] lift2 =
           { pdira_desc = pdira_desc'; pdira_loc = pdira_loc' } ->
         let pdira_desc = self#directive_argument_desc pdira_desc pdira_desc' in
         let pdira_loc = self#location pdira_loc pdira_loc' in
-        self#record "directive_argument"
+        self#record
+          "directive_argument"
           [ ("pdira_desc", pdira_desc); ("pdira_loc", pdira_loc) ]
 
     method directive_argument_desc

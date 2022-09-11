@@ -212,7 +212,10 @@ module Uri = struct
 
   let with_ this ?scheme ?authority ?path ?query ?fragment () =
     let change = Ojs.obj [||] in
-    iter_set change "scheme" [%js.of: string]
+    iter_set
+      change
+      "scheme"
+      [%js.of: string]
       (Option.map Scheme.to_string scheme);
     iter_set change "authority" [%js.of: string] authority;
     iter_set change "path" [%js.of: string] path;
@@ -2687,8 +2690,11 @@ module TreeView = struct
       let options = Ojs.obj [||] in
       iter_set options "select" [%js.of: bool] select;
       iter_set options "focus" [%js.of: bool] focus;
-      iter_set options "expand"
-        [%js.of: ([ `Bool of bool | `Int of int ][@js.union])] expand;
+      iter_set
+        options
+        "expand"
+        [%js.of: ([ `Bool of bool | `Int of int ][@js.union])]
+        expand;
       reveal this ~element options
   end
 end
@@ -3141,7 +3147,8 @@ module Window = struct
       a Promise.t =
     let task =
       [%js.of:
-        progress:Progress.t -> token:CancellationToken.t -> T.t Promise.t] task
+        progress:Progress.t -> token:CancellationToken.t -> T.t Promise.t]
+        task
     in
     [%js.to: T.t Promise.t] (withProgress ~options ~task)
 

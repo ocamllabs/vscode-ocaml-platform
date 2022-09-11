@@ -165,7 +165,8 @@ let onDidReceiveMessage_listener instance webview document msg =
 
   match int_prop "selectedOutput" with
   | Some i ->
-    Ast_editor_state.set_current_ast_mode ast_editor_state
+    Ast_editor_state.set_current_ast_mode
+      ast_editor_state
       (if i = 0 then Ast_editor_state.Original_ast else Preprocessed_ast);
     update_ast instance ~document ~webview
   | None -> (
@@ -175,9 +176,11 @@ let onDidReceiveMessage_listener instance webview document msg =
         let document = TextEditor.document editor in
         let anchor = Vscode.TextDocument.positionAt document ~offset:cbegin in
         let active = Vscode.TextDocument.positionAt document ~offset:cend in
-        TextEditor.set_selection editor
+        TextEditor.set_selection
+          editor
           (Selection.makePositions ~anchor ~active);
-        TextEditor.revealRange editor
+        TextEditor.revealRange
+          editor
           ~range:(Range.makePositions ~start:anchor ~end_:active)
           ()
       in
@@ -188,11 +191,13 @@ let onDidReceiveMessage_listener instance webview document msg =
                apply_selection editor cbegin cend
              else if
                (* (not !original_mode) && *)
-               (Ast_editor_state.entry_exists ast_editor_state
+               (Ast_editor_state.entry_exists
+                  ast_editor_state
                   ~origin_doc:(TextDocument.uri document))
                  ~pp_doc:(TextDocument.uri visible_doc)
                && not
-                    (Poly.equal Ast_editor_state.Original_ast
+                    (Poly.equal
+                       Ast_editor_state.Original_ast
                        (Ast_editor_state.get_current_ast_mode ast_editor_state))
              then
                match Option.both (int_prop "r_begin") (int_prop "r_end") with
@@ -223,7 +228,8 @@ let on_hover custom_doc webview =
 let activate_hover_mode instance ~document =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   match
-    Ast_editor_state.find_webview_by_doc ast_editor_state
+    Ast_editor_state.find_webview_by_doc
+      ast_editor_state
       (TextDocument.uri document)
   with
   | Some webview -> Some (on_hover document webview)
@@ -233,14 +239,19 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
     ~token:_ : CustomTextEditorProvider.ResolvedEditor.t =
   let webview = WebviewPanel.webview webviewPanel in
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  Ast_editor_state.set_webview ast_editor_state
+  Ast_editor_state.set_webview
+    ast_editor_state
     (TextDocument.uri document)
     webview;
   let (_ : Disposable.t) =
     let onDidReceiveMessage_disposable =
       let listener msg =
         Handlers.unpwrap
-          (Handlers.w4 onDidReceiveMessage_listener instance webview document
+          (Handlers.w4
+             onDidReceiveMessage_listener
+             instance
+             webview
+             document
              msg)
       in
       WebView.onDidReceiveMessage webview ~listener ()
@@ -248,16 +259,23 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
     let onDidChangeTextDocument_disposable =
       let listener event =
         Handlers.unpwrap
-          (Handlers.w4 onDidChangeTextDocument_listener instance document
-             webview event)
+          (Handlers.w4
+             onDidChangeTextDocument_listener
+             instance
+             document
+             webview
+             event)
       in
       Workspace.onDidChangeTextDocument ~listener ()
     in
-    WebviewPanel.onDidDispose webviewPanel
+    WebviewPanel.onDidDispose
+      webviewPanel
       ~listener:(fun () ->
-        Ast_editor_state.set_current_ast_mode ast_editor_state
+        Ast_editor_state.set_current_ast_mode
+          ast_editor_state
           Ast_editor_state.Original_ast;
-        Ast_editor_state.remove_webview ast_editor_state
+        Ast_editor_state.remove_webview
+          ast_editor_state
           (TextDocument.uri document);
         Disposable.dispose onDidReceiveMessage_disposable;
         Disposable.dispose onDidChangeTextDocument_disposable)
@@ -279,7 +297,8 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
 let open_ast_explorer ~uri =
   let open Promise.Syntax in
   let+ _ =
-    Vscode.Commands.executeCommand ~command:"vscode.openWith"
+    Vscode.Commands.executeCommand
+      ~command:"vscode.openWith"
       ~args:
         [ Uri.t_to_js uri
         ; Ojs.string_to_js "ast-editor"
@@ -299,9 +318,11 @@ let replace_document_content ~document ~content =
       ~end_:(TextLine.range last_line |> Range.end_)
   in
   let edit = WorkspaceEdit.make () in
-  WorkspaceEdit.replace edit
+  WorkspaceEdit.replace
+    edit
     ~uri:(TextDocument.uri document)
-    ~range ~newText:content;
+    ~range
+    ~newText:content;
   let (_ : bool Promise.t) = Workspace.applyEdit ~edit in
   ()
 
@@ -316,13 +337,16 @@ let open_pp_doc instance ~document =
         (`Uri
           (Uri.parse ("post-ppx: " ^ TextDocument.fileName document ^ "?") ()))
     in
-    Ast_editor_state.associate_origin_and_pp ast_editor_state
+    Ast_editor_state.associate_origin_and_pp
+      ast_editor_state
       ~origin_uri:(TextDocument.uri document)
       ~pp_doc_uri:(TextDocument.uri doc);
     replace_document_content ~content:pp_pp_str ~document:doc;
     let+ (_ : TextEditor.t) =
-      Window.showTextDocument ~document:(`TextDocument doc)
-        ~column:ViewColumn.Beside ()
+      Window.showTextDocument
+        ~document:(`TextDocument doc)
+        ~column:ViewColumn.Beside
+        ()
     in
     Ok ()
 
@@ -331,7 +355,8 @@ let reload_pp_doc instance ~document =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   let visibleTextEditors = Window.visibleTextEditors () in
   let origin_uri_opt =
-    Ast_editor_state.find_original_doc_by_pp_uri ast_editor_state
+    Ast_editor_state.find_original_doc_by_pp_uri
+      ast_editor_state
       (TextDocument.uri document)
   in
   match origin_uri_opt with
@@ -366,11 +391,13 @@ let rec manage_choice instance choice ~document =
           ~pp_uri:(TextDocument.uri document);
         reload_pp_doc
       | `Absent_or_pped -> open_preprocessed_doc_to_the_side)
-        instance ~document
+        instance
+        ~document
     in
     (*Find and update the webview*)
     let webview_opt =
-      Ast_editor_state.find_webview_by_doc ast_editor_state
+      Ast_editor_state.find_webview_by_doc
+        ast_editor_state
         (TextDocument.uri document)
     in
     let reload webview_opt ~document =
@@ -379,7 +406,8 @@ let rec manage_choice instance choice ~document =
       | Some webview -> update_ast instance ~document ~webview
     in
     (match
-       Ast_editor_state.find_original_doc_by_pp_uri ast_editor_state
+       Ast_editor_state.find_original_doc_by_pp_uri
+         ast_editor_state
          (TextDocument.uri document)
      with
     | Some uri ->
@@ -432,7 +460,8 @@ module Command = struct
       Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
     in
     Extension_commands.register_text_editor
-      ~id:Extension_consts.Commands.open_ast_explorer_to_the_side handler
+      ~id:Extension_consts.Commands.open_ast_explorer_to_the_side
+      handler
 
   let _reveal_ast_node =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
@@ -442,13 +471,15 @@ module Command = struct
         let+ webview =
           let ast_editor_state = Extension_instance.ast_editor_state instance in
           match
-            Ast_editor_state.find_webview_by_doc ast_editor_state
+            Ast_editor_state.find_webview_by_doc
+              ast_editor_state
               (TextDocument.uri document)
           with
           | Some _ as r -> Promise.return r
           | None ->
             let+ () = open_ast_explorer_handler textEditor in
-            Ast_editor_state.find_webview_by_doc ast_editor_state
+            Ast_editor_state.find_webview_by_doc
+              ast_editor_state
               (TextDocument.uri document)
         in
         let offset =
@@ -470,7 +501,8 @@ module Command = struct
       Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
     in
     Extension_commands.register_text_editor
-      ~id:Extension_consts.Commands.reveal_ast_node handler
+      ~id:Extension_consts.Commands.reveal_ast_node
+      handler
 
   let _switch_hover_mode =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
@@ -481,7 +513,8 @@ module Command = struct
           Disposable.dispose d;
           None
         | None ->
-          activate_hover_mode instance
+          activate_hover_mode
+            instance
             ~document:(TextEditor.document textEditor)
       in
       Ast_editor_state.set_hover_disposable ast_editor_state hover_dispoable
@@ -490,7 +523,8 @@ module Command = struct
       Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
     in
     Extension_commands.register_text_editor
-      ~id:Extension_consts.Commands.switch_hover_mode handler
+      ~id:Extension_consts.Commands.switch_hover_mode
+      handler
 
   let _show_preprocessed_document =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
@@ -508,7 +542,8 @@ module Command = struct
       Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
     in
     Extension_commands.register_text_editor
-      ~id:Extension_consts.Commands.show_preprocessed_document handler
+      ~id:Extension_consts.Commands.show_preprocessed_document
+      handler
 
   let _open_pp_editor_and_ast_explorer =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
@@ -522,7 +557,8 @@ module Command = struct
       Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
     in
     Extension_commands.register_text_editor
-      ~id:Extension_consts.Commands.open_pp_editor_and_ast_explorer handler
+      ~id:Extension_consts.Commands.open_pp_editor_and_ast_explorer
+      handler
 end
 
 let text_document_content_provider_ppx =
@@ -550,7 +586,8 @@ let manage_changed_origin instance ~document =
 
 let onDidSaveTextDocument_listener_pp instance document =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  Ast_editor_state.on_origin_update_content ast_editor_state
+  Ast_editor_state.on_origin_update_content
+    ast_editor_state
     (TextDocument.uri document)
 
 let onDidChangeActiveTextEditor_listener instance e =
@@ -569,7 +606,8 @@ let onDidChangeActiveTextEditor_listener instance e =
 
 let onDidCloseTextDocument_listener instance (document : TextDocument.t) =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  Ast_editor_state.remove_doc_entries ast_editor_state
+  Ast_editor_state.remove_doc_entries
+    ast_editor_state
     (TextDocument.uri document)
 
 let register extension instance =
@@ -586,8 +624,10 @@ let register extension instance =
       ~resolveCustomTextEditor:(resolveCustomTextEditor instance)
   in
   let disposable =
-    Vscode.Window.registerCustomTextEditorProvider ~viewType:"ast-editor"
-      ~provider:editorProvider ()
+    Vscode.Window.registerCustomTextEditorProvider
+      ~viewType:"ast-editor"
+      ~provider:editorProvider
+      ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable;
   (*Register listener that monitors closing documents. *)
@@ -606,7 +646,8 @@ let register extension instance =
   Vscode.ExtensionContext.subscribe extension ~disposable;
   (*Register content provider that enables opening Preprocessed Documents *)
   let disposable =
-    Vscode.Workspace.registerTextDocumentContentProvider ~scheme:"post-ppx"
+    Vscode.Workspace.registerTextDocumentContentProvider
+      ~scheme:"post-ppx"
       ~provider:text_document_content_provider_ppx
   in
   Vscode.ExtensionContext.subscribe extension ~disposable

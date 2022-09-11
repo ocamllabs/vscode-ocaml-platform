@@ -89,8 +89,10 @@ module Discover = struct
     | Error err ->
       let dir = Path.to_string dir in
       log "unable to read dir %s. error %s" dir err;
-      show_message `Warn
-        "Unable to read %s. No esy projects will be inferred from here" dir;
+      show_message
+        `Warn
+        "Unable to read %s. No esy projects will be inferred from here"
+        dir;
       Promise.return []
 
   let parse_dirs_up dir =
@@ -158,7 +160,9 @@ let setup_sandbox t manifest =
   | State.Ready -> ()
   | Pending ->
     let root_dir = Path.to_string manifest in
-    show_message `Info "Esy dependencies are not installed. Run esy under %s"
+    show_message
+      `Info
+      "Esy dependencies are not installed. Run esy under %s"
       root_dir
 
 let equal e1 e2 = Cmd.equal_spawn e1 e2

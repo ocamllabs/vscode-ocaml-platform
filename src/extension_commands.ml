@@ -103,7 +103,8 @@ let _switch_impl_intf =
           (* if, however, ocamllsp doesn't have the capability, recommend
              updating ocamllsp*)
           Promise.return
-          @@ show_message `Warn
+          @@ show_message
+               `Warn
                "The installed version of ocamllsp does not support switching \
                 between implementation and interface files. Consider updating \
                 ocamllsp."
@@ -147,11 +148,14 @@ let ( _open_ocamllsp_output_pane
     let show_output (lazy output) = OutputChannel.show output () in
     show_output output
   in
-  ( command Extension_consts.Commands.open_ocamllsp_output
+  ( command
+      Extension_consts.Commands.open_ocamllsp_output
       (handler Output.language_server_output_channel)
-  , command Extension_consts.Commands.open_ocaml_platform_ext_output
+  , command
+      Extension_consts.Commands.open_ocaml_platform_ext_output
       (handler Output.extension_output_channel)
-  , command Extension_consts.Commands.open_ocaml_commands_output
+  , command
+      Extension_consts.Commands.open_ocaml_commands_output
       (handler Output.command_output_channel) )
 
 module Holes_commands : sig
@@ -165,12 +169,14 @@ end = struct
       doesn't support jumping to holes. *)
   let ocaml_lsp_doesn't_support_holes instance ocaml_lsp =
     match
-      Ocaml_lsp.is_version_up_to_date ocaml_lsp
+      Ocaml_lsp.is_version_up_to_date
+        ocaml_lsp
         (Extension_instance.ocaml_version_exn instance)
     with
     | Ok () -> ()
     | Error (`Msg msg) ->
-      show_message `Warn
+      show_message
+        `Warn
         "The installed version of `ocamllsp` does not support typed holes. %s"
         msg
 
@@ -185,8 +191,11 @@ end = struct
       Selection.makePositions ~anchor ~active
     in
     TextEditor.set_selection text_editor new_selection;
-    TextEditor.revealRange text_editor ~range:hole
-      ~revealType:TextEditorRevealType.InCenterIfOutsideViewport ()
+    TextEditor.revealRange
+      text_editor
+      ~range:hole
+      ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
+      ()
 
   let jump_to_hole jump (instance : Extension_instance.t) ~args =
     (* this command is available (in the command palette) only when a file is
@@ -211,7 +220,9 @@ end = struct
           let+ holes =
             Custom_requests.send_request client Custom_requests.typedHoles uri
           in
-          jump ~cmd_args:args text_editor
+          jump
+            ~cmd_args:args
+            text_editor
             ~sorted_holes:(List.sort holes ~compare:Range.compare)
         in
         ())
@@ -278,7 +289,9 @@ end = struct
                 (* we don't want the same range that we're in now; we need the
                    next one *)
                 not
-                  (Range.contains range ~positionOrRange:(`Position current_pos)))
+                  (Range.contains
+                     range
+                     ~positionOrRange:(`Position current_pos)))
         in
         (* if the current position is larger than all other ranges, we cycle
            back to first hole in the file *)

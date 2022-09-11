@@ -46,8 +46,11 @@ end = struct
     in
     let (lazy outputChannel) = Output.language_server_output_channel in
     let revealOutputChannelOn = LanguageClient.RevealOutputChannelOn.Never in
-    LanguageClient.ClientOptions.create ~outputChannel ~revealOutputChannelOn
-      ~documentSelector ()
+    LanguageClient.ClientOptions.create
+      ~outputChannel
+      ~revealOutputChannelOn
+      ~documentSelector
+      ()
 
   let server_options sandbox =
     let command = Sandbox.get_command sandbox "ocamllsp" [] in
@@ -58,7 +61,8 @@ end = struct
       in
       Interop.Dict.union
         (fun _k _v1 v2 -> Some v2)
-        Process.Env.env extra_env_vars
+        Process.Env.env
+        extra_env_vars
     in
     match command with
     | Shell command ->
@@ -89,13 +93,17 @@ end = struct
       let experimental =
         Jsonoo.Encode.(object_ [ ("jumpToNextHole", bool true) ])
       in
-      LanguageClient.ClientCapabilities.set_experimental capabilities
+      LanguageClient.ClientCapabilities.set_experimental
+        capabilities
         (Some experimental)
     in
     let initialize ~capabilities:_ ~documentSelector:_ = () in
     let dispose () = () in
-    LanguageClient.StaticFeature.make ~fillClientCapabilities ~initialize
-      ~dispose ()
+    LanguageClient.StaticFeature.make
+      ~fillClientCapabilities
+      ~initialize
+      ~dispose
+      ()
 
   let start_language_server t =
     let open Promise.Syntax in
@@ -106,8 +114,12 @@ end = struct
       let client =
         let serverOptions = server_options t.sandbox in
         let clientOptions = client_options () in
-        LanguageClient.make ~id:"ocaml" ~name:"OCaml Platform VS Code extension"
-          ~serverOptions ~clientOptions ()
+        LanguageClient.make
+          ~id:"ocaml"
+          ~name:"OCaml Platform VS Code extension"
+          ~serverOptions
+          ~clientOptions
+          ()
       in
       LanguageClient.registerFeature client ~feature:client_capabilities;
       let open Promise.Syntax in
@@ -125,19 +137,24 @@ end = struct
     match res with
     | Ok () -> ()
     | Error s ->
-      show_message `Error
-        "An error occurred starting the language server `ocamllsp`. %s" s
+      show_message
+        `Error
+        "An error occurred starting the language server `ocamllsp`. %s"
+        s
 end
 
 include Language_server_init
 
 let documentation_server_info () =
   let status_bar =
-    Vscode.Window.createStatusBarItem ~alignment:StatusBarAlignment.Right
-      ~priority:100 ()
+    Vscode.Window.createStatusBarItem
+      ~alignment:StatusBarAlignment.Right
+      ~priority:100
+      ()
   in
   let command =
-    Command.create ~title:"Open Command Palette"
+    Command.create
+      ~title:"Open Command Palette"
       ~command:"workbench.action.quickOpen"
       ~arguments:[ Ojs.string_to_js ">OCaml: Stop Documentation server" ]
       ()
@@ -160,7 +177,8 @@ end = struct
     in
     let status_bar_item_text = make_status_bar_item_text sandbox in
     StatusBarItem.set_text status_bar_item status_bar_item_text;
-    StatusBarItem.set_command status_bar_item
+    StatusBarItem.set_command
+      status_bar_item
       (`String Extension_consts.Commands.select_sandbox);
     StatusBarItem.show status_bar_item;
     status_bar_item
@@ -188,7 +206,8 @@ let make () =
 let set_documentation_context ~running =
   let document_server_on = "ocaml.documentation-server-on" in
   let (_ : Ojs.t option Promise.t) =
-    Vscode.Commands.executeCommand ~command:"setContext"
+    Vscode.Commands.executeCommand
+      ~command:"setContext"
       ~args:[ Ojs.string_to_js document_server_on; Ojs.bool_to_js running ]
   in
   ()
@@ -208,10 +227,12 @@ let set_sandbox t new_sandbox =
   stop_documentation_server t;
   let (_ : Ojs.t option Promise.t) =
     Vscode.Commands.executeCommand
-      ~command:Extension_consts.Commands.refresh_sandbox ~args:[]
+      ~command:Extension_consts.Commands.refresh_sandbox
+      ~args:[]
   and (_ : Ojs.t option Promise.t) =
     Vscode.Commands.executeCommand
-      ~command:Extension_consts.Commands.refresh_switches ~args:[]
+      ~command:Extension_consts.Commands.refresh_switches
+      ~args:[]
   in
   ()
 
@@ -235,7 +256,8 @@ let start_documentation_server t ~path =
       set_documentation_context ~running:true;
       Ok server
     | Error e ->
-      log "Error while starting the documentation server: %s"
+      log
+        "Error while starting the documentation server: %s"
         (Node.JsError.message e);
       Error ())
 
@@ -257,8 +279,11 @@ let update_ocaml_info t =
       |> Result.map_error ~f:(function m ->
              `Unable_to_parse_version (`Version v, m))
     | Error e ->
-      log_chan ~section:"Ocaml.version_semver" `Warn
-        "Error running `ocamlc --version`: %s" e;
+      log_chan
+        ~section:"Ocaml.version_semver"
+        `Warn
+        "Error running `ocamlc --version`: %s"
+        e;
       Error `Ocamlc_missing
   in
   match ocaml_version with
@@ -269,10 +294,12 @@ let update_ocaml_info t =
     t.ocaml_version <- None;
     match e with
     | `Unable_to_parse_version (`Version v, `Msg msg) ->
-      show_message `Error
+      show_message
+        `Error
         "OCaml bytecode compiler `ocamlc` version could not be parsed. \
          Version: %s. Error %s"
-        v msg
+        v
+        msg
     | `Ocamlc_missing ->
       let (_ : unit Promise.t) =
         let+ maybe_choice =

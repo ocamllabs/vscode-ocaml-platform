@@ -33,7 +33,8 @@ module Experimental_capabilities = struct
       ; handleTypedHoles
       }
     with Jsonoo.Decode_error err ->
-      show_message `Warn
+      show_message
+        `Warn
         "Unexpected experimental capabilities from the language server. \
          Falling back to default: no experimental capabilities set.";
       log_chan `Error ~section:"Ocaml_lsp.of_json" "%s" err;
@@ -57,7 +58,9 @@ let get_version_from_serverInfo { serverInfo; experimental_capabilities = _ } =
   | Some { name; version } ->
     if String.equal name "ocamllsp" then version
     else (
-      log_chan ~section:"Ocaml_lsp.get_version" `Warn
+      log_chan
+        ~section:"Ocaml_lsp.get_version"
+        `Warn
         "the language server is not ocamllsp";
       (* practically impossible but let's be defensive *)
       None)
@@ -153,7 +156,8 @@ let is_version_up_to_date t ocaml_v =
             "There is a newer version of ocaml-lsp-server available. Consider \
              upgrading %s. Hint: $ opam install ocaml-lsp-server=%s and \
              restart the lsp server"
-            upgrade new_
+            upgrade
+            new_
       in
       `Msg msg)
 
