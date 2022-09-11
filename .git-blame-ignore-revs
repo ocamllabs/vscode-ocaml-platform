@@ -1,0 +1,5 @@
+# To understand why we need this file, see https://www.moxio.com/blog/43/ignoring-bulk-change-commits-with-git-blame
+
+# add ocamlformat config `wrap-fun-args=false`
+
+ad2ebf3a357c17ac184bcb0c43540cb2a9a614d2
