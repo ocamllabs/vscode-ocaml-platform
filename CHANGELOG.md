@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.11.0
 
 - Fix syntax highlighting for let bindings with type annotations (#991)
 
