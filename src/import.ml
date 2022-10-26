@@ -208,10 +208,4 @@ module Ocaml_version = struct
   let ( >= ) v1 v2 = Ocaml_version.compare v1 v2 >= 0
 
   include Ocaml_version
-
-  module Releases = struct
-    let v4_14_0 = of_string_exn "4.14.0"
-
-    include Releases
-  end
 end
