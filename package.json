@@ -7,13 +7,13 @@
   "publisher": "ocamllabs",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ocamllabs/vscode-ocaml-platform"
+    "url": "https://github.com/ocaml/vscode-ocaml"
   },
   "bugs": {
-    "url": "https://github.com/ocamllabs/vscode-ocaml-platform/issues"
+    "url": "https://github.com/ocaml/vscode-ocaml/issues"
   },
-  "homepage": "https://github.com/ocamllabs/vscode-ocaml-platform",
-  "main": "./dist/vscode_ocaml_platform.bc.js",
+  "homepage": "https://github.com/ocaml/vscode-ocaml",
+  "main": "./dist/vscode_ocaml.bc.js",
   "engines": {
     "vscode": "^1.64.0"
   },
@@ -261,7 +261,7 @@
       {
         "command": "ocaml.open-ocaml-platform-ext-output",
         "category": "OCaml",
-        "title": "Show OCaml Platform Extension Output"
+        "title": "Show OCaml Extension Output"
       },
       {
         "command": "ocaml.open-ocaml-commands-output",
@@ -451,7 +451,7 @@
       ]
     },
     "configuration": {
-      "title": "OCaml Platform",
+      "title": "OCaml",
       "properties": {
         "ocaml.sandbox": {
           "type": "object",
@@ -1021,8 +1021,8 @@
     "test:opam": "node ./test/runOpamTests.js",
     "test:problems": "node ./test/runProblemMatcherTests.js",
     "test": "npm-run-all -s test:*",
-    "package": "vsce package --out ocaml-platform.vsix --yarn",
-    "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --yarn",
+    "package": "vsce package --out vscode-ocaml.vsix --yarn",
+    "deploy:vsce": "vsce publish --packagePath vscode-ocaml.vsix --yarn",
     "deploy:ovsx": "ovsx publish --yarn",
     "fmt:check": "prettier . --check",
     "fmt": "prettier . --write"

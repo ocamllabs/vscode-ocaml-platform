@@ -6,8 +6,7 @@
 
     3. Helper functions that extract the tools from the setup sandbox. This
     includes just [ocamllsp] right now, but in future could include others like
-    debuggers, REPLs etc that could be shipped with [vscode-ocaml-platform]
-    plugin itself
+    debuggers, REPLs etc that could be shipped with [vscode-ocaml] plugin itself
 
     The separation between [init], [run_setup] and extraction helpers exist so
     that we can handle missing tools gracefully (ie provide degraded

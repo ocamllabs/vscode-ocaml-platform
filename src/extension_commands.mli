@@ -5,13 +5,12 @@
     and expose them here if they want to.
 
     All commands are registered using [register_all_commands] in
-    [Vscode_ocaml_platform.activate].
+    [Vscode_ocaml.activate].
 
     [1] https://code.visualstudio.com/api/references/vscode-api#commands *)
 
-(** Registers commands with vscode. Should be called in
-    [Vscode_ocaml_platform.activate]. It subscribes the disposables to the
-    extension context provided. *)
+(** Registers commands with vscode. Should be called in [Vscode_ocaml.activate].
+    It subscribes the disposables to the extension context provided. *)
 val register_all_commands :
   Vscode.ExtensionContext.t -> Extension_instance.t -> unit
 

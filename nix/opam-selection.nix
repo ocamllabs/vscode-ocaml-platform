@@ -644,17 +644,17 @@ in
       };
       opamSrc = "vscode.opam";
     };
-    vscode-ocaml-platform = 
+    vscode-ocaml = 
     {
-      pname = "vscode-ocaml-platform";
+      pname = "vscode-ocaml";
       version = "development";
-      src = self.directSrc "vscode-ocaml-platform";
+      src = self.directSrc "vscode-ocaml";
       opamInputs = 
       {
         inherit (selection) vscode promise_jsoo ppxlib opam-file-format
         ocaml-version ocaml jsonoo js_of_ocaml gen_js_api dune base;
       };
-      opamSrc = "vscode-ocaml-platform.opam";
+      opamSrc = "vscode-ocaml.opam";
     };
     yojson = 
     {

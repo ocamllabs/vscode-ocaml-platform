@@ -13,8 +13,8 @@ authors: [
   "Javier Chávarri <javier.chavarri@gmail.com>"
 ]
 license: "ISC"
-homepage: "https://github.com/ocamllabs/vscode-ocaml-platform"
-bug-reports: "https://github.com/ocamllabs/vscode-ocaml-platform/issues"
+homepage: "https://github.com/ocaml/vscode-ocaml"
+bug-reports: "https://github.com/ocaml/vscode-ocaml/issues"
 depends: [
   "dune" {>= "3.0"}
   "vscode" {= version}
@@ -43,4 +43,4 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-dev-repo: "git+https://github.com/ocamllabs/vscode-ocaml-platform.git"
+dev-repo: "git+https://github.com/ocaml/vscode-ocaml.git"

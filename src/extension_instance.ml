@@ -116,7 +116,7 @@ end = struct
         let clientOptions = client_options () in
         LanguageClient.make
           ~id:"ocaml"
-          ~name:"OCaml Platform VS Code extension"
+          ~name:"VSCode OCaml extension"
           ~serverOptions
           ~clientOptions
           ()

@@ -67,9 +67,7 @@ let github_item =
       ~title:"Open"
       ~command:"vscode.open"
       ~arguments:
-        [ Vscode.Uri.parse
-            "https://github.com/ocamllabs/vscode-ocaml-platform"
-            ()
+        [ Vscode.Uri.parse "https://github.com/ocaml/vscode-ocaml" ()
           |> Vscode.Uri.t_to_js
         ]
       ()

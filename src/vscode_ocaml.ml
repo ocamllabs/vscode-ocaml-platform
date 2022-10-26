@@ -6,7 +6,7 @@ let suggest_to_pick_sandbox () =
   let+ selection =
     Window.showInformationMessage
       ~message:
-        "OCaml Platform is using the package manager and sandbox available in \
+        "VSCode OCaml is using the package manager and sandbox available in \
          the environment. Pick a particular package manager and sandbox by \
          clicking the button below"
       ~choices:[ (select_pm_button_text, ()) ]
