@@ -35,3 +35,5 @@ val resolve_workspace_vars : string -> string
 val substitute_workspace_vars : string -> string
 
 val server_extraEnv : unit -> string Interop.Dict.t option
+
+val server_args_setting : string list setting
