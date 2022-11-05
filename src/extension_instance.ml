@@ -53,7 +53,8 @@ end = struct
       ()
 
   let server_options sandbox =
-    let command = Sandbox.get_command sandbox "ocamllsp" [] in
+    let args = Settings.(get server_args_setting) |> Option.value ~default:[] in
+    let command = Sandbox.get_command sandbox "ocamllsp" args in
     Cmd.log command;
     let env =
       let extra_env_vars =

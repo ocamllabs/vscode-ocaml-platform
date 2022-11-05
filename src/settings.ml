@@ -106,3 +106,10 @@ module ExtraEnv = struct
 end
 
 let server_extraEnv = ExtraEnv.get
+
+let server_args_setting =
+  create_setting
+    ~scope:ConfigurationTarget.Workspace
+    ~key:"ocaml.server.args"
+    ~of_json:Jsonoo.Decode.(list string)
+    ~to_json:Jsonoo.Encode.(list string)

@@ -8,6 +8,9 @@
 - Fix AST Explorer not displaying anything with error "Blocked script execution"
   (#1050)
 
+- Add `ocaml.server.args` configuration option to pass extra arguments to the
+  language server, i.e. ocamllsp (#1042)
+
 ## 1.11.0
 
 - Fix syntax highlighting for let bindings with type annotations (#991)

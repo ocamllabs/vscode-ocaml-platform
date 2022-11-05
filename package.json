@@ -466,6 +466,12 @@
           "default": null,
           "markdownDescription": "Extra environment variables that will be passed to OCaml LSP executable. Useful for debugging purposes mostly."
         },
+        "ocaml.server.args": {
+          "type": "array",
+          "items": "string",
+          "default": [],
+          "markdownDescription": "Extra arguments to pass to ocamllsp."
+        },
         "ocaml.dune.autoDetect": {
           "type": "boolean",
           "default": true,
