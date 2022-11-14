@@ -8,12 +8,12 @@ type t =
 let opam_binary = Path.of_string "opam"
 
 let make ?root () =
+  let open Promise.Syntax in
+  let* use_ocaml_env = Ocaml_windows.use_ocaml_env () in
   let spawn =
-    if Ocaml_windows.use_ocaml_env () then
-      Ocaml_windows.spawn_ocaml_env [ "opam" ]
+    if use_ocaml_env then Ocaml_windows.spawn_ocaml_env [ "opam" ]
     else { Cmd.bin = opam_binary; args = [] }
   in
-  let open Promise.Syntax in
   let* spawn = Cmd.check_spawn spawn in
   match (spawn, root) with
   | Error _, _ -> Promise.return None

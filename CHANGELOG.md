@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased
+
+- Change the `ocaml.useOcamlEnv` setting to only enable `ocaml-env` usage for
+  opam commands if it is available on the system (#978)
+
 ## 1.11.0
 
 - Fix syntax highlighting for let bindings with type annotations (#991)

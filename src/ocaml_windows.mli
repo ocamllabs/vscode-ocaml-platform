@@ -1,5 +1,5 @@
 (* Whether to use ocaml-env for opam on Windows *)
-val use_ocaml_env : unit -> bool
+val use_ocaml_env : unit -> bool Promise.t
 
 (* Spawn command from OCaml for Windows using ocaml-env *)
 val spawn_ocaml_env : string list -> Cmd.spawn
