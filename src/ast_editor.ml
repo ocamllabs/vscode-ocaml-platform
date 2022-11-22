@@ -238,6 +238,7 @@ let activate_hover_mode instance ~document =
 let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
     ~token:_ : CustomTextEditorProvider.ResolvedEditor.t =
   let webview = WebviewPanel.webview webviewPanel in
+  WebView.set_options webview (WebviewOptions.create ~enableScripts:true ());
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   Ast_editor_state.set_webview
     ast_editor_state
@@ -284,9 +285,6 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel
   (try transform_to_ast instance ~document ~webview
    with User_error err_msg ->
      send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview);
-  let options = WebView.options webview in
-  WebviewOptions.set_enableScripts options true;
-  WebView.set_options webview options;
   let p =
     let open Promise.Syntax in
     let+ r = read_html_file () in

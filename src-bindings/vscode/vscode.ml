@@ -2724,21 +2724,20 @@ module WebviewOptions = struct
 
   include
     [%js:
-    val enableCommandUris : t -> bool [@@js.get]
+    val enableCommandUris : t -> bool option [@@js.get]
 
-    val enableScripts : t -> bool [@@js.get]
+    val enableScripts : t -> bool option [@@js.get]
 
-    val set_enableScripts : t -> bool -> unit [@@js.set]
+    val localResourceRoots : t -> Uri.t list option [@@js.get]
 
-    val localResourceRoots : t -> Uri.t list [@@js.get]
-
-    val portMapping : t -> WebviewPortMapping.t list [@@js.get]
+    val portMapping : t -> WebviewPortMapping.t list option [@@js.get]
 
     val create :
-         enableCommandUris:bool
-      -> enableScripts:bool
-      -> localResourceRoots:Uri.t list
-      -> portMapping:WebviewPortMapping.t list
+         ?enableCommandUris:bool
+      -> ?enableScripts:bool
+      -> ?localResourceRoots:Uri.t list
+      -> ?portMapping:WebviewPortMapping.t list
+      -> unit
       -> t
       [@@js.builder]]
 end
