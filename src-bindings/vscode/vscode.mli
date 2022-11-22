@@ -2071,21 +2071,20 @@ end
 module WebviewOptions : sig
   include Js.T
 
-  val enableCommandUris : t -> bool
+  val enableCommandUris : t -> bool option
 
-  val enableScripts : t -> bool
+  val enableScripts : t -> bool option
 
-  val set_enableScripts : t -> bool -> unit
+  val localResourceRoots : t -> Uri.t list option
 
-  val localResourceRoots : t -> Uri.t list
-
-  val portMapping : t -> WebviewPortMapping.t list
+  val portMapping : t -> WebviewPortMapping.t list option
 
   val create :
-       enableCommandUris:bool
-    -> enableScripts:bool
-    -> localResourceRoots:Uri.t list
-    -> portMapping:WebviewPortMapping.t list
+       ?enableCommandUris:bool
+    -> ?enableScripts:bool
+    -> ?localResourceRoots:Uri.t list
+    -> ?portMapping:WebviewPortMapping.t list
+    -> unit
     -> t
 end
 
