@@ -69,8 +69,8 @@ jobs:
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v2
         with:
-          name: ocaml-platform-${{ github.sha }}
-          path: ocaml-platform.vsix
+          name: vscode-ocaml-${{ github.sha }}
+          path: vscode-ocaml.vsix
 
       - name: Test extension
         uses: GabrielBB/xvfb-action@v1
@@ -107,8 +107,8 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./ocaml-platform.vsix
-          asset_name: ocaml-platform.vsix
+          asset_path: ./vscode-ocaml.vsix
+          asset_name: vscode-ocaml.vsix
           asset_content_type: application/zip
         env:
           GITHUB_TOKEN: ${{ github.token }}

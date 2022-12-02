@@ -17,7 +17,7 @@ let
         in
         {
           vscode = default;
-          "vscode-ocaml-platform" = default;
+          "vscode-ocaml" = default;
         };
 
   };

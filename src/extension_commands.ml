@@ -141,9 +141,8 @@ let _open_current_dune_file =
   in
   command Extension_consts.Commands.open_current_dune_file handler
 
-let ( _open_ocamllsp_output_pane
-    , _open_ocaml_platform_ext_pane
-    , _open_ocaml_commands_pane ) =
+let _open_ocamllsp_output_pane, _open_ocaml_ext_pane, _open_ocaml_commands_pane
+    =
   let handler output (_instance : Extension_instance.t) ~args:_ =
     let show_output (lazy output) = OutputChannel.show output () in
     show_output output

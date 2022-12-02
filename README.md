@@ -1,6 +1,6 @@
-# VSCode OCaml Platform
+# VSCode OCaml
 
-[![Main workflow](https://img.shields.io/github/workflow/status/ocamllabs/vscode-ocaml-platform/Main%20workflow?branch=master)](https://github.com/ocamllabs/vscode-ocaml-platform/actions?query=workflow%3A%22Main+workflow%22+branch%3Amaster)
+[![Main workflow](https://img.shields.io/github/workflow/status/ocaml/vscode-ocaml/Main%20workflow?branch=master)](https://github.com/ocaml/vscode-ocaml/actions?query=workflow%3A%22Main+workflow%22+branch%3Amaster)
 
 Visual Studio Code extension for OCaml and relevant tools.
 
@@ -304,12 +304,12 @@ required for file formatting to work.
 ### Problems with this Extension or OPAM support in the Extension
 
 One by one, invoke and see outputs for commands
-`OCaml: Show OCaml Platform Extension Output` and
-`OCaml: Show OCaml Commands Output`. In these Output Views you may see errors
-and warnings, which can be handy to detect and fix the problem you're facing.
-Please, check the issue you're facing hasn't been already reported and report in
-[Issues](https://github.com/ocamllabs/vscode-ocaml-platform/issues) tab of this
-repository, if necessary.
+`OCaml: Show OCaml Extension Output` and `OCaml: Show OCaml Commands Output`. In
+these Output Views you may see errors and warnings, which can be handy to detect
+and fix the problem you're facing. Please, check the issue you're facing hasn't
+been already reported and report in
+[Issues](https://github.com/ocaml/vscode-ocaml/issues) tab of this repository,
+if necessary.
 
 ### Things to include in your Issue report
 
@@ -317,7 +317,7 @@ It is helpful to include information such as
 
 - Operation system information
 - VS Code version
-- OCaml Platform Extension version
+- OCaml Extension version
 - OCaml-LSP version
 - Reproducible setup (some codebase, for example, where we can see the bug
   happening) the problem
@@ -328,7 +328,7 @@ It is helpful to include information such as
 <details>
 <summary>I installed <code>ocaml-lsp-server</code>, but the extension still cannot find it.</summary>
 
-Make sure you installed the the language server in the sandbox used by the
+Make sure you installed the language server in the sandbox used by the
 extension.
 
 _OPAM_: If you're using opam, make sure that you're using correct switch when
@@ -364,13 +364,13 @@ In case you have a question or problem not listed above:
 
 - if you don't understand how to the extension works or how to make it work
   correctly, create a new discussion in the repository Discussions
-  [tab](https://github.com/ocamllabs/vscode-ocaml-platform/discussions).
+  [tab](https://github.com/ocaml/vscode-ocaml/discussions).
 
 - if the extension seems to misbehave:
   - see [Debugging](#debugging) section to see if you can see any reported
     errors
   - file an issue in the repository Issues
-    [tab](https://github.com/ocamllabs/vscode-ocaml-platform/issues).
+    [tab](https://github.com/ocaml/vscode-ocaml/issues).
 
 If this section doesn't contain the problem you managed to resolve, and you
 think this may help others, consider adding the problem and its solution here by
@@ -417,9 +417,8 @@ The extension does not offer such functionality because it is rarely necessary.
 A workaround is to _not_ install `ocamllsp`. As a result you will mostly have
 just syntax highlighting for OCaml source files but also a warning notification
 that `ocamllsp` wasn't found. See this
-[issue](https://github.com/ocamllabs/vscode-ocaml-platform/issues/889), feel
-free to upvote this issue by leaving a thumbs-up reaction. Pull requests are
-welcome as well.
+[issue](https://github.com/ocaml/vscode-ocaml/issues/889), feel free to upvote
+this issue by leaving a thumbs-up reaction. Pull requests are welcome as well.
 
 ### Persisting sandbox information
 
@@ -466,7 +465,7 @@ _Local switch_
 {
   "ocaml.sandbox": {
     "kind": "esy",
-    "root": "${workspaceFolder:vscode-ocaml-platform}"
+    "root": "${workspaceFolder:vscode-ocaml}"
   }
 }
 ```
