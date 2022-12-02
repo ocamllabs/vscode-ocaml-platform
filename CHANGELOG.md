@@ -5,7 +5,8 @@
 - Change the `ocaml.useOcamlEnv` setting to only enable `ocaml-env` usage for
   opam commands if it is available on the system (#978)
 
-- Fix AST Explorer not displaying anything with error "Blocked script execution" (#1050)
+- Fix AST Explorer not displaying anything with error "Blocked script execution"
+  (#1050)
 
 ## 1.11.0
 
