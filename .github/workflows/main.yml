@@ -26,10 +26,22 @@ jobs:
 
       - name: Use OCaml ${{ matrix.ocaml-compiler }}
         uses: ocaml/setup-ocaml@v2
+        if: runner.os != 'Windows'
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
           dune-cache: ${{ matrix.os == 'ubuntu-latest' }}
           opam-depext-flags: --with-test
+
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v2
+        if: runner.os == 'Windows'
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          dune-cache: false
+          opam-depext-flags: --with-test
+          opam-repositories: |
+            windows: https://github.com/fdopen/opam-repository-mingw.git
+            default: https://github.com/ocaml/opam-repository.git
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
