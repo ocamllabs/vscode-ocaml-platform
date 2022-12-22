@@ -1,15 +1,15 @@
 # Change Log
 
-## Unreleased
+## 1.12.0
 
-- Change the `ocaml.useOcamlEnv` setting to only enable `ocaml-env` usage for
-  opam commands if it is available on the system (#978)
+- Add `ocaml.server.args` configuration option to pass extra arguments to the
+  language server, i.e. ocamllsp (#1042)
 
 - Fix AST Explorer not displaying anything with error "Blocked script execution"
   (#1050)
 
-- Add `ocaml.server.args` configuration option to pass extra arguments to the
-  language server, i.e. ocamllsp (#1042)
+- Change the `ocaml.useOcamlEnv` setting to only enable `ocaml-env` usage for
+  opam commands if it is available on the system (#978)
 
 ## 1.11.0
 
