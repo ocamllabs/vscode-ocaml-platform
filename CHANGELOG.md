@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Update known ocamllsp versions (#1072)
+
 ## 1.12.0
 
 - Add `ocaml.server.args` configuration option to pass extra arguments to the
