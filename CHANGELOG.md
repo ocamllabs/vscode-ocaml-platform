@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Add more known versions of ocamllsp
+
 ## 1.12.1
 
 - Update known ocamllsp versions (#1072)
