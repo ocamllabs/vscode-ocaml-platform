@@ -429,11 +429,6 @@
           "group": "inline"
         },
         {
-          "command": "ocaml.uninstall-sandbox-package",
-          "when": "view == ocaml-sandbox",
-          "group": "inline"
-        },
-        {
           "command": "ocaml.open-switches-documentation",
           "when": "view == ocaml-switches && viewItem == package-with-doc",
           "group": "inline"
@@ -441,12 +436,17 @@
         {
           "command": "ocaml.open-sandbox-documentation",
           "when": "view == ocaml-sandbox && viewItem == package-with-doc",
-          "group": "inline"
+          "group": "inline@1"
         },
         {
           "command": "ocaml.generate-sandbox-documentation",
           "when": "view == ocaml-sandbox",
-          "group": "inline"
+          "group": "inline@2"
+        },
+        {
+          "command": "ocaml.uninstall-sandbox-package",
+          "when": "view == ocaml-sandbox",
+          "group": "inline@3"
         }
       ]
     },
