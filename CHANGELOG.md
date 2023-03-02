@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.12.3
+
+- Reorder sandbox buttons (#1083)
+
 ## 1.12.2
 
 - Add more known versions of ocamllsp
