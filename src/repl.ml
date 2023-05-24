@@ -148,7 +148,8 @@ let get_code text_editor =
     Vscode.TextDocument.getText document ~range:(selection :> Vscode.Range.t) ()
 
 let prepare_code code =
-  if String.is_suffix (String.strip code) ~suffix:";;" then code else code ^ ";;"
+  if String.is_suffix (String.strip code) ~suffix:";;" then code
+  else code ^ ";;"
 
 module Command = struct
   let _open_repl =
