@@ -40,7 +40,7 @@ jobs:
           dune-cache: false
           opam-depext-flags: --with-test
           opam-repositories: |
-            windows: https://github.com/fdopen/opam-repository-mingw.git
+            opam-repository-mingw: https://github.com/ocaml-opam/opam-repository-mingw.git#sunset
             default: https://github.com/ocaml/opam-repository.git
 
       - name: Use Node.js ${{ matrix.node-version }}
