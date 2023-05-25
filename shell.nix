@@ -10,9 +10,9 @@ pkgs.mkShell {
   inputsFrom = [ vscode vscode-ocaml-platform ];
   buildInputs = (with pkgs; [
     yarn
-    nodejs-14_x
+    nodejs-18_x
     gnumake
     ocamlformat_0_20_1
-    ocaml-ng.ocamlPackages_4_13.ocaml-lsp
+    ocaml-ng.ocamlPackages_4_14.ocaml-lsp
   ]);
 }
