@@ -4,6 +4,14 @@ let
   args = {
     inherit (pkgs.ocaml-ng.ocamlPackages_4_14) ocaml;
     selection = ./opam-selection.nix;
+    override = {pkg, selection}: {
+	    dune = super: super.overrideAttrs (attrs: {
+		    buildInputs =
+          (attrs.buildInputs or [])
+          ++ pkgs.lib.optionals stdenv.isDarwin
+            [ pkgs.darwin.apple_sdk.frameworks.CoreServices];
+      });
+    };
     src =
       let
         default = builtins.filterSource (path: type:
