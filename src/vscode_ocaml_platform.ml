@@ -21,9 +21,6 @@ let suggest_to_pick_sandbox () =
       ())
 
 let activate (extension : ExtensionContext.t) =
-  (* this env var update disables ocaml-lsp's logging to a file because we use
-     vscode [output] pane for logs *)
-  Process.Env.set "OCAML_LSP_SERVER_LOG" "-";
   let open Promise.Syntax in
   let instance = Extension_instance.make () in
   ExtensionContext.subscribe
