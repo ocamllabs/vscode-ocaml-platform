@@ -75,11 +75,10 @@ very useful to:
 
 ### Changelog
 
-User-visible changes should come with an entry in the changelog under
-the appropriate part of the unreleased section. PR that doesn't
-provide an entry will fail CI check. This behavior can be overridden
-by using the "no changelog" label, which is used for changes that are
-not user-visible.
+User-visible changes should come with an entry in the changelog under the
+appropriate part of the unreleased section. PR that doesn't provide an entry
+will fail CI check. This behavior can be overridden by using the "no changelog"
+label, which is used for changes that are not user-visible.
 
 ## Repository Structure
 
