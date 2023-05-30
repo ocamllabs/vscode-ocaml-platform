@@ -73,6 +73,14 @@ very useful to:
 - Run the tests: this will check that all the data is correctly formatted and
   can be invoked with `make test`
 
+### Changelog
+
+User-visible changes should come with an entry in the changelog under
+the appropriate part of the unreleased section. PR that doesn't
+provide an entry will fail CI check. This behavior can be overridden
+by using the "no changelog" label, which is used for changes that are
+not user-visible.
+
 ## Repository Structure
 
 The following snippet describes VSCode OCaml's repository structure.
