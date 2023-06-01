@@ -45,9 +45,9 @@ full without all of its dependencies.
      project root directory.
 
    - When you hover the cursor over OCaml code, the extension shows you the type
-     of the code. To get nicely formatted types, install
-     [ocamlformat-rpc](https://opam.ocaml.org/packages/ocamlformat-rpc/)
-     package.
+     of the code. Install
+     [ocamlformat](https://github.com/ocaml-ppx/ocamlformat#installation) to get
+     nicely formatted types.
 
 2. Install this extension from the VSCode
    [Marketplace](https://marketplace.visualstudio.com/items?itemName=ocamllabs.ocaml-platform).
