@@ -58,7 +58,7 @@ jobs:
         run: npm install --global esy
 
       - name: Install and build esy packages
-        uses: esy/github-action@v2
+        uses: esy/github-action@v1
         with:
           node-version: 16
           working-directory: test/fixtures/sample-esy
@@ -86,7 +86,7 @@ jobs:
           path: ocaml-platform.vsix
 
       - name: Test extension
-        uses: coactions/xvfb-action@v1
+        uses: coactions/setup-xvfb@v1
         with:
           run: yarn test
         env:
