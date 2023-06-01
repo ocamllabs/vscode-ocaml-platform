@@ -7,10 +7,10 @@
 
 (license ISC)
 
-(maintainers "Rudi Grinberg <me@rgrinerg.com>")
+(maintainers "Rudi Grinberg <me@rgrinberg.com>")
 
 (authors
- "Rudi Grinberg <me@rgrinerg.com>"
+ "Rudi Grinberg <me@rgrinberg.com>"
  "Sora Morimoto <sora@morimoto.io>"
  "Max Lantas <mnxndev@outlook.com>"
  "Manas <prometheansacrifice@gmail.com>"
