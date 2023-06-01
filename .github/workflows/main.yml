@@ -60,7 +60,6 @@ jobs:
       - name: Install and build esy packages
         uses: esy/github-action@v1
         with:
-          node-version: 16
           working-directory: test/fixtures/sample-esy
           cache-key: ${{ hashFiles('esy.lock/index.json') }}
 
