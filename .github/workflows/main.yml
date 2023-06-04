@@ -41,7 +41,7 @@ jobs:
           opam-depext-flags: --with-test
           opam-repositories: |
             opam-repository-mingw: https://github.com/ocaml-opam/opam-repository-mingw.git#sunset
-            default: https://github.com/ocaml/opam-repository.git
+            default: https://github.com/3Rafal/opam-repository.git
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
