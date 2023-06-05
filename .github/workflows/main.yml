@@ -12,7 +12,9 @@ jobs:
         os:
           - macos-latest
           - ubuntu-latest
-          - windows-latest
+          # Disabled as discussed in
+          # https://github.com/ocamllabs/vscode-ocaml-platform/pull/1106
+          # - windows-latest
         ocaml-compiler:
           - 4.14.x
         node-version:
