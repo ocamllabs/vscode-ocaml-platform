@@ -79,13 +79,13 @@ jobs:
 
       - name: Upload artifact
         if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ocaml-platform-${{ github.sha }}
           path: ocaml-platform.vsix
 
       - name: Test extension
-        uses: GabrielBB/xvfb-action@v1
+        uses: coactions/setup-xvfb@v1
         with:
           run: yarn test
         env:
