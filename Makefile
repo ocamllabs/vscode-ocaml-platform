@@ -6,7 +6,7 @@ all:
 
 .PHONY: deps
 deps: ## Install development dependencies
-	opam install -y ocamlformat.0.24.1 ocaml-lsp-server $(DEV_DEPS)
+	opam install -y ocamlformat.0.25.1 ocaml-lsp-server $(DEV_DEPS)
 	yarn --frozen-lockfile
 	yarn --frozen-lockfile --cwd astexplorer
 	opam install --deps-only --with-test --with-doc -y .

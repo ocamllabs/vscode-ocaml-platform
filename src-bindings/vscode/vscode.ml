@@ -307,7 +307,6 @@ end
 
 module Selection = struct
   include Class.Extend (Range) ()
-
   include Range
 
   include
@@ -996,7 +995,6 @@ end
 
 module CancellationToken = struct
   include Interface.Make ()
-
   module OnCancellationRequested = Event.Make (Js.Any)
 
   include
@@ -1377,7 +1375,6 @@ end
 
 module Pseudoterminal = struct
   include Interface.Make ()
-
   module OnDidWrite = Event.Make (Js.String)
   module OnDidOverrideDimensions =
     Event.Make (Js.Or_undefined (TerminalDimensions))
@@ -1590,7 +1587,6 @@ end
 
 module SecretStorage = struct
   include Interface.Make ()
-
   module OnDidChange = Event.Make (SecretStorageChangeEvent)
 
   include
@@ -2199,7 +2195,6 @@ end
 
 module TextDocumentContentProvider = struct
   include Interface.Make ()
-
   module OnDidChange = Event.Make (Uri)
 
   include
@@ -2221,7 +2216,6 @@ end
 
 module FileSystemWatcher = struct
   include Interface.Make ()
-
   module OnDidChange = Event.Make (Uri)
 
   include [%js: val onDidChange : t -> OnDidChange.t [@@js.get]]
@@ -2744,7 +2738,6 @@ end
 
 module WebView = struct
   include Interface.Make ()
-
   module OnDidReceiveMessage = Event.Make (Js.Any)
 
   include
