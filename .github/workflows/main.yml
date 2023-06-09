@@ -77,6 +77,8 @@ jobs:
 
       - name: Build extension
         run: opam exec -- make build-release
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
 
       - name: Package extension
         run: yarn package
