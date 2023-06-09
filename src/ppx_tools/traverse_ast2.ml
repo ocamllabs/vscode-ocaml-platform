@@ -17,8 +17,8 @@ open Ppxlib
     cases, refer to the end of {!expression_desc} and {!pattern_desc} methods.
     The string value of the [Error] carries the name of the method indicating
     the algebraic type where the (yet unkown) difference has occured which might
-    help with further debugging - c.f. {{:https://github.com/arozovyk/ast_diff}
-    ast_diff} *)
+    help with further debugging - c.f.
+    {{:https://github.com/arozovyk/ast_diff} ast_diff} *)
 class virtual ['res] lift2 =
   object (self)
     method virtual tuple

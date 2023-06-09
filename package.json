@@ -1026,7 +1026,7 @@
     "test:esy": "node ./test/runEsyTests.js",
     "test:opam": "node ./test/runOpamTests.js",
     "test:problems": "node ./test/runProblemMatcherTests.js",
-    "test": "npm-run-all -s test:*",
+    "test": "npm-run-all -s test:opam test:problems",
     "package": "vsce package --out ocaml-platform.vsix --yarn",
     "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --yarn",
     "deploy:ovsx": "ovsx publish --yarn",

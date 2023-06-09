@@ -111,10 +111,10 @@ let reparse_ast =
         (Jsonoo.Encode.list
            (fun x -> x)
            (if l_length > l_length' then
-            List.map2 (fun x x' -> Result.get_ok (f x x')) l l
-           else if l_length < l_length' then
-             List.map2 (fun x x' -> Result.get_ok (f x x')) l' l'
-           else List.map2 (fun x x' -> Result.get_ok (f x x')) l l'))
+              List.map2 (fun x x' -> Result.get_ok (f x x')) l l
+            else if l_length < l_length' then
+              List.map2 (fun x x' -> Result.get_ok (f x x')) l' l'
+            else List.map2 (fun x x' -> Result.get_ok (f x x')) l l'))
 
     method option f o o' =
       match (o, o') with
