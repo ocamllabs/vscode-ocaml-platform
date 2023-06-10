@@ -1,11 +1,23 @@
 version: 2
 updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+    labels:
+      - dependencies
+      - no changelog
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: daily
-    ignore:
-      - dependency-name: ovsx
     labels:
-      - "no changelog"
       - dependencies
+      - no changelog
+  - package-ecosystem: npm
+    directory: /astexplorer
+    schedule:
+      interval: daily
+    labels:
+      - dependencies
+      - no changelog
