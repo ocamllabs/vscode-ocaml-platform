@@ -1,8 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import "../css/style.css";
 import InteractorFactory from "./Interaction/InteractorFactory";
-import "regenerator-runtime";
 import ASTOutput from "./components/ASTOutput";
 import getTreeAdapter from "./parserMiddleware";
 import newParser from "./parsers/refmt-ml";

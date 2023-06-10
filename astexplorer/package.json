@@ -1,30 +1,8 @@
 {
   "name": "astexplorer",
-  "version": "1.0.0",
-  "description": "Search app using React",
-  "main": "index.js",
   "scripts": {
-    "start": "webpack --mode development",
-    "build": "webpack --mode production",
-    "start:dev": "webpack-dev-server --open"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@babel/core": "^7.22.5",
-    "@babel/plugin-transform-runtime": "^7.12.0",
-    "@babel/preset-env": "^7.12.0",
-    "@babel/preset-react": "^7.12.0",
-    "@types/regenerator-runtime": "^0.13.0",
-    "babel-loader": "^8.0.6",
-    "css-loader": "^3.0.0",
-    "html-webpack-inline-source-plugin": "1.0.0-beta.2",
-    "html-webpack-plugin": "^3.2.0",
-    "style-loader": "^2.0.0",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^4.15.1"
+    "build": "parcel build index.html",
+    "dev": "parcel watch index.html"
   },
   "dependencies": {
     "font-awesome": "^4.5.0",
@@ -33,5 +11,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.7"
+  },
+  "devDependencies": {
+    "parcel": "^2.9.2"
   }
 }
