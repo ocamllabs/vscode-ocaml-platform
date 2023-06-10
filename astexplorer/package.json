@@ -18,7 +18,7 @@
     "@babel/preset-react": "^7.12.0",
     "@types/regenerator-runtime": "^0.13.0",
     "babel-loader": "^8.0.6",
-    "css-loader": "^3.0.0",
+    "css-loader": "^5.2.7",
     "html-webpack-inline-source-plugin": "1.0.0-beta.2",
     "html-webpack-plugin": "^3.2.0",
     "style-loader": "^2.0.0",
