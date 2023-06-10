@@ -67,7 +67,7 @@ export default function Tree({ parseResult, position, error, selectedOutput }) {
   });
 
   return (
-    <div className="tree-visualization container">
+    <div className="tree-visualization">
       <div className="toolbar">
         {treeAdapter.getConfigurableFilters().map((filter) =>
           filter.key != "hideTypeKeys" ? (
