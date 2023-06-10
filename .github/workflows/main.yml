@@ -42,7 +42,7 @@ jobs:
         if: runner.os != 'Windows'
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
-          dune-cache: ${{ matrix.os == 'ubuntu-latest' }}
+          dune-cache: true
           opam-depext-flags: --with-test
 
       - name: Set-up OCaml ${{ matrix.ocaml-compiler }} on Windows
