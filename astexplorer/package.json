@@ -5,14 +5,14 @@
     "dev": "parcel watch index.html"
   },
   "dependencies": {
-    "font-awesome": "^4.5.0",
-    "json-stringify-safe": "^5.0.1",
-    "prop-types": "^15.5.10",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-redux": "^8.1.0"
+    "font-awesome": "4.7.0",
+    "json-stringify-safe": "5.0.1",
+    "prop-types": "15.8.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-redux": "8.1.0"
   },
   "devDependencies": {
-    "parcel": "^2.9.2"
+    "parcel": "2.9.2"
   }
 }
