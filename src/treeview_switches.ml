@@ -69,8 +69,8 @@ module Dependency = struct
     | Package dep ->
       Promise.return
         (if Opam.Package.has_dependencies dep then
-         TreeItemCollapsibleState.Collapsed
-        else None)
+           TreeItemCollapsibleState.Collapsed
+         else None)
 
   let to_treeitem instance dependency =
     let open Promise.Syntax in

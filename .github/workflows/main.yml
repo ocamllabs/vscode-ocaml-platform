@@ -6,19 +6,32 @@ on:
     branches:
       - master
 
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
+# Concurrent workflows are grouped by the PR or branch that triggered them
+# (github.ref) and the name of the workflow (github.workflow). The
+# 'cancel-in-progress' option then make sure that only one workflow is running
+# at a time. This doesn't prevent new jobs from running, rather it cancels
+# already running jobs before scheduling new jobs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'pull_request' || github.sha }}
+  cancel-in-progress: true
+
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
         os:
-          - macos-latest
+          # macos-13 is faster than latest (macos-12)
+          - macos-13
           - ubuntu-latest
-          - windows-latest
+          # Disabled as discussed in
+          # https://github.com/ocamllabs/vscode-ocaml-platform/pull/1106
+          # - windows-latest
         ocaml-compiler:
           - 4.14.x
         node-version:
-          - 16.x
+          - 20.x
 
     runs-on: ${{ matrix.os }}
 
@@ -26,15 +39,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+      - name: Set-up OCaml ${{ matrix.ocaml-compiler }} on Unix
         uses: ocaml/setup-ocaml@v2
         if: runner.os != 'Windows'
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
-          dune-cache: ${{ matrix.os == 'ubuntu-latest' }}
+          dune-cache: true
           opam-depext-flags: --with-test
 
-      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+      - name: Set-up OCaml ${{ matrix.ocaml-compiler }} on Windows
         uses: ocaml/setup-ocaml@v2
         if: runner.os == 'Windows'
         with:
@@ -45,7 +58,7 @@ jobs:
             opam-repository-mingw: https://github.com/ocaml-opam/opam-repository-mingw.git#sunset
             default: https://github.com/ocaml/opam-repository.git
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Set-up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
@@ -55,15 +68,6 @@ jobs:
 
       - name: Install opam packages
         run: opam install . --deps-only --with-test
-
-      - name: Use latest esy
-        run: npm install --global esy
-
-      - name: Install and build esy packages
-        uses: esy/github-action@v1
-        with:
-          working-directory: test/fixtures/sample-esy
-          cache-key: ${{ hashFiles('esy.lock/index.json') }}
 
       - name: Install npm packages
         run: |
@@ -139,12 +143,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+      - name: Set-up OCaml ${{ matrix.ocaml-compiler }}
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
           dune-cache: true
 
-      - run: opam depext --install ocamlformat=$(awk -F = '/^version=/{print $2}' .ocamlformat)
-
-      - run: opam exec -- dune build @fmt
+      - name: Lint fmt
+        uses: ocaml/setup-ocaml/lint-fmt@v2

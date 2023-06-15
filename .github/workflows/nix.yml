@@ -1,18 +1,30 @@
 name: "Nix"
+
 on:
   pull_request:
   push:
     branches:
       - master
+
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
+# Concurrent workflows are grouped by the PR or branch that triggered them
+# (github.ref) and the name of the workflow (github.workflow). The
+# 'cancel-in-progress' option then make sure that only one workflow is running
+# at a time. This doesn't prevent new jobs from running, rather it cancels
+# already running jobs before scheduling new jobs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'pull_request' || github.sha }}
+  cancel-in-progress: true
+
 jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: true
-      - uses: cachix/install-nix-action@v13
+      - uses: cachix/install-nix-action@v21
         with:
           nix_path: nixpkgs=channel:nixos-unstable
       - run: nix-shell --command "make nix-tests"
