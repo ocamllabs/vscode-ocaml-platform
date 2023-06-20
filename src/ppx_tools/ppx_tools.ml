@@ -15,9 +15,9 @@ let get_reparsed_code_from_pp_file ~path =
            let structure =
              Ppxlib_ast.Selected_ast.To_ocaml.copy_structure structure
            in
-           Caml.Format.asprintf "%a" Pprintast.structure structure
+           Stdlib.Format.asprintf "%a" Pprintast.structure structure
          | Intf signature ->
            let signature =
              Ppxlib_ast.Selected_ast.To_ocaml.copy_signature signature
            in
-           Caml.Format.asprintf "%a" Pprintast.signature signature)
+           Stdlib.Format.asprintf "%a" Pprintast.signature signature)

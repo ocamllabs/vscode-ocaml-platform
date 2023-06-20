@@ -338,16 +338,20 @@ let transform source kind =
   with Syntaxerr.Error e ->
     Error
       ("Syntax error at : "
-      ^ Caml.Format.asprintf "%a" Location.print (Syntaxerr.location_of_error e)
-      )
+      ^ Stdlib.Format.asprintf
+          "%a"
+          Location.print
+          (Syntaxerr.location_of_error e))
 
 let from_structure (structure : Parsetree.structure) =
   try Ok (parse_ast#structure structure)
   with Syntaxerr.Error e ->
     Error
       ("Syntax error at : "
-      ^ Caml.Format.asprintf "%a" Location.print (Syntaxerr.location_of_error e)
-      )
+      ^ Stdlib.Format.asprintf
+          "%a"
+          Location.print
+          (Syntaxerr.location_of_error e))
 
 let reparse s s' = reparse_ast#structure s s'
 

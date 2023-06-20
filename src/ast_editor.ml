@@ -60,7 +60,7 @@ end = struct
 
   let get_kind ~document =
     let relative = relative_document_path ~document in
-    match Caml.Filename.extension relative with
+    match Stdlib.Filename.extension relative with
     | ".ml" -> Structure
     | ".mli" -> Signature
     | _ -> Unknown
@@ -81,7 +81,7 @@ end = struct
       in
       match fname_opt with
       | Some fname ->
-        let ( / ) = Caml.Filename.concat in
+        let ( / ) = Stdlib.Filename.concat in
         root / build_root / fname
       | None ->
         let uri = Uri.toString (TextDocument.uri document) () in
