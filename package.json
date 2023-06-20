@@ -18,7 +18,8 @@
     "vscode": "^1.64.0"
   },
   "categories": [
-    "Programming Languages"
+    "Programming Languages",
+    "Debuggers"
   ],
   "activationEvents": [
     "onLanguage:ocaml",
@@ -48,7 +49,13 @@
     "workspaceContains:**/*.mll",
     "workspaceContains:**/*.mly",
     "workspaceContains:**/*.re",
-    "workspaceContains:**/*.rei"
+    "workspaceContains:**/*.rei",
+    "onDebugResolve:ocamlearlybird",
+    "onDebugResolve:ocamlearlybird.dune",
+    "onDebugInitialConfigurations",
+    "onDebugDynamicConfigurations",
+    "onCommand:ocamlearlybird.startDebug",
+    "onCommand:ocamlearlybird.variableGotoClosureCodeLocation"
   ],
   "icon": "assets/logo.png",
   "contributes": {
@@ -267,6 +274,14 @@
         "command": "ocaml.open-ocaml-commands-output",
         "category": "OCaml",
         "title": "Show OCaml Commands Output"
+      },
+      {
+        "command": "ocamlearlybird.startDebug",
+        "title": "Start an OCaml Debug Session"
+      },
+      {
+        "command": "ocamlearlybird.variableGotoClosureCodeLocation",
+        "title": "Goto Closure Code Location"
       }
     ],
     "keybindings": [
@@ -448,6 +463,19 @@
           "when": "view == ocaml-sandbox",
           "group": "inline@3"
         }
+      ],
+      "explorer/context": [
+        {
+          "when": "resourceFilename =~ /\\.bc$/ || resourceFilename =~ /^a\\.out$/ || resourceFilename =~ /\\.d\\.byte$/",
+          "command": "ocamlearlybird.startDebug"
+        }
+      ],
+      "debug/variables/context": [
+        {
+          "when": "debugProtocolVariableMenuContext == 'ocamlearlybird.function'",
+          "command": "ocamlearlybird.variableGotoClosureCodeLocation",
+          "group": "navigation"
+        }
       ]
     },
     "configuration": {
@@ -564,6 +592,16 @@
           "type": "boolean",
           "default": true,
           "description": "Controls whether to use Utop for the REPL if it is installed in the current switch."
+        },
+        "ocamlearlybird.path": {
+          "type": "string",
+          "description": "Path to ocamlearlybird executable.",
+          "default": "ocamlearlybird"
+        },
+        "ocamlearlybird.connectToLocalDebugAdapterServer": {
+          "type": "boolean",
+          "description": "Connect to a running ocamlearlybird server.",
+          "default": false
         }
       }
     },
@@ -1019,6 +1057,107 @@
             "filenamePattern": "*.bc"
           }
         ]
+      }
+    ],
+    "breakpoints": [
+      {
+        "language": "ocaml"
+      },
+      {
+        "language": "reason"
+      },
+      {
+        "language": "ocamllex"
+      },
+      {
+        "language": "menhir"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "ocamlearlybird",
+        "label": "Ocamlearlybird",
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "program"
+            ],
+            "properties": {
+              "noDebug": {
+                "type": "boolean",
+                "default": false
+              },
+              "cwd": {
+                "type": "string",
+                "description": "The working directory for debuggee program."
+              },
+              "env": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Environment variables passed to the debuggee program.",
+                "default": {}
+              },
+              "program": {
+                "type": "string",
+                "description": "The path of debuggee program."
+              },
+              "source_dirs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "The path to search sources.",
+                "default": []
+              },
+              "onlyDebugGlob": {
+                "type": "string",
+                "description": "Only debug sources which match `onlyDebugGlob`.",
+                "default": "true"
+              },
+              "followForkMode": {
+                "enum": [
+                  "forkChild",
+                  "forkParent"
+                ],
+                "description": "Set which process the debugger follows on fork.",
+                "default": "forkParent"
+              },
+              "yieldSteps": {
+                "type": "number",
+                "description": "Max steps to execute in batch. Debugger can not response other requests when executing steps in batch.",
+                "default": 4096
+              },
+              "arguments": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "The command-line arguments for the debuggee program.",
+                "default": []
+              },
+              "console": {
+                "enum": [
+                  "internalConsole",
+                  "integratedTerminal",
+                  "externalTerminal"
+                ],
+                "description": "Where to launch the debug target: internal console, integrated terminal, or external terminal.",
+                "default": "internalConsole"
+              },
+              "stopOnEntry": {
+                "type": "boolean",
+                "description": "Automatically stop after launch.",
+                "default": false
+              },
+              "_debugLog": {
+                "type": "string",
+                "description": "File to Log debug messages."
+              }
+            }
+          }
+        }
       }
     ]
   },
