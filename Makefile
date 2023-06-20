@@ -76,10 +76,6 @@ pkg: build # Builds and packages the extension for installment
 install: pkg # Builds, packages, and installs the extension to your VS Code
 	code --force --install-extension test_extension.vsix
 
-.PHONY: nix/opam-selection.nix
-nix/opam-selection.nix:
-	nix-shell -A resolve default.nix
-
 .PHONY:
 nix-tests:
 	dune build @runtest @all
