@@ -2430,3 +2430,97 @@ end
 module Env : sig
   val shell : unit -> string
 end
+
+module DebugAdapterDescriptor : sig
+  include Js.T
+end
+
+module DebugAdapterExecutableOptions : sig
+  include Js.T
+
+  val cwd : t -> string option
+
+  val env : t -> string Dict.t option
+
+  val create : ?cwd:string -> ?env:string Dict.t -> unit -> t
+end
+
+module DebugAdapterExecutable : sig
+  include Js.T
+
+  val make :
+       command:string
+    -> ?args:string list
+    -> ?options:DebugAdapterExecutableOptions.t
+    -> unit
+    -> t
+end
+
+module DebugSession : sig
+  include Js.T
+end
+
+module DebugAdapterDescriptorFactory : sig
+  include Js.T
+
+  val createDebugAdapterDescriptor :
+       t
+    -> session:DebugSession.t
+    -> executable:DebugAdapterExecutable.t or_undefined
+    -> DebugAdapterDescriptor.t ProviderResult.t
+
+  val create :
+       createDebugAdapterDescriptor:
+         (   session:DebugSession.t
+          -> executable:DebugAdapterExecutable.t or_undefined
+          -> DebugAdapterDescriptor.t ProviderResult.t)
+    -> t
+end
+
+module DebugConfigurationProvider : sig
+  include Js.T
+
+  val create :
+       provideDebugConfigurations:
+         (   folder:WorkspaceFolder.t or_undefined
+          -> token:CancellationToken.t
+          -> Ojs.t list ProviderResult.t)
+    -> resolveDebugConfiguration:
+         (   folder:WorkspaceFolder.t or_undefined
+          -> debugConfiguration:Ojs.t
+          -> token:CancellationToken.t
+          -> Ojs.t ProviderResult.t)
+    -> resolveDebugConfigurationWithSubstitutedVariables:
+         (   folder:WorkspaceFolder.t or_undefined
+          -> debugConfiguration:Ojs.t
+          -> token:CancellationToken.t
+          -> Ojs.t ProviderResult.t)
+    -> t
+end
+
+module DebugConfigurationProviderTriggerKind : sig
+  type t =
+    | Initial
+    | Dynamic
+
+  include Js.T with type t := t
+end
+
+module Debug : sig
+  val registerDebugAdapterDescriptorFactory :
+    debugType:string -> factory:DebugAdapterDescriptorFactory.t -> Disposable.t
+
+  val registerDebugConfigurationProvider :
+       debugType:string
+    -> provider:DebugConfigurationProvider.t
+    -> ?triggerKind:DebugConfigurationProviderTriggerKind.t
+    -> unit
+    -> Disposable.t
+
+  val startDebugging :
+       folder:WorkspaceFolder.t or_undefined
+    -> nameOrConfiguration:Ojs.t
+    -> ?parentSessionOrOptions:Ojs.t
+    -> unit
+    -> bool Promise.t
+end

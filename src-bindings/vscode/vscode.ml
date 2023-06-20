@@ -3229,3 +3229,115 @@ end
 module Env = struct
   include [%js: val shell : unit -> string [@@js.get "vscode.env.shell"]]
 end
+
+module DebugAdapterDescriptor = struct
+  include Interface.Make ()
+end
+
+module DebugAdapterExecutableOptions = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val cwd : t -> string or_undefined [@@js.get]
+
+    val env : t -> string Dict.t or_undefined [@@js.get]
+
+    val create : ?cwd:string -> ?env:string Dict.t -> unit -> t [@@js.builder]]
+end
+
+module DebugAdapterExecutable = struct
+  include Class.Extend (DebugAdapterDescriptor) ()
+
+  include
+    [%js:
+    val make :
+         command:string
+      -> ?args:string list
+      -> ?options:DebugAdapterExecutableOptions.t
+      -> unit
+      -> t
+      [@@js.new "vscode.DebugAdapterExecutable"]]
+end
+
+module DebugSession = struct
+  include Class.Make ()
+end
+
+module DebugAdapterDescriptorFactory = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val createDebugAdapterDescriptor :
+         t
+      -> session:DebugSession.t
+      -> executable:DebugAdapterExecutable.t or_undefined
+      -> DebugAdapterDescriptor.t ProviderResult.t
+      [@@js.call]
+
+    val create :
+         createDebugAdapterDescriptor:
+           (   session:DebugSession.t
+            -> executable:DebugAdapterExecutable.t or_undefined
+            -> DebugAdapterDescriptor.t ProviderResult.t)
+      -> t
+      [@@js.builder]]
+end
+
+module DebugConfigurationProvider = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val create :
+         provideDebugConfigurations:
+           (   folder:WorkspaceFolder.t or_undefined
+            -> token:CancellationToken.t
+            -> Ojs.t list ProviderResult.t)
+      -> resolveDebugConfiguration:
+           (   folder:WorkspaceFolder.t or_undefined
+            -> debugConfiguration:Ojs.t
+            -> token:CancellationToken.t
+            -> Ojs.t ProviderResult.t)
+      -> resolveDebugConfigurationWithSubstitutedVariables:
+           (   folder:WorkspaceFolder.t or_undefined
+            -> debugConfiguration:Ojs.t
+            -> token:CancellationToken.t
+            -> Ojs.t ProviderResult.t)
+      -> t
+      [@@js.builder]]
+end
+
+module DebugConfigurationProviderTriggerKind = struct
+  type t =
+    | Initial [@js 1] [@js.default]
+    | Dynamic [@js 2]
+  [@@js.enum] [@@js]
+end
+
+module Debug = struct
+  include
+    [%js:
+    val registerDebugAdapterDescriptorFactory :
+         debugType:string
+      -> factory:DebugAdapterDescriptorFactory.t
+      -> Disposable.t
+      [@@js.global "vscode.debug.registerDebugAdapterDescriptorFactory"]
+
+    val registerDebugConfigurationProvider :
+         debugType:string
+      -> provider:DebugConfigurationProvider.t
+      -> ?triggerKind:DebugConfigurationProviderTriggerKind.t
+      -> unit
+      -> Disposable.t
+      [@@js.global "vscode.debug.registerDebugConfigurationProvider"]
+
+    val startDebugging :
+         folder:WorkspaceFolder.t or_undefined
+      -> nameOrConfiguration:Ojs.t
+      -> ?parentSessionOrOptions:Ojs.t
+      -> unit
+      -> bool Promise.t
+      [@@js.global "vscode.debug.startDebugging"]]
+end
