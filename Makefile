@@ -21,7 +21,7 @@ switch: create_switch deps ## Create an opam switch and install development depe
 .PHONY: build
 build: ## Build the project
 	dune build src/vscode_ocaml_platform.bc.js
-	yarn --cwd astexplorer start
+	yarn --cwd astexplorer build
 	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
 		--external:vscode \
