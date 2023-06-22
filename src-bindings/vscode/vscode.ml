@@ -3274,11 +3274,7 @@ module DebugSession = struct
   include
     [%js:
     val customRequest :
-         t
-      -> command:string
-      -> ?args:Js.Any.t
-      -> unit
-      -> Js.Any.t Promise.t
+      t -> command:string -> ?args:Js.Any.t -> unit -> Js.Any.t Promise.t
       [@@js.call]]
 end
 

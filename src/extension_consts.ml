@@ -71,8 +71,7 @@ module Command_errors = struct
       expl
 end
 
-module Debuggers =
-struct
+module Debuggers = struct
   let earlybird = ocaml_prefixed "earlybird"
 end
 

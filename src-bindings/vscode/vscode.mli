@@ -2290,8 +2290,7 @@ module Window : sig
     -> TextEditor.t Promise.t
 
   val showTextDocument2 :
-        document:
-          ([ `TextDocument of TextDocument.t | `Uri of Uri.t ][@js.union])
+       document:([ `TextDocument of TextDocument.t | `Uri of Uri.t ][@js.union])
     -> ?options:TextDocumentShowOptions.t
     -> unit
     -> TextEditor.t Promise.t
@@ -2467,11 +2466,7 @@ module DebugSession : sig
   include Js.T
 
   val customRequest :
-       t
-    -> command:string
-    -> ?args:Js.Any.t
-    -> unit
-    -> Js.Any.t Promise.t
+    t -> command:string -> ?args:Js.Any.t -> unit -> Js.Any.t Promise.t
 end
 
 module DebugAdapterDescriptorFactory : sig

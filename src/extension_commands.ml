@@ -372,6 +372,7 @@ end
 
 module Debug_commands : sig
   val _debug_variable_goto_closure_code_location : t
+
   val _start_debug : t
 end = struct
   let _debug_variable_goto_closure_code_location =
@@ -381,23 +382,55 @@ end = struct
       match Debug.activeDebugSession () with
       | Some debugSession ->
         let context = List.hd_exn args in
-        let variablesReference = Ojs.get_prop_ascii (Ojs.get_prop_ascii context "variable") "variablesReference" in
-        let data = Ojs.obj [| ("handle", variablesReference )|] in
+        let variablesReference =
+          Ojs.get_prop_ascii
+            (Ojs.get_prop_ascii context "variable")
+            "variablesReference"
+        in
+        let data = Ojs.obj [| ("handle", variablesReference) |] in
         let open Promise.Syntax in
         let (_ : unit Promise.t) =
-          let* result = DebugSession.customRequest debugSession ~command:"variableGetClosureCodeLocation" ~args:data () in
+          let* result =
+            DebugSession.customRequest
+              debugSession
+              ~command:"variableGetClosureCodeLocation"
+              ~args:data
+              ()
+          in
           let loc = Ojs.get_prop_ascii result "location" in
-          let* doc = Workspace.openTextDocument (`Filename (Ojs.get_prop_ascii loc "source" |> Ojs.string_of_js)) in
+          let* doc =
+            Workspace.openTextDocument
+              (`Filename (Ojs.get_prop_ascii loc "source" |> Ojs.string_of_js))
+          in
           let pos = Ojs.get_prop_ascii loc "pos" in
           let end_ = Ojs.get_prop_ascii loc "end_" in
-          let+ _ = Window.showTextDocument2 ~document:(`TextDocument doc) ~options:(TextDocumentShowOptions.create ~preview:true ~selection:(Range.makePositions ~start:(Position.make ~line:((Ojs.array_get pos 0 |> Ojs.int_of_js) - 1) ~character:((Ojs.array_get pos 1 |> Ojs.int_of_js) - 1)) ~end_:(Position.make ~line:((Ojs.array_get end_ 0 |> Ojs.int_of_js) - 1) ~character:((Ojs.array_get end_ 1 |> Ojs.int_of_js) - 1))) ()) () in
+          let+ _ =
+            Window.showTextDocument2
+              ~document:(`TextDocument doc)
+              ~options:
+                (TextDocumentShowOptions.create
+                   ~preview:true
+                   ~selection:
+                     (Range.makePositions
+                        ~start:
+                          (Position.make
+                             ~line:((Ojs.array_get pos 0 |> Ojs.int_of_js) - 1)
+                             ~character:
+                               ((Ojs.array_get pos 1 |> Ojs.int_of_js) - 1))
+                        ~end_:
+                          (Position.make
+                             ~line:((Ojs.array_get end_ 0 |> Ojs.int_of_js) - 1)
+                             ~character:
+                               ((Ojs.array_get end_ 1 |> Ojs.int_of_js) - 1)))
+                   ())
+              ()
+          in
           ()
         in
         ()
       | None -> ()
     in
-    command "ocamlearlybird.variableGotoClosureCodeLocation"
-      handler
+    command "ocamlearlybird.variableGotoClosureCodeLocation" handler
 
   let _start_debug =
     let handler (instance : Extension_instance.t) ~args =
@@ -409,25 +442,29 @@ end = struct
       let folder = Workspace.getWorkspaceFolder ~uri in
       match folder with
       | Some folder ->
-        let configs = Ojs.obj
-          [| ("name", Ojs.string_to_js (Path.basename (Path.of_string (Uri.fsPath uri))))
-            ; ("type", Ojs.string_to_js Extension_consts.Debuggers.earlybird)
-            ; ("request", Ojs.string_to_js "launch")
-            ; ("program", Ojs.string_to_js (Uri.fsPath uri))
-            ; ("stopOnEntry", Ojs.bool_to_js true)
-            ; ("yieldSteps", Ojs.int_to_js 4096)
-          |]
+        let configs =
+          Ojs.obj
+            [| ( "name"
+               , Ojs.string_to_js
+                   (Path.basename (Path.of_string (Uri.fsPath uri))) )
+             ; ("type", Ojs.string_to_js Extension_consts.Debuggers.earlybird)
+             ; ("request", Ojs.string_to_js "launch")
+             ; ("program", Ojs.string_to_js (Uri.fsPath uri))
+             ; ("stopOnEntry", Ojs.bool_to_js true)
+             ; ("yieldSteps", Ojs.int_to_js 4096)
+            |]
         in
         (* let open Promise.Syntax in *)
         let (_ : bool Promise.t) =
-          Debug.startDebugging ~folder:(Some folder) ~nameOrConfiguration:configs ()
+          Debug.startDebugging
+            ~folder:(Some folder)
+            ~nameOrConfiguration:configs
+            ()
         in
         ()
-      | None ->
-        ()
+      | None -> ()
     in
-    command "ocamlearlybird.startDebug"
-      handler
+    command "ocamlearlybird.startDebug" handler
 end
 
 let register extension instance = function

@@ -5,15 +5,16 @@ let debugType = Extension_consts.Debuggers.earlybird
 let provideDebugConfigurations ~folder:_ ?token:_ () =
   let promise =
     let configs =
-      [ DebugConfiguration.t_of_js @@ Ojs.obj
-            [| ("name", Ojs.string_to_js "OCaml Debug")
+      [ DebugConfiguration.t_of_js
+        @@ Ojs.obj
+             [| ("name", Ojs.string_to_js "OCaml Debug")
               ; ("type", Ojs.string_to_js Extension_consts.Debuggers.earlybird)
               ; ("request", Ojs.string_to_js "launch")
               ; ("program", Ojs.string_to_js "${workspaceFolder}/a.out")
               ; ("stopOnEntry", Ojs.bool_to_js false)
               ; ("yieldSteps", Ojs.int_to_js 4096)
               ; ("onlyDebugGlob", Ojs.string_to_js "<${workspaceFolder}/**/*>")
-            |]
+             |]
       ]
     in
     Promise.return (Some configs)
@@ -24,16 +25,14 @@ let resolveDebugConfiguration ~folder:_ ~debugConfiguration ?token:_ () =
   let promise =
     let debugConfiguration = DebugConfiguration.t_to_js debugConfiguration in
     let debugConfiguration =
-      if Ojs.has_property debugConfiguration "type" then
-        debugConfiguration
-      else (
+      if Ojs.has_property debugConfiguration "type" then debugConfiguration
+      else
         Ojs.obj
-            [| ("name", Ojs.string_to_js "${fileBasename}")
-              ; ("type", Ojs.string_to_js Extension_consts.Debuggers.earlybird)
-              ; ("request", Ojs.string_to_js "launch")
-              ; ("program", Ojs.string_to_js "${file}")
-            |]
-      )
+          [| ("name", Ojs.string_to_js "${fileBasename}")
+           ; ("type", Ojs.string_to_js Extension_consts.Debuggers.earlybird)
+           ; ("request", Ojs.string_to_js "launch")
+           ; ("program", Ojs.string_to_js "${file}")
+          |]
     in
     Promise.return (Some (DebugConfiguration.t_of_js debugConfiguration))
   in
@@ -59,19 +58,22 @@ let createDebugAdapterDescriptor ~instance ~session ~executable =
   let result = DebugAdapterExecutable.make ~command:bin ~args () in
   `Value
     (Some
-        (DebugAdapterExecutable.t_to_js result
-        |> DebugAdapterDescriptor.t_of_js))
+       (DebugAdapterExecutable.t_to_js result |> DebugAdapterDescriptor.t_of_js))
 
 let register extension instance =
   let provider =
-    DebugConfigurationProvider.create ~provideDebugConfigurations
+    DebugConfigurationProvider.create
+      ~provideDebugConfigurations
       ~resolveDebugConfiguration
-      ~resolveDebugConfigurationWithSubstitutedVariables ()
+      ~resolveDebugConfigurationWithSubstitutedVariables
+      ()
   in
   let disposable =
     Debug.registerDebugConfigurationProvider
-      ~debugType ~provider
-      ~triggerKind:DebugConfigurationProviderTriggerKind.Initial ()
+      ~debugType
+      ~provider
+      ~triggerKind:DebugConfigurationProviderTriggerKind.Initial
+      ()
   in
   ExtensionContext.subscribe extension ~disposable;
 
