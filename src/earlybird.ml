@@ -1,5 +1,34 @@
 open Import
 
+module VariableGetClosureCodeLocation = struct
+  let command = "variableGetClosureCodeLocation"
+
+  module Args = struct
+    type t = { handle : int } [@@js]
+  end
+
+  module Result = struct
+    type position = int * int [@@js]
+
+    let position_to_vscode (line, character) =
+      Position.make ~line:(line - 1) ~character:(character - 1)
+
+    type range =
+      { source : string
+      ; pos : position
+      ; end_ : position
+      }
+    [@@js]
+
+    let range_to_vscode { pos; end_; _ } =
+      let start = position_to_vscode pos in
+      let end_ = position_to_vscode end_ in
+      Range.makePositions ~start ~end_
+
+    type t = { location : range option } [@@js]
+  end
+end
+
 let debugType = Extension_consts.Debuggers.earlybird
 
 let createDebugAdapterDescriptor ~instance ~session ~executable =

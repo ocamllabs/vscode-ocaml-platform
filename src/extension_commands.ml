@@ -405,59 +405,59 @@ end = struct
     command Extension_consts.Commands.start_debugging handler
 
   let _goto_closure_code_location =
-    let handler (instance : Extension_instance.t) ~args =
-      ignore instance;
-      ignore args;
+    let handler (_ : Extension_instance.t) ~args =
+      let open Promise.Syntax in
       match Debug.activeDebugSession () with
       | Some debugSession ->
         let context = List.hd_exn args in
         let variablesReference =
-          Ojs.get_prop_ascii
-            (Ojs.get_prop_ascii context "variable")
-            "variablesReference"
+          Jsonoo.Decode.(
+            at [ "variable"; "variablesReference" ] int (Jsonoo.t_of_js context))
         in
-        let data = Ojs.obj [| ("handle", variablesReference) |] in
-        let open Promise.Syntax in
+        let args =
+          Earlybird.VariableGetClosureCodeLocation.Args.t_to_js
+            { handle = variablesReference }
+        in
         let (_ : unit Promise.t) =
           let* result =
             DebugSession.customRequest
               debugSession
-              ~command:"variableGetClosureCodeLocation"
-              ~args:data
+              ~command:Earlybird.VariableGetClosureCodeLocation.command
+              ~args
               ()
           in
-          let loc = Ojs.get_prop_ascii result "location" in
-          let* doc =
-            Workspace.openTextDocument
-              (`Filename (Ojs.get_prop_ascii loc "source" |> Ojs.string_of_js))
+          let result =
+            Earlybird.VariableGetClosureCodeLocation.Result.t_of_js result
           in
-          let pos = Ojs.get_prop_ascii loc "pos" in
-          let end_ = Ojs.get_prop_ascii loc "end_" in
-          let+ _ =
-            Window.showTextDocument2
-              ~document:(`TextDocument doc)
-              ~options:
-                (TextDocumentShowOptions.create
-                   ~preview:true
-                   ~selection:
-                     (Range.makePositions
-                        ~start:
-                          (Position.make
-                             ~line:((Ojs.array_get pos 0 |> Ojs.int_of_js) - 1)
-                             ~character:
-                               ((Ojs.array_get pos 1 |> Ojs.int_of_js) - 1))
-                        ~end_:
-                          (Position.make
-                             ~line:((Ojs.array_get end_ 0 |> Ojs.int_of_js) - 1)
-                             ~character:
-                               ((Ojs.array_get end_ 1 |> Ojs.int_of_js) - 1)))
-                   ())
-              ()
-          in
-          ()
+          match result.location with
+          | Some range ->
+            let* text_document =
+              Workspace.openTextDocument (`Filename range.source)
+            in
+            let selection =
+              Earlybird.VariableGetClosureCodeLocation.Result.range_to_vscode
+                range
+            in
+            let+ _ =
+              Window.showTextDocument2
+                ~document:(`TextDocument text_document)
+                ~options:
+                  (TextDocumentShowOptions.create ~preview:true ~selection ())
+                ()
+            in
+            ()
+          | None ->
+            let+ _ =
+              Window.showInformationMessage
+                ~message:"No closure code location"
+                ()
+            in
+            ()
         in
         ()
-      | None -> ()
+      | None ->
+        let _ = Window.showErrorMessage ~message:"No active debug session" () in
+        ()
     in
     command Extension_consts.Commands.goto_closure_code_location handler
 end
