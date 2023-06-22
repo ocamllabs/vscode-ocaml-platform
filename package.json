@@ -1064,10 +1064,10 @@
         "language": "reason"
       },
       {
-        "language": "ocamllex"
+        "language": "ocaml.ocamllex"
       },
       {
-        "language": "menhir"
+        "language": "ocaml.menhir"
       }
     ],
     "debuggers": [
