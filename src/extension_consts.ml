@@ -60,6 +60,10 @@ module Commands = struct
     ocaml_prefixed "open-ocaml-platform-ext-output"
 
   let open_ocaml_commands_output = ocaml_prefixed "open-ocaml-commands-output"
+
+  let start_debugging = ocaml_prefixed "start-debugging"
+
+  let goto_closure_code_location = ocaml_prefixed "goto-closure-code-location"
 end
 
 module Command_errors = struct

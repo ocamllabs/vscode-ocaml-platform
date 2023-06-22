@@ -371,11 +371,11 @@ end = struct
 end
 
 module Debug_commands : sig
-  val _debug_variable_goto_closure_code_location : t
+  val _goto_closure_code_location : t
 
-  val _start_debug : t
+  val _start_debugging : t
 end = struct
-  let _debug_variable_goto_closure_code_location =
+  let _goto_closure_code_location =
     let handler (instance : Extension_instance.t) ~args =
       ignore instance;
       ignore args;
@@ -430,9 +430,9 @@ end = struct
         ()
       | None -> ()
     in
-    command "ocamlearlybird.variableGotoClosureCodeLocation" handler
+    command Extension_consts.Commands.goto_closure_code_location handler
 
-  let _start_debug =
+  let _start_debugging =
     let handler (instance : Extension_instance.t) ~args =
       ignore instance;
       ignore args;
@@ -464,7 +464,7 @@ end = struct
         ()
       | None -> ()
     in
-    command "ocamlearlybird.startDebug" handler
+    command Extension_consts.Commands.start_debugging handler
 end
 
 let register extension instance = function

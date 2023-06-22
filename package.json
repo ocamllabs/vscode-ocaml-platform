@@ -38,6 +38,8 @@
     "onCommand:ocaml.show-preprocessed-document",
     "onCommand:ocaml.open-pp-editor-and-ast-explorer",
     "onCommand:ocaml.stop-documentation-server",
+    "onCommand:ocaml.start-debugging",
+    "onCommand:ocaml.goto-closure-code-location",
     "onCustomEditor:ast-editor",
     "onCustomEditor:cm-files-editor",
     "workspaceContains:**/dune-workspace",
@@ -50,9 +52,7 @@
     "workspaceContains:**/*.mly",
     "workspaceContains:**/*.re",
     "workspaceContains:**/*.rei",
-    "onDebugResolve:ocaml.earlybird",
-    "onCommand:ocamlearlybird.startDebug",
-    "onCommand:ocamlearlybird.variableGotoClosureCodeLocation"
+    "onDebugResolve:ocaml.earlybird"
   ],
   "icon": "assets/logo.png",
   "contributes": {
@@ -273,11 +273,13 @@
         "title": "Show OCaml Commands Output"
       },
       {
-        "command": "ocamlearlybird.startDebug",
-        "title": "Start an OCaml Debug Session"
+        "command": "ocaml.start-debugging",
+        "category": "OCaml",
+        "title": "Start OCaml Debugging"
       },
       {
-        "command": "ocamlearlybird.variableGotoClosureCodeLocation",
+        "command": "ocaml.goto-closure-code-location",
+        "category": "OCaml",
         "title": "Goto Closure Code Location"
       }
     ],
@@ -402,6 +404,14 @@
         {
           "command": "ocaml.generate-sandbox-documentation",
           "when": "false"
+        },
+        {
+          "command": "ocaml.start-debugging",
+          "when": "false"
+        },
+        {
+          "command": "ocaml.goto-closure-code-location",
+          "when": "false"
         }
       ],
       "editor/title": [
@@ -463,14 +473,14 @@
       ],
       "explorer/context": [
         {
-          "when": "resourceFilename =~ /\\.bc$/ || resourceFilename =~ /^a\\.out$/ || resourceFilename =~ /\\.d\\.byte$/",
-          "command": "ocamlearlybird.startDebug"
+          "command": "ocaml.start-debugging",
+          "when": "resourceFilename =~ /\\.bc$/ || resourceFilename =~ /^a\\.out$/ || resourceFilename =~ /\\.d\\.byte$/"
         }
       ],
       "debug/variables/context": [
         {
+          "command": "ocaml.goto-closure-code-location",
           "when": "debugProtocolVariableMenuContext == 'ocamlearlybird.function'",
-          "command": "ocamlearlybird.variableGotoClosureCodeLocation",
           "group": "navigation"
         }
       ]
