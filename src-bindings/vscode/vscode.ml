@@ -1308,7 +1308,7 @@ module TextDocumentShowOptions = struct
     val selection : t -> Range.t or_undefined [@@js.get]
 
     val create :
-         viewColumn:ViewColumn.t
+         ?viewColumn:ViewColumn.t
       -> ?preserveFocus:bool
       -> ?preview:bool
       -> ?selection:Range.t
@@ -2986,6 +2986,14 @@ module Window = struct
       -> TextEditor.t Promise.t
       [@@js.global "vscode.window.showTextDocument"]
 
+    val showTextDocument2 :
+         document:
+           ([ `TextDocument of TextDocument.t | `Uri of Uri.t ][@js.union])
+      -> ?options:TextDocumentShowOptions.t
+      -> unit
+      -> TextEditor.t Promise.t
+      [@@js.global "vscode.window.showTextDocument"]
+
     val showInformationMessage :
          message:string
       -> ?options:MessageOptions.t
@@ -3262,6 +3270,16 @@ end
 
 module DebugSession = struct
   include Class.Make ()
+
+  include
+    [%js:
+    val customRequest :
+         t
+      -> command:string
+      -> args:Jsonoo.t
+      -> unit
+      -> Jsonoo.t Promise.t
+      [@@js.call]]
 end
 
 module DebugAdapterDescriptorFactory = struct
@@ -3319,6 +3337,9 @@ end
 module Debug = struct
   include
     [%js:
+    val activeDebugSession : unit -> DebugSession.t or_undefined
+      [@@js.get "vscode.debug.activeDebugSession"]
+
     val registerDebugAdapterDescriptorFactory :
          debugType:string
       -> factory:DebugAdapterDescriptorFactory.t

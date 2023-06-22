@@ -370,6 +370,35 @@ end = struct
     command Extension_consts.Commands.prev_hole (jump_to_hole Prev_hole.jump)
 end
 
+module Debug_commands : sig
+  val _debug_variable_goto_closure_code_location : t
+end = struct
+  let _debug_variable_goto_closure_code_location =
+    let handler (instance : Extension_instance.t) ~args =
+      ignore instance;
+      ignore args;
+      match Debug.activeDebugSession () with
+      | Some debugSession ->
+        let context = List.hd_exn args in
+        let variablesReference = Ojs.get_prop_ascii (Ojs.get_prop_ascii context "variable") "variablesReference" in
+        let data = Ojs.obj [| ("handle", variablesReference )|] in
+        let open Promise.Syntax in
+        let (_ : unit Promise.t) =
+          let* result = DebugSession.customRequest debugSession ~command:"variableGetClosureCodeLocation" ~args:(Jsonoo.t_of_js data) () in
+          let loc = Ojs.get_prop_ascii (Jsonoo.t_to_js result) "location" in
+          let* doc = Workspace.openTextDocument (`Filename (Ojs.get_prop_ascii loc "source" |> Ojs.string_of_js)) in
+          let pos = Ojs.get_prop_ascii loc "pos" in
+          let end_ = Ojs.get_prop_ascii loc "end_" in
+          let+ _ = Window.showTextDocument2 ~document:(`TextDocument doc) ~options:(TextDocumentShowOptions.create ~preview:true ~selection:(Range.makePositions ~start:(Position.make ~line:((Ojs.array_get pos 0 |> Ojs.int_of_js) - 1) ~character:((Ojs.array_get pos 1 |> Ojs.int_of_js) - 1)) ~end_:(Position.make ~line:((Ojs.array_get end_ 0 |> Ojs.int_of_js) - 1) ~character:((Ojs.array_get end_ 1 |> Ojs.int_of_js) - 1))) ()) () in
+          ()
+        in
+        ()
+      | None -> ()
+    in
+    command "ocamlearlybird.variableGotoClosureCodeLocation"
+      handler
+end
+
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in

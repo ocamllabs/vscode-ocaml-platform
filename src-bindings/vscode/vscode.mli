@@ -1015,7 +1015,7 @@ module TextDocumentShowOptions : sig
   val selection : t -> Range.t option
 
   val create :
-       viewColumn:ViewColumn.t
+       ?viewColumn:ViewColumn.t
     -> ?preserveFocus:bool
     -> ?preview:bool
     -> ?selection:Range.t
@@ -2289,6 +2289,13 @@ module Window : sig
     -> unit
     -> TextEditor.t Promise.t
 
+  val showTextDocument2 :
+        document:
+          ([ `TextDocument of TextDocument.t | `Uri of Uri.t ][@js.union])
+    -> ?options:TextDocumentShowOptions.t
+    -> unit
+    -> TextEditor.t Promise.t
+
   val showInformationMessage :
        message:string
     -> ?options:MessageOptions.t
@@ -2458,6 +2465,13 @@ end
 
 module DebugSession : sig
   include Js.T
+
+  val customRequest :
+       t
+    -> command:string
+    -> args:Jsonoo.t
+    -> unit
+    -> Jsonoo.t Promise.t
 end
 
 module DebugAdapterDescriptorFactory : sig
@@ -2507,6 +2521,8 @@ module DebugConfigurationProviderTriggerKind : sig
 end
 
 module Debug : sig
+  val activeDebugSession : unit -> DebugSession.t option
+
   val registerDebugAdapterDescriptorFactory :
     debugType:string -> factory:DebugAdapterDescriptorFactory.t -> Disposable.t
 
