@@ -372,6 +372,7 @@ end
 
 module Debug_commands : sig
   val _debug_variable_goto_closure_code_location : t
+  val _start_debug : t
 end = struct
   let _debug_variable_goto_closure_code_location =
     let handler (instance : Extension_instance.t) ~args =
@@ -396,6 +397,36 @@ end = struct
       | None -> ()
     in
     command "ocamlearlybird.variableGotoClosureCodeLocation"
+      handler
+
+  let _start_debug =
+    let handler (instance : Extension_instance.t) ~args =
+      ignore instance;
+      ignore args;
+      let resourceUri = List.hd_exn args in
+      let uri = Uri.t_of_js resourceUri in
+      (* TODO: fallback *)
+      let folder = Workspace.getWorkspaceFolder ~uri in
+      match folder with
+      | Some folder ->
+        let configs = Ojs.obj
+          [| ("name", Ojs.string_to_js (Path.basename (Path.of_string (Uri.fsPath uri))))
+            ; ("type", Ojs.string_to_js "ocamlearlybird")
+            ; ("request", Ojs.string_to_js "launch")
+            ; ("program", Ojs.string_to_js (Uri.fsPath uri))
+            ; ("stopOnEntry", Ojs.bool_to_js true)
+            ; ("yieldSteps", Ojs.int_to_js 4096)
+          |]
+        in
+        (* let open Promise.Syntax in *)
+        let (_ : bool Promise.t) =
+          Debug.startDebugging ~folder:(Some folder) ~nameOrConfiguration:configs ()
+        in
+        ()
+      | None ->
+        ()
+    in
+    command "ocamlearlybird.startDebug"
       handler
 end
 
