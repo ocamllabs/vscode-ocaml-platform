@@ -71,4 +71,9 @@ module Command_errors = struct
       expl
 end
 
+module Debuggers =
+struct
+  let earlybird = ocaml_prefixed "earlybird"
+end
+
 (* TODO: Refactor the code so that we don't need any "constants" module *)

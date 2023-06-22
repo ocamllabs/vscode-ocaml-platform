@@ -411,7 +411,7 @@ end = struct
       | Some folder ->
         let configs = Ojs.obj
           [| ("name", Ojs.string_to_js (Path.basename (Path.of_string (Uri.fsPath uri))))
-            ; ("type", Ojs.string_to_js "ocamlearlybird")
+            ; ("type", Ojs.string_to_js Extension_consts.Debuggers.earlybird)
             ; ("request", Ojs.string_to_js "launch")
             ; ("program", Ojs.string_to_js (Uri.fsPath uri))
             ; ("stopOnEntry", Ojs.bool_to_js true)

@@ -44,7 +44,7 @@ let register extension instance =
         let configs =
           [ Ojs.obj
                 [| ("name", Ojs.string_to_js "OCaml Debug")
-                 ; ("type", Ojs.string_to_js "ocamlearlybird")
+                 ; ("type", Ojs.string_to_js Extension_consts.Debuggers.earlybird)
                  ; ("request", Ojs.string_to_js "launch")
                  ; ("program", Ojs.string_to_js "${workspaceFolder}/a.out")
                  ; ("stopOnEntry", Ojs.bool_to_js false)
@@ -65,7 +65,7 @@ let register extension instance =
           else (
             Ojs.obj
                 [| ("name", Ojs.string_to_js "${fileBasename}")
-                 ; ("type", Ojs.string_to_js "ocamlearlybird")
+                 ; ("type", Ojs.string_to_js Extension_consts.Debuggers.earlybird)
                  ; ("request", Ojs.string_to_js "launch")
                  ; ("program", Ojs.string_to_js "${file}")
                 |]
@@ -86,7 +86,7 @@ let register extension instance =
     in
     let disposable =
       Vscode.Debug.registerDebugConfigurationProvider
-        ~debugType:"ocamlearlybird" ~provider
+        ~debugType:Extension_consts.Debuggers.earlybird ~provider
         ~triggerKind:DebugConfigurationProviderTriggerKind.Initial ()
     in
     ExtensionContext.subscribe extension ~disposable
@@ -119,5 +119,5 @@ let register extension instance =
     in
     ExtensionContext.subscribe extension ~disposable
   in
-  registerDebugAdapterDescriptorFactory ~debugType:"ocamlearlybird";
+  registerDebugAdapterDescriptorFactory ~debugType:Extension_consts.Debuggers.earlybird;
   registerDebugDuneExecutableConfigurationProvider ()

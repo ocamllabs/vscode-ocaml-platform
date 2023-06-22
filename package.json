@@ -50,10 +50,9 @@
     "workspaceContains:**/*.mly",
     "workspaceContains:**/*.re",
     "workspaceContains:**/*.rei",
-    "onDebugResolve:ocamlearlybird",
-    "onDebugResolve:ocamlearlybird.dune",
-    "onDebugInitialConfigurations",
-    "onDebugDynamicConfigurations",
+    "onDebugResolve:ocaml.earlybird",
+    "onDebugInitialConfigurations:ocaml.earlybird",
+    "onDebugDynamicConfigurations:ocaml.earlybird",
     "onCommand:ocamlearlybird.startDebug",
     "onCommand:ocamlearlybird.variableGotoClosureCodeLocation"
   ],
@@ -1075,8 +1074,8 @@
     ],
     "debuggers": [
       {
-        "type": "ocamlearlybird",
-        "label": "Ocamlearlybird",
+        "type": "ocaml.earlybird",
+        "label": "OCaml earlybird",
         "configurationAttributes": {
           "launch": {
             "required": [
