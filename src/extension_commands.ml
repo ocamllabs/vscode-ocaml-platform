@@ -375,6 +375,31 @@ module Debug_commands : sig
 
   val _start_debugging : t
 end = struct
+  let _start_debugging =
+    let handler (instance : Extension_instance.t) ~args =
+      ignore instance;
+      ignore args;
+      let resourceUri = List.hd_exn args in
+      let uri = Uri.t_of_js resourceUri in
+      (* TODO: fallback *)
+      let folder = Workspace.getWorkspaceFolder ~uri in
+      let config =
+        Ojs.obj
+          [| ( "name"
+             , Ojs.string_to_js
+                 (Path.basename (Path.of_string (Uri.fsPath uri))) )
+           ; ("type", Ojs.string_to_js Extension_consts.Debuggers.earlybird)
+           ; ("request", Ojs.string_to_js "launch")
+           ; ("program", Ojs.string_to_js (Uri.fsPath uri))
+          |]
+      in
+      let (_ : bool Promise.t) =
+        Debug.startDebugging ~folder ~nameOrConfiguration:config ()
+      in
+      ()
+    in
+    command Extension_consts.Commands.start_debugging handler
+
   let _goto_closure_code_location =
     let handler (instance : Extension_instance.t) ~args =
       ignore instance;
@@ -431,40 +456,6 @@ end = struct
       | None -> ()
     in
     command Extension_consts.Commands.goto_closure_code_location handler
-
-  let _start_debugging =
-    let handler (instance : Extension_instance.t) ~args =
-      ignore instance;
-      ignore args;
-      let resourceUri = List.hd_exn args in
-      let uri = Uri.t_of_js resourceUri in
-      (* TODO: fallback *)
-      let folder = Workspace.getWorkspaceFolder ~uri in
-      match folder with
-      | Some folder ->
-        let configs =
-          Ojs.obj
-            [| ( "name"
-               , Ojs.string_to_js
-                   (Path.basename (Path.of_string (Uri.fsPath uri))) )
-             ; ("type", Ojs.string_to_js Extension_consts.Debuggers.earlybird)
-             ; ("request", Ojs.string_to_js "launch")
-             ; ("program", Ojs.string_to_js (Uri.fsPath uri))
-             ; ("stopOnEntry", Ojs.bool_to_js true)
-             ; ("yieldSteps", Ojs.int_to_js 4096)
-            |]
-        in
-        (* let open Promise.Syntax in *)
-        let (_ : bool Promise.t) =
-          Debug.startDebugging
-            ~folder:(Some folder)
-            ~nameOrConfiguration:configs
-            ()
-        in
-        ()
-      | None -> ()
-    in
-    command Extension_consts.Commands.start_debugging handler
 end
 
 let register extension instance = function
