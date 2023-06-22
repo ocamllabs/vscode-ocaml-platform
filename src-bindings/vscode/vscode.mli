@@ -2539,7 +2539,8 @@ module Debug : sig
 
   val startDebugging :
        folder:WorkspaceFolder.t or_undefined
-    -> nameOrConfiguration:Ojs.t
+    -> nameOrConfiguration:
+         [ `Name of string | `Configuration of DebugConfiguration.t ]
     -> ?parentSessionOrOptions:Ojs.t
     -> unit
     -> bool Promise.t

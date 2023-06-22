@@ -3360,7 +3360,9 @@ module Debug = struct
 
     val startDebugging :
          folder:WorkspaceFolder.t or_undefined
-      -> nameOrConfiguration:Ojs.t
+      -> nameOrConfiguration:
+           ([ `Name of string | `Configuration of DebugConfiguration.t ]
+           [@js.union])
       -> ?parentSessionOrOptions:Ojs.t
       -> unit
       -> bool Promise.t

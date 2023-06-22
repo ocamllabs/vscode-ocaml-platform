@@ -384,17 +384,21 @@ end = struct
       (* TODO: fallback *)
       let folder = Workspace.getWorkspaceFolder ~uri in
       let config =
-        Ojs.obj
-          [| ( "name"
-             , Ojs.string_to_js
-                 (Path.basename (Path.of_string (Uri.fsPath uri))) )
-           ; ("type", Ojs.string_to_js Extension_consts.Debuggers.earlybird)
-           ; ("request", Ojs.string_to_js "launch")
-           ; ("program", Ojs.string_to_js (Uri.fsPath uri))
-          |]
+        DebugConfiguration.t_of_js
+        @@ Ojs.obj
+             [| ( "name"
+                , Ojs.string_to_js
+                    (Path.basename (Path.of_string (Uri.fsPath uri))) )
+              ; ("type", Ojs.string_to_js Extension_consts.Debuggers.earlybird)
+              ; ("request", Ojs.string_to_js "launch")
+              ; ("program", Ojs.string_to_js (Uri.fsPath uri))
+             |]
       in
       let (_ : bool Promise.t) =
-        Debug.startDebugging ~folder ~nameOrConfiguration:config ()
+        Debug.startDebugging
+          ~folder
+          ~nameOrConfiguration:(`Configuration config)
+          ()
       in
       ()
     in
