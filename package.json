@@ -599,16 +599,6 @@
           "type": "boolean",
           "default": true,
           "description": "Controls whether to use Utop for the REPL if it is installed in the current switch."
-        },
-        "ocamlearlybird.path": {
-          "type": "string",
-          "description": "Path to ocamlearlybird executable.",
-          "default": "ocamlearlybird"
-        },
-        "ocamlearlybird.connectToLocalDebugAdapterServer": {
-          "type": "boolean",
-          "description": "Connect to a running ocamlearlybird server.",
-          "default": false
         }
       }
     },
