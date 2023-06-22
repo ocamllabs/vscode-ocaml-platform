@@ -385,8 +385,8 @@ end = struct
         let data = Ojs.obj [| ("handle", variablesReference )|] in
         let open Promise.Syntax in
         let (_ : unit Promise.t) =
-          let* result = DebugSession.customRequest debugSession ~command:"variableGetClosureCodeLocation" ~args:(Jsonoo.t_of_js data) () in
-          let loc = Ojs.get_prop_ascii (Jsonoo.t_to_js result) "location" in
+          let* result = DebugSession.customRequest debugSession ~command:"variableGetClosureCodeLocation" ~args:data () in
+          let loc = Ojs.get_prop_ascii result "location" in
           let* doc = Workspace.openTextDocument (`Filename (Ojs.get_prop_ascii loc "source" |> Ojs.string_of_js)) in
           let pos = Ojs.get_prop_ascii loc "pos" in
           let end_ = Ojs.get_prop_ascii loc "end_" in

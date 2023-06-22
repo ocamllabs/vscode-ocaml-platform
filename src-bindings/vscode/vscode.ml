@@ -3276,9 +3276,9 @@ module DebugSession = struct
     val customRequest :
          t
       -> command:string
-      -> args:Jsonoo.t
+      -> ?args:Js.Any.t
       -> unit
-      -> Jsonoo.t Promise.t
+      -> Js.Any.t Promise.t
       [@@js.call]]
 end
 
@@ -3303,26 +3303,34 @@ module DebugAdapterDescriptorFactory = struct
       [@@js.builder]]
 end
 
+module DebugConfiguration = struct
+  include Interface.Make ()
+end
+
 module DebugConfigurationProvider = struct
   include Interface.Make ()
 
   include
     [%js:
     val create :
-         provideDebugConfigurations:
+         ?provideDebugConfigurations:
            (   folder:WorkspaceFolder.t or_undefined
-            -> token:CancellationToken.t
-            -> Ojs.t list ProviderResult.t)
-      -> resolveDebugConfiguration:
+            -> ?token:CancellationToken.t
+            -> unit
+            -> DebugConfiguration.t list ProviderResult.t)
+      -> ?resolveDebugConfiguration:
            (   folder:WorkspaceFolder.t or_undefined
-            -> debugConfiguration:Ojs.t
-            -> token:CancellationToken.t
-            -> Ojs.t ProviderResult.t)
-      -> resolveDebugConfigurationWithSubstitutedVariables:
+            -> debugConfiguration:DebugConfiguration.t
+            -> ?token:CancellationToken.t
+            -> unit
+            -> DebugConfiguration.t ProviderResult.t)
+      -> ?resolveDebugConfigurationWithSubstitutedVariables:
            (   folder:WorkspaceFolder.t or_undefined
-            -> debugConfiguration:Ojs.t
-            -> token:CancellationToken.t
-            -> Ojs.t ProviderResult.t)
+            -> debugConfiguration:DebugConfiguration.t
+            -> ?token:CancellationToken.t
+            -> unit
+            -> DebugConfiguration.t ProviderResult.t)
+      -> unit
       -> t
       [@@js.builder]]
 end

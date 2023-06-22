@@ -2,10 +2,10 @@ open Import
 
 let debugType = Extension_consts.Debuggers.earlybird
 
-let provideDebugConfigurations ~folder:_ ~token:_ =
+let provideDebugConfigurations ~folder:_ ?token:_ () =
   let promise =
     let configs =
-      [ Ojs.obj
+      [ DebugConfiguration.t_of_js @@ Ojs.obj
             [| ("name", Ojs.string_to_js "OCaml Debug")
               ; ("type", Ojs.string_to_js Extension_consts.Debuggers.earlybird)
               ; ("request", Ojs.string_to_js "launch")
@@ -20,8 +20,9 @@ let provideDebugConfigurations ~folder:_ ~token:_ =
   in
   `Promise promise
 
-let resolveDebugConfiguration ~folder:_ ~debugConfiguration ~token:_ =
+let resolveDebugConfiguration ~folder:_ ~debugConfiguration ?token:_ () =
   let promise =
+    let debugConfiguration = DebugConfiguration.t_to_js debugConfiguration in
     let debugConfiguration =
       if Ojs.has_property debugConfiguration "type" then
         debugConfiguration
@@ -34,12 +35,12 @@ let resolveDebugConfiguration ~folder:_ ~debugConfiguration ~token:_ =
             |]
       )
     in
-    Promise.return (Some debugConfiguration)
+    Promise.return (Some (DebugConfiguration.t_of_js debugConfiguration))
   in
   `Promise promise
 
 let resolveDebugConfigurationWithSubstitutedVariables ~folder:_
-    ~debugConfiguration ~token:_ =
+    ~debugConfiguration ?token:_ () =
   `Value (Some debugConfiguration)
 
 let createDebugAdapterDescriptor ~instance ~session ~executable =
@@ -65,7 +66,7 @@ let register extension instance =
   let provider =
     DebugConfigurationProvider.create ~provideDebugConfigurations
       ~resolveDebugConfiguration
-      ~resolveDebugConfigurationWithSubstitutedVariables
+      ~resolveDebugConfigurationWithSubstitutedVariables ()
   in
   let disposable =
     Debug.registerDebugConfigurationProvider

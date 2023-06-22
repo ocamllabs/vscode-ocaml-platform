@@ -2469,14 +2469,15 @@ module DebugSession : sig
   val customRequest :
        t
     -> command:string
-    -> args:Jsonoo.t
+    -> ?args:Js.Any.t
     -> unit
-    -> Jsonoo.t Promise.t
+    -> Js.Any.t Promise.t
 end
 
 module DebugAdapterDescriptorFactory : sig
   include Js.T
 
+  (* TODO: unused? remove? *)
   val createDebugAdapterDescriptor :
        t
     -> session:DebugSession.t
@@ -2491,24 +2492,32 @@ module DebugAdapterDescriptorFactory : sig
     -> t
 end
 
+module DebugConfiguration : sig
+  include Js.T
+end
+
 module DebugConfigurationProvider : sig
   include Js.T
 
   val create :
-       provideDebugConfigurations:
+       ?provideDebugConfigurations:
          (   folder:WorkspaceFolder.t or_undefined
-          -> token:CancellationToken.t
-          -> Ojs.t list ProviderResult.t)
-    -> resolveDebugConfiguration:
+          -> ?token:CancellationToken.t
+          -> unit
+          -> DebugConfiguration.t list ProviderResult.t)
+    -> ?resolveDebugConfiguration:
          (   folder:WorkspaceFolder.t or_undefined
-          -> debugConfiguration:Ojs.t
-          -> token:CancellationToken.t
-          -> Ojs.t ProviderResult.t)
-    -> resolveDebugConfigurationWithSubstitutedVariables:
+          -> debugConfiguration:DebugConfiguration.t
+          -> ?token:CancellationToken.t
+          -> unit
+          -> DebugConfiguration.t ProviderResult.t)
+    -> ?resolveDebugConfigurationWithSubstitutedVariables:
          (   folder:WorkspaceFolder.t or_undefined
-          -> debugConfiguration:Ojs.t
-          -> token:CancellationToken.t
-          -> Ojs.t ProviderResult.t)
+          -> debugConfiguration:DebugConfiguration.t
+          -> ?token:CancellationToken.t
+          -> unit
+          -> DebugConfiguration.t ProviderResult.t)
+    -> unit
     -> t
 end
 
