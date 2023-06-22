@@ -1080,10 +1080,6 @@
               "program"
             ],
             "properties": {
-              "noDebug": {
-                "type": "boolean",
-                "default": false
-              },
               "cwd": {
                 "type": "string",
                 "description": "The working directory for debuggee program."
