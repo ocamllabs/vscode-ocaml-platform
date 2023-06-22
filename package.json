@@ -51,8 +51,6 @@
     "workspaceContains:**/*.re",
     "workspaceContains:**/*.rei",
     "onDebugResolve:ocaml.earlybird",
-    "onDebugInitialConfigurations:ocaml.earlybird",
-    "onDebugDynamicConfigurations:ocaml.earlybird",
     "onCommand:ocamlearlybird.startDebug",
     "onCommand:ocamlearlybird.variableGotoClosureCodeLocation"
   ],
@@ -1156,7 +1154,15 @@
               }
             }
           }
-        }
+        },
+        "initialConfigurations": [
+          {
+            "name": "OCaml earlybird",
+            "type": "ocaml.earlybird",
+            "request": "launch",
+            "program": "${workspaceFolder}/a.out"
+          }
+        ]
       }
     ]
   },
