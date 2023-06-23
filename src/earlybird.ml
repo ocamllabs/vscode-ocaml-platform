@@ -16,7 +16,7 @@ module VariableGetClosureCodeLocation = struct
     type range =
       { source : string
       ; pos : position
-      ; end_ : position
+      ; end_ : position [@js "end_"]
       }
     [@@js]
 
