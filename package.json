@@ -275,7 +275,7 @@
       {
         "command": "ocaml.start-debugging",
         "category": "OCaml",
-        "title": "Start OCaml Debugging"
+        "title": "Start OCaml Debugging (experimental)"
       },
       {
         "command": "ocaml.goto-closure-code-location",
@@ -1073,7 +1073,7 @@
     "debuggers": [
       {
         "type": "ocaml.earlybird",
-        "label": "OCaml earlybird",
+        "label": "OCaml earlybird (experimental)",
         "configurationAttributes": {
           "launch": {
             "required": [
@@ -1153,7 +1153,7 @@
         },
         "initialConfigurations": [
           {
-            "name": "OCaml earlybird",
+            "name": "OCaml earlybird (experimental)",
             "type": "ocaml.earlybird",
             "request": "launch",
             "program": "${workspaceFolder}/a.out"

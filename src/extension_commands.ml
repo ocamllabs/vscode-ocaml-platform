@@ -388,7 +388,7 @@ end = struct
       | Some uri ->
         let folder = Workspace.getWorkspaceFolder ~uri in
         let fsPath = Uri.fsPath uri in
-        let name = Path.basename (Path.of_string fsPath) in
+        let name = Path.basename (Path.of_string fsPath) ^ " (experimental)" in
         let config =
           DebugConfiguration.t_of_js
           @@ Ojs.obj
