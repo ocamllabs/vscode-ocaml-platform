@@ -2978,15 +2978,14 @@ module Window = struct
       [@@js.get "vscode.window.onDidCloseTerminal"]
 
     val showTextDocument :
-         document:
-           ([ `TextDocument of TextDocument.t | `Uri of Uri.t ][@js.union])
+         document:TextDocument.t
       -> ?column:ViewColumn.t
       -> ?preserveFocus:bool
       -> unit
       -> TextEditor.t Promise.t
       [@@js.global "vscode.window.showTextDocument"]
 
-    val showTextDocument2 :
+    val showTextDocument' :
          document:
            ([ `TextDocument of TextDocument.t | `Uri of Uri.t ][@js.union])
       -> ?options:TextDocumentShowOptions.t

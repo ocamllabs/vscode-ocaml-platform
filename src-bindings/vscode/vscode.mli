@@ -2283,14 +2283,14 @@ module Window : sig
   val onDidCloseTerminal : unit -> Terminal.t Event.t
 
   val showTextDocument :
-       document:[ `TextDocument of TextDocument.t | `Uri of Uri.t ]
+       document:TextDocument.t
     -> ?column:ViewColumn.t
     -> ?preserveFocus:bool
     -> unit
     -> TextEditor.t Promise.t
 
-  val showTextDocument2 :
-       document:([ `TextDocument of TextDocument.t | `Uri of Uri.t ][@js.union])
+  val showTextDocument' :
+       document:[ `TextDocument of TextDocument.t | `Uri of Uri.t ]
     -> ?options:TextDocumentShowOptions.t
     -> unit
     -> TextEditor.t Promise.t

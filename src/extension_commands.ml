@@ -446,7 +446,7 @@ end = struct
                 range
             in
             let+ _ =
-              Window.showTextDocument2
+              Window.showTextDocument'
                 ~document:(`TextDocument text_document)
                 ~options:
                   (TextDocumentShowOptions.create ~preview:true ~selection ())
