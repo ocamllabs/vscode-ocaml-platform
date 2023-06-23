@@ -376,31 +376,38 @@ module Debug_commands : sig
   val _start_debugging : t
 end = struct
   let _start_debugging =
-    let handler (instance : Extension_instance.t) ~args =
-      ignore instance;
-      ignore args;
-      let resourceUri = List.hd_exn args in
-      let uri = Uri.t_of_js resourceUri in
-      (* TODO: fallback *)
-      let folder = Workspace.getWorkspaceFolder ~uri in
-      let config =
-        DebugConfiguration.t_of_js
-        @@ Ojs.obj
-             [| ( "name"
-                , Ojs.string_to_js
-                    (Path.basename (Path.of_string (Uri.fsPath uri))) )
-              ; ("type", Ojs.string_to_js Extension_consts.Debuggers.earlybird)
-              ; ("request", Ojs.string_to_js "launch")
-              ; ("program", Ojs.string_to_js (Uri.fsPath uri))
-             |]
+    let handler (_ : Extension_instance.t) ~args =
+      let resourceUri =
+        match args with
+        | resourceUri :: _ -> Some (Uri.t_of_js resourceUri)
+        | [] ->
+          Option.map (Window.activeTextEditor ()) ~f:(fun textEditor ->
+              TextDocument.uri (TextEditor.document textEditor))
       in
-      let (_ : bool Promise.t) =
-        Debug.startDebugging
-          ~folder
-          ~nameOrConfiguration:(`Configuration config)
-          ()
-      in
-      ()
+      match resourceUri with
+      | Some uri ->
+        let folder = Workspace.getWorkspaceFolder ~uri in
+        let fsPath = Uri.fsPath uri in
+        let name = Path.basename (Path.of_string fsPath) in
+        let config =
+          DebugConfiguration.t_of_js
+          @@ Ojs.obj
+               [| ("name", Ojs.string_to_js name)
+                ; ("type", Ojs.string_to_js Extension_consts.Debuggers.earlybird)
+                ; ("request", Ojs.string_to_js "launch")
+                ; ("program", Ojs.string_to_js fsPath)
+               |]
+        in
+        let (_ : bool Promise.t) =
+          Debug.startDebugging
+            ~folder
+            ~nameOrConfiguration:(`Configuration config)
+            ()
+        in
+        ()
+      | None ->
+        let _ = Window.showErrorMessage ~message:"No active resource" () in
+        ()
     in
     command Extension_consts.Commands.start_debugging handler
 
