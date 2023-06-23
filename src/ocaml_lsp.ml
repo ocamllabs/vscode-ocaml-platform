@@ -112,6 +112,8 @@ let lsp_versions =
          ; "1.14.2"
          ; "1.15.0-4.14"
          ; "1.15.1-4.14"
+         ; "1.16.0-4.14"
+         ; "1.16.1"
          ; "1.16.2"
         |] )
     ; ( (5, 0)
@@ -119,6 +121,7 @@ let lsp_versions =
          ; "1.15.0~5.0preview1"
          ; "1.15.0-5.0"
          ; "1.15.1-5.0"
+         ; "1.16.1"
          ; "1.16.2"
         |] )
     ]
@@ -143,7 +146,7 @@ let is_version_up_to_date t ocaml_v =
     | None -> (
       match available_versions ocaml_v with
       | Some v -> Error (`Newer_available (None, Array.last v))
-      | None -> Ok ())
+      | None -> Error (`Newer_available (None, "test")))
     | Some v -> (
       match available_versions ocaml_v with
       | None -> Ok ()
