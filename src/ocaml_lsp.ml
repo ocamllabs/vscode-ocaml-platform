@@ -146,7 +146,7 @@ let is_version_up_to_date t ocaml_v =
     | None -> (
       match available_versions ocaml_v with
       | Some v -> Error (`Newer_available (None, Array.last v))
-      | None -> Error (`Newer_available (None, "test")))
+      | None -> Ok ())
     | Some v -> (
       match available_versions ocaml_v with
       | None -> Ok ()
