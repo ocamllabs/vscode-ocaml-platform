@@ -10,7 +10,10 @@
   outputs = { self, nixpkgs, flake-utils, nix-filter, ... }@inputs:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = nixpkgs.legacyPackages."${system}";
+        pkgs = import nixpkgs {
+          inherit system;
+          config = { allowUnfree = true; };
+        };
         inherit (pkgs.ocamlPackages) buildDunePackage;
         jsonoo = buildDunePackage {
           pname = "jsonoo";
@@ -66,7 +69,12 @@
             jsonoo
             ocaml-lsp
             pkgs.ocamlformat
+            pkgs.vscode
+            pkgs.nodePackages.parcel
           ];
+          shellHook = ''
+            make yarn-deps
+          '';
         };
       });
 }

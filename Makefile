@@ -4,11 +4,15 @@
 all:
 	dune build --root .
 
+.PHONY: yarn-deps
+yarn-deps:
+	yarn --frozen-lockfile
+	yarn --frozen-lockfile --cwd astexplorer
+
 .PHONY: deps
 deps: ## Install development dependencies
 	opam install -y ocamlformat.0.25.1 ocaml-lsp-server $(DEV_DEPS)
-	yarn --frozen-lockfile
-	yarn --frozen-lockfile --cwd astexplorer
+	$(MAKE) yarn-deps
 	opam install --deps-only --with-test --with-doc -y .
 
 .PHONY: create_switch
