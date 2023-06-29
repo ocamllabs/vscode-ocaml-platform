@@ -2489,6 +2489,10 @@ end
 
 module DebugConfiguration : sig
   include Js.T
+
+  val create : name:string -> request:string -> type_:string -> t
+
+  val set : t -> string -> Ojs.t -> unit
 end
 
 module DebugConfigurationProvider : sig

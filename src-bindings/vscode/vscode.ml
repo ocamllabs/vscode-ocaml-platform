@@ -3300,6 +3300,13 @@ end
 
 module DebugConfiguration = struct
   include Interface.Make ()
+
+  include
+    [%js:
+    val create : name:string -> request:string -> type_:string -> t
+      [@@js.builder]
+
+    val set : t -> string -> Ojs.t -> unit [@@js.index_set]]
 end
 
 module DebugConfigurationProvider = struct
