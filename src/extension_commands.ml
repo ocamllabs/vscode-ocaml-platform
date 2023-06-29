@@ -390,14 +390,12 @@ end = struct
         let fsPath = Uri.fsPath uri in
         let name = Path.basename (Path.of_string fsPath) ^ " (experimental)" in
         let config =
-          DebugConfiguration.t_of_js
-          @@ Ojs.obj
-               [| ("name", Ojs.string_to_js name)
-                ; ("type", Ojs.string_to_js Extension_consts.Debuggers.earlybird)
-                ; ("request", Ojs.string_to_js "launch")
-                ; ("program", Ojs.string_to_js fsPath)
-               |]
+          DebugConfiguration.create
+            ~name
+            ~type_:Extension_consts.Debuggers.earlybird
+            ~request:"launch"
         in
+        DebugConfiguration.set config "program" (Ojs.string_to_js fsPath);
         let (_ : bool Promise.t) =
           Debug.startDebugging
             ~folder
