@@ -31,9 +31,7 @@ end
 
 let debugType = Extension_consts.Debuggers.earlybird
 
-let createDebugAdapterDescriptor ~instance ~session ~executable =
-  ignore session;
-  ignore executable;
+let createDebugAdapterDescriptor ~instance ~session:_ ~executable:_ =
   let sandbox = Extension_instance.sandbox instance in
   let cmd = Sandbox.get_command sandbox "ocamlearlybird" [ "debug" ] in
   let bin, args =
