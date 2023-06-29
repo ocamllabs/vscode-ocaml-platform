@@ -3237,10 +3237,6 @@ module Env = struct
   include [%js: val shell : unit -> string [@@js.get "vscode.env.shell"]]
 end
 
-module DebugAdapterDescriptor = struct
-  include Interface.Make ()
-end
-
 module DebugAdapterExecutableOptions = struct
   include Interface.Make ()
 
@@ -3254,7 +3250,7 @@ module DebugAdapterExecutableOptions = struct
 end
 
 module DebugAdapterExecutable = struct
-  include Class.Extend (DebugAdapterDescriptor) ()
+  include Class.Make ()
 
   include
     [%js:
@@ -3265,6 +3261,45 @@ module DebugAdapterExecutable = struct
       -> unit
       -> t
       [@@js.new "vscode.DebugAdapterExecutable"]]
+end
+
+module DebugAdapterServer = struct
+  include Class.Make ()
+end
+
+module DebugAdapterNamedPipeServer = struct
+  include Class.Make ()
+end
+
+module DebugAdapterInlineImplementation = struct
+  include Class.Make ()
+end
+
+module DebugAdapterDescriptor = struct
+  type t =
+    ([ `Executable of DebugAdapterExecutable.t
+     | `Server of DebugAdapterServer.t
+     | `NamedPipeServer of DebugAdapterNamedPipeServer.t
+     | `InlineImplementation of DebugAdapterInlineImplementation.t
+     ]
+    [@js.union])
+  [@@js]
+
+  let t_of_js js_val : t =
+    let constructor_name =
+      [%js.to: string]
+      @@ Ojs.get_prop_ascii (Ojs.get_prop_ascii js_val "constructor") "name"
+    in
+    match constructor_name with
+    | "DebugAdapterExecutable" ->
+      `Executable ([%js.to: DebugAdapterExecutable.t] js_val)
+    | "DebugAdapterServer" -> `Server ([%js.to: DebugAdapterServer.t] js_val)
+    | "DebugAdapterNamedPipeServer" ->
+      `NamedPipeServer ([%js.to: DebugAdapterNamedPipeServer.t] js_val)
+    | "DebugAdapterInlineImplementation" ->
+      `InlineImplementation
+        ([%js.to: DebugAdapterInlineImplementation.t] js_val)
+    | _ -> assert false
 end
 
 module DebugSession = struct

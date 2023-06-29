@@ -41,9 +41,7 @@ let createDebugAdapterDescriptor ~instance ~session:_ ~executable:_ =
     (* Custom sandbox is not supported *)
   in
   let result = DebugAdapterExecutable.make ~command:bin ~args () in
-  `Value
-    (Some
-       (DebugAdapterExecutable.t_to_js result |> DebugAdapterDescriptor.t_of_js))
+  `Value (Some (`Executable result))
 
 let register extension instance =
   let createDebugAdapterDescriptor = createDebugAdapterDescriptor ~instance in

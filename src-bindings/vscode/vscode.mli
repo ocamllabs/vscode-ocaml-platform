@@ -2437,10 +2437,6 @@ module Env : sig
   val shell : unit -> string
 end
 
-module DebugAdapterDescriptor : sig
-  include Js.T
-end
-
 module DebugAdapterExecutableOptions : sig
   include Js.T
 
@@ -2460,6 +2456,29 @@ module DebugAdapterExecutable : sig
     -> ?options:DebugAdapterExecutableOptions.t
     -> unit
     -> t
+end
+
+module DebugAdapterServer : sig
+  include Js.T
+end
+
+module DebugAdapterNamedPipeServer : sig
+  include Js.T
+end
+
+module DebugAdapterInlineImplementation : sig
+  include Js.T
+end
+
+module DebugAdapterDescriptor : sig
+  type t =
+    [ `Executable of DebugAdapterExecutable.t
+    | `Server of DebugAdapterServer.t
+    | `NamedPipeServer of DebugAdapterNamedPipeServer.t
+    | `InlineImplementation of DebugAdapterInlineImplementation.t
+    ]
+
+  include Js.T with type t := t
 end
 
 module DebugSession : sig
