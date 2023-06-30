@@ -2221,12 +2221,17 @@ module FileSystemWatcher = struct
   include [%js: val onDidChange : t -> OnDidChange.t [@@js.get]]
 end
 
+module ConfigurationChangeEvent = struct
+  include Interface.Make ()
+end
+
 module Workspace = struct
   module OnDidChangeWorkspaceFolders = Event.Make (WorkspaceFolder)
   module OnDidOpenTextDocument = Event.Make (TextDocument)
   module OnDidCloseTextDocument = Event.Make (TextDocument)
   module OnDidSaveTextDocument = Event.Make (TextDocument)
   module OnDidChangeTextDocument = Event.Make (TextDocumentChangeEvent)
+  module OnDidChangeConfiguration = Event.Make (ConfigurationChangeEvent)
 
   type textDocumentOptions =
     { language : string
@@ -2264,6 +2269,9 @@ module Workspace = struct
 
     val textDocuments : unit -> TextDocument.t list
       [@@js.get "vscode.workspace.textDocuments"]
+
+    val onDidChangeConfiguration : OnDidChangeConfiguration.t
+      [@@js.global "vscode.workspace.onDidChangeConfiguration"]
 
     val onDidChangeWorkspaceFolders : OnDidChangeWorkspaceFolders.t
       [@@js.global "vscode.workspace.onDidChangeWorkspaceFolders"]

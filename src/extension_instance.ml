@@ -47,10 +47,17 @@ end = struct
     let (lazy outputChannel) = Output.language_server_output_channel in
     let revealOutputChannelOn = LanguageClient.RevealOutputChannelOn.Never in
     let initializationOptions =
-      LanguageClient.InitializationOptions.create
-        ?codelens:Settings.(get server_codelens_setting)
-        ?extendedHover:Settings.(get server_extendedHover_setting)
-        ()
+      let codelens =
+        Option.map
+          Settings.(get server_codelens_setting)
+          ~f:(fun enable -> LanguageClient.OcamllspSetting.create ~enable ())
+      in
+      let extendedHover =
+        Option.map
+          Settings.(get server_extendedHover_setting)
+          ~f:(fun enable -> LanguageClient.OcamllspSetting.create ~enable ())
+      in
+      LanguageClient.OcamllspConfig.create ?codelens ?extendedHover ()
     in
     LanguageClient.ClientOptions.create
       ~outputChannel

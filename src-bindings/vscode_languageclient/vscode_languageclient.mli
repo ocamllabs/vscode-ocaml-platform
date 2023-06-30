@@ -63,18 +63,29 @@ module DocumentSelector : sig
   val language : ?scheme:string -> ?pattern:string -> string -> selector
 end
 
-module InitializationOptions : sig
+module OcamllspSetting : sig
   include Js.T
 
-  val codelens : t -> bool option
+  val enable : t -> bool option
 
-  val extendedHover : t -> bool option
+  val create : enable:bool -> unit -> t
+end
 
-  val createCodelens : codelens:bool -> ?extendedHover:bool -> unit -> t
+module OcamllspConfig : sig
+  include Js.T
 
-  val createExtendedHover : ?codelens:bool -> extendedHover:bool -> unit -> t
+  val codelens : t -> OcamllspSetting.t option
 
-  val create : ?codelens:bool -> ?extendedHover:bool -> unit -> t
+  val extendedHover : t -> OcamllspSetting.t option
+
+  val createCodelens :
+    codelens:OcamllspSetting.t -> ?extendedHover:OcamllspSetting.t -> unit -> t
+
+  val createExtendedHover :
+    ?codelens:OcamllspSetting.t -> extendedHover:OcamllspSetting.t -> unit -> t
+
+  val create :
+    ?codelens:OcamllspSetting.t -> ?extendedHover:OcamllspSetting.t -> unit -> t
 end
 
 module ClientOptions : sig
@@ -86,13 +97,13 @@ module ClientOptions : sig
 
   val revealOutputChannelOn : t -> RevealOutputChannelOn.t
 
-  val initializationOptions : t -> InitializationOptions.t
+  val initializationOptions : t -> OcamllspConfig.t
 
   val create :
        ?documentSelector:DocumentSelector.t
     -> ?outputChannel:Vscode.OutputChannel.t
     -> ?revealOutputChannelOn:RevealOutputChannelOn.t
-    -> ?initializationOptions:InitializationOptions.t
+    -> ?initializationOptions:OcamllspConfig.t
     -> unit
     -> t
 end
@@ -163,6 +174,12 @@ module StaticFeature : sig
     -> t
 end
 
+module DidChangeConfiguration : sig
+  include Js.T
+
+  val create : settings:OcamllspConfig.t -> unit -> t
+end
+
 module LanguageClient : sig
   include Js.T
 
@@ -193,4 +210,6 @@ module LanguageClient : sig
     -> Jsonoo.t Promise.t
 
   val registerFeature : t -> feature:StaticFeature.t -> unit
+
+  val sendNotification : t -> string -> DidChangeConfiguration.t -> unit
 end

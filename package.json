@@ -474,7 +474,7 @@
         },
         "ocaml.server.codelens": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "markdownDescription": "Enable/Disable codelens"
         },
         "ocaml.server.extendedHover": {
