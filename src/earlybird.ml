@@ -33,14 +33,11 @@ let debugType = Extension_consts.Debuggers.earlybird
 
 let createDebugAdapterDescriptor ~instance ~session:_ ~executable:_ =
   let sandbox = Extension_instance.sandbox instance in
-  let cmd = Sandbox.get_command sandbox "ocamlearlybird" [ "debug" ] in
-  let bin, args =
-    match cmd with
-    | Cmd.Spawn { bin; args } -> (Path.to_string bin, args)
-    | _ -> assert false
-    (* Custom sandbox is not supported *)
+  let command = Sandbox.get_command sandbox "ocamlearlybird" [ "debug" ] in
+  let { Cmd.bin; args } = Cmd.to_spawn command in
+  let result =
+    DebugAdapterExecutable.make ~command:(Path.to_string bin) ~args ()
   in
-  let result = DebugAdapterExecutable.make ~command:bin ~args () in
   `Value (Some (`Executable result))
 
 let register extension instance =

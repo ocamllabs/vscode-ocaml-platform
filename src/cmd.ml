@@ -20,6 +20,13 @@ let to_string = function
   | Spawn { bin; args } ->
     Path.to_string bin :: args |> List.map ~f:quote |> String.concat ~sep:" "
 
+let to_spawn = function
+  | Spawn spawn -> spawn
+  | Shell command_line -> (
+    match Platform.shell with
+    | Sh bin -> { bin; args = [ "-c"; command_line ] }
+    | PowerShell bin -> { bin; args = [ "-c"; "& " ^ command_line ] })
+
 let path_missing_from_env = "'PATH' variable not found in the environment"
 
 let append { bin; args = args1 } args2 = { bin; args = args1 @ args2 }
