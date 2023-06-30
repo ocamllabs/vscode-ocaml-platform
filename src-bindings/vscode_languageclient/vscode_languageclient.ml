@@ -78,6 +78,25 @@ module DocumentSelector = struct
     `Filter (DocumentFilter.createLanguage ~language:l ~scheme ?pattern ())
 end
 
+module InitializationOptions = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val codelens : t -> bool or_undefined [@@js.get]
+
+    val extendedHover : t -> bool or_undefined [@@js.get]
+
+    val createCodelens : codelens:bool -> ?extendedHover:bool -> unit -> t
+      [@@js.builder]
+
+    val createExtendedHover : ?codelens:bool -> extendedHover:bool -> unit -> t
+      [@@js.builder]
+
+    val create : ?codelens:bool -> ?extendedHover:bool -> unit -> t
+      [@@js.builder]]
+end
+
 module ClientOptions = struct
   include Interface.Make ()
 
@@ -89,10 +108,13 @@ module ClientOptions = struct
 
     val revealOutputChannelOn : t -> RevealOutputChannelOn.t [@@js.get]
 
+    val initializationOptions : t -> InitializationOptions.t [@@js.get]
+
     val create :
          ?documentSelector:DocumentSelector.t
       -> ?outputChannel:Vscode.OutputChannel.t
       -> ?revealOutputChannelOn:RevealOutputChannelOn.t
+      -> ?initializationOptions:InitializationOptions.t
       -> unit
       -> t
       [@@js.builder]]

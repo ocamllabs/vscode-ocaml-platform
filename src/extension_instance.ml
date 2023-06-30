@@ -46,10 +46,17 @@ end = struct
     in
     let (lazy outputChannel) = Output.language_server_output_channel in
     let revealOutputChannelOn = LanguageClient.RevealOutputChannelOn.Never in
+    let initializationOptions =
+      LanguageClient.InitializationOptions.create
+        ?codelens:Settings.(get server_codelens_setting)
+        ?extendedHover:Settings.(get server_extendedHover_setting)
+        ()
+    in
     LanguageClient.ClientOptions.create
       ~outputChannel
       ~revealOutputChannelOn
       ~documentSelector
+      ~initializationOptions
       ()
 
   let server_options sandbox =

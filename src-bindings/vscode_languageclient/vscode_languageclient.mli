@@ -63,6 +63,20 @@ module DocumentSelector : sig
   val language : ?scheme:string -> ?pattern:string -> string -> selector
 end
 
+module InitializationOptions : sig
+  include Js.T
+
+  val codelens : t -> bool option
+
+  val extendedHover : t -> bool option
+
+  val createCodelens : codelens:bool -> ?extendedHover:bool -> unit -> t
+
+  val createExtendedHover : ?codelens:bool -> extendedHover:bool -> unit -> t
+
+  val create : ?codelens:bool -> ?extendedHover:bool -> unit -> t
+end
+
 module ClientOptions : sig
   include Js.T
 
@@ -72,10 +86,13 @@ module ClientOptions : sig
 
   val revealOutputChannelOn : t -> RevealOutputChannelOn.t
 
+  val initializationOptions : t -> InitializationOptions.t
+
   val create :
        ?documentSelector:DocumentSelector.t
     -> ?outputChannel:Vscode.OutputChannel.t
     -> ?revealOutputChannelOn:RevealOutputChannelOn.t
+    -> ?initializationOptions:InitializationOptions.t
     -> unit
     -> t
 end
