@@ -1156,7 +1156,7 @@
             "name": "OCaml earlybird (experimental)",
             "type": "ocaml.earlybird",
             "request": "launch",
-            "program": "${workspaceFolder}/a.out"
+            "program": "${workspaceFolder}/_build/default/path/to/bytecode/executable.bc"
           }
         ]
       }
