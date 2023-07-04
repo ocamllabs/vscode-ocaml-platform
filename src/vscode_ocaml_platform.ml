@@ -20,12 +20,48 @@ let suggest_to_pick_sandbox () =
       in
       ())
 
+let notify_configuration_changes instance =
+  Workspace.onDidChangeConfiguration
+    ~listener:(fun _event ->
+      match Extension_instance.language_client instance with
+      | None -> ()
+      | Some client ->
+        let codelens =
+          Option.map
+            Settings.(get server_codelens_setting)
+            ~f:(fun enable ->
+              LanguageClient.OcamllspSettingEnable.create ~enable ())
+        in
+        let extendedHover =
+          Option.map
+            Settings.(get server_extendedHover_setting)
+            ~f:(fun enable ->
+              LanguageClient.OcamllspSettingEnable.create ~enable ())
+        in
+        let settings =
+          LanguageClient.OcamllspSettings.create ?codelens ?extendedHover ()
+        in
+        let payload =
+          let settings =
+            LanguageClient.DidChangeConfiguration.create ~settings ()
+          in
+          LanguageClient.DidChangeConfiguration.t_to_js settings
+        in
+        LanguageClient.sendNotification
+          client
+          "workspace/didChangeConfiguration"
+          payload)
+    ()
+
 let activate (extension : ExtensionContext.t) =
   let open Promise.Syntax in
   let instance = Extension_instance.make () in
   ExtensionContext.subscribe
     extension
     ~disposable:(Extension_instance.disposable instance);
+  ExtensionContext.subscribe
+    extension
+    ~disposable:(notify_configuration_changes instance);
   Dune_formatter.register extension instance;
   Dune_task_provider.register extension instance;
   Extension_commands.register_all_commands extension instance;
@@ -37,37 +73,6 @@ let activate (extension : ExtensionContext.t) =
   Cm_editor.register extension instance;
   Repl.register extension instance;
   let sandbox_opt = Sandbox.of_settings_or_detect () in
-  ExtensionContext.subscribe
-    extension
-    ~disposable:
-      (Workspace.onDidChangeConfiguration
-         ~listener:(fun _event ->
-           match Extension_instance.language_client instance with
-           | None -> ()
-           | Some client ->
-             let codelens =
-               Option.map
-                 Settings.(get server_codelens_setting)
-                 ~f:(fun enable ->
-                   LanguageClient.OcamllspSetting.create ~enable ())
-             in
-             let extendedHover =
-               Option.map
-                 Settings.(get server_extendedHover_setting)
-                 ~f:(fun enable ->
-                   LanguageClient.OcamllspSetting.create ~enable ())
-             in
-             let options =
-               LanguageClient.OcamllspConfig.create ?codelens ?extendedHover ()
-             in
-             let payload =
-               LanguageClient.DidChangeConfiguration.create ~settings:options ()
-             in
-             LanguageClient.sendNotification
-               client
-               "workspace/didChangeConfiguration"
-               payload)
-         ());
   let (_ : unit Promise.t) =
     let* sandbox_opt in
     let is_fallback = Option.is_none sandbox_opt in

@@ -63,7 +63,7 @@ module DocumentSelector : sig
   val language : ?scheme:string -> ?pattern:string -> string -> selector
 end
 
-module OcamllspSetting : sig
+module OcamllspSettingEnable : sig
   include Js.T
 
   val enable : t -> bool option
@@ -71,21 +71,18 @@ module OcamllspSetting : sig
   val create : enable:bool -> unit -> t
 end
 
-module OcamllspConfig : sig
+module OcamllspSettings : sig
   include Js.T
 
-  val codelens : t -> OcamllspSetting.t option
+  val codelens : t -> OcamllspSettingEnable.t option
 
-  val extendedHover : t -> OcamllspSetting.t option
-
-  val createCodelens :
-    codelens:OcamllspSetting.t -> ?extendedHover:OcamllspSetting.t -> unit -> t
-
-  val createExtendedHover :
-    ?codelens:OcamllspSetting.t -> extendedHover:OcamllspSetting.t -> unit -> t
+  val extendedHover : t -> OcamllspSettingEnable.t option
 
   val create :
-    ?codelens:OcamllspSetting.t -> ?extendedHover:OcamllspSetting.t -> unit -> t
+       ?codelens:OcamllspSettingEnable.t
+    -> ?extendedHover:OcamllspSettingEnable.t
+    -> unit
+    -> t
 end
 
 module ClientOptions : sig
@@ -97,13 +94,13 @@ module ClientOptions : sig
 
   val revealOutputChannelOn : t -> RevealOutputChannelOn.t
 
-  val initializationOptions : t -> OcamllspConfig.t
+  val initializationOptions : t -> Jsonoo.t
 
   val create :
        ?documentSelector:DocumentSelector.t
     -> ?outputChannel:Vscode.OutputChannel.t
     -> ?revealOutputChannelOn:RevealOutputChannelOn.t
-    -> ?initializationOptions:OcamllspConfig.t
+    -> ?initializationOptions:Jsonoo.t
     -> unit
     -> t
 end
@@ -177,7 +174,7 @@ end
 module DidChangeConfiguration : sig
   include Js.T
 
-  val create : settings:OcamllspConfig.t -> unit -> t
+  val create : settings:OcamllspSettings.t -> unit -> t
 end
 
 module LanguageClient : sig
@@ -211,5 +208,5 @@ module LanguageClient : sig
 
   val registerFeature : t -> feature:StaticFeature.t -> unit
 
-  val sendNotification : t -> string -> DidChangeConfiguration.t -> unit
+  val sendNotification : t -> string -> Ojs.t -> unit
 end

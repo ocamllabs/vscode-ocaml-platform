@@ -78,7 +78,7 @@ module DocumentSelector = struct
     `Filter (DocumentFilter.createLanguage ~language:l ~scheme ?pattern ())
 end
 
-module OcamllspSetting = struct
+module OcamllspSettingEnable = struct
   include Interface.Make ()
 
   include
@@ -88,32 +88,18 @@ module OcamllspSetting = struct
     val create : enable:bool -> unit -> t [@@js.builder]]
 end
 
-module OcamllspConfig = struct
+module OcamllspSettings = struct
   include Interface.Make ()
 
   include
     [%js:
-    val codelens : t -> OcamllspSetting.t or_undefined [@@js.get]
+    val codelens : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
 
-    val extendedHover : t -> OcamllspSetting.t or_undefined [@@js.get]
-
-    val createCodelens :
-         codelens:OcamllspSetting.t
-      -> ?extendedHover:OcamllspSetting.t
-      -> unit
-      -> t
-      [@@js.builder]
-
-    val createExtendedHover :
-         ?codelens:OcamllspSetting.t
-      -> extendedHover:OcamllspSetting.t
-      -> unit
-      -> t
-      [@@js.builder]
+    val extendedHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
 
     val create :
-         ?codelens:OcamllspSetting.t
-      -> ?extendedHover:OcamllspSetting.t
+         ?codelens:OcamllspSettingEnable.t
+      -> ?extendedHover:OcamllspSettingEnable.t
       -> unit
       -> t
       [@@js.builder]]
@@ -130,13 +116,13 @@ module ClientOptions = struct
 
     val revealOutputChannelOn : t -> RevealOutputChannelOn.t [@@js.get]
 
-    val initializationOptions : t -> OcamllspConfig.t [@@js.get]
+    val initializationOptions : t -> Jsonoo.t [@@js.get]
 
     val create :
          ?documentSelector:DocumentSelector.t
       -> ?outputChannel:Vscode.OutputChannel.t
       -> ?revealOutputChannelOn:RevealOutputChannelOn.t
-      -> ?initializationOptions:OcamllspConfig.t
+      -> ?initializationOptions:Jsonoo.t
       -> unit
       -> t
       [@@js.builder]]
@@ -224,7 +210,7 @@ module DidChangeConfiguration = struct
 
   include
     [%js:
-    val create : settings:OcamllspConfig.t -> unit -> t [@@js.builder]]
+    val create : settings:OcamllspSettings.t -> unit -> t [@@js.builder]]
 end
 
 module LanguageClient = struct
@@ -261,6 +247,5 @@ module LanguageClient = struct
 
     val registerFeature : t -> feature:StaticFeature.t -> unit [@@js.call]
 
-    val sendNotification : t -> string -> DidChangeConfiguration.t -> unit
-      [@@js.call]]
+    val sendNotification : t -> string -> Ojs.t -> unit [@@js.call]]
 end

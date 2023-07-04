@@ -118,12 +118,12 @@ let server_codelens_setting =
   create_setting
     ~scope:ConfigurationTarget.Workspace
     ~key:"ocaml.server.codelens"
-    ~of_json:Jsonoo.Decode.(bool)
-    ~to_json:Jsonoo.Encode.(bool)
+    ~of_json:Jsonoo.Decode.bool
+    ~to_json:Jsonoo.Encode.bool
 
 let server_extendedHover_setting =
   create_setting
     ~scope:ConfigurationTarget.Workspace
     ~key:"ocaml.server.extendedHover"
-    ~of_json:Jsonoo.Decode.(bool)
-    ~to_json:Jsonoo.Encode.(bool)
+    ~of_json:Jsonoo.Decode.bool
+    ~to_json:Jsonoo.Encode.bool
