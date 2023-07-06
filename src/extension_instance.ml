@@ -326,7 +326,7 @@ let update_ocaml_info t =
 
 let open_terminal sandbox =
   let terminal = Terminal_sandbox.create sandbox in
-  Terminal_sandbox.show terminal
+  Terminal_sandbox.show ~preserveFocus:false terminal
 
 let ast_editor_state t = t.ast_editor_state
 
