@@ -22,7 +22,7 @@ async function main() {
           root: projectPath,
           kind: "esy",
         },
-      })
+      }),
     );
     // The folder containing the Extension Manifest package.json
     // Passed to `--extensionDevelopmentPath`

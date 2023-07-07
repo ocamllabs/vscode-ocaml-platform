@@ -27,22 +27,22 @@ suite("Basic tests", () => {
     const projectUri = Uri.file(projectPath);
     await vscode.commands.executeCommand("vscode.openFolder", projectUri);
     const ocamlDocument1 = await vscode.workspace.openTextDocument(
-      Uri.file(path.join(projectPath, "foo.ml"))
+      Uri.file(path.join(projectPath, "foo.ml")),
     );
 
     const ocamlDocument2 = await vscode.workspace.openTextDocument(
-      Uri.file(path.join(projectPath, "main.ml"))
+      Uri.file(path.join(projectPath, "main.ml")),
     );
 
     assert.strictEqual(
       ocamlDocument1.languageId,
       "ocaml",
-      "Must be identified as an OCaml document"
+      "Must be identified as an OCaml document",
     );
     assert.strictEqual(
       ocamlDocument2.languageId,
       "ocaml",
-      "Must be identified as an OCaml document"
+      "Must be identified as an OCaml document",
     );
     console.log("Cleaning up (opam)...");
     try {

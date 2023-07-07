@@ -15,7 +15,7 @@ window.addEventListener("message", (event) => {
     case "getDirectoryInfo":
       VsCodeStateChangeBuffer.directoryInfo += message.directoryInfo;
       VsCodeStateChangeCallbacks.getDirectoryInfo(
-        VsCodeStateChangeBuffer.directoryInfo
+        VsCodeStateChangeBuffer.directoryInfo,
       );
       break;
   }

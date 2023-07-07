@@ -6,7 +6,7 @@ const identity = (v) => v;
 function valuesFromArray(settings) {
   return settings.reduce(
     (obj, name) => ((obj[name] = settings.indexOf(name) > -1), obj),
-    {}
+    {},
   );
 }
 
@@ -47,7 +47,7 @@ export default function SettingsRenderer(props) {
     update = getUpdateStrategy(parserSettings),
   } = settingsConfiguration;
   const values = (settingsConfiguration.values || getValuesFromSettings)(
-    parserSettings
+    parserSettings,
   );
 
   return (
@@ -84,8 +84,8 @@ export default function SettingsRenderer(props) {
                         update(
                           parserSettings,
                           fieldName,
-                          converter(target.value)
-                        )
+                          converter(target.value),
+                        ),
                       )
                     }
                     value={values[fieldName]}

@@ -60,7 +60,7 @@ export default {
 
   nodeToRange(node) {
     const locKey = locKeys.find((key) =>
-      Object.prototype.hasOwnProperty.call(node, key)
+      Object.prototype.hasOwnProperty.call(node, key),
     );
     if (locKey) {
       const range =

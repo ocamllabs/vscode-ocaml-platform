@@ -98,7 +98,7 @@ function useOpenState(openFromParent, isInRange) {
   } else if (wasInRange !== isInRange) {
     computedOpenState = transition(
       previousComputedOpenState.current,
-      isInRange && !wasInRange ? EVENTS.GAIN_FOCUS : EVENTS.LOOSE_FOCUS
+      isInRange && !wasInRange ? EVENTS.GAIN_FOCUS : EVENTS.LOOSE_FOCUS,
     );
     if (!isInRange && wasInRange && ownOpenState === OPEN_STATES.CLOSED) {
       setOwnOpenState(OPEN_STATES.DEFAULT);
@@ -106,7 +106,7 @@ function useOpenState(openFromParent, isInRange) {
   } else if (openFromParent && !previousOpenFromParent) {
     computedOpenState = transition(
       previousComputedOpenState.current,
-      EVENTS.DEEP_OPEN
+      EVENTS.DEEP_OPEN,
     );
   }
 
@@ -135,11 +135,11 @@ const Element = React.memo(
     const opensByDefault =
       useMemo(
         () => treeAdapter.opensByDefault(value, name),
-        [treeAdapter, value, name]
+        [treeAdapter, value, name],
       ) || level === 0;
     const [openState, setOpenState] = useOpenState(
       open,
-      autofocus && (isInRange || hasChildrenInRange)
+      autofocus && (isInRange || hasChildrenInRange),
     );
     const element = useRef();
     if (autofocus && isInRange && !hasChildrenInRange) {
@@ -164,7 +164,7 @@ const Element = React.memo(
         }
         setOpenState(newOpenState);
       },
-      [onClick, isOpen]
+      [onClick, isOpen],
     );
 
     const range = treeAdapter.getRange(value);
@@ -280,8 +280,8 @@ const Element = React.memo(
                 value,
                 node,
                 Number.isInteger(+key) ? undefined : key,
-                computed
-              )
+                computed,
+              ),
             );
           content = <ul className="value-body">{elements}</ul>;
         } else {
@@ -300,7 +300,7 @@ const Element = React.memo(
           const node = value;
           let elements = Array.from(treeAdapter.walkNode(value)).map(
             ({ key, value, computed }) =>
-              renderChild(key, value, node, key, computed)
+              renderChild(key, value, node, key, computed),
           );
           content = <ul className="value-body">{elements}</ul>;
           showToggler = elements.length > 0;
@@ -363,7 +363,7 @@ const Element = React.memo(
       (nextProps.isInRange || nextProps.hashChildrenInRange) &&
       prevProps.position === nextProps.position
     );
-  }
+  },
 );
 
 Element.propTypes = {
@@ -483,7 +483,7 @@ export default function ElementContainer(props) {
   const isInRange = props.treeAdapter.isInRange(
     props.value,
     props.name,
-    props.position
+    props.position,
   );
   const onClick = useCallback(
     (state, own) => {
@@ -500,7 +500,7 @@ export default function ElementContainer(props) {
         props.onClick(state);
       }
     },
-    [props.value, props.onClick]
+    [props.value, props.onClick],
   );
 
   return (
@@ -510,7 +510,7 @@ export default function ElementContainer(props) {
       hasChildrenInRange={props.treeAdapter.hasChildrenInRange(
         props.value,
         props.name,
-        props.position
+        props.position,
       )}
       isInRange={isInRange}
       onClick={onClick}
