@@ -6,7 +6,7 @@ function useSelectedNode() {
   const context = React.useContext(SelectedNodeContext);
   if (!context) {
     throw new Error(
-      "useSelectedNode must be used within a SelectedNodeContext"
+      "useSelectedNode must be used within a SelectedNodeContext",
     );
   }
   return context;

@@ -13,7 +13,7 @@ class TreeAdapter {
    */
   getConfigurableFilters() {
     return (this._adapterOptions.filters || []).filter((filter) =>
-      Boolean(filter.key)
+      Boolean(filter.key),
     );
   }
 
@@ -237,7 +237,7 @@ function createTreeAdapter(type, adapterOptions, filterValues) {
   }
   return new TreeAdapter(
     Object.assign({}, TreeAdapterConfigs[type], adapterOptions),
-    filterValues
+    filterValues,
   );
 }
 

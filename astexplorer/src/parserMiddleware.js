@@ -10,7 +10,7 @@ export default function getTreeAdapter(newParser) {
     type: "default",
     options: {
       openByDefault: (newParser.opensByDefault || (() => false)).bind(
-        newParser
+        newParser,
       ),
       nodeToRange: newParser.nodeToRange.bind(newParser),
       nodeToName: newParser.getNodeName.bind(newParser),

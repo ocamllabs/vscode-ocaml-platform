@@ -13,7 +13,7 @@ function run() {
 
   return new Promise((c, e) => {
     const files = ["opam.test.js"].map((f) =>
-      path.resolve(testsRoot, "suite", f)
+      path.resolve(testsRoot, "suite", f),
     );
 
     // Add files to the test suite

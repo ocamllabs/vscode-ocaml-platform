@@ -11,23 +11,23 @@ suite("Basic tests", () => {
   test("Esy", async () => {
     await vscode.commands.executeCommand("vscode.openFolder", projectUri);
     const ocamlDocument1 = await vscode.workspace.openTextDocument(
-      Uri.file(path.join(projectPath, "bin", "SampleEsyApp.ml"))
+      Uri.file(path.join(projectPath, "bin", "SampleEsyApp.ml")),
     );
 
     const ocamlDocument2 = await vscode.workspace.openTextDocument(
-      Uri.file(path.join(projectPath, "bin", "CamlUtil.ml"))
+      Uri.file(path.join(projectPath, "bin", "CamlUtil.ml")),
     );
 
     assert.strictEqual(
       ocamlDocument1.languageId,
       "ocaml",
-      "Must be identified as an OCaml document"
+      "Must be identified as an OCaml document",
     );
 
     assert.strictEqual(
       ocamlDocument2.languageId,
       "ocaml",
-      "Must be identified as an OCaml document"
+      "Must be identified as an OCaml document",
     );
 
     // TODO: the plugin could support build related tasks

@@ -5,7 +5,7 @@ export default function cx(...configs) {
         ? config
         : Object.keys(config)
             .filter((k) => config[k])
-            .join(" ")
+            .join(" "),
     )
     .join(" ");
 }

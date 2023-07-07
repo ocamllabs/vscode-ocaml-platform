@@ -33,7 +33,7 @@ function reducer(state, element) {
   logEvent(
     "tree_view_settings",
     element.checked ? "enabled" : "disabled",
-    element.name
+    element.name,
   );
 
   return newState;
@@ -57,7 +57,7 @@ export default function Tree({ parseResult, position, error, selectedOutput }) {
   const [settings, updateSettings] = useReducer(reducer, null, initSettings);
   const treeAdapter = useMemo(
     () => treeAdapterFromParseResult(parseResult, settings),
-    [parseResult.treeAdapter, settings]
+    [parseResult.treeAdapter, settings],
   );
   const rootElement = useRef();
 
@@ -80,7 +80,7 @@ export default function Tree({ parseResult, position, error, selectedOutput }) {
             </span>
           ) : (
             ""
-          )
+          ),
         )}
         {selectedOutput == 1 ? (
           <button
