@@ -78,6 +78,33 @@ module DocumentSelector = struct
     `Filter (DocumentFilter.createLanguage ~language:l ~scheme ?pattern ())
 end
 
+module OcamllspSettingEnable = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val enable : t -> bool or_undefined [@@js.get]
+
+    val create : enable:bool -> unit -> t [@@js.builder]]
+end
+
+module OcamllspSettings = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val codelens : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+
+    val extendedHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+
+    val create :
+         ?codelens:OcamllspSettingEnable.t
+      -> ?extendedHover:OcamllspSettingEnable.t
+      -> unit
+      -> t
+      [@@js.builder]]
+end
+
 module ClientOptions = struct
   include Interface.Make ()
 
@@ -89,10 +116,13 @@ module ClientOptions = struct
 
     val revealOutputChannelOn : t -> RevealOutputChannelOn.t [@@js.get]
 
+    val initializationOptions : t -> Jsonoo.t [@@js.get]
+
     val create :
          ?documentSelector:DocumentSelector.t
       -> ?outputChannel:Vscode.OutputChannel.t
       -> ?revealOutputChannelOn:RevealOutputChannelOn.t
+      -> ?initializationOptions:Jsonoo.t
       -> unit
       -> t
       [@@js.builder]]
@@ -175,6 +205,14 @@ module StaticFeature = struct
       [@@js.builder]]
 end
 
+module DidChangeConfiguration = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val create : settings:OcamllspSettings.t -> unit -> t [@@js.builder]]
+end
+
 module LanguageClient = struct
   include Class.Make ()
 
@@ -207,5 +245,7 @@ module LanguageClient = struct
       -> Jsonoo.t Promise.t
       [@@js.call]
 
-    val registerFeature : t -> feature:StaticFeature.t -> unit [@@js.call]]
+    val registerFeature : t -> feature:StaticFeature.t -> unit [@@js.call]
+
+    val sendNotification : t -> string -> Ojs.t -> unit [@@js.call]]
 end

@@ -472,6 +472,16 @@
           "default": [],
           "markdownDescription": "Extra arguments to pass to ocamllsp."
         },
+        "ocaml.server.codelens": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Enable/Disable codelens"
+        },
+        "ocaml.server.extendedHover": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable extended hover"
+        },
         "ocaml.dune.autoDetect": {
           "type": "boolean",
           "default": true,

@@ -63,6 +63,28 @@ module DocumentSelector : sig
   val language : ?scheme:string -> ?pattern:string -> string -> selector
 end
 
+module OcamllspSettingEnable : sig
+  include Js.T
+
+  val enable : t -> bool option
+
+  val create : enable:bool -> unit -> t
+end
+
+module OcamllspSettings : sig
+  include Js.T
+
+  val codelens : t -> OcamllspSettingEnable.t option
+
+  val extendedHover : t -> OcamllspSettingEnable.t option
+
+  val create :
+       ?codelens:OcamllspSettingEnable.t
+    -> ?extendedHover:OcamllspSettingEnable.t
+    -> unit
+    -> t
+end
+
 module ClientOptions : sig
   include Js.T
 
@@ -72,10 +94,13 @@ module ClientOptions : sig
 
   val revealOutputChannelOn : t -> RevealOutputChannelOn.t
 
+  val initializationOptions : t -> Jsonoo.t
+
   val create :
        ?documentSelector:DocumentSelector.t
     -> ?outputChannel:Vscode.OutputChannel.t
     -> ?revealOutputChannelOn:RevealOutputChannelOn.t
+    -> ?initializationOptions:Jsonoo.t
     -> unit
     -> t
 end
@@ -146,6 +171,12 @@ module StaticFeature : sig
     -> t
 end
 
+module DidChangeConfiguration : sig
+  include Js.T
+
+  val create : settings:OcamllspSettings.t -> unit -> t
+end
+
 module LanguageClient : sig
   include Js.T
 
@@ -176,4 +207,6 @@ module LanguageClient : sig
     -> Jsonoo.t Promise.t
 
   val registerFeature : t -> feature:StaticFeature.t -> unit
+
+  val sendNotification : t -> string -> Ojs.t -> unit
 end

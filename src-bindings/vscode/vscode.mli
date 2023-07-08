@@ -1730,6 +1730,10 @@ module FileSystemWatcher : sig
   val onDidChange : t -> Uri.t Event.t
 end
 
+module ConfigurationChangeEvent : sig
+  include Js.T
+end
+
 module Workspace : sig
   val workspaceFolders : unit -> WorkspaceFolder.t list
 
@@ -1750,6 +1754,8 @@ module Workspace : sig
   val onDidChangeWorkspaceFolders : WorkspaceFolder.t Event.t
 
   val onDidChangeTextDocument : TextDocumentChangeEvent.t Event.t
+
+  val onDidChangeConfiguration : ConfigurationChangeEvent.t Event.t
 
   val asRelativePath :
        pathOrUri:([ `String of string | `Uri of Uri.t ][@js.union])

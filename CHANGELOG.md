@@ -4,6 +4,7 @@
 
 - Trim whitespace when running `Evaluate Selection` command (#1100)
 - Encode URI when sending the `switchImplIntf` request (#983)
+- Support LSP server settings (#1157)
 
 ## 1.12.3
 
