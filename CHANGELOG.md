@@ -8,6 +8,8 @@
 
 - Support LSP server settings (#1157)
 
+- Maintain focus on editor when sending code to REPL (#1161)
+
 ## 1.12.2
 
 - Add more known versions of ocamllsp
