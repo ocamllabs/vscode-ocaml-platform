@@ -1160,6 +1160,18 @@
             "program": "${command:AskProgram}"
           }
         ],
+        "configurationSnippets": [
+          {
+            "label": "OCaml earlybird (experimental)",
+            "description": "A new configuration for launching OCaml earlybird debug program",
+            "body": {
+              "name": "${2:OCaml earlybird (experimental)}",
+              "type": "ocaml.earlybird",
+              "request": "launch",
+              "program": "^\"\\${workspaceFolder}/${1:OCaml Bytecode Executable}\""
+            }
+          }
+        ],
         "variables": {
           "AskProgram": "ocaml.ask-debug-program"
         }
