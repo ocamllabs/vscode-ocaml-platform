@@ -48,4 +48,38 @@ let register extension instance =
   let disposable =
     Debug.registerDebugAdapterDescriptorFactory ~debugType ~factory
   in
+  ExtensionContext.subscribe extension ~disposable;
+
+  let callback ~args:_ =
+    let open Promise.Syntax in
+    let defaultUri =
+      Option.map (Workspace.rootPath ()) ~f:(fun path -> Uri.parse path ())
+    in
+    let filters =
+      Interop.Dict.singleton "OCaml Bytecode Executable" [ "bc"; "d.byte" ]
+    in
+    let options =
+      OpenDialogOptions.create
+        ~canSelectFiles:true
+        ~canSelectFolders:false
+        ~canSelectMany:false
+        ?defaultUri
+        ~filters
+        ~openLabel:"Debug"
+        ~title:"OCaml earlybird (experimental)"
+        ()
+    in
+    let result =
+      let+ uri = Window.showOpenDialog ~options () in
+      match uri with
+      | Some [ uri ] -> Some (Uri.fsPath uri)
+      | _ -> None
+    in
+    [%js.of: string option Promise.t] result
+  in
+  let disposable =
+    Commands.registerCommandReturn
+      ~command:Extension_consts.Commands.ask_debug_program
+      ~callback
+  in
   ExtensionContext.subscribe extension ~disposable

@@ -1133,6 +1133,24 @@ module InputBoxOptions = struct
       [@@js.builder]]
 end
 
+module OpenDialogOptions = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val create :
+         ?canSelectFiles:bool
+      -> ?canSelectFolders:bool
+      -> ?canSelectMany:bool
+      -> ?defaultUri:Uri.t
+      -> ?filters:string list Interop.Dict.t
+      -> ?openLabel:string
+      -> ?title:string
+      -> unit
+      -> t
+      [@@js.builder]]
+end
+
 module MessageItem = struct
   include Interface.Make ()
 
@@ -3040,6 +3058,10 @@ module Window = struct
       -> string or_undefined Promise.t
       [@@js.global "vscode.window.showInputBox"]
 
+    val showOpenDialog :
+      ?options:OpenDialogOptions.t -> unit -> Uri.t list or_undefined Promise.t
+      [@@js.global "vscode.window.showOpenDialog"]
+
     val createOutputChannel : name:string -> OutputChannel.t
       [@@js.global "vscode.window.createOutputChannel"]
 
@@ -3182,6 +3204,12 @@ module Commands = struct
     val registerCommand :
          command:string
       -> callback:(args:(Js.Any.t list[@js.variadic]) -> unit)
+      -> Disposable.t
+      [@@js.global "vscode.commands.registerCommand"]
+
+    val registerCommandReturn :
+         command:string
+      -> callback:(args:(Js.Any.t list[@js.variadic]) -> Js.Any.t)
       -> Disposable.t
       [@@js.global "vscode.commands.registerCommand"]
 

@@ -896,6 +896,21 @@ module InputBoxOptions : sig
     -> t
 end
 
+module OpenDialogOptions : sig
+  include Js.T
+
+  val create :
+       ?canSelectFiles:bool
+    -> ?canSelectFolders:bool
+    -> ?canSelectMany:bool
+    -> ?defaultUri:Uri.t
+    -> ?filters:string list Interop.Dict.t
+    -> ?openLabel:string
+    -> ?title:string
+    -> unit
+    -> t
+end
+
 module MessageItem : sig
   include Js.T
 
@@ -2336,6 +2351,9 @@ module Window : sig
     -> unit
     -> string option Promise.t
 
+  val showOpenDialog :
+    ?options:OpenDialogOptions.t -> unit -> Uri.t list option Promise.t
+
   val createOutputChannel : name:string -> OutputChannel.t
 
   val setStatusBarMessage :
@@ -2398,6 +2416,9 @@ end
 module Commands : sig
   val registerCommand :
     command:string -> callback:(args:Js.Any.t list -> unit) -> Disposable.t
+
+  val registerCommandReturn :
+    command:string -> callback:(args:Js.Any.t list -> Js.Any.t) -> Disposable.t
 
   val registerTextEditorCommand :
        command:string

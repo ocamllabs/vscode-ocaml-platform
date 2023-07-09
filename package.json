@@ -40,6 +40,7 @@
     "onCommand:ocaml.stop-documentation-server",
     "onCommand:ocaml.start-debugging",
     "onCommand:ocaml.goto-closure-code-location",
+    "onCommand:ocaml.ask-debug-program",
     "onCustomEditor:ast-editor",
     "onCustomEditor:cm-files-editor",
     "workspaceContains:**/dune-workspace",
@@ -1156,9 +1157,12 @@
             "name": "OCaml earlybird (experimental)",
             "type": "ocaml.earlybird",
             "request": "launch",
-            "program": "${workspaceFolder}/_build/default/path/to/bytecode/executable.bc"
+            "program": "${command:AskProgram}"
           }
-        ]
+        ],
+        "variables": {
+          "AskProgram": "ocaml.ask-debug-program"
+        }
       }
     ]
   },

@@ -64,6 +64,8 @@ module Commands = struct
   let start_debugging = ocaml_prefixed "start-debugging"
 
   let goto_closure_code_location = ocaml_prefixed "goto-closure-code-location"
+
+  let ask_debug_program = ocaml_prefixed "ask-debug-program"
 end
 
 module Command_errors = struct
