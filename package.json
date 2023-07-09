@@ -475,7 +475,7 @@
       "explorer/context": [
         {
           "command": "ocaml.start-debugging",
-          "when": "resourceFilename =~ /\\.bc$/ || resourceFilename =~ /^a\\.out$/ || resourceFilename =~ /\\.d\\.byte$/"
+          "when": "resourceFilename =~ /\\.bc$/"
         }
       ],
       "debug/variables/context": [

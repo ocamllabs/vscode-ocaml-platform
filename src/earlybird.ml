@@ -55,9 +55,7 @@ let register extension instance =
     let defaultUri =
       Option.map (Workspace.rootPath ()) ~f:(fun path -> Uri.parse path ())
     in
-    let filters =
-      Interop.Dict.singleton "OCaml Bytecode Executable" [ "bc"; "d.byte" ]
-    in
+    let filters = Interop.Dict.singleton "OCaml Bytecode Executable" [ "bc" ] in
     let options =
       OpenDialogOptions.create
         ~canSelectFiles:true
