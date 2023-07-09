@@ -396,6 +396,7 @@ end = struct
             ~request:"launch"
         in
         DebugConfiguration.set config "program" (Ojs.string_to_js fsPath);
+        DebugConfiguration.set config "stopOnEntry" (Ojs.bool_to_js true);
         let (_ : bool Promise.t) =
           Debug.startDebugging
             ~folder

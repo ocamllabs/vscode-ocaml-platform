@@ -1157,7 +1157,8 @@
             "name": "OCaml earlybird (experimental)",
             "type": "ocaml.earlybird",
             "request": "launch",
-            "program": "${command:AskProgram}"
+            "program": "${command:AskProgram}",
+            "stopOnEntry": true
           }
         ],
         "configurationSnippets": [
