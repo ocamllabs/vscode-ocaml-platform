@@ -283,8 +283,8 @@
           },
           "patterns": [
             {
-              "comment": "github",
-              "begin": "\\([[:space:]]*(github)\\b",
+              "comment": "hosting services",
+              "begin": "\\([[:space:]]*(bitbucket|github|gitlab|sourcehut)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-project" }
