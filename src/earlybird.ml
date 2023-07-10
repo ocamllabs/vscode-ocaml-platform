@@ -31,14 +31,35 @@ end
 
 let debugType = Extension_consts.Debuggers.earlybird
 
+let check_earlybird_available sandbox =
+  let earlybird_help =
+    (* earlybird <= 1.1.0 doesn't have --version *)
+    Sandbox.get_command sandbox "ocamlearlybird" [ "--help" ]
+  in
+  Cmd.output earlybird_help
+  |> Promise.Result.fold
+       ~ok:(fun (_ : string) -> ())
+       ~error:(fun (_ : string) ->
+         "Debugging failed: `earlybird` is not installed in the current \
+          sandbox.\n\n\
+          Hint: $ opam install earlybird")
+
 let createDebugAdapterDescriptor ~instance ~session:_ ~executable:_ =
   let sandbox = Extension_instance.sandbox instance in
-  let command = Sandbox.get_command sandbox "ocamlearlybird" [ "debug" ] in
-  let { Cmd.bin; args } = Cmd.to_spawn command in
-  let result =
-    DebugAdapterExecutable.make ~command:(Path.to_string bin) ~args ()
+  let promise =
+    let open Promise.Syntax in
+    let* res = check_earlybird_available sandbox in
+    match res with
+    | Ok () ->
+      let command = Sandbox.get_command sandbox "ocamlearlybird" [ "debug" ] in
+      let { Cmd.bin; args } = Cmd.to_spawn command in
+      let result =
+        DebugAdapterExecutable.make ~command:(Path.to_string bin) ~args ()
+      in
+      Promise.return (Some (`Executable result))
+    | Error s -> Promise.reject (Ojs.string_to_js s)
   in
-  `Value (Some (`Executable result))
+  `Promise promise
 
 let register extension instance =
   let createDebugAdapterDescriptor = createDebugAdapterDescriptor ~instance in
