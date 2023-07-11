@@ -70,18 +70,14 @@ let get_shell_args () =
 type t = Terminal.t
 
 let create ?name ?command sandbox =
-  let shell_path = get_shell_path () in
-  let shell_args = get_shell_args () in
   let ({ Cmd.bin; args } as command) =
     match command with
     | Some command -> command
-    | None -> (
-      match Sandbox.get_command sandbox shell_path shell_args with
-      | Spawn spawn -> spawn
-      | Shell command_line -> (
-        match Platform.shell with
-        | Sh bin -> { bin; args = [ "-c"; command_line ] }
-        | PowerShell bin -> { bin; args = [ "-c"; "& " ^ command_line ] }))
+    | None ->
+      let shell_path = get_shell_path () in
+      let shell_args = get_shell_args () in
+      let command = Sandbox.get_command sandbox shell_path shell_args in
+      Cmd.to_spawn command
   in
   Cmd.log (Spawn command);
   let name = Option.value name ~default:(Sandbox.to_pretty_string sandbox) in

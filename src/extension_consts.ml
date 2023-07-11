@@ -60,6 +60,12 @@ module Commands = struct
     ocaml_prefixed "open-ocaml-platform-ext-output"
 
   let open_ocaml_commands_output = ocaml_prefixed "open-ocaml-commands-output"
+
+  let start_debugging = ocaml_prefixed "start-debugging"
+
+  let goto_closure_code_location = ocaml_prefixed "goto-closure-code-location"
+
+  let ask_debug_program = ocaml_prefixed "ask-debug-program"
 end
 
 module Command_errors = struct
@@ -69,6 +75,10 @@ module Command_errors = struct
        editor. %s"
       cmd_name
       expl
+end
+
+module Debuggers = struct
+  let earlybird = ocaml_prefixed "earlybird"
 end
 
 (* TODO: Refactor the code so that we don't need any "constants" module *)

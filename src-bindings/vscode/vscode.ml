@@ -1133,6 +1133,24 @@ module InputBoxOptions = struct
       [@@js.builder]]
 end
 
+module OpenDialogOptions = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val create :
+         ?canSelectFiles:bool
+      -> ?canSelectFolders:bool
+      -> ?canSelectMany:bool
+      -> ?defaultUri:Uri.t
+      -> ?filters:string list Interop.Dict.t
+      -> ?openLabel:string
+      -> ?title:string
+      -> unit
+      -> t
+      [@@js.builder]]
+end
+
 module MessageItem = struct
   include Interface.Make ()
 
@@ -1308,7 +1326,7 @@ module TextDocumentShowOptions = struct
     val selection : t -> Range.t or_undefined [@@js.get]
 
     val create :
-         viewColumn:ViewColumn.t
+         ?viewColumn:ViewColumn.t
       -> ?preserveFocus:bool
       -> ?preview:bool
       -> ?selection:Range.t
@@ -2986,10 +3004,17 @@ module Window = struct
       [@@js.get "vscode.window.onDidCloseTerminal"]
 
     val showTextDocument :
-         document:
-           ([ `TextDocument of TextDocument.t | `Uri of Uri.t ][@js.union])
+         document:TextDocument.t
       -> ?column:ViewColumn.t
       -> ?preserveFocus:bool
+      -> unit
+      -> TextEditor.t Promise.t
+      [@@js.global "vscode.window.showTextDocument"]
+
+    val showTextDocument' :
+         document:
+           ([ `TextDocument of TextDocument.t | `Uri of Uri.t ][@js.union])
+      -> ?options:TextDocumentShowOptions.t
       -> unit
       -> TextEditor.t Promise.t
       [@@js.global "vscode.window.showTextDocument"]
@@ -3040,6 +3065,10 @@ module Window = struct
       -> unit
       -> string or_undefined Promise.t
       [@@js.global "vscode.window.showInputBox"]
+
+    val showOpenDialog :
+      ?options:OpenDialogOptions.t -> unit -> Uri.t list or_undefined Promise.t
+      [@@js.global "vscode.window.showOpenDialog"]
 
     val createOutputChannel : name:string -> OutputChannel.t
       [@@js.global "vscode.window.createOutputChannel"]
@@ -3186,6 +3215,12 @@ module Commands = struct
       -> Disposable.t
       [@@js.global "vscode.commands.registerCommand"]
 
+    val registerCommandReturn :
+         command:string
+      -> callback:(args:(Js.Any.t list[@js.variadic]) -> Js.Any.t)
+      -> Disposable.t
+      [@@js.global "vscode.commands.registerCommand"]
+
     val registerTextEditorCommand :
          command:string
       -> callback:
@@ -3236,4 +3271,177 @@ end
 
 module Env = struct
   include [%js: val shell : unit -> string [@@js.get "vscode.env.shell"]]
+end
+
+module DebugAdapterExecutableOptions = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val cwd : t -> string or_undefined [@@js.get]
+
+    val env : t -> string Dict.t or_undefined [@@js.get]
+
+    val create : ?cwd:string -> ?env:string Dict.t -> unit -> t [@@js.builder]]
+end
+
+module DebugAdapterExecutable = struct
+  include Class.Make ()
+
+  include
+    [%js:
+    val make :
+         command:string
+      -> ?args:string list
+      -> ?options:DebugAdapterExecutableOptions.t
+      -> unit
+      -> t
+      [@@js.new "vscode.DebugAdapterExecutable"]]
+end
+
+module DebugAdapterServer = struct
+  include Class.Make ()
+end
+
+module DebugAdapterNamedPipeServer = struct
+  include Class.Make ()
+end
+
+module DebugAdapterInlineImplementation = struct
+  include Class.Make ()
+end
+
+module DebugAdapterDescriptor = struct
+  type t =
+    ([ `Executable of DebugAdapterExecutable.t
+     | `Server of DebugAdapterServer.t
+     | `NamedPipeServer of DebugAdapterNamedPipeServer.t
+     | `InlineImplementation of DebugAdapterInlineImplementation.t
+     ]
+    [@js.union])
+  [@@js]
+
+  let t_of_js js_val : t =
+    let constructor_name =
+      [%js.to: string]
+      @@ Ojs.get_prop_ascii (Ojs.get_prop_ascii js_val "constructor") "name"
+    in
+    match constructor_name with
+    | "DebugAdapterExecutable" ->
+      `Executable ([%js.to: DebugAdapterExecutable.t] js_val)
+    | "DebugAdapterServer" -> `Server ([%js.to: DebugAdapterServer.t] js_val)
+    | "DebugAdapterNamedPipeServer" ->
+      `NamedPipeServer ([%js.to: DebugAdapterNamedPipeServer.t] js_val)
+    | "DebugAdapterInlineImplementation" ->
+      `InlineImplementation
+        ([%js.to: DebugAdapterInlineImplementation.t] js_val)
+    | _ -> assert false
+end
+
+module DebugSession = struct
+  include Class.Make ()
+
+  include
+    [%js:
+    val customRequest :
+      t -> command:string -> ?args:Js.Any.t -> unit -> Js.Any.t Promise.t
+      [@@js.call]]
+end
+
+module DebugAdapterDescriptorFactory = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val createDebugAdapterDescriptor :
+         t
+      -> session:DebugSession.t
+      -> executable:DebugAdapterExecutable.t or_undefined
+      -> DebugAdapterDescriptor.t ProviderResult.t
+      [@@js.call]
+
+    val create :
+         createDebugAdapterDescriptor:
+           (   session:DebugSession.t
+            -> executable:DebugAdapterExecutable.t or_undefined
+            -> DebugAdapterDescriptor.t ProviderResult.t)
+      -> t
+      [@@js.builder]]
+end
+
+module DebugConfiguration = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val create : name:string -> request:string -> type_:string -> t
+      [@@js.builder]
+
+    val set : t -> string -> Ojs.t -> unit [@@js.index_set]]
+end
+
+module DebugConfigurationProvider = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val create :
+         ?provideDebugConfigurations:
+           (   folder:WorkspaceFolder.t or_undefined
+            -> ?token:CancellationToken.t
+            -> unit
+            -> DebugConfiguration.t list ProviderResult.t)
+      -> ?resolveDebugConfiguration:
+           (   folder:WorkspaceFolder.t or_undefined
+            -> debugConfiguration:DebugConfiguration.t
+            -> ?token:CancellationToken.t
+            -> unit
+            -> DebugConfiguration.t ProviderResult.t)
+      -> ?resolveDebugConfigurationWithSubstitutedVariables:
+           (   folder:WorkspaceFolder.t or_undefined
+            -> debugConfiguration:DebugConfiguration.t
+            -> ?token:CancellationToken.t
+            -> unit
+            -> DebugConfiguration.t ProviderResult.t)
+      -> unit
+      -> t
+      [@@js.builder]]
+end
+
+module DebugConfigurationProviderTriggerKind = struct
+  type t =
+    | Initial [@js 1] [@js.default]
+    | Dynamic [@js 2]
+  [@@js.enum] [@@js]
+end
+
+module Debug = struct
+  include
+    [%js:
+    val activeDebugSession : unit -> DebugSession.t or_undefined
+      [@@js.get "vscode.debug.activeDebugSession"]
+
+    val registerDebugAdapterDescriptorFactory :
+         debugType:string
+      -> factory:DebugAdapterDescriptorFactory.t
+      -> Disposable.t
+      [@@js.global "vscode.debug.registerDebugAdapterDescriptorFactory"]
+
+    val registerDebugConfigurationProvider :
+         debugType:string
+      -> provider:DebugConfigurationProvider.t
+      -> ?triggerKind:DebugConfigurationProviderTriggerKind.t
+      -> unit
+      -> Disposable.t
+      [@@js.global "vscode.debug.registerDebugConfigurationProvider"]
+
+    val startDebugging :
+         folder:WorkspaceFolder.t or_undefined
+      -> nameOrConfiguration:
+           ([ `Name of string | `Configuration of DebugConfiguration.t ]
+           [@js.union])
+      -> ?parentSessionOrOptions:Ojs.t
+      -> unit
+      -> bool Promise.t
+      [@@js.global "vscode.debug.startDebugging"]]
 end

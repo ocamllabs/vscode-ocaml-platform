@@ -18,7 +18,8 @@
     "vscode": "^1.64.0"
   },
   "categories": [
-    "Programming Languages"
+    "Programming Languages",
+    "Debuggers"
   ],
   "activationEvents": [
     "onLanguage:ocaml",
@@ -37,6 +38,9 @@
     "onCommand:ocaml.show-preprocessed-document",
     "onCommand:ocaml.open-pp-editor-and-ast-explorer",
     "onCommand:ocaml.stop-documentation-server",
+    "onCommand:ocaml.start-debugging",
+    "onCommand:ocaml.goto-closure-code-location",
+    "onCommand:ocaml.ask-debug-program",
     "onCustomEditor:ast-editor",
     "onCustomEditor:cm-files-editor",
     "workspaceContains:**/dune-workspace",
@@ -48,7 +52,8 @@
     "workspaceContains:**/*.mll",
     "workspaceContains:**/*.mly",
     "workspaceContains:**/*.re",
-    "workspaceContains:**/*.rei"
+    "workspaceContains:**/*.rei",
+    "onDebugResolve:ocaml.earlybird"
   ],
   "icon": "assets/logo.png",
   "contributes": {
@@ -267,6 +272,16 @@
         "command": "ocaml.open-ocaml-commands-output",
         "category": "OCaml",
         "title": "Show OCaml Commands Output"
+      },
+      {
+        "command": "ocaml.start-debugging",
+        "category": "OCaml",
+        "title": "Start OCaml Debugging (experimental)"
+      },
+      {
+        "command": "ocaml.goto-closure-code-location",
+        "category": "OCaml",
+        "title": "Goto Closure Code Location"
       }
     ],
     "keybindings": [
@@ -390,6 +405,14 @@
         {
           "command": "ocaml.generate-sandbox-documentation",
           "when": "false"
+        },
+        {
+          "command": "ocaml.start-debugging",
+          "when": "false"
+        },
+        {
+          "command": "ocaml.goto-closure-code-location",
+          "when": "false"
         }
       ],
       "editor/title": [
@@ -447,6 +470,19 @@
           "command": "ocaml.uninstall-sandbox-package",
           "when": "view == ocaml-sandbox",
           "group": "inline@3"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "ocaml.start-debugging",
+          "when": "resourceFilename =~ /\\.bc$/"
+        }
+      ],
+      "debug/variables/context": [
+        {
+          "command": "ocaml.goto-closure-code-location",
+          "when": "debugProtocolVariableMenuContext == 'ocamlearlybird.function'",
+          "group": "navigation"
         }
       ]
     },
@@ -1029,6 +1065,127 @@
             "filenamePattern": "*.bc"
           }
         ]
+      }
+    ],
+    "breakpoints": [
+      {
+        "language": "ocaml"
+      },
+      {
+        "language": "reason"
+      },
+      {
+        "language": "ocaml.ocamllex"
+      },
+      {
+        "language": "ocaml.menhir"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "ocaml.earlybird",
+        "label": "OCaml earlybird (experimental)",
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "program"
+            ],
+            "properties": {
+              "cwd": {
+                "type": "string",
+                "description": "The working directory for debuggee program."
+              },
+              "env": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Environment variables passed to the debuggee program.",
+                "default": {}
+              },
+              "program": {
+                "type": "string",
+                "description": "The path of debuggee program."
+              },
+              "source_dirs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "The path to search sources.",
+                "default": []
+              },
+              "onlyDebugGlob": {
+                "type": "string",
+                "description": "Only debug sources which match `onlyDebugGlob`.",
+                "default": "true"
+              },
+              "followForkMode": {
+                "enum": [
+                  "forkChild",
+                  "forkParent"
+                ],
+                "description": "Set which process the debugger follows on fork.",
+                "default": "forkParent"
+              },
+              "yieldSteps": {
+                "type": "number",
+                "description": "Max steps to execute in batch. Debugger can not response other requests when executing steps in batch.",
+                "default": 4096
+              },
+              "arguments": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "The command-line arguments for the debuggee program.",
+                "default": []
+              },
+              "console": {
+                "enum": [
+                  "internalConsole",
+                  "integratedTerminal",
+                  "externalTerminal"
+                ],
+                "description": "Where to launch the debug target: internal console, integrated terminal, or external terminal.",
+                "default": "internalConsole"
+              },
+              "stopOnEntry": {
+                "type": "boolean",
+                "description": "Automatically stop after launch.",
+                "default": false
+              },
+              "_debugLog": {
+                "type": "string",
+                "description": "File to Log debug messages."
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "name": "OCaml earlybird (experimental)",
+            "type": "ocaml.earlybird",
+            "request": "launch",
+            "program": "${command:AskProgram}",
+            "stopOnEntry": true
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "OCaml earlybird (experimental)",
+            "description": "A new configuration for launching OCaml earlybird debug program",
+            "body": {
+              "name": "${2:OCaml earlybird (experimental)}",
+              "type": "ocaml.earlybird",
+              "request": "launch",
+              "program": "^\"\\${workspaceFolder}/${1:OCaml Bytecode Executable}\""
+            }
+          }
+        ],
+        "variables": {
+          "AskProgram": "ocaml.ask-debug-program"
+        }
       }
     ]
   },

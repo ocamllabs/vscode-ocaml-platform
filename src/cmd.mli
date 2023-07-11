@@ -18,6 +18,8 @@ type stderr = string
 (* surround a string with quotes if it has spaces *)
 val quote : string -> string
 
+val to_spawn : t -> spawn
+
 val append : spawn -> string list -> spawn
 
 val check_spawn :

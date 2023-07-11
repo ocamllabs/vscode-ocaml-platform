@@ -896,6 +896,21 @@ module InputBoxOptions : sig
     -> t
 end
 
+module OpenDialogOptions : sig
+  include Js.T
+
+  val create :
+       ?canSelectFiles:bool
+    -> ?canSelectFolders:bool
+    -> ?canSelectMany:bool
+    -> ?defaultUri:Uri.t
+    -> ?filters:string list Interop.Dict.t
+    -> ?openLabel:string
+    -> ?title:string
+    -> unit
+    -> t
+end
+
 module MessageItem : sig
   include Js.T
 
@@ -1015,7 +1030,7 @@ module TextDocumentShowOptions : sig
   val selection : t -> Range.t option
 
   val create :
-       viewColumn:ViewColumn.t
+       ?viewColumn:ViewColumn.t
     -> ?preserveFocus:bool
     -> ?preview:bool
     -> ?selection:Range.t
@@ -2289,9 +2304,15 @@ module Window : sig
   val onDidCloseTerminal : unit -> Terminal.t Event.t
 
   val showTextDocument :
-       document:[ `TextDocument of TextDocument.t | `Uri of Uri.t ]
+       document:TextDocument.t
     -> ?column:ViewColumn.t
     -> ?preserveFocus:bool
+    -> unit
+    -> TextEditor.t Promise.t
+
+  val showTextDocument' :
+       document:[ `TextDocument of TextDocument.t | `Uri of Uri.t ]
+    -> ?options:TextDocumentShowOptions.t
     -> unit
     -> TextEditor.t Promise.t
 
@@ -2335,6 +2356,9 @@ module Window : sig
     -> ?token:CancellationToken.t
     -> unit
     -> string option Promise.t
+
+  val showOpenDialog :
+    ?options:OpenDialogOptions.t -> unit -> Uri.t list option Promise.t
 
   val createOutputChannel : name:string -> OutputChannel.t
 
@@ -2399,6 +2423,9 @@ module Commands : sig
   val registerCommand :
     command:string -> callback:(args:Js.Any.t list -> unit) -> Disposable.t
 
+  val registerCommandReturn :
+    command:string -> callback:(args:Js.Any.t list -> Js.Any.t) -> Disposable.t
+
   val registerTextEditorCommand :
        command:string
     -> callback:
@@ -2435,4 +2462,136 @@ end
 
 module Env : sig
   val shell : unit -> string
+end
+
+module DebugAdapterExecutableOptions : sig
+  include Js.T
+
+  val cwd : t -> string option
+
+  val env : t -> string Dict.t option
+
+  val create : ?cwd:string -> ?env:string Dict.t -> unit -> t
+end
+
+module DebugAdapterExecutable : sig
+  include Js.T
+
+  val make :
+       command:string
+    -> ?args:string list
+    -> ?options:DebugAdapterExecutableOptions.t
+    -> unit
+    -> t
+end
+
+module DebugAdapterServer : sig
+  include Js.T
+end
+
+module DebugAdapterNamedPipeServer : sig
+  include Js.T
+end
+
+module DebugAdapterInlineImplementation : sig
+  include Js.T
+end
+
+module DebugAdapterDescriptor : sig
+  type t =
+    [ `Executable of DebugAdapterExecutable.t
+    | `Server of DebugAdapterServer.t
+    | `NamedPipeServer of DebugAdapterNamedPipeServer.t
+    | `InlineImplementation of DebugAdapterInlineImplementation.t
+    ]
+
+  include Js.T with type t := t
+end
+
+module DebugSession : sig
+  include Js.T
+
+  val customRequest :
+    t -> command:string -> ?args:Js.Any.t -> unit -> Js.Any.t Promise.t
+end
+
+module DebugAdapterDescriptorFactory : sig
+  include Js.T
+
+  (* TODO: unused? remove? *)
+  val createDebugAdapterDescriptor :
+       t
+    -> session:DebugSession.t
+    -> executable:DebugAdapterExecutable.t or_undefined
+    -> DebugAdapterDescriptor.t ProviderResult.t
+
+  val create :
+       createDebugAdapterDescriptor:
+         (   session:DebugSession.t
+          -> executable:DebugAdapterExecutable.t or_undefined
+          -> DebugAdapterDescriptor.t ProviderResult.t)
+    -> t
+end
+
+module DebugConfiguration : sig
+  include Js.T
+
+  val create : name:string -> request:string -> type_:string -> t
+
+  val set : t -> string -> Ojs.t -> unit
+end
+
+module DebugConfigurationProvider : sig
+  include Js.T
+
+  val create :
+       ?provideDebugConfigurations:
+         (   folder:WorkspaceFolder.t or_undefined
+          -> ?token:CancellationToken.t
+          -> unit
+          -> DebugConfiguration.t list ProviderResult.t)
+    -> ?resolveDebugConfiguration:
+         (   folder:WorkspaceFolder.t or_undefined
+          -> debugConfiguration:DebugConfiguration.t
+          -> ?token:CancellationToken.t
+          -> unit
+          -> DebugConfiguration.t ProviderResult.t)
+    -> ?resolveDebugConfigurationWithSubstitutedVariables:
+         (   folder:WorkspaceFolder.t or_undefined
+          -> debugConfiguration:DebugConfiguration.t
+          -> ?token:CancellationToken.t
+          -> unit
+          -> DebugConfiguration.t ProviderResult.t)
+    -> unit
+    -> t
+end
+
+module DebugConfigurationProviderTriggerKind : sig
+  type t =
+    | Initial
+    | Dynamic
+
+  include Js.T with type t := t
+end
+
+module Debug : sig
+  val activeDebugSession : unit -> DebugSession.t option
+
+  val registerDebugAdapterDescriptorFactory :
+    debugType:string -> factory:DebugAdapterDescriptorFactory.t -> Disposable.t
+
+  val registerDebugConfigurationProvider :
+       debugType:string
+    -> provider:DebugConfigurationProvider.t
+    -> ?triggerKind:DebugConfigurationProviderTriggerKind.t
+    -> unit
+    -> Disposable.t
+
+  val startDebugging :
+       folder:WorkspaceFolder.t or_undefined
+    -> nameOrConfiguration:
+         [ `Name of string | `Configuration of DebugConfiguration.t ]
+    -> ?parentSessionOrOptions:Ojs.t
+    -> unit
+    -> bool Promise.t
 end

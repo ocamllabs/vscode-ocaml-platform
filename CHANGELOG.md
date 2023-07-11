@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add experimental
+  [earlybird bytecode debugger](https://github.com/hackwaly/ocamlearlybird)
+  integration (#1148)
 - Trim whitespace when running `Evaluate Selection` command (#1100)
 
 - Encode URI when sending the `switchImplIntf` request (#983)

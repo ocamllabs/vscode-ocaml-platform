@@ -341,10 +341,7 @@ let open_pp_doc instance ~document =
       ~pp_doc_uri:(TextDocument.uri doc);
     replace_document_content ~content:pp_pp_str ~document:doc;
     let+ (_ : TextEditor.t) =
-      Window.showTextDocument
-        ~document:(`TextDocument doc)
-        ~column:ViewColumn.Beside
-        ()
+      Window.showTextDocument ~document:doc ~column:ViewColumn.Beside ()
     in
     Ok ()
 

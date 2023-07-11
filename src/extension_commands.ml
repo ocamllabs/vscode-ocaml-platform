@@ -370,6 +370,104 @@ end = struct
     command Extension_consts.Commands.prev_hole (jump_to_hole Prev_hole.jump)
 end
 
+module Debug_commands : sig
+  val _goto_closure_code_location : t
+
+  val _start_debugging : t
+end = struct
+  let _start_debugging =
+    let handler (_ : Extension_instance.t) ~args =
+      let resourceUri =
+        match args with
+        | resourceUri :: _ -> Some (Uri.t_of_js resourceUri)
+        | [] ->
+          Option.map (Window.activeTextEditor ()) ~f:(fun textEditor ->
+              TextDocument.uri (TextEditor.document textEditor))
+      in
+      match resourceUri with
+      | Some uri ->
+        let folder = Workspace.getWorkspaceFolder ~uri in
+        let fsPath = Uri.fsPath uri in
+        let name = Path.basename (Path.of_string fsPath) ^ " (experimental)" in
+        let config =
+          DebugConfiguration.create
+            ~name
+            ~type_:Extension_consts.Debuggers.earlybird
+            ~request:"launch"
+        in
+        DebugConfiguration.set config "program" (Ojs.string_to_js fsPath);
+        DebugConfiguration.set config "stopOnEntry" (Ojs.bool_to_js true);
+        let (_ : bool Promise.t) =
+          Debug.startDebugging
+            ~folder
+            ~nameOrConfiguration:(`Configuration config)
+            ()
+        in
+        ()
+      | None ->
+        let _ = Window.showErrorMessage ~message:"No active resource" () in
+        ()
+    in
+    command Extension_consts.Commands.start_debugging handler
+
+  let _goto_closure_code_location =
+    let handler (_ : Extension_instance.t) ~args =
+      let open Promise.Syntax in
+      match Debug.activeDebugSession () with
+      | Some debugSession ->
+        let context = List.hd_exn args in
+        let variablesReference =
+          Jsonoo.Decode.(
+            at [ "variable"; "variablesReference" ] int (Jsonoo.t_of_js context))
+        in
+        let args =
+          Earlybird.VariableGetClosureCodeLocation.Args.t_to_js
+            { handle = variablesReference }
+        in
+        let (_ : unit Promise.t) =
+          let* result =
+            DebugSession.customRequest
+              debugSession
+              ~command:Earlybird.VariableGetClosureCodeLocation.command
+              ~args
+              ()
+          in
+          let result =
+            Earlybird.VariableGetClosureCodeLocation.Result.t_of_js result
+          in
+          match result.location with
+          | Some range ->
+            let* text_document =
+              Workspace.openTextDocument (`Filename range.source)
+            in
+            let selection =
+              Earlybird.VariableGetClosureCodeLocation.Result.range_to_vscode
+                range
+            in
+            let+ _ =
+              Window.showTextDocument'
+                ~document:(`TextDocument text_document)
+                ~options:
+                  (TextDocumentShowOptions.create ~preview:true ~selection ())
+                ()
+            in
+            ()
+          | None ->
+            let+ _ =
+              Window.showInformationMessage
+                ~message:"No closure code location"
+                ()
+            in
+            ()
+        in
+        ()
+      | None ->
+        let _ = Window.showErrorMessage ~message:"No active debug session" () in
+        ()
+    in
+    command Extension_consts.Commands.goto_closure_code_location handler
+end
+
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in

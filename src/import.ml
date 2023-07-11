@@ -104,7 +104,7 @@ let log_value msg (js_val : Ojs.t) = log_json msg (Jsonoo.t_of_js js_val)
 let open_file_in_text_editor target_uri =
   let open Promise.Syntax in
   let uri = Uri.parse target_uri () in
-  let* doc =
+  let* document =
     Workspace.openTextDocument (`Uri uri)
     |> Promise.catch ~rejected:(fun (_ : Promise.error) ->
            (* if file does not exist *)
@@ -112,7 +112,7 @@ let open_file_in_text_editor target_uri =
            let+ doc = Workspace.openTextDocument (`Uri create_file_uri) in
            doc)
   in
-  let+ text_editor = Window.showTextDocument ~document:(`TextDocument doc) () in
+  let+ text_editor = Window.showTextDocument ~document () in
   text_editor
 
 let with_confirmation message ~yes ?(no = "Cancel") f =

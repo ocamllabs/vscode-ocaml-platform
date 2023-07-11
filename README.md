@@ -203,6 +203,8 @@ to `ocamllsp`.
   - OCamllex
 - Task Provider
   - Dune
+- Debugger
+  - Earlybird (experimental)
 
 ## Configuration
 
@@ -260,6 +262,50 @@ prefix `OCaml:`:
 | `ocaml.switch-impl-intf`     | Switch implementation/interface             | `Alt+O`            |
 | `ocaml.open-repl`            | Open REPL                                   |                    |
 | `ocaml.evaluate-selection`   | Evaluate Selection                          | `Shift+Enter`      |
+
+## Debugging OCaml programs (experimental)
+
+Experimental support for debugging OCaml programs is provided via
+[earlybird](https://github.com/hackwaly/ocamlearlybird). Problems with the
+debugger should be reported at <https://github.com/hackwaly/ocamlearlybird>.
+
+Two steps to set up debugging:
+
+1. Install [earlybird](https://opam.ocaml.org/packages/earlybird/), which
+   provides the `ocamlearlybird` executable.
+
+   For newer OCaml version support, opam pin the development version from
+   <https://github.com/hackwaly/ocamlearlybird>.
+
+2. Build _bytecode_ version of your OCaml program executable.
+
+   See
+   [dune documentation](https://dune.readthedocs.io/en/stable/quick-start.html#building-a-hello-world-program-in-bytecode)
+   for further information.
+
+There are three ways to launch the debugger in VS Code:
+
+1. Navigate to the built OCaml bytecode executable in VS Code Explorer panel (a
+   `.bc` file in `_build` directory), right click on it and select "Start OCaml
+   Debugging (experimental)".
+
+   The debugger launches immediately.
+
+2. If no VS Code launch configurations (the `.vscode/launch.json` file) exist,
+   then navigate to VS Code Run and Debug panel, click on "create a launch.json
+   file" and select "OCaml earlybird (experimental)".
+
+   Run the created "OCaml earlybird (experimental)" launch configuration to
+   launch the debugger. By default, it asks to open an OCaml bytecode executable
+   (a `.bc` file in `_build` directory) to debug. You can hard-code a specific
+   program instead of the default `${command:AskProgram}`.
+
+3. If some VS Code launch configurations exist (in `.vscode/launch.json`), then
+   open the `launch.json` file and inside `configurations` press Ctrl+Space to
+   select the "OCaml earlybird (experimental)" snippet. Then fill in the OCaml
+   bytecode executable path and desired launch configuration name.
+
+   Run the created launch configuration to launch the debugger.
 
 ## Debugging the extension
 
