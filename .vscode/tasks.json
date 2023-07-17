@@ -5,8 +5,8 @@
   "tasks": [
     {
       "type": "shell",
-      "command": "dune build @vscode -w",
-      "label": "dune build @vscode -w",
+      "command": "dune build src/vscode_ocaml_platform.bc.js -w",
+      "label": "dune build src/vscode_ocaml_platform.bc.js -w",
       "problemMatcher": "$ocamlc",
       "presentation": {
         "reveal": "never"
