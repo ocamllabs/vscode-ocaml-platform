@@ -2145,7 +2145,7 @@
             },
             {
               "comment": "flags",
-              "begin": "\\b\\([[:space:]]*(flags)\\b",
+              "begin": "\\([[:space:]]*(flags)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": {

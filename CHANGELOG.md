@@ -15,6 +15,8 @@
 
 - Add more patterns to `opam-metadata.source` (#1165)
 
+- Fix highlighting of flags stanza in dune files (#1182)
+
 ## 1.12.2
 
 - Add more known versions of ocamllsp
