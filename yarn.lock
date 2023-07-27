@@ -127,10 +127,10 @@
   resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.64.0.tgz#bfd82c8d92dc7824c1be084be1ab46ce20d7fb55"
   integrity sha512-bSlAWz5WtcSL3cO9tAT/KpEH9rv5OBnm93OIIFwdCshaAiqr2bp1AUyEwW9MWeCvZBHEXc3V0fTYVdVyzDNwHA==
 
-"@vscode/vsce@2.19.0", "@vscode/vsce@^2.19.0":
-  version "2.19.0"
-  resolved "https://registry.yarnpkg.com/@vscode/vsce/-/vsce-2.19.0.tgz#342225662811245bc40d855636d000147c394b11"
-  integrity sha512-dAlILxC5ggOutcvJY24jxz913wimGiUrHaPkk16Gm9/PGFbz1YezWtrXsTKUtJws4fIlpX2UIlVlVESWq8lkfQ==
+"@vscode/vsce@2.20.0", "@vscode/vsce@^2.19.0":
+  version "2.20.0"
+  resolved "https://registry.yarnpkg.com/@vscode/vsce/-/vsce-2.20.0.tgz#0e81dd9fcbd7ef35bb6aabb4b64aedfac58d9bf4"
+  integrity sha512-FR8Tq2WgGRi/Py5/9WUFG2DCxdqaHXyuhHXSP8hsNc1FsxNzAkqKqfvOUUGxA7gOytmc9s/000QA7wKVukMDbQ==
   dependencies:
     azure-devops-node-api "^11.0.1"
     chalk "^2.4.2"
@@ -145,7 +145,7 @@
     minimatch "^3.0.3"
     parse-semver "^1.1.1"
     read "^1.0.7"
-    semver "^5.1.0"
+    semver "^7.5.2"
     tmp "^0.2.1"
     typed-rest-client "^1.8.4"
     url-join "^4.0.1"
