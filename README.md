@@ -277,7 +277,17 @@ Two steps to set up debugging:
    For newer OCaml version support, opam pin the development version from
    <https://github.com/hackwaly/ocamlearlybird>.
 
-2. Build _bytecode_ version of your OCaml program executable.
+2. If you use `dune` language version 3.0+ to build your project, switch to 3.7+
+   and make sure that you add:
+
+   ```
+   (map_workspace_root false)
+   ```
+
+   to your `dune-project` file. More info on this
+   [here](https://dune.readthedocs.io/en/stable/dune-files.html#map-workspace-root).
+
+3. Build _bytecode_ version of your OCaml program executable.
 
    See
    [dune documentation](https://dune.readthedocs.io/en/stable/quick-start.html#building-a-hello-world-program-in-bytecode)
