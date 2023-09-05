@@ -35,7 +35,13 @@ module Process = struct
 
     val platform : string [@@js.global "process.platform"]
 
-    val arch : string [@@js.global "process.arch"]]
+    val arch : string [@@js.global "process.arch"]
+
+    val listeners : string -> (unit -> unit) array
+    [@@js.global "process.listeners"]
+
+    val removeListener : string -> (unit -> unit) -> unit
+    [@@js.global "process.removeListener"]]
 
   module Env = struct
     include [%js: val env : Ojs.t [@@js.global "process.env"]]
