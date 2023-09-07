@@ -1565,10 +1565,10 @@ pify@^3.0.0:
   resolved "https://registry.yarnpkg.com/pify/-/pify-3.0.0.tgz#e5a4acd2c101fdf3d9a4d07f0dbc4db49dd28176"
   integrity sha512-C3FsVNH1udSEX48gGX1xfvwTWfsYWj5U+8/uK15BGzIGrKoUpghX8hWZwa/OFnakBiiVNmBvemTJR5mcy7iPcg==
 
-polka@^1.0.0-next.22:
-  version "1.0.0-next.22"
-  resolved "https://registry.yarnpkg.com/polka/-/polka-1.0.0-next.22.tgz#3c25659a401608cf437732f292baf481dc6ec16e"
-  integrity sha512-a7tsZy5gFbJr0aUltZS97xCkbPglXuD67AMvTyZX7BTDBH384FWf0ZQF6rPvdutSxnO1vUlXM2zSLf5tCKk5RA==
+polka@^1.0.0-next.23:
+  version "1.0.0-next.23"
+  resolved "https://registry.yarnpkg.com/polka/-/polka-1.0.0-next.23.tgz#04552865f26fa513ff2b651387e5c2da433471c1"
+  integrity sha512-19z2ny2aGdx+dns3icsQy6G7sWe0Dg7QTqSGE4B010EFbxvGzjjn37gBBjM8T0K2p6rthZ6+oXoBF3DcFceOPA==
   dependencies:
     "@polka/url" "^1.0.0-next.21"
     trouter "^3.1.0"
