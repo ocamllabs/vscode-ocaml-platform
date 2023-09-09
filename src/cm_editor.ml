@@ -20,7 +20,7 @@ end = struct
 
     val create :
       uri:Uri.t -> onDidChange:OnDidChange.t -> dispose:(unit -> unit) -> t
-      [@@js.builder]]
+    [@@js.builder]]
 
   let content t ~instance =
     let uri = uri t in

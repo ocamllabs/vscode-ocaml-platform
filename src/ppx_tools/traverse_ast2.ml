@@ -11,7 +11,7 @@ open Ppxlib
     are structurally identical (expect their [Location.t] values); The
     [Error err_msg] occurs when two ASTs contain structural differences due to
     the fact that the same code can have multiple AST representation. Basic
-    example of such difference is [Pexp_tuple \[el\]] (singleton tuple) which
+    example of such difference is [Pexp_tuple [el]] (singleton tuple) which
     gives [(pprintast_value_of_el)] when pretty printing and is then reparsed to
     just [el] since brackets are simply ignored. For all (known) difference
     cases, refer to the end of {!expression_desc} and {!pattern_desc} methods.

@@ -15,7 +15,7 @@ module Server = struct
     [%js:
     val close :
       t -> ?callback:(Node.JsError.t or_undefined -> unit) -> unit -> t
-      [@@js.call "close"]
+    [@@js.call "close"]
 
     val address : t -> Address.t or_undefined [@@js.call]
 
@@ -53,12 +53,12 @@ include
     -> ?callback:(unit -> unit)
     -> unit
     -> polka
-    [@@js.call "listen"]
+  [@@js.call "listen"]
 
   val get_ : polka -> string -> (unit -> unit) -> polka [@@js.call "get"]
 
   val use_ : polka -> (Middleware.t list[@js.variadic]) -> polka
-    [@@js.call "use"]
+  [@@js.call "use"]
 
   val server : polka -> Server.t [@@js.get]]
 
@@ -79,5 +79,5 @@ module Sirv = struct
     [%js:
     val serve :
       string -> ?options:Options.t -> unit -> (Middleware.t[@js.dummy])
-      [@@js.global "sirv"]]
+    [@@js.global "sirv"]]
 end
