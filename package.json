@@ -1189,6 +1189,9 @@
       }
     ]
   },
+  "workspaces": [
+    "astexplorer"
+  ],
   "scripts": {
     "test:esy": "node ./test/runEsyTests.js",
     "test:opam": "node ./test/runOpamTests.js",
@@ -1207,13 +1210,13 @@
   },
   "devDependencies": {
     "@types/vscode": "1.64.0",
+    "@vscode/vsce": "2.21.0",
     "esbuild": "0.19.2",
     "fs-extra": "11.1.1",
     "mocha": "10.2.0",
     "npm-run-all": "4.1.5",
     "ovsx": "0.8.3",
     "prettier": "3.0.3",
-    "@vscode/vsce": "2.21.0",
     "vscode-test": "1.6.1"
   },
   "prettier": {
@@ -1227,5 +1230,6 @@
         }
       }
     ]
-  }
+  },
+  "packageManager": "yarn@3.6.3"
 }

@@ -6,8 +6,7 @@ all:
 
 .PHONY: yarn-deps
 yarn-deps:
-	yarn --frozen-lockfile
-	yarn --frozen-lockfile --cwd astexplorer
+	yarn --immutable
 
 .PHONY: deps
 deps: ## Install development dependencies
@@ -25,7 +24,7 @@ switch: create_switch deps ## Create an opam switch and install development depe
 .PHONY: build
 build: ## Build the project
 	dune build src/vscode_ocaml_platform.bc.js
-	yarn --cwd astexplorer build
+	yarn workspace astexplorer build
 	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
 		--external:vscode \
@@ -37,7 +36,7 @@ build: ## Build the project
 .PHONY: build-release
 build-release:
 	dune build src/vscode_ocaml_platform.bc.js --profile=release
-	yarn --cwd astexplorer build
+	yarn workspace astexplorer build
 	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
 		--external:vscode \
