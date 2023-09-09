@@ -39,7 +39,7 @@ module Regexp = struct
       -> regexp:t
       -> replacer:(string -> (Ojs.t list[@js.variadic]) -> string)
       -> string
-      [@@js.call]]
+    [@@js.call]]
 
   type replacer =
        matched:string

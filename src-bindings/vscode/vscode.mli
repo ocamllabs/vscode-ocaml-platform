@@ -2069,7 +2069,7 @@ module TreeView : sig
       -> ?expand:[ `Bool of bool | `Int of int ]
       -> unit
       -> Promise.void
-      [@@js.call]
+    [@@js.call]
   end
 end
 

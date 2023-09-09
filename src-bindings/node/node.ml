@@ -79,7 +79,7 @@ module Buffer = struct
       -> ?encoding:string
       -> unit
       -> unit
-      [@@js.call]]
+    [@@js.call]]
 
   let append buf other = buf := concat [ !buf; other ]
 end
@@ -165,7 +165,7 @@ module Fs = struct
     val readDir : string -> string list Promise.t [@@js.global "fs.readDir"]
 
     val readFile : string -> encoding:string -> string Promise.t
-      [@@js.global "fs.readFile"]
+    [@@js.global "fs.readFile"]
 
     val exists : string -> bool Promise.t [@@js.global "fs.exists"]]
 
@@ -223,10 +223,10 @@ module ChildProcess = struct
       -> ?callback:(exec_result or_undefined -> string -> string -> unit)
       -> unit
       -> t
-      [@@js.global "child_process.exec"]
+    [@@js.global "child_process.exec"]
 
     val spawn : string -> string array -> ?options:Options.t -> unit -> t
-      [@@js.global "child_process.spawn"]
+    [@@js.global "child_process.spawn"]
 
     val get_stdout : t -> Stream.Readable.t [@@js.get "stdout"]
 

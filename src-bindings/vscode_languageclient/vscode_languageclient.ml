@@ -48,15 +48,15 @@ module DocumentFilter = struct
 
     val createLanguage :
       language:string -> ?scheme:string -> ?pattern:string -> unit -> t
-      [@@js.builder]
+    [@@js.builder]
 
     val createScheme :
       ?language:string -> scheme:string -> ?pattern:string -> unit -> t
-      [@@js.builder]
+    [@@js.builder]
 
     val createPattern :
       ?language:string -> ?scheme:string -> pattern:string -> unit -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module DocumentSelector = struct
@@ -102,7 +102,7 @@ module OcamllspSettings = struct
       -> ?extendedHover:OcamllspSettingEnable.t
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module ClientOptions = struct
@@ -125,7 +125,7 @@ module ClientOptions = struct
       -> ?initializationOptions:Jsonoo.t
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module ExecutableOptions = struct
@@ -148,7 +148,7 @@ module ExecutableOptions = struct
       -> ?shell:bool
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module Executable = struct
@@ -168,7 +168,7 @@ module Executable = struct
       -> ?options:ExecutableOptions.t
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module ServerOptions = Executable
@@ -202,7 +202,7 @@ module StaticFeature = struct
       -> dispose:(unit -> unit)
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module DidChangeConfiguration = struct
@@ -226,7 +226,7 @@ module LanguageClient = struct
       -> ?forceDebug:bool
       -> unit
       -> t
-      [@@js.new "vscode_languageclient.LanguageClient"]
+    [@@js.new "vscode_languageclient.LanguageClient"]
 
     val start : t -> unit Promise.t [@@js.call]
 
@@ -243,7 +243,7 @@ module LanguageClient = struct
       -> ?token:Vscode.CancellationToken.t
       -> unit
       -> Jsonoo.t Promise.t
-      [@@js.call]
+    [@@js.call]
 
     val registerFeature : t -> feature:StaticFeature.t -> unit [@@js.call]
 

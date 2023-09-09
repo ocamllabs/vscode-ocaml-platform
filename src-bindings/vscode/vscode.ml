@@ -8,7 +8,7 @@ module Disposable = struct
   include
     [%js:
     val from : (t list[@js.variadic]) -> t
-      [@@js.global "vscode.Disposable.from"]
+    [@@js.global "vscode.Disposable.from"]
 
     val make : dispose:(unit -> unit) -> t [@@js.new "vscode.Disposable"]
 
@@ -35,7 +35,7 @@ module Command = struct
       -> ?arguments:Js.Any.t list
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module Position = struct
@@ -62,7 +62,7 @@ module Position = struct
     val compareTo : t -> other:t -> int [@@js.call]
 
     val translate : t -> ?lineDelta:int -> ?characterDelta:int -> unit -> t
-      [@@js.call]
+    [@@js.call]
 
     val with_ : t -> ?line:int -> ?character:int -> unit -> t [@@js.call]]
 end
@@ -77,7 +77,7 @@ module Range = struct
     val end_ : t -> Position.t [@@js.get]
 
     val makePositions : start:Position.t -> end_:Position.t -> t
-      [@@js.new "vscode.Range"]
+    [@@js.new "vscode.Range"]
 
     val makeCoordinates :
          startLine:int
@@ -85,7 +85,7 @@ module Range = struct
       -> endLine:int
       -> endCharacter:int
       -> t
-      [@@js.new "vscode.Range"]
+    [@@js.new "vscode.Range"]
 
     val isEmpty : t -> bool [@@js.get]
 
@@ -95,7 +95,7 @@ module Range = struct
          t
       -> positionOrRange:([ `Position of Position.t | `Range of t ][@js.union])
       -> bool
-      [@@js.call]
+    [@@js.call]
 
     val isEqual : t -> other:t -> bool [@@js.call]
 
@@ -104,7 +104,7 @@ module Range = struct
     val union : t -> other:t -> t [@@js.call]
 
     val with_ : t -> ?start:Position.t -> ?end_:Position.t -> unit -> t
-      [@@js.call]]
+    [@@js.call]]
 end
 
 module TextLine = struct
@@ -132,7 +132,7 @@ module TextLine = struct
       -> firstNonWhitespaceCharacterIndex:int
       -> isEmptyOrWhitespace:bool
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module EndOfLine = struct
@@ -148,15 +148,15 @@ module TextEdit = struct
   include
     [%js:
     val replace : range:Range.t -> newText:string -> t
-      [@@js.global "vscode.TextEdit.replace"]
+    [@@js.global "vscode.TextEdit.replace"]
 
     val insert : position:Position.t -> newText:string -> t
-      [@@js.global "vscode.TextEdit.insert"]
+    [@@js.global "vscode.TextEdit.insert"]
 
     val delete : Range.t -> t [@@js.global "vscode.TextEdit.delete"]
 
     val setEndOfLine : EndOfLine.t -> t
-      [@@js.global "vscode.TextEdit.setEndOfLine"]
+    [@@js.global "vscode.TextEdit.setEndOfLine"]
 
     val range : t -> Range.t [@@js.get]
 
@@ -185,12 +185,12 @@ module Uri = struct
   include
     [%js:
     val parse : string -> ?strict:bool -> unit -> t
-      [@@js.global "vscode.Uri.parse"]
+    [@@js.global "vscode.Uri.parse"]
 
     val file : string -> t [@@js.global "vscode.Uri.file"]
 
     val joinPath : t -> pathSegments:(string list[@js.variadic]) -> t
-      [@@js.global "vscode.Uri.joinPath"]
+    [@@js.global "vscode.Uri.joinPath"]
 
     val scheme : t -> string [@@js.get]
 
@@ -254,7 +254,7 @@ module TextDocument = struct
     val lineAt : t -> line:int -> TextLine.t [@@js.call]
 
     val lineAtPosition : t -> position:Position.t -> TextLine.t
-      [@@js.call "lineAt"]
+    [@@js.call "lineAt"]
 
     val offsetAt : t -> position:Position.t -> int [@@js.call]
 
@@ -268,7 +268,7 @@ module TextDocument = struct
       -> ?regex:Regexp.t
       -> unit
       -> Range.t or_undefined
-      [@@js.call]
+    [@@js.call]
 
     val validateRange : t -> range:Range.t -> Range.t [@@js.call]
 
@@ -316,7 +316,7 @@ module Selection = struct
     val active : t -> Position.t [@@js.get]
 
     val makePositions : anchor:Position.t -> active:Position.t -> t
-      [@@js.new "vscode.Selection"]
+    [@@js.new "vscode.Selection"]
 
     val makeCoordinates :
          anchorLine:int
@@ -324,7 +324,7 @@ module Selection = struct
       -> activeLine:int
       -> activeCharacter:int
       -> t
-      [@@js.new "vscode.Selection"]
+    [@@js.new "vscode.Selection"]
 
     val isReversed : t -> bool [@@js.get]]
 end
@@ -362,7 +362,7 @@ module TextEditorEdit = struct
   include
     [%js:
     val replace : t -> location:replaceLocation -> value:string -> unit
-      [@@js.call]
+    [@@js.call]
 
     val insert : t -> location:Position.t -> value:string -> unit [@@js.call]
 
@@ -376,7 +376,7 @@ module TextEditorEdit = struct
       -> delete:(location:deleteLocation -> unit)
       -> setEndOfLine:(endOfLine:EndOfLine.t -> t)
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module TextEditorCursorStyle = struct
@@ -453,7 +453,7 @@ module TextEditorOptions = struct
       -> ?lineNumbers:TextEditorLineNumbersStyle.t
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module TextEditorDecorationType = struct
@@ -482,14 +482,14 @@ module MarkdownString = struct
     val supportThemeIcons : t -> bool or_undefined [@@js.get]
 
     val make : ?value:string -> ?supportThemeIcons:bool -> unit -> t
-      [@@js.new "vscode.MarkdownString"]
+    [@@js.new "vscode.MarkdownString"]
 
     val appendText : t -> value:string -> t [@@js.call]
 
     val appendMarkdown : t -> value:string -> t [@@js.call]
 
     val appendCodeblock : t -> value:string -> ?language:string -> unit -> t
-      [@@js.call]]
+    [@@js.call]]
 end
 
 module ThemeColor = struct
@@ -566,7 +566,7 @@ module ThemableDecorationAttachmentRenderOptions = struct
       -> ?height:string
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module ThemableDecorationInstanceRenderOptions = struct
@@ -575,17 +575,17 @@ module ThemableDecorationInstanceRenderOptions = struct
   include
     [%js:
     val before : t -> ThemableDecorationAttachmentRenderOptions.t or_undefined
-      [@@js.get]
+    [@@js.get]
 
     val after : t -> ThemableDecorationAttachmentRenderOptions.t or_undefined
-      [@@js.get]
+    [@@js.get]
 
     val create :
          ?before:ThemableDecorationAttachmentRenderOptions.t
       -> ?after:ThemableDecorationAttachmentRenderOptions.t
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module DecorationInstanceRenderOptions = struct
@@ -594,17 +594,17 @@ module DecorationInstanceRenderOptions = struct
   include
     [%js:
     val light : t -> ThemableDecorationInstanceRenderOptions.t or_undefined
-      [@@js.get]
+    [@@js.get]
 
     val dark : t -> ThemableDecorationInstanceRenderOptions.t or_undefined
-      [@@js.get]
+    [@@js.get]
 
     val create :
          ?light:ThemableDecorationInstanceRenderOptions.t
       -> ?dark:ThemableDecorationInstanceRenderOptions.t
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module DecorationOptions = struct
@@ -629,7 +629,7 @@ module DecorationOptions = struct
     val hoverMessage : t -> hoverMessage or_undefined [@@js.get]
 
     val renderOptions : t -> DecorationInstanceRenderOptions.t or_undefined
-      [@@js.get]
+    [@@js.get]
 
     val create :
          range:Range.t
@@ -637,7 +637,7 @@ module DecorationOptions = struct
       -> ?renderOptions:DecorationInstanceRenderOptions.t or_undefined
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module SnippetString = struct
@@ -659,10 +659,10 @@ module SnippetString = struct
       -> ?number:int
       -> unit
       -> t
-      [@@js.call]
+    [@@js.call]
 
     val appendChoice : t -> values:string list -> ?number:int -> unit -> t
-      [@@js.call]
+    [@@js.call]
 
     val appendVariable :
          t
@@ -670,7 +670,7 @@ module SnippetString = struct
       -> defaultValue:
            ([ `String of string | `Function of t -> unit ][@js.union])
       -> t
-      [@@js.call]]
+    [@@js.call]]
 end
 
 module TextEditor = struct
@@ -707,7 +707,7 @@ module TextEditor = struct
       -> Ojs.t
       -> unit
       -> bool Promise.t
-      [@@js.call]
+    [@@js.call]
 
     val insertSnippet :
          t
@@ -715,7 +715,7 @@ module TextEditor = struct
       -> ?location:insertSnippetLocation
       -> Ojs.t
       -> bool Promise.t
-      [@@js.call]
+    [@@js.call]
 
     val setDecorations :
          t
@@ -724,11 +724,11 @@ module TextEditor = struct
            ([ `Ranges of Range.t list | `Options of DecorationOptions.t list ]
            [@js.union])
       -> unit
-      [@@js.call]
+    [@@js.call]
 
     val revealRange :
       t -> range:Range.t -> ?revealType:TextEditorRevealType.t -> unit -> unit
-      [@@js.call]]
+    [@@js.call]]
 
   let edit this ~callback ?undoStopBefore ?undoStopAfter () =
     let options = Ojs.obj [||] in
@@ -791,7 +791,7 @@ module WorkspaceConfiguration = struct
     val get : t -> section:string -> Js.Any.t or_undefined [@@js.call]
 
     val get_default : t -> section:string -> defaultValue:Ojs.t -> Ojs.t
-      [@@js.call]
+    [@@js.call]
 
     val has : t -> section:string -> bool [@@js.call]
 
@@ -807,7 +807,7 @@ module WorkspaceConfiguration = struct
       -> ?overrideInLanguage:bool
       -> unit
       -> Promise.void
-      [@@js.call]]
+    [@@js.call]]
 
   let inspect (type a) (module T : Js.T with type t = a) this ~section :
       a inspectResult or_undefined =
@@ -832,7 +832,7 @@ module WorkspaceEdit = struct
       -> range:Range.t
       -> newText:string (*TODO ->?metadata:WorkspaceEditEntryMetadata.t*)
       -> unit
-      [@@js.call]
+    [@@js.call]
 
     val make : unit -> t [@@js.new "vscode.WorkspaceEdit"]]
 end
@@ -900,7 +900,7 @@ module StatusBarItem = struct
     val command : t -> command or_undefined [@@js.get]
 
     val accessibilityInformation : t -> AccessibilityInformation.t or_undefined
-      [@@js.get]
+    [@@js.get]
 
     val set_alignment : t -> StatusBarAlignment.t -> unit [@@js.set "alignment"]
 
@@ -917,7 +917,7 @@ module StatusBarItem = struct
     val set_command : t -> command -> unit [@@js.set]
 
     val set_accessibilityInformation : t -> AccessibilityInformation.t -> unit
-      [@@js.set]
+    [@@js.set]
 
     val show : t -> unit [@@js.call]
 
@@ -939,7 +939,7 @@ module WorkspaceFoldersChangeEvent = struct
 
     val create :
       added:WorkspaceFolder.t list -> removed:WorkspaceFolder.t list -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module FormattingOptions = struct
@@ -1007,7 +1007,7 @@ module CancellationToken = struct
          isCancellationRequested:bool
       -> onCancellationRequested:OnCancellationRequested.t
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module QuickPickItem = struct
@@ -1033,7 +1033,7 @@ module QuickPickItem = struct
       -> ?alwaysShow:bool
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module QuickPickOptions = struct
@@ -1066,7 +1066,7 @@ module QuickPickOptions = struct
     val canPickMany : t -> bool or_undefined [@@js.get]
 
     val onDidSelectItem : t -> (onDidSelectItemArgs -> unit) or_undefined
-      [@@js.get]
+    [@@js.get]
 
     val create :
          ?title:string
@@ -1078,7 +1078,7 @@ module QuickPickOptions = struct
       -> ?onDidSelectItem:(item:onDidSelectItemArgs -> unit)
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module ProviderResult = struct
@@ -1117,7 +1117,7 @@ module InputBoxOptions = struct
     val ignoreFocusOut : t -> bool or_undefined [@@js.get]
 
     val validateInput : t -> (string -> string ProviderResult.t) or_undefined
-      [@@js.get]
+    [@@js.get]
 
     val create :
          ?title:string
@@ -1130,7 +1130,7 @@ module InputBoxOptions = struct
       -> ?validateInput:(value:string -> string option Promise.t)
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module OpenDialogOptions = struct
@@ -1148,7 +1148,7 @@ module OpenDialogOptions = struct
       -> ?title:string
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module MessageItem = struct
@@ -1161,7 +1161,7 @@ module MessageItem = struct
     val isCloseAffordance : t -> bool or_undefined [@@js.get]
 
     val create : title:string -> ?isCloseAffordance:bool -> unit -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module Location = struct
@@ -1178,7 +1178,7 @@ module Location = struct
       -> rangeOrPosition:
            ([ `Range of Range.t | `Position of Position.t ][@js.union])
       -> t
-      [@@js.new "vscode.Location"]]
+    [@@js.new "vscode.Location"]]
 end
 
 module ProgressLocation = struct
@@ -1216,7 +1216,7 @@ module ProgressOptions = struct
 
     val create :
       location:location -> ?title:string -> ?cancellable:bool -> unit -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module DiagnosticSeverity = struct
@@ -1238,7 +1238,7 @@ module DiagnosticRelatedInformation = struct
     val message : t -> string [@@js.get]
 
     val make : location:Location.t -> message:string -> t
-      [@@js.new "vscode.DiagnosticRelatedInformation"]]
+    [@@js.new "vscode.DiagnosticRelatedInformation"]]
 end
 
 module DiagnosticTag = struct
@@ -1297,7 +1297,7 @@ module Diagnostic = struct
 
     val relatedInformation :
       t -> DiagnosticRelatedInformation.t list or_undefined
-      [@@js.get]
+    [@@js.get]
 
     val tags : t -> DiagnosticTag.t list or_undefined [@@js.get]
 
@@ -1307,7 +1307,7 @@ module Diagnostic = struct
       -> ?severity:DiagnosticSeverity.t
       -> unit
       -> t
-      [@@js.new "vscode.Diagnostic"]]
+    [@@js.new "vscode.Diagnostic"]]
 
   let make ?severity ~message range = make ~range ~message ?severity ()
 end
@@ -1332,7 +1332,7 @@ module TextDocumentShowOptions = struct
       -> ?selection:Range.t
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module TerminalOptions = struct
@@ -1403,12 +1403,12 @@ module Pseudoterminal = struct
     val onDidWrite : t -> OnDidWrite.t [@@js.get]
 
     val onDidOverrideDimensions : t -> OnDidOverrideDimensions.t or_undefined
-      [@@js.get]
+    [@@js.get]
 
     val onDidClose : t -> OnDidClose.t or_undefined [@@js.get]
 
     val open_ : t -> ?initialDimensions:TerminalDimensions.t -> unit -> unit
-      [@@js.call]
+    [@@js.call]
 
     val close : t -> unit [@@js.call]
 
@@ -1416,7 +1416,7 @@ module Pseudoterminal = struct
 
     val setDimensions :
       t -> (dimensions:TerminalDimensions.t -> unit) or_undefined
-      [@@js.get]
+    [@@js.get]
 
     val create :
          onDidWrite:OnDidWrite.t
@@ -1428,7 +1428,7 @@ module Pseudoterminal = struct
       -> ?setDimensions:(dimensions:TerminalDimensions.t -> unit)
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module ExtensionTerminalOptions = struct
@@ -1451,7 +1451,7 @@ module Extensions = struct
   include
     [%js:
     val getExtension : string -> Extension.t or_undefined
-      [@@js.global "vscode.extensions.getExtension"]]
+    [@@js.global "vscode.extensions.getExtension"]]
 end
 
 module TerminalExitStatus = struct
@@ -1490,7 +1490,7 @@ module Terminal = struct
     val exitStatus : t -> TerminalExitStatus.t or_undefined [@@js.get]
 
     val sendText : t -> text:string -> ?addNewLine:bool -> unit -> unit
-      [@@js.call]
+    [@@js.call]
 
     val show : t -> ?preserveFocus:bool -> unit -> unit [@@js.call]
 
@@ -1572,7 +1572,7 @@ module EnvironmentVariableCollection = struct
     val prepend : t -> variable:string -> value:string -> unit [@@js.call]
 
     val get : t -> variable:string -> EnvironmentVariableMutator.t or_undefined
-      [@@js.call]
+    [@@js.call]
 
     val forEach :
          t
@@ -1582,7 +1582,7 @@ module EnvironmentVariableCollection = struct
             -> collection:t
             -> unit)
       -> unit
-      [@@js.call]
+    [@@js.call]
 
     val delete : t -> variable:string -> unit [@@js.call]
 
@@ -1636,7 +1636,7 @@ module ExtensionContext = struct
     val extensionPath : t -> string [@@js.get]
 
     val environmentVariableCollection : t -> EnvironmentVariableCollection.t
-      [@@js.get]
+    [@@js.get]
 
     val asAbsolutePath : t -> relativePath:string -> string [@@js.call]
 
@@ -1686,7 +1686,7 @@ module ShellQuotingOptions = struct
     val weak : t -> string or_undefined [@@js.get]
 
     val create : ?escape:escape -> ?strong:string -> ?weak:string -> unit -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module ShellExecutionOptions = struct
@@ -1712,7 +1712,7 @@ module ShellExecutionOptions = struct
       -> ?env:string Dict.t
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module ShellQuoting = struct
@@ -1754,7 +1754,7 @@ module ShellExecution = struct
     [%js:
     val makeCommandLine :
       commandLine:string -> ?options:ShellExecutionOptions.t -> unit -> t
-      [@@js.new "vscode.ShellExecution"]
+    [@@js.new "vscode.ShellExecution"]
 
     val makeCommandArgs :
          command:shellString
@@ -1762,7 +1762,7 @@ module ShellExecution = struct
       -> ?options:ShellExecutionOptions.t
       -> unit
       -> t
-      [@@js.new "vscode.ShellExecution"]
+    [@@js.new "vscode.ShellExecution"]
 
     val commandLine : t -> string or_undefined [@@js.get]
 
@@ -1792,7 +1792,7 @@ module ProcessExecution = struct
     [%js:
     val makeProcess :
       process:string -> ?options:ProcessExecutionOptions.t -> unit -> t
-      [@@js.new "vscode.ProcessExecution"]
+    [@@js.new "vscode.ProcessExecution"]
 
     val makeProcessArgs :
          process:string
@@ -1800,7 +1800,7 @@ module ProcessExecution = struct
       -> ?options:ProcessExecutionOptions.t
       -> unit
       -> t
-      [@@js.new "vscode.ProcessExecution"]
+    [@@js.new "vscode.ProcessExecution"]
 
     val process : t -> string [@@js.get]
 
@@ -1834,7 +1834,7 @@ module CustomExecution = struct
          callback:
            (resolvedDefinition:TaskDefinition.t -> Pseudoterminal.t Promise.t)
       -> t
-      [@@js.new "vscode.CustomExecution"]]
+    [@@js.new "vscode.CustomExecution"]]
 end
 
 module RelativePattern = struct
@@ -1855,7 +1855,7 @@ module RelativePattern = struct
            [@js.union])
       -> pattern:string
       -> t
-      [@@js.new "vscode.RelativePattern"]]
+    [@@js.new "vscode.RelativePattern"]]
 end
 
 module GlobPattern = struct
@@ -1885,7 +1885,7 @@ module DocumentFilter = struct
 
     val create :
       ?language:string -> ?scheme:string -> ?pattern:GlobPattern.t -> unit -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module DocumentSelector = struct
@@ -1927,7 +1927,7 @@ module DocumentFormattingEditProvider = struct
       -> options:FormattingOptions.t
       -> token:CancellationToken.t
       -> TextEdit.t list ProviderResult.t
-      [@@js.call]
+    [@@js.call]
 
     val create :
          provideDocumentFormattingEdits:
@@ -1936,7 +1936,7 @@ module DocumentFormattingEditProvider = struct
             -> token:CancellationToken.t
             -> TextEdit.t list ProviderResult.t)
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module Hover = struct
@@ -1955,7 +1955,7 @@ module Hover = struct
             ]
            [@js.union])
       -> t
-      [@@js.new "vscode.Hover"]]
+    [@@js.new "vscode.Hover"]]
 end
 
 module HoverProvider = struct
@@ -1969,7 +1969,7 @@ module HoverProvider = struct
       -> position:Position.t
       -> token:CancellationToken.t
       -> Hover.t ProviderResult.t
-      [@@js.call]
+    [@@js.call]
 
     val create :
          provideHover:
@@ -1978,7 +1978,7 @@ module HoverProvider = struct
             -> token:CancellationToken.t
             -> Hover.t ProviderResult.t)
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module TaskGroup = struct
@@ -2065,7 +2065,7 @@ module TaskPresentationOptions = struct
       -> ?clear:bool
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module Task = struct
@@ -2097,7 +2097,7 @@ module Task = struct
       -> ?problemMatchers:string list
       -> unit
       -> t
-      [@@js.new "vscode.Task"]
+    [@@js.new "vscode.Task"]
 
     val definition : t -> TaskDefinition.t [@@js.get]
 
@@ -2132,18 +2132,18 @@ module TaskProvider = struct
       [%js:
       val provideTasks :
         t -> token:CancellationToken.t -> T.t list ProviderResult.t
-        [@@js.call]
+      [@@js.call]
 
       val resolveTask :
         t -> task:T.t -> token:CancellationToken.t -> T.t ProviderResult.t
-        [@@js.call]
+      [@@js.call]
 
       val create :
            provideTasks:(token:CancellationToken.t -> T.t list ProviderResult.t)
         -> resolveTask:
              (task:T.t -> token:CancellationToken.t -> T.t ProviderResult.t)
         -> t
-        [@@js.builder]]
+      [@@js.builder]]
   end
 
   module Default = Make (Task)
@@ -2221,7 +2221,7 @@ module TextDocumentContentProvider = struct
 
     val provideTextDocumentContent :
       t -> uri:Uri.t -> token:CancellationToken.t -> string ProviderResult.t
-      [@@js.call]
+    [@@js.call]
 
     val create :
          ?onDidChange:OnDidChange.t
@@ -2229,7 +2229,7 @@ module TextDocumentContentProvider = struct
            (uri:Uri.t -> token:CancellationToken.t -> string ProviderResult.t)
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module FileSystemWatcher = struct
@@ -2266,7 +2266,7 @@ module Workspace = struct
   include
     [%js:
     val workspaceFolders : unit -> WorkspaceFolder.t maybe_list
-      [@@js.get "vscode.workspace.workspaceFolders"]
+    [@@js.get "vscode.workspace.workspaceFolders"]
 
     val name : unit -> string or_undefined [@@js.get "vscode.workspace.name"]
 
@@ -2277,58 +2277,58 @@ module Workspace = struct
       -> ?ignoreDeleteEvents:(bool[@js.default false])
       -> unit
       -> FileSystemWatcher.t
-      [@@js.global "vscode.workspace.createFileSystemWatcher"]
+    [@@js.global "vscode.workspace.createFileSystemWatcher"]
 
     val workspaceFile : unit -> Uri.t or_undefined
-      [@@js.get "vscode.workspace.workspaceFile"]
+    [@@js.get "vscode.workspace.workspaceFile"]
 
     val rootPath : unit -> string or_undefined
-      [@@js.get "vscode.workspace.rootPath"]
+    [@@js.get "vscode.workspace.rootPath"]
 
     val textDocuments : unit -> TextDocument.t list
-      [@@js.get "vscode.workspace.textDocuments"]
+    [@@js.get "vscode.workspace.textDocuments"]
 
     val onDidChangeConfiguration : OnDidChangeConfiguration.t
-      [@@js.global "vscode.workspace.onDidChangeConfiguration"]
+    [@@js.global "vscode.workspace.onDidChangeConfiguration"]
 
     val onDidChangeWorkspaceFolders : OnDidChangeWorkspaceFolders.t
-      [@@js.global "vscode.workspace.onDidChangeWorkspaceFolders"]
+    [@@js.global "vscode.workspace.onDidChangeWorkspaceFolders"]
 
     val getWorkspaceFolder : uri:Uri.t -> WorkspaceFolder.t or_undefined
-      [@@js.global "vscode.workspace.getWorkspaceFolder"]
+    [@@js.global "vscode.workspace.getWorkspaceFolder"]
 
     val onDidOpenTextDocument : OnDidOpenTextDocument.t
-      [@@js.global "vscode.workspace.onDidOpenTextDocument"]
+    [@@js.global "vscode.workspace.onDidOpenTextDocument"]
 
     val onDidSaveTextDocument : OnDidSaveTextDocument.t
-      [@@js.global "vscode.workspace.onDidSaveTextDocument"]
+    [@@js.global "vscode.workspace.onDidSaveTextDocument"]
 
     val onDidCloseTextDocument : OnDidCloseTextDocument.t
-      [@@js.global "vscode.workspace.onDidCloseTextDocument"]
+    [@@js.global "vscode.workspace.onDidCloseTextDocument"]
 
     val onDidChangeTextDocument : OnDidChangeTextDocument.t
-      [@@js.global "vscode.workspace.onDidChangeTextDocument"]
+    [@@js.global "vscode.workspace.onDidChangeTextDocument"]
 
     val applyEdit : edit:WorkspaceEdit.t -> bool Promise.t
-      [@@js.global "vscode.workspace.applyEdit"]
+    [@@js.global "vscode.workspace.applyEdit"]
 
     val registerTextDocumentContentProvider :
       scheme:string -> provider:TextDocumentContentProvider.t -> Disposable.t
-      [@@js.global "vscode.workspace.registerTextDocumentContentProvider"]
+    [@@js.global "vscode.workspace.registerTextDocumentContentProvider"]
 
     val asRelativePath :
          pathOrUri:([ `String of string | `Uri of Uri.t ][@js.union])
       -> ?includeWorkspaceFolder:bool
       -> unit
       -> string
-      [@@js.global "vscode.workspace.asRelativePath"]
+    [@@js.global "vscode.workspace.asRelativePath"]
 
     val getConfiguration :
          ?section:string
       -> ?scope:ConfigurationScope.t
       -> unit
       -> WorkspaceConfiguration.t
-      [@@js.global "vscode.workspace.getConfiguration"]
+    [@@js.global "vscode.workspace.getConfiguration"]
 
     val findFiles :
          includes:GlobPattern.t
@@ -2337,7 +2337,7 @@ module Workspace = struct
       -> ?token:CancellationToken.t
       -> unit
       -> Uri.t list Promise.t
-      [@@js.global "vscode.workspace.findFiles"]
+    [@@js.global "vscode.workspace.findFiles"]
 
     val openTextDocument :
          ([ `Uri of Uri.t
@@ -2346,14 +2346,14 @@ module Workspace = struct
           ]
          [@js.union])
       -> TextDocument.t Promise.t
-      [@@js.global "vscode.workspace.openTextDocument"]
+    [@@js.global "vscode.workspace.openTextDocument"]
 
     val updateWorkspaceFolders :
          start:int
       -> deleteCount:int or_undefined
       -> workspaceFoldersToAdd:(workspaceFolderToAdd list[@js.variadic])
       -> bool
-      [@@js.global "vscode.workspace.updateWorkspaceFolders"]]
+    [@@js.global "vscode.workspace.updateWorkspaceFolders"]]
 end
 
 module TreeItemCollapsibleState = struct
@@ -2394,7 +2394,7 @@ module TreeItemLabel = struct
     val highlights : t -> (int * int) list or_undefined [@@js.get]
 
     val create : label:string -> ?highlights:(int * int) list -> unit -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module ThemeIcon = struct
@@ -2403,7 +2403,7 @@ module ThemeIcon = struct
   include
     [%js:
     val make : id:string -> ?color:ThemeColor.t -> unit -> t
-      [@@js.new "vscode.ThemeIcon"]
+    [@@js.new "vscode.ThemeIcon"]
 
     val file : t [@@js.global "vscode.ThemeIcon.File"]
 
@@ -2502,14 +2502,14 @@ module TreeItem = struct
     [%js:
     val make_label :
       label:label -> ?collapsibleState:TreeItemCollapsibleState.t -> unit -> t
-      [@@js.new "vscode.TreeItem"]
+    [@@js.new "vscode.TreeItem"]
 
     val make_resource :
          resourceUri:Uri.t
       -> ?collapsibleState:TreeItemCollapsibleState.t
       -> unit
       -> t
-      [@@js.new "vscode.TreeItem"]
+    [@@js.new "vscode.TreeItem"]
 
     val label : t -> label or_undefined [@@js.get]
 
@@ -2536,10 +2536,10 @@ module TreeItem = struct
     val set_tooltip : t -> tooltip -> unit [@@js.set]
 
     val collapsibleState : t -> TreeItemCollapsibleState.t or_undefined
-      [@@js.get]
+    [@@js.get]
 
     val set_collapsibleState : t -> TreeItemCollapsibleState.t -> unit
-      [@@js.set]
+    [@@js.set]
 
     val command : t -> Command.t or_undefined [@@js.get]
 
@@ -2550,10 +2550,10 @@ module TreeItem = struct
     val set_contextValue : t -> string -> unit [@@js.set]
 
     val accessibilityInformation : t -> AccessibilityInformation.t or_undefined
-      [@@js.get]
+    [@@js.get]
 
     val set_accessibilityInformation : t -> AccessibilityInformation.t -> unit
-      [@@js.set]]
+    [@@js.set]]
 end
 
 module TreeDataProvider = struct
@@ -2581,15 +2581,15 @@ module TreeDataProvider = struct
     include
       [%js:
       val onDidChangeTreeData : t -> OnDidChangeTreeData.t or_undefined
-        [@@js.get]
+      [@@js.get]
 
       val getTreeItem : t -> element:T.t -> getTreeItemResult [@@js.call]
 
       val getChildren : t -> ?element:T.t -> unit -> T.t list ProviderResult.t
-        [@@js.call]
+      [@@js.call]
 
       val getParent : t -> (element:T.t -> T.t ProviderResult.t) or_undefined
-        [@@js.call]
+      [@@js.call]
 
       val resolveTreeItem :
            t
@@ -2598,7 +2598,7 @@ module TreeDataProvider = struct
             -> token:CancellationToken.t
             -> TreeItem.t ProviderResult.t)
            or_undefined
-        [@@js.call]
+      [@@js.call]
 
       val create :
            ?onDidChangeTreeData:OnDidChangeTreeData.t
@@ -2612,7 +2612,7 @@ module TreeDataProvider = struct
               -> TreeItem.t ProviderResult.t)
         -> unit
         -> t
-        [@@js.builder]]
+      [@@js.builder]]
   end
 end
 
@@ -2759,7 +2759,7 @@ module WebviewOptions = struct
       -> ?portMapping:WebviewPortMapping.t list
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module WebView = struct
@@ -2793,7 +2793,7 @@ module WebView = struct
       -> asWebviewUri:(Uri.t -> Uri.t)
       -> postMessage:(Js.Any.t -> bool Promise.t)
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module WebviewPanel = struct
@@ -2852,7 +2852,7 @@ module WebviewPanel = struct
 
     val reveal :
       t -> ?preserveFocus:bool -> ?viewColumn:ViewColumn.t -> unit -> unit
-      [@@js.call]
+    [@@js.call]
 
     val create :
          onDidChangeViewState:OnDidChangeViewState.t
@@ -2868,7 +2868,7 @@ module WebviewPanel = struct
       -> reveal:
            (?preserveFocus:bool -> ?viewColumn:ViewColumn.t -> unit -> unit)
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module CustomTextEditorProvider = struct
@@ -2899,7 +2899,7 @@ module CustomTextEditorProvider = struct
       -> webviewPanel:WebviewPanel.t
       -> token:CancellationToken.t
       -> ResolvedEditor.t
-      [@@js.call]
+    [@@js.call]
 
     val create :
          resolveCustomTextEditor:
@@ -2908,7 +2908,7 @@ module CustomTextEditorProvider = struct
             -> token:CancellationToken.t
             -> ResolvedEditor.t)
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module CustomDocumentOpenContext = struct
@@ -2931,7 +2931,7 @@ module CustomReadonlyEditorProvider = struct
         -> openContext:CustomDocumentOpenContext.t
         -> token:CancellationToken.t
         -> T.t Promise.t
-        [@@js.call]
+      [@@js.call]
 
       val resolveCustomEditor :
            t
@@ -2939,7 +2939,7 @@ module CustomReadonlyEditorProvider = struct
         -> webviewPanel:WebviewPanel.t
         -> token:CancellationToken.t
         -> unit Promise.t
-        [@@js.call]
+      [@@js.call]
 
       val create :
            resolveCustomEditor:
@@ -2953,7 +2953,7 @@ module CustomReadonlyEditorProvider = struct
               -> token:CancellationToken.t
               -> T.t Promise.t)
         -> t
-        [@@js.builder]]
+      [@@js.builder]]
   end
 end
 
@@ -2965,7 +2965,7 @@ module RegisterCustomEditorProviderOptions = struct
     val supportsMultipleEditorsPerDocument : t -> bool or_undefined [@@js.get]
 
     val create : ?supportsMultipleEditorsPerDocument:bool -> unit -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module Window = struct
@@ -2978,30 +2978,30 @@ module Window = struct
   include
     [%js:
     val activeTextEditor : unit -> TextEditor.t or_undefined
-      [@@js.get "vscode.window.activeTextEditor"]
+    [@@js.get "vscode.window.activeTextEditor"]
 
     val visibleTextEditors : unit -> TextEditor.t list
-      [@@js.get "vscode.window.visibleTextEditors"]
+    [@@js.get "vscode.window.visibleTextEditors"]
 
     val onDidChangeActiveTextEditor : unit -> OnDidChangeActiveTextEditor.t
-      [@@js.get "vscode.window.onDidChangeActiveTextEditor"]
+    [@@js.get "vscode.window.onDidChangeActiveTextEditor"]
 
     val onDidChangeVisibleTextEditors : unit -> OnDidChangeVisibleTextEditors.t
-      [@@js.get "vscode.window.onDidChangeVisibleTextEditors"]
+    [@@js.get "vscode.window.onDidChangeVisibleTextEditors"]
 
     val terminals : unit -> Terminal.t list [@@js.get "vscode.window.terminals"]
 
     val activeTerminal : unit -> Terminal.t or_undefined
-      [@@js.get "vscode.window.activeTerminal"]
+    [@@js.get "vscode.window.activeTerminal"]
 
     val onDidChangeActiveTerminal : unit -> OnDidChangeActiveTerminal.t
-      [@@js.get "vscode.window.onDidChangeActiveTerminal"]
+    [@@js.get "vscode.window.onDidChangeActiveTerminal"]
 
     val onDidOpenTerminal : unit -> OnDidOpenTerminal.t
-      [@@js.get "vscode.window.onDidOpenTerminal"]
+    [@@js.get "vscode.window.onDidOpenTerminal"]
 
     val onDidCloseTerminal : unit -> OnDidCloseTerminal.t
-      [@@js.get "vscode.window.onDidCloseTerminal"]
+    [@@js.get "vscode.window.onDidCloseTerminal"]
 
     val showTextDocument :
          document:TextDocument.t
@@ -3009,7 +3009,7 @@ module Window = struct
       -> ?preserveFocus:bool
       -> unit
       -> TextEditor.t Promise.t
-      [@@js.global "vscode.window.showTextDocument"]
+    [@@js.global "vscode.window.showTextDocument"]
 
     val showTextDocument' :
          document:
@@ -3017,7 +3017,7 @@ module Window = struct
       -> ?options:TextDocumentShowOptions.t
       -> unit
       -> TextEditor.t Promise.t
-      [@@js.global "vscode.window.showTextDocument"]
+    [@@js.global "vscode.window.showTextDocument"]
 
     val showInformationMessage :
          message:string
@@ -3025,7 +3025,7 @@ module Window = struct
       -> items:(MessageItem.t list[@js.variadic])
       -> unit
       -> MessageItem.t or_undefined Promise.t
-      [@@js.global "vscode.window.showInformationMessage"]
+    [@@js.global "vscode.window.showInformationMessage"]
 
     val showWarningMessage :
          message:string
@@ -3033,7 +3033,7 @@ module Window = struct
       -> items:(MessageItem.t list[@js.variadic])
       -> unit
       -> MessageItem.t or_undefined Promise.t
-      [@@js.global "vscode.window.showWarningMessage"]
+    [@@js.global "vscode.window.showWarningMessage"]
 
     val showErrorMessage :
          message:string
@@ -3041,7 +3041,7 @@ module Window = struct
       -> items:(MessageItem.t list[@js.variadic])
       -> unit
       -> MessageItem.t or_undefined Promise.t
-      [@@js.global "vscode.window.showErrorMessage"]
+    [@@js.global "vscode.window.showErrorMessage"]
 
     val showQuickPickItems :
          choices:QuickPickItem.t list
@@ -3049,7 +3049,7 @@ module Window = struct
       -> ?token:CancellationToken.t
       -> unit
       -> QuickPickItem.t or_undefined Promise.t
-      [@@js.global "vscode.window.showQuickPick"]
+    [@@js.global "vscode.window.showQuickPick"]
 
     val showQuickPick :
          items:string list
@@ -3057,38 +3057,38 @@ module Window = struct
       -> ?token:CancellationToken.t
       -> unit
       -> string or_undefined Promise.t
-      [@@js.global "vscode.window.showQuickPick"]
+    [@@js.global "vscode.window.showQuickPick"]
 
     val showInputBox :
          ?options:InputBoxOptions.t
       -> ?token:CancellationToken.t
       -> unit
       -> string or_undefined Promise.t
-      [@@js.global "vscode.window.showInputBox"]
+    [@@js.global "vscode.window.showInputBox"]
 
     val showOpenDialog :
       ?options:OpenDialogOptions.t -> unit -> Uri.t list or_undefined Promise.t
-      [@@js.global "vscode.window.showOpenDialog"]
+    [@@js.global "vscode.window.showOpenDialog"]
 
     val createOutputChannel : name:string -> OutputChannel.t
-      [@@js.global "vscode.window.createOutputChannel"]
+    [@@js.global "vscode.window.createOutputChannel"]
 
     val setStatusBarMessage :
          text:string
       -> ?hide:([ `AfterTimeout of int ][@js.union])
       -> unit
       -> Disposable.t
-      [@@js.global "vscode.window.setStatusBarMessage"]
+    [@@js.global "vscode.window.setStatusBarMessage"]
 
     val withProgress : options:ProgressOptions.t -> task:Ojs.t -> Ojs.t
-      [@@js.global "vscode.window.withProgress"]
+    [@@js.global "vscode.window.withProgress"]
 
     val createStatusBarItem :
          ?alignment:StatusBarAlignment.t
       -> ?priority:int
       -> unit
       -> StatusBarItem.t
-      [@@js.global "vscode.window.createStatusBarItem"]
+    [@@js.global "vscode.window.createStatusBarItem"]
 
     val createTerminal :
          ?name:string
@@ -3096,7 +3096,7 @@ module Window = struct
       -> ?shellArgs:([ `String of string | `Strings of string list ][@js.union])
       -> unit
       -> Terminal.t
-      [@@js.global "vscode.window.createTerminal"]
+    [@@js.global "vscode.window.createTerminal"]
 
     val createTerminalFromOptions :
          options:
@@ -3105,21 +3105,21 @@ module Window = struct
             ]
            [@js.union])
       -> Terminal.t
-      [@@js.global "vscode.window.createTerminal"]
+    [@@js.global "vscode.window.createTerminal"]
 
     val registerTreeDataProvider :
       viewId:string -> treeDataProvider:Ojs.t -> Disposable.t
-      [@@js.global "vscode.window.registerTreeDataProvider"]
+    [@@js.global "vscode.window.registerTreeDataProvider"]
 
     val createTreeView : viewId:string -> options:Ojs.t -> Ojs.t
-      [@@js.global "vscode.window.createTreeView"]
+    [@@js.global "vscode.window.createTreeView"]
 
     val createWebviewPanel :
          viewType:string
       -> title:string
       -> showOptions:ViewColumn.t
       -> WebviewPanel.t
-      [@@js.global "vscode.window.createWebviewPanel"]
+    [@@js.global "vscode.window.createWebviewPanel"]
 
     val registerCustomTextEditorProvider :
          viewType:string
@@ -3127,7 +3127,7 @@ module Window = struct
       -> ?options:RegisterCustomEditorProviderOptions.t
       -> unit
       -> Disposable.t
-      [@@js.global "vscode.window.registerCustomEditorProvider"]
+    [@@js.global "vscode.window.registerCustomEditorProvider"]
 
     val registerCustomReadonlyEditorProvider :
          viewType:string
@@ -3135,7 +3135,7 @@ module Window = struct
       -> ?options:RegisterCustomEditorProviderOptions.t
       -> unit
       -> Disposable.t
-      [@@js.global "vscode.window.registerCustomEditorProvider"]]
+    [@@js.global "vscode.window.registerCustomEditorProvider"]]
 
   let getChoices choices =
     choices
@@ -3213,13 +3213,13 @@ module Commands = struct
          command:string
       -> callback:(args:(Js.Any.t list[@js.variadic]) -> unit)
       -> Disposable.t
-      [@@js.global "vscode.commands.registerCommand"]
+    [@@js.global "vscode.commands.registerCommand"]
 
     val registerCommandReturn :
          command:string
       -> callback:(args:(Js.Any.t list[@js.variadic]) -> Js.Any.t)
       -> Disposable.t
-      [@@js.global "vscode.commands.registerCommand"]
+    [@@js.global "vscode.commands.registerCommand"]
 
     val registerTextEditorCommand :
          command:string
@@ -3229,16 +3229,16 @@ module Commands = struct
             -> args:(Js.Any.t list[@js.variadic])
             -> unit)
       -> Disposable.t
-      [@@js.global "vscode.commands.registerTextEditorCommand"]
+    [@@js.global "vscode.commands.registerTextEditorCommand"]
 
     val executeCommand :
          command:string
       -> args:(Js.Any.t list[@js.variadic])
       -> Js.Any.t or_undefined Promise.t
-      [@@js.global "vscode.commands.executeCommand"]
+    [@@js.global "vscode.commands.executeCommand"]
 
     val getCommands : ?filterInternal:bool -> unit -> string list Promise.t
-      [@@js.global "vscode.commands.getCommands"]]
+    [@@js.global "vscode.commands.getCommands"]]
 end
 
 module Languages = struct
@@ -3248,17 +3248,17 @@ module Languages = struct
          selector:DocumentSelector.t
       -> provider:DocumentFormattingEditProvider.t
       -> Disposable.t
-      [@@js.global "vscode.languages.registerDocumentFormattingEditProvider"]
+    [@@js.global "vscode.languages.registerDocumentFormattingEditProvider"]
 
     val registerHoverProvider :
       selector:DocumentSelector.t -> provider:HoverProvider.t -> Disposable.t
-      [@@js.global "vscode.languages.registerHoverProvider"]
+    [@@js.global "vscode.languages.registerHoverProvider"]
 
     val getDiagnostics : Uri.t -> Diagnostic.t list
-      [@@js.global "vscode.languages.getDiagnostics"]
+    [@@js.global "vscode.languages.getDiagnostics"]
 
     val getDiagnostics_all : unit -> (Uri.t * Diagnostic.t list) list
-      [@@js.global "vscode.languages.getDiagnostics"]]
+    [@@js.global "vscode.languages.getDiagnostics"]]
 end
 
 module Tasks = struct
@@ -3266,7 +3266,7 @@ module Tasks = struct
     [%js:
     val registerTaskProvider :
       type_:string -> provider:TaskProvider.Default.t -> Disposable.t
-      [@@js.global "vscode.tasks.registerTaskProvider"]]
+    [@@js.global "vscode.tasks.registerTaskProvider"]]
 end
 
 module Env = struct
@@ -3296,7 +3296,7 @@ module DebugAdapterExecutable = struct
       -> ?options:DebugAdapterExecutableOptions.t
       -> unit
       -> t
-      [@@js.new "vscode.DebugAdapterExecutable"]]
+    [@@js.new "vscode.DebugAdapterExecutable"]]
 end
 
 module DebugAdapterServer = struct
@@ -3345,7 +3345,7 @@ module DebugSession = struct
     [%js:
     val customRequest :
       t -> command:string -> ?args:Js.Any.t -> unit -> Js.Any.t Promise.t
-      [@@js.call]]
+    [@@js.call]]
 end
 
 module DebugAdapterDescriptorFactory = struct
@@ -3358,7 +3358,7 @@ module DebugAdapterDescriptorFactory = struct
       -> session:DebugSession.t
       -> executable:DebugAdapterExecutable.t or_undefined
       -> DebugAdapterDescriptor.t ProviderResult.t
-      [@@js.call]
+    [@@js.call]
 
     val create :
          createDebugAdapterDescriptor:
@@ -3366,7 +3366,7 @@ module DebugAdapterDescriptorFactory = struct
             -> executable:DebugAdapterExecutable.t or_undefined
             -> DebugAdapterDescriptor.t ProviderResult.t)
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module DebugConfiguration = struct
@@ -3375,7 +3375,7 @@ module DebugConfiguration = struct
   include
     [%js:
     val create : name:string -> request:string -> type_:string -> t
-      [@@js.builder]
+    [@@js.builder]
 
     val set : t -> string -> Ojs.t -> unit [@@js.index_set]]
 end
@@ -3405,7 +3405,7 @@ module DebugConfigurationProvider = struct
             -> DebugConfiguration.t ProviderResult.t)
       -> unit
       -> t
-      [@@js.builder]]
+    [@@js.builder]]
 end
 
 module DebugConfigurationProviderTriggerKind = struct
@@ -3419,13 +3419,13 @@ module Debug = struct
   include
     [%js:
     val activeDebugSession : unit -> DebugSession.t or_undefined
-      [@@js.get "vscode.debug.activeDebugSession"]
+    [@@js.get "vscode.debug.activeDebugSession"]
 
     val registerDebugAdapterDescriptorFactory :
          debugType:string
       -> factory:DebugAdapterDescriptorFactory.t
       -> Disposable.t
-      [@@js.global "vscode.debug.registerDebugAdapterDescriptorFactory"]
+    [@@js.global "vscode.debug.registerDebugAdapterDescriptorFactory"]
 
     val registerDebugConfigurationProvider :
          debugType:string
@@ -3433,7 +3433,7 @@ module Debug = struct
       -> ?triggerKind:DebugConfigurationProviderTriggerKind.t
       -> unit
       -> Disposable.t
-      [@@js.global "vscode.debug.registerDebugConfigurationProvider"]
+    [@@js.global "vscode.debug.registerDebugConfigurationProvider"]
 
     val startDebugging :
          folder:WorkspaceFolder.t or_undefined
@@ -3443,5 +3443,5 @@ module Debug = struct
       -> ?parentSessionOrOptions:Ojs.t
       -> unit
       -> bool Promise.t
-      [@@js.global "vscode.debug.startDebugging"]]
+    [@@js.global "vscode.debug.startDebugging"]]
 end
