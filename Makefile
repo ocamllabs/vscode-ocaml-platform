@@ -2,7 +2,7 @@
 
 .PHONY: all
 all:
-	dune build --root .
+	dune build
 
 .PHONY: yarn-deps
 yarn-deps:
@@ -51,21 +51,21 @@ build-release:
 
 .PHONY: test
 test: ## Run the unit tests
-	dune build --root . @runtest
+	dune build @runtest
 	yarn test
 
 .PHONY: clean
 clean: ## Clean build artifacts and other generated files
-	dune clean --root .
+	dune clean
 	rm -r dist/
 
 .PHONY: doc
 doc: ## Generate odoc documentation
-	dune build --root . @doc
+	dune build @doc
 
 .PHONY: fmt
 fmt: ## Format the codebase with ocamlformat
-	dune build --root . --auto-promote @fmt
+	dune build --auto-promote @fmt
 	yarn fmt
 
 .PHONY: watch
