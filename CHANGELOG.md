@@ -1,6 +1,10 @@
 # Change Log
 
-## Unreleased
+# Unreleased
+
+- Fix highlighting of flags stanza in dune files (#1182)
+
+## 1.13.0
 
 - Add experimental
   [earlybird bytecode debugger](https://github.com/hackwaly/ocamlearlybird)
@@ -14,8 +18,6 @@
 - Maintain focus on editor when sending code to REPL (#1161)
 
 - Add more patterns to `opam-metadata.source` (#1165)
-
-- Fix highlighting of flags stanza in dune files (#1182)
 
 ## 1.12.2
 
