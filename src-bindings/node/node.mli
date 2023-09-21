@@ -29,10 +29,6 @@ module Process : sig
 
   val arch : string
 
-  val listeners : string -> (unit -> unit) array
-
-  val removeListener : string -> (unit -> unit) -> unit
-
   module Env : sig
     val get : string -> string option
 

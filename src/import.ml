@@ -27,11 +27,11 @@ include Base
 
 (* This is used to remove the listener jsoo adding, which could cause vscode
    extension host terminated unexpectedly *)
-let _ =
-  let listeners = Process.listeners "uncaughtException" in
-  Process.removeListener
-    "uncaughtException"
-    (Array.get listeners (Array.length listeners - 1))
+let () =
+  Js_of_ocaml.Js.Unsafe.eval_string
+    "process.removeListener('uncaughtException', \
+     process.listeners('uncaughtException')[process.listeners('uncaughtException').length \
+     - 1])"
 
 module List = struct
   include List
