@@ -1,8 +1,9 @@
 # Change Log
 
-# Unreleased
+# 1.13.1
 
 - Fix highlighting of flags stanza in dune files (#1182)
+
 - Fix extension crashing when overriding global exception handler (#1212)
 
 ## 1.13.0
