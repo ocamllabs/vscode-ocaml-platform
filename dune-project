@@ -47,7 +47,12 @@
   (ppxlib
    (>= 0.26.0))
   (opam-file-format
-   (>= 2.1.2))))
+   (>= 2.1.2))
+  (ocamlformat
+   (and
+    (= 0.26.0)
+    :with-dev-setup))
+  (ocaml-lsp-server :with-dev-setup)))
 
 (package
  (name vscode)
@@ -62,4 +67,9 @@
   (promise_jsoo
    (>= 0.3.1))
   (jsonoo
-   (>= 0.2.1))))
+   (>= 0.2.1))
+  (ocamlformat
+   (and
+    (= 0.26.0)
+    :with-dev-setup))
+  (ocaml-lsp-server :with-dev-setup)))

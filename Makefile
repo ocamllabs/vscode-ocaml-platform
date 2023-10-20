@@ -10,9 +10,8 @@ yarn-deps:
 
 .PHONY: deps
 deps: ## Install development dependencies
-	opam install -y ocamlformat.0.25.1 ocaml-lsp-server $(DEV_DEPS)
 	$(MAKE) yarn-deps
-	opam install --deps-only --with-test --with-doc -y .
+	opam install --deps-only --with-test --with-doc --with-dev-setup --yes .
 
 .PHONY: create_switch
 create_switch:

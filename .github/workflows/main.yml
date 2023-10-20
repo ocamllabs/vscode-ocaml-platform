@@ -30,10 +30,6 @@ jobs:
           # Disabled as discussed in
           # https://github.com/ocamllabs/vscode-ocaml-platform/pull/1106
           # - windows-latest
-        ocaml-compiler:
-          - 4.14.x
-        node-version:
-          - 20.x
 
     runs-on: ${{ matrix.os }}
 
@@ -41,38 +37,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set-up OCaml ${{ matrix.ocaml-compiler }} on Unix
+      - name: Set-up OCaml 4.14
         uses: ocaml/setup-ocaml@v2
-        if: runner.os != 'Windows'
         with:
-          ocaml-compiler: ${{ matrix.ocaml-compiler }}
-          dune-cache: true
-          opam-depext-flags: --with-test
+          ocaml-compiler: "4.14"
+          allow-prelease-opam: true
 
-      - name: Set-up OCaml ${{ matrix.ocaml-compiler }} on Windows
-        uses: ocaml/setup-ocaml@v2
-        if: runner.os == 'Windows'
-        with:
-          ocaml-compiler: ${{ matrix.ocaml-compiler }}
-          dune-cache: false
-          opam-depext-flags: --with-test
-          opam-repositories: |
-            opam-repository-mingw: https://github.com/ocaml-opam/opam-repository-mingw.git#sunset
-            default: https://github.com/ocaml/opam-repository.git
-
-      - name: Set-up Node.js ${{ matrix.node-version }}
+      - name: Set-up Node.js 20.x
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: "20.x"
 
-      - name: Install ocaml-lsp-server
-        run: opam install ocaml-lsp-server
-
-      - name: Install opam packages
-        run: opam install . --deps-only --with-test
-
-      - name: Install npm packages
-        run: yarn --frozen-lockfile
+      - name: Install dependencies
+        run: make deps
 
       - name: Check formatting
         run: yarn fmt:check
@@ -131,23 +108,48 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-  lint-fmt:
-    strategy:
-      matrix:
-        ocaml-compiler:
-          - 4.14.x
+  analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
 
+      - name: Set-up OCaml 4.14
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: "4.14"
+          allow-prelease-opam: true
+
+      - name: Analysis
+        uses: ocaml/setup-ocaml/analysis@analysis
+
+  lint-opam:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
+
+      - name: Set-up OCaml 4.14
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: "4.14"
+          allow-prelease-opam: true
+
+      - name: Lint opam
+        uses: ocaml/setup-ocaml/lint-opam@v2
+
+  lint-fmt:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set-up OCaml ${{ matrix.ocaml-compiler }}
+      - name: Set-up OCaml 4.14
         uses: ocaml/setup-ocaml@v2
         with:
-          ocaml-compiler: ${{ matrix.ocaml-compiler }}
-          dune-cache: true
+          ocaml-compiler: "4.14"
+          allow-prelease-opam: true
 
       - name: Lint fmt
         uses: ocaml/setup-ocaml/lint-fmt@v2
