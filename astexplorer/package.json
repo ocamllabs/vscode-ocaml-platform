@@ -1,5 +1,7 @@
 {
   "name": "astexplorer",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
     "build": "parcel build index.html",
     "dev": "parcel watch index.html"
