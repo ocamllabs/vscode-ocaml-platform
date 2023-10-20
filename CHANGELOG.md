@@ -1,5 +1,10 @@
 # Change Log
 
+# Unreleased
+
+- Disable semantic highlight in reason files to fix highlighting when opening
+  them over ssh (#1231)
+
 # 1.13.1
 
 - Fix highlighting of flags stanza in dune files (#1182)
