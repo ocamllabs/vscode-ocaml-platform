@@ -72,9 +72,7 @@ jobs:
         run: opam install . --deps-only --with-test
 
       - name: Install npm packages
-        run: |
-          yarn --frozen-lockfile --cwd astexplorer
-          yarn --frozen-lockfile
+        run: yarn --frozen-lockfile
 
       - name: Check formatting
         run: yarn fmt:check
