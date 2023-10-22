@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Indentation level for let, let*, and let+ expressions increased for identifiers with single quotes.
+
 - Disable semantic highlight in reason files to fix highlighting when opening
   them over ssh (#1231)
 
