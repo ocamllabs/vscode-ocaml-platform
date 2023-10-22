@@ -2,8 +2,8 @@
 
 # Unreleased
 
-- Indentation level for let, let\*, and let+ expressions and their and
-  equivalents increased for identifiers with single quotes.
+- Indentation level is increased more reliably for `let`, `and`, and their
+  binding operator equivalents.
 
 - Disable semantic highlight in reason files to fix highlighting when opening
   them over ssh (#1231)
