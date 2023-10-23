@@ -3,7 +3,7 @@ const os = require("os");
 const fs = require("fs-extra");
 const cp = require("child_process");
 
-const { runTests } = require("vscode-test");
+const { runTests } = require("@vscode/test-electron");
 
 const root = path.dirname(__dirname);
 const sampleEsySrc = path.join(root, "test", "fixtures", "sample-esy");
