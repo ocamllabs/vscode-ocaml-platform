@@ -2,13 +2,15 @@
 
 # Unreleased
 
+## 1.13.2
+
 - Indentation level is increased more reliably for `let`, `and`, and their
   binding operator equivalents (#1237)
 
 - Disable semantic highlight in reason files to fix highlighting when opening
   them over ssh (#1231)
 
-# 1.13.1
+## 1.13.1
 
 - Fix highlighting of flags stanza in dune files (#1182)
 
