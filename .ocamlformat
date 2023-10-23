@@ -1,5 +1,5 @@
-# upgrading the version, don't forget to update ocamlformat version for `deps` target in `Makefile`
-version=0.26.0
+# upgrading the version, don't forget to update ocamlformat version in `dune-project`
+version=0.26.1
 profile=conventional
 ocaml-version=4.14.0
 break-separators=before
