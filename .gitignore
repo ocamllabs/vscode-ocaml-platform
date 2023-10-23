@@ -15,6 +15,12 @@ _build/
 _opam/
 
 # Normal npm stuff
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
 node_modules/
 
 # VSCode settings
