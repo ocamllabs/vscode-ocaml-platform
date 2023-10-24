@@ -6,7 +6,7 @@ all:
 
 .PHONY: yarn-deps
 yarn-deps:
-	yarn --frozen-lockfile
+	yarn --immutable
 
 .PHONY: deps
 deps: ## Install development dependencies
