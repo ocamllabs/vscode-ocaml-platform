@@ -14,10 +14,3 @@ updates:
     labels:
       - dependencies
       - no changelog
-  - package-ecosystem: npm
-    directory: /astexplorer
-    schedule:
-      interval: daily
-    labels:
-      - dependencies
-      - no changelog
