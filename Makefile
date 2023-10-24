@@ -29,7 +29,7 @@ build: ## Build the project
 		--external:vscode \
 		--outdir=dist \
 		--platform=node \
-		--target=es6 \
+		--target=es2022 \
 		--sourcemap
 
 .PHONY: build-release
@@ -41,7 +41,7 @@ build-release:
 		--external:vscode \
 		--outdir=dist \
 		--platform=node \
-		--target=es6 \
+		--target=es2022 \
 		--minify-whitespace \
 		--minify-syntax \
 		--sourcemap \

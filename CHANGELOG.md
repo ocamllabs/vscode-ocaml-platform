@@ -2,6 +2,9 @@
 
 # Unreleased
 
+- Set the VSCode lower bound to 1.82.0 and set the build target to es2022 to get
+  better runtime performance (#1245)
+
 ## 1.13.2
 
 - Indentation level is increased more reliably for `let`, `and`, and their
