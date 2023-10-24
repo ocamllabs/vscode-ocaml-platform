@@ -44,7 +44,7 @@ jobs:
           allow-prelease-opam: true
 
       - name: Set-up Node.js 20.x
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "20.x"
 
