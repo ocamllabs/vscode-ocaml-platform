@@ -1209,7 +1209,7 @@
     "vscode-languageclient": "9.0.1"
   },
   "devDependencies": {
-    "@types/vscode": "1.64.0",
+    "@types/vscode": "1.82.0",
     "@vscode/test-electron": "2.3.5",
     "@vscode/vsce": "2.21.1",
     "esbuild": "0.19.5",
@@ -1222,7 +1222,7 @@
   },
   "packageManager": "yarn@4.0.0+sha256.6d855253732ba8d231b6cd917961654f6c8439164c962a4e355c9c58360ebe44",
   "engines": {
-    "vscode": "^1.64.0"
+    "vscode": "^1.82.0"
   },
   "icon": "assets/logo.png"
 }

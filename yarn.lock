@@ -1419,10 +1419,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/vscode@npm:1.64.0":
-  version: 1.64.0
-  resolution: "@types/vscode@npm:1.64.0"
-  checksum: 5d14a8211887d2f368a57cdb1fe2b99e0fe175daa2dddb9d1413384f78191fe6e40a3c27c0216c05b957178c6facb6d7e841ce03c96e76d53fbd061cec71cbd4
+"@types/vscode@npm:1.82.0":
+  version: 1.82.0
+  resolution: "@types/vscode@npm:1.82.0"
+  checksum: 5ebc17c52edac6873cf37ce33e9fde160d6b4591c7b6928ed68ebed3e703228c8234fb05f49e25020ef775ecc9076b097452d7f6a6b2cdaceb334d6d4881fc4c
   languageName: node
   linkType: hard
 
@@ -4595,7 +4595,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "ocaml-platform@workspace:."
   dependencies:
-    "@types/vscode": "npm:1.64.0"
+    "@types/vscode": "npm:1.82.0"
     "@vscode/test-electron": "npm:2.3.5"
     "@vscode/vsce": "npm:2.21.1"
     esbuild: "npm:0.19.5"
