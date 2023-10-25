@@ -1,1 +1,1 @@
-(dirs :standard \ node_modules astexplorer)
+(dirs :standard \ astexplorer node_modules tests)

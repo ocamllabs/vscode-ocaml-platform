@@ -1,4 +1,4 @@
-const assert = require("assert");
+const assert = require("node:assert");
 
 const problemLocations = {
   'File "file.ml", line 4, characters 6-7:': [
@@ -48,8 +48,8 @@ const problemMessages = {
   ],
 };
 
-suite("Basic tests", () => {
-  test("Problem Matcher tests", async () => {
+suite("basic", () => {
+  test("problem matcher", async () => {
     const locationRegex = new RegExp(
       '^\\s*\\bFile\\b\\s*"(.*)",\\s*\\blines?\\b\\s*(\\d+)(?:-(\\d+))?(?:,\\s*\\bcharacters\\b\\s*(\\d+)-(\\d+)\\s*)?:\\s*$',
     );
@@ -65,7 +65,7 @@ suite("Basic tests", () => {
         null,
         "Location regex should match: " + problem,
       );
-      assert.deepStrictEqual(captures.slice(1), expected);
+      assert.deepStrictEqual(captures?.slice(1), expected);
     }
 
     for (const [problem, expected] of Object.entries(problemMessages)) {
@@ -75,7 +75,7 @@ suite("Basic tests", () => {
         null,
         "Message regex should match: " + problem,
       );
-      assert.deepStrictEqual(captures.slice(1), expected);
+      assert.deepStrictEqual(captures?.slice(1), expected);
     }
   });
 });
