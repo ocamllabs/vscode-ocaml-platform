@@ -2,6 +2,8 @@
 
 # Unreleased
 
+## 1.13.3
+
 - Set the VSCode lower bound to 1.82.0 and set the build target to es2022 to get
   better runtime performance (#1245)
 
