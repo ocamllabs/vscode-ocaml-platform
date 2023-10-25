@@ -121,13 +121,23 @@ module Path : sig
   val isAbsolute : string -> bool
 
   val join : string list -> string
+
+  val resolve : string list -> string
 end
 
 module Os : sig
   val homedir : unit -> string
+
+  val tmpdir : unit -> string
 end
 
 module Fs : sig
+  module Sync : sig
+    val copy : string -> string -> unit
+
+    val writeFile : string -> string -> unit
+  end
+
   val readDir : string -> (string list, string) result Promise.t
 
   val readFile : string -> string Promise.t
@@ -193,4 +203,8 @@ module ChildProcess : sig
     -> string
     -> string array
     -> return Promise.t
+
+  module Sync : sig
+    val exec : string -> ?options:Options.t -> unit -> string
+  end
 end

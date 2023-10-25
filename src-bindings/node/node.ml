@@ -48,7 +48,11 @@ module Process = struct
   end
 end
 
-module Os = [%js: val homedir : unit -> string [@@js.global "os.homedir"]]
+module Os =
+  [%js:
+  val homedir : unit -> string [@@js.global "os.homedir"]
+
+  val tmpdir : unit -> string [@@js.global "os.tmpdir"]]
 
 module JsError = struct
   type t = Promise.error [@@js]
@@ -148,7 +152,10 @@ module Path = struct
 
     val isAbsolute : string -> bool [@@js.global "path.isAbsolute"]
 
-    val join : (string list[@js.variadic]) -> string [@@js.global "path.join"]]
+    val join : (string list[@js.variadic]) -> string [@@js.global "path.join"]
+
+    val resolve : (string list[@js.variadic]) -> string
+    [@@js.global "path.resolve"]]
 
   let delimiter =
     assert (String.length delimiter = 1);
@@ -160,6 +167,14 @@ module Path = struct
 end
 
 module Fs = struct
+  module Sync = struct
+    include
+      [%js:
+      val copy : string -> string -> unit [@@js.global "fs.copyFileSync"]
+
+      val writeFile : string -> string -> unit [@@js.global "fs.writeFileSync"]]
+  end
+
   include
     [%js:
     val readDir : string -> string list Promise.t [@@js.global "fs.readDir"]
@@ -315,4 +330,11 @@ module ChildProcess = struct
     Promise.make @@ fun ~resolve ~reject:_ ->
     let cp = spawn cmd args ?options () in
     handle_child_process cp ?logger ?stdin resolve
+
+  module Sync = struct
+    include
+      [%js:
+      val exec : string -> ?options:Options.t -> unit -> string
+      [@@js.global "child_process.execSync"]]
+  end
 end

@@ -49,8 +49,7 @@ build-release:
 
 .PHONY: test
 test: ## Run the unit tests
-	dune build @runtest
-	yarn test
+	dune build @all @runtest --no-buffer
 
 .PHONY: clean
 clean: ## Clean build artifacts and other generated files

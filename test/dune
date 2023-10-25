@@ -1,1 +1,33 @@
 (data_only_dirs fixtures)
+
+(executable
+ (name run_opam_tests)
+ (modules run_opam_tests)
+ (modes js)
+ (libraries vscode.test_electron node))
+
+(executable
+ (name run_problem_matcher_tests)
+ (modules run_problem_matcher_tests)
+ (modes js)
+ (libraries vscode.test_electron node))
+
+(executable
+ (name run_esy_tests)
+ (modules run_esy_tests)
+ (modes js)
+ (libraries vscode.test_electron fs_extra node))
+
+(rule
+ (alias runtest)
+ (deps
+  (source_tree fixtures)
+  (source_tree suite)
+  run_opam_tests.bc.js
+  run_problem_matcher_tests.bc.js
+  run_esy_tests.bc.js)
+ (action
+  (progn
+   (run node ./run_opam_tests.bc.js)
+   (run node ./run_problem_matcher_tests.bc.js)
+   (run node ./run_esy_tests.bc.js))))
