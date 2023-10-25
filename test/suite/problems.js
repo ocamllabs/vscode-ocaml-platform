@@ -1,6 +1,5 @@
 const path = require("path");
 const Mocha = require("mocha");
-const glob = require("glob");
 
 function run() {
   // Create the mocha test
