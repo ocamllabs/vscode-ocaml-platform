@@ -1426,15 +1426,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode/test-electron@npm:2.3.5":
-  version: 2.3.5
-  resolution: "@vscode/test-electron@npm:2.3.5"
+"@vscode/test-electron@npm:2.3.6":
+  version: 2.3.6
+  resolution: "@vscode/test-electron@npm:2.3.6"
   dependencies:
     http-proxy-agent: "npm:^4.0.1"
     https-proxy-agent: "npm:^5.0.0"
     jszip: "npm:^3.10.1"
     semver: "npm:^7.5.2"
-  checksum: e39d3a5008d1a33b9d844c82ed44e6ec28e56484022356445bc19b49075924ed355e1f1b2c2765afe22cc45c2301f11a813e5ab05b8a3f15159e0b9de45eef5b
+  checksum: 5dc7cadfa11c28920911f6a27744147a5a12d43b6cbaf97cf276142021d886d5262bb60ce1c5af2d2eb436ae4069a33a54ae30e29a7bcd64d2dfcfce3883312d
   languageName: node
   linkType: hard
 
@@ -4596,7 +4596,7 @@ __metadata:
   resolution: "ocaml-platform@workspace:."
   dependencies:
     "@types/vscode": "npm:1.82.0"
-    "@vscode/test-electron": "npm:2.3.5"
+    "@vscode/test-electron": "npm:2.3.6"
     "@vscode/vsce": "npm:2.21.1"
     esbuild: "npm:0.19.5"
     fs-extra: "npm:11.1.1"
