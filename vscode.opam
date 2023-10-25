@@ -19,7 +19,7 @@ depends: [
   "dune" {>= "3.0"}
   "ocaml" {>= "4.13"}
   "js_of_ocaml" {>= "4.1.0"}
-  "gen_js_api" {= "1.1.1"}
+  "gen_js_api" {= "1.1.2"}
   "promise_jsoo" {>= "0.3.1"}
   "jsonoo" {>= "0.2.1"}
   "ocamlformat" {= "0.26.1" & with-dev-setup}
