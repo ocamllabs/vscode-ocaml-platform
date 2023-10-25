@@ -6,7 +6,4 @@ homepage: "foo"
 description: "Description"
 synopsis: "Synopsis"
 bug-reports: "https//foo.bar"
-depends: [
-  "ocaml"             {>= "4.04.2" & < "5.00.0"}
-  "base"              {>= "v0.12" }
-]
+depends: ["ocaml" "base"]

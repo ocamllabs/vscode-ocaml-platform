@@ -5,8 +5,8 @@ _build/
 _opam/
 
 # esy
-test/fixtures/sample-esy/_esy/
-test/fixtures/sample-esy/esy.lock/
+tests/fixtures/sample-esy/_esy/
+tests/fixtures/sample-esy/esy.lock/
 
 # Normal npm stuff
 node_modules/
