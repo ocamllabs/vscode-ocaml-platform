@@ -67,10 +67,13 @@ jobs:
           name: ocaml-platform-${{ github.sha }}
           path: ocaml-platform.vsix
 
-      - name: Test extension
-        uses: coactions/setup-xvfb@v1
-        with:
-          run: yarn test
+      - name: Test extension on Linux
+        if: runner.os == 'Linux'
+        run: xvfb-run -a yarn test
+
+      - name: Test extension on macOS
+        if: runner.os == 'macOS'
+        run: yarn test
 
       - name: Publish extension to VSCode Marketplace
         if: success() && runner.os == 'Linux' && startsWith(github.ref, 'refs/tags')
