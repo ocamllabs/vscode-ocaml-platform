@@ -88,6 +88,14 @@ end
 module Js = struct
   type 'a t = (module Ojs.T with type t = 'a)
 
+  module type Generic = sig
+    type 'a t
+
+    val t_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
+
+    val t_of_js : (Ojs.t -> 'a) -> Ojs.t -> 'a t
+  end
+
   module Unit = struct
     type t = unit
 

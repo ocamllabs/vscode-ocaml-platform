@@ -750,11 +750,13 @@ module Event : sig
     -> unit
     -> Disposable.t
 
+  include Js.Generic with type 'a t := 'a t
+
   module Make (T : Ojs.T) : Ojs.T with type t = T.t t
 end
 
 module EventEmitter : sig
-  type 'a t
+  include Js.Generic
 
   module Make (T : Ojs.T) : sig
     include Ojs.T with type t = T.t t
@@ -857,9 +859,7 @@ module ProviderResult : sig
     | `Promise of 'a option Promise.t
     ]
 
-  val t_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
-
-  val t_of_js : (Ojs.t -> 'a) -> Ojs.t -> 'a t
+  include Js.Generic with type 'a t := 'a t
 end
 
 module InputBoxOptions : sig
@@ -1651,7 +1651,7 @@ module Task : sig
 end
 
 module TaskProvider : sig
-  type 'a t
+  include Js.Generic
 
   module Make (T : Ojs.T) : sig
     type nonrec t = T.t t
@@ -1948,7 +1948,7 @@ module TreeItem : sig
 end
 
 module TreeDataProvider : sig
-  type 'a t
+  include Js.Generic
 
   module Make (T : Ojs.T) : sig
     type nonrec t = T.t t
@@ -1990,7 +1990,7 @@ module TreeDataProvider : sig
 end
 
 module TreeViewOptions : sig
-  type 'a t
+  include Js.Generic
 
   module Make (T : Ojs.T) : sig
     type nonrec t = T.t t
@@ -2004,7 +2004,7 @@ module TreeViewOptions : sig
 end
 
 module TreeViewExpansionEvent : sig
-  type 'a t
+  include Js.Generic
 
   module Make (T : Ojs.T) : sig
     type nonrec t = T.t t
@@ -2016,7 +2016,7 @@ module TreeViewExpansionEvent : sig
 end
 
 module TreeViewSelectionChangeEvent : sig
-  type 'a t
+  include Js.Generic
 
   module Make (T : Ojs.T) : sig
     type nonrec t = T.t t
@@ -2036,7 +2036,7 @@ module TreeViewVisibilityChangeEvent : sig
 end
 
 module TreeView : sig
-  type 'a t = private Disposable.t
+  include Js.Generic with type 'a t = private Disposable.t
 
   module Make (T : Ojs.T) : sig
     type nonrec t = T.t t
@@ -2067,7 +2067,6 @@ module TreeView : sig
       -> ?expand:[ `Bool of bool | `Int of int ]
       -> unit
       -> Promise.void
-    [@@js.call]
   end
 end
 
@@ -2240,7 +2239,7 @@ module CustomDocumentOpenContext : sig
 end
 
 module CustomReadonlyEditorProvider : sig
-  type 'a t
+  include Js.Generic
 
   module Make (T : CustomDocument.T) : sig
     type nonrec t = T.t t

@@ -135,7 +135,7 @@ end
 
 module Net : sig
   module Socket : sig
-    type t
+    include Ojs.T
 
     val make : unit -> t
 
@@ -159,7 +159,7 @@ end
 
 module ChildProcess : sig
   module Options : sig
-    type t
+    include Ojs.T
 
     val create : ?cwd:string -> ?env:string Interop.Dict.t -> unit -> t
   end

@@ -962,6 +962,7 @@ module Event = struct
     -> ?disposables:Disposable.t list
     -> unit
     -> Disposable.t
+  [@@js]
 
   module Make (T : Ojs.T) = struct
     type t =

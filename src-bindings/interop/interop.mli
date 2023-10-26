@@ -42,6 +42,14 @@ end
 module Js : sig
   type 'a t = (module Ojs.T with type t = 'a)
 
+  module type Generic = sig
+    type 'a t
+
+    val t_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
+
+    val t_of_js : (Ojs.t -> 'a) -> Ojs.t -> 'a t
+  end
+
   module Unit : Ojs.T with type t = unit
 
   module Result (Ok : Ojs.T) (Error : Ojs.T) :
@@ -57,13 +65,8 @@ module Interface : sig
 
   module Extend (Super : Ojs.T) () : Ojs.T with type t = private Super.t
 
-  module Generic (Super : Ojs.T) () : sig
-    type 'a t = private Super.t
-
-    val t_of_js : (Ojs.t -> 'a) -> Ojs.t -> 'a t
-
-    val t_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
-  end
+  module Generic (Super : Ojs.T) () :
+    Js.Generic with type 'a t = private Super.t
 end
 
 module Class = Interface
