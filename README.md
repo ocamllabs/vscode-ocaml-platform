@@ -1,6 +1,6 @@
 # VSCode OCaml Platform
 
-[![Main workflow](https://img.shields.io/github/workflow/status/ocamllabs/vscode-ocaml-platform/Main%20workflow?branch=master)](https://github.com/ocamllabs/vscode-ocaml-platform/actions?query=workflow%3A%22Main+workflow%22+branch%3Amaster)
+[![Main workflow](https://github.com/ocamllabs/vscode-ocaml-platform/actions/workflows/main.yml/badge.svg)](https://github.com/ocamllabs/vscode-ocaml-platform/actions/workflows/main.yml)
 
 Visual Studio Code extension for OCaml and relevant tools.
 
