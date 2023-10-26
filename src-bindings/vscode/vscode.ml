@@ -982,13 +982,11 @@ module EventEmitter = struct
   module Make (T : Ojs.T) = struct
     type t = T.t G.t [@@js]
 
-    module Event = Event.Make (T)
-
     include
       [%js:
       val make : unit -> t [@@js.new "vscode.EventEmitter"]
 
-      val event : t -> Event.t [@@js.get]
+      val event : t -> T.t Event.t [@@js.get]
 
       val fire : t -> T.t -> unit [@@js.call]
 
@@ -998,18 +996,15 @@ end
 
 module CancellationToken = struct
   include Interface.Make ()
-  module OnCancellationRequested = Event.Make (Ojs)
 
   include
     [%js:
     val isCancellationRequested : t -> bool [@@js.get]
 
-    val onCancellationRequested : t -> OnCancellationRequested.t [@@js.get]
+    val onCancellationRequested : t -> Ojs.t Event.t [@@js.get]
 
     val create :
-         isCancellationRequested:bool
-      -> onCancellationRequested:OnCancellationRequested.t
-      -> t
+      isCancellationRequested:bool -> onCancellationRequested:Ojs.t Event.t -> t
     [@@js.builder]]
 end
 
@@ -1396,19 +1391,16 @@ end
 
 module Pseudoterminal = struct
   include Interface.Make ()
-  module OnDidWrite = Event.Make (Ojs.String)
-  module OnDidOverrideDimensions =
-    Event.Make (Js.Or_undefined (TerminalDimensions))
-  module OnDidClose = Event.Make (Js.Or_undefined (Ojs.Int))
 
   include
     [%js:
-    val onDidWrite : t -> OnDidWrite.t [@@js.get]
+    val onDidWrite : t -> string Event.t [@@js.get]
 
-    val onDidOverrideDimensions : t -> OnDidOverrideDimensions.t or_undefined
+    val onDidOverrideDimensions :
+      t -> TerminalDimensions.t or_undefined Event.t or_undefined
     [@@js.get]
 
-    val onDidClose : t -> OnDidClose.t or_undefined [@@js.get]
+    val onDidClose : t -> int or_undefined Event.t or_undefined [@@js.get]
 
     val open_ : t -> ?initialDimensions:TerminalDimensions.t -> unit -> unit
     [@@js.call]
@@ -1422,9 +1414,9 @@ module Pseudoterminal = struct
     [@@js.get]
 
     val create :
-         onDidWrite:OnDidWrite.t
-      -> ?onDidOverrideDimensions:OnDidOverrideDimensions.t
-      -> ?onDidClose:OnDidClose.t
+         onDidWrite:string Event.t
+      -> ?onDidOverrideDimensions:TerminalDimensions.t or_undefined Event.t
+      -> ?onDidClose:int or_undefined Event.t
       -> open_:(?initialDimensions:TerminalDimensions.t -> unit -> unit)
       -> close:(unit -> unit)
       -> ?handleInput:(data:string -> unit)
@@ -1609,7 +1601,6 @@ end
 
 module SecretStorage = struct
   include Interface.Make ()
-  module OnDidChange = Event.Make (SecretStorageChangeEvent)
 
   include
     [%js:
@@ -1619,7 +1610,7 @@ module SecretStorage = struct
 
     val delete : t -> key:string -> Promise.void [@@js.call]
 
-    val onDidChange : t -> OnDidChange.t [@@js.get]]
+    val onDidChange : t -> SecretStorageChangeEvent.t Event.t [@@js.get]]
 end
 
 module ExtensionContext = struct
@@ -2218,18 +2209,17 @@ end
 
 module TextDocumentContentProvider = struct
   include Interface.Make ()
-  module OnDidChange = Event.Make (Uri)
 
   include
     [%js:
-    val onDidChange : t -> OnDidChange.t or_undefined [@@js.get]
+    val onDidChange : t -> Uri.t Event.t or_undefined [@@js.get]
 
     val provideTextDocumentContent :
       t -> uri:Uri.t -> token:CancellationToken.t -> string ProviderResult.t
     [@@js.call]
 
     val create :
-         ?onDidChange:OnDidChange.t
+         ?onDidChange:Uri.t Event.t
       -> provideTextDocumentContent:
            (uri:Uri.t -> token:CancellationToken.t -> string ProviderResult.t)
       -> unit
@@ -2239,9 +2229,8 @@ end
 
 module FileSystemWatcher = struct
   include Interface.Make ()
-  module OnDidChange = Event.Make (Uri)
 
-  include [%js: val onDidChange : t -> OnDidChange.t [@@js.get]]
+  include [%js: val onDidChange : t -> Uri.t Event.t [@@js.get]]
 end
 
 module ConfigurationChangeEvent = struct
@@ -2249,13 +2238,6 @@ module ConfigurationChangeEvent = struct
 end
 
 module Workspace = struct
-  module OnDidChangeWorkspaceFolders = Event.Make (WorkspaceFolder)
-  module OnDidOpenTextDocument = Event.Make (TextDocument)
-  module OnDidCloseTextDocument = Event.Make (TextDocument)
-  module OnDidSaveTextDocument = Event.Make (TextDocument)
-  module OnDidChangeTextDocument = Event.Make (TextDocumentChangeEvent)
-  module OnDidChangeConfiguration = Event.Make (ConfigurationChangeEvent)
-
   type textDocumentOptions =
     { language : string
     ; content : string
@@ -2293,25 +2275,25 @@ module Workspace = struct
     val textDocuments : unit -> TextDocument.t list
     [@@js.get "vscode.workspace.textDocuments"]
 
-    val onDidChangeConfiguration : OnDidChangeConfiguration.t
+    val onDidChangeConfiguration : ConfigurationChangeEvent.t Event.t
     [@@js.global "vscode.workspace.onDidChangeConfiguration"]
 
-    val onDidChangeWorkspaceFolders : OnDidChangeWorkspaceFolders.t
+    val onDidChangeWorkspaceFolders : WorkspaceFolder.t Event.t
     [@@js.global "vscode.workspace.onDidChangeWorkspaceFolders"]
 
     val getWorkspaceFolder : uri:Uri.t -> WorkspaceFolder.t or_undefined
     [@@js.global "vscode.workspace.getWorkspaceFolder"]
 
-    val onDidOpenTextDocument : OnDidOpenTextDocument.t
+    val onDidOpenTextDocument : TextDocument.t Event.t
     [@@js.global "vscode.workspace.onDidOpenTextDocument"]
 
-    val onDidSaveTextDocument : OnDidSaveTextDocument.t
+    val onDidSaveTextDocument : TextDocument.t Event.t
     [@@js.global "vscode.workspace.onDidSaveTextDocument"]
 
-    val onDidCloseTextDocument : OnDidCloseTextDocument.t
+    val onDidCloseTextDocument : TextDocument.t Event.t
     [@@js.global "vscode.workspace.onDidCloseTextDocument"]
 
-    val onDidChangeTextDocument : OnDidChangeTextDocument.t
+    val onDidChangeTextDocument : TextDocumentChangeEvent.t Event.t
     [@@js.global "vscode.workspace.onDidChangeTextDocument"]
 
     val applyEdit : edit:WorkspaceEdit.t -> bool Promise.t
@@ -2568,10 +2550,6 @@ module TreeDataProvider = struct
   module Make (T : Ojs.T) = struct
     type t = T.t G.t [@@js]
 
-    module OnDidChangeTreeData = Event.Make (struct
-      type t = T.t or_undefined [@@js]
-    end)
-
     type getTreeItemResult =
       ([ `Value of TreeItem.t
        | `Promise of TreeItem.t Promise.t
@@ -2586,7 +2564,7 @@ module TreeDataProvider = struct
 
     include
       [%js:
-      val onDidChangeTreeData : t -> OnDidChangeTreeData.t or_undefined
+      val onDidChangeTreeData : t -> T.t or_undefined Event.t or_undefined
       [@@js.get]
 
       val getTreeItem : t -> element:T.t -> getTreeItemResult [@@js.call]
@@ -2607,7 +2585,7 @@ module TreeDataProvider = struct
       [@@js.call]
 
       val create :
-           ?onDidChangeTreeData:OnDidChangeTreeData.t
+           ?onDidChangeTreeData:T.t or_undefined Event.t
         -> getTreeItem:(element:T.t -> getTreeItemResult)
         -> getChildren:(?element:T.t -> unit -> T.t list ProviderResult.t)
         -> ?getParent:(element:T.t -> T.t ProviderResult.t)
@@ -2629,11 +2607,9 @@ module TreeViewOptions = struct
   module Make (T : Ojs.T) = struct
     type t = T.t G.t [@@js]
 
-    module TreeDataProvider = TreeDataProvider.Make (T)
-
     include
       [%js:
-      val treeDataProvider : t -> TreeDataProvider.t [@@js.get]
+      val treeDataProvider : t -> T.t TreeDataProvider.t [@@js.get]
 
       val showCollapseAll : t -> bool or_undefined [@@js.get]
 
@@ -2688,25 +2664,23 @@ module TreeView = struct
   module Make (T : Ojs.T) = struct
     type t = T.t G.t [@@js]
 
-    module OnDidExpandElement = Event.Make (TreeViewExpansionEvent.Make (T))
-    module OnDidCollapseElement = Event.Make (TreeViewExpansionEvent.Make (T))
-    module OnDidChangeSelection =
-      Event.Make (TreeViewSelectionChangeEvent.Make (T))
-    module OnDidChangeVisibility = Event.Make (TreeViewVisibilityChangeEvent)
-
     include
       [%js:
-      val onDidExpandElement : t -> OnDidExpandElement.t [@@js.get]
+      val onDidExpandElement : t -> T.t TreeViewExpansionEvent.t Event.t
+      [@@js.get]
 
-      val onDidCollapseElement : t -> OnDidCollapseElement.t [@@js.get]
+      val onDidCollapseElement : t -> T.t TreeViewExpansionEvent.t Event.t
+      [@@js.get]
 
       val selection : t -> T.t list [@@js.get]
 
-      val onDidChangeSelection : t -> OnDidChangeSelection.t [@@js.get]
+      val onDidChangeSelection : t -> T.t TreeViewSelectionChangeEvent.t Event.t
+      [@@js.get]
 
       val visible : t -> bool [@@js.get]
 
-      val onDidChangeVisibility : t -> OnDidChangeVisibility.t [@@js.get]
+      val onDidChangeVisibility : t -> TreeViewVisibilityChangeEvent.t Event.t
+      [@@js.get]
 
       val message : t -> string or_undefined [@@js.get]
 
@@ -2774,11 +2748,10 @@ end
 
 module WebView = struct
   include Interface.Make ()
-  module OnDidReceiveMessage = Event.Make (Ojs)
 
   include
     [%js:
-    val onDidReceiveMessage : t -> OnDidReceiveMessage.t [@@js.get]
+    val onDidReceiveMessage : t -> Ojs.t Event.t [@@js.get]
 
     val cspSource : t -> string [@@js.get]
 
@@ -2795,7 +2768,7 @@ module WebView = struct
     val postMessage : t -> Ojs.t -> bool Promise.t [@@js.call]
 
     val create :
-         onDidReceiveMessage:OnDidReceiveMessage.t
+         onDidReceiveMessage:Ojs.t Event.t
       -> cspSource:string
       -> html:string
       -> options:WebviewOptions.t
@@ -2832,15 +2805,13 @@ module WebviewPanel = struct
     [@js.union])
   [@@js]
 
-  module OnDidChangeViewState =
-    Event.Make (WebviewPanelOnDidChangeViewStateEvent)
-  module OnDidDispose = Event.Make (Js.Unit)
-
   include
     [%js:
-    val onDidChangeViewState : t -> OnDidChangeViewState.t [@@js.get]
+    val onDidChangeViewState :
+      t -> WebviewPanelOnDidChangeViewStateEvent.t Event.t
+    [@@js.get]
 
-    val onDidDispose : t -> OnDidDispose.t [@@js.get]
+    val onDidDispose : t -> unit Event.t [@@js.get]
 
     val active : t -> bool [@@js.get]
 
@@ -2865,8 +2836,8 @@ module WebviewPanel = struct
     [@@js.call]
 
     val create :
-         onDidChangeViewState:OnDidChangeViewState.t
-      -> onDidDispose:OnDidDispose.t
+         onDidChangeViewState:WebviewPanelOnDidChangeViewStateEvent.t Event.t
+      -> onDidDispose:unit Event.t
       -> active:bool
       -> options:WebviewPanelOptions.t
       -> title:string
@@ -2980,12 +2951,6 @@ module RegisterCustomEditorProviderOptions = struct
 end
 
 module Window = struct
-  module OnDidChangeActiveTextEditor = Event.Make (TextEditor)
-  module OnDidChangeVisibleTextEditors = Event.Make (Ojs.List (TextEditor))
-  module OnDidChangeActiveTerminal = Event.Make (Js.Or_undefined (Terminal))
-  module OnDidOpenTerminal = Event.Make (Terminal)
-  module OnDidCloseTerminal = Event.Make (Terminal)
-
   include
     [%js:
     val activeTextEditor : unit -> TextEditor.t or_undefined
@@ -2994,10 +2959,10 @@ module Window = struct
     val visibleTextEditors : unit -> TextEditor.t list
     [@@js.get "vscode.window.visibleTextEditors"]
 
-    val onDidChangeActiveTextEditor : unit -> OnDidChangeActiveTextEditor.t
+    val onDidChangeActiveTextEditor : unit -> TextEditor.t Event.t
     [@@js.get "vscode.window.onDidChangeActiveTextEditor"]
 
-    val onDidChangeVisibleTextEditors : unit -> OnDidChangeVisibleTextEditors.t
+    val onDidChangeVisibleTextEditors : unit -> TextEditor.t list Event.t
     [@@js.get "vscode.window.onDidChangeVisibleTextEditors"]
 
     val terminals : unit -> Terminal.t list [@@js.get "vscode.window.terminals"]
@@ -3005,13 +2970,13 @@ module Window = struct
     val activeTerminal : unit -> Terminal.t or_undefined
     [@@js.get "vscode.window.activeTerminal"]
 
-    val onDidChangeActiveTerminal : unit -> OnDidChangeActiveTerminal.t
+    val onDidChangeActiveTerminal : unit -> Terminal.t or_undefined Event.t
     [@@js.get "vscode.window.onDidChangeActiveTerminal"]
 
-    val onDidOpenTerminal : unit -> OnDidOpenTerminal.t
+    val onDidOpenTerminal : unit -> Terminal.t Event.t
     [@@js.get "vscode.window.onDidOpenTerminal"]
 
-    val onDidCloseTerminal : unit -> OnDidCloseTerminal.t
+    val onDidCloseTerminal : unit -> Terminal.t Event.t
     [@@js.get "vscode.window.onDidCloseTerminal"]
 
     val showTextDocument :

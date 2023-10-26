@@ -12,14 +12,13 @@ module Cm_document : sig
   val create : uri:Uri.t -> t
 end = struct
   include CustomDocument
-  module OnDidChange = Event.Make (Js.Unit)
 
   include
     [%js:
-    val onDidChange : t -> OnDidChange.t [@@js.get]
+    val onDidChange : t -> unit Event.t [@@js.get]
 
     val create :
-      uri:Uri.t -> onDidChange:OnDidChange.t -> dispose:(unit -> unit) -> t
+      uri:Uri.t -> onDidChange:unit Event.t -> dispose:(unit -> unit) -> t
     [@@js.builder]]
 
   let content t ~instance =
