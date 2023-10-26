@@ -107,7 +107,7 @@ module Command = struct
           in
           let* result =
             Vscode.Window.withProgress
-              (module Interop.Js.Result (Interop.Js.Unit) (Interop.Js.String))
+              (module Interop.Js.Result (Interop.Js.Unit) (Ojs.String))
               ~options
               ~task
           in

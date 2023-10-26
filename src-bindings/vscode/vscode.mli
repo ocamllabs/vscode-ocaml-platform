@@ -3,7 +3,7 @@ open Interop
 val version : string
 
 module Disposable : sig
-  include Js.T
+  include Ojs.T
 
   val from : t list -> t
 
@@ -13,7 +13,7 @@ module Disposable : sig
 end
 
 module Command : sig
-  include Js.T
+  include Ojs.T
 
   val title : t -> string
 
@@ -21,19 +21,19 @@ module Command : sig
 
   val tooltip : t -> string option
 
-  val arguments : t -> Js.Any.t list
+  val arguments : t -> Ojs.t list
 
   val create :
        title:string
     -> command:string
     -> ?tooltip:string
-    -> ?arguments:Js.Any.t list
+    -> ?arguments:Ojs.t list
     -> unit
     -> t
 end
 
 module Position : sig
-  include Js.T
+  include Ojs.T
 
   val make : line:int -> character:int -> t
 
@@ -59,7 +59,7 @@ module Position : sig
 end
 
 module Range : sig
-  include Js.T
+  include Ojs.T
 
   val start : t -> Position.t
 
@@ -87,7 +87,7 @@ module Range : sig
 end
 
 module TextLine : sig
-  include Js.T
+  include Ojs.T
 
   val lineNumber : t -> int
 
@@ -116,11 +116,11 @@ module EndOfLine : sig
     | CRLF
     | LF
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module TextEdit : sig
-  include Js.T
+  include Ojs.T
 
   val replace : range:Range.t -> newText:string -> t
 
@@ -140,7 +140,7 @@ module TextEdit : sig
 end
 
 module Uri : sig
-  include Js.T
+  include Ojs.T
 
   module Scheme : sig
     type t =
@@ -188,7 +188,7 @@ module Uri : sig
 end
 
 module TextDocument : sig
-  include Js.T
+  include Ojs.T
 
   val uri : t -> Uri.t
 
@@ -233,7 +233,7 @@ module TextDocument : sig
 end
 
 module WorkspaceFolder : sig
-  include Js.T
+  include Ojs.T
 
   val uri : t -> Uri.t
 
@@ -258,7 +258,7 @@ module ViewColumn : sig
     | Eight
     | Nine
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module Selection : sig
@@ -281,7 +281,7 @@ module Selection : sig
 end
 
 module TextEditorEdit : sig
-  include Js.T
+  include Ojs.T
 
   type replaceLocation =
     [ `Position of Position.t
@@ -319,7 +319,7 @@ module TextEditorCursorStyle : sig
     | BlockOutline
     | UnderlineThin
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module TextEditorLineNumbersStyle : sig
@@ -328,7 +328,7 @@ module TextEditorLineNumbersStyle : sig
     | On
     | Relative
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module TextEditorRevealType : sig
@@ -338,11 +338,11 @@ module TextEditorRevealType : sig
     | InCenterIfOutsideViewport
     | AtTop
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module TextEditorOptions : sig
-  include Js.T
+  include Ojs.T
 
   type tabSize =
     [ `Int of int
@@ -372,7 +372,7 @@ module TextEditorOptions : sig
 end
 
 module TextEditorDecorationType : sig
-  include Js.T
+  include Ojs.T
 
   val key : t -> string
 
@@ -384,7 +384,7 @@ module TextEditorDecorationType : sig
 end
 
 module MarkdownString : sig
-  include Js.T
+  include Ojs.T
 
   val value : t -> string
 
@@ -402,13 +402,13 @@ module MarkdownString : sig
 end
 
 module ThemeColor : sig
-  include Js.T
+  include Ojs.T
 
   val make : id:string -> t
 end
 
 module ThemableDecorationAttachmentRenderOptions : sig
-  include Js.T
+  include Ojs.T
 
   type contentIconPath =
     [ `String of string
@@ -462,7 +462,7 @@ module ThemableDecorationAttachmentRenderOptions : sig
 end
 
 module ThemableDecorationInstanceRenderOptions : sig
-  include Js.T
+  include Ojs.T
 
   val before : t -> ThemableDecorationAttachmentRenderOptions.t option
 
@@ -476,7 +476,7 @@ module ThemableDecorationInstanceRenderOptions : sig
 end
 
 module DecorationInstanceRenderOptions : sig
-  include Js.T
+  include Ojs.T
 
   val light : t -> ThemableDecorationInstanceRenderOptions.t option
 
@@ -490,7 +490,7 @@ module DecorationInstanceRenderOptions : sig
 end
 
 module DecorationOptions : sig
-  include Js.T
+  include Ojs.T
 
   type hoverMessage =
     [ `MarkdownString of MarkdownString.t
@@ -512,7 +512,7 @@ module DecorationOptions : sig
 end
 
 module SnippetString : sig
-  include Js.T
+  include Ojs.T
 
   val value : t -> string
 
@@ -539,7 +539,7 @@ module SnippetString : sig
 end
 
 module TextEditor : sig
-  include Js.T
+  include Ojs.T
 
   type insertSnippetLocation =
     [ `Position of Position.t
@@ -596,11 +596,11 @@ module ConfigurationTarget : sig
     | Workspace
     | WorkspaceFolder
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module WorkspaceConfiguration : sig
-  include Js.T
+  include Ojs.T
 
   type 'a inspectResult =
     { key : string
@@ -615,7 +615,7 @@ module WorkspaceConfiguration : sig
     ; languageIds : string list option
     }
 
-  val get : t -> section:string -> Js.Any.t option
+  val get : t -> section:string -> Ojs.t option
 
   val get_default : 'a Js.t -> t -> section:string -> defaultValue:'a -> 'a
 
@@ -626,7 +626,7 @@ module WorkspaceConfiguration : sig
   val update :
        t
     -> section:string
-    -> value:Js.Any.t
+    -> value:Ojs.t
     -> ?configurationTarget:
          [ `ConfigurationTarget of ConfigurationTarget.t | `Bool of bool ]
     -> ?overrideInLanguage:bool
@@ -635,7 +635,7 @@ module WorkspaceConfiguration : sig
 end
 
 module WorkspaceEdit : sig
-  include Js.T
+  include Ojs.T
 
   val size : t -> int
 
@@ -654,11 +654,11 @@ module StatusBarAlignment : sig
     | Left
     | Right
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module AccessibilityInformation : sig
-  include Js.T
+  include Ojs.T
 
   val label : t -> string
 
@@ -668,7 +668,7 @@ module AccessibilityInformation : sig
 end
 
 module StatusBarItem : sig
-  include Js.T
+  include Ojs.T
 
   type color =
     [ `String of string
@@ -722,7 +722,7 @@ module StatusBarItem : sig
 end
 
 module WorkspaceFoldersChangeEvent : sig
-  include Js.T
+  include Ojs.T
 
   val added : t -> WorkspaceFolder.t list
 
@@ -733,7 +733,7 @@ module WorkspaceFoldersChangeEvent : sig
 end
 
 module FormattingOptions : sig
-  include Js.T
+  include Ojs.T
 
   val tabSize : t -> int
 
@@ -745,19 +745,21 @@ end
 module Event : sig
   type 'a t =
        listener:('a -> unit)
-    -> ?thisArgs:Js.Any.t
+    -> ?thisArgs:Ojs.t
     -> ?disposables:Disposable.t list
     -> unit
     -> Disposable.t
 
-  module Make (T : Js.T) : Js.T with type t = T.t t
+  include Js.Generic with type 'a t := 'a t
+
+  module Make (T : Ojs.T) : Ojs.T with type t = T.t t
 end
 
 module EventEmitter : sig
-  type 'a t
+  include Js.Generic
 
-  module Make (T : Js.T) : sig
-    include Js.T with type t = T.t t
+  module Make (T : Ojs.T) : sig
+    include Ojs.T with type t = T.t t
 
     val make : unit -> t
 
@@ -770,21 +772,19 @@ module EventEmitter : sig
 end
 
 module CancellationToken : sig
-  include Js.T
+  include Ojs.T
 
   val isCancellationRequested : t -> bool
 
-  val onCancellationRequested : t -> Js.Any.t Event.t
+  val onCancellationRequested : t -> Ojs.t Event.t
 
   val create :
-       isCancellationRequested:bool
-    -> onCancellationRequested:Js.Any.t Event.t
-    -> t
+    isCancellationRequested:bool -> onCancellationRequested:Ojs.t Event.t -> t
 end
 
 module CustomDocument : sig
   module type T = sig
-    include Js.T
+    include Ojs.T
 
     val uri : t -> Uri.t
 
@@ -797,7 +797,7 @@ module CustomDocument : sig
 end
 
 module QuickPickItem : sig
-  include Js.T
+  include Ojs.T
 
   val label : t -> string
 
@@ -820,7 +820,7 @@ module QuickPickItem : sig
 end
 
 module QuickPickOptions : sig
-  include Js.T
+  include Ojs.T
 
   type onDidSelectItemArgs =
     [ `QuickPickItem of QuickPickItem.t
@@ -859,13 +859,11 @@ module ProviderResult : sig
     | `Promise of 'a option Promise.t
     ]
 
-  val t_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
-
-  val t_of_js : (Ojs.t -> 'a) -> Ojs.t -> 'a t
+  include Js.Generic with type 'a t := 'a t
 end
 
 module InputBoxOptions : sig
-  include Js.T
+  include Ojs.T
 
   val title : t -> string option
 
@@ -897,7 +895,7 @@ module InputBoxOptions : sig
 end
 
 module OpenDialogOptions : sig
-  include Js.T
+  include Ojs.T
 
   val create :
        ?canSelectFiles:bool
@@ -912,7 +910,7 @@ module OpenDialogOptions : sig
 end
 
 module MessageItem : sig
-  include Js.T
+  include Ojs.T
 
   val title : t -> string
 
@@ -922,7 +920,7 @@ module MessageItem : sig
 end
 
 module Location : sig
-  include Js.T
+  include Ojs.T
 
   val uri : t -> Uri.t
 
@@ -940,11 +938,11 @@ module ProgressLocation : sig
     | Window
     | Notification
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module ProgressOptions : sig
-  include Js.T
+  include Ojs.T
 
   type location =
     [ `ProgressLocation of ProgressLocation.t
@@ -972,7 +970,7 @@ module DiagnosticSeverity : sig
 end
 
 module DiagnosticRelatedInformation : sig
-  include Js.T
+  include Ojs.T
 
   val location : t -> Location.t
 
@@ -988,7 +986,7 @@ module DiagnosticTag : sig
 end
 
 module Diagnostic : sig
-  include Js.T
+  include Ojs.T
 
   type code_target =
     { value : [ `String of string | `Int of int ]
@@ -1019,7 +1017,7 @@ module Diagnostic : sig
 end
 
 module TextDocumentShowOptions : sig
-  include Js.T
+  include Ojs.T
 
   val viewColumn : t -> ViewColumn.t option
 
@@ -1039,7 +1037,7 @@ module TextDocumentShowOptions : sig
 end
 
 module TerminalOptions : sig
-  include Js.T
+  include Ojs.T
 
   type shellArgs =
     [ `Arg of string
@@ -1067,7 +1065,7 @@ module TerminalOptions : sig
 end
 
 module TerminalDimensions : sig
-  include Js.T
+  include Ojs.T
 
   val columns : t -> int
 
@@ -1077,7 +1075,7 @@ module TerminalDimensions : sig
 end
 
 module Pseudoterminal : sig
-  include Js.T
+  include Ojs.T
 
   val onDidWrite : t -> string Event.t
 
@@ -1106,7 +1104,7 @@ module Pseudoterminal : sig
 end
 
 module ExtensionTerminalOptions : sig
-  include Js.T
+  include Ojs.T
 
   val name : t -> string
 
@@ -1116,7 +1114,7 @@ module ExtensionTerminalOptions : sig
 end
 
 module Extension : sig
-  include Js.T
+  include Ojs.T
 end
 
 module Extensions : sig
@@ -1124,7 +1122,7 @@ module Extensions : sig
 end
 
 module TerminalExitStatus : sig
-  include Js.T
+  include Ojs.T
 
   val code : t -> int
 
@@ -1132,7 +1130,7 @@ module TerminalExitStatus : sig
 end
 
 module Terminal : sig
-  include Js.T
+  include Ojs.T
 
   type creationOptions =
     [ `TerminalOptions of TerminalOptions.t
@@ -1159,7 +1157,7 @@ module Terminal : sig
 end
 
 module OutputChannel : sig
-  include Js.T
+  include Ojs.T
 
   val name : t -> string
 
@@ -1179,13 +1177,13 @@ module OutputChannel : sig
 end
 
 module Memento : sig
-  include Js.T
+  include Ojs.T
 
-  val get : t -> key:string -> Js.Any.t option
+  val get : t -> key:string -> Ojs.t option
 
   val get_default : 'a Js.t -> t -> key:string -> defaultValue:'a -> 'a
 
-  val update : t -> key:string -> value:Js.Any.t -> Promise.void
+  val update : t -> key:string -> value:Ojs.t -> Promise.void
 end
 
 module EnvironmentVariableMutatorType : sig
@@ -1194,11 +1192,11 @@ module EnvironmentVariableMutatorType : sig
     | Append
     | Prepend
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module EnvironmentVariableMutator : sig
-  include Js.T
+  include Ojs.T
 
   val type_ : t -> EnvironmentVariableMutatorType.t
 
@@ -1206,7 +1204,7 @@ module EnvironmentVariableMutator : sig
 end
 
 module EnvironmentVariableCollection : sig
-  include Js.T
+  include Ojs.T
 
   val persistent : t -> bool
 
@@ -1238,17 +1236,17 @@ module ExtensionMode : sig
     | Development
     | Test
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module SecretStorageChangeEvent : sig
-  include Js.T
+  include Ojs.T
 
   val key : t -> string
 end
 
 module SecretStorage : sig
-  include Js.T
+  include Ojs.T
 
   val get : t -> key:string -> string option Promise.t
 
@@ -1260,7 +1258,7 @@ module SecretStorage : sig
 end
 
 module ExtensionContext : sig
-  include Js.T
+  include Ojs.T
 
   val subscriptions : t -> Disposable.t list
 
@@ -1290,7 +1288,7 @@ module ExtensionContext : sig
 end
 
 module ShellQuotingOptions : sig
-  include Js.T
+  include Ojs.T
 
   type escapeLiteral =
     { escapeChar : string
@@ -1312,7 +1310,7 @@ module ShellQuotingOptions : sig
 end
 
 module ShellExecutionOptions : sig
-  include Js.T
+  include Ojs.T
 
   val executable : t -> string option
 
@@ -1340,11 +1338,11 @@ module ShellQuoting : sig
     | Strong
     | Weak
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module ShellQuotedString : sig
-  include Js.T
+  include Ojs.T
 
   val value : t -> string
 
@@ -1354,7 +1352,7 @@ module ShellQuotedString : sig
 end
 
 module ShellExecution : sig
-  include Js.T
+  include Ojs.T
 
   type shellString =
     [ `String of string
@@ -1381,7 +1379,7 @@ module ShellExecution : sig
 end
 
 module ProcessExecutionOptions : sig
-  include Js.T
+  include Ojs.T
 
   val cwd : t -> string option
 
@@ -1391,7 +1389,7 @@ module ProcessExecutionOptions : sig
 end
 
 module ProcessExecution : sig
-  include Js.T
+  include Ojs.T
 
   val makeProcess :
     process:string -> ?options:ProcessExecutionOptions.t -> unit -> t
@@ -1411,19 +1409,19 @@ module ProcessExecution : sig
 end
 
 module TaskDefinition : sig
-  include Js.T
+  include Ojs.T
 
   val type_ : t -> string
 
-  val get_attribute : t -> string -> Js.Any.t
+  val get_attribute : t -> string -> Ojs.t
 
-  val set_attribute : t -> string -> Js.Any.t -> unit
+  val set_attribute : t -> string -> Ojs.t -> unit
 
-  val create : type_:string -> ?attributes:(string * Js.Any.t) list -> unit -> t
+  val create : type_:string -> ?attributes:(string * Ojs.t) list -> unit -> t
 end
 
 module CustomExecution : sig
-  include Js.T
+  include Ojs.T
 
   val make :
        callback:
@@ -1432,7 +1430,7 @@ module CustomExecution : sig
 end
 
 module RelativePattern : sig
-  include Js.T
+  include Ojs.T
 
   val base : t -> string
 
@@ -1454,11 +1452,11 @@ module GlobPattern : sig
     | `RelativePattern of RelativePattern.t
     ]
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module DocumentFilter : sig
-  include Js.T
+  include Ojs.T
 
   val language : t -> string option
 
@@ -1481,11 +1479,11 @@ module DocumentSelector : sig
     | `List of selector list
     ]
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module DocumentFormattingEditProvider : sig
-  include Js.T
+  include Ojs.T
 
   val provideDocumentFormattingEdits :
        t
@@ -1504,7 +1502,7 @@ module DocumentFormattingEditProvider : sig
 end
 
 module Hover : sig
-  include Js.T
+  include Ojs.T
 
   val contents : t -> MarkdownString.t
 
@@ -1519,7 +1517,7 @@ module Hover : sig
 end
 
 module HoverProvider : sig
-  include Js.T
+  include Ojs.T
 
   val provideHover :
        t
@@ -1538,7 +1536,7 @@ module HoverProvider : sig
 end
 
 module TaskGroup : sig
-  include Js.T
+  include Ojs.T
 
   val clean : t
 
@@ -1555,11 +1553,11 @@ module TaskScope : sig
     | Global
     | Workspace
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module RunOptions : sig
-  include Js.T
+  include Ojs.T
 
   val reevaluateOnRerun : t -> bool option
 
@@ -1572,7 +1570,7 @@ module TaskRevealKind : sig
     | Silent
     | Never
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module TaskPanelKind : sig
@@ -1581,11 +1579,11 @@ module TaskPanelKind : sig
     | Dedicated
     | New
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module TaskPresentationOptions : sig
-  include Js.T
+  include Ojs.T
 
   val reveal : t -> TaskRevealKind.t option
 
@@ -1611,7 +1609,7 @@ module TaskPresentationOptions : sig
 end
 
 module Task : sig
-  include Js.T
+  include Ojs.T
 
   type execution =
     [ `ProcessExecution of ProcessExecution.t
@@ -1653,9 +1651,9 @@ module Task : sig
 end
 
 module TaskProvider : sig
-  type 'a t
+  include Js.Generic
 
-  module Make (T : Js.T) : sig
+  module Make (T : Ojs.T) : sig
     type nonrec t = T.t t
 
     val provideTasks :
@@ -1681,11 +1679,11 @@ module ConfigurationScope : sig
     | `WorkspaceFolder of WorkspaceFolder.t
     ]
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module MessageOptions : sig
-  include Js.T
+  include Ojs.T
 
   val modal : t -> bool option
 
@@ -1693,7 +1691,7 @@ module MessageOptions : sig
 end
 
 module Progress : sig
-  include Js.T
+  include Ojs.T
 
   type value =
     { message : string option
@@ -1704,7 +1702,7 @@ module Progress : sig
 end
 
 module TextDocumentContentChangeEvent : sig
-  include Js.T
+  include Ojs.T
 
   val range : t -> Range.t
 
@@ -1716,7 +1714,7 @@ module TextDocumentContentChangeEvent : sig
 end
 
 module TextDocumentChangeEvent : sig
-  include Js.T
+  include Ojs.T
 
   val contentChanges : t -> TextDocumentContentChangeEvent.t list
 
@@ -1724,7 +1722,7 @@ module TextDocumentChangeEvent : sig
 end
 
 module TextDocumentContentProvider : sig
-  include Js.T
+  include Ojs.T
 
   val onDidChange : t -> Uri.t Event.t option
 
@@ -1740,13 +1738,13 @@ module TextDocumentContentProvider : sig
 end
 
 module FileSystemWatcher : sig
-  include Js.T
+  include Ojs.T
 
   val onDidChange : t -> Uri.t Event.t
 end
 
 module ConfigurationChangeEvent : sig
-  include Js.T
+  include Ojs.T
 end
 
 module Workspace : sig
@@ -1837,11 +1835,11 @@ module TreeItemCollapsibleState : sig
     | Collapsed
     | Expanded
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module TreeItemLabel : sig
-  include Js.T
+  include Ojs.T
 
   val create : label:string -> ?highlights:(int * int) list -> unit -> t
 
@@ -1851,7 +1849,7 @@ module TreeItemLabel : sig
 end
 
 module ThemeIcon : sig
-  include Js.T
+  include Ojs.T
 
   val make : id:string -> ?color:ThemeColor.t -> unit -> t
 
@@ -1865,7 +1863,7 @@ module ThemeIcon : sig
 end
 
 module TreeItem : sig
-  include Js.T
+  include Ojs.T
 
   type label =
     [ `String of string
@@ -1878,7 +1876,7 @@ module TreeItem : sig
       ; dark : [ `String of string | `Uri of Uri.t ]
       }
 
-    include Js.T with type t := t
+    include Ojs.T with type t := t
   end
 
   type iconPath =
@@ -1950,9 +1948,9 @@ module TreeItem : sig
 end
 
 module TreeDataProvider : sig
-  type 'a t
+  include Js.Generic
 
-  module Make (T : Js.T) : sig
+  module Make (T : Ojs.T) : sig
     type nonrec t = T.t t
 
     val onDidChangeTreeData : t -> T.t option Event.t option
@@ -1992,9 +1990,9 @@ module TreeDataProvider : sig
 end
 
 module TreeViewOptions : sig
-  type 'a t
+  include Js.Generic
 
-  module Make (T : Js.T) : sig
+  module Make (T : Ojs.T) : sig
     type nonrec t = T.t t
 
     val treeDataProvider : t -> T.t TreeDataProvider.t
@@ -2006,9 +2004,9 @@ module TreeViewOptions : sig
 end
 
 module TreeViewExpansionEvent : sig
-  type 'a t
+  include Js.Generic
 
-  module Make (T : Js.T) : sig
+  module Make (T : Ojs.T) : sig
     type nonrec t = T.t t
 
     val element : t -> T.t
@@ -2018,9 +2016,9 @@ module TreeViewExpansionEvent : sig
 end
 
 module TreeViewSelectionChangeEvent : sig
-  type 'a t
+  include Js.Generic
 
-  module Make (T : Js.T) : sig
+  module Make (T : Ojs.T) : sig
     type nonrec t = T.t t
 
     val selection : t -> T.t list
@@ -2030,7 +2028,7 @@ module TreeViewSelectionChangeEvent : sig
 end
 
 module TreeViewVisibilityChangeEvent : sig
-  include Js.T
+  include Ojs.T
 
   val visible : t -> bool
 
@@ -2038,9 +2036,9 @@ module TreeViewVisibilityChangeEvent : sig
 end
 
 module TreeView : sig
-  type 'a t = private Disposable.t
+  include Js.Generic with type 'a t = private Disposable.t
 
-  module Make (T : Js.T) : sig
+  module Make (T : Ojs.T) : sig
     type nonrec t = T.t t
 
     val onDidExpandElement : t -> T.t TreeViewExpansionEvent.t Event.t
@@ -2069,12 +2067,11 @@ module TreeView : sig
       -> ?expand:[ `Bool of bool | `Int of int ]
       -> unit
       -> Promise.void
-    [@@js.call]
   end
 end
 
 module WebviewPanelOptions : sig
-  include Js.T
+  include Ojs.T
 
   val enableFindWidget : t -> bool option
 
@@ -2082,7 +2079,7 @@ module WebviewPanelOptions : sig
 end
 
 module WebviewPortMapping : sig
-  include Js.T
+  include Ojs.T
 
   val extensionHostPort : t -> int
 
@@ -2090,7 +2087,7 @@ module WebviewPortMapping : sig
 end
 
 module WebviewOptions : sig
-  include Js.T
+  include Ojs.T
 
   val enableCommandUris : t -> bool option
 
@@ -2110,9 +2107,9 @@ module WebviewOptions : sig
 end
 
 module WebView : sig
-  include Js.T
+  include Ojs.T
 
-  val onDidReceiveMessage : t -> Js.Any.t Event.t
+  val onDidReceiveMessage : t -> Ojs.t Event.t
 
   val cspSource : t -> string
 
@@ -2126,26 +2123,26 @@ module WebView : sig
 
   val asWebviewUri : t -> localResource:Uri.t -> Uri.t
 
-  val postMessage : t -> Js.Any.t -> bool Promise.t
+  val postMessage : t -> Ojs.t -> bool Promise.t
 
   val create :
-       onDidReceiveMessage:Js.Any.t Event.t
+       onDidReceiveMessage:Ojs.t Event.t
     -> cspSource:string
     -> html:string
     -> options:WebviewOptions.t
     -> close:(unit -> unit)
     -> asWebviewUri:(Uri.t -> Uri.t)
-    -> postMessage:(Js.Any.t -> bool Promise.t)
+    -> postMessage:(Ojs.t -> bool Promise.t)
     -> t
 end
 
 module WebviewPanel : sig
-  include Js.T
+  include Ojs.T
 
   module WebviewPanelOnDidChangeViewStateEvent : sig
     type webviewPanel := t
 
-    include Js.T
+    include Ojs.T
 
     val webviewPanel : t -> webviewPanel
   end
@@ -2156,7 +2153,7 @@ module WebviewPanel : sig
       ; dark : Uri.t
       }
 
-    include Js.T with type t := t
+    include Ojs.T with type t := t
   end
 
   val onDidChangeViewState :
@@ -2185,7 +2182,7 @@ module WebviewPanel : sig
 
   val set_webview : t -> WebView.t -> unit
 
-  val dispose : t -> Js.Any.t
+  val dispose : t -> Ojs.t
 
   val reveal :
     t -> ?preserveFocus:bool -> ?viewColumn:ViewColumn.t -> unit -> unit
@@ -2200,13 +2197,13 @@ module WebviewPanel : sig
     -> viewType:string
     -> visible:bool
     -> webview:WebView.t
-    -> dispose:Js.Any.t
+    -> dispose:Ojs.t
     -> reveal:(?preserveFocus:bool -> ?viewColumn:ViewColumn.t -> unit -> unit)
     -> t
 end
 
 module CustomTextEditorProvider : sig
-  include Js.T
+  include Ojs.T
 
   module ResolvedEditor : sig
     type t =
@@ -2236,13 +2233,13 @@ module CustomTextEditorProvider : sig
 end
 
 module CustomDocumentOpenContext : sig
-  include Js.T
+  include Ojs.T
 
   val backupId : t -> string or_undefined
 end
 
 module CustomReadonlyEditorProvider : sig
-  type 'a t
+  include Js.Generic
 
   module Make (T : CustomDocument.T) : sig
     type nonrec t = T.t t
@@ -2277,7 +2274,7 @@ module CustomReadonlyEditorProvider : sig
 end
 
 module RegisterCustomEditorProviderOptions : sig
-  include Js.T
+  include Ojs.T
 
   val supportsMultipleEditorsPerDocument : t -> bool or_undefined
 
@@ -2421,22 +2418,22 @@ end
 
 module Commands : sig
   val registerCommand :
-    command:string -> callback:(args:Js.Any.t list -> unit) -> Disposable.t
+    command:string -> callback:(args:Ojs.t list -> unit) -> Disposable.t
 
   val registerCommandReturn :
-    command:string -> callback:(args:Js.Any.t list -> Js.Any.t) -> Disposable.t
+    command:string -> callback:(args:Ojs.t list -> Ojs.t) -> Disposable.t
 
   val registerTextEditorCommand :
        command:string
     -> callback:
          (   textEditor:TextEditor.t
           -> edit:TextEditorEdit.t
-          -> args:Js.Any.t list
+          -> args:Ojs.t list
           -> unit)
     -> Disposable.t
 
   val executeCommand :
-    command:string -> args:Js.Any.t list -> Js.Any.t option Promise.t
+    command:string -> args:Ojs.t list -> Ojs.t option Promise.t
 
   val getCommands : ?filterInternal:bool -> unit -> string list Promise.t
 end
@@ -2465,7 +2462,7 @@ module Env : sig
 end
 
 module DebugAdapterExecutableOptions : sig
-  include Js.T
+  include Ojs.T
 
   val cwd : t -> string option
 
@@ -2475,7 +2472,7 @@ module DebugAdapterExecutableOptions : sig
 end
 
 module DebugAdapterExecutable : sig
-  include Js.T
+  include Ojs.T
 
   val make :
        command:string
@@ -2486,15 +2483,15 @@ module DebugAdapterExecutable : sig
 end
 
 module DebugAdapterServer : sig
-  include Js.T
+  include Ojs.T
 end
 
 module DebugAdapterNamedPipeServer : sig
-  include Js.T
+  include Ojs.T
 end
 
 module DebugAdapterInlineImplementation : sig
-  include Js.T
+  include Ojs.T
 end
 
 module DebugAdapterDescriptor : sig
@@ -2505,18 +2502,18 @@ module DebugAdapterDescriptor : sig
     | `InlineImplementation of DebugAdapterInlineImplementation.t
     ]
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module DebugSession : sig
-  include Js.T
+  include Ojs.T
 
   val customRequest :
-    t -> command:string -> ?args:Js.Any.t -> unit -> Js.Any.t Promise.t
+    t -> command:string -> ?args:Ojs.t -> unit -> Ojs.t Promise.t
 end
 
 module DebugAdapterDescriptorFactory : sig
-  include Js.T
+  include Ojs.T
 
   (* TODO: unused? remove? *)
   val createDebugAdapterDescriptor :
@@ -2534,7 +2531,7 @@ module DebugAdapterDescriptorFactory : sig
 end
 
 module DebugConfiguration : sig
-  include Js.T
+  include Ojs.T
 
   val create : name:string -> request:string -> type_:string -> t
 
@@ -2542,7 +2539,7 @@ module DebugConfiguration : sig
 end
 
 module DebugConfigurationProvider : sig
-  include Js.T
+  include Ojs.T
 
   val create :
        ?provideDebugConfigurations:
@@ -2571,7 +2568,7 @@ module DebugConfigurationProviderTriggerKind : sig
     | Initial
     | Dynamic
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module Debug : sig

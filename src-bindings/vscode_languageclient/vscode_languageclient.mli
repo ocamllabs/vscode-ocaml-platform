@@ -7,11 +7,11 @@ module RevealOutputChannelOn : sig
     | Error
     | Never
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 end
 
 module ServerCapabilities : sig
-  include Js.T
+  include Ojs.T
 
   val experimental : t -> Jsonoo.t option
 
@@ -19,7 +19,7 @@ module ServerCapabilities : sig
 end
 
 module InitializeResult : sig
-  include Js.T
+  include Ojs.T
 
   val capabilities : t -> ServerCapabilities.t
 
@@ -32,7 +32,7 @@ module InitializeResult : sig
 end
 
 module DocumentFilter : sig
-  include Js.T
+  include Ojs.T
 
   val language : t -> string option
 
@@ -58,13 +58,13 @@ module DocumentSelector : sig
 
   type t = selector array
 
-  include Js.T with type t := t
+  include Ojs.T with type t := t
 
   val language : ?scheme:string -> ?pattern:string -> string -> selector
 end
 
 module OcamllspSettingEnable : sig
-  include Js.T
+  include Ojs.T
 
   val enable : t -> bool option
 
@@ -72,7 +72,7 @@ module OcamllspSettingEnable : sig
 end
 
 module OcamllspSettings : sig
-  include Js.T
+  include Ojs.T
 
   val codelens : t -> OcamllspSettingEnable.t option
 
@@ -86,7 +86,7 @@ module OcamllspSettings : sig
 end
 
 module ClientOptions : sig
-  include Js.T
+  include Ojs.T
 
   val documentSelector : t -> DocumentSelector.t option
 
@@ -106,7 +106,7 @@ module ClientOptions : sig
 end
 
 module ExecutableOptions : sig
-  include Js.T
+  include Ojs.T
 
   val cwd : t -> string option
 
@@ -126,7 +126,7 @@ module ExecutableOptions : sig
 end
 
 module Executable : sig
-  include Js.T
+  include Ojs.T
 
   val command : t -> string
 
@@ -145,11 +145,11 @@ end
 module ServerOptions = Executable
 
 module InitializeParams : sig
-  include Js.T
+  include Ojs.T
 end
 
 module ClientCapabilities : sig
-  include Js.T
+  include Ojs.T
 
   val experimental : t -> Jsonoo.t or_undefined
 
@@ -157,7 +157,7 @@ module ClientCapabilities : sig
 end
 
 module StaticFeature : sig
-  include Js.T
+  include Ojs.T
 
   val make :
        ?fillInitializeParams:(params:InitializeParams.t -> unit)
@@ -172,13 +172,13 @@ module StaticFeature : sig
 end
 
 module DidChangeConfiguration : sig
-  include Js.T
+  include Ojs.T
 
   val create : settings:OcamllspSettings.t -> unit -> t
 end
 
 module LanguageClient : sig
-  include Js.T
+  include Ojs.T
 
   val make :
        id:string

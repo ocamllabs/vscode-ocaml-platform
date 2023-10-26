@@ -26,13 +26,13 @@ module Command = struct
 
     val tooltip : t -> string or_undefined [@@js.get]
 
-    val arguments : t -> Js.Any.t maybe_list [@@js.get]
+    val arguments : t -> Ojs.t maybe_list [@@js.get]
 
     val create :
          title:string
       -> command:string
       -> ?tooltip:string
-      -> ?arguments:Js.Any.t list
+      -> ?arguments:Ojs.t list
       -> unit
       -> t
     [@@js.builder]]
@@ -788,19 +788,29 @@ module WorkspaceConfiguration = struct
 
   include
     [%js:
-    val get : t -> section:string -> Js.Any.t or_undefined [@@js.call]
+    val get : t -> section:string -> Ojs.t or_undefined [@@js.call]
 
-    val get_default : t -> section:string -> defaultValue:Ojs.t -> Ojs.t
+    val get_default :
+         ((module Ojs.T with type t = 'a)[@js])
+      -> t
+      -> section:string
+      -> defaultValue:'a
+      -> 'a
     [@@js.call]
 
     val has : t -> section:string -> bool [@@js.call]
 
-    val inspect : t -> section:string -> Ojs.t [@@js.call]
+    val inspect :
+         ((module Ojs.T with type t = 'a)[@js])
+      -> t
+      -> section:string
+      -> 'a inspectResult or_undefined
+    [@@js.call]
 
     val update :
          t
       -> section:string
-      -> value:Js.Any.t
+      -> value:Ojs.t
       -> ?configurationTarget:
            ([ `ConfigurationTarget of ConfigurationTarget.t | `Bool of bool ]
            [@js.union])
@@ -808,15 +818,6 @@ module WorkspaceConfiguration = struct
       -> unit
       -> Promise.void
     [@@js.call]]
-
-  let inspect (type a) (module T : Js.T with type t = a) this ~section :
-      a inspectResult or_undefined =
-    [%js.to: T.t inspectResult or_undefined] (inspect this ~section)
-
-  let get_default (type a) (module T : Js.T with type t = a) this ~section
-      ~(defaultValue : a) : a =
-    let defaultValue = [%js.of: T.t] defaultValue in
-    [%js.to: T.t] (get_default this ~section ~defaultValue)
 end
 
 module WorkspaceEdit = struct
@@ -957,15 +958,16 @@ end
 module Event = struct
   type 'a t =
        listener:('a -> unit)
-    -> ?thisArgs:Js.Any.t
+    -> ?thisArgs:Ojs.t
     -> ?disposables:Disposable.t list
     -> unit
     -> Disposable.t
+  [@@js]
 
-  module Make (T : Js.T) = struct
+  module Make (T : Ojs.T) = struct
     type t =
          listener:(T.t -> unit)
-      -> ?thisArgs:Js.Any.t
+      -> ?thisArgs:Ojs.t
       -> ?disposables:Disposable.t list
       -> unit
       -> Disposable.t
@@ -974,18 +976,17 @@ module Event = struct
 end
 
 module EventEmitter = struct
-  include Class.Generic (Ojs) ()
+  module G = Class.Generic (Ojs) ()
+  include G
 
-  module Make (T : Js.T) = struct
-    type t = T.t generic [@@js]
-
-    module Event = Event.Make (T)
+  module Make (T : Ojs.T) = struct
+    type t = T.t G.t [@@js]
 
     include
       [%js:
       val make : unit -> t [@@js.new "vscode.EventEmitter"]
 
-      val event : t -> Event.t [@@js.get]
+      val event : t -> T.t Event.t [@@js.get]
 
       val fire : t -> T.t -> unit [@@js.call]
 
@@ -995,18 +996,15 @@ end
 
 module CancellationToken = struct
   include Interface.Make ()
-  module OnCancellationRequested = Event.Make (Js.Any)
 
   include
     [%js:
     val isCancellationRequested : t -> bool [@@js.get]
 
-    val onCancellationRequested : t -> OnCancellationRequested.t [@@js.get]
+    val onCancellationRequested : t -> Ojs.t Event.t [@@js.get]
 
     val create :
-         isCancellationRequested:bool
-      -> onCancellationRequested:OnCancellationRequested.t
-      -> t
+      isCancellationRequested:bool -> onCancellationRequested:Ojs.t Event.t -> t
     [@@js.builder]]
 end
 
@@ -1393,19 +1391,16 @@ end
 
 module Pseudoterminal = struct
   include Interface.Make ()
-  module OnDidWrite = Event.Make (Js.String)
-  module OnDidOverrideDimensions =
-    Event.Make (Js.Or_undefined (TerminalDimensions))
-  module OnDidClose = Event.Make (Js.Or_undefined (Js.Int))
 
   include
     [%js:
-    val onDidWrite : t -> OnDidWrite.t [@@js.get]
+    val onDidWrite : t -> string Event.t [@@js.get]
 
-    val onDidOverrideDimensions : t -> OnDidOverrideDimensions.t or_undefined
+    val onDidOverrideDimensions :
+      t -> TerminalDimensions.t or_undefined Event.t or_undefined
     [@@js.get]
 
-    val onDidClose : t -> OnDidClose.t or_undefined [@@js.get]
+    val onDidClose : t -> int or_undefined Event.t or_undefined [@@js.get]
 
     val open_ : t -> ?initialDimensions:TerminalDimensions.t -> unit -> unit
     [@@js.call]
@@ -1419,9 +1414,9 @@ module Pseudoterminal = struct
     [@@js.get]
 
     val create :
-         onDidWrite:OnDidWrite.t
-      -> ?onDidOverrideDimensions:OnDidOverrideDimensions.t
-      -> ?onDidClose:OnDidClose.t
+         onDidWrite:string Event.t
+      -> ?onDidOverrideDimensions:TerminalDimensions.t or_undefined Event.t
+      -> ?onDidClose:int or_undefined Event.t
       -> open_:(?initialDimensions:TerminalDimensions.t -> unit -> unit)
       -> close:(unit -> unit)
       -> ?handleInput:(data:string -> unit)
@@ -1528,16 +1523,17 @@ module Memento = struct
 
   include
     [%js:
-    val get : t -> key:string -> Js.Any.t or_undefined [@@js.call]
+    val get : t -> key:string -> Ojs.t or_undefined [@@js.call]
 
-    val get_default : t -> key:string -> defaultValue:Ojs.t -> Ojs.t [@@js.call]
+    val get_default :
+         ((module Ojs.T with type t = 'a)[@js])
+      -> t
+      -> key:string
+      -> defaultValue:'a
+      -> 'a
+    [@@js.call]
 
-    val update : t -> key:string -> value:Js.Any.t -> Promise.void [@@js.call]]
-
-  let get_default (type a) (module T : Js.T with type t = a) this ~key
-      ~(defaultValue : a) : a =
-    let defaultValue = [%js.of: T.t] defaultValue in
-    [%js.to: T.t] (get_default this ~key ~defaultValue)
+    val update : t -> key:string -> value:Ojs.t -> Promise.void [@@js.call]]
 end
 
 module EnvironmentVariableMutatorType = struct
@@ -1605,7 +1601,6 @@ end
 
 module SecretStorage = struct
   include Interface.Make ()
-  module OnDidChange = Event.Make (SecretStorageChangeEvent)
 
   include
     [%js:
@@ -1615,7 +1610,7 @@ module SecretStorage = struct
 
     val delete : t -> key:string -> Promise.void [@@js.call]
 
-    val onDidChange : t -> OnDidChange.t [@@js.get]]
+    val onDidChange : t -> SecretStorageChangeEvent.t Event.t [@@js.get]]
 end
 
 module ExtensionContext = struct
@@ -2123,10 +2118,11 @@ module Task = struct
 end
 
 module TaskProvider = struct
-  include Interface.Generic (Ojs) ()
+  module G = Interface.Generic (Ojs) ()
+  include G
 
-  module Make (T : Js.T) = struct
-    type t = T.t generic [@@js]
+  module Make (T : Ojs.T) = struct
+    type t = T.t G.t [@@js]
 
     include
       [%js:
@@ -2213,18 +2209,17 @@ end
 
 module TextDocumentContentProvider = struct
   include Interface.Make ()
-  module OnDidChange = Event.Make (Uri)
 
   include
     [%js:
-    val onDidChange : t -> OnDidChange.t or_undefined [@@js.get]
+    val onDidChange : t -> Uri.t Event.t or_undefined [@@js.get]
 
     val provideTextDocumentContent :
       t -> uri:Uri.t -> token:CancellationToken.t -> string ProviderResult.t
     [@@js.call]
 
     val create :
-         ?onDidChange:OnDidChange.t
+         ?onDidChange:Uri.t Event.t
       -> provideTextDocumentContent:
            (uri:Uri.t -> token:CancellationToken.t -> string ProviderResult.t)
       -> unit
@@ -2234,9 +2229,8 @@ end
 
 module FileSystemWatcher = struct
   include Interface.Make ()
-  module OnDidChange = Event.Make (Uri)
 
-  include [%js: val onDidChange : t -> OnDidChange.t [@@js.get]]
+  include [%js: val onDidChange : t -> Uri.t Event.t [@@js.get]]
 end
 
 module ConfigurationChangeEvent = struct
@@ -2244,13 +2238,6 @@ module ConfigurationChangeEvent = struct
 end
 
 module Workspace = struct
-  module OnDidChangeWorkspaceFolders = Event.Make (WorkspaceFolder)
-  module OnDidOpenTextDocument = Event.Make (TextDocument)
-  module OnDidCloseTextDocument = Event.Make (TextDocument)
-  module OnDidSaveTextDocument = Event.Make (TextDocument)
-  module OnDidChangeTextDocument = Event.Make (TextDocumentChangeEvent)
-  module OnDidChangeConfiguration = Event.Make (ConfigurationChangeEvent)
-
   type textDocumentOptions =
     { language : string
     ; content : string
@@ -2288,25 +2275,25 @@ module Workspace = struct
     val textDocuments : unit -> TextDocument.t list
     [@@js.get "vscode.workspace.textDocuments"]
 
-    val onDidChangeConfiguration : OnDidChangeConfiguration.t
+    val onDidChangeConfiguration : ConfigurationChangeEvent.t Event.t
     [@@js.global "vscode.workspace.onDidChangeConfiguration"]
 
-    val onDidChangeWorkspaceFolders : OnDidChangeWorkspaceFolders.t
+    val onDidChangeWorkspaceFolders : WorkspaceFolder.t Event.t
     [@@js.global "vscode.workspace.onDidChangeWorkspaceFolders"]
 
     val getWorkspaceFolder : uri:Uri.t -> WorkspaceFolder.t or_undefined
     [@@js.global "vscode.workspace.getWorkspaceFolder"]
 
-    val onDidOpenTextDocument : OnDidOpenTextDocument.t
+    val onDidOpenTextDocument : TextDocument.t Event.t
     [@@js.global "vscode.workspace.onDidOpenTextDocument"]
 
-    val onDidSaveTextDocument : OnDidSaveTextDocument.t
+    val onDidSaveTextDocument : TextDocument.t Event.t
     [@@js.global "vscode.workspace.onDidSaveTextDocument"]
 
-    val onDidCloseTextDocument : OnDidCloseTextDocument.t
+    val onDidCloseTextDocument : TextDocument.t Event.t
     [@@js.global "vscode.workspace.onDidCloseTextDocument"]
 
-    val onDidChangeTextDocument : OnDidChangeTextDocument.t
+    val onDidChangeTextDocument : TextDocumentChangeEvent.t Event.t
     [@@js.global "vscode.workspace.onDidChangeTextDocument"]
 
     val applyEdit : edit:WorkspaceEdit.t -> bool Promise.t
@@ -2366,7 +2353,7 @@ end
 
 module CustomDocument = struct
   module type T = sig
-    include Js.T
+    include Ojs.T
 
     val uri : t -> Uri.t
 
@@ -2557,14 +2544,11 @@ module TreeItem = struct
 end
 
 module TreeDataProvider = struct
-  include Interface.Generic (Ojs) ()
+  module G = Interface.Generic (Ojs) ()
+  include G
 
-  module Make (T : Js.T) = struct
-    type t = T.t generic [@@js]
-
-    module OnDidChangeTreeData = Event.Make (struct
-      type t = T.t or_undefined [@@js]
-    end)
+  module Make (T : Ojs.T) = struct
+    type t = T.t G.t [@@js]
 
     type getTreeItemResult =
       ([ `Value of TreeItem.t
@@ -2580,7 +2564,7 @@ module TreeDataProvider = struct
 
     include
       [%js:
-      val onDidChangeTreeData : t -> OnDidChangeTreeData.t or_undefined
+      val onDidChangeTreeData : t -> T.t or_undefined Event.t or_undefined
       [@@js.get]
 
       val getTreeItem : t -> element:T.t -> getTreeItemResult [@@js.call]
@@ -2601,7 +2585,7 @@ module TreeDataProvider = struct
       [@@js.call]
 
       val create :
-           ?onDidChangeTreeData:OnDidChangeTreeData.t
+           ?onDidChangeTreeData:T.t or_undefined Event.t
         -> getTreeItem:(element:T.t -> getTreeItemResult)
         -> getChildren:(?element:T.t -> unit -> T.t list ProviderResult.t)
         -> ?getParent:(element:T.t -> T.t ProviderResult.t)
@@ -2617,16 +2601,15 @@ module TreeDataProvider = struct
 end
 
 module TreeViewOptions = struct
-  include Class.Generic (Ojs) ()
+  module G = Class.Generic (Ojs) ()
+  include G
 
-  module Make (T : Js.T) = struct
-    type t = T.t generic [@@js]
-
-    module TreeDataProvider = TreeDataProvider.Make (T)
+  module Make (T : Ojs.T) = struct
+    type t = T.t G.t [@@js]
 
     include
       [%js:
-      val treeDataProvider : t -> TreeDataProvider.t [@@js.get]
+      val treeDataProvider : t -> T.t TreeDataProvider.t [@@js.get]
 
       val showCollapseAll : t -> bool or_undefined [@@js.get]
 
@@ -2635,10 +2618,11 @@ module TreeViewOptions = struct
 end
 
 module TreeViewExpansionEvent = struct
-  include Interface.Generic (Ojs) ()
+  module G = Interface.Generic (Ojs) ()
+  include G
 
-  module Make (T : Js.T) = struct
-    type t = T.t generic [@@js]
+  module Make (T : Ojs.T) = struct
+    type t = T.t G.t [@@js]
 
     include
       [%js:
@@ -2649,10 +2633,11 @@ module TreeViewExpansionEvent = struct
 end
 
 module TreeViewSelectionChangeEvent = struct
-  include Interface.Generic (Ojs) ()
+  module G = Interface.Generic (Ojs) ()
+  include G
 
-  module Make (T : Js.T) = struct
-    type t = T.t generic [@@js]
+  module Make (T : Ojs.T) = struct
+    type t = T.t G.t [@@js]
 
     include
       [%js:
@@ -2673,30 +2658,29 @@ module TreeViewVisibilityChangeEvent = struct
 end
 
 module TreeView = struct
-  include Class.Generic (Disposable) ()
+  module G = Class.Generic (Disposable) ()
+  include G
 
-  module Make (T : Js.T) = struct
-    type t = T.t generic [@@js]
-
-    module OnDidExpandElement = Event.Make (TreeViewExpansionEvent.Make (T))
-    module OnDidCollapseElement = Event.Make (TreeViewExpansionEvent.Make (T))
-    module OnDidChangeSelection =
-      Event.Make (TreeViewSelectionChangeEvent.Make (T))
-    module OnDidChangeVisibility = Event.Make (TreeViewVisibilityChangeEvent)
+  module Make (T : Ojs.T) = struct
+    type t = T.t G.t [@@js]
 
     include
       [%js:
-      val onDidExpandElement : t -> OnDidExpandElement.t [@@js.get]
+      val onDidExpandElement : t -> T.t TreeViewExpansionEvent.t Event.t
+      [@@js.get]
 
-      val onDidCollapseElement : t -> OnDidCollapseElement.t [@@js.get]
+      val onDidCollapseElement : t -> T.t TreeViewExpansionEvent.t Event.t
+      [@@js.get]
 
       val selection : t -> T.t list [@@js.get]
 
-      val onDidChangeSelection : t -> OnDidChangeSelection.t [@@js.get]
+      val onDidChangeSelection : t -> T.t TreeViewSelectionChangeEvent.t Event.t
+      [@@js.get]
 
       val visible : t -> bool [@@js.get]
 
-      val onDidChangeVisibility : t -> OnDidChangeVisibility.t [@@js.get]
+      val onDidChangeVisibility : t -> TreeViewVisibilityChangeEvent.t Event.t
+      [@@js.get]
 
       val message : t -> string or_undefined [@@js.get]
 
@@ -2764,11 +2748,10 @@ end
 
 module WebView = struct
   include Interface.Make ()
-  module OnDidReceiveMessage = Event.Make (Js.Any)
 
   include
     [%js:
-    val onDidReceiveMessage : t -> OnDidReceiveMessage.t [@@js.get]
+    val onDidReceiveMessage : t -> Ojs.t Event.t [@@js.get]
 
     val cspSource : t -> string [@@js.get]
 
@@ -2782,16 +2765,16 @@ module WebView = struct
 
     val asWebviewUri : t -> localResource:Uri.t -> Uri.t [@@js.call]
 
-    val postMessage : t -> Js.Any.t -> bool Promise.t [@@js.call]
+    val postMessage : t -> Ojs.t -> bool Promise.t [@@js.call]
 
     val create :
-         onDidReceiveMessage:OnDidReceiveMessage.t
+         onDidReceiveMessage:Ojs.t Event.t
       -> cspSource:string
       -> html:string
       -> options:WebviewOptions.t
       -> close:(unit -> unit)
       -> asWebviewUri:(Uri.t -> Uri.t)
-      -> postMessage:(Js.Any.t -> bool Promise.t)
+      -> postMessage:(Ojs.t -> bool Promise.t)
       -> t
     [@@js.builder]]
 end
@@ -2822,15 +2805,13 @@ module WebviewPanel = struct
     [@js.union])
   [@@js]
 
-  module OnDidChangeViewState =
-    Event.Make (WebviewPanelOnDidChangeViewStateEvent)
-  module OnDidDispose = Event.Make (Js.Unit)
-
   include
     [%js:
-    val onDidChangeViewState : t -> OnDidChangeViewState.t [@@js.get]
+    val onDidChangeViewState :
+      t -> WebviewPanelOnDidChangeViewStateEvent.t Event.t
+    [@@js.get]
 
-    val onDidDispose : t -> OnDidDispose.t [@@js.get]
+    val onDidDispose : t -> unit Event.t [@@js.get]
 
     val active : t -> bool [@@js.get]
 
@@ -2848,15 +2829,15 @@ module WebviewPanel = struct
 
     val set_webview : t -> WebView.t -> unit [@@js.set]
 
-    val dispose : t -> Js.Any.t [@@js.call]
+    val dispose : t -> Ojs.t [@@js.call]
 
     val reveal :
       t -> ?preserveFocus:bool -> ?viewColumn:ViewColumn.t -> unit -> unit
     [@@js.call]
 
     val create :
-         onDidChangeViewState:OnDidChangeViewState.t
-      -> onDidDispose:OnDidDispose.t
+         onDidChangeViewState:WebviewPanelOnDidChangeViewStateEvent.t Event.t
+      -> onDidDispose:unit Event.t
       -> active:bool
       -> options:WebviewPanelOptions.t
       -> title:string
@@ -2864,7 +2845,7 @@ module WebviewPanel = struct
       -> viewType:string
       -> visible:bool
       -> webview:WebView.t
-      -> dispose:Js.Any.t
+      -> dispose:Ojs.t
       -> reveal:
            (?preserveFocus:bool -> ?viewColumn:ViewColumn.t -> unit -> unit)
       -> t
@@ -2918,10 +2899,11 @@ module CustomDocumentOpenContext = struct
 end
 
 module CustomReadonlyEditorProvider = struct
-  include Interface.Generic (Ojs) ()
+  module G = Interface.Generic (Ojs) ()
+  include G
 
   module Make (T : CustomDocument.T) = struct
-    type t = T.t generic [@@js]
+    type t = T.t G.t [@@js]
 
     include
       [%js:
@@ -2969,12 +2951,6 @@ module RegisterCustomEditorProviderOptions = struct
 end
 
 module Window = struct
-  module OnDidChangeActiveTextEditor = Event.Make (TextEditor)
-  module OnDidChangeVisibleTextEditors = Event.Make (Js.List (TextEditor))
-  module OnDidChangeActiveTerminal = Event.Make (Js.Or_undefined (Terminal))
-  module OnDidOpenTerminal = Event.Make (Terminal)
-  module OnDidCloseTerminal = Event.Make (Terminal)
-
   include
     [%js:
     val activeTextEditor : unit -> TextEditor.t or_undefined
@@ -2983,10 +2959,10 @@ module Window = struct
     val visibleTextEditors : unit -> TextEditor.t list
     [@@js.get "vscode.window.visibleTextEditors"]
 
-    val onDidChangeActiveTextEditor : unit -> OnDidChangeActiveTextEditor.t
+    val onDidChangeActiveTextEditor : unit -> TextEditor.t Event.t
     [@@js.get "vscode.window.onDidChangeActiveTextEditor"]
 
-    val onDidChangeVisibleTextEditors : unit -> OnDidChangeVisibleTextEditors.t
+    val onDidChangeVisibleTextEditors : unit -> TextEditor.t list Event.t
     [@@js.get "vscode.window.onDidChangeVisibleTextEditors"]
 
     val terminals : unit -> Terminal.t list [@@js.get "vscode.window.terminals"]
@@ -2994,13 +2970,13 @@ module Window = struct
     val activeTerminal : unit -> Terminal.t or_undefined
     [@@js.get "vscode.window.activeTerminal"]
 
-    val onDidChangeActiveTerminal : unit -> OnDidChangeActiveTerminal.t
+    val onDidChangeActiveTerminal : unit -> Terminal.t or_undefined Event.t
     [@@js.get "vscode.window.onDidChangeActiveTerminal"]
 
-    val onDidOpenTerminal : unit -> OnDidOpenTerminal.t
+    val onDidOpenTerminal : unit -> Terminal.t Event.t
     [@@js.get "vscode.window.onDidOpenTerminal"]
 
-    val onDidCloseTerminal : unit -> OnDidCloseTerminal.t
+    val onDidCloseTerminal : unit -> Terminal.t Event.t
     [@@js.get "vscode.window.onDidCloseTerminal"]
 
     val showTextDocument :
@@ -3080,7 +3056,11 @@ module Window = struct
       -> Disposable.t
     [@@js.global "vscode.window.setStatusBarMessage"]
 
-    val withProgress : options:ProgressOptions.t -> task:Ojs.t -> Ojs.t
+    val withProgress :
+         ((module Ojs.T with type t = 'a)[@js])
+      -> options:ProgressOptions.t
+      -> task:(progress:Progress.t -> token:CancellationToken.t -> 'a Promise.t)
+      -> 'a Promise.t
     [@@js.global "vscode.window.withProgress"]
 
     val createStatusBarItem :
@@ -3108,10 +3088,17 @@ module Window = struct
     [@@js.global "vscode.window.createTerminal"]
 
     val registerTreeDataProvider :
-      viewId:string -> treeDataProvider:Ojs.t -> Disposable.t
+         ((module Ojs.T with type t = 'a)[@js])
+      -> viewId:string
+      -> treeDataProvider:'a TreeDataProvider.t
+      -> Disposable.t
     [@@js.global "vscode.window.registerTreeDataProvider"]
 
-    val createTreeView : viewId:string -> options:Ojs.t -> Ojs.t
+    val createTreeView :
+         ((module Ojs.T with type t = 'a)[@js])
+      -> viewId:string
+      -> options:'a TreeViewOptions.t
+      -> 'a TreeView.t
     [@@js.global "vscode.window.createTreeView"]
 
     val createWebviewPanel :
@@ -3130,8 +3117,9 @@ module Window = struct
     [@@js.global "vscode.window.registerCustomEditorProvider"]
 
     val registerCustomReadonlyEditorProvider :
-         viewType:string
-      -> provider:Ojs.t
+         ((module Ojs.T with type t = 'a)[@js])
+      -> viewType:string
+      -> provider:'a CustomReadonlyEditorProvider.t
       -> ?options:RegisterCustomEditorProviderOptions.t
       -> unit
       -> Disposable.t
@@ -3172,38 +3160,15 @@ module Window = struct
     in
     List.assoc item choices
 
-  let withProgress (type a) (module T : Js.T with type t = a) ~options ~task :
-      a Promise.t =
-    let task =
-      [%js.of:
-        progress:Progress.t -> token:CancellationToken.t -> T.t Promise.t]
-        task
-    in
-    [%js.to: T.t Promise.t] (withProgress ~options ~task)
-
-  let registerTreeDataProvider (type a) (module T : Js.T with type t = a)
-      ~(viewId : string) ~(treeDataProvider : a TreeDataProvider.t) :
-      Disposable.t =
-    let module TreeDataProvider = TreeDataProvider.Make (T) in
-    let treeDataProvider = [%js.of: TreeDataProvider.t] treeDataProvider in
-    registerTreeDataProvider ~viewId ~treeDataProvider
-
-  let createTreeView (type a) (module T : Js.T with type t = a)
-      ~(viewId : string) ~(options : a TreeViewOptions.t) : a TreeView.t =
-    let module TreeViewOptions = TreeViewOptions.Make (T) in
-    let module TreeView = TreeView.Make (T) in
-    let options = [%js.of: TreeViewOptions.t] options in
-    [%js.to: TreeView.t] (createTreeView ~viewId ~options)
-
   let registerCustomReadonlyEditorProvider (type a)
-      (module T : CustomDocument.T with type t = a) ~(viewType : string)
-      ~(provider : a CustomReadonlyEditorProvider.t)
-      ?(options : RegisterCustomEditorProviderOptions.t or_undefined) () :
-      Disposable.t =
-    let module CustomReadonlyEditorProvider =
-      CustomReadonlyEditorProvider.Make (T) in
-    let provider = [%js.of: CustomReadonlyEditorProvider.t] provider in
-    registerCustomReadonlyEditorProvider ~viewType ~provider ?options ()
+      (module T : CustomDocument.T with type t = a) ~viewType
+      ~(provider : a CustomReadonlyEditorProvider.t) ?options () =
+    registerCustomReadonlyEditorProvider
+      (module T)
+      ~viewType
+      ~provider
+      ?options
+      ()
 end
 
 module Commands = struct
@@ -3211,13 +3176,13 @@ module Commands = struct
     [%js:
     val registerCommand :
          command:string
-      -> callback:(args:(Js.Any.t list[@js.variadic]) -> unit)
+      -> callback:(args:(Ojs.t list[@js.variadic]) -> unit)
       -> Disposable.t
     [@@js.global "vscode.commands.registerCommand"]
 
     val registerCommandReturn :
          command:string
-      -> callback:(args:(Js.Any.t list[@js.variadic]) -> Js.Any.t)
+      -> callback:(args:(Ojs.t list[@js.variadic]) -> Ojs.t)
       -> Disposable.t
     [@@js.global "vscode.commands.registerCommand"]
 
@@ -3226,15 +3191,15 @@ module Commands = struct
       -> callback:
            (   textEditor:TextEditor.t
             -> edit:TextEditorEdit.t
-            -> args:(Js.Any.t list[@js.variadic])
+            -> args:(Ojs.t list[@js.variadic])
             -> unit)
       -> Disposable.t
     [@@js.global "vscode.commands.registerTextEditorCommand"]
 
     val executeCommand :
          command:string
-      -> args:(Js.Any.t list[@js.variadic])
-      -> Js.Any.t or_undefined Promise.t
+      -> args:(Ojs.t list[@js.variadic])
+      -> Ojs.t or_undefined Promise.t
     [@@js.global "vscode.commands.executeCommand"]
 
     val getCommands : ?filterInternal:bool -> unit -> string list Promise.t
@@ -3344,7 +3309,7 @@ module DebugSession = struct
   include
     [%js:
     val customRequest :
-      t -> command:string -> ?args:Js.Any.t -> unit -> Js.Any.t Promise.t
+      t -> command:string -> ?args:Ojs.t -> unit -> Ojs.t Promise.t
     [@@js.call]]
 end
 

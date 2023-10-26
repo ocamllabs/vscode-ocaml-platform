@@ -2,14 +2,14 @@ open Interop
 
 module Server : sig
   module Address : sig
-    include Js.T
+    include Ojs.T
 
     val port : t -> int
 
     val address : t -> string
   end
 
-  type t
+  include Ojs.T
 
   val close : t -> ?callback:(Node.JsError.t or_undefined -> unit) -> unit -> t
 
@@ -27,15 +27,17 @@ type polka
 
 module Middleware : sig
   module Request : sig
-    include Js.T
+    include Ojs.T
   end
 
   module Response : sig
-    include Js.T
+    include Ojs.T
   end
 
   type t =
     request:Request.t -> response:Response.t -> next:(unit -> polka) -> polka
+
+  include Ojs.T with type t := t
 end
 
 val create : unit -> polka
@@ -51,7 +53,7 @@ val server : polka -> Server.t
 
 module Sirv : sig
   module Options : sig
-    type t
+    include Ojs.T
 
     val create : dev:bool -> t
   end

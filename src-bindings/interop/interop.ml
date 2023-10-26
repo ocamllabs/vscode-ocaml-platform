@@ -86,18 +86,14 @@ module Dict = struct
 end
 
 module Js = struct
-  module type T = sig
-    type t
+  type 'a t = (module Ojs.T with type t = 'a)
 
-    val t_of_js : Ojs.t -> t
+  module type Generic = sig
+    type 'a t
 
-    val t_to_js : t -> Ojs.t
-  end
+    val t_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
 
-  type 'a t = (module T with type t = 'a)
-
-  module Any = struct
-    type t = Ojs.t [@@js]
+    val t_of_js : (Ojs.t -> 'a) -> Ojs.t -> 'a t
   end
 
   module Unit = struct
@@ -108,23 +104,7 @@ module Js = struct
     let t_to_js _ = undefined
   end
 
-  module Bool = struct
-    type t = bool [@@js]
-  end
-
-  module Int = struct
-    type t = int [@@js]
-  end
-
-  module String = struct
-    type t = string [@@js]
-  end
-
-  module Option (T : T) = struct
-    type t = T.t option [@@js]
-  end
-
-  module Result (Ok : T) (Error : T) = struct
+  module Result (Ok : Ojs.T) (Error : Ojs.T) = struct
     type t = (Ok.t, Error.t) result
 
     type js_result =
@@ -149,15 +129,11 @@ module Js = struct
         js_result_to_js { case = "error"; error; ok = undefined }
   end
 
-  module Or_undefined (T : T) = struct
+  module Or_undefined (T : Ojs.T) = struct
     type t = T.t or_undefined [@@js]
   end
 
-  module List (T : T) = struct
-    type t = T.t list [@@js]
-  end
-
-  module Dict (T : T) = struct
+  module Dict (T : Ojs.T) = struct
     type t = T.t Dict.t [@@js]
   end
 end
@@ -167,18 +143,12 @@ module Interface = struct
     type t = Ojs.t [@@js]
   end
 
-  module Extend (Super : Js.T) () = struct
+  module Extend (Super : Ojs.T) () = struct
     type t = Super.t [@@js]
   end
 
-  module Generic (Super : Js.T) () = struct
-    type 'a t = Super.t
-
-    type 'a generic = 'a t
-
-    let generic_of_js _ = Super.t_of_js
-
-    let generic_to_js _ = Super.t_to_js
+  module Generic (Super : Ojs.T) () = struct
+    type 'a t = Super.t [@@js]
   end
 end
 
