@@ -975,10 +975,11 @@ module Event = struct
 end
 
 module EventEmitter = struct
-  include Class.Generic (Ojs) ()
+  module G = Class.Generic (Ojs) ()
+  include G
 
   module Make (T : Ojs.T) = struct
-    type t = T.t generic [@@js]
+    type t = T.t G.t [@@js]
 
     module Event = Event.Make (T)
 
@@ -2125,10 +2126,11 @@ module Task = struct
 end
 
 module TaskProvider = struct
-  include Interface.Generic (Ojs) ()
+  module G = Interface.Generic (Ojs) ()
+  include G
 
   module Make (T : Ojs.T) = struct
-    type t = T.t generic [@@js]
+    type t = T.t G.t [@@js]
 
     include
       [%js:
@@ -2559,10 +2561,11 @@ module TreeItem = struct
 end
 
 module TreeDataProvider = struct
-  include Interface.Generic (Ojs) ()
+  module G = Interface.Generic (Ojs) ()
+  include G
 
   module Make (T : Ojs.T) = struct
-    type t = T.t generic [@@js]
+    type t = T.t G.t [@@js]
 
     module OnDidChangeTreeData = Event.Make (struct
       type t = T.t or_undefined [@@js]
@@ -2619,10 +2622,11 @@ module TreeDataProvider = struct
 end
 
 module TreeViewOptions = struct
-  include Class.Generic (Ojs) ()
+  module G = Class.Generic (Ojs) ()
+  include G
 
   module Make (T : Ojs.T) = struct
-    type t = T.t generic [@@js]
+    type t = T.t G.t [@@js]
 
     module TreeDataProvider = TreeDataProvider.Make (T)
 
@@ -2637,10 +2641,11 @@ module TreeViewOptions = struct
 end
 
 module TreeViewExpansionEvent = struct
-  include Interface.Generic (Ojs) ()
+  module G = Interface.Generic (Ojs) ()
+  include G
 
   module Make (T : Ojs.T) = struct
-    type t = T.t generic [@@js]
+    type t = T.t G.t [@@js]
 
     include
       [%js:
@@ -2651,10 +2656,11 @@ module TreeViewExpansionEvent = struct
 end
 
 module TreeViewSelectionChangeEvent = struct
-  include Interface.Generic (Ojs) ()
+  module G = Interface.Generic (Ojs) ()
+  include G
 
   module Make (T : Ojs.T) = struct
-    type t = T.t generic [@@js]
+    type t = T.t G.t [@@js]
 
     include
       [%js:
@@ -2675,10 +2681,11 @@ module TreeViewVisibilityChangeEvent = struct
 end
 
 module TreeView = struct
-  include Class.Generic (Disposable) ()
+  module G = Class.Generic (Disposable) ()
+  include G
 
   module Make (T : Ojs.T) = struct
-    type t = T.t generic [@@js]
+    type t = T.t G.t [@@js]
 
     module OnDidExpandElement = Event.Make (TreeViewExpansionEvent.Make (T))
     module OnDidCollapseElement = Event.Make (TreeViewExpansionEvent.Make (T))
@@ -2920,10 +2927,11 @@ module CustomDocumentOpenContext = struct
 end
 
 module CustomReadonlyEditorProvider = struct
-  include Interface.Generic (Ojs) ()
+  module G = Interface.Generic (Ojs) ()
+  include G
 
   module Make (T : CustomDocument.T) = struct
-    type t = T.t generic [@@js]
+    type t = T.t G.t [@@js]
 
     include
       [%js:

@@ -60,11 +60,9 @@ module Interface : sig
   module Generic (Super : Ojs.T) () : sig
     type 'a t = private Super.t
 
-    type 'a generic = 'a t
+    val t_of_js : (Ojs.t -> 'a) -> Ojs.t -> 'a t
 
-    val generic_of_js : (Ojs.t -> 'a) -> Ojs.t -> 'a t
-
-    val generic_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
+    val t_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
   end
 end
 

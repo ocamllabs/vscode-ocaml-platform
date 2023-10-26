@@ -140,13 +140,7 @@ module Interface = struct
   end
 
   module Generic (Super : Ojs.T) () = struct
-    type 'a t = Super.t
-
-    type 'a generic = 'a t
-
-    let generic_of_js _ = Super.t_of_js
-
-    let generic_to_js _ = Super.t_to_js
+    type 'a t = Super.t [@@js]
   end
 end
 
