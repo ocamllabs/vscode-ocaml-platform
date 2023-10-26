@@ -3122,10 +3122,17 @@ module Window = struct
     [@@js.global "vscode.window.createTerminal"]
 
     val registerTreeDataProvider :
-      viewId:string -> treeDataProvider:Ojs.t -> Disposable.t
+         ((module Ojs.T with type t = 'a)[@js])
+      -> viewId:string
+      -> treeDataProvider:'a TreeDataProvider.t
+      -> Disposable.t
     [@@js.global "vscode.window.registerTreeDataProvider"]
 
-    val createTreeView : viewId:string -> options:Ojs.t -> Ojs.t
+    val createTreeView :
+         ((module Ojs.T with type t = 'a)[@js])
+      -> viewId:string
+      -> options:'a TreeViewOptions.t
+      -> 'a TreeView.t
     [@@js.global "vscode.window.createTreeView"]
 
     val createWebviewPanel :
@@ -3144,8 +3151,9 @@ module Window = struct
     [@@js.global "vscode.window.registerCustomEditorProvider"]
 
     val registerCustomReadonlyEditorProvider :
-         viewType:string
-      -> provider:Ojs.t
+         ((module Ojs.T with type t = 'a)[@js])
+      -> viewType:string
+      -> provider:'a CustomReadonlyEditorProvider.t
       -> ?options:RegisterCustomEditorProviderOptions.t
       -> unit
       -> Disposable.t
@@ -3186,29 +3194,15 @@ module Window = struct
     in
     List.assoc item choices
 
-  let registerTreeDataProvider (type a) (module T : Ojs.T with type t = a)
-      ~(viewId : string) ~(treeDataProvider : a TreeDataProvider.t) :
-      Disposable.t =
-    let module TreeDataProvider = TreeDataProvider.Make (T) in
-    let treeDataProvider = [%js.of: TreeDataProvider.t] treeDataProvider in
-    registerTreeDataProvider ~viewId ~treeDataProvider
-
-  let createTreeView (type a) (module T : Ojs.T with type t = a)
-      ~(viewId : string) ~(options : a TreeViewOptions.t) : a TreeView.t =
-    let module TreeViewOptions = TreeViewOptions.Make (T) in
-    let module TreeView = TreeView.Make (T) in
-    let options = [%js.of: TreeViewOptions.t] options in
-    [%js.to: TreeView.t] (createTreeView ~viewId ~options)
-
   let registerCustomReadonlyEditorProvider (type a)
-      (module T : CustomDocument.T with type t = a) ~(viewType : string)
-      ~(provider : a CustomReadonlyEditorProvider.t)
-      ?(options : RegisterCustomEditorProviderOptions.t or_undefined) () :
-      Disposable.t =
-    let module CustomReadonlyEditorProvider =
-      CustomReadonlyEditorProvider.Make (T) in
-    let provider = [%js.of: CustomReadonlyEditorProvider.t] provider in
-    registerCustomReadonlyEditorProvider ~viewType ~provider ?options ()
+      (module T : CustomDocument.T with type t = a) ~viewType
+      ~(provider : a CustomReadonlyEditorProvider.t) ?options () =
+    registerCustomReadonlyEditorProvider
+      (module T)
+      ~viewType
+      ~provider
+      ?options
+      ()
 end
 
 module Commands = struct
