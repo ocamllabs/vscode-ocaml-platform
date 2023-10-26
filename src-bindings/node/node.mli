@@ -1,11 +1,9 @@
-open Interop
-
 val __filename : unit -> string
 
 val __dirname : unit -> string
 
 module Timeout : sig
-  include Js.T
+  include Ojs.T
 
   val hasRef : t -> bool
 
@@ -39,13 +37,13 @@ module Process : sig
 end
 
 module JsError : sig
-  include Js.T with type t = Promise.error
+  include Ojs.T with type t = Promise.error
 
   val message : t -> string
 end
 
 module Buffer : sig
-  include Js.T
+  include Ojs.T
 
   val toString : t -> string
 
@@ -67,7 +65,7 @@ end
 
 module Stream : sig
   module Readable : sig
-    include Js.T
+    include Ojs.T
 
     type chunk =
       [ `String of string
@@ -88,7 +86,7 @@ module Stream : sig
   end
 
   module Writable : sig
-    include Js.T
+    include Ojs.T
 
     val on :
          t

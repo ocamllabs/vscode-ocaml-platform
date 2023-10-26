@@ -40,43 +40,24 @@ module Dict : sig
 end
 
 module Js : sig
-  module type T = sig
-    type t
+  type 'a t = (module Ojs.T with type t = 'a)
 
-    val t_of_js : Ojs.t -> t
+  module Unit : Ojs.T with type t = unit
 
-    val t_to_js : t -> Ojs.t
-  end
+  module Result (Ok : Ojs.T) (Error : Ojs.T) :
+    Ojs.T with type t = (Ok.t, Error.t) result
 
-  type 'a t = (module T with type t = 'a)
+  module Or_undefined (T : Ojs.T) : Ojs.T with type t = T.t or_undefined
 
-  module Any : T with type t = Ojs.t
-
-  module Unit : T with type t = unit
-
-  module Bool : T with type t = bool
-
-  module Int : T with type t = int
-
-  module String : T with type t = string
-
-  module Option (T : T) : T with type t = T.t option
-
-  module Result (Ok : T) (Error : T) : T with type t = (Ok.t, Error.t) result
-
-  module Or_undefined (T : T) : T with type t = T.t or_undefined
-
-  module List (T : T) : T with type t = T.t list
-
-  module Dict (T : T) : T with type t = T.t Dict.t
+  module Dict (T : Ojs.T) : Ojs.T with type t = T.t Dict.t
 end
 
 module Interface : sig
-  module Make () : Js.T with type t = private Ojs.t
+  module Make () : Ojs.T with type t = private Ojs.t
 
-  module Extend (Super : Js.T) () : Js.T with type t = private Super.t
+  module Extend (Super : Ojs.T) () : Ojs.T with type t = private Super.t
 
-  module Generic (Super : Js.T) () : sig
+  module Generic (Super : Ojs.T) () : sig
     type 'a t = private Super.t
 
     type 'a generic = 'a t

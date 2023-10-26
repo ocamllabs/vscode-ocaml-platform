@@ -2,7 +2,7 @@ open Interop
 
 module Server : sig
   module Address : sig
-    include Js.T
+    include Ojs.T
 
     val port : t -> int
 
@@ -27,11 +27,11 @@ type polka
 
 module Middleware : sig
   module Request : sig
-    include Js.T
+    include Ojs.T
   end
 
   module Response : sig
-    include Js.T
+    include Ojs.T
   end
 
   type t =
