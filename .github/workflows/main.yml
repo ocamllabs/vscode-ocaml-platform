@@ -41,6 +41,7 @@ jobs:
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: "4.14"
+          dune-cache: true
           allow-prelease-opam: true
 
       - name: Set-up Node.js 20.x
@@ -119,6 +120,7 @@ jobs:
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: "4.14"
+          dune-cache: true
           allow-prelease-opam: true
 
       - name: Lint opam
