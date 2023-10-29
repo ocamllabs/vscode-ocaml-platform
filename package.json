@@ -1221,7 +1221,7 @@
     "prettier": "3.0.3",
     "prettier-plugin-packagejson": "2.4.6"
   },
-  "packageManager": "yarn@4.0.0+sha256.6d855253732ba8d231b6cd917961654f6c8439164c962a4e355c9c58360ebe44",
+  "packageManager": "yarn@4.0.1",
   "engines": {
     "vscode": "^1.82.0"
   },
