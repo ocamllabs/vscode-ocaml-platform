@@ -199,7 +199,7 @@ module StaticFeature = struct
            (   capabilities:ServerCapabilities.t
             -> documentSelector:DocumentSelector.t or_undefined
             -> unit)
-      -> dispose:(unit -> unit)
+      -> clear:(unit -> unit)
       -> unit
       -> t
     [@@js.builder]]
