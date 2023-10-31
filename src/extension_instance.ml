@@ -99,11 +99,11 @@ end = struct
         (Some experimental)
     in
     let initialize ~capabilities:_ ~documentSelector:_ = () in
-    let dispose () = () in
+    let clear () = () in
     LanguageClient.StaticFeature.make
       ~fillClientCapabilities
       ~initialize
-      ~dispose
+      ~clear
       ()
 
   let start_language_server t =

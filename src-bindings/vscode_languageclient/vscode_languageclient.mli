@@ -166,7 +166,7 @@ module StaticFeature : sig
          (   capabilities:ServerCapabilities.t
           -> documentSelector:DocumentSelector.t or_undefined
           -> unit)
-    -> dispose:(unit -> unit)
+    -> clear:(unit -> unit)
     -> unit
     -> t
 end
