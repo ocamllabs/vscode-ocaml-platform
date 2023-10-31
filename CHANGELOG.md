@@ -2,6 +2,8 @@
 
 # Unreleased
 
+## 1.13.4
+
 - Fix extension crashing after restarting the language server (#1262)
 
 ## 1.13.3
