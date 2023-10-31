@@ -94,24 +94,6 @@ jobs:
           draft: true
           files: ocaml-platform.vsix
 
-  analysis:
-    runs-on: ubuntu-latest
-
-    if: github.ref == 'refs/heads/master'
-
-    steps:
-      - name: Checkout tree
-        uses: actions/checkout@v4
-
-      - name: Set-up OCaml 4.14
-        uses: ocaml/setup-ocaml@v2
-        with:
-          ocaml-compiler: "4.14"
-          allow-prelease-opam: true
-
-      - name: Analysis
-        uses: ocaml/setup-ocaml/analysis@analysis
-
   lint-opam:
     runs-on: ubuntu-latest
     steps:

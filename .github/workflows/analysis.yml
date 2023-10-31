@@ -1,0 +1,27 @@
+name: Opam Dependency Submission
+
+on:
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: analysis
+  cancel-in-progress: true
+
+jobs:
+  analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
+
+      - name: Set-up OCaml 4.14
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: "4.14"
+          allow-prelease-opam: true
+
+      - name: Opam Dependency Submission
+        uses: ocaml/setup-ocaml/analysis@analysis
