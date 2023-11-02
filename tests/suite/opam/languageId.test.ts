@@ -1,33 +1,31 @@
-const assert = require("node:assert");
-const child_process = require("node:child_process");
-const os = require("node:os");
-const path = require("node:path");
-const util = require("node:util");
+import * as assert from "node:assert";
+import * as child_process from "node:child_process";
+import * as os from "node:os";
+import * as path from "node:path";
+import * as process from "node:process";
+import * as util from "node:util";
 
-const fs = require("fs-extra");
-const vscode = require("vscode");
-const { Uri } = require("vscode");
+import * as fs from "fs-extra";
+import * as vscode from "vscode";
 
 const exec = util.promisify(child_process.exec);
 
 const root = path.resolve(__dirname, "../../../");
 const fixtureSrcDir = path.join(root, "tests", "fixtures");
-const sampleEsySrc = path.join(fixtureSrcDir, "sample-opam");
+const sampleOpamSrc = path.join(fixtureSrcDir, "sample-opam");
 const projectPath = path.join(os.tmpdir(), "sample-opam");
 
 setup(async () => {
-  await fs.copy(sampleEsySrc, projectPath);
+  await fs.copy(sampleOpamSrc, projectPath);
 
-  await exec("esy", { cwd: projectPath });
-
-  await fs.writeFile(
-    path.join(projectPath, ".vscode", "settings.json"),
-    JSON.stringify({ "ocaml.sandbox": { root: projectPath, kind: "esy" } }),
-  );
+  await exec("opam install . --deps-only --yes", {
+    cwd: projectPath,
+    env: { ...process.env, PATH: process.env["PATH"], OPAMSWITCH: root },
+  });
 
   await vscode.commands.executeCommand(
     "vscode.openFolder",
-    Uri.file(projectPath),
+    vscode.Uri.file(projectPath),
   );
 });
 
@@ -35,13 +33,15 @@ teardown(async () => {
   await fs.remove(projectPath);
 });
 
-suite("esy", () => {
+suite("opam", () => {
+  if (process.platform === "win32") return;
+
   test("languageId", async () => {
     const ocamlDocument1 = await vscode.workspace.openTextDocument(
-      Uri.file(path.join(projectPath, "bin", "SampleEsyApp.ml")),
+      vscode.Uri.file(path.join(projectPath, "foo.ml")),
     );
     const ocamlDocument2 = await vscode.workspace.openTextDocument(
-      Uri.file(path.join(projectPath, "bin", "CamlUtil.ml")),
+      vscode.Uri.file(path.join(projectPath, "main.ml")),
     );
 
     assert.strictEqual(

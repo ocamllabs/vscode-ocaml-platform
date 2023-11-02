@@ -1,0 +1,14 @@
+{
+  "extends": [
+    "@tsconfig/strictest/tsconfig.json",
+    "@tsconfig/node20/tsconfig.json"
+  ],
+  "compilerOptions": {
+    "isolatedModules": true,
+    "module": "NodeNext",
+    "moduleDetection": "force",
+    "moduleResolution": "NodeNext",
+    "noEmit": true
+  },
+  "exclude": ["_build", "_opam", ".yarn", "astexplorer", "dist", "node_modules"]
+}
