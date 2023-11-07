@@ -1578,10 +1578,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mocha@npm:10.0.3":
-  version: 10.0.3
-  resolution: "@types/mocha@npm:10.0.3"
-  checksum: 842235a90ec401d42b10bbdd1e4b040e529f96b6e4dc745ff44739f25e39f6dfb1c193660e139b3ba44b5d61b3b48891776ea776aed4506df0557a434151fde0
+"@types/mocha@npm:10.0.4":
+  version: 10.0.4
+  resolution: "@types/mocha@npm:10.0.4"
+  checksum: 19efb41146c94a313e50385e449ccc322aa6b04edacd6f11b27aee2c027a2b07525b478e7d243163748c1533e370511fb5d9457e473a23dc0afd22692aecc882
   languageName: node
   linkType: hard
 
@@ -4742,7 +4742,7 @@ __metadata:
     "@tsconfig/node20": "npm:20.1.2"
     "@tsconfig/strictest": "npm:2.0.2"
     "@types/fs-extra": "npm:11.0.3"
-    "@types/mocha": "npm:10.0.3"
+    "@types/mocha": "npm:10.0.4"
     "@types/vscode": "npm:1.82.0"
     "@vscode/test-electron": "npm:2.3.6"
     "@vscode/vsce": "npm:2.22.0"
