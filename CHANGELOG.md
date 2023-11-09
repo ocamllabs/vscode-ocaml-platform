@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Support switching between impl and intf in reason (#1274)
+
 ## 1.13.4
 
 - Fix extension crashing after restarting the language server (#1262)
