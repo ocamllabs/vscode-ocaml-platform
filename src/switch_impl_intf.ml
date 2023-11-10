@@ -2,11 +2,13 @@ open Import
 
 let insert_inferred_intf ~source_uri client text_editor =
   let open Promise.Syntax in
-  (* XXX this seems sketchy. shouldn't it work for reason as well? *)
-  match String.is_suffix source_uri ~suffix:".ml" with
+  match
+    String.is_suffix source_uri ~suffix:".ml"
+    || String.is_suffix source_uri ~suffix:".re"
+  with
   | false -> Promise.return ()
   | true ->
-    (* If the source file was a .ml, infer the interface *)
+    (* If the source file was a .ml or .re, infer the interface *)
     let* inferred_intf =
       Custom_requests.send_request client Custom_requests.inferIntf source_uri
     in
