@@ -9,6 +9,7 @@ tests/fixtures/sample-esy/_esy/
 tests/fixtures/sample-esy/esy.lock/
 
 # Normal npm stuff
-node_modules/
 .vscode-test/
+.yarn/
 dist/
+node_modules/
