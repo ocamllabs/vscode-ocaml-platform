@@ -157,8 +157,8 @@ const Element = React.memo(
         const newOpenState = shiftKey
           ? OPEN_STATES.DEEP_OPEN
           : isOpen
-          ? OPEN_STATES.CLOSED
-          : OPEN_STATES.OPEN;
+            ? OPEN_STATES.CLOSED
+            : OPEN_STATES.OPEN;
         if (onClick) {
           onClick(newOpenState, true);
         }
