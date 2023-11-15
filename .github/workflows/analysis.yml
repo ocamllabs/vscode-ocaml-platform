@@ -1,16 +1,19 @@
-name: Opam Dependency Submission
+name: Dependency Analysis
 
 on:
   push:
     branches:
       - master
+  pull_request:
 
 concurrency:
-  group: analysis
+  group: dependency-analysis
   cancel-in-progress: false
 
 jobs:
-  analysis:
+  opam-dependency-submission:
+    name: Opam Dependency Submission
+
     runs-on: ubuntu-latest
 
     steps:
@@ -25,3 +28,20 @@ jobs:
 
       - name: Opam Dependency Submission
         uses: ocaml/setup-ocaml/analysis@analysis
+
+  dependency-review:
+    name: Dependency Review
+
+    if: github.event_name == 'pull_request'
+
+    needs:
+      - opam-dependency-submission
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v3
