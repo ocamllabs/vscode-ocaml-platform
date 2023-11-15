@@ -1917,9 +1917,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001541":
-  version: 1.0.30001561
-  resolution: "caniuse-lite@npm:1.0.30001561"
-  checksum: 6e84c84026fee53edbdbb5aded7a04a036aae4c2e367cf6bdc90c6783a591e2fdcfcdebcc4e774aca61092e542a61200c8c16b06659396492426033c4dbcc618
+  version: 1.0.30001562
+  resolution: "caniuse-lite@npm:1.0.30001562"
+  checksum: 4d2d4174317b582699ed66e12034a21222c931b9fefc42d53a283666d1323c27bb2d135b9f5efd89c242222b591111a21b2c90166457019389191d54566eef68
   languageName: node
   linkType: hard
 
@@ -2435,9 +2435,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.4.535":
-  version: 1.4.580
-  resolution: "electron-to-chromium@npm:1.4.580"
-  checksum: b0aa56873c8be54b7b34ce30551fda6872f2571d40080e8f3ceb779b48f3f1ab146b55896add89bf9629dde29dc0603bc1df6251d9052f3c918140669422047a
+  version: 1.4.583
+  resolution: "electron-to-chromium@npm:1.4.583"
+  checksum: 48545d5d281d55e9ae32491bcbac6d8be016de55553ad75ba6154daa2d3db619f76d3730a846e3737e581537e39b2f176edd864463d16cb6211f2defa1be9464
   languageName: node
   linkType: hard
 
@@ -4012,9 +4012,11 @@ __metadata:
   linkType: hard
 
 "lru-cache@npm:^10.0.1, lru-cache@npm:^9.1.1 || ^10.0.0":
-  version: 10.0.1
-  resolution: "lru-cache@npm:10.0.1"
-  checksum: 982dabfb227b9a2daf56d712ae0e72e01115a28c0a2068cd71277bca04568f3417bbf741c6c7941abc5c620fd8059e34f15607f90ebccbfa0a17533322d27a8e
+  version: 10.0.2
+  resolution: "lru-cache@npm:10.0.2"
+  dependencies:
+    semver: "npm:^7.3.5"
+  checksum: 5c83a7a2a320a445129cb67a1794437db5483942df63536026fba1cb7ba2e1f7456037876cc9d31076132010f92cb943bee358d336dd94105e50ea971e6d737d
   languageName: node
   linkType: hard
 
