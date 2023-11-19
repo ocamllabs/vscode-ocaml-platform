@@ -10,9 +10,14 @@ concurrency:
   group: dependency-analysis
   cancel-in-progress: false
 
+permissions: read-all
+
 jobs:
   opam-dependency-submission:
     name: Opam Dependency Submission
+
+    permissions:
+      contents: write
 
     runs-on: ubuntu-latest
 
