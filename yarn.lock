@@ -1623,15 +1623,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode/test-electron@npm:2.3.7":
-  version: 2.3.7
-  resolution: "@vscode/test-electron@npm:2.3.7"
+"@vscode/test-electron@npm:2.3.8":
+  version: 2.3.8
+  resolution: "@vscode/test-electron@npm:2.3.8"
   dependencies:
     http-proxy-agent: "npm:^4.0.1"
     https-proxy-agent: "npm:^5.0.0"
     jszip: "npm:^3.10.1"
     semver: "npm:^7.5.2"
-  checksum: 8a445ecb4afbccd205081ec110fc94e8a6fa290e4add69cd6e91475ca76d46ffca6f3f811afd11148bf6a4f945f1c4a84bcf0f2a3b6102a68eaa23c1ac32457f
+  checksum: f894d6c243c27d68374ddf581c04cb6defe478180be1f7bed39dfff9b4d147b0a072923c2e7a99f5431801b0bf21c1d72354b0b912467fba1da93c15069c70c3
   languageName: node
   linkType: hard
 
@@ -4736,7 +4736,7 @@ __metadata:
     "@types/fs-extra": "npm:11.0.4"
     "@types/mocha": "npm:10.0.6"
     "@types/vscode": "npm:1.82.0"
-    "@vscode/test-electron": "npm:2.3.7"
+    "@vscode/test-electron": "npm:2.3.8"
     "@vscode/vsce": "npm:2.22.0"
     esbuild: "npm:0.19.7"
     fs-extra: "npm:11.1.1"
