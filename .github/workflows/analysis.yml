@@ -29,7 +29,7 @@ jobs:
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: "4.14"
-          allow-prelease-opam: true
+          allow-prerelease-opam: true
 
       - name: Opam Dependency Submission
         uses: ocaml/setup-ocaml/analysis@analysis
