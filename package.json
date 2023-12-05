@@ -1204,7 +1204,7 @@
     "onDebugResolve:ocaml.earlybird"
   ],
   "dependencies": {
-    "polka": "^1.0.0-next.23",
+    "polka": "^1.0.0-next.24",
     "sirv": "^2.0.3",
     "vscode-languageclient": "9.0.1"
   },
