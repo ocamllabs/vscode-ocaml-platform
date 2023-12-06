@@ -1,10 +1,7 @@
 name: Dependency Analysis
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
+  - push
 
 concurrency:
   group: dependency-analysis
