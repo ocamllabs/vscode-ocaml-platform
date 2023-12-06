@@ -1650,7 +1650,7 @@ __metadata:
     prop-types: "npm:15.8.1"
     react: "npm:18.2.0"
     react-dom: "npm:18.2.0"
-    react-redux: "npm:9.0.1"
+    react-redux: "npm:9.0.2"
   languageName: unknown
   linkType: soft
 
@@ -5084,9 +5084,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-redux@npm:9.0.1":
-  version: 9.0.1
-  resolution: "react-redux@npm:9.0.1"
+"react-redux@npm:9.0.2":
+  version: 9.0.2
+  resolution: "react-redux@npm:9.0.2"
   dependencies:
     "@types/use-sync-external-store": "npm:^0.0.3"
     use-sync-external-store: "npm:^1.0.0"
@@ -5108,7 +5108,7 @@ __metadata:
       optional: true
     redux:
       optional: true
-  checksum: 0e9d18398746883e1aa85766bb0b41339d51fc9d066876dd6170a3e9c559d91a85dffeb510e20f495a0a939ce33c4d73808f6c145915c041ea00dbfea211ee10
+  checksum: 84cf07fb9c3c8cca383b114f9010f09bf9d28d8876da9dfb5d8666ee98cfb1d47a7799f9470ffb4e0859c0d89ad603f0a50182ce8d3d66a7873b82f4ede15acb
   languageName: node
   linkType: hard
 
