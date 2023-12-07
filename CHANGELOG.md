@@ -2,6 +2,8 @@
 
 # Unreleased
 
+## 1.14.1
+
 - Fix incorrect esy sandbox docs (#1297)
 
 ## 1.14.0
