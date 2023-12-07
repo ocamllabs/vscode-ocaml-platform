@@ -522,7 +522,7 @@ _Local switch_
 {
   "ocaml.sandbox": {
     "kind": "esy",
-    "root": "${workspaceFolder:vscode-ocaml-platform}"
+    "root": "${firstWorkspaceFolder}"
   }
 }
 ```
