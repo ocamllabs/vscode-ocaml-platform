@@ -1205,7 +1205,7 @@
   ],
   "dependencies": {
     "polka": "^1.0.0-next.24",
-    "sirv": "^2.0.3",
+    "sirv": "^2.0.4",
     "vscode-languageclient": "9.0.1"
   },
   "devDependencies": {
