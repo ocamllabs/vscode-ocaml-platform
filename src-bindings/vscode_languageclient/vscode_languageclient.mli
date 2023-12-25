@@ -78,9 +78,12 @@ module OcamllspSettings : sig
 
   val extendedHover : t -> OcamllspSettingEnable.t option
 
+  val syntaxDocumentation : t -> OcamllspSettingEnable.t option
+
   val create :
        ?codelens:OcamllspSettingEnable.t
     -> ?extendedHover:OcamllspSettingEnable.t
+    -> ?syntaxDocumentation:OcamllspSettingEnable.t
     -> unit
     -> t
 end

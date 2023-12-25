@@ -38,8 +38,14 @@ let notify_configuration_changes instance =
             ~f:(fun enable ->
               LanguageClient.OcamllspSettingEnable.create ~enable ())
         in
+        let syntaxDocumentation =
+          Option.map
+            Settings.(get server_syntaxDocumentation_setting)
+            ~f:(fun enable ->
+              LanguageClient.OcamllspSettingEnable.create ~enable ())
+        in
         let settings =
-          LanguageClient.OcamllspSettings.create ?codelens ?extendedHover ()
+          LanguageClient.OcamllspSettings.create ?codelens ?extendedHover ?syntaxDocumentation ()
         in
         let payload =
           let settings =
