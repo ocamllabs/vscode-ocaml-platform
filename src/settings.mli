@@ -41,3 +41,5 @@ val server_args_setting : string list setting
 val server_codelens_setting : bool setting
 
 val server_extendedHover_setting : bool setting
+
+val server_syntaxDocumentation_setting : bool setting
