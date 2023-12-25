@@ -272,6 +272,11 @@
           "default": false,
           "markdownDescription": "Enable/Disable extended hover"
         },
+        "ocaml.server.syntaxDocumentation": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable syntax documentation"
+        },
         "ocaml.dune.autoDetect": {
           "type": "boolean",
           "default": true,
