@@ -45,7 +45,11 @@ let notify_configuration_changes instance =
               LanguageClient.OcamllspSettingEnable.create ~enable ())
         in
         let settings =
-          LanguageClient.OcamllspSettings.create ?codelens ?extendedHover ?syntaxDocumentation ()
+          LanguageClient.OcamllspSettings.create
+            ?codelens
+            ?extendedHover
+            ?syntaxDocumentation
+            ()
         in
         let payload =
           let settings =
