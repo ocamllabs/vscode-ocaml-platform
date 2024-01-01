@@ -1,7 +1,9 @@
 name: Opam Dependency Submission
 
 on:
-  - push
+  push:
+    branches:
+      - master
 
 concurrency:
   group: opam-dependency-submission
@@ -29,4 +31,4 @@ jobs:
           allow-prerelease-opam: true
 
       - name: Opam Dependency Submission
-        uses: ocaml/setup-ocaml/analysis@analysis
+        uses: ocaml/setup-ocaml/analysis@v2
