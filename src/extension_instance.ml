@@ -11,6 +11,8 @@ type t =
   ; documentation_server_info : StatusBarItem.t
   ; sandbox_info : StatusBarItem.t
   ; ast_editor_state : Ast_editor_state.t
+  ; mutable codelens : bool option
+  ; mutable extended_hover : bool option
   }
 
 let sandbox t = t.sandbox
@@ -22,6 +24,35 @@ let ocaml_lsp t = Option.map ~f:snd t.lsp_client
 let lsp_client t = t.lsp_client
 
 let ocaml_version_exn t = Option.value_exn t.ocaml_version
+
+let send_configuration ?codelens ?extended_hover client =
+  let codelens =
+    Option.map codelens ~f:(fun enable ->
+        LanguageClient.OcamllspSettingEnable.create ~enable ())
+  in
+  let extendedHover =
+    Option.map extended_hover ~f:(fun enable ->
+        LanguageClient.OcamllspSettingEnable.create ~enable ())
+  in
+  let settings =
+    LanguageClient.OcamllspSettings.create ?codelens ?extendedHover ()
+  in
+  let payload =
+    let settings = LanguageClient.DidChangeConfiguration.create ~settings () in
+    LanguageClient.DidChangeConfiguration.t_to_js settings
+  in
+  LanguageClient.sendNotification
+    client
+    "workspace/didChangeConfiguration"
+    payload
+
+let set_configuration t ?codelens ?extended_hover () =
+  t.codelens <- codelens;
+  t.extended_hover <- extended_hover;
+  match t.lsp_client with
+  | None -> ()
+  | Some (client, (_ : Ocaml_lsp.t)) ->
+    send_configuration ?codelens ?extended_hover client
 
 let stop_server t =
   match t.lsp_client with
@@ -133,6 +164,10 @@ end = struct
        with
       | Ok () -> ()
       | Error (`Msg m) -> show_message `Warn "%s" m);
+      send_configuration
+        client
+        ?codelens:t.codelens
+        ?extended_hover:t.extended_hover;
       Ok ()
     in
     match res with
@@ -189,7 +224,7 @@ end = struct
     StatusBarItem.set_text sandbox_info status_bar_item_text
 end
 
-let make () =
+let make ?codelens ?extended_hover () =
   let sandbox = Sandbox.Global in
   let sandbox_info = Sandbox_info.make sandbox in
   let documentation_server_info = documentation_server_info () in
@@ -202,6 +237,8 @@ let make () =
   ; ocaml_version = None
   ; ast_editor_state
   ; documentation_server = None
+  ; codelens
+  ; extended_hover
   }
 
 let set_documentation_context ~running =

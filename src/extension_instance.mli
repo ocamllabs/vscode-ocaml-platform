@@ -2,7 +2,7 @@ open Import
 
 type t
 
-val make : unit -> t
+val make : ?codelens:bool -> ?extended_hover:bool -> unit -> t
 
 val sandbox : t -> Sandbox.t
 
@@ -22,6 +22,9 @@ val lsp_client : t -> (LanguageClient.t * Ocaml_lsp.t) option
 val ocaml_version_exn : t -> Ocaml_version.t
 
 val start_language_server : t -> unit Promise.t
+
+val set_configuration :
+  t -> ?codelens:bool -> ?extended_hover:bool -> unit -> unit
 
 val open_terminal : Sandbox.t -> unit
 
