@@ -62,7 +62,7 @@ end = struct
       in
       Interop.Dict.union
         (fun _k _v1 v2 -> Some v2)
-        Process.Env.env
+        (Process.Env.env ())
         extra_env_vars
     in
     match command with
