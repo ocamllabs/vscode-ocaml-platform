@@ -23,34 +23,9 @@ let suggest_to_pick_sandbox () =
 let notify_configuration_changes instance =
   Workspace.onDidChangeConfiguration
     ~listener:(fun _event ->
-      match Extension_instance.language_client instance with
-      | None -> ()
-      | Some client ->
-        let codelens =
-          Option.map
-            Settings.(get server_codelens_setting)
-            ~f:(fun enable ->
-              LanguageClient.OcamllspSettingEnable.create ~enable ())
-        in
-        let extendedHover =
-          Option.map
-            Settings.(get server_extendedHover_setting)
-            ~f:(fun enable ->
-              LanguageClient.OcamllspSettingEnable.create ~enable ())
-        in
-        let settings =
-          LanguageClient.OcamllspSettings.create ?codelens ?extendedHover ()
-        in
-        let payload =
-          let settings =
-            LanguageClient.DidChangeConfiguration.create ~settings ()
-          in
-          LanguageClient.DidChangeConfiguration.t_to_js settings
-        in
-        LanguageClient.sendNotification
-          client
-          "workspace/didChangeConfiguration"
-          payload)
+      let codelens = Settings.(get server_codelens_setting) in
+      let extended_hover = Settings.(get server_extendedHover_setting) in
+      Extension_instance.set_configuration instance ?codelens ?extended_hover ())
     ()
 
 let activate (extension : ExtensionContext.t) =

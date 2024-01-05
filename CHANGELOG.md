@@ -3,6 +3,7 @@
 # Unreleased
 
 - Fix direnv compatibility by loading the process.env on every command (#1322)
+- Fix server settings missing on LSP startup (#1321)
 
 ## 1.14.2
 
