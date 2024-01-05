@@ -4487,7 +4487,7 @@ __metadata:
     ovsx: "npm:0.8.3"
     polka: "npm:^1.0.0-next.24"
     prettier: "npm:3.1.1"
-    prettier-plugin-packagejson: "npm:2.4.8"
+    prettier-plugin-packagejson: "npm:2.4.9"
     sirv: "npm:^2.0.4"
     typescript: "npm:5.3.3"
     vscode-languageclient: "npm:9.0.1"
@@ -4825,18 +4825,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier-plugin-packagejson@npm:2.4.8":
-  version: 2.4.8
-  resolution: "prettier-plugin-packagejson@npm:2.4.8"
+"prettier-plugin-packagejson@npm:2.4.9":
+  version: 2.4.9
+  resolution: "prettier-plugin-packagejson@npm:2.4.9"
   dependencies:
     sort-package-json: "npm:2.6.0"
-    synckit: "npm:0.8.8"
+    synckit: "npm:0.9.0"
   peerDependencies:
     prettier: ">= 1.16.0"
   peerDependenciesMeta:
     prettier:
       optional: true
-  checksum: f38580e069234da5f7ab13f72cea20579651037ee52ed07fb12517a2488b5b8f443075749ec6622b3c9e7a66e7ffbac8930516b174eb619e50b4ed49e2b05ef5
+  checksum: 6e1666c00d53dc8d4715e5c96978fc8446f93b7768852e11ff23f140297bc86a491d5ba381ea394d7ce3535b6f7afe64587a20176085491da91f814da3bfbcc9
   languageName: node
   linkType: hard
 
@@ -5670,13 +5670,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"synckit@npm:0.8.8":
-  version: 0.8.8
-  resolution: "synckit@npm:0.8.8"
+"synckit@npm:0.9.0":
+  version: 0.9.0
+  resolution: "synckit@npm:0.9.0"
   dependencies:
     "@pkgr/core": "npm:^0.1.0"
     tslib: "npm:^2.6.2"
-  checksum: c3d3aa8e284f3f84f2f868b960c9f49239b364e35f6d20825a448449a3e9c8f49fe36cdd5196b30615682f007830d46f2ea354003954c7336723cb821e4b6519
+  checksum: b5c1e7c03fefe3d36a9ab4e71dd21859cb32be4138712c31a893382a568fd00efc59ede8f521dd7e53d43a2fea92bdf717e987ea9ed6ad94f97ef28d71d0ba2f
   languageName: node
   linkType: hard
 
