@@ -18,7 +18,7 @@ bug-reports: "https://github.com/ocamllabs/vscode-ocaml-platform/issues"
 depends: [
   "dune" {>= "3.0"}
   "ocaml" {>= "4.13"}
-  "js_of_ocaml" {>= "4.1.0"}
+  "js_of_ocaml" {>= "5.5.2"}
   "gen_js_api" {= "1.1.2"}
   "promise_jsoo" {>= "0.3.1"}
   "jsonoo" {>= "0.2.1"}
