@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Fix direnv compatibility by loading the process.env on every command (#1322)
+
 ## 1.14.2
 
 - Add `1.17.0` to the list of known versions of ocamllsp
