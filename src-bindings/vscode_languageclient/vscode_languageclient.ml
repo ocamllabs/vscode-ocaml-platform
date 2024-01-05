@@ -97,9 +97,12 @@ module OcamllspSettings = struct
 
     val extendedHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
 
+    val duneDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+
     val create :
          ?codelens:OcamllspSettingEnable.t
       -> ?extendedHover:OcamllspSettingEnable.t
+      -> ?duneDiagnostics:OcamllspSettingEnable.t
       -> unit
       -> t
     [@@js.builder]]
