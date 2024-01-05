@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Add `1.17.0` to the list of known versions of ocamllsp
+
 ## 1.14.1
 
 - Fix incorrect esy sandbox docs (#1297)
