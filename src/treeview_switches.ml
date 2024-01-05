@@ -33,7 +33,7 @@ module Dependency = struct
 
   let context_value = function
     | Switch _ -> "opam-switch"
-    | Package _ -> "package"
+    | Package _ -> "opam-package"
 
   let icon dependency is_current_sandbox =
     match dependency with

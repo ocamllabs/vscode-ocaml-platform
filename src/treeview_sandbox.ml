@@ -33,7 +33,7 @@ module Dependency = struct
     in
     let item = Vscode.TreeItem.make_label ~label ~collapsibleState () in
     Vscode.TreeItem.set_iconPath item icon;
-    TreeItem.set_contextValue item "package";
+    TreeItem.set_contextValue item "opam-package";
     let+ _ =
       Promise.Option.iter
         (fun desc -> TreeItem.set_description item (`String desc))
