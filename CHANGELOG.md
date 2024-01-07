@@ -3,6 +3,7 @@
 # Unreleased
 
 - Fix direnv compatibility by loading the process.env on every command (#1322)
+
 - Fix server settings missing on LSP startup (#1321)
 
 ## 1.14.2
@@ -45,6 +46,7 @@
 - Add experimental
   [earlybird bytecode debugger](https://github.com/hackwaly/ocamlearlybird)
   integration (#1148)
+
 - Trim whitespace when running `Evaluate Selection` command (#1100)
 
 - Encode URI when sending the `switchImplIntf` request (#983)
