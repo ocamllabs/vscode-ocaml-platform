@@ -78,9 +78,12 @@ module OcamllspSettings : sig
 
   val extendedHover : t -> OcamllspSettingEnable.t option
 
+  val duneDiagnostics : t -> OcamllspSettingEnable.t option
+
   val create :
        ?codelens:OcamllspSettingEnable.t
     -> ?extendedHover:OcamllspSettingEnable.t
+    -> ?duneDiagnostics:OcamllspSettingEnable.t
     -> unit
     -> t
 end

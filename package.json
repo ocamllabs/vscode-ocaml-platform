@@ -272,6 +272,11 @@
           "default": false,
           "markdownDescription": "Enable/Disable extended hover"
         },
+        "ocaml.server.duneDiagnostics": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Enable/Disable dune diagnostics"
+        },
         "ocaml.dune.autoDetect": {
           "type": "boolean",
           "default": true,

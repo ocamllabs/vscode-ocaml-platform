@@ -25,7 +25,12 @@ let notify_configuration_changes instance =
     ~listener:(fun _event ->
       let codelens = Settings.(get server_codelens_setting) in
       let extended_hover = Settings.(get server_extendedHover_setting) in
-      Extension_instance.set_configuration instance ~codelens ~extended_hover)
+      let dune_diagnostics = Settings.(get server_duneDiagnostics_setting) in
+      Extension_instance.set_configuration
+        instance
+        ~codelens
+        ~extended_hover
+        ~dune_diagnostics)
     ()
 
 let activate (extension : ExtensionContext.t) =

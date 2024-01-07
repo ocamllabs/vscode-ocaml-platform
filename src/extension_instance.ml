@@ -13,6 +13,7 @@ type t =
   ; ast_editor_state : Ast_editor_state.t
   ; mutable codelens : bool option
   ; mutable extended_hover : bool option
+  ; mutable dune_diagnostics : bool option
   }
 
 let sandbox t = t.sandbox
@@ -25,7 +26,7 @@ let lsp_client t = t.lsp_client
 
 let ocaml_version_exn t = Option.value_exn t.ocaml_version
 
-let send_configuration ?codelens ?extended_hover client =
+let send_configuration ?codelens ?extended_hover ?dune_diagnostics client =
   let codelens =
     Option.map codelens ~f:(fun enable ->
         LanguageClient.OcamllspSettingEnable.create ~enable ())
@@ -34,8 +35,16 @@ let send_configuration ?codelens ?extended_hover client =
     Option.map extended_hover ~f:(fun enable ->
         LanguageClient.OcamllspSettingEnable.create ~enable ())
   in
+  let duneDiagnostics =
+    Option.map dune_diagnostics ~f:(fun enable ->
+        LanguageClient.OcamllspSettingEnable.create ~enable ())
+  in
   let settings =
-    LanguageClient.OcamllspSettings.create ?codelens ?extendedHover ()
+    LanguageClient.OcamllspSettings.create
+      ?codelens
+      ?extendedHover
+      ?duneDiagnostics
+      ()
   in
   let payload =
     let settings = LanguageClient.DidChangeConfiguration.create ~settings () in
@@ -46,13 +55,14 @@ let send_configuration ?codelens ?extended_hover client =
     "workspace/didChangeConfiguration"
     payload
 
-let set_configuration t ~codelens ~extended_hover =
+let set_configuration t ~codelens ~extended_hover ~dune_diagnostics =
   t.codelens <- codelens;
   t.extended_hover <- extended_hover;
+  t.dune_diagnostics <- dune_diagnostics;
   match t.lsp_client with
   | None -> ()
   | Some (client, (_ : Ocaml_lsp.t)) ->
-    send_configuration ?codelens ?extended_hover client
+    send_configuration ?codelens ?extended_hover ?dune_diagnostics client
 
 let stop_server t =
   match t.lsp_client with
@@ -167,7 +177,8 @@ end = struct
       send_configuration
         client
         ?codelens:t.codelens
-        ?extended_hover:t.extended_hover;
+        ?extended_hover:t.extended_hover
+        ?dune_diagnostics:t.dune_diagnostics;
       Ok ()
     in
     match res with
@@ -239,6 +250,7 @@ let make () =
   ; documentation_server = None
   ; codelens = None
   ; extended_hover = None
+  ; dune_diagnostics = None
   }
 
 let set_documentation_context ~running =
