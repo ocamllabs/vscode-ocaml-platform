@@ -29,25 +29,25 @@ let ocaml_version_exn t = Option.value_exn t.ocaml_version
 let send_configuration ~codelens ~extended_hover ~dune_diagnostics client =
   let codelens =
     Option.map codelens ~f:(fun enable ->
-        LanguageClient.OcamllspSettingEnable.create ~enable ())
+        Ocaml_lsp.OcamllspSettingEnable.create ~enable)
   in
   let extendedHover =
     Option.map extended_hover ~f:(fun enable ->
-        LanguageClient.OcamllspSettingEnable.create ~enable ())
+        Ocaml_lsp.OcamllspSettingEnable.create ~enable)
   in
   let duneDiagnostics =
     Option.map dune_diagnostics ~f:(fun enable ->
-        LanguageClient.OcamllspSettingEnable.create ~enable ())
+        Ocaml_lsp.OcamllspSettingEnable.create ~enable)
   in
   let settings =
-    LanguageClient.OcamllspSettings.create
-      ?codelens
-      ?extendedHover
-      ?duneDiagnostics
-      ()
+    Ocaml_lsp.OcamllspSettings.create ~codelens ~extendedHover ~duneDiagnostics
   in
   let payload =
-    let settings = LanguageClient.DidChangeConfiguration.create ~settings () in
+    let settings =
+      LanguageClient.DidChangeConfiguration.create
+        ~settings:(Ocaml_lsp.OcamllspSettings.t_to_js settings)
+        ()
+    in
     LanguageClient.DidChangeConfiguration.t_to_js settings
   in
   LanguageClient.sendNotification

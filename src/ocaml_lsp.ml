@@ -1,4 +1,38 @@
 open! Import
+open Interop
+
+module OcamllspSettingEnable = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val enable : t -> bool or_undefined [@@js.get]
+
+    val create : enable:bool -> t [@@js.builder]]
+end
+
+module OcamllspSettings = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val codelens : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+
+    val extendedHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+
+    val duneDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+
+    val create :
+         ?codelens:OcamllspSettingEnable.t
+      -> ?extendedHover:OcamllspSettingEnable.t
+      -> ?duneDiagnostics:OcamllspSettingEnable.t
+      -> unit
+      -> t
+    [@@js.builder]]
+
+  let create ~codelens ~extendedHover ~duneDiagnostics =
+    create ?codelens ?extendedHover ?duneDiagnostics ()
+end
 
 module Experimental_capabilities = struct
   type t =

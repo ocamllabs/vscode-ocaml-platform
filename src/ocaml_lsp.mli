@@ -12,3 +12,27 @@ val can_handle_switch_impl_intf : t -> bool
 val can_handle_infer_intf : t -> bool
 
 val can_handle_typed_holes : t -> bool
+
+module OcamllspSettingEnable : sig
+  include Ojs.T
+
+  val enable : t -> bool option
+
+  val create : enable:bool -> t
+end
+
+module OcamllspSettings : sig
+  include Ojs.T
+
+  val codelens : t -> OcamllspSettingEnable.t option
+
+  val extendedHover : t -> OcamllspSettingEnable.t option
+
+  val duneDiagnostics : t -> OcamllspSettingEnable.t option
+
+  val create :
+       codelens:OcamllspSettingEnable.t option
+    -> extendedHover:OcamllspSettingEnable.t option
+    -> duneDiagnostics:OcamllspSettingEnable.t option
+    -> t
+end
