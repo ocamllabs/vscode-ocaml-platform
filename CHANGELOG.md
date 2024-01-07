@@ -5,6 +5,7 @@
 - Fix direnv compatibility by loading the process.env on every command (#1322)
 
 - Fix server settings missing on LSP startup (#1321)
+- Fix broken syntax highlighting for a wildcard in the env stanza (#1334)
 
 - Add config to disabling dune diagnostics (#1320)
 
