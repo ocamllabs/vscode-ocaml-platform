@@ -46,7 +46,7 @@ let send_configuration ?codelens ?extended_hover client =
     "workspace/didChangeConfiguration"
     payload
 
-let set_configuration t ?codelens ?extended_hover () =
+let set_configuration t ~codelens ~extended_hover =
   t.codelens <- codelens;
   t.extended_hover <- extended_hover;
   match t.lsp_client with
@@ -224,7 +224,7 @@ end = struct
     StatusBarItem.set_text sandbox_info status_bar_item_text
 end
 
-let make ?codelens ?extended_hover () =
+let make () =
   let sandbox = Sandbox.Global in
   let sandbox_info = Sandbox_info.make sandbox in
   let documentation_server_info = documentation_server_info () in
@@ -237,8 +237,8 @@ let make ?codelens ?extended_hover () =
   ; ocaml_version = None
   ; ast_editor_state
   ; documentation_server = None
-  ; codelens
-  ; extended_hover
+  ; codelens = None
+  ; extended_hover = None
   }
 
 let set_documentation_context ~running =
