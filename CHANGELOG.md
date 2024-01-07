@@ -7,7 +7,7 @@
 
 ## 1.14.2
 
-- Add `1.17.0` to the list of known versions of ocamllsp
+- Add `1.17.0` to the list of known versions of ocamllsp (#1326)
 
 ## 1.14.1
 
