@@ -1,5 +1,5 @@
-var fs = require("fs");
-var promisify = require("util").promisify;
+const fs = require("fs");
+const promisify = require("util").promisify;
 
 joo_global_object.fs = {
   readDir: promisify(fs.readdir),

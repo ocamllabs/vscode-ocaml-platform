@@ -9,7 +9,11 @@
     "indentStyle": "space"
   },
   "linter": {
-    "enabled": false
+    "enabled": true,
+    "ignore": ["astexplorer"],
+    "rules": {
+      "recommended": true
+    }
   },
   "organizeImports": {
     "enabled": true

@@ -31,7 +31,8 @@
     "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --yarn --no-dependencies",
     "deploy:ovsx": "ovsx publish --yarn --no-dependencies",
     "fmt:check": "biome format .",
-    "fmt": "biome format . --write"
+    "fmt": "biome format . --write",
+    "lint": "biome lint ."
   },
   "contributes": {
     "breakpoints": [

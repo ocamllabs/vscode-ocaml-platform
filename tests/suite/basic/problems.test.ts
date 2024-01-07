@@ -63,7 +63,7 @@ suite("basic", () => {
       assert.notStrictEqual(
         captures,
         null,
-        "Location regex should match: " + problem,
+        `Location regex should match: ${problem}`,
       );
       assert.deepStrictEqual(captures?.slice(1), expected);
     }
@@ -73,7 +73,7 @@ suite("basic", () => {
       assert.notStrictEqual(
         captures,
         null,
-        "Message regex should match: " + problem,
+        `Message regex should match: ${problem}`,
       );
       assert.deepStrictEqual(captures?.slice(1), expected);
     }
