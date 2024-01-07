@@ -63,31 +63,6 @@ module DocumentSelector : sig
   val language : ?scheme:string -> ?pattern:string -> string -> selector
 end
 
-module OcamllspSettingEnable : sig
-  include Ojs.T
-
-  val enable : t -> bool option
-
-  val create : enable:bool -> unit -> t
-end
-
-module OcamllspSettings : sig
-  include Ojs.T
-
-  val codelens : t -> OcamllspSettingEnable.t option
-
-  val extendedHover : t -> OcamllspSettingEnable.t option
-
-  val duneDiagnostics : t -> OcamllspSettingEnable.t option
-
-  val create :
-       ?codelens:OcamllspSettingEnable.t
-    -> ?extendedHover:OcamllspSettingEnable.t
-    -> ?duneDiagnostics:OcamllspSettingEnable.t
-    -> unit
-    -> t
-end
-
 module ClientOptions : sig
   include Ojs.T
 
@@ -177,7 +152,7 @@ end
 module DidChangeConfiguration : sig
   include Ojs.T
 
-  val create : settings:OcamllspSettings.t -> unit -> t
+  val create : settings:Ojs.t -> unit -> t
 end
 
 module LanguageClient : sig
