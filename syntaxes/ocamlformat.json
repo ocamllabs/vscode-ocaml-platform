@@ -29,71 +29,79 @@
       "patterns": [
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(align-cases|align-constructors-decl|align-variants-decl|assignment-operator)\\b"
+          "match": "\\b(?<!-)(align-cases|align-constructors-decl|align-variants-decl|assignment-operator)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(break-before-in|break-cases|break-collection-expressions|break-collection|break-fun-decl|break-fun-sig|break-infix-before-func|break-infix|break-separators|break-sequences|break-string-literals|break-struct)\\b"
+          "match": "\\b(?<!-)(break-before-in|break-cases|break-collection-expressions|break-colon|break-fun-decl|break-fun-sig|break-infix|break-infix-before-func|break-separators|break-sequences|break-string-literals|break-struct)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(cases-exp-indent|cases-matching-exp-indent|comment-check)\\b"
+          "match": "\\b(?<!-)(cases-exp-indent|cases-matching-exp-indent|check|comment-check)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(disable|disambiguate-non-breaking-match|doc-comments-padding|doc-comments-tag-only|doc-comments-val|doc-comments|dock-collection-brackets)\\b"
+          "match": "\\b(?<!-)(debug|disable|disable-conf-attrs|disable-conf-files|disable-outside-detected-project|disambiguate-non-breaking-match|doc|doc-comments|doc-comments-padding|doc-comments-tag-only|doc-comments-val|dock-collection-brackets)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(escape-chars|escape-strings|exp-grouping|extension-indent|extension-sugar)\\b"
+          "match": "\\b(?<!-)(enable-outside-detected-project|escape-chars|escape-strings|exp-grouping|extension-indent|extension-sugar)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(field-space|function-indent-nested|function-indent)\\b"
+          "match": "\\b(?<!-)(field-space|function-indent|function-indent-nested)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(if-then-else|indent-after-in|indicate-multiline-delimiters|indicate-nested-or-patterns|infix-precedence)\\b"
+          "match": "\\b(?<!-)(if-then-else|ignore-invalid-option|impl|indent-after-in|indicate-multiline-delimiters|indicate-nested-or-patterns|infix-precedence|inplace|intf)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(leading-nested-match-parens|let-and|let-binding-indent|let-binding-spacing|let-module|let-open)\\b"
+          "match": "\\b(?<!-)(leading-nested-match-parens|let-and|let-binding-indent|let-binding-spacing|let-module|let-open|line-endings)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(m|margin|match-indent-nested|match-indent|max-indent|module-item-spacing|max-iters)\\b"
+          "match": "\\b(?<!-)(margin|margin-check|match-indent|match-indent-nested|max-indent|max-iters|module-item-spacing)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(n|nested-match|no-align-cases|no-align-constructors-decl|no-align-variants-decl|no-break-infix-before-func|no-break-sequences|no-disable|no-disambiguate-non-breaking-match|no-dock-collection-brackets|no-leading-nested-match-parens|no-ocp-indent-compat|no-parens-ite|no-parse-docstrings|no-space-around-arrays|no-space-around-lists|no-space-around-records|no-space-around-variants|no-wrap-comments|no-wrap-fun-args)\\b"
+          "match": "\\b(?<!-)(name|nested-match|no-break-infix-before-func|no-break-sequences|no-comment-check|no-debug|no-disable|no-disable-conf-attrs|no-disambiguate-non-breaking-match|no-dock-collection-brackets|no-leading-nested-match-parens|no-margin-check|no-ocp-indent-compat|no-parens-ite|no-parse-docstrings|no-parse-toplevel-phrases|no-quiet|no-space-around-arrays|no-space-around-lists|no-space-around-records|no-space-around-variants|no-version-check|no-wrap-comments|no-wrap-fun-args)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(ocp-indent-compat)\\b"
+          "match": "\\b(?<!-)(ocaml-version|ocp-indent-compat|ocp-indent-config|output)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(p|profile|parens-ite|parens-tuple-patterns|parens-tuple|parse-docstrings)\\b"
+          "match": "\\b(?<!-)(parens-ite|parens-tuple|parens-tuple-patterns|parse-docstrings|parse-toplevel-phrases|print-config|profile)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(q|quiet)\\b"
+          "match": "\\b(?<!-)(sequence-blank-line|sequence-style|single-case|space-around-arrays|space-around-lists|space-around-records|space-around-variants|stritem-extension-indent)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(sequence-blank-line|sequence-style|single-case|space-around-arrays|space-around-lists|space-around-records|space-around-variants|stritem-extension-indent)\\b"
+          "match": "\\b(?<!-)(type-decl|type-decl-indent)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(type-decl-indent|type-decl)\\b"
+          "match": "\\b(?<!-)(wrap-comments|wrap-fun-args)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(version)\\b"
+          "match": "\\b(?<!-)(quiet)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(wrap-comments|wrap-fun-args)\\b"
+          "match": "\\b(?<!-)(repl-file|root)(?!-)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(?<!-)(use-file)(?!-)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(?<!-)(version|version-check)(?!-)\\b"
         }
       ]
     },
@@ -111,79 +119,119 @@
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(after-when-possible|after|align|all|always|auto)\\b"
+          "match": "\\b(?<!-)(begin-line|end-line)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(before-except-val|before|begin-line)\\b"
+          "match": "\\b(?<!-)(auto|fit-or-vertical)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(closing-on-separate-line|compact|conventional)\\b"
+          "match": "\\b(?<!-)(all|fit|fit-or-vertical|nested|toplevel|vertical)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(decimal|default|double-semicolon)\\b"
+          "match": "\\b(?<!-)(fit-or-vertical|wrap)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(end-line)\\b"
+          "match": "\\b(?<!-)(after|before)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(fit-or-vertical|fit|force)\\b"
+          "match": "\\b(?<!-)(fit-or-vertical|smart|wrap)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(hexadecimal)\\b"
+          "match": "\\b(?<!-)(fit-or-vertical|wrap|wrap-or-vertical)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(indent)\\b"
+          "match": "\\b(?<!-)(auto|never)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(janestreet)\\b"
+          "match": "\\b(?<!-)(force|natural)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(k-r|keyword-first)\\b"
+          "match": "\\b(?<!-)(compact|normal)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(long|loose)\\b"
+          "match": "\\b(?<!-)(after-when-possible|before|before-except-val)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(multi-line-only)\\b"
+          "match": "\\b(?<!-)(default|fit)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(natural|nested|never|no|normal)\\b"
+          "match": "\\b(?<!-)(parens|preserve)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(ocamlformat)\\b"
+          "match": "\\b(?<!-)(loose|tight|tight-decl)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(parens|preserve-one|preserve)\\b"
+          "match": "\\b(?<!-)(always|auto|never)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(separator|short|smart|space|sparse)\\b"
+          "match": "\\b(?<!-)(compact|fit-or-vertical|k-r|keyword-first|vertical)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(terminator|tight-decl|tight|toplevel)\\b"
+          "match": "\\b(?<!-)(closing-on-separate-line|no|space)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(unsafe-no|unset)\\b"
+          "match": "\\b(?<!-)(space|unsafe-no)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
-          "match": "\\b(wrap)\\b"
+          "match": "\\b(?<!-)(indent|parens)(?!-)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(?<!-)(compact|sparse)(?!-)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(?<!-)(compact|double-semicolon|sparse)(?!-)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(?<!-)(crlf|lf)(?!-)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(?<!-)(compact|preserve|sparse)(?!-)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(?<!-)(align|wrap)(?!-)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(?<!-)(conventional|default|janestreet|ocamlformat)(?!-)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(?<!-)(always|multi-line-only)(?!-)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(?<!-)(always|multi-line-only)(?!-)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(?<!-)(compact|preserve-one)(?!-)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(?<!-)(before|separator|terminator)(?!-)\\b"
         }
       ]
     }
