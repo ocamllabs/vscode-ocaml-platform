@@ -801,7 +801,7 @@
           "patterns": [
             {
               "comment": "profile name",
-              "begin": "\\([[:space:]]*([a-zA-Z0-9]+)\\b",
+              "begin": "\\([[:space:]]*([[:word:]]+)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": {

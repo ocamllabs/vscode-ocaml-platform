@@ -11,6 +11,9 @@ type t =
   ; documentation_server_info : StatusBarItem.t
   ; sandbox_info : StatusBarItem.t
   ; ast_editor_state : Ast_editor_state.t
+  ; mutable codelens : bool option
+  ; mutable extended_hover : bool option
+  ; mutable dune_diagnostics : bool option
   }
 
 let sandbox t = t.sandbox
@@ -22,6 +25,44 @@ let ocaml_lsp t = Option.map ~f:snd t.lsp_client
 let lsp_client t = t.lsp_client
 
 let ocaml_version_exn t = Option.value_exn t.ocaml_version
+
+let send_configuration ~codelens ~extended_hover ~dune_diagnostics client =
+  let codelens =
+    Option.map codelens ~f:(fun enable ->
+        Ocaml_lsp.OcamllspSettingEnable.create ~enable)
+  in
+  let extendedHover =
+    Option.map extended_hover ~f:(fun enable ->
+        Ocaml_lsp.OcamllspSettingEnable.create ~enable)
+  in
+  let duneDiagnostics =
+    Option.map dune_diagnostics ~f:(fun enable ->
+        Ocaml_lsp.OcamllspSettingEnable.create ~enable)
+  in
+  let settings =
+    Ocaml_lsp.OcamllspSettings.create ~codelens ~extendedHover ~duneDiagnostics
+  in
+  let payload =
+    let settings =
+      LanguageClient.DidChangeConfiguration.create
+        ~settings:(Ocaml_lsp.OcamllspSettings.t_to_js settings)
+        ()
+    in
+    LanguageClient.DidChangeConfiguration.t_to_js settings
+  in
+  LanguageClient.sendNotification
+    client
+    "workspace/didChangeConfiguration"
+    payload
+
+let set_configuration t ~codelens ~extended_hover ~dune_diagnostics =
+  t.codelens <- codelens;
+  t.extended_hover <- extended_hover;
+  t.dune_diagnostics <- dune_diagnostics;
+  match t.lsp_client with
+  | None -> ()
+  | Some (client, (_ : Ocaml_lsp.t)) ->
+    send_configuration ~codelens ~extended_hover ~dune_diagnostics client
 
 let stop_server t =
   match t.lsp_client with
@@ -62,7 +103,7 @@ end = struct
       in
       Interop.Dict.union
         (fun _k _v1 v2 -> Some v2)
-        Process.Env.env
+        (Process.Env.env ())
         extra_env_vars
     in
     match command with
@@ -133,6 +174,11 @@ end = struct
        with
       | Ok () -> ()
       | Error (`Msg m) -> show_message `Warn "%s" m);
+      send_configuration
+        client
+        ~codelens:t.codelens
+        ~extended_hover:t.extended_hover
+        ~dune_diagnostics:t.dune_diagnostics;
       Ok ()
     in
     match res with
@@ -202,6 +248,9 @@ let make () =
   ; ocaml_version = None
   ; ast_editor_state
   ; documentation_server = None
+  ; codelens = None
+  ; extended_hover = None
+  ; dune_diagnostics = None
   }
 
 let set_documentation_context ~running =

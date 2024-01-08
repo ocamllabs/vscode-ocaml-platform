@@ -23,6 +23,13 @@ val ocaml_version_exn : t -> Ocaml_version.t
 
 val start_language_server : t -> unit Promise.t
 
+val set_configuration :
+     t
+  -> codelens:bool option
+  -> extended_hover:bool option
+  -> dune_diagnostics:bool option
+  -> unit
+
 val open_terminal : Sandbox.t -> unit
 
 val disposable : t -> Disposable.t

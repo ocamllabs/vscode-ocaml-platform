@@ -2,6 +2,17 @@
 
 # Unreleased
 
+- Fix direnv compatibility by loading the process.env on every command (#1322)
+
+- Fix server settings missing on LSP startup (#1321)
+- Fix broken syntax highlighting for a wildcard in the env stanza (#1334)
+
+- Add config to disabling dune diagnostics (#1320)
+
+## 1.14.2
+
+- Add `1.17.0` to the list of known versions of ocamllsp (#1326)
+
 ## 1.14.1
 
 - Fix incorrect esy sandbox docs (#1297)
@@ -39,6 +50,7 @@
 - Add experimental
   [earlybird bytecode debugger](https://github.com/hackwaly/ocamlearlybird)
   integration (#1148)
+
 - Trim whitespace when running `Evaluate Selection` command (#1100)
 
 - Encode URI when sending the `switchImplIntf` request (#983)

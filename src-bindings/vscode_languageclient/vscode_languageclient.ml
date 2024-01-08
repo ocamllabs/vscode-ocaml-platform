@@ -78,37 +78,6 @@ module DocumentSelector = struct
     `Filter (DocumentFilter.createLanguage ~language:l ~scheme ?pattern ())
 end
 
-module OcamllspSettingEnable = struct
-  include Interface.Make ()
-
-  include
-    [%js:
-    val enable : t -> bool or_undefined [@@js.get]
-
-    val create : enable:bool -> unit -> t [@@js.builder]]
-end
-
-module OcamllspSettings = struct
-  include Interface.Make ()
-
-  include
-    [%js:
-    val codelens : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
-
-    val extendedHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
-
-    val syntaxDocumentation : t -> OcamllspSettingEnable.t or_undefined
-    [@@js.get]
-
-    val create :
-         ?codelens:OcamllspSettingEnable.t
-      -> ?extendedHover:OcamllspSettingEnable.t
-      -> ?syntaxDocumentation:OcamllspSettingEnable.t
-      -> unit
-      -> t
-    [@@js.builder]]
-end
-
 module ClientOptions = struct
   include Interface.Make ()
 
@@ -212,9 +181,7 @@ end
 module DidChangeConfiguration = struct
   include Interface.Make ()
 
-  include
-    [%js:
-    val create : settings:OcamllspSettings.t -> unit -> t [@@js.builder]]
+  include [%js: val create : settings:Ojs.t -> unit -> t [@@js.builder]]
 end
 
 module LanguageClient = struct

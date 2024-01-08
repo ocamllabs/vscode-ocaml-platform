@@ -1,4 +1,38 @@
 open! Import
+open Interop
+
+module OcamllspSettingEnable = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val enable : t -> bool or_undefined [@@js.get]
+
+    val create : enable:bool -> t [@@js.builder]]
+end
+
+module OcamllspSettings = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val codelens : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+
+    val extendedHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+
+    val duneDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+
+    val create :
+         ?codelens:OcamllspSettingEnable.t
+      -> ?extendedHover:OcamllspSettingEnable.t
+      -> ?duneDiagnostics:OcamllspSettingEnable.t
+      -> unit
+      -> t
+    [@@js.builder]]
+
+  let create ~codelens ~extendedHover ~duneDiagnostics =
+    create ?codelens ?extendedHover ?duneDiagnostics ()
+end
 
 module Experimental_capabilities = struct
   type t =
@@ -115,6 +149,7 @@ let lsp_versions =
          ; "1.16.0-4.14"
          ; "1.16.1"
          ; "1.16.2"
+         ; "1.17.0"
         |] )
     ; ( (5, 0)
       , [| "1.13.2~5.0preview"
@@ -123,8 +158,9 @@ let lsp_versions =
          ; "1.15.1-5.0"
          ; "1.16.1"
          ; "1.16.2"
+         ; "1.17.0"
         |] )
-    ; ((5, 1), [| "1.16.1"; "1.16.2" |])
+    ; ((5, 1), [| "1.16.1"; "1.16.2"; "1.17.0" |])
     ]
   in
   let rest =

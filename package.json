@@ -1,7 +1,7 @@
 {
   "name": "ocaml-platform",
   "displayName": "OCaml Platform",
-  "version": "1.14.1",
+  "version": "1.14.2",
   "private": true,
   "description": "Official OCaml language extension for VSCode",
   "categories": [
@@ -271,6 +271,11 @@
           "type": "boolean",
           "default": false,
           "markdownDescription": "Enable/Disable extended hover"
+        },
+        "ocaml.server.duneDiagnostics": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Enable/Disable dune diagnostics"
         },
         "ocaml.server.syntaxDocumentation": {
           "type": "boolean",
@@ -1175,27 +1180,8 @@
     ]
   },
   "activationEvents": [
-    "onLanguage:ocaml",
-    "onLanguage:ocaml.interface",
-    "onLanguage:reason",
-    "onLanguage:ocaml.ocamllex",
-    "onLanguage:ocaml.menhir",
-    "onLanguage:dune",
-    "onLanguage:dune-project",
-    "onLanguage:dune-workspace",
     "onLanguage:cram",
-    "onCommand:ocaml.select-sandbox",
-    "onCommand:ocaml.open-terminal",
-    "onCommand:ocaml.open-terminal-select",
-    "onCommand:ocaml.open-ast-explorer-to-the-side",
-    "onCommand:ocaml.show-preprocessed-document",
-    "onCommand:ocaml.open-pp-editor-and-ast-explorer",
-    "onCommand:ocaml.stop-documentation-server",
-    "onCommand:ocaml.start-debugging",
-    "onCommand:ocaml.goto-closure-code-location",
     "onCommand:ocaml.ask-debug-program",
-    "onCustomEditor:ast-editor",
-    "onCustomEditor:cm-files-editor",
     "workspaceContains:**/dune-workspace",
     "workspaceContains:**/dune",
     "workspaceContains:**/dune-project",
@@ -1215,7 +1201,7 @@
   },
   "devDependencies": {
     "@swc-node/register": "1.6.8",
-    "@swc/core": "1.3.101",
+    "@swc/core": "1.3.102",
     "@tsconfig/node20": "20.1.2",
     "@tsconfig/strictest": "2.0.2",
     "@types/fs-extra": "11.0.4",
@@ -1223,14 +1209,14 @@
     "@types/vscode": "1.82.0",
     "@vscode/test-electron": "2.3.8",
     "@vscode/vsce": "2.22.0",
-    "esbuild": "0.19.10",
+    "esbuild": "0.19.11",
     "fs-extra": "11.2.0",
     "glob": "10.3.10",
     "mocha": "10.2.0",
     "npm-run-all": "4.1.5",
     "ovsx": "0.8.3",
     "prettier": "3.1.1",
-    "prettier-plugin-packagejson": "2.4.7",
+    "prettier-plugin-packagejson": "2.4.9",
     "typescript": "5.3.3"
   },
   "packageManager": "yarn@4.0.2+sha256.825003a0f561ad09a3b1ac4a3b3ea6207af2796d54f62a9420520915721f5186",

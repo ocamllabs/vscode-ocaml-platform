@@ -72,7 +72,7 @@ watch: ## Watch for the filesystem and rebuild on every change
 
 .PHONY: pkg
 pkg: build # Builds and packages the extension for installment
-	yarn vsce package --out ./test_extension.vsix
+	yarn vsce package --out ./test_extension.vsix --yarn --no-dependencies
 
 .PHONY: install
 install: pkg # Builds, packages, and installs the extension to your VS Code

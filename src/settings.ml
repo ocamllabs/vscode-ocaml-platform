@@ -128,6 +128,13 @@ let server_extendedHover_setting =
     ~of_json:Jsonoo.Decode.bool
     ~to_json:Jsonoo.Encode.bool
 
+let server_duneDiagnostics_setting =
+  create_setting
+    ~scope:ConfigurationTarget.Workspace
+    ~key:"ocaml.server.duneDiagnostics"
+    ~of_json:Jsonoo.Decode.bool
+    ~to_json:Jsonoo.Encode.bool
+
 let server_syntaxDocumentation_setting =
   create_setting
     ~scope:ConfigurationTarget.Workspace

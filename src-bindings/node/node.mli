@@ -32,7 +32,7 @@ module Process : sig
 
     val set : string -> string -> unit
 
-    val env : string Interop.Dict.t
+    val env : unit -> string Interop.Dict.t
   end
 end
 
