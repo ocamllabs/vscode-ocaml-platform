@@ -1,0 +1,26 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.4.1/schema.json",
+  "formatter": {
+    "enabled": true,
+    "ignore": [
+      "tests/fixtures/sample-esy/esy.lock",
+      "tests/fixtures/sample-esy/_esy"
+    ],
+    "indentStyle": "space"
+  },
+  "linter": {
+    "enabled": true,
+    "ignore": ["astexplorer"],
+    "rules": {
+      "recommended": true
+    }
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true
+  }
+}

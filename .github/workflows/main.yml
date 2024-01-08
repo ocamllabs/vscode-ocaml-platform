@@ -51,6 +51,9 @@ jobs:
       - name: Install dependencies
         run: make deps
 
+      - name: Check linting with Biome
+        run: yarn lint
+
       - name: Check formatting
         run: yarn fmt:check
 

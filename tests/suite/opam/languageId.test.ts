@@ -20,7 +20,7 @@ setup(async () => {
 
   await exec("opam install . --deps-only --yes", {
     cwd: projectPath,
-    env: { ...process.env, PATH: process.env["PATH"], OPAMSWITCH: root },
+    env: { ...process.env, PATH: process.env.PATH, OPAMSWITCH: root },
   });
 
   await vscode.commands.executeCommand(
