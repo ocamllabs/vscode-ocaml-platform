@@ -2,7 +2,9 @@
 
 # Unreleased
 
-- Add snippet for dune alias stanza (#1347) 
+- Update syntax for ocamlformat (#1343)
+
+- Add snippet for dune alias stanza (#1347)
 
 ## 1.15.0
 
