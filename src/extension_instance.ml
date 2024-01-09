@@ -14,6 +14,7 @@ type t =
   ; mutable codelens : bool option
   ; mutable extended_hover : bool option
   ; mutable dune_diagnostics : bool option
+  ; mutable syntax_documentation : bool option
   }
 
 let sandbox t = t.sandbox
@@ -26,7 +27,7 @@ let lsp_client t = t.lsp_client
 
 let ocaml_version_exn t = Option.value_exn t.ocaml_version
 
-let send_configuration ~codelens ~extended_hover ~dune_diagnostics client =
+let send_configuration ~codelens ~extended_hover ~dune_diagnostics ~syntax_documentation client =
   let codelens =
     Option.map codelens ~f:(fun enable ->
         Ocaml_lsp.OcamllspSettingEnable.create ~enable)
@@ -39,8 +40,12 @@ let send_configuration ~codelens ~extended_hover ~dune_diagnostics client =
     Option.map dune_diagnostics ~f:(fun enable ->
         Ocaml_lsp.OcamllspSettingEnable.create ~enable)
   in
+  let syntaxDocumentation =
+    Option.map syntax_documentation ~f:(fun enable ->
+        Ocaml_lsp.OcamllspSettingEnable.create ~enable)
+  in
   let settings =
-    Ocaml_lsp.OcamllspSettings.create ~codelens ~extendedHover ~duneDiagnostics
+    Ocaml_lsp.OcamllspSettings.create ~codelens ~extendedHover ~duneDiagnostics ~syntaxDocumentation
   in
   let payload =
     let settings =
@@ -55,14 +60,15 @@ let send_configuration ~codelens ~extended_hover ~dune_diagnostics client =
     "workspace/didChangeConfiguration"
     payload
 
-let set_configuration t ~codelens ~extended_hover ~dune_diagnostics =
+let set_configuration t ~codelens ~extended_hover ~dune_diagnostics ~syntax_documentation =
   t.codelens <- codelens;
   t.extended_hover <- extended_hover;
   t.dune_diagnostics <- dune_diagnostics;
+  t.syntax_documentation <- syntax_documentation;
   match t.lsp_client with
   | None -> ()
   | Some (client, (_ : Ocaml_lsp.t)) ->
-    send_configuration ~codelens ~extended_hover ~dune_diagnostics client
+    send_configuration ~codelens ~extended_hover ~dune_diagnostics ~syntax_documentation client
 
 let stop_server t =
   match t.lsp_client with
@@ -178,7 +184,8 @@ end = struct
         client
         ~codelens:t.codelens
         ~extended_hover:t.extended_hover
-        ~dune_diagnostics:t.dune_diagnostics;
+        ~dune_diagnostics:t.dune_diagnostics
+        ~syntax_documentation:t.syntax_documentation;
       Ok ()
     in
     match res with
@@ -251,6 +258,7 @@ let make () =
   ; codelens = None
   ; extended_hover = None
   ; dune_diagnostics = None
+  ; syntax_documentation = None
   }
 
 let set_documentation_context ~running =

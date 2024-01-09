@@ -22,16 +22,19 @@ module OcamllspSettings = struct
 
     val duneDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
 
+    val syntaxDocumentation : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+
     val create :
          ?codelens:OcamllspSettingEnable.t
       -> ?extendedHover:OcamllspSettingEnable.t
       -> ?duneDiagnostics:OcamllspSettingEnable.t
+      -> ?syntaxDocumentation:OcamllspSettingEnable.t
       -> unit
       -> t
     [@@js.builder]]
 
-  let create ~codelens ~extendedHover ~duneDiagnostics =
-    create ?codelens ?extendedHover ?duneDiagnostics ()
+  let create ~codelens ~extendedHover ~duneDiagnostics ~syntaxDocumentation =
+    create ?codelens ?extendedHover ?duneDiagnostics ?syntaxDocumentation ()
 end
 
 module Experimental_capabilities = struct
