@@ -1,4 +1,8 @@
 {
+  "alias": {
+    "prefix": "alias",
+    "body": ["(alias\n (name $1)\n (deps $2))"]
+  },
   "env": {
     "prefix": "env",
     "body": ["(env\n ($1 $2))"]
