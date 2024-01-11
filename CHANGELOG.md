@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Add snippet for dune alias stanza (#1347) 
+
 ## 1.15.0
 
 - Fix direnv compatibility by loading the process.env on every command (#1322)
