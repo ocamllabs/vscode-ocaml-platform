@@ -22,7 +22,8 @@ module OcamllspSettings = struct
 
     val duneDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
 
-    val syntaxDocumentation : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+    val syntaxDocumentation : t -> OcamllspSettingEnable.t or_undefined
+    [@@js.get]
 
     val create :
          ?codelens:OcamllspSettingEnable.t

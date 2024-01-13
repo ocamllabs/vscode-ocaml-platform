@@ -27,7 +27,8 @@ let lsp_client t = t.lsp_client
 
 let ocaml_version_exn t = Option.value_exn t.ocaml_version
 
-let send_configuration ~codelens ~extended_hover ~dune_diagnostics ~syntax_documentation client =
+let send_configuration ~codelens ~extended_hover ~dune_diagnostics
+    ~syntax_documentation client =
   let codelens =
     Option.map codelens ~f:(fun enable ->
         Ocaml_lsp.OcamllspSettingEnable.create ~enable)
@@ -45,7 +46,11 @@ let send_configuration ~codelens ~extended_hover ~dune_diagnostics ~syntax_docum
         Ocaml_lsp.OcamllspSettingEnable.create ~enable)
   in
   let settings =
-    Ocaml_lsp.OcamllspSettings.create ~codelens ~extendedHover ~duneDiagnostics ~syntaxDocumentation
+    Ocaml_lsp.OcamllspSettings.create
+      ~codelens
+      ~extendedHover
+      ~duneDiagnostics
+      ~syntaxDocumentation
   in
   let payload =
     let settings =
@@ -60,7 +65,8 @@ let send_configuration ~codelens ~extended_hover ~dune_diagnostics ~syntax_docum
     "workspace/didChangeConfiguration"
     payload
 
-let set_configuration t ~codelens ~extended_hover ~dune_diagnostics ~syntax_documentation =
+let set_configuration t ~codelens ~extended_hover ~dune_diagnostics
+    ~syntax_documentation =
   t.codelens <- codelens;
   t.extended_hover <- extended_hover;
   t.dune_diagnostics <- dune_diagnostics;
@@ -68,7 +74,12 @@ let set_configuration t ~codelens ~extended_hover ~dune_diagnostics ~syntax_docu
   match t.lsp_client with
   | None -> ()
   | Some (client, (_ : Ocaml_lsp.t)) ->
-    send_configuration ~codelens ~extended_hover ~dune_diagnostics ~syntax_documentation client
+    send_configuration
+      ~codelens
+      ~extended_hover
+      ~dune_diagnostics
+      ~syntax_documentation
+      client
 
 let stop_server t =
   match t.lsp_client with
