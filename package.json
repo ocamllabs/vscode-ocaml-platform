@@ -278,6 +278,11 @@
           "default": true,
           "markdownDescription": "Enable/Disable dune diagnostics"
         },
+        "ocaml.server.syntaxDocumentation": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable syntax documentation"
+        },
         "ocaml.dune.autoDetect": {
           "type": "boolean",
           "default": true,

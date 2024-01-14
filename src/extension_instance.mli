@@ -28,6 +28,7 @@ val set_configuration :
   -> codelens:bool option
   -> extended_hover:bool option
   -> dune_diagnostics:bool option
+  -> syntax_documentation:bool option
   -> unit
 
 val open_terminal : Sandbox.t -> unit

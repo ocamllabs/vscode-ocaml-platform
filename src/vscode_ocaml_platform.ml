@@ -26,11 +26,15 @@ let notify_configuration_changes instance =
       let codelens = Settings.(get server_codelens_setting) in
       let extended_hover = Settings.(get server_extendedHover_setting) in
       let dune_diagnostics = Settings.(get server_duneDiagnostics_setting) in
+      let syntax_documentation =
+        Settings.(get server_syntaxDocumentation_setting)
+      in
       Extension_instance.set_configuration
         instance
         ~codelens
         ~extended_hover
-        ~dune_diagnostics)
+        ~dune_diagnostics
+        ~syntax_documentation)
     ()
 
 let activate (extension : ExtensionContext.t) =

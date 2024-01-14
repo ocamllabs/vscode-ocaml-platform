@@ -30,9 +30,12 @@ module OcamllspSettings : sig
 
   val duneDiagnostics : t -> OcamllspSettingEnable.t option
 
+  val syntaxDocumentation : t -> OcamllspSettingEnable.t option
+
   val create :
        codelens:OcamllspSettingEnable.t option
     -> extendedHover:OcamllspSettingEnable.t option
     -> duneDiagnostics:OcamllspSettingEnable.t option
+    -> syntaxDocumentation:OcamllspSettingEnable.t option
     -> t
 end
