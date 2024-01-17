@@ -128,7 +128,7 @@
         {
           "comment": "ocamldoc comment",
           "name": "comment.doc.ocaml",
-          "begin": "\\(\\*\\*",
+          "begin": "\\(\\*\\*(?!\\*)",
           "end": "\\*\\)",
           "patterns": [
             { "include": "source.ocaml.ocamldoc#markup" },
