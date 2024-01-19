@@ -2,6 +2,8 @@
 
 # Unreleased
 
+## 1.16.1
+
 - No longer color comments starting three stars or more as ocamldoc comments (#1355)
 
 ## 1.16.0
