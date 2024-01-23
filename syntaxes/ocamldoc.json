@@ -14,6 +14,36 @@
     "markup": {
       "patterns": [
         {
+          "comment": "ocamldoc documentation tag @raise",
+          "match": "(\\@raises?)\\s+(\\S+)",
+          "captures": {
+            "1": { "name": "keyword.doc-tag.ocamldoc" },
+            "2": { 
+              "name": "markup.inline.raw.ocamldoc source.embedded.ocamldoc constant.language.capital-identifier.ocaml" 
+            }
+          }
+        },
+        {
+          "comment": "ocamldoc documentation tag @param",
+          "match": "(\\@param)\\s+(\\S+)",
+          "captures": {
+            "1": { "name": "keyword.doc-tag.ocamldoc" },
+            "2": { 
+              "name": "markup.inline.raw.ocamldoc source.embedded.ocamldoc" 
+            }
+          }
+        },
+        {
+          "comment": "ocamldoc documentation tag @see",
+          "match": "(\\@see)\\s+(<.*?>|\".*?\"|'.*?')",
+          "captures": {
+            "1": { "name": "keyword.doc-tag.ocamldoc" },
+            "2": { 
+              "name": "markup.underline.link.ocamldoc meta.link.ocamldoc" 
+            }
+          }
+        },
+        {
           "comment": "ocamldoc documentation tag",
           "name": "keyword.doc-tag.ocamldoc",
           "match": "\\@[[:lower:]]+"
