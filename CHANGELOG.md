@@ -3,6 +3,7 @@
 # Unreleased
 
 - Fix non-ocaml markdown code block syntax highlighting being influenced (issue #1288, #1369)
+- Add syntax color to ocamldoc and odoc markup (#1365)
 
 ## 1.16.1
 
