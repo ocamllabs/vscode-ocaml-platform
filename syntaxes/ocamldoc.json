@@ -57,10 +57,10 @@
           "contentName": "markup.inline.raw.ocamldoc source.embedded.ocamldoc",
           "patterns": [{ "include": "source.ocaml" }],
           "beginCaptures": {
-            "1": {"name":"markup.inline.raw.ocamldoc"}
+            "1": { "name": "markup.inline.raw.ocamldoc" }
           },
           "endCaptures": {
-            "1": {"name":"markup.inline.raw.ocamldoc"}
+            "1": { "name": "markup.inline.raw.ocamldoc" }
           }
         },
         {
@@ -115,10 +115,14 @@
           "begin": "((?<!\\\\){(ul|ol)\\s)",
           "end": "((?<!\\\\)})",
           "beginCaptures": {
-            "1": {"name":"punctuation.definition.list.begin.markdown.ocamldoc"}
+            "1": {
+              "name":"punctuation.definition.list.begin.markdown.ocamldoc"
+            }
           },
           "endCaptures": {
-            "1": {"name":"punctuation.definition.list.begin.markdown.ocamldoc"}
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.ocamldoc"
+            }
           },
           "patterns": [{ "include": "#lists" }]
         },
@@ -126,7 +130,7 @@
           "comment": "ocamldoc links",
           "begin": "(?<!\\\\){({:\\s.*?})",
           "beginCaptures": {
-            "1": {"name":"string.other.link.title.markdown.ocamldoc"}
+            "1": { "name": "string.other.link.title.markdown.ocamldoc" }
           },
           "end": "(?<!\\\\)\\}",
           "patterns": [{ "include": "#markup" }],
@@ -155,13 +159,18 @@
           "begin": "((?<!\\\\){(\\-|li)\\s)",
           "end": "((?<!\\\\)})",
           "beginCaptures": {
-            "1": {"name":"punctuation.definition.list.begin.markdown.ocamldoc"}
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.ocamldoc"
+            }
           },
           "endCaptures": {
-            "1": {"name":"punctuation.definition.list.begin.markdown.ocamldoc"}
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.ocamldoc"
+            }
           },
           "patterns": [{ "include": "#markup" }]
         }
-      ]}
+      ]
+    }
   }
 }
