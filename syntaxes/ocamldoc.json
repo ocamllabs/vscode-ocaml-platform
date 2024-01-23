@@ -120,7 +120,7 @@
           "end": "((?<!\\\\)})",
           "beginCaptures": {
             "1": {
-              "name":"punctuation.definition.list.begin.markdown.ocamldoc"
+              "name": "punctuation.definition.list.begin.markdown.ocamldoc"
             }
           },
           "endCaptures": {
