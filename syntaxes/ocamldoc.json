@@ -18,8 +18,8 @@
           "match": "(\\@raises?)\\s+(\\S+)",
           "captures": {
             "1": { "name": "keyword.doc-tag.ocamldoc" },
-            "2": { 
-              "name": "markup.inline.raw.ocamldoc source.embedded.ocamldoc constant.language.capital-identifier.ocaml" 
+            "2": {
+              "name": "markup.inline.raw.ocamldoc source.embedded.ocamldoc constant.language.capital-identifier.ocaml"
             }
           }
         },
@@ -28,8 +28,8 @@
           "match": "(\\@param)\\s+(\\S+)",
           "captures": {
             "1": { "name": "keyword.doc-tag.ocamldoc" },
-            "2": { 
-              "name": "markup.inline.raw.ocamldoc source.embedded.ocamldoc" 
+            "2": {
+              "name": "markup.inline.raw.ocamldoc source.embedded.ocamldoc"
             }
           }
         },
@@ -38,8 +38,8 @@
           "match": "(\\@see)\\s+(<.*?>|\".*?\"|'.*?')",
           "captures": {
             "1": { "name": "keyword.doc-tag.ocamldoc" },
-            "2": { 
-              "name": "markup.underline.link.ocamldoc meta.link.ocamldoc" 
+            "2": {
+              "name": "markup.underline.link.ocamldoc meta.link.ocamldoc"
             }
           }
         },
