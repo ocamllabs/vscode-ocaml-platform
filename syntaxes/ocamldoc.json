@@ -67,19 +67,22 @@
           "comment": "ocamldoc heading tag",
           "begin": "(?<!\\\\){[0-9]+\\s",
           "end": "(?<!\\\\)}",
-          "name": "markup.heading.ocamldoc"
+          "name": "markup.heading.ocamldoc",
+          "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "ocamldoc bold",
           "begin": "(?<!\\\\){b\\s",
           "end": "(?<!\\\\)}",
-          "name": "markup.bold.ocamldoc"
+          "name": "markup.bold.ocamldoc",
+          "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "ocamldoc italic/emph",
           "begin": "(?<!\\\\){(i|e)\\s",
           "end": "(?<!\\\\)}",
-          "name": "markup.italic.ocamldoc"
+          "name": "markup.italic.ocamldoc",
+          "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "ocamldoc verbatim",
@@ -91,7 +94,8 @@
           "comment": "ocamldoc exponent/index",
           "begin": "(?<!\\\\){(\\^|\\_)\\s",
           "end": "(?<!\\\\)}",
-          "name": "markup.exponent.ocamldoc"
+          "name": "markup.exponent.ocamldoc",
+          "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "odoc inline math",
