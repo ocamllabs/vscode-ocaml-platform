@@ -43,7 +43,7 @@
         },
         {
           "comment": "cross-reference",
-          "begin": "(?<!\\\\)\\{!((modules?|modtype|class|classtype|val|type|exception|attribute|method|section|const|recfield):)?",
+          "begin": "(?<!\\\\)\\{!((modules?|modtype|module-type|class|classtype|class-type|val|value|type|exception|exn|attribute|method|section|const|recfield|field|extension|extension-decl|instance-variable|label|page):)?",
           "end": "(?<!\\\\)\\}",
           "name": "markup.inline.raw.ocamldoc",
           "contentName": "source.embedded.ocamldoc",
@@ -51,7 +51,7 @@
         },
         {
           "comment": "cross-reference with alt text",
-          "begin": "(?<!\\\\)\\{(\\{!((module|modtype|class|classtype|val|type|exception|attribute|method|section|const|recfield):)?)",
+          "begin": "(?<!\\\\)\\{(\\{!((module|modtype|module-type|class|classtype|class-type|val|value|type|exception|exn|attribute|method|section|const|recfield|field|extension|extension-decl|instance-variable|label|page):)?)",
           "end": "(\\}).*?(?<!\\\\)\\}",
           "name": "markup.underline.link.ocamldoc meta.link.ocamldoc",
           "contentName": "markup.inline.raw.ocamldoc source.embedded.ocamldoc",
