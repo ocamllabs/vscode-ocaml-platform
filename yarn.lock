@@ -1659,7 +1659,42 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode/vsce@npm:2.22.0, @vscode/vsce@npm:^2.19.0":
+"@vscode/vsce@npm:2.23.0":
+  version: 2.23.0
+  resolution: "@vscode/vsce@npm:2.23.0"
+  dependencies:
+    azure-devops-node-api: "npm:^11.0.1"
+    chalk: "npm:^2.4.2"
+    cheerio: "npm:^1.0.0-rc.9"
+    commander: "npm:^6.2.1"
+    find-yarn-workspace-root: "npm:^2.0.0"
+    glob: "npm:^7.0.6"
+    hosted-git-info: "npm:^4.0.2"
+    jsonc-parser: "npm:^3.2.0"
+    keytar: "npm:^7.7.0"
+    leven: "npm:^3.1.0"
+    markdown-it: "npm:^12.3.2"
+    mime: "npm:^1.3.4"
+    minimatch: "npm:^3.0.3"
+    parse-semver: "npm:^1.1.1"
+    read: "npm:^1.0.7"
+    semver: "npm:^7.5.2"
+    tmp: "npm:^0.2.1"
+    typed-rest-client: "npm:^1.8.4"
+    url-join: "npm:^4.0.1"
+    xml2js: "npm:^0.5.0"
+    yauzl: "npm:^2.3.1"
+    yazl: "npm:^2.2.2"
+  dependenciesMeta:
+    keytar:
+      optional: true
+  bin:
+    vsce: vsce
+  checksum: 242a11099d0fe8e09190e7c51e22feeec497cbdcdb1449c4c0373bb8642d5b8358cd76f5258b7b367fb5ab9a8f80a27578723dfc5372a62dce9c2ecaf4e50bd6
+  languageName: node
+  linkType: hard
+
+"@vscode/vsce@npm:^2.19.0":
   version: 2.22.0
   resolution: "@vscode/vsce@npm:2.22.0"
   dependencies:
@@ -2788,6 +2823,15 @@ __metadata:
     locate-path: "npm:^6.0.0"
     path-exists: "npm:^4.0.0"
   checksum: 062c5a83a9c02f53cdd6d175a37ecf8f87ea5bbff1fdfb828f04bfa021441bc7583e8ebc0872a4c1baab96221fb8a8a275a19809fb93fbc40bd69ec35634069a
+  languageName: node
+  linkType: hard
+
+"find-yarn-workspace-root@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "find-yarn-workspace-root@npm:2.0.0"
+  dependencies:
+    micromatch: "npm:^4.0.2"
+  checksum: b0d3843013fbdaf4e57140e0165889d09fa61745c9e85da2af86e54974f4cc9f1967e40f0d8fc36a79d53091f0829c651d06607d552582e53976f3cd8f4e5689
   languageName: node
   linkType: hard
 
@@ -3961,7 +4005,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"micromatch@npm:^4.0.5":
+"micromatch@npm:^4.0.2, micromatch@npm:^4.0.5":
   version: 4.0.5
   resolution: "micromatch@npm:4.0.5"
   dependencies:
@@ -4463,7 +4507,7 @@ __metadata:
     "@types/mocha": "npm:10.0.6"
     "@types/vscode": "npm:1.82.0"
     "@vscode/test-electron": "npm:2.3.9"
-    "@vscode/vsce": "npm:2.22.0"
+    "@vscode/vsce": "npm:2.23.0"
     esbuild: "npm:0.19.12"
     fs-extra: "npm:11.2.0"
     glob: "npm:10.3.10"
