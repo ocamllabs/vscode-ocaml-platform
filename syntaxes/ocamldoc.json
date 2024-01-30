@@ -95,7 +95,7 @@
         },
         {
           "comment": "ocamldoc heading tag",
-          "begin": "(?<!\\\\){[0-9]+[[:space:]]",
+          "begin": "(?<!\\\\){[[:digit:]]+[[:space:]]",
           "end": "(?<!\\\\)}",
           "name": "markup.heading.ocamldoc",
           "patterns": [{ "include": "#markup" }]
