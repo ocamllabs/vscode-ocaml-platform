@@ -15,7 +15,7 @@
       "patterns": [
         {
           "comment": "ocamldoc documentation tag @raise",
-          "match": "(@raises?)\\s+(\\S+)",
+          "match": "(@raises?)[[:space:]]+([^[:space:]]+)",
           "captures": {
             "1": { "name": "keyword.doc-tag.ocamldoc" },
             "2": {
@@ -25,7 +25,7 @@
         },
         {
           "comment": "ocamldoc documentation tag @param",
-          "match": "(@param)\\s+(\\S+)",
+          "match": "(@param)[[:space:]]+([^[:space:]]+)",
           "captures": {
             "1": { "name": "keyword.doc-tag.ocamldoc" },
             "2": {
@@ -35,7 +35,7 @@
         },
         {
           "comment": "ocamldoc documentation tag @see",
-          "match": "(@see)\\s+(<.*?>|\".*?\"|'.*?')",
+          "match": "(@see)[[:space:]]+(<.*?>|\".*?\"|'.*?')",
           "captures": {
             "1": { "name": "keyword.doc-tag.ocamldoc" },
             "2": {
@@ -66,7 +66,7 @@
         },
         {
           "comment": "embedded other language source",
-          "begin": "(?<!\\\\)\\{@\\S+?\\[",
+          "begin": "(?<!\\\\)\\{@[^[:space:]]+?\\[",
           "end": "(?<!\\\\)\\]\\}",
           "name": "markup.inline.raw.odoc",
           "contentName": "source.embedded.odoc"
@@ -95,58 +95,58 @@
         },
         {
           "comment": "ocamldoc heading tag",
-          "begin": "(?<!\\\\){[0-9]+\\s",
+          "begin": "(?<!\\\\){[0-9]+[[:space:]]",
           "end": "(?<!\\\\)}",
           "name": "markup.heading.ocamldoc",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "ocamldoc bold",
-          "begin": "(?<!\\\\){b\\s",
+          "begin": "(?<!\\\\){b[[:space:]]",
           "end": "(?<!\\\\)}",
           "name": "markup.bold.ocamldoc",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "ocamldoc italic/emph",
-          "begin": "(?<!\\\\){(i|e)\\s",
+          "begin": "(?<!\\\\){(i|e)[[:space:]]",
           "end": "(?<!\\\\)}",
           "name": "markup.italic.ocamldoc",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "ocamldoc verbatim",
-          "begin": "(?<!\\\\){v\\s",
+          "begin": "(?<!\\\\){v[[:space:]]",
           "end": "\\bv}",
           "name": "markup.inline.raw.ocamldoc"
         },
         {
           "comment": "ocamldoc exponent/index",
-          "begin": "(?<!\\\\){(\\^|\\_)\\s",
+          "begin": "(?<!\\\\){(\\^|\\_)[[:space:]]",
           "end": "(?<!\\\\)}",
           "name": "markup.exponent.ocamldoc",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "odoc inline math",
-          "begin": "(?<!\\\\){m\\s",
+          "begin": "(?<!\\\\){m[[:space:]]",
           "end": "(?<!\\\\)\\}",
           "name": "support.class.math.odoc markup.math.inline.odoc meta.math.inline.odoc"
         },
         {
           "comment": "odoc math block",
-          "begin": "(?<!\\\\){math\\s",
+          "begin": "(?<!\\\\){math[[:space:]]",
           "end": "(?<!\\\\)\\}",
           "name": "support.class.math.odoc markup.math.block.odoc meta.math.block.odoc"
         },
         {
           "comment": "ocamldoc simple lists",
-          "match": "^\\s*(\\-|\\+)",
+          "match": "^[[:space:]]*(\\-|\\+)",
           "name": "punctuation.definition.list.begin.markdown.ocamldoc"
         },
         {
           "comment": "ocamldoc lists",
-          "begin": "((?<!\\\\){(ul|ol)\\s)",
+          "begin": "((?<!\\\\){(ul|ol)[[:space:]])",
           "end": "((?<!\\\\)})",
           "beginCaptures": {
             "1": {
@@ -162,7 +162,7 @@
         },
         {
           "comment": "ocamldoc links",
-          "begin": "(?<!\\\\){({:\\s.*?})",
+          "begin": "(?<!\\\\){({:[[:space:]].*?})",
           "beginCaptures": {
             "1": { "name": "string.other.link.title.markdown.ocamldoc" }
           },
@@ -172,7 +172,7 @@
         },
         {
           "comment": "ocamldoc latex",
-          "begin": "(?<!\\\\){\\%(\\s|latex:)",
+          "begin": "(?<!\\\\){\\%([[:space:]]|latex:)",
           "end": "\\%}",
           "name": "markup.inline.raw.ocamldoc",
           "patterns": [{ "include": "text.tex.latex" }]
@@ -190,7 +190,7 @@
       "patterns": [
         {
           "comment": "ocamldoc list element",
-          "begin": "((?<!\\\\){(\\-|li)\\s)",
+          "begin": "((?<!\\\\){(\\-|li)[[:space:]])",
           "end": "((?<!\\\\)})",
           "beginCaptures": {
             "1": {
