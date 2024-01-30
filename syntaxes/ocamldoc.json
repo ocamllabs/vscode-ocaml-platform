@@ -15,7 +15,7 @@
       "patterns": [
         {
           "comment": "ocamldoc documentation tag @raise",
-          "match": "(\\@raises?)\\s+(\\S+)",
+          "match": "(@raises?)\\s+(\\S+)",
           "captures": {
             "1": { "name": "keyword.doc-tag.ocamldoc" },
             "2": {
@@ -25,7 +25,7 @@
         },
         {
           "comment": "ocamldoc documentation tag @param",
-          "match": "(\\@param)\\s+(\\S+)",
+          "match": "(@param)\\s+(\\S+)",
           "captures": {
             "1": { "name": "keyword.doc-tag.ocamldoc" },
             "2": {
@@ -35,7 +35,7 @@
         },
         {
           "comment": "ocamldoc documentation tag @see",
-          "match": "(\\@see)\\s+(<.*?>|\".*?\"|'.*?')",
+          "match": "(@see)\\s+(<.*?>|\".*?\"|'.*?')",
           "captures": {
             "1": { "name": "keyword.doc-tag.ocamldoc" },
             "2": {
@@ -46,7 +46,7 @@
         {
           "comment": "ocamldoc documentation tag",
           "name": "keyword.doc-tag.ocamldoc",
-          "match": "\\@[[:lower:]]+"
+          "match": "@[[:lower:]]+"
         },
         {
           "comment": "embedded ocaml source",
@@ -66,7 +66,7 @@
         },
         {
           "comment": "embedded other language source",
-          "begin": "(?<!\\\\)\\{\\@\\S+?\\[",
+          "begin": "(?<!\\\\)\\{@\\S+?\\[",
           "end": "(?<!\\\\)\\]\\}",
           "name": "markup.inline.raw.odoc",
           "contentName": "source.embedded.odoc"
