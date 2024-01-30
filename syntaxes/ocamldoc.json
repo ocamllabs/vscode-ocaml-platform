@@ -1,15 +1,8 @@
 {
   "scopeName": "source.ocaml.ocamldoc",
-  "name": "comment.other.ocamldoc",
+  "name": "OCamldoc",
   "fileTypes": ["mld"],
-  "patterns": [
-    {
-      "name": "comment.other.ocamldoc",
-      "begin": "",
-      "end": "",
-      "patterns": [{ "include": "#markup" }]
-    }
-  ],
+  "patterns": [{ "include": "#markup" }],
   "repository": {
     "markup": {
       "patterns": [
