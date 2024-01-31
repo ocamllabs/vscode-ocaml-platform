@@ -2,6 +2,8 @@
 
 # Unreleased
 
+## 1.17.0
+
 - Add syntax color to ocamldoc and odoc markup (#1365)
 - Remove comment color from mld files (but keep markup color) (issue #1014,
   #1365)
