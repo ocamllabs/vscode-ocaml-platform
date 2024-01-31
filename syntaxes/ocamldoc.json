@@ -1,29 +1,201 @@
 {
   "scopeName": "source.ocaml.ocamldoc",
-  "name": "comment.other.ocamldoc",
+  "name": "OCamldoc",
   "fileTypes": ["mld"],
-  "patterns": [
-    {
-      "name": "comment.other.ocamldoc",
-      "begin": "",
-      "end": "",
-      "patterns": [{ "include": "#markup" }]
-    }
-  ],
+  "patterns": [{ "include": "#markup" }],
   "repository": {
     "markup": {
       "patterns": [
         {
+          "comment": "ocamldoc documentation tag @raise",
+          "match": "(@raises?)[[:space:]]+([^[:space:]]+)",
+          "captures": {
+            "1": { "name": "keyword.doc-tag.ocamldoc" },
+            "2": {
+              "name": "markup.inline.raw.ocamldoc source.embedded.ocamldoc constant.language.capital-identifier.ocaml"
+            }
+          }
+        },
+        {
+          "comment": "ocamldoc documentation tag @param",
+          "match": "(@param)[[:space:]]+([^[:space:]]+)",
+          "captures": {
+            "1": { "name": "keyword.doc-tag.ocamldoc" },
+            "2": {
+              "name": "markup.inline.raw.ocamldoc source.embedded.ocamldoc"
+            }
+          }
+        },
+        {
+          "comment": "ocamldoc documentation tag @see",
+          "match": "(@see)[[:space:]]+(<.*?>|\".*?\"|'.*?')",
+          "captures": {
+            "1": { "name": "keyword.doc-tag.ocamldoc" },
+            "2": {
+              "name": "markup.underline.link.ocamldoc meta.link.ocamldoc"
+            }
+          }
+        },
+        {
           "comment": "ocamldoc documentation tag",
           "name": "keyword.doc-tag.ocamldoc",
-          "match": "\\@[[:lower:]]+"
+          "match": "@[[:lower:]]+"
         },
         {
           "comment": "embedded ocaml source",
           "begin": "(?<!\\\\)\\[",
           "end": "(?<!\\\\)\\]",
+          "name": "markup.inline.raw.ocamldoc",
           "contentName": "source.embedded.ocamldoc",
           "patterns": [{ "include": "source.ocaml" }]
+        },
+        {
+          "comment": "embedded preformatted ocaml source",
+          "begin": "(?<!\\\\)\\{\\[",
+          "end": "(?<!\\\\)\\]\\}",
+          "name": "markup.inline.raw.ocamldoc",
+          "contentName": "source.embedded.ocamldoc",
+          "patterns": [{ "include": "source.ocaml" }]
+        },
+        {
+          "comment": "embedded other language source",
+          "begin": "(?<!\\\\)\\{@[^[:space:]]+?\\[",
+          "end": "(?<!\\\\)\\]\\}",
+          "name": "markup.inline.raw.odoc",
+          "contentName": "source.embedded.odoc"
+        },
+        {
+          "comment": "cross-reference",
+          "begin": "(?<!\\\\)\\{!((modules?|modtype|module-type|class|classtype|class-type|val|value|type|exception|exn|attribute|method|section|const|recfield|field|extension|extension-decl|instance-variable|label|page):)?",
+          "end": "(?<!\\\\)\\}",
+          "name": "markup.inline.raw.ocamldoc",
+          "contentName": "source.embedded.ocamldoc",
+          "patterns": [{ "include": "source.ocaml" }]
+        },
+        {
+          "comment": "cross-reference with alt text",
+          "begin": "(?<!\\\\)\\{(\\{!((module|modtype|module-type|class|classtype|class-type|val|value|type|exception|exn|attribute|method|section|const|recfield|field|extension|extension-decl|instance-variable|label|page):)?)",
+          "end": "(\\}).*?(?<!\\\\)\\}",
+          "name": "markup.underline.link.ocamldoc meta.link.ocamldoc",
+          "contentName": "markup.inline.raw.ocamldoc source.embedded.ocamldoc",
+          "patterns": [{ "include": "source.ocaml" }],
+          "beginCaptures": {
+            "1": { "name": "markup.inline.raw.ocamldoc" }
+          },
+          "endCaptures": {
+            "1": { "name": "markup.inline.raw.ocamldoc" }
+          }
+        },
+        {
+          "comment": "ocamldoc heading tag",
+          "begin": "(?<!\\\\){[[:digit:]]+[[:space:]]",
+          "end": "(?<!\\\\)}",
+          "name": "markup.heading.ocamldoc",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "ocamldoc bold",
+          "begin": "(?<!\\\\){b[[:space:]]",
+          "end": "(?<!\\\\)}",
+          "name": "markup.bold.ocamldoc",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "ocamldoc italic/emph",
+          "begin": "(?<!\\\\){(i|e)[[:space:]]",
+          "end": "(?<!\\\\)}",
+          "name": "markup.italic.ocamldoc",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "ocamldoc verbatim",
+          "begin": "(?<!\\\\){v[[:space:]]",
+          "end": "\\bv}",
+          "name": "markup.inline.raw.ocamldoc"
+        },
+        {
+          "comment": "ocamldoc exponent/index",
+          "begin": "(?<!\\\\){(\\^|\\_)[[:space:]]",
+          "end": "(?<!\\\\)}",
+          "name": "markup.exponent.ocamldoc",
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "odoc inline math",
+          "begin": "(?<!\\\\){m[[:space:]]",
+          "end": "(?<!\\\\)\\}",
+          "name": "support.class.math.odoc markup.math.inline.odoc meta.math.inline.odoc"
+        },
+        {
+          "comment": "odoc math block",
+          "begin": "(?<!\\\\){math[[:space:]]",
+          "end": "(?<!\\\\)\\}",
+          "name": "support.class.math.odoc markup.math.block.odoc meta.math.block.odoc"
+        },
+        {
+          "comment": "ocamldoc simple lists",
+          "match": "^[[:space:]]*(\\-|\\+)",
+          "name": "punctuation.definition.list.begin.markdown.ocamldoc"
+        },
+        {
+          "comment": "ocamldoc lists",
+          "begin": "((?<!\\\\){(ul|ol)[[:space:]])",
+          "end": "((?<!\\\\)})",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.ocamldoc"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.ocamldoc"
+            }
+          },
+          "patterns": [{ "include": "#lists" }]
+        },
+        {
+          "comment": "ocamldoc links",
+          "begin": "(?<!\\\\){({:[[:space:]].*?})",
+          "beginCaptures": {
+            "1": { "name": "string.other.link.title.markdown.ocamldoc" }
+          },
+          "end": "(?<!\\\\)\\}",
+          "patterns": [{ "include": "#markup" }],
+          "name": "markup.underline.link.ocamldoc meta.link.ocamldoc"
+        },
+        {
+          "comment": "ocamldoc latex",
+          "begin": "(?<!\\\\){\\%([[:space:]]|latex:)",
+          "end": "\\%}",
+          "name": "markup.inline.raw.ocamldoc",
+          "patterns": [{ "include": "text.tex.latex" }]
+        },
+        {
+          "comment": "ocamldoc html",
+          "begin": "(?<!\\\\){\\%html:",
+          "end": "\\%}",
+          "name": "markup.inline.raw.ocamldoc",
+          "patterns": [{ "include": "text.html.derivative" }]
+        }
+      ]
+    },
+    "lists": {
+      "patterns": [
+        {
+          "comment": "ocamldoc list element",
+          "begin": "((?<!\\\\){(\\-|li)[[:space:]])",
+          "end": "((?<!\\\\)})",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.ocamldoc"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.ocamldoc"
+            }
+          },
+          "patterns": [{ "include": "#markup" }]
         }
       ]
     }
