@@ -1279,39 +1279,40 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc-node/core@npm:^1.10.6":
-  version: 1.10.6
-  resolution: "@swc-node/core@npm:1.10.6"
+"@swc-node/core@npm:^1.12.0":
+  version: 1.12.0
+  resolution: "@swc-node/core@npm:1.12.0"
   peerDependencies:
     "@swc/core": ">= 1.3"
-  checksum: 10c0/cadcd927b3ab02a2888b7da43d80d5a6e19b4100e5b757ef7a4148123ce2940202053a0c412f20664e1eb18185fca26371f3cac3f866c4d2b1df5e8d2e63b99f
+    "@swc/types": ">= 0.1"
+  checksum: 10c0/b7eb65de202e76ca039556c774a638daa9b6ccaf2598b9be861000a5cf3f9260b106dcfedcbe3f80acb7675b03e5d37b20cc52575b3cb5fd770c50b939976417
   languageName: node
   linkType: hard
 
-"@swc-node/register@npm:1.6.8":
-  version: 1.6.8
-  resolution: "@swc-node/register@npm:1.6.8"
+"@swc-node/register@npm:1.8.0":
+  version: 1.8.0
+  resolution: "@swc-node/register@npm:1.8.0"
   dependencies:
-    "@swc-node/core": "npm:^1.10.6"
-    "@swc-node/sourcemap-support": "npm:^0.3.0"
-    colorette: "npm:^2.0.19"
+    "@swc-node/core": "npm:^1.12.0"
+    "@swc-node/sourcemap-support": "npm:^0.4.0"
+    colorette: "npm:^2.0.20"
     debug: "npm:^4.3.4"
-    pirates: "npm:^4.0.5"
-    tslib: "npm:^2.5.0"
+    pirates: "npm:^4.0.6"
+    tslib: "npm:^2.6.2"
   peerDependencies:
     "@swc/core": ">= 1.3"
     typescript: ">= 4.3"
-  checksum: 10c0/681da27f9dbe7aa976c6873a2a0094d14237a4d51dea7c3c54d58e00e5375593d136b2d6e80e24412128cf338b238fc73206b3b69711698ee8fd6ceb40081551
+  checksum: 10c0/82181150a977b05d7eaf7b02c218954342e930c8700482bc71479b0dd1649f0621086e79ae67e4026dbc03b8096260af1cdae0cf40778fcc62efbeaa3bd9ca4b
   languageName: node
   linkType: hard
 
-"@swc-node/sourcemap-support@npm:^0.3.0":
-  version: 0.3.0
-  resolution: "@swc-node/sourcemap-support@npm:0.3.0"
+"@swc-node/sourcemap-support@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "@swc-node/sourcemap-support@npm:0.4.0"
   dependencies:
     source-map-support: "npm:^0.5.21"
-    tslib: "npm:^2.5.0"
-  checksum: 10c0/331aac139159918377202723e5e4b34164714f29118c494d31d5ca19b9b7e54f958bcd94cae675a7854e84ed043f366b3041aa94377f80d3d9cbe891da1ed3de
+    tslib: "npm:^2.6.2"
+  checksum: 10c0/b5130e17ee255fbb04233ce0ab39480c863850ce12aafbc7e784104c10403b19a7339646abb71dbb1659b3ffd53608a48e86f174112b946ba31fd7acdb811dd0
   languageName: node
   linkType: hard
 
@@ -2076,7 +2077,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"colorette@npm:^2.0.19":
+"colorette@npm:^2.0.20":
   version: 2.0.20
   resolution: "colorette@npm:2.0.20"
   checksum: 10c0/e94116ff33b0ff56f3b83b9ace895e5bf87c2a7a47b3401b8c3f3226e050d5ef76cf4072fb3325f9dc24d1698f9b730baf4e05eeaf861d74a1883073f4c98a40
@@ -4349,7 +4350,7 @@ __metadata:
   resolution: "ocaml-platform@workspace:."
   dependencies:
     "@biomejs/biome": "npm:1.5.3"
-    "@swc-node/register": "npm:1.6.8"
+    "@swc-node/register": "npm:1.8.0"
     "@swc/core": "npm:1.3.107"
     "@tsconfig/node20": "npm:20.1.2"
     "@tsconfig/strictest": "npm:2.0.2"
@@ -4619,7 +4620,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pirates@npm:^4.0.5":
+"pirates@npm:^4.0.6":
   version: 4.0.6
   resolution: "pirates@npm:4.0.6"
   checksum: 10c0/00d5fa51f8dded94d7429700fb91a0c1ead00ae2c7fd27089f0c5b63e6eca36197fe46384631872690a66f390c5e27198e99006ab77ae472692ab9c2ca903f36
@@ -5557,7 +5558,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.4.0, tslib@npm:^2.5.0":
+"tslib@npm:^2.4.0, tslib@npm:^2.6.2":
   version: 2.6.2
   resolution: "tslib@npm:2.6.2"
   checksum: 10c0/e03a8a4271152c8b26604ed45535954c0a45296e32445b4b87f8a5abdb2421f40b59b4ca437c4346af0f28179780d604094eb64546bee2019d903d01c6c19bdb
