@@ -25,14 +25,6 @@ let property_exists json property =
 
 include Base
 
-(* This is used to remove the listener jsoo adding, which could cause vscode
-   extension host terminated unexpectedly *)
-let () =
-  Js_of_ocaml.Js.Unsafe.eval_string
-    "process.removeListener('uncaughtException', \
-     process.listeners('uncaughtException')[process.listeners('uncaughtException').length \
-     - 1])"
-
 module List = struct
   include List
 
