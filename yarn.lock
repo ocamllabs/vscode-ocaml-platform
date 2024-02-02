@@ -1524,10 +1524,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/vscode@npm:1.82.0":
-  version: 1.82.0
-  resolution: "@types/vscode@npm:1.82.0"
-  checksum: 10c0/5ebc17c52edac6873cf37ce33e9fde160d6b4591c7b6928ed68ebed3e703228c8234fb05f49e25020ef775ecc9076b097452d7f6a6b2cdaceb334d6d4881fc4c
+"@types/vscode@npm:1.86.0":
+  version: 1.86.0
+  resolution: "@types/vscode@npm:1.86.0"
+  checksum: 10c0/38d73e073e2d4ee4b1cf2c8762540c4b875af98c43f5632f62a978bcdc12170090b86e7c8e09f8207808e5727f8b90ac8bac9aad73b44205c0fd7ec9c3f045e2
   languageName: node
   linkType: hard
 
@@ -4355,7 +4355,7 @@ __metadata:
     "@tsconfig/strictest": "npm:2.0.2"
     "@types/fs-extra": "npm:11.0.4"
     "@types/mocha": "npm:10.0.6"
-    "@types/vscode": "npm:1.82.0"
+    "@types/vscode": "npm:1.86.0"
     "@vscode/test-electron": "npm:2.3.9"
     "@vscode/vsce": "npm:2.23.0"
     esbuild: "npm:0.20.0"

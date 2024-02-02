@@ -1208,7 +1208,7 @@
     "@tsconfig/strictest": "2.0.2",
     "@types/fs-extra": "11.0.4",
     "@types/mocha": "10.0.6",
-    "@types/vscode": "1.82.0",
+    "@types/vscode": "1.86.0",
     "@vscode/test-electron": "2.3.9",
     "@vscode/vsce": "2.23.0",
     "esbuild": "0.20.0",
@@ -1221,7 +1221,7 @@
   },
   "packageManager": "yarn@4.1.0",
   "engines": {
-    "vscode": "^1.82.0"
+    "vscode": "^1.86.0"
   },
   "icon": "assets/logo.png",
   "galleryBanner": {

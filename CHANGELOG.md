@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Set the VSCode lower bound to 1.86.0 (#1379)
+
 ## 1.17.0
 
 - Add syntax color to ocamldoc and odoc markup (#1365)
