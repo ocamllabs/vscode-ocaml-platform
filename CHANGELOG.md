@@ -2,6 +2,8 @@
 
 # Unreleased
 
+## 1.17.1
+
 - Set the VSCode lower bound to 1.86.0 (#1379)
 
 ## 1.17.0
