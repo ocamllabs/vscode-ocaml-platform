@@ -112,7 +112,7 @@ module DecorationRenderOptions = struct
 
   include
     [%js:
-    val backgroundColor : t -> string or_undefined[@@js.get]
+    val backgroundColor : t -> string or_undefined [@@js.get]
 
     val create : ?backgroundColor:string -> unit -> t [@@js.builder]]
 end
@@ -3097,9 +3097,8 @@ module Window = struct
       -> Terminal.t
     [@@js.global "vscode.window.createTerminal"]
 
-    val createTextEditorDecorationType:
-         options: DecorationRenderOptions.t
-      -> TextEditorDecorationType.t
+    val createTextEditorDecorationType :
+      options: DecorationRenderOptions.t -> TextEditorDecorationType.t
     [@@js.global "vscode.window.createTextEditorDecorationType"]
 
     val registerTreeDataProvider :
