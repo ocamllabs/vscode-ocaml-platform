@@ -1,6 +1,6 @@
 open Import
 
-module NullableString (M: sig
+module NullableString (M : sig
   val key: string
 end) =
 struct
@@ -211,9 +211,10 @@ module Command = struct
             Terminal_sandbox.send term code)
           else
             (* Clear the decoration *)
-            Vscode.TextEditor.setDecorations textEditor
-                ~decorationType:evalTextDecorationType
-                ~rangesOrOptions:(`Ranges []);
+            Vscode.TextEditor.setDecorations
+              textEditor
+              ~decorationType:evalTextDecorationType
+              ~rangesOrOptions:(`Ranges []);
       in
       ()
     in

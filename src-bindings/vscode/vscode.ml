@@ -3098,7 +3098,7 @@ module Window = struct
     [@@js.global "vscode.window.createTerminal"]
 
     val createTextEditorDecorationType :
-      options: DecorationRenderOptions.t -> TextEditorDecorationType.t
+      options:DecorationRenderOptions.t -> TextEditorDecorationType.t
     [@@js.global "vscode.window.createTextEditorDecorationType"]
 
     val registerTreeDataProvider :
