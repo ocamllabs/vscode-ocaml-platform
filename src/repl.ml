@@ -1,7 +1,7 @@
 open Import
 
 module NullableString (M : sig
-  val key: string
+  val key : string
 end) =
 struct
   type t = string option
@@ -214,7 +214,7 @@ module Command = struct
             Vscode.TextEditor.setDecorations
               textEditor
               ~decorationType:evalTextDecorationType
-              ~rangesOrOptions:(`Ranges []);
+              ~rangesOrOptions:(`Ranges [])
       in
       ()
     in
