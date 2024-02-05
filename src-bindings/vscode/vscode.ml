@@ -107,6 +107,16 @@ module Range = struct
     [@@js.call]]
 end
 
+module DecorationRenderOptions = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val backgroundColor : t -> string or_undefined[@@js.get]
+
+    val create : ?backgroundColor:string -> unit -> t [@@js.builder]]
+end
+
 module TextLine = struct
   include Interface.Make ()
 
@@ -3086,6 +3096,11 @@ module Window = struct
            [@js.union])
       -> Terminal.t
     [@@js.global "vscode.window.createTerminal"]
+
+    val createTextEditorDecorationType:
+         options: DecorationRenderOptions.t
+      -> TextEditorDecorationType.t
+    [@@js.global "vscode.window.createTextEditorDecorationType"]
 
     val registerTreeDataProvider :
          ((module Ojs.T with type t = 'a)[@js])

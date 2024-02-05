@@ -1,6 +1,6 @@
 open Import
 
-module Repl_path = struct
+module NullableString (M: sig val key: string end) = struct
   type t = string option
 
   let of_json json =
@@ -11,10 +11,12 @@ module Repl_path = struct
     let open Jsonoo.Encode in
     nullable string t
 
-  let key = "path"
-
+  let key = M.key
   let t = Settings.create_setting ~scope:Global ~key ~of_json ~to_json
 end
+
+module Repl_path = NullableString (struct let key = "path" end)
+module Repl_evalTextBackgroundColor = NullableString (struct let key = "evalTextBackgroundColor" end)
 
 let ocaml_utop_setting =
   Settings.create_setting
@@ -49,6 +51,9 @@ let get_repl_path () =
 
 let get_repl_args () =
   Option.join (Settings.get ~section:"ocaml.repl" Repl_args.t)
+
+let get_repl_evalTextBackgroundColor () =
+  Option.join (Settings.get ~section:"ocaml.repl" Repl_evalTextBackgroundColor.t)
 
 let name = "REPL"
 
@@ -132,7 +137,7 @@ let create_terminal instance sandbox =
         Extension_instance.set_repl instance term;
         Ok term))
 
-let get_code text_editor =
+let get_range text_editor =
   let selection = Vscode.TextEditor.selection text_editor in
   let start_line = Vscode.Selection.start selection |> Vscode.Position.line in
   let end_line = Vscode.Selection.end_ selection |> Vscode.Position.line in
@@ -143,9 +148,9 @@ let get_code text_editor =
   let document = Vscode.TextEditor.document text_editor in
   if start_line = end_line && start_char = end_char then
     let line = Vscode.TextDocument.lineAt document ~line:start_line in
-    Vscode.TextLine.text line
+    Vscode.TextLine.range line
   else
-    Vscode.TextDocument.getText document ~range:(selection :> Vscode.Range.t) ()
+    (selection :> Vscode.Range.t)
 
 let prepare_code code =
   if String.is_suffix (String.strip code) ~suffix:";;" then code
@@ -169,6 +174,12 @@ module Command = struct
     in
     Extension_commands.register ~id:Extension_consts.Commands.open_repl handler
 
+  let evalTextDecorationType: TextEditorDecorationType.t =
+    let bgcolor = get_repl_evalTextBackgroundColor () in
+    let render_options = Vscode.DecorationRenderOptions.create
+                        ?backgroundColor:bgcolor () in
+    Vscode.Window.createTextEditorDecorationType ~options:render_options
+
   let _evaluate_selection =
     let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
       let (_ : unit Promise.t) =
@@ -178,10 +189,20 @@ module Command = struct
         match term with
         | Error err -> show_message `Error "Could not start the REPL: %s" err
         | Ok term ->
-          let code = get_code textEditor in
+          let range = get_range textEditor in
+          let document = Vscode.TextEditor.document textEditor in
+          let code = Vscode.TextDocument.getText document ~range:range () in
           if String.length code > 0 then
             let code = prepare_code code in
+            let r = `Ranges [range] in
+            Vscode.TextEditor.setDecorations textEditor
+                ~decorationType:evalTextDecorationType ~rangesOrOptions:r;
             Terminal_sandbox.send term code
+          else
+            (* Clear the decoration *)
+            Vscode.TextEditor.setDecorations textEditor
+                ~decorationType:evalTextDecorationType
+                ~rangesOrOptions:(`Ranges []);
       in
       ()
     in

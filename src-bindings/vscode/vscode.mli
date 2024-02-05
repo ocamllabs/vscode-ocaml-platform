@@ -489,6 +489,14 @@ module DecorationInstanceRenderOptions : sig
     -> t
 end
 
+module DecorationRenderOptions : sig
+  include Ojs.T
+
+  val backgroundColor: t -> string option
+
+  val create : ?backgroundColor:string -> unit -> t
+end
+
 module DecorationOptions : sig
   include Ojs.T
 
@@ -2384,6 +2392,10 @@ module Window : sig
          | `ExtensionTerminalOptions of ExtensionTerminalOptions.t
          ]
     -> Terminal.t
+
+  val createTextEditorDecorationType:
+      options:DecorationRenderOptions.t
+    -> TextEditorDecorationType.t
 
   val registerTreeDataProvider :
        'a Js.t

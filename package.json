@@ -375,6 +375,11 @@
           "type": "boolean",
           "default": true,
           "description": "Controls whether to use Utop for the REPL if it is installed in the current switch."
+        },
+        "ocaml.repl.evalTextBackgroundColor": {
+          "type": "string",
+          "format": "color-hex",
+          "description": "The background color of the text evaluated in REPL."
         }
       }
     },
