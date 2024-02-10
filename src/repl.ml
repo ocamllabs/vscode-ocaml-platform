@@ -15,6 +15,7 @@ struct
     nullable string t
 
   let key = M.key
+
   let t = Settings.create_setting ~scope:Global ~key ~of_json ~to_json
 end
 
