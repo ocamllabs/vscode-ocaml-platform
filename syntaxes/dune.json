@@ -1,7 +1,9 @@
 {
   "name": "dune",
   "scopeName": "source.dune",
-  "fileTypes": ["dune"],
+  "fileTypes": [
+    "dune"
+  ],
   "patterns": [
     {
       "include": "#stanzas"
@@ -74,8 +76,8 @@
               ]
             },
             {
-              "comment": "archive_name/language/include_dir",
-              "begin": "\\([[:space:]]*(archive_name|language|include_dir)\\b",
+              "comment": "archive_name/language/include_dir/enabled_if",
+              "begin": "\\([[:space:]]*(archive_name|language|include_dir|enabled_if)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -340,8 +342,8 @@
               ]
             },
             {
-              "comment": "rule/alias",
-              "begin": "\\([[:space:]]*(alias)\\b",
+              "comment": "rule/alias/aliases",
+              "begin": "\\([[:space:]]*(alias|aliases)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -464,8 +466,8 @@
           },
           "patterns": [
             {
-              "comment": "modules/merge_into/flags/infer",
-              "begin": "\\([[:space:]]*(modules|merge_into|flags|infer)\\b",
+              "comment": "modules/merge_into/flags/infer/explain",
+              "begin": "\\([[:space:]]*(modules|merge_into|flags|infer|explain)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -713,8 +715,8 @@
               ]
             },
             {
-              "comment": "install/etc/doc/stublibs/man/misc/site/files",
-              "begin": "\\([[:space:]]*(etc|doc|stublibs|man|misc|site|files)\\b",
+              "comment": "install/etc/doc/stublibs/man/misc/site/files/section/source_trees",
+              "begin": "\\([[:space:]]*(etc|doc|stublibs|man|misc|site|files|section|source_trees)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -743,38 +745,8 @@
           },
           "patterns": [
             {
-              "comment": "files/alias/mode",
-              "begin": "\\([[:space:]]*(files|alias|mode)\\b",
-              "end": "\\)",
-              "beginCaptures": {
-                "1": {
-                  "name": "keyword.language.dune"
-                }
-              },
-              "patterns": [
-                {
-                  "include": "#general"
-                }
-              ]
-            },
-            {
-              "comment": "mode",
-              "begin": "\\([[:space:]]*(mode)\\b",
-              "end": "\\)",
-              "beginCaptures": {
-                "1": {
-                  "name": "keyword.language.dune"
-                }
-              },
-              "patterns": [
-                {
-                  "include": "#general"
-                }
-              ]
-            },
-            {
-              "comment": "enabled_if",
-              "begin": "\\([[:space:]]*(enabled_if)\\b",
+              "comment": "files/alias/mode/enabled_if/only_sources",
+              "begin": "\\([[:space:]]*(files|alias|mode|enabled_if|only_sources)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -825,8 +797,8 @@
                   ]
                 },
                 {
-                  "comment": "env/ocamlc_flags/ocamlopt_flags/c_flags/cxx_flags/menhir_flags",
-                  "begin": "\\([[:space:]]*(ocamlc_flags|ocamlopt_flags|c_flags|cxx_flags|menhir_flags)\\b",
+                  "comment": "env/ocamlc_flags/ocamlopt_flags/c_flags/cxx_flags/menhir_flags/link_flags",
+                  "begin": "\\([[:space:]]*(ocamlc_flags|ocamlopt_flags|c_flags|cxx_flags|menhir_flags|link_flags)\\b",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -940,6 +912,21 @@
                         }
                       ]
                     },
+                    {
+                      "include": "#general"
+                    }
+                  ]
+                },
+                {
+                  "comment": "env/bin_annot",
+                  "begin": "\\([[:space:]]*(bin_annot)\\b",
+                  "end": "\\)",
+                  "beginCaptures": {
+                    "1": {
+                      "name": "keyword.language.dune"
+                    }
+                  },
+                  "patterns": [
                     {
                       "include": "#general"
                     }
@@ -1129,14 +1116,9 @@
           },
           "patterns": [
             {
-              "comment": "lib",
-              "begin": "\\([[:space:]]*(lib)\\b",
-              "end": "\\)",
-              "beginCaptures": {
-                "1": {
-                  "name": "keyword.language.dune"
-                }
-              },
+              "comment": "no/qualified/unqualified",
+              "match": "\\b(no|qualified|unqualified)\\b",
+              "name": "variable.declaration.other.dune",
               "patterns": [
                 {
                   "include": "#general"
@@ -1378,8 +1360,8 @@
               ]
             },
             {
-              "comment": "files/preludes",
-              "begin": "\\([[:space:]]*(files|preludes)\\b",
+              "comment": "files/preludes/deps/libraries/enabled_if/package/locks",
+              "begin": "\\([[:space:]]*(files|preludes|deps|libraries|enabled_if|package|locks)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -2396,8 +2378,8 @@
           },
           "patterns": [
             {
-              "comment": "javascript_files/flags",
-              "begin": "\\([[:space:]]*(javascript_files|flags)\\b",
+              "comment": "javascript_files/flags/build_runtime_flags/link_flags",
+              "begin": "\\([[:space:]]*(javascript_files|flags|build_runtime_flags|link_flags)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -2883,7 +2865,6 @@
               "name": "constant.language.variable.action.dune",
               "match": "\\^"
             },
-
             {
               "name": "constant.language.variable.dune",
               "match": "(?<=\\{)(project_root|workspace_root|profile|context_name)(?=\\})"
@@ -2916,7 +2897,6 @@
               "name": "constant.language.variable.dune",
               "match": "(?<=\\{)(ignoring_promoted_rule)(?=\\})"
             },
-
             {
               "name": "constant.language.variable.dune",
               "match": "(?<=\\{)(ocaml-config)(?=:)"
