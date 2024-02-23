@@ -280,14 +280,15 @@
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
           },
-          "patterns": [{
-            "comment": "relative_to_project/inside_opam_directory",
-            "name": "variable.other.declaration.dune-project",
-            "match": "\\b(relative_to_project|inside_opam_directory)\\b"
+          "patterns": [
+            {
+              "comment": "relative_to_project/inside_opam_directory",
+              "name": "variable.other.declaration.dune-project",
+              "match": "\\b(relative_to_project|inside_opam_directory)\\b"
             },
             { "include": "source.dune#general" }
           ]
-        },        
+        },
         {
           "comment": "subst",
           "begin": "\\([[:space:]]*(subst)\\b",
@@ -295,14 +296,15 @@
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
           },
-          "patterns": [{
-            "comment": "enabled/disabled",
-            "name": "variable.other.declaration.dune-project",
-            "match": "\\b(enabled|disabled)\\b"
+          "patterns": [
+            {
+              "comment": "enabled/disabled",
+              "name": "variable.other.declaration.dune-project",
+              "match": "\\b(enabled|disabled)\\b"
             },
             { "include": "source.dune#general" }
           ]
-        },        
+        },
         {
           "comment": "use_standard_c_and_cxx_flags",
           "begin": "\\([[:space:]]*(use_standard_c_and_cxx_flags)\\b",
