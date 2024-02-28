@@ -1,4 +1,6 @@
-open Import
+open Import;;
+
+let x = 3;;
 
 module Repl_path = struct
   type t = string option
@@ -132,8 +134,47 @@ let create_terminal instance sandbox =
         Extension_instance.set_repl instance term;
         Ok term))
 
-let get_code text_editor =
-  let selection = Vscode.TextEditor.selection text_editor in
+(* To skip (possibly nested) comments and strings, this implements a
+   stateful parser working as a finite automata for each input character. *)
+type toplevel_delim_finder_state =
+  Empty
+  (* Comment: '(', '*', contents, '*', ')' *)
+  | CommentLParen of int | CommentLStar of int | Comment of int
+  | CommentRStar of int | CommentRParen of int
+  (* String quotation mark, '"', begin and end *)
+  | StringBegin | StringEnd
+  (* The two characters, first ';' and second ';'. *)
+  | ToplevelDelim1 | ToplevelDelim2
+
+(*
+(* Find the range of statement (delimited by ';;') that includes a position *)
+let find_toplevel_delimiter (document:Vscode.TextDocument.t) (pos:Vscode.Position.t)
+                            (reverse:bool):Vscode.Position.t option =
+  let line_idx, char_idx = Vscode.Position.line pos, Vscode.Position.character pos in
+  let num_lines = Vscode.TextDocument.lineCount document in
+
+  (* Increment or decrement position (line_idx, char_idx) *)
+  let next_pos (line_len:int) (line_idx:int) (char_idx:int): (int*int) option =
+    if reverse then
+      if line_idx = 0 && char_idx = 0 then None
+      else if char_idx = 0 then Some (line_idx - 1, line_len - 1)
+      else Some (line_idx, char_idx - 1)
+    else
+      if line_idx = num_lines - 1 && char_idx = line_len - 1 then None
+      else if char_idx = line_len - 1 then Some (line_idx + 1, 0)
+      else Some (line_idx, char_idx + 1) in
+
+  let ref fn (line_idx:int) (char_idx:int):(int*int) option =
+    let line = Vscode.TextDocument.lineAt document ~line:line_idx in
+    let line_len = String.length (Vscode.TextLine.text line) in
+
+    if ipos < 0 || ipos >= 
+
+  while (openingParenthesis > 0 && !editor.document.getText(new vscode.Range(cursorPosition.line, openingParenthesis - 1, cursorPosition.line, openingParenthesis)).match(/\(/)) {
+      openingParenthesis--;
+  }
+*)
+let get_code text_editor selection =
   let start_line = Vscode.Selection.start selection |> Vscode.Position.line in
   let end_line = Vscode.Selection.end_ selection |> Vscode.Position.line in
   let start_char =
@@ -178,7 +219,8 @@ module Command = struct
         match term with
         | Error err -> show_message `Error "Could not start the REPL: %s" err
         | Ok term ->
-          let code = get_code textEditor in
+          let selection = Vscode.TextEditor.selection textEditor in
+          let code = get_code textEditor selection in
           if String.length code > 0 then
             let code = prepare_code code in
             Terminal_sandbox.send term code
@@ -191,31 +233,12 @@ module Command = struct
 end
 
 let register extension instance =
-  let timer =
-    Node.setInterval
-      (fun () ->
-        match Extension_instance.repl instance with
-        | None -> ()
-        | Some t ->
-          let (_ : unit Promise.t) =
-            let open Promise.Syntax in
-            let+ procid = Terminal.processId t in
-            match procid with
-            | Some procid -> (
-              try
-                (* Signal 0 is reserved as a test signal for the existence of a
-                   process.
-                   https://nodejs.org/api/process.html#processkillpid-signal*)
-                Process.kill ~pid:procid ~signal:(`Number 0) ()
-              with _ ->
-                (* The REPL process is killed. Dispose the terminal. *)
-                Terminal.dispose t;
-                Extension_instance.close_repl instance)
-            | None -> ()
-          in
-          ())
-      500
+  let disposable =
+    Vscode.Window.onDidCloseTerminal
+      ()
+      ~listener:(fun terminal ->
+        if String.equal (Vscode.Terminal.name terminal) name then
+          Extension_instance.close_repl instance)
+      ()
   in
-  Vscode.ExtensionContext.subscribe
-    extension
-    ~disposable:(Disposable.make ~dispose:(fun () -> Node.clearTimeout timer))
+  Vscode.ExtensionContext.subscribe extension ~disposable
