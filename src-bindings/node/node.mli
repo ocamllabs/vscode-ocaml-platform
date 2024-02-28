@@ -27,6 +27,9 @@ module Process : sig
 
   val arch : string
 
+  val kill :
+    pid:int -> ?signal:[ `String of string | `Number of int ] -> unit -> unit
+
   module Env : sig
     val get : string -> string option
 

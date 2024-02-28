@@ -35,7 +35,14 @@ module Process = struct
 
     val platform : string [@@js.global "process.platform"]
 
-    val arch : string [@@js.global "process.arch"]]
+    val arch : string [@@js.global "process.arch"]
+
+    val kill :
+         pid:int
+      -> ?signal:([ `String of string | `Number of int ][@js.union])
+      -> unit
+      -> unit
+    [@@js.global "process.kill"]]
 
   module Env = struct
     include [%js: val env : Ojs.t [@@js.global "process.env"]]

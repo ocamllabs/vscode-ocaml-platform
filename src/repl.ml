@@ -191,12 +191,31 @@ module Command = struct
 end
 
 let register extension instance =
-  let disposable =
-    Vscode.Window.onDidCloseTerminal
-      ()
-      ~listener:(fun terminal ->
-        if String.equal (Vscode.Terminal.name terminal) name then
-          Extension_instance.close_repl instance)
-      ()
+  let timer =
+    Node.setInterval
+      (fun () ->
+        match Extension_instance.repl instance with
+        | None -> ()
+        | Some t ->
+          let _ =
+            let open Promise.Syntax in
+            let+ procid = Terminal.processId t in
+            match procid with
+            | Some procid -> (
+              try
+                (* Signal 0 is reserved as a test signal for the existence of a
+                   process.
+                   https://nodejs.org/api/process.html#processkillpid-signal*)
+                Process.kill ~pid:procid ~signal:(`Number 0) ()
+              with _ ->
+                (* The REPL process is killed. Dispose the terminal. *)
+                Terminal.dispose t;
+                Extension_instance.close_repl instance)
+            | None -> ()
+          in
+          ())
+      500
   in
-  Vscode.ExtensionContext.subscribe extension ~disposable
+  Vscode.ExtensionContext.subscribe
+    extension
+    ~disposable:(Disposable.make ~dispose:(fun () -> Node.clearTimeout timer))
