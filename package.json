@@ -18,6 +18,8 @@
   },
   "license": "MIT",
   "publisher": "ocamllabs",
+  "sideEffects": false,
+  "type": "commonjs",
   "main": "./dist/vscode_ocaml_platform.bc.js",
   "workspaces": [
     "astexplorer"

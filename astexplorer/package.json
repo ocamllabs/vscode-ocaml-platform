@@ -1,7 +1,10 @@
 {
   "name": "astexplorer",
-  "version": "0.0.0",
   "private": true,
+  "sideEffects": [
+    "./src/components/visualization/Tree.js"
+  ],
+  "type": "module",
   "scripts": {
     "build": "parcel build index.html",
     "dev": "parcel watch index.html"
