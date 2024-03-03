@@ -195,16 +195,17 @@ let register extension instance =
     let listener closed_terminal =
       ignore
         (match Extension_instance.repl instance with
-        | None -> Promise.return ()
-        | Some repl_terminal ->
-          let open Promise.Syntax in
-          let+ repl_terminal_pid, closed_terminal_pid =
-            Promise.all2
-              ( Terminal.processId repl_terminal
-              , Terminal.processId closed_terminal )
-          in
-          if repl_terminal_pid = closed_terminal_pid then
-            Extension_instance.close_repl instance)
+         | None -> Promise.return ()
+         | Some repl_terminal ->
+           let open Promise.Syntax in
+           let+ repl_terminal_pid, closed_terminal_pid =
+             Promise.all2
+               ( Terminal.processId repl_terminal
+               , Terminal.processId closed_terminal )
+           in
+           if repl_terminal_pid = closed_terminal_pid then
+             Extension_instance.close_repl instance
+          : unit Promise.t)
     in
     Vscode.Window.onDidCloseTerminal () ~listener ()
   in
