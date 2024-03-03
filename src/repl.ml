@@ -122,7 +122,7 @@ let create_terminal instance sandbox =
       let+ () =
         Promise.make (fun ~resolve ~reject:_ ->
             let (_ : Node.Timeout.t) =
-              Node.setTimeout (fun () -> resolve ()) 400
+              Node.setTimeout (fun () -> resolve ()) 2500
             in
             ())
       in
@@ -192,20 +192,14 @@ end
 
 let register extension instance =
   let disposable =
-    let listener closed_terminal =
-      ignore
-        (match Extension_instance.repl instance with
-        | None -> Promise.return ()
+    Vscode.Window.onDidCloseTerminal
+      ()
+      ~listener:(fun closed_terminal ->
+        match Extension_instance.repl instance with
+        | None -> ()
         | Some repl_terminal ->
-          let open Promise.Syntax in
-          let+ repl_terminal_pid, closed_terminal_pid =
-            Promise.all2
-              ( Terminal.processId repl_terminal
-              , Terminal.processId closed_terminal )
-          in
-          if repl_terminal_pid = closed_terminal_pid then
+          if phys_equal repl_terminal closed_terminal then
             Extension_instance.close_repl instance)
-    in
-    Vscode.Window.onDidCloseTerminal () ~listener ()
+      ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable
