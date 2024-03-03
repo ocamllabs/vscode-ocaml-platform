@@ -165,13 +165,8 @@ let prepare_code code =
   if String.is_suffix (String.strip code) ~suffix:";;" then code
   else code ^ ";;"
 
-(* Highlighted OCaml code *)
-let prevEvalTextDecorationType : TextEditorDecorationType.t option ref =
-  ref None
-
-let prevEvalTextDecorationRange : Range.t option ref = ref None
-
-let getEvalTextDecorationType () : TextEditorDecorationType.t =
+(* Get the TextEditorDecorationType.t of the previously evaluated text *)
+let eval_text_decoration_type () : TextEditorDecorationType.t =
   let bgcolor = get_repl_evalTextBackgroundColor () in
   let render_options =
     Vscode.DecorationRenderOptions.create ?backgroundColor:bgcolor ()
@@ -179,17 +174,17 @@ let getEvalTextDecorationType () : TextEditorDecorationType.t =
   let r =
     Vscode.Window.createTextEditorDecorationType ~options:render_options
   in
-  prevEvalTextDecorationType := Some r;
   r
 
-let removeEvalTextDecoration textEditor : unit =
-  match !prevEvalTextDecorationType with
-  | Some r ->
+(* Remove the highlight of previously evaluated text *)
+let remove_eval_text_decoration instance textEditor : unit =
+  match Extension_instance.repl_prev_eval_text_info instance with
+  | Some r, _ ->
     Vscode.TextEditor.setDecorations
       textEditor
       ~decorationType:r
       ~rangesOrOptions:(`Ranges [])
-  | None -> ()
+  | None, _ -> ()
 
 module Command = struct
   let _open_repl =
@@ -221,19 +216,27 @@ module Command = struct
           let range = get_range textEditor in
           let document = Vscode.TextEditor.document textEditor in
           let code = Vscode.TextDocument.getText document ~range () in
-          (* Clear the previous decoration *)
-          removeEvalTextDecoration textEditor;
+          (* Clear the previous text highlight *)
+          remove_eval_text_decoration instance textEditor;
 
           if String.length code > 0 then (
-            prevEvalTextDecorationRange := Some range;
             let code = prepare_code code in
             let r = `Ranges [ range ] in
+            let decor_type = eval_text_decoration_type () in
             Vscode.TextEditor.setDecorations
               textEditor
-              ~decorationType:(getEvalTextDecorationType ())
+              ~decorationType:decor_type
               ~rangesOrOptions:r;
+            Extension_instance.set_repl_prev_eval_text_info
+              instance
+              ~ty:(Some decor_type)
+              ~range:(Some range);
             Terminal_sandbox.send term code)
-          else prevEvalTextDecorationRange := None
+          else
+            Extension_instance.set_repl_prev_eval_text_info
+              instance
+              ~ty:None
+              ~range:None
       in
       ()
     in
@@ -254,19 +257,18 @@ let register extension instance =
   Vscode.ExtensionContext.subscribe extension ~disposable;
   let disposable =
     Vscode.Workspace.onDidChangeTextDocument () ~listener:(fun event ->
-        match
-          (!prevEvalTextDecorationRange, Vscode.Window.activeTextEditor ())
-        with
+        let _, prev_range =
+          Extension_instance.repl_prev_eval_text_info instance
+        in
+        match (prev_range, Vscode.Window.activeTextEditor ()) with
         | None, _ | _, None -> ()
         | Some prevRange, Some editor -> (
-          let poss = TextDocumentChangeEvent.contentChanges event in
-          let h = List.hd poss in
-          match h with
-          | None -> ()
-          | Some h ->
+          match TextDocumentChangeEvent.contentChanges event with
+          | [] -> ()
+          | h :: _ ->
             let r = TextDocumentContentChangeEvent.range h in
             let pos = Range.start r in
             if Position.isBeforeOrEqual pos ~other:(Range.end_ prevRange) then
-              removeEvalTextDecoration editor))
+              remove_eval_text_decoration instance editor))
   in
   Vscode.ExtensionContext.subscribe extension ~disposable

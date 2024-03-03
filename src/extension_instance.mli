@@ -41,6 +41,12 @@ val set_repl : t -> Terminal.t -> unit
 
 val close_repl : t -> unit
 
+val repl_prev_eval_text_info :
+  t -> TextEditorDecorationType.t option * Range.t option
+
+val set_repl_prev_eval_text_info :
+  t -> ty:TextEditorDecorationType.t option -> range:Range.t option -> unit
+
 val update_ocaml_info : t -> unit Promise.t
 
 val ast_editor_state : t -> Ast_editor_state.t
