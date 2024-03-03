@@ -1478,7 +1478,7 @@ module Terminal = struct
     [%js:
     val name : t -> string [@@js.get]
 
-    val processId : t -> int Promise.t [@@js.get]
+    val processId : t -> int or_undefined Promise.t [@@js.get]
 
     val creationOptions : t -> creationOptions [@@js.get]
 

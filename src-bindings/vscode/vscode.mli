@@ -1139,7 +1139,7 @@ module Terminal : sig
 
   val name : t -> string
 
-  val processId : t -> int Promise.t
+  val processId : t -> int option Promise.t
 
   val creationOptions : t -> creationOptions
 
