@@ -1,6 +1,9 @@
 open Import
 
-module Repl_path = struct
+module NullableString (M : sig
+  val key : string
+end) =
+struct
   type t = string option
 
   let of_json json =
@@ -11,10 +14,18 @@ module Repl_path = struct
     let open Jsonoo.Encode in
     nullable string t
 
-  let key = "path"
+  let key = M.key
 
   let t = Settings.create_setting ~scope:Global ~key ~of_json ~to_json
 end
+
+module Repl_path = NullableString (struct
+  let key = "path"
+end)
+
+module Repl_evalTextBackgroundColor = NullableString (struct
+  let key = "evalTextBackgroundColor"
+end)
 
 let ocaml_utop_setting =
   Settings.create_setting
@@ -49,6 +60,10 @@ let get_repl_path () =
 
 let get_repl_args () =
   Option.join (Settings.get ~section:"ocaml.repl" Repl_args.t)
+
+let get_repl_evalTextBackgroundColor () =
+  Option.join
+    (Settings.get ~section:"ocaml.repl" Repl_evalTextBackgroundColor.t)
 
 let name = "REPL"
 
@@ -132,7 +147,7 @@ let create_terminal instance sandbox =
         Extension_instance.set_repl instance term;
         Ok term))
 
-let get_code text_editor =
+let get_range text_editor =
   let selection = Vscode.TextEditor.selection text_editor in
   let start_line = Vscode.Selection.start selection |> Vscode.Position.line in
   let end_line = Vscode.Selection.end_ selection |> Vscode.Position.line in
@@ -143,13 +158,33 @@ let get_code text_editor =
   let document = Vscode.TextEditor.document text_editor in
   if start_line = end_line && start_char = end_char then
     let line = Vscode.TextDocument.lineAt document ~line:start_line in
-    Vscode.TextLine.text line
-  else
-    Vscode.TextDocument.getText document ~range:(selection :> Vscode.Range.t) ()
+    Vscode.TextLine.range line
+  else (selection :> Vscode.Range.t)
 
 let prepare_code code =
   if String.is_suffix (String.strip code) ~suffix:";;" then code
   else code ^ ";;"
+
+(* Get the TextEditorDecorationType.t of the previously evaluated text *)
+let eval_text_decoration_type () : TextEditorDecorationType.t =
+  let bgcolor = get_repl_evalTextBackgroundColor () in
+  let render_options =
+    Vscode.DecorationRenderOptions.create ?backgroundColor:bgcolor ()
+  in
+  let r =
+    Vscode.Window.createTextEditorDecorationType ~options:render_options
+  in
+  r
+
+(* Remove the highlight of previously evaluated text *)
+let remove_eval_text_decoration instance textEditor : unit =
+  match Extension_instance.repl_prev_eval_text_info instance with
+  | Some r, _ ->
+    Vscode.TextEditor.setDecorations
+      textEditor
+      ~decorationType:r
+      ~rangesOrOptions:(`Ranges [])
+  | None, _ -> ()
 
 module Command = struct
   let _open_repl =
@@ -178,10 +213,30 @@ module Command = struct
         match term with
         | Error err -> show_message `Error "Could not start the REPL: %s" err
         | Ok term ->
-          let code = get_code textEditor in
-          if String.length code > 0 then
+          let range = get_range textEditor in
+          let document = Vscode.TextEditor.document textEditor in
+          let code = Vscode.TextDocument.getText document ~range () in
+          (* Clear the previous text highlight *)
+          remove_eval_text_decoration instance textEditor;
+
+          if String.length code > 0 then (
             let code = prepare_code code in
-            Terminal_sandbox.send term code
+            let r = `Ranges [ range ] in
+            let decor_type = eval_text_decoration_type () in
+            Vscode.TextEditor.setDecorations
+              textEditor
+              ~decorationType:decor_type
+              ~rangesOrOptions:r;
+            Extension_instance.set_repl_prev_eval_text_info
+              instance
+              ~ty:(Some decor_type)
+              ~range:(Some range);
+            Terminal_sandbox.send term code)
+          else
+            Extension_instance.set_repl_prev_eval_text_info
+              instance
+              ~ty:None
+              ~range:None
       in
       ()
     in
@@ -201,5 +256,22 @@ let register extension instance =
           if phys_equal repl_terminal closed_terminal then
             Extension_instance.close_repl instance)
       ()
+  in
+  Vscode.ExtensionContext.subscribe extension ~disposable;
+  let disposable =
+    Vscode.Workspace.onDidChangeTextDocument () ~listener:(fun event ->
+        let _, prev_range =
+          Extension_instance.repl_prev_eval_text_info instance
+        in
+        match (prev_range, Vscode.Window.activeTextEditor ()) with
+        | None, _ | _, None -> ()
+        | Some prevRange, Some editor -> (
+          match TextDocumentChangeEvent.contentChanges event with
+          | [] -> ()
+          | h :: _ ->
+            let r = TextDocumentContentChangeEvent.range h in
+            let pos = Range.start r in
+            if Position.isBeforeOrEqual pos ~other:(Range.end_ prevRange) then
+              remove_eval_text_decoration instance editor))
   in
   Vscode.ExtensionContext.subscribe extension ~disposable

@@ -1,8 +1,17 @@
 open Import
 
+type repl_instance =
+  { mutable repl : Terminal_sandbox.t option
+        (* The highlighting decoration and text range of previously evaluated
+           OCaml code. These fields are used to remove the text decoration when
+           the user modifies the text or evaluates a new text. *)
+  ; mutable prev_eval_text_decor : TextEditorDecorationType.t option
+  ; mutable prev_eval_text_range : Range.t option
+  }
+
 type t =
   { mutable sandbox : Sandbox.t
-  ; mutable repl : Terminal_sandbox.t option
+  ; mutable repl : repl_instance
   ; mutable ocaml_version : Ocaml_version.t option
         (** assumption: it must be set before initializing the language server;
             the lang server initialization needs the ocaml version *)
@@ -257,12 +266,15 @@ let make () =
   let sandbox = Sandbox.Global in
   let sandbox_info = Sandbox_info.make sandbox in
   let documentation_server_info = documentation_server_info () in
+  let repl : repl_instance =
+    { repl = None; prev_eval_text_decor = None; prev_eval_text_range = None }
+  in
   let ast_editor_state = Ast_editor_state.make () in
   { sandbox
   ; lsp_client = None
   ; sandbox_info
   ; documentation_server_info
-  ; repl = None
+  ; repl
   ; ocaml_version = None
   ; ast_editor_state
   ; documentation_server = None
@@ -330,11 +342,19 @@ let start_documentation_server t ~path =
         (Node.JsError.message e);
       Error ())
 
-let repl t = t.repl
+let repl t = t.repl.repl
 
-let set_repl t repl = t.repl <- Some repl
+let set_repl t repl = t.repl.repl <- Some repl
 
-let close_repl t = t.repl <- None
+let close_repl t = t.repl.repl <- None
+
+let repl_prev_eval_text_info t =
+  (t.repl.prev_eval_text_decor, t.repl.prev_eval_text_range)
+
+let set_repl_prev_eval_text_info tt ~(ty : TextEditorDecorationType.t option)
+    ~(range : Range.t option) =
+  tt.repl.prev_eval_text_decor <- ty;
+  tt.repl.prev_eval_text_range <- range
 
 let update_ocaml_info t =
   let open Promise.Syntax in
