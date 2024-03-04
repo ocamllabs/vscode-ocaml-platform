@@ -194,9 +194,12 @@ let register extension instance =
   let disposable =
     Vscode.Window.onDidCloseTerminal
       ()
-      ~listener:(fun terminal ->
-        if String.equal (Vscode.Terminal.name terminal) name then
-          Extension_instance.close_repl instance)
+      ~listener:(fun closed_terminal ->
+        match Extension_instance.repl instance with
+        | None -> ()
+        | Some repl_terminal ->
+          if phys_equal repl_terminal closed_terminal then
+            Extension_instance.close_repl instance)
       ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable
