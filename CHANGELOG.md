@@ -2,6 +2,7 @@
 
 # Unreleased
 
+- Fix opening a new REPL terminal after first one was terminated (issue #935, #1398) 
 - Add an option for highlighting the background of the statement sent to REPL (#1382)
 
 ## 1.17.1
