@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Fix opening a new REPL terminal after first one was terminated (issue #935, #1398) 
+
 ## 1.17.1
 
 - Set the VSCode lower bound to 1.86.0 (#1379)
