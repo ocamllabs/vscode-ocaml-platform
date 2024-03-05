@@ -2189,7 +2189,7 @@ module WebviewPanel : sig
 
   val create :
        onDidChangeViewState:WebviewPanelOnDidChangeViewStateEvent.t Event.t
-    -> onDidDispose:Js.Unit.t Event.t
+    -> onDidDispose:unit Event.t
     -> active:bool
     -> options:WebviewPanelOptions.t
     -> title:string
@@ -2208,7 +2208,7 @@ module CustomTextEditorProvider : sig
   module ResolvedEditor : sig
     type t =
       [ `Promise of unit Promise.t
-      | `Unit of Js.Unit.t
+      | `Unit of unit
       ]
 
     val t_to_js : t -> Ojs.t

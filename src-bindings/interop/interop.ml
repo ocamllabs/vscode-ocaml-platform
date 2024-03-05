@@ -97,11 +97,7 @@ module Js = struct
   end
 
   module Unit = struct
-    type t = unit
-
-    let t_of_js _ = ()
-
-    let t_to_js _ = undefined
+    type t = unit [@@js]
   end
 
   module Result (Ok : Ojs.T) (Error : Ojs.T) = struct

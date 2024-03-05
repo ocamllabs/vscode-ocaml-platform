@@ -2858,17 +2858,17 @@ module CustomTextEditorProvider = struct
   module ResolvedEditor = struct
     type t =
       ([ `Promise of unit Promise.t
-       | `Unit of Js.Unit.t
+       | `Unit of unit
        ]
       [@js.union])
     [@@js]
 
     let t_of_js js_val =
-      if Ojs.is_null js_val then `Unit ([%js.to: Js.Unit.t] js_val)
+      if Ojs.is_null js_val then `Unit ([%js.to: unit] js_val)
       else `Promise ([%js.to: unit Promise.t] js_val)
 
     let t_to_js = function
-      | `Unit v -> Js.Unit.t_to_js v
+      | `Unit v -> [%js.of: unit] v
       | `Promise p -> [%js.of: unit Promise.t] p
   end
 

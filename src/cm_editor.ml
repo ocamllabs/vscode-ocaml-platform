@@ -7,7 +7,7 @@ module Cm_document : sig
   val content :
     t -> instance:Extension_instance.t -> (string, string) result Promise.t
 
-  val onDidChange : t -> Js.Unit.t Event.t
+  val onDidChange : t -> unit Event.t
 
   val create : uri:Uri.t -> t
 end = struct
