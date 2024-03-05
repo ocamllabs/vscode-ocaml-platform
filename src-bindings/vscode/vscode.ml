@@ -816,7 +816,7 @@ module WorkspaceConfiguration = struct
            [@js.union])
       -> ?overrideInLanguage:bool
       -> unit
-      -> Promise.void
+      -> unit Promise.t
     [@@js.call]]
 end
 
@@ -1533,7 +1533,7 @@ module Memento = struct
       -> 'a
     [@@js.call]
 
-    val update : t -> key:string -> value:Ojs.t -> Promise.void [@@js.call]]
+    val update : t -> key:string -> value:Ojs.t -> unit Promise.t [@@js.call]]
 end
 
 module EnvironmentVariableMutatorType = struct
@@ -1606,9 +1606,9 @@ module SecretStorage = struct
     [%js:
     val get : t -> key:string -> string or_undefined Promise.t [@@js.call]
 
-    val store : t -> key:string -> value:string -> Promise.void [@@js.call]
+    val store : t -> key:string -> value:string -> unit Promise.t [@@js.call]
 
-    val delete : t -> key:string -> Promise.void [@@js.call]
+    val delete : t -> key:string -> unit Promise.t [@@js.call]
 
     val onDidChange : t -> SecretStorageChangeEvent.t Event.t [@@js.get]]
 end
@@ -2688,7 +2688,7 @@ module TreeView = struct
 
       val description : t -> string or_undefined [@@js.get]
 
-      val reveal : t -> element:T.t -> Ojs.t -> Promise.void [@@js.call]]
+      val reveal : t -> element:T.t -> Ojs.t -> unit Promise.t [@@js.call]]
 
     let reveal this ~element ?select ?focus ?expand () =
       let options = Ojs.obj [||] in
@@ -2857,7 +2857,7 @@ module CustomTextEditorProvider = struct
 
   module ResolvedEditor = struct
     type t =
-      ([ `Promise of Promise.void
+      ([ `Promise of unit Promise.t
        | `Unit of Js.Unit.t
        ]
       [@js.union])
@@ -2865,11 +2865,11 @@ module CustomTextEditorProvider = struct
 
     let t_of_js js_val =
       if Ojs.is_null js_val then `Unit ([%js.to: Js.Unit.t] js_val)
-      else `Promise ([%js.to: Promise.void] js_val)
+      else `Promise ([%js.to: unit Promise.t] js_val)
 
     let t_to_js = function
       | `Unit v -> Js.Unit.t_to_js v
-      | `Promise p -> Promise.void_to_js p
+      | `Promise p -> Promise.t_to_js (fun () -> Ojs.variable "undefined") p
   end
 
   include
