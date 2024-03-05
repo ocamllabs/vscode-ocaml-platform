@@ -631,7 +631,7 @@ module WorkspaceConfiguration : sig
          [ `ConfigurationTarget of ConfigurationTarget.t | `Bool of bool ]
     -> ?overrideInLanguage:bool
     -> unit
-    -> Promise.void
+    -> unit Promise.t
 end
 
 module WorkspaceEdit : sig
@@ -1183,7 +1183,7 @@ module Memento : sig
 
   val get_default : 'a Js.t -> t -> key:string -> defaultValue:'a -> 'a
 
-  val update : t -> key:string -> value:Ojs.t -> Promise.void
+  val update : t -> key:string -> value:Ojs.t -> unit Promise.t
 end
 
 module EnvironmentVariableMutatorType : sig
@@ -1250,9 +1250,9 @@ module SecretStorage : sig
 
   val get : t -> key:string -> string option Promise.t
 
-  val store : t -> key:string -> value:string -> Promise.void
+  val store : t -> key:string -> value:string -> unit Promise.t
 
-  val delete : t -> key:string -> Promise.void
+  val delete : t -> key:string -> unit Promise.t
 
   val onDidChange : t -> SecretStorageChangeEvent.t Event.t
 end
@@ -2066,7 +2066,7 @@ module TreeView : sig
       -> ?focus:bool
       -> ?expand:[ `Bool of bool | `Int of int ]
       -> unit
-      -> Promise.void
+      -> unit Promise.t
   end
 end
 
@@ -2207,7 +2207,7 @@ module CustomTextEditorProvider : sig
 
   module ResolvedEditor : sig
     type t =
-      [ `Promise of Promise.void
+      [ `Promise of unit Promise.t
       | `Unit of Js.Unit.t
       ]
 
