@@ -2869,7 +2869,7 @@ module CustomTextEditorProvider = struct
 
     let t_to_js = function
       | `Unit v -> Js.Unit.t_to_js v
-      | `Promise p -> Promise.t_to_js (fun () -> Ojs.variable "undefined") p
+      | `Promise p -> [%js.of: unit Promise.t] p
   end
 
   include
