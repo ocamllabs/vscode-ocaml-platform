@@ -1219,7 +1219,7 @@
     "ovsx": "0.8.3",
     "typescript": "5.3.3"
   },
-  "packageManager": "yarn@4.1.0",
+  "packageManager": "yarn@4.1.1",
   "engines": {
     "vscode": "^1.86.0"
   },
