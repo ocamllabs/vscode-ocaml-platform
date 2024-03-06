@@ -2,6 +2,10 @@
 
 # Unreleased
 
+## 1.17.3
+
+- Republish 1.17.2 (#1405)
+
 ## 1.17.2
 
 - Fix opening a new REPL terminal after first one was terminated (issue #935,
