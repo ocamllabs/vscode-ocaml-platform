@@ -2,6 +2,9 @@
 
 # Unreleased
 
+- Fallback to `ocaml.org` package documentation page if there is no doc field in
+  the package's opam file (#1331)
+
 ## 1.17.3
 
 - Republish 1.17.2 (#1405)
