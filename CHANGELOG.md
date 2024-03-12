@@ -2,6 +2,8 @@
 
 # Unreleased
 
+## 1.18.0
+
 - Fallback to `ocaml.org` package documentation page if there is no doc field in
   the package's opam file (#1331)
 
