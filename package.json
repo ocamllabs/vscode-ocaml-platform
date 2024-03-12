@@ -1065,12 +1065,12 @@
         },
         {
           "command": "ocaml.open-switches-documentation",
-          "when": "view == ocaml-switches && viewItem == package-with-doc",
+          "when": "view == ocaml-switches && viewItem == opam-package",
           "group": "inline"
         },
         {
           "command": "ocaml.open-sandbox-documentation",
-          "when": "view == ocaml-sandbox && viewItem == package-with-doc",
+          "when": "view == ocaml-sandbox && viewItem == opam-package",
           "group": "inline@1"
         },
         {
