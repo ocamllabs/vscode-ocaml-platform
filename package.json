@@ -1219,7 +1219,7 @@
     "mocha": "10.3.0",
     "npm-run-all": "4.1.5",
     "ovsx": "0.8.4",
-    "typescript": "5.4.2"
+    "typescript": "5.4.3"
   },
   "packageManager": "yarn@4.1.1",
   "engines": {
