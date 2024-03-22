@@ -33,18 +33,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@biomejs/biome@npm:1.6.1":
-  version: 1.6.1
-  resolution: "@biomejs/biome@npm:1.6.1"
+"@biomejs/biome@npm:1.6.2":
+  version: 1.6.2
+  resolution: "@biomejs/biome@npm:1.6.2"
   dependencies:
-    "@biomejs/cli-darwin-arm64": "npm:1.6.1"
-    "@biomejs/cli-darwin-x64": "npm:1.6.1"
-    "@biomejs/cli-linux-arm64": "npm:1.6.1"
-    "@biomejs/cli-linux-arm64-musl": "npm:1.6.1"
-    "@biomejs/cli-linux-x64": "npm:1.6.1"
-    "@biomejs/cli-linux-x64-musl": "npm:1.6.1"
-    "@biomejs/cli-win32-arm64": "npm:1.6.1"
-    "@biomejs/cli-win32-x64": "npm:1.6.1"
+    "@biomejs/cli-darwin-arm64": "npm:1.6.2"
+    "@biomejs/cli-darwin-x64": "npm:1.6.2"
+    "@biomejs/cli-linux-arm64": "npm:1.6.2"
+    "@biomejs/cli-linux-arm64-musl": "npm:1.6.2"
+    "@biomejs/cli-linux-x64": "npm:1.6.2"
+    "@biomejs/cli-linux-x64-musl": "npm:1.6.2"
+    "@biomejs/cli-win32-arm64": "npm:1.6.2"
+    "@biomejs/cli-win32-x64": "npm:1.6.2"
   dependenciesMeta:
     "@biomejs/cli-darwin-arm64":
       optional: true
@@ -64,62 +64,62 @@ __metadata:
       optional: true
   bin:
     biome: bin/biome
-  checksum: 10c0/789580c9aa7e0661a643e82de85f15bcc4ef0c79a099204f234b3769cface5c604b137260a4a60767ab3a692bd7ac19e2de1fc75537ec14e7698f0b6a133cfef
+  checksum: 10c0/a1b0c5a557469c7f8c8501a2d78a8eb91fc678d639faf0566ccaf84be7b8ee38956a1a47d10b227b60004217cad80e44730a55505a2d00b01327921a421706ca
   languageName: node
   linkType: hard
 
-"@biomejs/cli-darwin-arm64@npm:1.6.1":
-  version: 1.6.1
-  resolution: "@biomejs/cli-darwin-arm64@npm:1.6.1"
+"@biomejs/cli-darwin-arm64@npm:1.6.2":
+  version: 1.6.2
+  resolution: "@biomejs/cli-darwin-arm64@npm:1.6.2"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@biomejs/cli-darwin-x64@npm:1.6.1":
-  version: 1.6.1
-  resolution: "@biomejs/cli-darwin-x64@npm:1.6.1"
+"@biomejs/cli-darwin-x64@npm:1.6.2":
+  version: 1.6.2
+  resolution: "@biomejs/cli-darwin-x64@npm:1.6.2"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@biomejs/cli-linux-arm64-musl@npm:1.6.1":
-  version: 1.6.1
-  resolution: "@biomejs/cli-linux-arm64-musl@npm:1.6.1"
+"@biomejs/cli-linux-arm64-musl@npm:1.6.2":
+  version: 1.6.2
+  resolution: "@biomejs/cli-linux-arm64-musl@npm:1.6.2"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@biomejs/cli-linux-arm64@npm:1.6.1":
-  version: 1.6.1
-  resolution: "@biomejs/cli-linux-arm64@npm:1.6.1"
+"@biomejs/cli-linux-arm64@npm:1.6.2":
+  version: 1.6.2
+  resolution: "@biomejs/cli-linux-arm64@npm:1.6.2"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@biomejs/cli-linux-x64-musl@npm:1.6.1":
-  version: 1.6.1
-  resolution: "@biomejs/cli-linux-x64-musl@npm:1.6.1"
+"@biomejs/cli-linux-x64-musl@npm:1.6.2":
+  version: 1.6.2
+  resolution: "@biomejs/cli-linux-x64-musl@npm:1.6.2"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@biomejs/cli-linux-x64@npm:1.6.1":
-  version: 1.6.1
-  resolution: "@biomejs/cli-linux-x64@npm:1.6.1"
+"@biomejs/cli-linux-x64@npm:1.6.2":
+  version: 1.6.2
+  resolution: "@biomejs/cli-linux-x64@npm:1.6.2"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@biomejs/cli-win32-arm64@npm:1.6.1":
-  version: 1.6.1
-  resolution: "@biomejs/cli-win32-arm64@npm:1.6.1"
+"@biomejs/cli-win32-arm64@npm:1.6.2":
+  version: 1.6.2
+  resolution: "@biomejs/cli-win32-arm64@npm:1.6.2"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@biomejs/cli-win32-x64@npm:1.6.1":
-  version: 1.6.1
-  resolution: "@biomejs/cli-win32-x64@npm:1.6.1"
+"@biomejs/cli-win32-x64@npm:1.6.2":
+  version: 1.6.2
+  resolution: "@biomejs/cli-win32-x64@npm:1.6.2"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -4516,7 +4516,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "ocaml-platform@workspace:."
   dependencies:
-    "@biomejs/biome": "npm:1.6.1"
+    "@biomejs/biome": "npm:1.6.2"
     "@swc-node/register": "npm:1.9.0"
     "@swc/core": "npm:1.4.8"
     "@tsconfig/node20": "npm:20.1.2"
