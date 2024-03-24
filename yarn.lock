@@ -1586,10 +1586,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tsconfig/node20@npm:20.1.2":
-  version: 20.1.2
-  resolution: "@tsconfig/node20@npm:20.1.2"
-  checksum: 10c0/e438fa9b93f0e6ea667affbbd3217692bf3f92db1b3dcbfba1dd141a7dbcd647c19ed87ce76871c723bed398759ec4a5590685f3e669b600c9371f143a19e0c1
+"@tsconfig/node20@npm:20.1.3":
+  version: 20.1.3
+  resolution: "@tsconfig/node20@npm:20.1.3"
+  checksum: 10c0/619b35b5100fd7e7000aa0ba530c1ac95d1ce89f5cc94590c04a4fc7fcebb72e52cbc2ebd1300b6ba23ac33d74fe5fb559c5f191af45adc2dfbff09c8f0da7ee
   languageName: node
   linkType: hard
 
@@ -4519,7 +4519,7 @@ __metadata:
     "@biomejs/biome": "npm:1.6.2"
     "@swc-node/register": "npm:1.9.0"
     "@swc/core": "npm:1.4.8"
-    "@tsconfig/node20": "npm:20.1.2"
+    "@tsconfig/node20": "npm:20.1.3"
     "@tsconfig/strictest": "npm:2.0.3"
     "@types/fs-extra": "npm:11.0.4"
     "@types/mocha": "npm:10.0.6"
