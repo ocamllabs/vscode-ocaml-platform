@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Fix `sideEffects` field in `astexplorer/package.json` (#1427)
+
 ## 1.18.0
 
 - Fallback to `ocaml.org` package documentation page if there is no doc field in
