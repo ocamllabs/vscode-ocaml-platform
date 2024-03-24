@@ -2,7 +2,7 @@
   "name": "astexplorer",
   "private": true,
   "sideEffects": [
-    "./src/components/visualization/Tree.js"
+    "./src/index.js"
   ],
   "type": "module",
   "scripts": {
