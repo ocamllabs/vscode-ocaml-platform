@@ -1664,7 +1664,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode/vsce@npm:2.24.0, @vscode/vsce@npm:^2.19.0":
+"@vscode/vsce@npm:2.24.0, @vscode/vsce@npm:^2.24.0":
   version: 2.24.0
   resolution: "@vscode/vsce@npm:2.24.0"
   dependencies:
@@ -4544,7 +4544,7 @@ __metadata:
     glob: "npm:10.3.10"
     mocha: "npm:10.4.0"
     npm-run-all: "npm:4.1.5"
-    ovsx: "npm:0.8.4"
+    ovsx: "npm:0.9.0"
     polka: "npm:1.0.0-next.25"
     sirv: "npm:2.0.4"
     typescript: "npm:5.4.3"
@@ -4568,20 +4568,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ovsx@npm:0.8.4":
-  version: 0.8.4
-  resolution: "ovsx@npm:0.8.4"
+"ovsx@npm:0.9.0":
+  version: 0.9.0
+  resolution: "ovsx@npm:0.9.0"
   dependencies:
-    "@vscode/vsce": "npm:^2.19.0"
+    "@vscode/vsce": "npm:^2.24.0"
     commander: "npm:^6.1.0"
     follow-redirects: "npm:^1.14.6"
     is-ci: "npm:^2.0.0"
     leven: "npm:^3.1.0"
-    semver: "npm:^7.5.2"
+    semver: "npm:^7.6.0"
     tmp: "npm:^0.2.1"
   bin:
     ovsx: lib/ovsx
-  checksum: 10c0/20e9c63f6815b78fe5d81fd5bb0f67ccabe442a179e5c9b585bd4f702e6e3284f02e5ff36b9afae4bdd74e8474dd0173e635fc2c9183b5e7160eb062946b2c83
+  checksum: 10c0/efe53d2d585ea7bb2c5b0a30a086106d4d2c22db7998504b436b5f986c9245f8f74a9957c079cd270d5ef98ce07ef3c2331e2ce1645e5189916028bbb4ca5a31
   languageName: node
   linkType: hard
 
@@ -5235,7 +5235,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.5.2":
+"semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.5.2, semver@npm:^7.6.0":
   version: 7.6.0
   resolution: "semver@npm:7.6.0"
   dependencies:
