@@ -241,6 +241,11 @@
         "command": "ocaml.goto-closure-code-location",
         "category": "OCaml",
         "title": "Goto Closure Code Location"
+      },
+      {
+        "command": "ocaml.select-dune-context",
+        "category": "OCaml",
+        "title": "Select a Dune context for this Workspace"
       }
     ],
     "configuration": {

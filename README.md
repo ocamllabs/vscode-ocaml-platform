@@ -262,6 +262,7 @@ prefix `OCaml:`:
 | `ocaml.switch-impl-intf`     | Switch implementation/interface             | `Alt+O`            |
 | `ocaml.open-repl`            | Open REPL                                   |                    |
 | `ocaml.evaluate-selection`   | Evaluate Selection                          | `Shift+Enter`      |
+| `ocaml.select-dune-context`  | Select a Dune context for this workspace    |                    |
 
 ## Debugging OCaml programs (experimental)
 

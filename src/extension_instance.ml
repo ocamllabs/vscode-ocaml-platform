@@ -15,6 +15,7 @@ type t =
   ; mutable extended_hover : bool option
   ; mutable dune_diagnostics : bool option
   ; mutable syntax_documentation : bool option
+  ; mutable dune_context : string option
   }
 
 let sandbox t = t.sandbox
@@ -28,7 +29,7 @@ let lsp_client t = t.lsp_client
 let ocaml_version_exn t = Option.value_exn t.ocaml_version
 
 let send_configuration ~codelens ~extended_hover ~dune_diagnostics
-    ~syntax_documentation client =
+    ~syntax_documentation ~dune_context client =
   let codelens =
     Option.map codelens ~f:(fun enable ->
         Ocaml_lsp.OcamllspSettingEnable.create ~enable)
@@ -45,12 +46,17 @@ let send_configuration ~codelens ~extended_hover ~dune_diagnostics
     Option.map syntax_documentation ~f:(fun enable ->
         Ocaml_lsp.OcamllspSettingEnable.create ~enable)
   in
+  let duneContext =
+    Option.map dune_context ~f:(fun value ->
+        Ocaml_lsp.OcamllspSettingString.create ~value)
+  in
   let settings =
     Ocaml_lsp.OcamllspSettings.create
       ~codelens
       ~extendedHover
       ~duneDiagnostics
       ~syntaxDocumentation
+      ~duneContext
   in
   let payload =
     let settings =
@@ -66,11 +72,12 @@ let send_configuration ~codelens ~extended_hover ~dune_diagnostics
     payload
 
 let set_configuration t ~codelens ~extended_hover ~dune_diagnostics
-    ~syntax_documentation =
+    ~syntax_documentation ~dune_context =
   t.codelens <- codelens;
   t.extended_hover <- extended_hover;
   t.dune_diagnostics <- dune_diagnostics;
   t.syntax_documentation <- syntax_documentation;
+  t.dune_context <- dune_context;
   match t.lsp_client with
   | None -> ()
   | Some (client, (_ : Ocaml_lsp.t)) ->
@@ -79,6 +86,7 @@ let set_configuration t ~codelens ~extended_hover ~dune_diagnostics
       ~extended_hover
       ~dune_diagnostics
       ~syntax_documentation
+      ~dune_context
       client
 
 let stop_server t =
@@ -196,7 +204,8 @@ end = struct
         ~codelens:t.codelens
         ~extended_hover:t.extended_hover
         ~dune_diagnostics:t.dune_diagnostics
-        ~syntax_documentation:t.syntax_documentation;
+        ~syntax_documentation:t.syntax_documentation
+        ~dune_context:t.dune_context;
       Ok ()
     in
     match res with
@@ -270,6 +279,7 @@ let make () =
   ; extended_hover = None
   ; dune_diagnostics = None
   ; syntax_documentation = None
+  ; dune_context = None
   }
 
 let set_documentation_context ~running =

@@ -158,6 +158,23 @@ let ( _open_ocamllsp_output_pane
       Extension_consts.Commands.open_ocaml_commands_output
       (handler Output.command_output_channel) )
 
+let _set_dune_contexts =
+  let handler (instance : Extension_instance.t) ~args:_ =
+    let open Promise.Syntax in
+    let (_ : unit Promise.t) =
+      let* sandbox = Sandbox.select_sandbox () in
+      match sandbox with
+      | None (* sandbox selection cancelled *) -> Promise.return ()
+      | Some new_sandbox ->
+        Extension_instance.set_sandbox instance new_sandbox;
+        let* () = Sandbox.save_to_settings new_sandbox in
+        let* () = Extension_instance.update_ocaml_info instance in
+        Extension_instance.start_language_server instance
+    in
+    ()
+  in
+  command Extension_consts.Commands.select_dune_context handler
+
 module Holes_commands : sig
   val _jump_to_prev_hole : t
 

@@ -20,3 +20,5 @@ val switchImplIntf : (string, string array) custom_request
 val inferIntf : (string, string) custom_request
 
 val typedHoles : (Uri.t, Range.t list) custom_request
+
+val getDuneContexts : (unit, string list) custom_request

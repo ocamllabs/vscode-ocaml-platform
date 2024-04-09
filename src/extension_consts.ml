@@ -66,6 +66,9 @@ module Commands = struct
   let goto_closure_code_location = ocaml_prefixed "goto-closure-code-location"
 
   let ask_debug_program = ocaml_prefixed "ask-debug-program"
+
+  let select_dune_context = ocaml_prefixed "select-dune-context"
+
 end
 
 module Command_errors = struct

@@ -11,7 +11,7 @@ yarn-deps:
 .PHONY: deps
 deps: ## Install development dependencies
 	$(MAKE) yarn-deps
-	opam install --deps-only --with-test --with-doc --with-dev-setup --yes .
+	opam install --deps-only --with-test --with-doc --yes .
 
 .PHONY: create_switch
 create_switch:
