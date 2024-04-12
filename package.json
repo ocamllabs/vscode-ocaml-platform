@@ -1212,7 +1212,7 @@
     "@types/mocha": "10.0.6",
     "@types/vscode": "1.86.0",
     "@vscode/test-electron": "2.3.9",
-    "@vscode/vsce": "2.24.0",
+    "@vscode/vsce": "2.25.0",
     "esbuild": "0.20.2",
     "fs-extra": "11.2.0",
     "glob": "10.3.12",
