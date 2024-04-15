@@ -158,20 +158,60 @@ let ( _open_ocamllsp_output_pane
       Extension_consts.Commands.open_ocaml_commands_output
       (handler Output.command_output_channel) )
 
-let _set_dune_contexts =
+let _set_dune_context =
   let handler (instance : Extension_instance.t) ~args:_ =
     let open Promise.Syntax in
-    let (_ : unit Promise.t) =
-      let* sandbox = Sandbox.select_sandbox () in
-      match sandbox with
-      | None (* sandbox selection cancelled *) -> Promise.return ()
-      | Some new_sandbox ->
-        Extension_instance.set_sandbox instance new_sandbox;
-        let* () = Sandbox.save_to_settings new_sandbox in
-        let* () = Extension_instance.update_ocaml_info instance in
-        Extension_instance.start_language_server instance
+    let select_context (choices : string list) =
+      let current_context =
+        (* TODO (jchavarri): read from config *) "default"
+      in
+      let choices =
+        let to_quick_pick current_context context =
+          let create = QuickPickItem.create in
+          let description =
+            if String.equal current_context context then
+              Some "Currently selected Dune context"
+            else None
+          in
+          create ~label:context ?description ()
+        in
+        List.map
+          ~f:(fun (context : string) ->
+            let quick_pick = to_quick_pick current_context context in
+            (quick_pick, context))
+          choices
+      in
+      let options =
+        let placeHolder =
+          "Which Dune context would you like to use in the editor?"
+        in
+        QuickPickOptions.create ~canPickMany:false ~placeHolder ()
+      in
+      Window.showQuickPickItems ~choices ~options ()
     in
-    ()
+    let select_dune_context client =
+      let* candidates =
+        Custom_requests.send_request client Custom_requests.getDuneContexts ()
+      in
+      let* context = select_context candidates in
+      match context with
+      | None (* context selection cancelled *) -> Promise.return ()
+      | Some new_context ->
+        Settings.set Settings.server_duneContext_setting new_context
+    in
+    match Extension_instance.lsp_client instance with
+    | None -> show_message `Warn "ocamllsp is not running."
+    | Some (client, ocaml_lsp) ->
+      if Ocaml_lsp.can_handle_dune_contexts ocaml_lsp then
+        let (_ : unit Promise.t) = select_dune_context client in
+        ()
+      else
+        (* if ocamllsp doesn't have the capability, recommend updating
+           ocamllsp*)
+        show_message
+          `Warn
+          "The installed version of ocamllsp does not support setting the Dune \
+           context. Consider updating ocamllsp."
   in
   command Extension_consts.Commands.select_dune_context handler
 

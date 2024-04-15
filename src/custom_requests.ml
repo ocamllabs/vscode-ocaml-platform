@@ -36,6 +36,6 @@ let typedHoles =
 
 let getDuneContexts =
   { meth = ocamllsp_prefixed "duneContexts"
-  ; encode_params = (fun () -> Jsonoo.Encode.list Fn.id [])
+  ; encode_params = (fun () -> Jsonoo.Encode.null)
   ; decode_response = Jsonoo.Decode.(list string)
   }

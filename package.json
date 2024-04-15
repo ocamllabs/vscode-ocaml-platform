@@ -285,6 +285,11 @@
           "default": true,
           "markdownDescription": "Enable/Disable dune diagnostics"
         },
+        "ocaml.server.duneContext": {
+          "type": "string",
+          "default": "default",
+          "markdownDescription": "Set the current Dune context for Merlin"
+        },
         "ocaml.server.syntaxDocumentation": {
           "type": "boolean",
           "default": false,
