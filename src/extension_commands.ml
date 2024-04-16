@@ -163,7 +163,9 @@ let _set_dune_context =
     let open Promise.Syntax in
     let select_context (choices : string list) =
       let current_context =
-        (* TODO (jchavarri): read from config *) "default"
+        Option.value
+          ~default:"default"
+          (Settings.get Settings.server_duneContext_setting)
       in
       let choices =
         let to_quick_pick current_context context =
@@ -197,7 +199,10 @@ let _set_dune_context =
       match context with
       | None (* context selection cancelled *) -> Promise.return ()
       | Some new_context ->
-        Settings.set Settings.server_duneContext_setting new_context
+        let* () =
+          Settings.set Settings.server_duneContext_setting new_context
+        in
+        Extension_instance.start_language_server instance
     in
     match Extension_instance.lsp_client instance with
     | None -> show_message `Warn "ocamllsp is not running."

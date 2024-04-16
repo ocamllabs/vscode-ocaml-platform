@@ -119,7 +119,14 @@ end = struct
       ()
 
   let server_options sandbox =
-    let args = Settings.(get server_args_setting) |> Option.value ~default:[] in
+    let args =
+      let default_args =
+        match Settings.get Settings.server_duneContext_setting with
+        | None -> []
+        | Some context -> [ "--context"; context ]
+      in
+      Settings.(get server_args_setting) |> Option.value ~default:default_args
+    in
     let command = Sandbox.get_command sandbox "ocamllsp" args in
     Cmd.log command;
     let env =
