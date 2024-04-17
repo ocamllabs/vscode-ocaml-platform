@@ -1664,7 +1664,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode/vsce@npm:2.25.0":
+"@vscode/vsce@npm:2.25.0, @vscode/vsce@npm:^2.25.0":
   version: 2.25.0
   resolution: "@vscode/vsce@npm:2.25.0"
   dependencies:
@@ -1697,40 +1697,6 @@ __metadata:
   bin:
     vsce: vsce
   checksum: 10c0/bab6e2f0daa557374986a686e31651c1021bf8a87c529e1af8a561abf287af52150a305b5b2fa836457cd41a87285c1885914225b3f788d622bb8bdc1844133e
-  languageName: node
-  linkType: hard
-
-"@vscode/vsce@npm:^2.24.0":
-  version: 2.24.0
-  resolution: "@vscode/vsce@npm:2.24.0"
-  dependencies:
-    azure-devops-node-api: "npm:^11.0.1"
-    chalk: "npm:^2.4.2"
-    cheerio: "npm:^1.0.0-rc.9"
-    commander: "npm:^6.2.1"
-    glob: "npm:^7.0.6"
-    hosted-git-info: "npm:^4.0.2"
-    jsonc-parser: "npm:^3.2.0"
-    keytar: "npm:^7.7.0"
-    leven: "npm:^3.1.0"
-    markdown-it: "npm:^12.3.2"
-    mime: "npm:^1.3.4"
-    minimatch: "npm:^3.0.3"
-    parse-semver: "npm:^1.1.1"
-    read: "npm:^1.0.7"
-    semver: "npm:^7.5.2"
-    tmp: "npm:^0.2.1"
-    typed-rest-client: "npm:^1.8.4"
-    url-join: "npm:^4.0.1"
-    xml2js: "npm:^0.5.0"
-    yauzl: "npm:^2.3.1"
-    yazl: "npm:^2.2.2"
-  dependenciesMeta:
-    keytar:
-      optional: true
-  bin:
-    vsce: vsce
-  checksum: 10c0/998fb780702321d18e6340c35be85ab421249a61e68fac7d9bc111e1a44ae756d149a736b81d80f1cc7f66aef9f50b29bb0d95ee1f0ce7afa0d4becf9d54456b
   languageName: node
   linkType: hard
 
@@ -1893,16 +1859,6 @@ __metadata:
   dependencies:
     possible-typed-array-names: "npm:^1.0.0"
   checksum: 10c0/d07226ef4f87daa01bd0fe80f8f310982e345f372926da2e5296aecc25c41cab440916bbaa4c5e1034b453af3392f67df5961124e4b586df1e99793a1374bdb2
-  languageName: node
-  linkType: hard
-
-"azure-devops-node-api@npm:^11.0.1":
-  version: 11.2.0
-  resolution: "azure-devops-node-api@npm:11.2.0"
-  dependencies:
-    tunnel: "npm:0.0.6"
-    typed-rest-client: "npm:^1.8.4"
-  checksum: 10c0/ff7554fdfea1607e2c5a4a5d5bf06138779b725a1c3c416803343500b34f040c4d51daa1eaf65b8f5e6bb31632544b208121293e400e2dd9158d97590ead6666
   languageName: node
   linkType: hard
 
@@ -4662,7 +4618,7 @@ __metadata:
     glob: "npm:10.3.12"
     mocha: "npm:10.4.0"
     npm-run-all: "npm:4.1.5"
-    ovsx: "npm:0.9.0"
+    ovsx: "npm:0.9.1"
     polka: "npm:1.0.0-next.25"
     sirv: "npm:2.0.4"
     typescript: "npm:5.4.5"
@@ -4686,11 +4642,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ovsx@npm:0.9.0":
-  version: 0.9.0
-  resolution: "ovsx@npm:0.9.0"
+"ovsx@npm:0.9.1":
+  version: 0.9.1
+  resolution: "ovsx@npm:0.9.1"
   dependencies:
-    "@vscode/vsce": "npm:^2.24.0"
+    "@vscode/vsce": "npm:^2.25.0"
     commander: "npm:^6.1.0"
     follow-redirects: "npm:^1.14.6"
     is-ci: "npm:^2.0.0"
@@ -4699,7 +4655,7 @@ __metadata:
     tmp: "npm:^0.2.1"
   bin:
     ovsx: lib/ovsx
-  checksum: 10c0/efe53d2d585ea7bb2c5b0a30a086106d4d2c22db7998504b436b5f986c9245f8f74a9957c079cd270d5ef98ce07ef3c2331e2ce1645e5189916028bbb4ca5a31
+  checksum: 10c0/bbaf06a58974df723e8fff5d65bb5e06d3d0385b28d966136b6b0cb729da668cbcc50f2d6d81bdfaeae318de33dc6db0b8589f3a04d81d0722d122d878b410b9
   languageName: node
   linkType: hard
 
