@@ -4,6 +4,10 @@
 
 - Allow selection of Dune context (#1449)
 
+## 1.18.1
+
+- Fix `sideEffects` field in `astexplorer/package.json` (#1427)
+
 ## 1.18.0
 
 - Fallback to `ocaml.org` package documentation page if there is no doc field in

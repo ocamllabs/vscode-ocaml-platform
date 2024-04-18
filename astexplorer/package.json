@@ -2,7 +2,7 @@
   "name": "astexplorer",
   "private": true,
   "sideEffects": [
-    "./src/components/visualization/Tree.js"
+    "./src/index.js"
   ],
   "type": "module",
   "scripts": {
@@ -16,7 +16,7 @@
     "prop-types": "15.8.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-redux": "9.1.0"
+    "react-redux": "9.1.1"
   },
   "devDependencies": {
     "parcel": "2.12.0"
