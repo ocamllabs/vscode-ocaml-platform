@@ -11,16 +11,6 @@ module OcamllspSettingEnable = struct
     val create : enable:bool -> t [@@js.builder]]
 end
 
-module OcamllspSettingString = struct
-  include Interface.Make ()
-
-  include
-    [%js:
-    val value : t -> string or_undefined [@@js.get]
-
-    val create : value:string -> t [@@js.builder]]
-end
-
 module OcamllspSettings = struct
   include Interface.Make ()
 
@@ -35,27 +25,17 @@ module OcamllspSettings = struct
     val syntaxDocumentation : t -> OcamllspSettingEnable.t or_undefined
     [@@js.get]
 
-    val duneContext : t -> OcamllspSettingString.t or_undefined [@@js.get]
-
     val create :
          ?codelens:OcamllspSettingEnable.t
       -> ?extendedHover:OcamllspSettingEnable.t
       -> ?duneDiagnostics:OcamllspSettingEnable.t
       -> ?syntaxDocumentation:OcamllspSettingEnable.t
-      -> ?duneContext:OcamllspSettingString.t
       -> unit
       -> t
     [@@js.builder]]
 
-  let create ~codelens ~extendedHover ~duneDiagnostics ~syntaxDocumentation
-      ~duneContext =
-    create
-      ?codelens
-      ?extendedHover
-      ?duneDiagnostics
-      ?syntaxDocumentation
-      ?duneContext
-      ()
+  let create ~codelens ~extendedHover ~duneDiagnostics ~syntaxDocumentation =
+    create ?codelens ?extendedHover ?duneDiagnostics ?syntaxDocumentation ()
 end
 
 module Experimental_capabilities = struct

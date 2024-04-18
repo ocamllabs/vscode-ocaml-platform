@@ -165,7 +165,7 @@ let _set_dune_context =
       let current_context =
         Option.value
           ~default:"default"
-          (Settings.get Settings.server_duneContext_setting)
+          (Settings.get Settings.dune_context_setting)
       in
       let choices =
         let to_quick_pick current_context context =
@@ -199,9 +199,7 @@ let _set_dune_context =
       match context with
       | None (* context selection cancelled *) -> Promise.return ()
       | Some new_context ->
-        let* () =
-          Settings.set Settings.server_duneContext_setting new_context
-        in
+        let* () = Settings.set Settings.dune_context_setting new_context in
         Extension_instance.start_language_server instance
     in
     match Extension_instance.lsp_client instance with

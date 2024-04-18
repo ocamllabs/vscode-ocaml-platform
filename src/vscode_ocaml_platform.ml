@@ -29,14 +29,12 @@ let notify_configuration_changes instance =
       let syntax_documentation =
         Settings.(get server_syntaxDocumentation_setting)
       in
-      let dune_context = Settings.(get server_duneContext_setting) in
       Extension_instance.set_configuration
         instance
         ~codelens
         ~extended_hover
         ~dune_diagnostics
-        ~syntax_documentation
-        ~dune_context)
+        ~syntax_documentation)
     ()
 
 let activate (extension : ExtensionContext.t) =

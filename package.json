@@ -285,11 +285,6 @@
           "default": true,
           "markdownDescription": "Enable/Disable dune diagnostics"
         },
-        "ocaml.server.duneContext": {
-          "type": "string",
-          "default": "default",
-          "markdownDescription": "Set the current Dune context for Merlin"
-        },
         "ocaml.server.syntaxDocumentation": {
           "type": "boolean",
           "default": false,
@@ -299,6 +294,11 @@
           "type": "boolean",
           "default": true,
           "description": "Controls whether dune tasks should be automatically detected."
+        },
+        "ocaml.dune.context": {
+          "type": "string",
+          "default": "default",
+          "markdownDescription": "Set the current Dune context for Merlin"
         },
         "ocaml.trace.server": {
           "description": "Controls the logging output of the language server. Valid settings are `off`, `messages`, or `verbose`.",

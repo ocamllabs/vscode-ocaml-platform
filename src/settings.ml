@@ -142,9 +142,9 @@ let server_syntaxDocumentation_setting =
     ~of_json:Jsonoo.Decode.bool
     ~to_json:Jsonoo.Encode.bool
 
-let server_duneContext_setting =
+let dune_context_setting =
   create_setting
     ~scope:ConfigurationTarget.Workspace
-    ~key:"ocaml.server.duneContext"
+    ~key:"ocaml.dune.context"
     ~of_json:Jsonoo.Decode.string
     ~to_json:Jsonoo.Encode.string

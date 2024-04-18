@@ -23,14 +23,6 @@ module OcamllspSettingEnable : sig
   val create : enable:bool -> t
 end
 
-module OcamllspSettingString : sig
-  include Ojs.T
-
-  val value : t -> string option
-
-  val create : value:string -> t
-end
-
 module OcamllspSettings : sig
   include Ojs.T
 
@@ -42,13 +34,10 @@ module OcamllspSettings : sig
 
   val syntaxDocumentation : t -> OcamllspSettingEnable.t option
 
-  val duneContext : t -> OcamllspSettingString.t option
-
   val create :
        codelens:OcamllspSettingEnable.t option
     -> extendedHover:OcamllspSettingEnable.t option
     -> duneDiagnostics:OcamllspSettingEnable.t option
     -> syntaxDocumentation:OcamllspSettingEnable.t option
-    -> duneContext:OcamllspSettingString.t option
     -> t
 end

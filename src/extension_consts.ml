@@ -68,7 +68,6 @@ module Commands = struct
   let ask_debug_program = ocaml_prefixed "ask-debug-program"
 
   let select_dune_context = ocaml_prefixed "select-dune-context"
-
 end
 
 module Command_errors = struct

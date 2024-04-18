@@ -15,7 +15,6 @@ type t =
   ; mutable extended_hover : bool option
   ; mutable dune_diagnostics : bool option
   ; mutable syntax_documentation : bool option
-  ; mutable dune_context : string option
   }
 
 let sandbox t = t.sandbox
@@ -29,7 +28,7 @@ let lsp_client t = t.lsp_client
 let ocaml_version_exn t = Option.value_exn t.ocaml_version
 
 let send_configuration ~codelens ~extended_hover ~dune_diagnostics
-    ~syntax_documentation ~dune_context client =
+    ~syntax_documentation client =
   let codelens =
     Option.map codelens ~f:(fun enable ->
         Ocaml_lsp.OcamllspSettingEnable.create ~enable)
@@ -46,17 +45,12 @@ let send_configuration ~codelens ~extended_hover ~dune_diagnostics
     Option.map syntax_documentation ~f:(fun enable ->
         Ocaml_lsp.OcamllspSettingEnable.create ~enable)
   in
-  let duneContext =
-    Option.map dune_context ~f:(fun value ->
-        Ocaml_lsp.OcamllspSettingString.create ~value)
-  in
   let settings =
     Ocaml_lsp.OcamllspSettings.create
       ~codelens
       ~extendedHover
       ~duneDiagnostics
       ~syntaxDocumentation
-      ~duneContext
   in
   let payload =
     let settings =
@@ -72,12 +66,11 @@ let send_configuration ~codelens ~extended_hover ~dune_diagnostics
     payload
 
 let set_configuration t ~codelens ~extended_hover ~dune_diagnostics
-    ~syntax_documentation ~dune_context =
+    ~syntax_documentation =
   t.codelens <- codelens;
   t.extended_hover <- extended_hover;
   t.dune_diagnostics <- dune_diagnostics;
   t.syntax_documentation <- syntax_documentation;
-  t.dune_context <- dune_context;
   match t.lsp_client with
   | None -> ()
   | Some (client, (_ : Ocaml_lsp.t)) ->
@@ -86,7 +79,6 @@ let set_configuration t ~codelens ~extended_hover ~dune_diagnostics
       ~extended_hover
       ~dune_diagnostics
       ~syntax_documentation
-      ~dune_context
       client
 
 let stop_server t =
@@ -119,14 +111,17 @@ end = struct
       ()
 
   let server_options sandbox =
+    let args = Settings.(get server_args_setting) |> Option.value ~default:[] in
     let args =
-      let default_args =
-        match Settings.get Settings.server_duneContext_setting with
-        | None -> []
-        | Some context -> [ "--context"; context ]
-      in
-      Settings.(get server_args_setting) |> Option.value ~default:default_args
+      (* `handleDuneContexts` capability is already checked when getting the
+         contexts for the `ocaml.select-dune-context` command, so the only way
+         to get here with a version of ocamllsp that doesn't support contexts is
+         if the user adds the `dune.context` setting manually *)
+      match Settings.get Settings.dune_context_setting with
+      | None -> args
+      | Some context -> "--context" :: context :: args
     in
+
     let command = Sandbox.get_command sandbox "ocamllsp" args in
     Cmd.log command;
     let env =
@@ -211,8 +206,7 @@ end = struct
         ~codelens:t.codelens
         ~extended_hover:t.extended_hover
         ~dune_diagnostics:t.dune_diagnostics
-        ~syntax_documentation:t.syntax_documentation
-        ~dune_context:t.dune_context;
+        ~syntax_documentation:t.syntax_documentation;
       Ok ()
     in
     match res with
@@ -286,7 +280,6 @@ let make () =
   ; extended_hover = None
   ; dune_diagnostics = None
   ; syntax_documentation = None
-  ; dune_context = None
   }
 
 let set_documentation_context ~running =

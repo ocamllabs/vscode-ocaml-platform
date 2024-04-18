@@ -46,4 +46,4 @@ val server_duneDiagnostics_setting : bool setting
 
 val server_syntaxDocumentation_setting : bool setting
 
-val server_duneContext_setting : string setting
+val dune_context_setting : string setting
