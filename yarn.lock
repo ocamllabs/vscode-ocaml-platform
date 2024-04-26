@@ -2014,7 +2014,7 @@ __metadata:
     parcel: "npm:2.12.0"
     process: "npm:0.11.10"
     prop-types: "npm:15.8.1"
-    react: "npm:18.2.0"
+    react: "npm:18.3.0"
     react-dom: "npm:18.3.0"
     react-redux: "npm:9.1.1"
   languageName: unknown
@@ -5455,12 +5455,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:18.2.0":
-  version: 18.2.0
-  resolution: "react@npm:18.2.0"
+"react@npm:18.3.0":
+  version: 18.3.0
+  resolution: "react@npm:18.3.0"
   dependencies:
     loose-envify: "npm:^1.1.0"
-  checksum: 10c0/b562d9b569b0cb315e44b48099f7712283d93df36b19a39a67c254c6686479d3980b7f013dc931f4a5a3ae7645eae6386b4aa5eea933baa54ecd0f9acb0902b8
+  checksum: 10c0/ad87bbfdb0c5466148c657da18b0d5458e835389fc591d59840f0e6ec797a004073a01c8cdbff1767a8774c7219054a56f74dacd67bdbb849f1314e427999268
   languageName: node
   linkType: hard
 
