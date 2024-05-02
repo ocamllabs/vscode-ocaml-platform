@@ -24,8 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          # macos-14 is faster than latest
-          - macos-14
+          - macos-latest
           - ubuntu-latest
           # Disabled as discussed in
           # https://github.com/ocamllabs/vscode-ocaml-platform/pull/1106
