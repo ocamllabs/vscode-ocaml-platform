@@ -33,19 +33,19 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout code
+      - name: Checkout tree
         uses: actions/checkout@v4
 
-      - name: Set-up OCaml 4.14
+      - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: "4.14"
           allow-prerelease-opam: true
 
-      - name: Set-up Node.js 20.x
+      - name: Set-up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.x"
+          node-version: 22
           check-latest: true
 
       - name: Install dependencies
@@ -103,27 +103,25 @@ jobs:
       - name: Checkout tree
         uses: actions/checkout@v4
 
-      - name: Set-up OCaml 4.14
+      - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: "4.14"
           allow-prerelease-opam: true
 
-      - name: Lint opam
-        uses: ocaml/setup-ocaml/lint-opam@v2
+      - uses: ocaml/setup-ocaml/lint-opam@v2
 
   lint-fmt:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout tree
         uses: actions/checkout@v4
 
-      - name: Set-up OCaml 4.14
+      - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: "4.14"
           allow-prerelease-opam: true
 
-      - name: Lint fmt
-        uses: ocaml/setup-ocaml/lint-fmt@v2
+      - uses: ocaml/setup-ocaml/lint-fmt@v2
