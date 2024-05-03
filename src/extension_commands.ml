@@ -191,30 +191,44 @@ let _set_dune_context =
       in
       Window.showQuickPickItems ~choices ~options ()
     in
-    let select_dune_context client =
-      let* candidates =
-        Custom_requests.send_request client Custom_requests.getDuneContexts ()
-      in
-      let* context = select_context candidates in
-      match context with
-      | None (* context selection cancelled *) -> Promise.return ()
-      | Some new_context ->
-        let* () = Settings.set Settings.dune_context_setting new_context in
-        Extension_instance.start_language_server instance
+    let select_dune_context () =
+      match Workspace.rootPath () with
+      | None ->
+        (* Assumes that Dune root matches the workspace root *)
+        Promise.return
+          (show_message
+             `Warn
+             "Project root wasn't found. Can't select Dune context without \
+              project root.")
+      | Some root -> (
+        let* result =
+          let sandbox = Extension_instance.sandbox instance in
+          let cmd =
+            Sandbox.get_command sandbox "dune" [ "describe"; "contexts" ]
+          in
+          let env =
+            Interop.Dict.of_alist [ ("DUNE_CONFIG__GLOBAL_LOCK", "disabled") ]
+          in
+          Cmd.output ~env ~cwd:(Path.of_string root) cmd
+        in
+        match result with
+        | Error msg ->
+          Promise.return
+            (show_message
+               `Warn
+               "Error when calling `dune describe contexts': %s"
+               msg)
+        | Ok output -> (
+          let candidates = String.split output ~on:'\n' in
+          let* context = select_context candidates in
+          match context with
+          | None (* context selection cancelled *) -> Promise.return ()
+          | Some new_context ->
+            let* () = Settings.set Settings.dune_context_setting new_context in
+            Extension_instance.start_language_server instance))
     in
-    match Extension_instance.lsp_client instance with
-    | None -> show_message `Warn "ocamllsp is not running."
-    | Some (client, ocaml_lsp) ->
-      if Ocaml_lsp.can_handle_dune_contexts ocaml_lsp then
-        let (_ : unit Promise.t) = select_dune_context client in
-        ()
-      else
-        (* if ocamllsp doesn't have the capability, recommend updating
-           ocamllsp*)
-        show_message
-          `Warn
-          "The installed version of ocamllsp does not support setting the Dune \
-           context. Consider updating ocamllsp."
+    let (_ : unit Promise.t) = select_dune_context () in
+    ()
   in
   command Extension_consts.Commands.select_dune_context handler
 

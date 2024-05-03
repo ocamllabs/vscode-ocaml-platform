@@ -33,9 +33,3 @@ let typedHoles =
         Jsonoo.Encode.(object_ [ ("uri", string @@ Uri.toString uri ()) ]))
   ; decode_response = Jsonoo.Decode.list Range.t_of_json
   }
-
-let getDuneContexts =
-  { meth = ocamllsp_prefixed "duneContexts"
-  ; encode_params = (fun () -> Jsonoo.Encode.null)
-  ; decode_response = Jsonoo.Decode.(list string)
-  }

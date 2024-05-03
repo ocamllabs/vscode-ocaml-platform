@@ -13,8 +13,6 @@ val can_handle_infer_intf : t -> bool
 
 val can_handle_typed_holes : t -> bool
 
-val can_handle_dune_contexts : t -> bool
-
 module OcamllspSettingEnable : sig
   include Ojs.T
 

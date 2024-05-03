@@ -44,7 +44,6 @@ module Experimental_capabilities = struct
     ; handleSwitchImplIntf : bool
     ; handleInferIntf : bool
     ; handleTypedHoles : bool
-    ; handleDuneContexts : bool
     }
 
   let default =
@@ -52,7 +51,6 @@ module Experimental_capabilities = struct
     ; handleSwitchImplIntf = false
     ; handleInferIntf = false
     ; handleTypedHoles = false
-    ; handleDuneContexts = false
     }
 
   (** Creates [t] given a JSON of form [{ 'handleSwitchImplIntf' : true, .... }] *)
@@ -67,12 +65,10 @@ module Experimental_capabilities = struct
       let handleSwitchImplIntf = has_capability "handleSwitchImplIntf" in
       let handleInferIntf = has_capability "handleInferIntf" in
       let handleTypedHoles = has_capability "handleTypedHoles" in
-      let handleDuneContexts = has_capability "handleDuneContexts" in
       { interfaceSpecificLangId
       ; handleSwitchImplIntf
       ; handleInferIntf
       ; handleTypedHoles
-      ; handleDuneContexts
       }
     with Jsonoo.Decode_error err ->
       show_message
@@ -234,5 +230,3 @@ let can_handle_switch_impl_intf t =
 let can_handle_infer_intf t = t.experimental_capabilities.handleSwitchImplIntf
 
 let can_handle_typed_holes t = t.experimental_capabilities.handleTypedHoles
-
-let can_handle_dune_contexts t = t.experimental_capabilities.handleDuneContexts

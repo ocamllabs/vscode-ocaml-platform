@@ -113,10 +113,6 @@ end = struct
   let server_options sandbox =
     let args = Settings.(get server_args_setting) |> Option.value ~default:[] in
     let args =
-      (* `handleDuneContexts` capability is already checked when getting the
-         contexts for the `ocaml.select-dune-context` command, so the only way
-         to get here with a version of ocamllsp that doesn't support contexts is
-         if the user adds the `dune.context` setting manually *)
       match Settings.get Settings.dune_context_setting with
       | None -> args
       | Some context -> "--context" :: context :: args
