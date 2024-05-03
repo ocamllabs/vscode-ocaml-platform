@@ -88,10 +88,13 @@
         },
         {
           "comment": "ocamldoc heading tag",
-          "begin": "(?<!\\\\){[[:digit:]]+[[:space:]]",
+          "begin": "(?<!\\\\){[[:digit:]]+(:[^[:space:]]*)?[[:space:]]",
           "end": "(?<!\\\\)}",
           "name": "markup.heading.ocamldoc",
-          "patterns": [{ "include": "#markup" }]
+          "patterns": [{ "include": "#markup" }],
+          "beginCaptures": {
+            "1": { "name": "meta.link.label.ocamldoc" }
+          }
         },
         {
           "comment": "ocamldoc bold",
