@@ -66,7 +66,7 @@
                   "name": "keyword.language.dune"
                 }
               },
-              "contentName": "variable.declaration.other.dune",
+              "contentName": "variable.other.declaration.dune",
               "patterns": [
                 {
                   "include": "#general"
@@ -112,7 +112,7 @@
                   "name": "keyword.language.dune"
                 }
               },
-              "contentName": "variable.declaration.other.dune",
+              "contentName": "variable.other.declaration.dune",
               "patterns": [
                 {
                   "include": "#general"
@@ -363,7 +363,7 @@
                   "name": "keyword.language.dune"
                 }
               },
-              "contentName": "variable.declaration.other.dune",
+              "contentName": "variable.other.declaration.dune",
               "patterns": [
                 {
                   "include": "#general"
@@ -455,33 +455,7 @@
         },
         {
           "comment": "menhir",
-          "begin": "\\([[:space:]]*(menhir)\\b",
-          "end": "\\)",
-          "beginCaptures": {
-            "1": {
-              "name": "keyword.language.dune"
-            }
-          },
-          "patterns": [
-            {
-              "comment": "modules/merge_into/flags/infer/explain",
-              "begin": "\\([[:space:]]*(modules|merge_into|flags|infer|explain)\\b",
-              "end": "\\)",
-              "beginCaptures": {
-                "1": {
-                  "name": "keyword.language.dune"
-                }
-              },
-              "patterns": [
-                {
-                  "include": "#general"
-                }
-              ]
-            },
-            {
-              "include": "#general"
-            }
-          ]
+          "include": "#menhir"
         },
         {
           "comment": "cinaps",
@@ -532,7 +506,7 @@
                   "name": "keyword.language.dune"
                 }
               },
-              "contentName": "variable.declaration.other.dune",
+              "contentName": "variable.other.declaration.dune",
               "patterns": [
                 {
                   "include": "#general"
@@ -575,7 +549,7 @@
                   "name": "keyword.language.dune"
                 }
               },
-              "contentName": "variable.declaration.other.dune",
+              "contentName": "variable.other.declaration.dune",
               "patterns": [
                 {
                   "include": "#general"
@@ -609,7 +583,7 @@
                   "name": "keyword.language.dune"
                 }
               },
-              "contentName": "variable.declaration.other.dune",
+              "contentName": "variable.other.declaration.dune",
               "patterns": [
                 {
                   "include": "#general"
@@ -683,8 +657,8 @@
           },
           "patterns": [
             {
-              "comment": "install/lib/lib_root/libexec/libexec_root",
-              "begin": "\\([[:space:]]*(lib|lib_root|libexec|libexec_root)\\b",
+              "comment": "install/files",
+              "begin": "\\([[:space:]]*(files)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -698,8 +672,8 @@
               ]
             },
             {
-              "comment": "install/bin/sbin/toplevel/share/share_root",
-              "begin": "\\([[:space:]]*(bin|sbin|toplevel|share|share_root)\\b",
+              "comment": "install/section",
+              "begin": "\\([[:space:]]*(section)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -708,27 +682,37 @@
               },
               "patterns": [
                 {
-                  "include": "#general"
+                  "comment": "all section names",
+                  "match": "\\b(lib|lib_root|libexec|libexec_root|bin|sbin|toplevel|share|share_root|etc|stublibs|doc|man|misc)\\b",
+                  "name": "variable.other.declaration.dune"
+                },
+                {
+                  "comment": "site",
+                  "begin": "\\([[:space:]]*(site)\\b",
+                  "end": "\\)",
+                  "beginCaptures": {
+                    "1": {
+                      "name": "keyword.language.dune"
+                    }
+                  },
+                  "patterns": [
+                    {
+                      "include": "#general"
+                    }
+                  ]
                 }
               ]
             },
             {
-              "comment": "install/etc/doc/stublibs/man/misc/site/files/section/source_trees",
-              "begin": "\\([[:space:]]*(etc|doc|stublibs|man|misc|site|files|section|source_trees)\\b",
+              "comment": "install/package",
+              "begin": "\\([[:space:]]*(package)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
                   "name": "keyword.language.dune"
                 }
               },
-              "patterns": [
-                {
-                  "include": "#general"
-                }
-              ]
-            },
-            {
-              "include": "#general"
+              "contentName": "variable.other.declaration.dune"
             }
           ]
         },
@@ -775,7 +759,7 @@
               "end": "\\)",
               "beginCaptures": {
                 "1": {
-                  "name": "variable.declaration.other.dune"
+                  "name": "variable.other.declaration.dune"
                 }
               },
               "patterns": [
@@ -818,12 +802,20 @@
                       "name": "keyword.language.dune"
                     }
                   },
-                  "contentName": "variable.declaration.other.dune",
+                  "contentName": "variable.other.declaration.dune",
                   "patterns": [
                     {
                       "include": "#general"
                     }
                   ]
+                },
+                {
+                  "comment": "env/menhir",
+                  "include": "#menhir"
+                },
+                {
+                  "comment": "env/js_of_ocaml",
+                  "include": "#js_of_ocaml"
                 },
                 {
                   "comment": "env/binaries",
@@ -1010,7 +1002,7 @@
                   "name": "keyword.language.dune"
                 }
               },
-              "contentName": "variable.declaration.other.dune",
+              "contentName": "variable.other.declaration.dune",
               "patterns": [
                 {
                   "include": "#general"
@@ -1116,7 +1108,7 @@
             {
               "comment": "no/qualified/unqualified",
               "match": "\\b(no|qualified|unqualified)\\b",
-              "name": "variable.declaration.other.dune",
+              "name": "variable.other.declaration.dune",
               "patterns": [
                 {
                   "include": "#general"
@@ -1147,7 +1139,7 @@
                   "name": "keyword.language.dune"
                 }
               },
-              "contentName": "variable.declaration.other.dune",
+              "contentName": "variable.other.declaration.dune",
               "patterns": [
                 {
                   "include": "#general"
@@ -1211,6 +1203,21 @@
           ]
         },
         {
+          "comment": "dynamic_include",
+          "begin": "\\([[:space:]]*(dynamic_include)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
           "comment": "using",
           "begin": "\\([[:space:]]*(using)\\b",
           "end": "\\)",
@@ -1244,7 +1251,7 @@
                   "name": "keyword.language.dune"
                 }
               },
-              "contentName": "variable.declaration.other.dune",
+              "contentName": "variable.other.declaration.dune",
               "patterns": [
                 {
                   "include": "#general"
@@ -1350,7 +1357,7 @@
                   "name": "keyword.language.dune"
                 }
               },
-              "contentName": "variable.declaration.other.dune",
+              "contentName": "variable.other.declaration.dune",
               "patterns": [
                 {
                   "include": "#general"
@@ -1396,7 +1403,7 @@
                   "name": "keyword.language.dune"
                 }
               },
-              "contentName": "variable.declaration.other.dune",
+              "contentName": "variable.other.declaration.dune",
               "patterns": [
                 {
                   "include": "#general"
@@ -1437,7 +1444,7 @@
                       "name": "keyword.language.dune"
                     }
                   },
-                  "contentName": "variable.declaration.other.dune",
+                  "contentName": "variable.other.declaration.dune",
                   "patterns": [
                     {
                       "include": "#general"
@@ -1543,7 +1550,7 @@
                       "name": "keyword.language.dune"
                     }
                   },
-                  "contentName": "variable.declaration.other.dune",
+                  "contentName": "variable.other.declaration.dune",
                   "patterns": [
                     {
                       "include": "#general"
@@ -1666,7 +1673,7 @@
               "name": "keyword.language.dune"
             }
           },
-          "contentName": "variable.declaration.other.dune",
+          "contentName": "variable.other.declaration.dune",
           "patterns": [
             {
               "include": "#general"
@@ -2055,7 +2062,7 @@
           "comment": "foreign_archives",
           "begin": "\\([[:space:]]*(foreign_archives)\\b",
           "end": "\\)",
-          "contentName": "variable.declaration.other.dune",
+          "contentName": "variable.other.declaration.dune",
           "beginCaptures": {
             "1": {
               "name": "keyword.language.dune"
@@ -2086,7 +2093,7 @@
                   "name": "keyword.language.dune"
                 }
               },
-              "contentName": "variable.declaration.other.dune",
+              "contentName": "variable.other.declaration.dune",
               "patterns": [
                 {
                   "include": "#general"
@@ -2367,33 +2374,7 @@
         },
         {
           "comment": "js_of_ocaml",
-          "begin": "\\([[:space:]]*(js_of_ocaml)\\b",
-          "end": "\\)",
-          "beginCaptures": {
-            "1": {
-              "name": "keyword.language.dune"
-            }
-          },
-          "patterns": [
-            {
-              "comment": "javascript_files/flags/build_runtime_flags/link_flags",
-              "begin": "\\([[:space:]]*(javascript_files|flags|build_runtime_flags|link_flags)\\b",
-              "end": "\\)",
-              "beginCaptures": {
-                "1": {
-                  "name": "keyword.language.dune"
-                }
-              },
-              "patterns": [
-                {
-                  "include": "#general"
-                }
-              ]
-            },
-            {
-              "include": "#general"
-            }
-          ]
+          "include": "#js_of_ocaml"
         },
         {
           "comment": "inline_tests",
@@ -2577,7 +2558,7 @@
               "comment": "select/from",
               "match": "\\b(select|from)\\b",
               "name": "constant.language.dune",
-              "contentName": "variable.declaration.other.dune",
+              "contentName": "variable.other.declaration.dune",
               "patterns": [
                 {
                   "include": "#general"
@@ -2689,6 +2670,70 @@
               "include": "#general"
             }
           ]
+        }
+      ]
+    },
+    "menhir": {
+      "patterns": [
+        {
+          "comment": "menhir",
+          "begin": "\\([[:space:]]*(menhir)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "comment": "modules/merge_into/flags/infer/explain",
+              "begin": "\\([[:space:]]*(modules|merge_into|flags|infer|explain)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "include": "#general"
+            }
+          ]
+        }
+      ]
+    },
+    "js_of_ocaml": {
+      "comment": "js_of_ocaml",
+      "begin": "\\([[:space:]]*(js_of_ocaml)\\b",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.language.dune"
+        }
+      },
+      "patterns": [
+        {
+          "comment": "javascript_files/flags/build_runtime_flags/link_flags",
+          "begin": "\\([[:space:]]*(javascript_files|flags|build_runtime_flags|link_flags)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "include": "#general"
         }
       ]
     },

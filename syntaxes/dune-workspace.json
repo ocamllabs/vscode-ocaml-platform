@@ -184,6 +184,129 @@
             },
             { "include": "source.dune#general" }
           ]
+        },
+
+        {
+          "comment": "config:action_stderr_on_success/action_stdout_on_success",
+          "begin": "\\([[:space:]]*(action_stderr_on_success|action_stdout_on_success)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-workspace" }
+          },
+          "patterns": [
+            {
+              "comment": "print/swallow/must-be-empty",
+              "name": "variable.other.declaration.dune-project",
+              "match": "\\b(print|swallow|must-be-empty)\\b"
+            },
+            { "include": "source.dune#general" }
+          ]
+        },
+
+        {
+          "comment": "config:chache-check-probability",
+          "begin": "\\([[:space:]]*(cache-check-probability)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-workspace" }
+          },
+          "patterns": [{ "include": "source.dune#general" }]
+        },
+        {
+          "comment": "config:chache-storage-mode",
+          "begin": "\\([[:space:]]*(cache-storage-mode)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-workspace" }
+          },
+          "patterns": [
+            {
+              "comment": "auto/hardlink/copy",
+              "name": "variable.other.declaration.dune-project",
+              "match": "\\b(auto|hardlink|copy)\\b"
+            },
+            { "include": "source.dune#general" }
+          ]
+        },
+        {
+          "comment": "config:cache",
+          "begin": "\\([[:space:]]*(cache)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-workspace" }
+          },
+          "patterns": [
+            {
+              "comment": "enabled/disabled",
+              "name": "variable.other.declaration.dune-project",
+              "match": "\\b(enabled|disabled)\\b"
+            },
+            { "include": "source.dune#general" }
+          ]
+        },
+        {
+          "comment": "config:jobs",
+          "begin": "\\([[:space:]]*(jobs)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-workspace" }
+          },
+          "patterns": [
+            {
+              "comment": "auto",
+              "name": "variable.other.declaration.dune-project",
+              "match": "\\b(auto)\\b"
+            },
+            { "include": "source.dune#general" }
+          ]
+        },
+        {
+          "comment": "config:display",
+          "begin": "\\([[:space:]]*(display)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-workspace" }
+          },
+          "patterns": [
+            {
+              "comment": "progress/verbose/short/quiet",
+              "name": "variable.other.declaration.dune-project",
+              "match": "\\b(progress|verbose|short|quiet)\\b"
+            },
+            { "include": "source.dune#general" }
+          ]
+        },
+        {
+          "comment": "config:sandboxing_preference",
+          "begin": "\\([[:space:]]*(sandboxing_preference)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-workspace" }
+          },
+          "patterns": [
+            {
+              "comment": "none/hardlink/copy/simlink",
+              "name": "variable.other.declaration.dune-project",
+              "match": "\\b(none|hardlink|copy|simlink)\\b"
+            },
+            { "include": "source.dune#general" }
+          ]
+        },
+        {
+          "comment": "config:terminal-persistence",
+          "begin": "\\([[:space:]]*(terminal-persistence)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-workspace" }
+          },
+          "patterns": [
+            {
+              "comment": "preserve/clear-on-rebuild/clear-on-rebuild-and-flush-history",
+              "name": "variable.other.declaration.dune-project",
+              "match": "\\b(preserve|clear-on-rebuild-and-flush-history|clear-on-rebuild)\\b"
+            },
+            { "include": "source.dune#general" }
+          ]
         }
       ]
     }
