@@ -173,6 +173,22 @@
           "patterns": [{ "include": "#table" }]
         },
         {
+          "comment": "ocamldoc light tables",
+          "begin": "((?<!\\\\){t[[:space:]])",
+          "end": "((?<!\\\\)})",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.table.light.ocamldoc"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.table.light.ocamldoc"
+            }
+          },
+          "patterns": [{ "include": "#lighttable" }]
+        },
+        {
           "comment": "ocamldoc links",
           "begin": "(?<!\\\\){({:[[:space:]].*?})",
           "beginCaptures": {
@@ -272,6 +288,16 @@
             }
           },
           "patterns": [{ "include": "#markup" }]
+        }
+      ]
+    },
+    "lighttable": {
+      "patterns": [
+        { "include": "#markup" },
+        {
+          "comment": "table characters",
+          "match": "\\||(\\-\\-\\-+)|(:\\-\\-\\-+:)|(:\\-\\-+)|(\\-\\-+:)",
+          "name": "punctuation.definition.list.begin.markdown.tableheader.tablechars.ocamldoc"
         }
       ]
     }
