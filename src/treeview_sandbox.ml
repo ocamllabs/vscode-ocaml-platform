@@ -13,11 +13,6 @@ module Dependency = struct
 
   let tooltip t = Sandbox.Package.synopsis t
 
-  let context_value t =
-    match Sandbox.Package.documentation t with
-    | Some _ -> "package-with-doc"
-    | None -> "package"
-
   let icon _ =
     TreeItem.LightDarkIcon.
       { light = `String (Path.asset "number-light.svg" |> Path.to_string)
@@ -38,7 +33,7 @@ module Dependency = struct
     in
     let item = Vscode.TreeItem.make_label ~label ~collapsibleState () in
     Vscode.TreeItem.set_iconPath item icon;
-    TreeItem.set_contextValue item (context_value dependency);
+    TreeItem.set_contextValue item "opam-package";
     let+ _ =
       Promise.Option.iter
         (fun desc -> TreeItem.set_description item (`String desc))
@@ -64,15 +59,25 @@ module Command = struct
         let dep = Dependency.t_of_js arg in
         let open Promise.Syntax in
         let doc = Sandbox.Package.documentation dep in
-        match doc with
-        | None -> Promise.return ()
-        | Some doc ->
-          let+ _ =
-            Vscode.Commands.executeCommand
-              ~command:"vscode.open"
-              ~args:[ Vscode.Uri.parse doc () |> Vscode.Uri.t_to_js ]
-          in
-          ()
+        let uri =
+          match doc with
+          | None ->
+            let name = Sandbox.Package.name dep in
+            let version = Sandbox.Package.version dep in
+            Vscode.Uri.parse
+              (Printf.sprintf
+                 "https://ocaml.org/p/%s/%s/doc/index.html"
+                 name
+                 version)
+              ()
+          | Some doc -> Vscode.Uri.parse doc ()
+        in
+        let+ _ =
+          Vscode.Commands.executeCommand
+            ~command:"vscode.open"
+            ~args:[ Vscode.Uri.t_to_js uri ]
+        in
+        ()
       in
       ()
     in

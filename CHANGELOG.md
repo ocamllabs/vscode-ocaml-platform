@@ -2,7 +2,23 @@
 
 # Unreleased
 
-- Fix opening a new REPL terminal after first one was terminated (issue #935, #1398) 
+## 1.18.1
+
+- Fix `sideEffects` field in `astexplorer/package.json` (#1427)
+
+## 1.18.0
+
+- Fallback to `ocaml.org` package documentation page if there is no doc field in
+  the package's opam file (#1331)
+
+## 1.17.3
+
+- Republish 1.17.2 (#1405)
+
+## 1.17.2
+
+- Fix opening a new REPL terminal after first one was terminated (issue #935,
+  #1398)
 
 ## 1.17.1
 

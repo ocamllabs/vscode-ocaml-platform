@@ -33,10 +33,7 @@ module Dependency = struct
 
   let context_value = function
     | Switch _ -> "opam-switch"
-    | Package dep -> (
-      match Opam.Package.documentation dep with
-      | Some _ -> "package-with-doc"
-      | None -> "package")
+    | Package _ -> "opam-package"
 
   let icon dependency is_current_sandbox =
     match dependency with
@@ -171,18 +168,28 @@ module Command = struct
         | Switch _ ->
           Promise.return
           @@ show_message `Warn "Cannot open documentation of a switch."
-        | Package pkg -> (
+        | Package pkg ->
           let open Promise.Syntax in
           let doc = Opam.Package.documentation pkg in
-          match doc with
-          | None -> Promise.return ()
-          | Some doc ->
-            let+ (_ : Ojs.t option) =
-              Vscode.Commands.executeCommand
-                ~command:"vscode.open"
-                ~args:[ Vscode.Uri.parse doc () |> Vscode.Uri.t_to_js ]
-            in
-            ())
+          let uri =
+            match doc with
+            | None ->
+              let name = Opam.Package.name pkg in
+              let version = Opam.Package.version pkg in
+              Vscode.Uri.parse
+                (Printf.sprintf
+                   "https://ocaml.org/p/%s/%s/doc/index.html"
+                   name
+                   version)
+                ()
+            | Some doc -> Vscode.Uri.parse doc ()
+          in
+          let+ _ =
+            Vscode.Commands.executeCommand
+              ~command:"vscode.open"
+              ~args:[ Vscode.Uri.t_to_js uri ]
+          in
+          ()
       in
       ()
     in

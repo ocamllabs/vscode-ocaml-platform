@@ -10,7 +10,7 @@ async function run() {
     ui: "tdd",
     color: true,
     require: [register],
-    timeout: Infinity,
+    timeout: Number.POSITIVE_INFINITY,
   });
 
   const testsRoot = __dirname;

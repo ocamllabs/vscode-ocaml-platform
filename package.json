@@ -1,7 +1,7 @@
 {
   "name": "ocaml-platform",
   "displayName": "OCaml Platform",
-  "version": "1.17.1",
+  "version": "1.18.1",
   "private": true,
   "description": "Official OCaml language extension for VSCode",
   "categories": [
@@ -18,6 +18,8 @@
   },
   "license": "MIT",
   "publisher": "ocamllabs",
+  "sideEffects": false,
+  "type": "commonjs",
   "main": "./dist/vscode_ocaml_platform.bc.js",
   "workspaces": [
     "astexplorer"
@@ -1063,12 +1065,12 @@
         },
         {
           "command": "ocaml.open-switches-documentation",
-          "when": "view == ocaml-switches && viewItem == package-with-doc",
+          "when": "view == ocaml-switches && viewItem == opam-package",
           "group": "inline"
         },
         {
           "command": "ocaml.open-sandbox-documentation",
-          "when": "view == ocaml-sandbox && viewItem == package-with-doc",
+          "when": "view == ocaml-sandbox && viewItem == opam-package",
           "group": "inline@1"
         },
         {
@@ -1196,30 +1198,30 @@
     "onDebugResolve:ocaml.earlybird"
   ],
   "dependencies": {
-    "polka": "1.0.0-next.24",
+    "polka": "1.0.0-next.25",
     "sirv": "2.0.4",
     "vscode-languageclient": "9.0.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.5.3",
-    "@swc-node/register": "1.8.0",
-    "@swc/core": "1.4.2",
-    "@tsconfig/node20": "20.1.2",
-    "@tsconfig/strictest": "2.0.3",
+    "@biomejs/biome": "1.7.2",
+    "@swc-node/register": "1.9.1",
+    "@swc/core": "1.5.0",
+    "@tsconfig/node20": "20.1.4",
+    "@tsconfig/strictest": "2.0.5",
     "@types/fs-extra": "11.0.4",
     "@types/mocha": "10.0.6",
     "@types/vscode": "1.86.0",
     "@vscode/test-electron": "2.3.9",
-    "@vscode/vsce": "2.24.0",
-    "esbuild": "0.20.1",
+    "@vscode/vsce": "2.26.1",
+    "esbuild": "0.20.2",
     "fs-extra": "11.2.0",
-    "glob": "10.3.10",
-    "mocha": "10.3.0",
+    "glob": "10.3.12",
+    "mocha": "10.4.0",
     "npm-run-all": "4.1.5",
-    "ovsx": "0.8.3",
-    "typescript": "5.3.3"
+    "ovsx": "0.9.1",
+    "typescript": "5.4.5"
   },
-  "packageManager": "yarn@4.1.0",
+  "packageManager": "yarn@4.1.1",
   "engines": {
     "vscode": "^1.86.0"
   },
