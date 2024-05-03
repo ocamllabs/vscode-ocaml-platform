@@ -157,6 +157,22 @@
           "patterns": [{ "include": "#lists" }]
         },
         {
+          "comment": "ocamldoc tables",
+          "begin": "((?<!\\\\){table[[:space:]])",
+          "end": "((?<!\\\\)})",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.table.ocamldoc"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.table.ocamldoc"
+            }
+          },
+          "patterns": [{ "include": "#table" }]
+        },
+        {
           "comment": "ocamldoc links",
           "begin": "(?<!\\\\){({:[[:space:]].*?})",
           "beginCaptures": {
@@ -196,6 +212,63 @@
           "endCaptures": {
             "1": {
               "name": "punctuation.definition.list.begin.markdown.ocamldoc"
+            }
+          },
+          "patterns": [{ "include": "#markup" }]
+        }
+      ]
+    },
+    "table": {
+      "patterns": [
+        {
+          "comment": "ocamldoc table row",
+          "begin": "((?<!\\\\){tr[[:space:]])",
+          "end": "((?<!\\\\)})",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.table.row.ocamldoc"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.table.row.ocamldoc"
+            }
+          },
+          "patterns": [{ "include": "#tablerow" }]
+        }
+      ]
+    },
+    "tablerow": {
+      "patterns": [
+        {
+          "comment": "ocamldoc table cell",
+          "begin": "((?<!\\\\){td[[:space:]])",
+          "end": "((?<!\\\\)})",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.table.cell.ocamldoc"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.table.cell.ocamldoc"
+            }
+          },
+          "patterns": [{ "include": "#markup" }]
+        },
+        {
+          "comment": "ocamldoc table header cell",
+          "begin": "((?<!\\\\){th[[:space:]])",
+          "end": "((?<!\\\\)})",
+          "contentName": "markup.bold.tableheader.ocamldoc",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.tableheader.ocamldoc"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.list.begin.markdown.tableheader.ocamldoc"
             }
           },
           "patterns": [{ "include": "#markup" }]
