@@ -51,7 +51,7 @@
         },
         {
           "comment": "embedded preformatted ocaml source",
-          "begin": "(?<!\\\\)\\{\\[",
+          "begin": "(?<!\\\\)\\{(@ocaml([[:space:]].*?)?)?\\[",
           "end": "(?<!\\\\)\\]\\}",
           "name": "markup.inline.raw.ocamldoc",
           "contentName": "source.embedded.ocamldoc",
