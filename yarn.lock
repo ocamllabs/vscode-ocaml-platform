@@ -3264,9 +3264,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:10.4.0":
-  version: 10.4.0
-  resolution: "glob@npm:10.4.0"
+"glob@npm:10.4.1":
+  version: 10.4.1
+  resolution: "glob@npm:10.4.1"
   dependencies:
     foreground-child: "npm:^3.1.0"
     jackspeak: "npm:^3.1.2"
@@ -3275,7 +3275,7 @@ __metadata:
     path-scurry: "npm:^1.11.1"
   bin:
     glob: dist/esm/bin.mjs
-  checksum: 10c0/180d218de9539371664dd89cf4b26654b900b6cee689f0c5e281aab6cc655ccff11dba983906db9a75b2fcee9d6cea3e8d4db4d3cc66c2c6162b00b8cd6613cc
+  checksum: 10c0/77f2900ed98b9cc2a0e1901ee5e476d664dae3cd0f1b662b8bfd4ccf00d0edc31a11595807706a274ca10e1e251411bbf2e8e976c82bed0d879a9b89343ed379
   languageName: node
   linkType: hard
 
@@ -4941,7 +4941,7 @@ __metadata:
     "@vscode/vsce": "npm:2.26.1"
     esbuild: "npm:0.21.3"
     fs-extra: "npm:11.2.0"
-    glob: "npm:10.4.0"
+    glob: "npm:10.4.1"
     mocha: "npm:10.4.0"
     npm-run-all: "npm:4.1.5"
     ovsx: "npm:0.9.1"
