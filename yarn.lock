@@ -3264,18 +3264,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:10.3.16":
-  version: 10.3.16
-  resolution: "glob@npm:10.3.16"
+"glob@npm:10.4.0":
+  version: 10.4.0
+  resolution: "glob@npm:10.4.0"
   dependencies:
     foreground-child: "npm:^3.1.0"
     jackspeak: "npm:^3.1.2"
-    minimatch: "npm:^9.0.1"
-    minipass: "npm:^7.0.4"
-    path-scurry: "npm:^1.11.0"
+    minimatch: "npm:^9.0.4"
+    minipass: "npm:^7.1.2"
+    path-scurry: "npm:^1.11.1"
   bin:
     glob: dist/esm/bin.mjs
-  checksum: 10c0/f7eb4c3e66f221f0be3967c02527047167967549bdf8ed1bd5f6277d43a35191af4e2bb8c89f07a79664958bae088fd06659e69a0f1de462972f1eab52a715e8
+  checksum: 10c0/180d218de9539371664dd89cf4b26654b900b6cee689f0c5e281aab6cc655ccff11dba983906db9a75b2fcee9d6cea3e8d4db4d3cc66c2c6162b00b8cd6613cc
   languageName: node
   linkType: hard
 
@@ -4492,7 +4492,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^9.0.1":
+"minimatch@npm:^9.0.1, minimatch@npm:^9.0.4":
   version: 9.0.4
   resolution: "minimatch@npm:9.0.4"
   dependencies:
@@ -4579,6 +4579,13 @@ __metadata:
   version: 7.1.0
   resolution: "minipass@npm:7.1.0"
   checksum: 10c0/6861c6ec9dc3cb99c745b287d92b2a8f409951852940205b4bb106faceb790544288622a0db7aa152f37793e2fc8f303628787883d9a679f2126605204feb97f
+  languageName: node
+  linkType: hard
+
+"minipass@npm:^7.1.2":
+  version: 7.1.2
+  resolution: "minipass@npm:7.1.2"
+  checksum: 10c0/b0fd20bb9fb56e5fa9a8bfac539e8915ae07430a619e4b86ff71f5fc757ef3924b23b2c4230393af1eda647ed3d75739e4e0acb250a6b1eb277cf7f8fe449557
   languageName: node
   linkType: hard
 
@@ -4934,7 +4941,7 @@ __metadata:
     "@vscode/vsce": "npm:2.26.1"
     esbuild: "npm:0.21.3"
     fs-extra: "npm:11.2.0"
-    glob: "npm:10.3.16"
+    glob: "npm:10.4.0"
     mocha: "npm:10.4.0"
     npm-run-all: "npm:4.1.5"
     ovsx: "npm:0.9.1"
@@ -5151,13 +5158,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-scurry@npm:^1.11.0":
-  version: 1.11.0
-  resolution: "path-scurry@npm:1.11.0"
+"path-scurry@npm:^1.11.1":
+  version: 1.11.1
+  resolution: "path-scurry@npm:1.11.1"
   dependencies:
     lru-cache: "npm:^10.2.0"
     minipass: "npm:^5.0.0 || ^6.0.2 || ^7.0.0"
-  checksum: 10c0/a5cd5dfbc6d5bb01d06bc2eb16ccdf303d617865438a21fe15431b8ad334f23351f73259abeb7e4be56f9c68d237b26b4dba51c78b508586035dfc2b55085493
+  checksum: 10c0/32a13711a2a505616ae1cc1b5076801e453e7aae6ac40ab55b388bb91b9d0547a52f5aaceff710ea400205f18691120d4431e520afbe4266b836fadede15872d
   languageName: node
   linkType: hard
 
