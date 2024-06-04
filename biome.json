@@ -5,6 +5,7 @@
   },
   "formatter": {
     "enabled": true,
+    "formatWithErrors": true,
     "indentStyle": "space"
   },
   "linter": {
