@@ -51,11 +51,8 @@ jobs:
       - name: Install dependencies
         run: make deps
 
-      - name: Check linting with Biome
-        run: yarn lint
-
-      - name: Check formatting
-        run: yarn fmt:check
+      - name: Run CI checks with Biome
+        run: yarn ci
 
       - name: Build extension
         run: opam exec -- make build-release

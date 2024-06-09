@@ -32,9 +32,9 @@
     "package": "vsce package --out ocaml-platform.vsix --yarn --no-dependencies",
     "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --yarn --no-dependencies",
     "deploy:ovsx": "ovsx publish --yarn --no-dependencies",
-    "fmt:check": "biome format .",
-    "fmt": "biome format . --write",
-    "lint": "biome lint ."
+    "check": "biome check",
+    "ci": "biome ci",
+    "fix": "biome check --fix"
   },
   "contributes": {
     "breakpoints": [
