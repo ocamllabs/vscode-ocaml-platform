@@ -1203,7 +1203,7 @@
     "vscode-languageclient": "9.0.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.8.0",
+    "@biomejs/biome": "1.8.1",
     "@swc-node/register": "1.9.2",
     "@swc/core": "1.5.27",
     "@tsconfig/node22": "22.0.0",
