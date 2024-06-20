@@ -1894,9 +1894,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode/vsce@npm:2.28.0":
-  version: 2.28.0
-  resolution: "@vscode/vsce@npm:2.28.0"
+"@vscode/vsce@npm:2.29.0":
+  version: 2.29.0
+  resolution: "@vscode/vsce@npm:2.29.0"
   dependencies:
     "@azure/identity": "npm:^4.1.0"
     "@vscode/vsce-sign": "npm:^2.0.0"
@@ -1928,7 +1928,7 @@ __metadata:
       optional: true
   bin:
     vsce: vsce
-  checksum: 10c0/e56db471529c769226c9b49bd25c53038352eee0c8a6eb8540ad0e6e85223568eb6db7b7a6f5565148a226c15b0f8cf37666d99dd7fae673146a7d386e6c49e8
+  checksum: 10c0/1719e3c9e85efd395d2755a15474c85c7fb4cade80fa48f6ca064282fb7caabc0ec51ecf452a9d26064a1c8d60cf10a43af3bd180e627b4ae505f7db31a7e62f
   languageName: node
   linkType: hard
 
@@ -5108,7 +5108,7 @@ __metadata:
     "@types/mocha": "npm:10.0.6"
     "@types/vscode": "npm:1.86.0"
     "@vscode/test-electron": "npm:2.4.0"
-    "@vscode/vsce": "npm:2.28.0"
+    "@vscode/vsce": "npm:2.29.0"
     esbuild: "npm:0.21.5"
     fs-extra: "npm:11.2.0"
     glob: "npm:10.4.2"
