@@ -241,6 +241,11 @@
         "command": "ocaml.goto-closure-code-location",
         "category": "OCaml",
         "title": "Goto Closure Code Location"
+      },
+      {
+        "command": "ocaml.select-dune-context",
+        "category": "OCaml",
+        "title": "Select a Dune context for this Workspace"
       }
     ],
     "configuration": {
@@ -289,6 +294,11 @@
           "type": "boolean",
           "default": true,
           "description": "Controls whether dune tasks should be automatically detected."
+        },
+        "ocaml.dune.context": {
+          "type": "string",
+          "default": "default",
+          "markdownDescription": "Set the current Dune context for Merlin"
         },
         "ocaml.trace.server": {
           "description": "Controls the logging output of the language server. Valid settings are `off`, `messages`, or `verbose`.",

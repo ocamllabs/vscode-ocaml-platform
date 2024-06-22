@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Allow selection of Dune context (#1449)
+
 ## 1.18.1
 
 - Fix `sideEffects` field in `astexplorer/package.json` (#1427)

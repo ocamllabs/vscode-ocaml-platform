@@ -158,6 +158,80 @@ let ( _open_ocamllsp_output_pane
       Extension_consts.Commands.open_ocaml_commands_output
       (handler Output.command_output_channel) )
 
+let _set_dune_context =
+  let handler (instance : Extension_instance.t) ~args:_ =
+    let open Promise.Syntax in
+    let select_context (choices : string list) =
+      let current_context =
+        Option.value
+          ~default:"default"
+          (Settings.get Settings.dune_context_setting)
+      in
+      let choices =
+        let to_quick_pick current_context context =
+          let create = QuickPickItem.create in
+          let description =
+            if String.equal current_context context then
+              Some "Currently selected Dune context"
+            else None
+          in
+          create ~label:context ?description ()
+        in
+        List.map
+          ~f:(fun (context : string) ->
+            let quick_pick = to_quick_pick current_context context in
+            (quick_pick, context))
+          choices
+      in
+      let options =
+        let placeHolder =
+          "Which Dune context would you like to use in the editor?"
+        in
+        QuickPickOptions.create ~canPickMany:false ~placeHolder ()
+      in
+      Window.showQuickPickItems ~choices ~options ()
+    in
+    let select_dune_context () =
+      match Workspace.rootPath () with
+      | None ->
+        (* Assumes that Dune root matches the workspace root *)
+        Promise.return
+          (show_message
+             `Warn
+             "Project root wasn't found. Can't select Dune context without \
+              project root.")
+      | Some root -> (
+        let* result =
+          let sandbox = Extension_instance.sandbox instance in
+          let cmd =
+            Sandbox.get_command sandbox "dune" [ "describe"; "contexts" ]
+          in
+          let env =
+            Interop.Dict.of_alist [ ("DUNE_CONFIG__GLOBAL_LOCK", "disabled") ]
+          in
+          Cmd.output ~env ~cwd:(Path.of_string root) cmd
+        in
+        match result with
+        | Error msg ->
+          Promise.return
+            (show_message
+               `Warn
+               "Error when calling `dune describe contexts': %s"
+               msg)
+        | Ok output -> (
+          let candidates = String.split output ~on:'\n' in
+          let* context = select_context candidates in
+          match context with
+          | None (* context selection cancelled *) -> Promise.return ()
+          | Some new_context ->
+            let* () = Settings.set Settings.dune_context_setting new_context in
+            Extension_instance.start_language_server instance))
+    in
+    let (_ : unit Promise.t) = select_dune_context () in
+    ()
+  in
+  command Extension_consts.Commands.select_dune_context handler
+
 module Holes_commands : sig
   val _jump_to_prev_hole : t
 
