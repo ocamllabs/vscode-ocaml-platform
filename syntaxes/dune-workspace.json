@@ -285,9 +285,9 @@
           },
           "patterns": [
             {
-              "comment": "none/hardlink/copy/simlink",
+              "comment": "none/hardlink/copy/symlink",
               "name": "variable.other.declaration.dune-project",
-              "match": "\\b(none|hardlink|copy|simlink)\\b"
+              "match": "\\b(none|hardlink|copy|symlink)\\b"
             },
             { "include": "source.dune#general" }
           ]
