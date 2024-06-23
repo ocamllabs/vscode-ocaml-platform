@@ -64,7 +64,7 @@ doc: ## Generate odoc documentation
 .PHONY: fmt
 fmt: ## Format the codebase with ocamlformat
 	dune build --auto-promote @fmt
-	yarn fmt
+	yarn biome format --write
 
 .PHONY: watch
 watch: ## Watch for the filesystem and rebuild on every change
