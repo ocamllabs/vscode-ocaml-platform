@@ -2,6 +2,9 @@
 
 # Unreleased
 
+- Fix variable.other.declaration.dune-project to allow wider range of characters
+  (#1517)
+
 ## 1.19.1
 
 - This was a version bump only, there were no changes
