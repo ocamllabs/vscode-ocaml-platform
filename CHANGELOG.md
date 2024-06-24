@@ -3,6 +3,8 @@
 # Unreleased
 
 - Add new syntax patterns for dune(-project) files (#1391)
+- Add syntax color to odoc tables, odoc headings with labels, and odoc code
+  blocks with attributes (#1465)
 
 ## 1.18.1
 
