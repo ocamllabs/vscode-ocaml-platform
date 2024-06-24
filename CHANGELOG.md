@@ -2,6 +2,10 @@
 
 # Unreleased
 
+## 1.19.1
+
+- This was a version bump only, there were no changes
+
 ## 1.19.0
 
 - Add new syntax patterns for dune(-project) files (#1391)
