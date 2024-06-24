@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Add new syntax patterns for dune(-project) files (#1391)
+
 ## 1.18.1
 
 - Fix `sideEffects` field in `astexplorer/package.json` (#1427)

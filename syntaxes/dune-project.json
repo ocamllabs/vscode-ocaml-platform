@@ -246,6 +246,92 @@
           "contentName": "variable.other.declaration.dune-project",
           "patterns": [{ "include": "source.dune#general" }]
         },
+        {
+          "comment": "accept_alternative_dune_file_name",
+          "begin": "\\([[:space:]]*(accept_alternative_dune_file_name)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-project" }
+          },
+          "patterns": [{ "include": "source.dune#general" }]
+        },
+        {
+          "comment": "executables_implicit_empty_intf",
+          "begin": "\\([[:space:]]*(executables_implicit_empty_intf)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-project" }
+          },
+          "patterns": [{ "include": "source.dune#general" }]
+        },
+        {
+          "comment": "expand_aliases_in_sandbox",
+          "begin": "\\([[:space:]]*(expand_aliases_in_sandbox)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-project" }
+          },
+          "patterns": [{ "include": "source.dune#general" }]
+        },
+        {
+          "comment": "opam_file_location",
+          "begin": "\\([[:space:]]*(opam_file_location)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-project" }
+          },
+          "patterns": [
+            {
+              "comment": "relative_to_project/inside_opam_directory",
+              "name": "variable.other.declaration.dune-project",
+              "match": "\\b(relative_to_project|inside_opam_directory)\\b"
+            },
+            { "include": "source.dune#general" }
+          ]
+        },
+        {
+          "comment": "subst",
+          "begin": "\\([[:space:]]*(subst)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-project" }
+          },
+          "patterns": [
+            {
+              "comment": "enabled/disabled",
+              "name": "variable.other.declaration.dune-project",
+              "match": "\\b(enabled|disabled)\\b"
+            },
+            { "include": "source.dune#general" }
+          ]
+        },
+        {
+          "comment": "use_standard_c_and_cxx_flags",
+          "begin": "\\([[:space:]]*(use_standard_c_and_cxx_flags)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-project" }
+          },
+          "patterns": [{ "include": "source.dune#general" }]
+        },
+        {
+          "comment": "map_workspace_root",
+          "begin": "\\([[:space:]]*(map_workspace_root)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-project" }
+          },
+          "patterns": [{ "include": "source.dune#general" }]
+        },
+        {
+          "comment": "warnings",
+          "begin": "\\([[:space:]]*(warnings)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-project" }
+          },
+          "patterns": [{ "include": "source.dune#general" }]
+        },
 
         { "include": "#opam-metadata" }
       ]
