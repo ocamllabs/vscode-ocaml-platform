@@ -1,7 +1,7 @@
 # upgrading the version, don't forget to update ocamlformat version in `dune-project`
-version=0.26.1
+version=0.26.2
 profile=conventional
-ocaml-version=4.14.0
+ocaml-version=4.14.2
 break-separators=before
 dock-collection-brackets=false
 break-sequences=true
