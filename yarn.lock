@@ -4614,9 +4614,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mocha@npm:10.5.1":
-  version: 10.5.1
-  resolution: "mocha@npm:10.5.1"
+"mocha@npm:10.5.2":
+  version: 10.5.2
+  resolution: "mocha@npm:10.5.2"
   dependencies:
     ansi-colors: "npm:4.1.1"
     browser-stdout: "npm:1.3.1"
@@ -4641,7 +4641,7 @@ __metadata:
   bin:
     _mocha: bin/_mocha
     mocha: bin/mocha.js
-  checksum: 10c0/0e5a4c9012b8942d42e4c2e9579a50a30458d00b286a88b11a10fef37930d3c38f3c9a01d32ca83c9bc32971583c36a91526fd90f70c2568fe42a1bb71ac1f36
+  checksum: 10c0/ccafc4d6b166a897cc20c6e8bf912c08ef1ac6d3e903812a501a6c0717c8df48490f11752446db8664b0b46ca76d9949d9b18ddf0a5fefb132a8343d631c4000
   languageName: node
   linkType: hard
 
@@ -4943,7 +4943,7 @@ __metadata:
     esbuild: "npm:0.21.5"
     fs-extra: "npm:11.2.0"
     glob: "npm:10.4.2"
-    mocha: "npm:10.5.1"
+    mocha: "npm:10.5.2"
     npm-run-all: "npm:4.1.5"
     ovsx: "npm:0.9.1"
     polka: "npm:1.0.0-next.25"
