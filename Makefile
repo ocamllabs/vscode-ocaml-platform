@@ -26,6 +26,7 @@ build: ## Build the project
 	yarn workspace astexplorer build
 	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
+		--packages=bundle \
 		--external:vscode \
 		--outdir=dist \
 		--platform=node \
@@ -38,6 +39,7 @@ build-release:
 	yarn workspace astexplorer build
 	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
+		--packages=bundle \
 		--external:vscode \
 		--outdir=dist \
 		--platform=node \
