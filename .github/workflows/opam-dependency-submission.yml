@@ -25,10 +25,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set-up OCaml 4.14
-        uses: ocaml/setup-ocaml@v2
+        uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: "4.14"
-          allow-prerelease-opam: true
 
       - name: Opam Dependency Submission
-        uses: ocaml/setup-ocaml/analysis@v2
+        uses: ocaml/setup-ocaml/analysis@v3
