@@ -70,8 +70,8 @@ jobs:
         if: runner.os == 'Linux'
         run: xvfb-run -a yarn test
 
-      - name: Test extension on macOS
-        if: runner.os == 'macOS'
+      - name: Test extension on macOS/Windows
+        if: runner.os != 'Linux'
         run: yarn test
 
       - name: Publish extension to VSCode Marketplace
