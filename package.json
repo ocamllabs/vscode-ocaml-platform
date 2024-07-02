@@ -1213,7 +1213,7 @@
     "@types/vscode": "1.86.0",
     "@vscode/test-electron": "2.4.0",
     "@vscode/vsce": "2.29.0",
-    "esbuild": "0.22.0",
+    "esbuild": "0.23.0",
     "fs-extra": "11.2.0",
     "glob": "10.4.2",
     "mocha": "10.5.2",
