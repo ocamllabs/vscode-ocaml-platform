@@ -221,13 +221,17 @@ let log_chan ~section kind fmt =
       OutputChannel.appendLine output ~value)
     fmt
 
-let console_log fmt : unit =
+let console_log fmt =
   Printf.ksprintf
     (fun a ->
-      Js_of_ocaml.Js.Unsafe.meth_call
+      (Js_of_ocaml.Js.Unsafe.meth_call
+        :    Js_of_ocaml.Firebug.console Js_of_ocaml.Js.t
+          -> string
+          -> Js_of_ocaml.Js.Unsafe.any array
+          -> unit)
         Js_of_ocaml.Firebug.console
         "log"
-        [| Js_of_ocaml.Js.Unsafe.inject a |])
+        [| Js_of_ocaml.Js.Unsafe.inject (Js_of_ocaml.Js.string a) |])
     fmt
 
 (** @ulugbekna: unsafe because what it prints may not make much sense when printed in dev console *)
