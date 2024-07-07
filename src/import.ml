@@ -198,6 +198,22 @@ let log_chan ~section kind fmt =
       OutputChannel.appendLine output ~value)
     fmt
 
+let console_log fmt : unit =
+  Printf.ksprintf
+    (fun a ->
+      Js_of_ocaml.Js.Unsafe.meth_call
+        Js_of_ocaml.Firebug.console
+        "log"
+        [| Js_of_ocaml.Js.Unsafe.inject a |])
+    fmt
+
+(** @ulugbekna: unsafe because what it prints may not make much sense when printed in dev console *)
+let console_log_unsafe (a : 'a) : unit =
+  Js_of_ocaml.Js.Unsafe.meth_call
+    Js_of_ocaml.Firebug.console
+    "log"
+    [| Js_of_ocaml.Js.Unsafe.inject a |]
+
 module Ocaml_version = struct
   let ( > ) v1 v2 = Ocaml_version.compare v1 v2 = 1
 
