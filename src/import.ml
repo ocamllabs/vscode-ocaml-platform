@@ -176,6 +176,18 @@ module Range = struct
   include Vscode.Range
 end
 
+module TextDocumentIdentifier = struct
+  type t = { uri : Uri.t }
+
+  let t_of_json json =
+    let uri = Jsonoo.Decode.(field "uri" string) json in
+    { uri = Uri.parse uri () }
+
+  let json_of_t t =
+    let uri_s = Uri.toString t.uri () in
+    Jsonoo.Encode.(object_ [ ("uri", string uri_s) ])
+end
+
 module Promise = struct
   include Promise
 
