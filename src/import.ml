@@ -1,4 +1,5 @@
 include Vscode
+module Olsp_verbose_hover = Verbose_hover.Olsp_verbose_hover
 
 module LanguageClient = struct
   include Vscode_languageclient

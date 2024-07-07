@@ -57,6 +57,81 @@ let activate (extension : ExtensionContext.t) =
   Cm_editor.register extension instance;
   Repl.register extension instance;
   Earlybird.register extension instance;
+
+  let _hoverProviderDisposable =
+    let selector = `List [ `String "ocaml"; `String "ocaml.interface" ] in
+    let provider =
+      HoverProvider.create
+        ~provideHover:(fun ~document ~position ~token:_ ~context ->
+          match Extension_instance.language_client instance with
+          | None -> failwith "ocaml-lsp is missing"
+          | Some olsp ->
+            let uri = TextDocument.uri document in
+            let previous_verbosity =
+              match
+                context
+                |> Option.bind ~f:HoverContext.previousHover
+                |> Option.bind ~f:Olsp_verbose_hover.from_hover
+              with
+              | Some hover ->
+                let verbosity = Olsp_verbose_hover.verbosity hover in
+                let () =
+                  show_message
+                    `Info
+                    "previous hover had verbosity = %d"
+                    verbosity
+                in
+                verbosity
+              | None -> 0
+            in
+            let verbosity_delta =
+              let verbosity_delta =
+                Option.bind ~f:HoverContext.verbosityDelta context
+              in
+              let () =
+                show_message
+                  `Info
+                  "verbosity delta = %d"
+                  (Option.value verbosity_delta ~default:(-1))
+              in
+              let verbosity_delta = Option.value ~default:0 verbosity_delta in
+              verbosity_delta
+            in
+            let verbosity = previous_verbosity + verbosity_delta in
+            let open Promise.Syntax in
+            let r =
+              let+ hover =
+                Custom_requests.(
+                  send_request
+                    olsp
+                    ExtendedHover.hoverExtended
+                    { textDocument = { uri }
+                    ; position
+                    ; verbosity = Some verbosity
+                    })
+              in
+              match hover with
+              | None -> None
+              | Some hover ->
+                Some
+                  (Olsp_verbose_hover.to_verboseHover
+                     (Olsp_verbose_hover.make
+                        ~contents:hover.contents
+                          (* ~contents: (`MarkdownString (MarkdownString.make
+                             ~value:"hello" ())) *)
+                        ~verbosity
+                        ~range:None
+                        ~canIncreaseVerbosity:(Some true)
+                        ~canDecreaseVerbosity:(Some (verbosity > 0))
+                        ()))
+            in
+            `Promise r)
+    in
+    Languages.registerHoverProvider ~selector ~provider
+  in
+
+  ExtensionContext.subscribe extension ~disposable:_hoverProviderDisposable;
+
   let sandbox_opt = Sandbox.of_settings_or_detect () in
   let (_ : unit Promise.t) =
     let* sandbox_opt in

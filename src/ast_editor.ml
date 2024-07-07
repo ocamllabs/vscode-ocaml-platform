@@ -211,13 +211,14 @@ let onDidReceiveMessage_listener instance webview document msg =
 let on_hover custom_doc webview =
   let provider =
     let provideHover ~(document : TextDocument.t) ~(position : Position.t)
-        ~token:_ =
+        ~token:_ ~context:_ =
       let offset = TextDocument.offsetAt document ~position in
       if document_eq custom_doc document then
         send_msg "focus" (Ojs.int_to_js offset) ~webview;
       let hover =
-        Hover.make
+        VerboseHover.make
           ~contents:(`MarkdownString (MarkdownString.make ~value:"" ()))
+          ()
       in
       `Value (Some hover)
     in

@@ -20,3 +20,21 @@ val switchImplIntf : (string, string array) custom_request
 val inferIntf : (string, string) custom_request
 
 val typedHoles : (Uri.t, Range.t list) custom_request
+
+module ExtendedHover : sig
+  type request =
+    { textDocument : TextDocumentIdentifier.t
+    ; position : Position.t
+    ; verbosity : int option
+    }
+
+  type response =
+    { contents :
+        [ `MarkdownString of MarkdownString.t
+        | `MarkdownStringArray of MarkdownString.t list
+        ]
+    ; range : Range.t option
+    }
+
+  val hoverExtended : (request, response option) custom_request
+end

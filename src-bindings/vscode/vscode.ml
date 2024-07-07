@@ -1935,7 +1935,7 @@ module DocumentFormattingEditProvider = struct
 end
 
 module Hover = struct
-  include Interface.Make ()
+  include Class.Make ()
 
   include
     [%js:
@@ -1949,8 +1949,47 @@ module Hover = struct
             | `MarkdownStringArray of MarkdownString.t list
             ]
            [@js.union])
+      -> ?range:Range.t
+      -> unit
       -> t
     [@@js.new "vscode.Hover"]]
+end
+
+module VerboseHover = struct
+  include Class.Extend (Hover) ()
+
+  include
+    [%js:
+    val canIncreaseVerbosity : t -> bool or_undefined [@@js.get]
+
+    val canDecreaseVerbosity : t -> bool or_undefined [@@js.get]
+
+    val contents : t -> MarkdownString.t [@@js.get]
+
+    val range : t -> Range.t or_undefined [@@js.get]
+
+    val make :
+         contents:
+           ([ `MarkdownString of MarkdownString.t
+            | `MarkdownStringArray of MarkdownString.t list
+            ]
+           [@js.union])
+      -> ?range:Range.t
+      -> ?canIncreaseVerbosity:bool
+      -> ?canIncreaseVerbosity:bool
+      -> unit
+      -> t
+    [@@js.new "vscode.VerboseHover"]]
+end
+
+module HoverContext = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val verbosityDelta : t -> int or_undefined [@@js.get]
+
+    val previousHover : t -> Hover.t or_undefined [@@js.get]]
 end
 
 module HoverProvider = struct
@@ -1958,20 +1997,13 @@ module HoverProvider = struct
 
   include
     [%js:
-    val provideHover :
-         t
-      -> document:TextDocument.t
-      -> position:Position.t
-      -> token:CancellationToken.t
-      -> Hover.t ProviderResult.t
-    [@@js.call]
-
     val create :
          provideHover:
            (   document:TextDocument.t
             -> position:Position.t
             -> token:CancellationToken.t
-            -> Hover.t ProviderResult.t)
+            -> context:HoverContext.t option
+            -> VerboseHover.t ProviderResult.t)
       -> t
     [@@js.builder]]
 end

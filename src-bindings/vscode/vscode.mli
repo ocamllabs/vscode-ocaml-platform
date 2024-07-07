@@ -1513,25 +1513,53 @@ module Hover : sig
          [ `MarkdownString of MarkdownString.t
          | `MarkdownStringArray of MarkdownString.t list
          ]
+    -> ?range:Range.t
+    -> unit
     -> t
+end
+
+module VerboseHover : sig
+  include module type of Hover with type t = private Hover.t
+
+  val contents : t -> MarkdownString.t
+
+  val range : t -> Range.t option
+
+  val canIncreaseVerbosity : t -> bool or_undefined
+
+  val canDecreaseVerbosity : t -> bool or_undefined
+
+  val make :
+       contents:
+         ([ `MarkdownString of MarkdownString.t
+          | `MarkdownStringArray of MarkdownString.t list
+          ]
+         [@js.union])
+    -> ?range:Range.t
+    -> ?canIncreaseVerbosity:bool
+    -> ?canIncreaseVerbosity:bool
+    -> unit
+    -> t
+end
+
+module HoverContext : sig
+  include Ojs.T
+
+  val verbosityDelta : t -> int option
+
+  val previousHover : t -> Hover.t option
 end
 
 module HoverProvider : sig
   include Ojs.T
-
-  val provideHover :
-       t
-    -> document:TextDocument.t
-    -> position:Position.t
-    -> token:CancellationToken.t
-    -> Hover.t ProviderResult.t
 
   val create :
        provideHover:
          (   document:TextDocument.t
           -> position:Position.t
           -> token:CancellationToken.t
-          -> Hover.t ProviderResult.t)
+          -> context:HoverContext.t option
+          -> VerboseHover.t ProviderResult.t)
     -> t
 end
 

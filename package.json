@@ -1229,5 +1229,8 @@
   "galleryBanner": {
     "color": "#f29100",
     "theme": "light"
-  }
+  },
+  "enabledApiProposals": [
+    "editorHoverVerbosityLevel"
+  ]
 }

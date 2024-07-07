@@ -15,7 +15,9 @@
   vscode
   vscode_languageclient
   ppxlib
-  ppx_tools)
+  ppx_tools
+  interop)
  (modes js)
  (js_of_ocaml
+  (javascript_files stub.js)
   (flags --source-map --pretty)))
