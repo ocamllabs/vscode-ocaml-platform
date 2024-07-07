@@ -1504,7 +1504,7 @@ end
 module Hover : sig
   include Ojs.T
 
-  val contents : t -> MarkdownString.t
+  val contents : t -> MarkdownString.t list
 
   val range : t -> Range.t option
 
