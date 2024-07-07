@@ -16,7 +16,7 @@ module Olsp_verbose_hover = struct
 
     val canDecreaseVerbosity : t -> bool option [@@js.get]
 
-    val contents : t -> Vscode.MarkdownString.t [@@js.get]
+    val contents : t -> Vscode.MarkdownString.t list [@@js.get]
 
     val range : t -> Vscode.Range.t option [@@js.get]
 

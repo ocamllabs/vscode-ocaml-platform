@@ -50,6 +50,7 @@ module ExtendedHover = struct
     }
 
   let hoverExtended =
+    let log fmt = log_chan ~section:"verbose-hover-de/ser" `Info fmt in
     let encode_params { textDocument; position; verbosity } =
       Jsonoo.Encode.(
         object_
@@ -59,10 +60,7 @@ module ExtendedHover = struct
           ])
     in
     let decode_response json =
-      show_message
-        `Info
-        "ExtendedHover.decode_response %s"
-        (Jsonoo.stringify json);
+      log "ExtendedHover.decode_response %s" (Jsonoo.stringify json);
       Jsonoo.Decode.nullable
         (fun json ->
           let contents =
@@ -74,7 +72,7 @@ module ExtendedHover = struct
           let range =
             try Jsonoo.Decode.(nullable (field "range" Range.t_of_json) json)
             with _ ->
-              show_message `Info "No range in hover response";
+              log "No range in hover response";
               None
           in
           { contents; range })

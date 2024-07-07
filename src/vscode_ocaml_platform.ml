@@ -60,6 +60,7 @@ let activate (extension : ExtensionContext.t) =
 
   let _hoverProviderDisposable =
     let selector = `List [ `String "ocaml"; `String "ocaml.interface" ] in
+    let log fmt = log_chan ~section:"verbose-hover" `Info fmt in
     let provider =
       HoverProvider.create
         ~provideHover:(fun ~document ~position ~token:_ ~context ->
@@ -67,35 +68,26 @@ let activate (extension : ExtensionContext.t) =
           | None -> failwith "ocaml-lsp is missing"
           | Some olsp ->
             let uri = TextDocument.uri document in
-            let previous_verbosity =
-              match
-                context
-                |> Option.bind ~f:HoverContext.previousHover
-                |> Option.bind ~f:Olsp_verbose_hover.from_hover
-              with
-              | Some hover ->
-                let verbosity = Olsp_verbose_hover.verbosity hover in
-                let () =
-                  show_message
-                    `Info
-                    "previous hover had verbosity = %d"
-                    verbosity
-                in
-                verbosity
-              | None -> 0
+            let previous_hover =
+              context
+              |> Option.bind ~f:HoverContext.previousHover
+              |> Option.bind ~f:Olsp_verbose_hover.from_hover
             in
             let verbosity_delta =
               let verbosity_delta =
                 Option.bind ~f:HoverContext.verbosityDelta context
               in
-              let () =
-                show_message
-                  `Info
-                  "verbosity delta = %d"
-                  (Option.value verbosity_delta ~default:(-1))
-              in
+              log
+                "verbosity delta = %d"
+                (Option.value verbosity_delta ~default:(-1));
               let verbosity_delta = Option.value ~default:0 verbosity_delta in
               verbosity_delta
+            in
+            let previous_verbosity =
+              Option.value_map
+                previous_hover
+                ~f:Olsp_verbose_hover.verbosity
+                ~default:0
             in
             let verbosity = previous_verbosity + verbosity_delta in
             let open Promise.Syntax in
@@ -112,16 +104,37 @@ let activate (extension : ExtensionContext.t) =
               in
               match hover with
               | None -> None
-              | Some hover ->
+              | Some new_hover ->
+                let has_hover_contents_changed =
+                  match previous_hover with
+                  | None -> true
+                  | Some previous_hover -> (
+                    match new_hover.contents with
+                    | `MarkdownString new_contents ->
+                      let previous_hover =
+                        Olsp_verbose_hover.contents previous_hover
+                      in
+                      not
+                        (List.equal
+                           (fun a b ->
+                             String.equal
+                               (MarkdownString.value a)
+                               (MarkdownString.value b))
+                           previous_hover
+                           [ new_contents ])
+                    | _ -> true)
+                in
                 Some
                   (Olsp_verbose_hover.to_verboseHover
                      (Olsp_verbose_hover.make
-                        ~contents:hover.contents
+                        ~contents:new_hover.contents
                           (* ~contents: (`MarkdownString (MarkdownString.make
                              ~value:"hello" ())) *)
-                        ~verbosity
+                        ~verbosity:
+                          (if has_hover_contents_changed then verbosity
+                           else previous_verbosity)
                         ~range:None
-                        ~canIncreaseVerbosity:(Some true)
+                        ~canIncreaseVerbosity:(Some has_hover_contents_changed)
                         ~canDecreaseVerbosity:(Some (verbosity > 0))
                         ()))
             in

@@ -1964,7 +1964,7 @@ module VerboseHover = struct
 
     val canDecreaseVerbosity : t -> bool or_undefined [@@js.get]
 
-    val contents : t -> MarkdownString.t [@@js.get]
+    val contents : t -> MarkdownString.t list [@@js.get]
 
     val range : t -> Range.t or_undefined [@@js.get]
 

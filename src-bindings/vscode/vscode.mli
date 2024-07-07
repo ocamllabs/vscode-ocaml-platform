@@ -1521,7 +1521,7 @@ end
 module VerboseHover : sig
   include module type of Hover with type t = private Hover.t
 
-  val contents : t -> MarkdownString.t
+  val contents : t -> MarkdownString.t list
 
   val range : t -> Range.t option
 
