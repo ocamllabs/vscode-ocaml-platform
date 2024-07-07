@@ -1,13 +1,6 @@
 class OlspVerboseHover extends joo_global_object.vscode.VerboseHover {
 
 	constructor(contents, verbosity, range, canIncreaseVerbosity, canDecreaseVerbosity) {
-		console.log([
-			contents,
-			verbosity,
-			range,
-			canIncreaseVerbosity,
-			canDecreaseVerbosity
-		])
 		super(contents, range, canIncreaseVerbosity, canDecreaseVerbosity)
 		
 		this.verbosity = verbosity;
