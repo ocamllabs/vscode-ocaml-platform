@@ -9,6 +9,16 @@ module Process = Node.Process
 module ChildProcess = Node.ChildProcess
 module Fs = Node.Fs
 
+module Jsonoo = struct
+  include Jsonoo
+
+  module Decode = struct
+    include Jsonoo.Decode
+
+    let either_or a b json = try `Left (a json) with _ -> `Right (b json)
+  end
+end
+
 module Node = struct
   include Node
 
