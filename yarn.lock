@@ -1546,9 +1546,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc-node/register@npm:1.10.4":
-  version: 1.10.4
-  resolution: "@swc-node/register@npm:1.10.4"
+"@swc-node/register@npm:1.10.5":
+  version: 1.10.5
+  resolution: "@swc-node/register@npm:1.10.5"
   dependencies:
     "@swc-node/core": "npm:^1.13.2"
     "@swc-node/sourcemap-support": "npm:^0.5.1"
@@ -1560,7 +1560,7 @@ __metadata:
   peerDependencies:
     "@swc/core": ">= 1.4.13"
     typescript: ">= 4.3"
-  checksum: 10c0/6f2d2db38a09c3cdbce27e5ef24750fe35e7fd355cf40cd8752a19d3ee876cc42c36957633fff7b66f62d0f09eec09c213b1cc1a8cccfafce4619fc46a380d02
+  checksum: 10c0/f5608da6c9bef20e1d27d027f68466b092050e276655f672ed39930145f99808c0d722914d6b5f0ac6633a9affc915af257db780ac27a2acd04c722f26ee415e
   languageName: node
   linkType: hard
 
@@ -5250,7 +5250,7 @@ __metadata:
   resolution: "ocaml-platform@workspace:."
   dependencies:
     "@biomejs/biome": "npm:1.8.3"
-    "@swc-node/register": "npm:1.10.4"
+    "@swc-node/register": "npm:1.10.5"
     "@swc/core": "npm:1.6.13"
     "@tsconfig/node22": "npm:22.0.0"
     "@tsconfig/strictest": "npm:2.0.5"
