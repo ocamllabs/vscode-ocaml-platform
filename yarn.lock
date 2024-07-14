@@ -1536,21 +1536,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc-node/core@npm:^1.13.2":
-  version: 1.13.2
-  resolution: "@swc-node/core@npm:1.13.2"
+"@swc-node/core@npm:^1.13.3":
+  version: 1.13.3
+  resolution: "@swc-node/core@npm:1.13.3"
   peerDependencies:
     "@swc/core": ">= 1.4.13"
     "@swc/types": ">= 0.1"
-  checksum: 10c0/0fec01cd6b3823301d85728d9fdff42949777608e6f1717373c60da415698ea18e4b5b0f904174b62261a97e352f57c13a3222a164786e58c1cbf255feac0966
+  checksum: 10c0/01f69d6124691569cedd2e6d0c6d3e33ab96d8fca6607780d64359c884750cfd77541e112e545cf37d9f0ee5fdccd57fbf9eb07cfd0ae26f8cca88c974e82e08
   languageName: node
   linkType: hard
 
-"@swc-node/register@npm:1.10.5":
-  version: 1.10.5
-  resolution: "@swc-node/register@npm:1.10.5"
+"@swc-node/register@npm:1.10.7":
+  version: 1.10.7
+  resolution: "@swc-node/register@npm:1.10.7"
   dependencies:
-    "@swc-node/core": "npm:^1.13.2"
+    "@swc-node/core": "npm:^1.13.3"
     "@swc-node/sourcemap-support": "npm:^0.5.1"
     colorette: "npm:^2.0.20"
     debug: "npm:^4.3.5"
@@ -1560,7 +1560,7 @@ __metadata:
   peerDependencies:
     "@swc/core": ">= 1.4.13"
     typescript: ">= 4.3"
-  checksum: 10c0/f5608da6c9bef20e1d27d027f68466b092050e276655f672ed39930145f99808c0d722914d6b5f0ac6633a9affc915af257db780ac27a2acd04c722f26ee415e
+  checksum: 10c0/f988792db5186090060f9c7c4ed47d15ce47c62ac762388ed66743cf0e96524e32cb839e2635516af8cc5ef37f799b42dc2ae52e5bda60939407d50ac0d928a1
   languageName: node
   linkType: hard
 
@@ -5250,7 +5250,7 @@ __metadata:
   resolution: "ocaml-platform@workspace:."
   dependencies:
     "@biomejs/biome": "npm:1.8.3"
-    "@swc-node/register": "npm:1.10.5"
+    "@swc-node/register": "npm:1.10.7"
     "@swc/core": "npm:1.6.13"
     "@tsconfig/node22": "npm:22.0.0"
     "@tsconfig/strictest": "npm:2.0.5"
