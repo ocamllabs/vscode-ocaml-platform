@@ -3,10 +3,11 @@
 # Unreleased
 
 - Fix syntax for `dune-project.package.(depends|conflicts|depopts)` (#1543)
+- Add syntax for `dune-project.package.allow_empty` (#1542)
 
 ## 1.19.2
 
-- Fix variable.other.declaration.dune-project to allow wider range of characters
+- Fix `variable.other.declaration.dune-project` to allow wider range of characters
   (#1517)
 
 ## 1.19.1

@@ -220,6 +220,16 @@
               "patterns": [{ "include": "source.dune#general" }]
             },
 
+            {
+              "comment": "allow_empty",
+              "begin": "\\([[:space:]]*(allow_empty)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-project" }
+              },
+              "patterns": [{ "include": "source.dune#general" }]
+            },
+
             { "include": "#opam-metadata" },
             { "include": "source.dune#general" }
           ]
