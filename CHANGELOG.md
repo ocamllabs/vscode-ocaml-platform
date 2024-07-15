@@ -2,6 +2,8 @@
 
 # Unreleased
 
+## 1.19.2
+
 - Fix variable.other.declaration.dune-project to allow wider range of characters
   (#1517)
 
