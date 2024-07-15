@@ -2,6 +2,8 @@
 
 # Unreleased
 
+## 1.20.0
+
 - Fix syntax for `dune-project.package.(depends|conflicts|depopts)` (#1543)
 - Add syntax for `dune-project.package.allow_empty` (#1542)
 
