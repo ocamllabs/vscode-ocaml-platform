@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Fix syntax for `dune-project.package.(depends|conflicts|depopts)` (#1543)
+
 ## 1.19.2
 
 - Fix variable.other.declaration.dune-project to allow wider range of characters
