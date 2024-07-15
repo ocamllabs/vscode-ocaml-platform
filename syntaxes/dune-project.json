@@ -184,11 +184,11 @@
                 {
                   "comment": "dependency",
                   "name": "variable.other.declaration.dune-project",
-                  "match": "\\b([[:alpha:]-]+)\\b"
+                  "match": "\\b([[:alpha:]_-]+)\\b"
                 },
                 {
                   "comment": "dependency constraint",
-                  "begin": "\\([[:space:]]*([[:alpha:]-]+)\\b",
+                  "begin": "\\([[:space:]]*([[:alpha:]_-]+)\\b",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "variable.other.declaration.dune-project" }
