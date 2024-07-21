@@ -2029,9 +2029,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode/vsce@npm:2.31.0":
-  version: 2.31.0
-  resolution: "@vscode/vsce@npm:2.31.0"
+"@vscode/vsce@npm:2.31.1":
+  version: 2.31.1
+  resolution: "@vscode/vsce@npm:2.31.1"
   dependencies:
     "@azure/identity": "npm:^4.1.0"
     "@vscode/vsce-sign": "npm:^2.0.0"
@@ -2041,7 +2041,7 @@ __metadata:
     cockatiel: "npm:^3.1.2"
     commander: "npm:^6.2.1"
     form-data: "npm:^4.0.0"
-    glob: "npm:^7.0.6"
+    glob: "npm:^11.0.0"
     hosted-git-info: "npm:^4.0.2"
     jsonc-parser: "npm:^3.2.0"
     keytar: "npm:^7.7.0"
@@ -2052,7 +2052,7 @@ __metadata:
     parse-semver: "npm:^1.1.1"
     read: "npm:^1.0.7"
     semver: "npm:^7.5.2"
-    tmp: "npm:^0.2.1"
+    tmp: "npm:^0.2.3"
     typed-rest-client: "npm:^1.8.4"
     url-join: "npm:^4.0.1"
     xml2js: "npm:^0.5.0"
@@ -2063,7 +2063,7 @@ __metadata:
       optional: true
   bin:
     vsce: vsce
-  checksum: 10c0/fbfc3ff1c5fac6c327c3ea7eacc8d5ce9e86e302d8f3b080be6012618ff1f13f3bba6110cb05f90dfbfb15f416ca23485c5b2a3d3ab004d667a1906a1db36ac0
+  checksum: 10c0/a2e04ff8048a6ceea1eaded11bf6a754d98ec253a9e80b6dd41742ee82c8dc9f4e9f21765b6bf7e31f3b93a1a17b8d38383a424b360c79c5265fe17c0f271718
   languageName: node
   linkType: hard
 
@@ -3567,7 +3567,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:11.0.0":
+"glob@npm:11.0.0, glob@npm:^11.0.0":
   version: 11.0.0
   resolution: "glob@npm:11.0.0"
   dependencies:
@@ -5255,7 +5255,7 @@ __metadata:
     "@types/mocha": "npm:10.0.7"
     "@types/vscode": "npm:1.86.0"
     "@vscode/test-electron": "npm:2.4.1"
-    "@vscode/vsce": "npm:2.31.0"
+    "@vscode/vsce": "npm:2.31.1"
     esbuild: "npm:0.23.0"
     fs-extra: "npm:11.2.0"
     glob: "npm:11.0.0"
@@ -6558,7 +6558,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tmp@npm:^0.2.1":
+"tmp@npm:^0.2.1, tmp@npm:^0.2.3":
   version: 0.2.3
   resolution: "tmp@npm:0.2.3"
   checksum: 10c0/3e809d9c2f46817475b452725c2aaa5d11985cf18d32a7a970ff25b568438e2c076c2e8609224feef3b7923fa9749b74428e3e634f6b8e520c534eef2fd24125
