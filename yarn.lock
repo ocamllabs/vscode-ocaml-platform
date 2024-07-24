@@ -5261,7 +5261,7 @@ __metadata:
     glob: "npm:11.0.0"
     mocha: "npm:10.7.0"
     npm-run-all: "npm:4.1.5"
-    ovsx: "npm:0.9.1"
+    ovsx: "npm:0.9.2"
     polka: "npm:1.0.0-next.25"
     sirv: "npm:2.0.4"
     typescript: "npm:5.5.4"
@@ -5322,9 +5322,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ovsx@npm:0.9.1":
-  version: 0.9.1
-  resolution: "ovsx@npm:0.9.1"
+"ovsx@npm:0.9.2":
+  version: 0.9.2
+  resolution: "ovsx@npm:0.9.2"
   dependencies:
     "@vscode/vsce": "npm:^2.25.0"
     commander: "npm:^6.1.0"
@@ -5335,7 +5335,7 @@ __metadata:
     tmp: "npm:^0.2.1"
   bin:
     ovsx: lib/ovsx
-  checksum: 10c0/bbaf06a58974df723e8fff5d65bb5e06d3d0385b28d966136b6b0cb729da668cbcc50f2d6d81bdfaeae318de33dc6db0b8589f3a04d81d0722d122d878b410b9
+  checksum: 10c0/d119e529452ae4f0b530d49db19b262c2dc8d7d90d62464a910fe40a8441fad9989219b236a187abd03d14a71f44c8e91f12f97831a057b8f3854ed964750550
   languageName: node
   linkType: hard
 
