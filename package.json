@@ -21,19 +21,16 @@
   "sideEffects": false,
   "type": "commonjs",
   "main": "./dist/vscode_ocaml_platform.bc.js",
-  "workspaces": [
-    "astexplorer"
-  ],
   "scripts": {
     "test:basic": "node ./tests/runBasicTests.js",
     "test:esy": "node ./tests/runEsyTests.js",
     "test:opam": "node ./tests/runOpamTests.js",
     "test": "npm-run-all -s test:basic test:opam",
-    "package": "vsce package --out ocaml-platform.vsix --yarn --no-dependencies",
-    "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --yarn --no-dependencies",
-    "deploy:ovsx": "ovsx publish --yarn --no-dependencies",
+    "package": "vsce package --out ocaml-platform.vsix --no-dependencies",
+    "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --no-dependencies",
+    "deploy:ovsx": "ovsx publish --packagePath ocaml-platform.vsix --no-dependencies",
     "check": "biome check",
-    "ci": "biome ci",
+    "lint": "biome check",
     "fix": "biome check --fix"
   },
   "contributes": {
@@ -1221,7 +1218,7 @@
     "ovsx": "0.9.2",
     "typescript": "5.5.4"
   },
-  "packageManager": "yarn@4.3.1",
+  "packageManager": "pnpm@9.6.0",
   "engines": {
     "vscode": "^1.86.0"
   },

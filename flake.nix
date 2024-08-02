@@ -65,7 +65,7 @@
         devShells.default = pkgs.mkShell {
           inputsFrom = pkgs.lib.attrValues packages;
           buildInputs = with pkgs.ocamlPackages; [
-            pkgs.yarn
+            pkgs.corepack
             jsonoo
             ocaml-lsp
             pkgs.ocamlformat_0_26_1
@@ -73,7 +73,7 @@
             pkgs.nodePackages.parcel
           ];
           shellHook = ''
-            make yarn-deps
+            make npm-deps
           '';
         };
       });

@@ -10,5 +10,5 @@
     "moduleResolution": "NodeNext",
     "noEmit": true
   },
-  "exclude": ["_build", "_opam", ".yarn", "astexplorer", "dist", "node_modules"]
+  "exclude": ["_build", "_opam", "astexplorer", "dist", "node_modules"]
 }
