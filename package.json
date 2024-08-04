@@ -21,6 +21,9 @@
   "sideEffects": false,
   "type": "commonjs",
   "main": "./dist/vscode_ocaml_platform.bc.js",
+  "workspaces": [
+    "astexplorer"
+  ],
   "scripts": {
     "test:basic": "node ./tests/runBasicTests.js",
     "test:esy": "node ./tests/runEsyTests.js",
@@ -1218,7 +1221,7 @@
     "ovsx": "0.9.2",
     "typescript": "5.5.4"
   },
-  "packageManager": "pnpm@9.6.0",
+  "packageManager": "yarn@4.4.0",
   "engines": {
     "vscode": "^1.86.0"
   },

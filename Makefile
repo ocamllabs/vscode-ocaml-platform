@@ -6,7 +6,7 @@ all:
 
 .PHONY: npm-deps
 npm-deps:
-	pnpm install --frozen-lockfile
+	yarn install --immutable
 
 .PHONY: deps
 deps: ## Install development dependencies
@@ -23,8 +23,8 @@ switch: create_switch deps ## Create an opam switch and install development depe
 .PHONY: build
 build: ## Build the project
 	dune build src/vscode_ocaml_platform.bc.js
-	pnpm --filter astexplorer build
-	pnpm esbuild _build/default/src/vscode_ocaml_platform.bc.js \
+	yarn workspace astexplorer build
+	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
 		--packages=bundle \
 		--external:vscode \
@@ -36,8 +36,8 @@ build: ## Build the project
 .PHONY: build-release
 build-release:
 	dune build src/vscode_ocaml_platform.bc.js --profile=release
-	pnpm --filter astexplorer build
-	pnpm esbuild _build/default/src/vscode_ocaml_platform.bc.js \
+	yarn workspace astexplorer build
+	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
 		--packages=bundle \
 		--external:vscode \
@@ -52,7 +52,7 @@ build-release:
 .PHONY: test
 test: ## Run the unit tests
 	dune build @runtest
-	pnpm test
+	yarn test
 
 .PHONY: clean
 clean: ## Clean build artifacts and other generated files
@@ -66,7 +66,7 @@ doc: ## Generate odoc documentation
 .PHONY: fmt
 fmt: ## Format the codebase with ocamlformat
 	dune build --auto-promote @fmt
-	pnpm biome format --write
+	yarn biome format --write
 
 .PHONY: watch
 watch: ## Watch for the filesystem and rebuild on every change
@@ -74,7 +74,7 @@ watch: ## Watch for the filesystem and rebuild on every change
 
 .PHONY: pkg
 pkg: build # Builds and packages the extension for installment
-	pnpm vsce package --out ./test_extension.vsix --no-dependencies
+	yarn vsce package --out ./test_extension.vsix --no-dependencies
 
 .PHONY: install
 install: pkg # Builds, packages, and installs the extension to your VS Code

@@ -45,14 +45,14 @@ jobs:
 
       - name: Run CI checks with Biome
         if: runner.os == 'Linux'
-        run: pnpm lint
+        run: yarn lint
 
       - name: Build extension
         run: opam exec -- make build-release
 
       - name: Package extension
         if: runner.os == 'Linux'
-        run: pnpm package
+        run: yarn package
 
       - name: Upload artifact
         if: runner.os == 'Linux'
@@ -63,23 +63,23 @@ jobs:
 
       - name: Test extension on Linux
         if: runner.os == 'Linux'
-        run: xvfb-run -a pnpm test
+        run: xvfb-run -a yarn test
 
       - name: Test extension on macOS/Windows
         if: runner.os != 'Linux'
-        run: pnpm test
+        run: yarn test
 
       - name: Publish extension to VSCode Marketplace
         if: runner.os == 'Linux' && startsWith(github.ref, 'refs/tags')
         continue-on-error: true
-        run: pnpm deploy:vsce
+        run: yarn deploy:vsce
         env:
           VSCE_PAT: ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
 
       - name: Publish extension to Open VSX
         if: runner.os == 'Linux' && startsWith(github.ref, 'refs/tags')
         continue-on-error: true
-        run: pnpm deploy:ovsx --pat "$OVSX_PAT"
+        run: yarn deploy:ovsx --pat "$OVSX_PAT"
         env:
           OVSX_PAT: ${{ secrets.OPEN_VSX_TOKEN }}
 
