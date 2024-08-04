@@ -1202,7 +1202,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
     "@swc-node/register": "1.10.9",
-    "@swc/core": "1.7.5",
+    "@swc/core": "1.7.6",
     "@tsconfig/node22": "22.0.0",
     "@tsconfig/strictest": "2.0.5",
     "@types/fs-extra": "11.0.4",
