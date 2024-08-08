@@ -285,7 +285,7 @@ Two steps to set up debugging:
    ```
 
    to your `dune-project` file. More info on this
-   [here](https://dune.readthedocs.io/en/stable/dune-files.html#map-workspace-root).
+   [here](https://dune.readthedocs.io/en/stable/reference/dune-project/map_workspace_root.html).
 
 3. Build _bytecode_ version of your OCaml program executable.
 
