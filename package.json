@@ -38,7 +38,7 @@
     "test:esy": "node ./tests/runEsyTests.js",
     "test:opam": "node ./tests/runOpamTests.js",
     "test": "npm-run-all -s test:basic test:opam",
-    "package": "vsce package --out ocaml-platform.vsix --no-dependencies",
+    "package": "vsce package --out ocaml-platform.vsix --no-dependencies --allow-unused-files-pattern",
     "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --no-dependencies",
     "deploy:ovsx": "ovsx publish --packagePath ocaml-platform.vsix --no-dependencies",
     "check": "biome check",
