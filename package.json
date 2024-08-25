@@ -1,7 +1,7 @@
 {
   "name": "ocaml-platform",
   "displayName": "OCaml Platform",
-  "version": "1.20.0",
+  "version": "1.20.1",
   "private": true,
   "description": "Official OCaml language extension for VSCode",
   "categories": [
@@ -14,13 +14,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ocamllabs/vscode-ocaml-platform"
+    "url": "git+https://github.com/ocamllabs/vscode-ocaml-platform.git"
   },
   "license": "MIT",
   "publisher": "ocamllabs",
   "sideEffects": false,
   "type": "commonjs",
   "main": "./dist/vscode_ocaml_platform.bc.js",
+  "files": [
+    "assets",
+    "astexplorer/dist",
+    "dist",
+    "languages",
+    "LICENSE",
+    "snippets",
+    "syntaxes"
+  ],
   "workspaces": [
     "astexplorer"
   ],
