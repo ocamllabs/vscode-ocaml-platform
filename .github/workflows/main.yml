@@ -18,8 +18,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'pull_request' || github.sha }}
   cancel-in-progress: true
 
+permissions: read-all
+
 jobs:
   build:
+    permissions:
+      attestations: write
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout tree
@@ -53,6 +59,11 @@ jobs:
       - name: Package extension
         if: runner.os == 'Linux'
         run: yarn package
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: ocaml-platform.vsix
 
       - name: Upload artifact
         if: runner.os == 'Linux'
@@ -96,24 +107,19 @@ jobs:
     steps:
       - name: Checkout tree
         uses: actions/checkout@v4
-
       - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: 4
-
       - uses: ocaml/setup-ocaml/lint-opam@v3
 
   lint-fmt:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout tree
         uses: actions/checkout@v4
-
       - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: 4
-
       - uses: ocaml/setup-ocaml/lint-fmt@v3
