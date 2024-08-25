@@ -2,6 +2,11 @@
 
 # Unreleased
 
+## 1.20.1
+
+- This was a version bump only, there were no changes
+  - Update runtime dependencies
+
 ## 1.20.0
 
 - Fix syntax for `dune-project.package.(depends|conflicts|depopts)` (#1543)
