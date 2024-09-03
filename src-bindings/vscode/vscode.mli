@@ -280,6 +280,14 @@ module Selection : sig
   val isReversed : t -> bool
 end
 
+module Clipboard : sig
+  include Ojs.T
+
+  val readText : t -> string Promise.t
+
+  val writeText : t -> string -> unit Promise.t
+end
+
 module TextEditorEdit : sig
   include Ojs.T
 
@@ -2459,6 +2467,8 @@ end
 
 module Env : sig
   val shell : unit -> string
+
+  val clipboard : unit -> Clipboard.t
 end
 
 module DebugAdapterExecutableOptions : sig
