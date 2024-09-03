@@ -490,8 +490,12 @@ module Copy_type_under_cursor = struct
     let uri = TextDocument.uri doc in
     let selection = TextEditor.selection text_editor in
     let position = Selection.active selection in
-    Custom_requests.(
-      send_request client typeEnclosing (uri, `Position position, 0, 0))
+    Custom_requests.Type_enclosing.send
+      ~uri
+      ~at:(`Position position)
+      ~index:0
+      ~verbosity:0
+      client
 
   let _copy_type_under_cursor =
     let handler (instance : Extension_instance.t) ~args:_ =
@@ -513,7 +517,9 @@ module Copy_type_under_cursor = struct
           | Some (client, _) ->
             let clipboard = Env.clipboard () in
             let open Promise.Syntax in
-            let* _, type_, _ = get_enclosings text_editor client in
+            let* Custom_requests.Type_enclosing.{ type_; _ } =
+              get_enclosings text_editor client
+            in
             if String.equal type_ "<no information>" then
               show_message `Warn "No type information" |> Promise.return
             else

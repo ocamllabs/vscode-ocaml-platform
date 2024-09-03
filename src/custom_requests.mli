@@ -21,7 +21,18 @@ val inferIntf : (string, string) custom_request
 
 val typedHoles : (Uri.t, Range.t list) custom_request
 
-val typeEnclosing :
-  ( Uri.t * [ `Range of Range.t | `Position of Position.t ] * int * int
-  , int * string * Range.t list )
-  custom_request
+module Type_enclosing : sig
+  type response =
+    { index : int
+    ; type_ : string
+    ; enclosings : Range.t list
+    }
+
+  val send :
+       uri:Uri.t
+    -> at:[ `Position of Position.t | `Range of Range.t ]
+    -> index:int
+    -> verbosity:int
+    -> LanguageClient.t
+    -> response Promise.t
+end
