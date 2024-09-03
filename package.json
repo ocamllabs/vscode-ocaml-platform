@@ -250,6 +250,11 @@
         "command": "ocaml.goto-closure-code-location",
         "category": "OCaml",
         "title": "Goto Closure Code Location"
+      },
+      {
+        "command": "ocaml.copy-type-under-cursor",
+	"category": "OCaml",
+	"title": "Copy Type Under Cursor"
       }
     ],
     "configuration": {
@@ -1034,6 +1039,10 @@
         {
           "command": "ocaml.goto-closure-code-location",
           "when": "false"
+        },
+	{
+          "command": "ocaml.copy-type-under-cursor",
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
         }
       ],
       "editor/title": [
