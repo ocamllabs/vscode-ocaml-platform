@@ -20,3 +20,8 @@ val switchImplIntf : (string, string array) custom_request
 val inferIntf : (string, string) custom_request
 
 val typedHoles : (Uri.t, Range.t list) custom_request
+
+val typeEnclosing :
+  ( Uri.t * [ `Range of Range.t | `Position of Position.t ] * int * int
+  , int * string * Range.t list )
+  custom_request
