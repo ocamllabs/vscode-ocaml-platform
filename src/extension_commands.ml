@@ -468,6 +468,64 @@ end = struct
     command Extension_consts.Commands.goto_closure_code_location handler
 end
 
+module Copy_type_under_cursor = struct
+  let extension_name = "Copy Type Under Cursor"
+
+  let ocaml_lsp_doesnt_support_type_enclosing instance ocaml_lsp =
+    match
+      Ocaml_lsp.is_version_up_to_date
+        ocaml_lsp
+        (Extension_instance.ocaml_version_exn instance)
+    with
+    | Ok () -> ()
+    | Error (`Msg msg) ->
+      show_message
+        `Warn
+        "The installed version of `ocamllsp` does not support type enclosings. \
+         %s"
+        msg
+
+  let get_enclosings text_editor client =
+    let doc = TextEditor.document text_editor in
+    let uri = TextDocument.uri doc in
+    let selection = TextEditor.selection text_editor in
+    let position = Selection.active selection in
+    Custom_requests.(
+      send_request client typeEnclosing (uri, `Position position, 0, 0))
+
+  let _copy_type_under_cursor =
+    let handler (instance : Extension_instance.t) ~args:_ =
+      let copy_type_under_cursor () =
+        match Window.activeTextEditor () with
+        | None ->
+          Extension_consts.Command_errors.text_editor_must_be_active
+            extension_name
+            ~expl:"The command copy the type of the expression under cursor"
+          |> show_message `Error "%s" |> Promise.return
+        | Some text_editor -> (
+          match Extension_instance.lsp_client instance with
+          | None ->
+            show_message `Warn "ocamllsp is not running" |> Promise.return
+          | Some (_, ocaml_lsp)
+            when not (Ocaml_lsp.can_handle_type_enclosing ocaml_lsp) ->
+            ocaml_lsp_doesnt_support_type_enclosing instance ocaml_lsp
+            |> Promise.return
+          | Some (client, _) ->
+            let clipboard = Env.clipboard () in
+            let open Promise.Syntax in
+            let* _, type_, _ = get_enclosings text_editor client in
+            if String.equal type_ "<no information>" then
+              show_message `Warn "No type information" |> Promise.return
+            else
+              let+ () = Clipboard.writeText clipboard type_ in
+              show_message `Info "Type copied")
+      in
+      let (_ : unit Promise.t) = copy_type_under_cursor () in
+      ()
+    in
+    command Extension_consts.Commands.copy_type_under_cursor handler
+end
+
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in
