@@ -1,6 +1,0 @@
-{
-  "ocaml.sandbox": {
-    "root": "/path/will/be/populated/by/the/test",
-    "kind": "esy"
-  }
-}
