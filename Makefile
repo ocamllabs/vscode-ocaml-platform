@@ -73,12 +73,12 @@ watch: ## Watch for the filesystem and rebuild on every change
 	dune build @all -w --terminal-persistence=clear-on-rebuild
 
 .PHONY: pkg
-pkg: build # Builds and packages the extension for installment
-	yarn vsce package --out ./test_extension.vsix --no-dependencies
+pkg: build-release # Builds and packages the extension for installment
+	yarn package
 
 .PHONY: install
 install: pkg # Builds, packages, and installs the extension to your VS Code
-	code --force --install-extension test_extension.vsix
+	code --force --install-extension ocaml-platform.vsix
 
 .PHONY:
 nix-tests:

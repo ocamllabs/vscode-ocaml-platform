@@ -1,4 +1,4 @@
-import * as assert from "node:assert";
+const assert = require("node:assert");
 
 const problemLocations = {
   'File "file.ml", line 4, characters 6-7:': [
@@ -24,7 +24,7 @@ const problemLocations = {
     undefined,
     undefined,
   ],
-} as const;
+};
 
 const problemMessages = {
   "Error: This expression has type int": [
@@ -46,7 +46,7 @@ const problemMessages = {
     "8",
     "this pattern-matching is not exhaustive.",
   ],
-} as const;
+};
 
 suite("basic", () => {
   test("problem matcher", async () => {
