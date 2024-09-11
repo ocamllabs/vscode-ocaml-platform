@@ -65,7 +65,7 @@
         devShells.default = pkgs.mkShell {
           inputsFrom = pkgs.lib.attrValues packages;
           buildInputs = with pkgs.ocamlPackages; [
-            pkgs.yarn
+            pkgs.yarn-berry
             jsonoo
             ocaml-lsp
             pkgs.ocamlformat_0_26_2
