@@ -278,6 +278,8 @@ module Selection : sig
     -> t
 
   val isReversed : t -> bool
+
+  val to_range : t -> Range.t
 end
 
 module Clipboard : sig

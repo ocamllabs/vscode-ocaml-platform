@@ -489,10 +489,9 @@ module Copy_type_under_cursor = struct
     let doc = TextEditor.document text_editor in
     let uri = TextDocument.uri doc in
     let selection = TextEditor.selection text_editor in
-    let position = Selection.active selection in
     Custom_requests.Type_enclosing.send
       ~uri
-      ~at:(`Position position)
+      ~at:(`Range (Selection.to_range selection))
       ~index:0
       ~verbosity:0
       client
@@ -524,7 +523,7 @@ module Copy_type_under_cursor = struct
               show_message `Warn "No type information" |> Promise.return
             else
               let+ () = Clipboard.writeText clipboard type_ in
-              show_message `Info "Type copied")
+              show_message `Info "Type copied: %s" type_)
       in
       let (_ : unit Promise.t) = copy_type_under_cursor () in
       ()

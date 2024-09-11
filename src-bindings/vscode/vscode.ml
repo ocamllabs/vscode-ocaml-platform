@@ -309,6 +309,8 @@ module Selection = struct
   include Class.Extend (Range) ()
   include Range
 
+  let to_range x = x
+
   include
     [%js:
     val anchor : t -> Position.t [@@js.get]
