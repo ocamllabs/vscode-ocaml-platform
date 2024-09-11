@@ -68,7 +68,7 @@
             pkgs.yarn
             jsonoo
             ocaml-lsp
-            pkgs.ocamlformat_0_26_1
+            pkgs.ocamlformat_0_26_2
             pkgs.vscode
             pkgs.nodePackages.parcel
           ];
