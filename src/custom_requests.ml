@@ -33,3 +33,44 @@ let typedHoles =
         Jsonoo.Encode.(object_ [ ("uri", string @@ Uri.toString uri ()) ]))
   ; decode_response = Jsonoo.Decode.list Range.t_of_json
   }
+
+module Type_enclosing = struct
+  type request_params =
+    { uri : Uri.t
+    ; at : [ `Position of Position.t | `Range of Range.t ]
+    ; index : int
+    ; verbosity : int
+    }
+
+  type response =
+    { index : int
+    ; type_ : string
+    ; enclosings : Range.t list
+    }
+
+  let encode_params { uri; at; index; verbosity } =
+    let open Jsonoo.Encode in
+    let uri = ("uri", string @@ Uri.toString uri ()) in
+    let at =
+      match at with
+      | `Position p -> Position.json_of_t p
+      | `Range r -> Range.json_of_t r
+    in
+    let at = ("at", at) in
+    let index = ("index", int index) in
+    let verbosity = ("verbosity", int verbosity) in
+    object_ [ uri; at; index; verbosity ]
+
+  let decode_response response =
+    let open Jsonoo.Decode in
+    let index = field "index" int response in
+    let type_ = field "type" string response in
+    let enclosings = field "enclosings" (list Range.t_of_json) response in
+    { index; type_; enclosings }
+
+  let request =
+    { meth = ocamllsp_prefixed "typeEnclosing"; encode_params; decode_response }
+
+  let send ~uri ~at ~index ~verbosity client =
+    send_request client request { uri; at; index; verbosity }
+end

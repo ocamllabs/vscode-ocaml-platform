@@ -309,6 +309,8 @@ module Selection = struct
   include Class.Extend (Range) ()
   include Range
 
+  let to_range x = x
+
   include
     [%js:
     val anchor : t -> Position.t [@@js.get]
@@ -327,6 +329,16 @@ module Selection = struct
     [@@js.new "vscode.Selection"]
 
     val isReversed : t -> bool [@@js.get]]
+end
+
+module Clipboard = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val readText : t -> string Promise.t [@@js.get]
+
+    val writeText : t -> string -> unit Promise.t [@@js.call]]
 end
 
 module TextEditorEdit = struct
@@ -3235,7 +3247,11 @@ module Tasks = struct
 end
 
 module Env = struct
-  include [%js: val shell : unit -> string [@@js.get "vscode.env.shell"]]
+  include
+    [%js:
+    val shell : unit -> string [@@js.get "vscode.env.shell"]
+
+    val clipboard : unit -> Clipboard.t [@@js.get "vscode.env.clipboard"]]
 end
 
 module DebugAdapterExecutableOptions = struct
