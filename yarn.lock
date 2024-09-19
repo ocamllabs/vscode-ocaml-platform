@@ -4638,7 +4638,7 @@ __metadata:
     "@vscode/vsce": "npm:3.1.0"
     esbuild: "npm:0.23.1"
     ovsx: "npm:0.9.4"
-    polka: "npm:1.0.0-next.27"
+    polka: "npm:1.0.0-next.28"
     sirv: "npm:2.0.4"
     typescript: "npm:5.6.2"
     vscode-languageclient: "npm:9.0.1"
@@ -4900,13 +4900,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"polka@npm:1.0.0-next.27":
-  version: 1.0.0-next.27
-  resolution: "polka@npm:1.0.0-next.27"
+"polka@npm:1.0.0-next.28":
+  version: 1.0.0-next.28
+  resolution: "polka@npm:1.0.0-next.28"
   dependencies:
     "@polka/url": "npm:^1.0.0-next.21"
     trouter: "npm:^4.0.0"
-  checksum: 10c0/8a536844bf929e4ce1952b93424215cb74be85f17e50d99750267ae189e88b414fa303f79d95212dcc797f6f9b5c3398af6ce5c87cd41d0f70d39286cd8f6020
+  checksum: 10c0/206bab3eb1c3c44c2fba9704d998b144ec36c4852b0b97192a1fd3953f215b739e2286852492c13dcc9faecea0f7825a76356d6eef7e02afd6a800d1dbb84ead
   languageName: node
   linkType: hard
 
