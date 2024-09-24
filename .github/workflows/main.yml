@@ -34,7 +34,7 @@ jobs:
       - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: 4
+          ocaml-compiler: 5
           dune-cache: true
 
       - name: Set-up Node.js
@@ -110,7 +110,7 @@ jobs:
       - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: 4
+          ocaml-compiler: 5
       - uses: ocaml/setup-ocaml/lint-opam@v3
 
   lint-fmt:
@@ -121,5 +121,5 @@ jobs:
       - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: 4
+          ocaml-compiler: 5
       - uses: ocaml/setup-ocaml/lint-fmt@v3
