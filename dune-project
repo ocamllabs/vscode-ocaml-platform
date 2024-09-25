@@ -28,10 +28,7 @@
  (depends
   (vscode
    (= :version))
-  (ocaml
-   (and
-    (>= 4.13)
-    (< 4.15.0)))
+  (ocaml (>= 5.2.0))
   (js_of_ocaml
    (>= 4.1.0))
   (gen_js_api
