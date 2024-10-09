@@ -4599,7 +4599,7 @@ __metadata:
     "@vscode/test-electron": "npm:2.4.1"
     "@vscode/vsce": "npm:3.1.1"
     esbuild: "npm:0.24.0"
-    ovsx: "npm:0.9.5"
+    ovsx: "npm:0.10.0"
     polka: "npm:1.0.0-next.28"
     sirv: "npm:2.0.4"
     typescript: "npm:5.6.2"
@@ -4660,9 +4660,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ovsx@npm:0.9.5":
-  version: 0.9.5
-  resolution: "ovsx@npm:0.9.5"
+"ovsx@npm:0.10.0":
+  version: 0.10.0
+  resolution: "ovsx@npm:0.10.0"
   dependencies:
     "@vscode/vsce": "npm:^3.1.0"
     commander: "npm:^6.2.1"
@@ -4671,9 +4671,10 @@ __metadata:
     leven: "npm:^3.1.0"
     semver: "npm:^7.6.0"
     tmp: "npm:^0.2.3"
+    yauzl: "npm:^3.1.3"
   bin:
     ovsx: lib/ovsx
-  checksum: 10c0/27b8522dc5c883dc41c3fd53839e37ed390ff26f95150ed32d28070206240f51bd3eb4a12ae3cd528ef7573418fc825ffb33ff703da5d178be28304ba241c37b
+  checksum: 10c0/3bfc60881d1c9208d01a96a7b3880ca088e09d43b52b7666fd2c107b9dcea878ada62464fa9da8734f10c333ac28ced0ec9b206675f4cf4a94b341435cdeb90d
   languageName: node
   linkType: hard
 
@@ -6034,6 +6035,16 @@ __metadata:
     buffer-crc32: "npm:~0.2.3"
     fd-slicer: "npm:~1.1.0"
   checksum: 10c0/f265002af7541b9ec3589a27f5fb8f11cf348b53cc15e2751272e3c062cd73f3e715bc72d43257de71bbaecae446c3f1b14af7559e8ab0261625375541816422
+  languageName: node
+  linkType: hard
+
+"yauzl@npm:^3.1.3":
+  version: 3.1.3
+  resolution: "yauzl@npm:3.1.3"
+  dependencies:
+    buffer-crc32: "npm:~0.2.3"
+    pend: "npm:~1.2.0"
+  checksum: 10c0/e04a2567860e1337798cd2570d776b4040520b20660e7ec5dfcce24b8be2b134d6a5ae835804a0186b1a58cb8b1741b37eaa6a86f7546b6219b62a265dbaf3fc
   languageName: node
   linkType: hard
 

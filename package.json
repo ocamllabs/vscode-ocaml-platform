@@ -1227,7 +1227,7 @@
     "@vscode/test-electron": "2.4.1",
     "@vscode/vsce": "3.1.1",
     "esbuild": "0.24.0",
-    "ovsx": "0.9.5",
+    "ovsx": "0.10.0",
     "typescript": "5.6.2"
   },
   "packageManager": "yarn@4.5.0",
