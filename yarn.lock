@@ -4601,7 +4601,7 @@ __metadata:
     esbuild: "npm:0.24.0"
     ovsx: "npm:0.10.0"
     polka: "npm:1.0.0-next.28"
-    sirv: "npm:2.0.4"
+    sirv: "npm:3.0.0"
     typescript: "npm:5.6.3"
     vscode-languageclient: "npm:9.0.1"
   languageName: unknown
@@ -5325,14 +5325,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sirv@npm:2.0.4":
-  version: 2.0.4
-  resolution: "sirv@npm:2.0.4"
+"sirv@npm:3.0.0":
+  version: 3.0.0
+  resolution: "sirv@npm:3.0.0"
   dependencies:
     "@polka/url": "npm:^1.0.0-next.24"
     mrmime: "npm:^2.0.0"
     totalist: "npm:^3.0.0"
-  checksum: 10c0/68f8ee857f6a9415e9c07a1f31c7c561df8d5f1b1ba79bee3de583fa37da8718def5309f6b1c6e2c3ef77de45d74f5e49efc7959214443aa92d42e9c99180a4e
+  checksum: 10c0/282c52ee5a93cafa297096ad31aa6c3004a21d4c93abe728b701e51e4329acb887f6e92f07696225414fd6bb4a7782fd64a42d0b6b6467ae0f66bd3fde90b865
   languageName: node
   linkType: hard
 
