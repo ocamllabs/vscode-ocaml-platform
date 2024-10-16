@@ -6,6 +6,14 @@ type ('params, 'response) custom_request =
   ; decode_response : Jsonoo.t -> 'response
   }
 
+module type Custom_request = sig
+  type params
+
+  type response
+
+  val request : (params, response) custom_request
+end
+
 let send_request client req params =
   let data = req.encode_params params in
   let open Promise.Syntax in
@@ -35,7 +43,7 @@ let typedHoles =
   }
 
 module Type_enclosing = struct
-  type request_params =
+  type params =
     { uri : Uri.t
     ; at : [ `Position of Position.t | `Range of Range.t ]
     ; index : int
@@ -70,7 +78,4 @@ module Type_enclosing = struct
 
   let request =
     { meth = ocamllsp_prefixed "typeEnclosing"; encode_params; decode_response }
-
-  let send ~uri ~at ~index ~verbosity client =
-    send_request client request { uri; at; index; verbosity }
 end
