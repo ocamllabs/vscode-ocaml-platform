@@ -34,8 +34,15 @@ module DocumentPosition = struct
   let decode response =
     let open Jsonoo.Decode in
     let uri = field "uri" string response in
-    let position = field "position" Position.t_of_json response in
-    (Uri.parse uri (), position)
+    let position_or_range =
+      match try_optional (field "position" Position.t_of_json) response with
+      | Some position -> `Position position
+      | None -> (
+        match try_optional (field "range" Range.t_of_json) response with
+        | Some range -> `Range range
+        | None -> failwith "Expected either 'position' or 'range' field")
+    in
+    { uri = Uri.parse uri (); position = position_or_range }
 end
 
 let switchImplIntf =
@@ -268,8 +275,13 @@ module Merlin_jump = struct
     object_ (uri_position @ [ target ])
 
   let decode_response response =
-    let uri, position = DocumentPosition.decode response in
-    { uri; position }
+    let t = DocumentPosition.decode response in
+    let position =
+      match t.position with
+      | `Position p -> p
+      | `Range p -> Range.start p
+    in
+    { uri = t.uri; position }
 
   let make ~uri ~position ~target () = { uri; position; target }
 
