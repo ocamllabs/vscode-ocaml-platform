@@ -22,12 +22,7 @@ val inferIntf : (string, string) custom_request
 val typedHoles : (Uri.t, Range.t list) custom_request
 
 module Type_enclosing : sig
-  type params =
-    { uri : Uri.t
-    ; at : [ `Position of Position.t | `Range of Range.t ]
-    ; index : int
-    ; verbosity : int
-    }
+  type params
 
   type response =
     { index : int
@@ -46,12 +41,7 @@ module Type_enclosing : sig
 end
 
 module Get_documentation : sig
-  type params =
-    { uri : Uri.t
-    ; position : Position.t
-    ; identifier : string option
-    ; contentFormat : [ `Plantext | `Markdown ] option
-    }
+  type params
 
   type response =
     { kind : string
@@ -70,12 +60,7 @@ module Get_documentation : sig
 end
 
 module Construct : sig
-  type params =
-    { uri : Uri.t
-    ; position : Position.t
-    ; depth : int option
-    ; with_values : [ `None | `Local ] option
-    }
+  type params
 
   type response =
     { position : Range.t
@@ -96,11 +81,7 @@ end
 module Hover_extended : sig
   type res
 
-  type params =
-    { uri : Uri.t
-    ; position : Position.t
-    ; verbosity : int option
-    }
+  type params
 
   type response = res list
 
@@ -111,11 +92,7 @@ module Hover_extended : sig
 end
 
 module Merlin_jump : sig
-  type params =
-    { uri : Uri.t
-    ; position : Position.t
-    ; target : string
-    }
+  type params
 
   type response =
     { uri : Uri.t
@@ -130,13 +107,7 @@ end
 module Type_search : sig
   type res
 
-  type params =
-    { uri : Uri.t
-    ; position : Position.t
-    ; limit : int
-    ; query : string
-    ; with_doc : bool
-    }
+  type params
 
   type response = res list
 
