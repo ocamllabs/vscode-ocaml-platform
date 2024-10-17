@@ -30,6 +30,12 @@ module DocumentPosition = struct
         | `Range r -> Range.json_of_t r )
     in
     [ uri; position ]
+
+  let decode response =
+    let open Jsonoo.Decode in
+    let uri = field "uri" string response in
+    let position = field "position" Position.t_of_json response in
+    (Uri.parse uri (), position)
 end
 
 let switchImplIntf =
@@ -239,4 +245,34 @@ module Hover_extended = struct
 
   let request =
     { meth = ocamllsp_prefixed "hoverExtended"; encode_params; decode_response }
+end
+
+module Merlin_jump = struct
+  type params =
+    { uri : Uri.t
+    ; position : Position.t
+    ; target : string
+    }
+
+  type response =
+    { uri : Uri.t
+    ; position : Position.t
+    }
+
+  let encode_params { uri; position; target } =
+    let open Jsonoo.Encode in
+    let uri_position =
+      DocumentPosition.encode { uri; position = `Position position }
+    in
+    let target = ("target", string target) in
+    object_ (uri_position @ [ target ])
+
+  let decode_response response =
+    let uri, position = DocumentPosition.decode response in
+    { uri; position }
+
+  let make ~uri ~position ~target () = { uri; position; target }
+
+  let request =
+    { meth = ocamllsp_prefixed "jump"; encode_params; decode_response }
 end
