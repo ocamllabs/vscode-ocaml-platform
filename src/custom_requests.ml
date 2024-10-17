@@ -6,14 +6,6 @@ type ('params, 'response) custom_request =
   ; decode_response : Jsonoo.t -> 'response
   }
 
-module type Custom_request = sig
-  type params
-
-  type response
-
-  val request : (params, response) custom_request
-end
-
 let send_request client req params =
   let data = req.encode_params params in
   let open Promise.Syntax in
@@ -76,6 +68,111 @@ module Type_enclosing = struct
     let enclosings = field "enclosings" (list Range.t_of_json) response in
     { index; type_; enclosings }
 
+  let make ~uri ~at ~index ~verbosity = { uri; at; index; verbosity }
+
   let request =
     { meth = ocamllsp_prefixed "typeEnclosing"; encode_params; decode_response }
+end
+
+module Get_documentation = struct
+  type params =
+    { uri : Uri.t
+    ; position : Position.t
+    ; identifier : string option
+    ; contentFormat : [ `Plantext | `Markdown ] option
+    }
+
+  type response =
+    { kind : string
+    ; value : string
+    }
+
+  let encode_params { uri; position; identifier; contentFormat } =
+    let open Jsonoo.Encode in
+    let uri = ("uri", string @@ Uri.toString uri ()) in
+    let position = ("position", Position.json_of_t position) in
+    let identifier =
+      ( "identifier"
+      , Option.(
+          value ~default:null (map ~f:(fun ident -> string ident) identifier))
+      )
+    in
+    let contentFormat =
+      ( "contentFormat"
+      , Option.(
+          value
+            ~default:null
+            (map
+               ~f:(fun cf ->
+                 match cf with
+                 | `Plantext -> string "plaintext"
+                 | `Markdown -> string "markdown")
+               contentFormat)) )
+    in
+    object_ [ uri; position; identifier; contentFormat ]
+
+  let decode_response response =
+    let open Jsonoo.Decode in
+    let decode_doc json =
+      let kind = field "kind" string json in
+      let value = field "value" string json in
+      { kind; value }
+    in
+    field "doc" decode_doc response
+
+  let make ~uri ~position ?(identifier = None) ?(contentFormat = None) () =
+    { uri; position; identifier; contentFormat }
+
+  let request =
+    { meth = ocamllsp_prefixed "getDocumentation"
+    ; encode_params
+    ; decode_response
+    }
+end
+
+module Construct = struct
+  type params =
+    { uri : Uri.t
+    ; position : Position.t
+    ; depth : int option
+    ; with_values : [ `None | `Local ] option
+    }
+
+  type response =
+    { position : Range.t
+    ; result : string list
+    }
+
+  let encode_params { uri; position; depth; with_values } =
+    let open Jsonoo.Encode in
+    let uri = ("uri", string @@ Uri.toString uri ()) in
+    let position = ("position", Position.json_of_t position) in
+    let depth =
+      ("depth", Option.(value ~default:null (map ~f:(fun d -> int d) depth)))
+    in
+    let with_values =
+      ( "with_values"
+      , Option.(
+          value
+            ~default:null
+            (map
+               ~f:(fun w ->
+                 match w with
+                 | `None -> string "none"
+                 | `Local -> string "local")
+               with_values)) )
+    in
+    object_ [ uri; position; depth; with_values ]
+
+  let decode_response response =
+    let open Jsonoo.Decode in
+    let position = field "position" Range.t_of_json response in
+    let result = field "result" (list string) response in
+    { position; result }
+
+  let make ~uri ~position ?(depth = None) ?(with_values = None) () =
+    { uri; position; depth; with_values }
+
+  let request =
+    { meth = ocamllsp_prefixed "construct"; encode_params; decode_response }
 end

@@ -9,14 +9,6 @@ open Import
 
 type ('params, 'response) custom_request
 
-module type Custom_request = sig
-  type params
-
-  type response
-
-  val request : (params, response) custom_request
-end
-
 val send_request :
      LanguageClient.t
   -> ('params, 'resp) custom_request
@@ -30,8 +22,6 @@ val inferIntf : (string, string) custom_request
 val typedHoles : (Uri.t, Range.t list) custom_request
 
 module Type_enclosing : sig
-  include Custom_request
-
   type params =
     { uri : Uri.t
     ; at : [ `Position of Position.t | `Range of Range.t ]
@@ -44,6 +34,61 @@ module Type_enclosing : sig
     ; type_ : string
     ; enclosings : Range.t list
     }
+
+  val make :
+       uri:Uri.t
+    -> at:[ `Position of Position.t | `Range of Range.t ]
+    -> index:int
+    -> verbosity:int
+    -> params
+
+  val request : (params, response) custom_request
+end
+
+module Get_documentation : sig
+  type params =
+    { uri : Uri.t
+    ; position : Position.t
+    ; identifier : string option
+    ; contentFormat : [ `Plantext | `Markdown ] option
+    }
+
+  type response =
+    { kind : string
+    ; value : string
+    }
+
+  val make :
+       uri:Uri.t
+    -> position:Position.t
+    -> ?identifier:string option
+    -> ?contentFormat:[ `Plantext | `Markdown ] option
+    -> unit
+    -> params
+
+  val request : (params, response) custom_request
+end
+
+module Construct : sig
+  type params =
+    { uri : Uri.t
+    ; position : Position.t
+    ; depth : int option
+    ; with_values : [ `None | `Local ] option
+    }
+
+  type response =
+    { position : Range.t
+    ; result : string list
+    }
+
+  val make :
+       uri:Uri.t
+    -> position:Position.t
+    -> ?depth:int option
+    -> ?with_values:[ `None | `Local ] option
+    -> unit
+    -> params
 
   val request : (params, response) custom_request
 end
