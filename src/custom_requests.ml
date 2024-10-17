@@ -14,6 +14,24 @@ let send_request client req params =
 
 let ocamllsp_prefixed s = "ocamllsp/" ^ s
 
+module DocumentPosition = struct
+  type t =
+    { uri : Uri.t
+    ; position : [ `Position of Position.t | `Range of Range.t ]
+    }
+
+  let encode { uri; position } =
+    let open Jsonoo.Encode in
+    let uri = ("uri", string @@ Uri.toString uri ()) in
+    let position =
+      ( "position"
+      , match position with
+        | `Position p -> Position.json_of_t p
+        | `Range r -> Range.json_of_t r )
+    in
+    [ uri; position ]
+end
+
 let switchImplIntf =
   { meth = ocamllsp_prefixed "switchImplIntf"
   ; encode_params = Jsonoo.Encode.string
@@ -50,16 +68,10 @@ module Type_enclosing = struct
 
   let encode_params { uri; at; index; verbosity } =
     let open Jsonoo.Encode in
-    let uri = ("uri", string @@ Uri.toString uri ()) in
-    let at =
-      match at with
-      | `Position p -> Position.json_of_t p
-      | `Range r -> Range.json_of_t r
-    in
-    let at = ("at", at) in
+    let uri_position = DocumentPosition.encode { uri; position = at } in
     let index = ("index", int index) in
     let verbosity = ("verbosity", int verbosity) in
-    object_ [ uri; at; index; verbosity ]
+    object_ (uri_position @ [ index; verbosity ])
 
   let decode_response response =
     let open Jsonoo.Decode in
@@ -89,8 +101,9 @@ module Get_documentation = struct
 
   let encode_params { uri; position; identifier; contentFormat } =
     let open Jsonoo.Encode in
-    let uri = ("uri", string @@ Uri.toString uri ()) in
-    let position = ("position", Position.json_of_t position) in
+    let uri_position =
+      DocumentPosition.encode { uri; position = `Position position }
+    in
     let identifier =
       ( "identifier"
       , Option.(
@@ -109,7 +122,7 @@ module Get_documentation = struct
                  | `Markdown -> string "markdown")
                contentFormat)) )
     in
-    object_ [ uri; position; identifier; contentFormat ]
+    object_ (uri_position @ [ identifier; contentFormat ])
 
   let decode_response response =
     let open Jsonoo.Decode in
@@ -145,8 +158,9 @@ module Construct = struct
 
   let encode_params { uri; position; depth; with_values } =
     let open Jsonoo.Encode in
-    let uri = ("uri", string @@ Uri.toString uri ()) in
-    let position = ("position", Position.json_of_t position) in
+    let uri_position =
+      DocumentPosition.encode { uri; position = `Position position }
+    in
     let depth =
       ("depth", Option.(value ~default:null (map ~f:(fun d -> int d) depth)))
     in
@@ -162,7 +176,7 @@ module Construct = struct
                  | `Local -> string "local")
                with_values)) )
     in
-    object_ [ uri; position; depth; with_values ]
+    object_ (uri_position @ [ depth; with_values ])
 
   let decode_response response =
     let open Jsonoo.Decode in
@@ -175,4 +189,54 @@ module Construct = struct
 
   let request =
     { meth = ocamllsp_prefixed "construct"; encode_params; decode_response }
+end
+
+module Hover_extended = struct
+  type content =
+    { kind : string
+    ; value : string
+    }
+
+  type res =
+    { contents : content
+    ; range : Range.t
+    }
+
+  type params =
+    { uri : Uri.t
+    ; position : Position.t
+    ; verbosity : int option
+    }
+
+  type response = res list
+
+  let encode_params { uri; position; verbosity } =
+    let open Jsonoo.Encode in
+    let uri_position =
+      DocumentPosition.encode { uri; position = `Position position }
+    in
+    let verbosity =
+      ( "verbosity"
+      , Option.(value ~default:null (map ~f:(fun d -> int d) verbosity)) )
+    in
+    object_ (uri_position @ [ verbosity ])
+
+  let make ~uri ~position ?(verbosity = None) () = { uri; position; verbosity }
+
+  let decode_response response =
+    let open Jsonoo.Decode in
+    let decode_content response =
+      { kind = field "kind" string response
+      ; value = field "value" string response
+      }
+    in
+    let decode_res response =
+      { contents = field "contents" decode_content response
+      ; range = field "range" Range.t_of_json response
+      }
+    in
+    list decode_res response
+
+  let request =
+    { meth = ocamllsp_prefixed "hoverExtended"; encode_params; decode_response }
 end

@@ -92,3 +92,20 @@ module Construct : sig
 
   val request : (params, response) custom_request
 end
+
+module Hover_extended : sig
+  type res
+
+  type params =
+    { uri : Uri.t
+    ; position : Position.t
+    ; verbosity : int option
+    }
+
+  type response = res list
+
+  val make :
+    uri:Uri.t -> position:Position.t -> ?verbosity:int option -> unit -> params
+
+  val request : (params, response) custom_request
+end
