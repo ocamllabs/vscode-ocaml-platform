@@ -493,11 +493,11 @@ module Copy_type_under_cursor = struct
       send_request
         client
         Type_enclosing.request
-        { uri
-        ; at = `Range (Selection.to_range selection)
-        ; index = 0
-        ; verbosity = 0
-        })
+        (Type_enclosing.make
+           ~uri
+           ~at:(`Range (Selection.to_range selection))
+           ~index:0
+           ~verbosity:0))
 
   let _copy_type_under_cursor =
     let handler (instance : Extension_instance.t) ~args:_ =
