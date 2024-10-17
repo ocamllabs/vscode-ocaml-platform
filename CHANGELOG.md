@@ -2,8 +2,10 @@
 
 # Unreleased
 
-- Add `ocaml.copy-type-under-cursor` to copy, in the clipboard the type of 
+- Add `ocaml.copy-type-under-cursor` to copy, in the clipboard the type of
   the expression under the cursor (#1582)
+
+- Add modules for `ocaml-lsp` custom requests to copy (#1619)
 
 ## 1.20.1
 
