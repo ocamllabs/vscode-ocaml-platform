@@ -288,3 +288,53 @@ module Merlin_jump = struct
   let request =
     { meth = ocamllsp_prefixed "jump"; encode_params; decode_response }
 end
+
+module Type_search = struct
+  type res =
+    { name : string
+    ; typ : string
+    ; loc : Range.t
+    ; doc : string option
+    ; cost : int
+    ; constructible : string
+    }
+
+  type params =
+    { uri : Uri.t
+    ; position : Position.t
+    ; limit : int
+    ; query : string
+    ; with_doc : bool
+    }
+
+  type response = res list
+
+  let encode_params { uri; position; limit; query; with_doc } =
+    let open Jsonoo.Encode in
+    let uri_position =
+      DocumentPosition.encode { uri; position = `Position position }
+    in
+    let query = ("query", string query) in
+    let limit = ("limit", int limit) in
+    let with_doc = ("with_doc", bool with_doc) in
+    object_ (uri_position @ [ query; limit; with_doc ])
+
+  let decode_response response =
+    let open Jsonoo.Decode in
+    let decode_res response =
+      let name = field "name" string response in
+      let typ = field "typ" string response in
+      let loc = field "loc" Range.t_of_json response in
+      let doc = try_optional (field "doc" string) response in
+      let cost = field "cost" int response in
+      let constructible = field "constructible" string response in
+      { name; typ; loc; doc; cost; constructible }
+    in
+    list decode_res response
+
+  let make ~uri ~position ~limit ~query ~with_doc () =
+    { uri; position; limit; query; with_doc }
+
+  let request =
+    { meth = ocamllsp_prefixed "typeSearch"; encode_params; decode_response }
+end
