@@ -20,11 +20,11 @@ module DocumentPosition = struct
     ; position : [ `Position of Position.t | `Range of Range.t ]
     }
 
-  let encode { uri; position } =
+  let encode { uri; position } ~pos_name =
     let open Jsonoo.Encode in
     let uri = ("uri", string @@ Uri.toString uri ()) in
     let position =
-      ( "position"
+      ( pos_name
       , match position with
         | `Position p -> Position.json_of_t p
         | `Range r -> Range.json_of_t r )
@@ -68,7 +68,9 @@ module Type_enclosing = struct
 
   let encode_params { uri; at; index; verbosity } =
     let open Jsonoo.Encode in
-    let uri_position = DocumentPosition.encode { uri; position = at } in
+    let uri_position =
+      DocumentPosition.encode { uri; position = at } ~pos_name:"at"
+    in
     let index = ("index", int index) in
     let verbosity = ("verbosity", int verbosity) in
     object_ (index :: verbosity :: uri_position)
