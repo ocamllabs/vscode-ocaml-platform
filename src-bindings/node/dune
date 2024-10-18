@@ -1,9 +1,9 @@
 (library
  (name node)
- (public_name vscode.node)
+ (public_name vscode-node)
  (preprocess
   (pps gen_js_api.ppx))
  (js_of_ocaml
   (javascript_files node_stub.js))
- (libraries interop promise_jsoo jsonoo gen_js_api js_of_ocaml)
+ (libraries vscode-interop promise_jsoo jsonoo gen_js_api js_of_ocaml)
  (modes byte))
