@@ -210,7 +210,7 @@ module Hover_extended = struct
     ; value : string
     }
 
-  type res =
+  type hover_extended_results =
     { contents : content
     ; range : Range.t
     }
@@ -221,7 +221,7 @@ module Hover_extended = struct
     ; verbosity : int option
     }
 
-  type response = res list
+  type response = hover_extended_results list
 
   let encode_params { uri; position; verbosity } =
     let open Jsonoo.Encode in
@@ -290,7 +290,7 @@ module Merlin_jump = struct
 end
 
 module Type_search = struct
-  type res =
+  type tpye_search_results =
     { name : string
     ; typ : string
     ; loc : Range.t
@@ -307,7 +307,7 @@ module Type_search = struct
     ; with_doc : bool
     }
 
-  type response = res list
+  type response = tpye_search_results list
 
   let encode_params { uri; position; limit; query; with_doc } =
     let open Jsonoo.Encode in

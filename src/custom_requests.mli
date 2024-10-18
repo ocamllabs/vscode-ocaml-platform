@@ -79,11 +79,19 @@ module Construct : sig
 end
 
 module Hover_extended : sig
-  type res
+  type content =
+    { kind : string
+    ; value : string
+    }
+
+  type hover_extended_results =
+    { contents : content
+    ; range : Range.t
+    }
 
   type params
 
-  type response = res list
+  type response = hover_extended_results list
 
   val make :
     uri:Uri.t -> position:Position.t -> ?verbosity:int option -> unit -> params
@@ -105,11 +113,18 @@ module Merlin_jump : sig
 end
 
 module Type_search : sig
-  type res
+  type tpye_search_results =
+    { name : string
+    ; typ : string
+    ; loc : Range.t
+    ; doc : string option
+    ; cost : int
+    ; constructible : string
+    }
 
   type params
 
-  type response = res list
+  type response = tpye_search_results list
 
   val make :
        uri:Uri.t
