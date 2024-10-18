@@ -71,7 +71,7 @@ module Type_enclosing = struct
     let uri_position = DocumentPosition.encode { uri; position = at } in
     let index = ("index", int index) in
     let verbosity = ("verbosity", int verbosity) in
-    object_ (uri_position @ [ index; verbosity ])
+    object_ (index :: verbosity :: uri_position)
 
   let decode_response response =
     let open Jsonoo.Decode in
