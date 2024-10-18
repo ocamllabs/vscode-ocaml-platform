@@ -1,14 +1,14 @@
 name: Builds, tests & co
 
 on:
-  pull_request:
   push:
     branches:
       - master
     tags:
       - "*"
+  pull_request_target:
 
-# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
 # Concurrent workflows are grouped by the PR or branch that triggered them
 # (github.ref) and the name of the workflow (github.workflow). The
 # 'cancel-in-progress' option then make sure that only one workflow is running
