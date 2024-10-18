@@ -60,8 +60,6 @@
    (>= 4.1.0))
   (gen_js_api
    (= 1.1.2))
-  (vscode-interop
-   (= :version))
   (ocamlformat
    (and
     (= 0.26.2)
@@ -105,6 +103,8 @@
    (>= 0.3.1))
   (jsonoo
    (>= 0.2.1))
+  (vscode-interop
+   (= :version))
   (ocamlformat
    (and
     (= 0.27.0)
