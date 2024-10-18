@@ -35,7 +35,7 @@ let typedHoles =
   }
 
 module Type_enclosing = struct
-  type request_params =
+  type params =
     { uri : Uri.t
     ; at : [ `Position of Position.t | `Range of Range.t ]
     ; index : int
@@ -68,9 +68,8 @@ module Type_enclosing = struct
     let enclosings = field "enclosings" (list Range.t_of_json) response in
     { index; type_; enclosings }
 
+  let make ~uri ~at ~index ~verbosity = { uri; at; index; verbosity }
+
   let request =
     { meth = ocamllsp_prefixed "typeEnclosing"; encode_params; decode_response }
-
-  let send ~uri ~at ~index ~verbosity client =
-    send_request client request { uri; at; index; verbosity }
 end
