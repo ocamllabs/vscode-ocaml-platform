@@ -22,17 +22,103 @@ val inferIntf : (string, string) custom_request
 val typedHoles : (Uri.t, Range.t list) custom_request
 
 module Type_enclosing : sig
+  type params
+
   type response =
     { index : int
     ; type_ : string
     ; enclosings : Range.t list
     }
 
-  val send :
+  val make :
        uri:Uri.t
     -> at:[ `Position of Position.t | `Range of Range.t ]
     -> index:int
     -> verbosity:int
-    -> LanguageClient.t
-    -> response Promise.t
+    -> params
+
+  val request : (params, response) custom_request
+end
+
+module Get_documentation : sig
+  type params
+
+  type response =
+    { kind : string
+    ; value : string
+    }
+
+  val make :
+       uri:Uri.t
+    -> position:Position.t
+    -> ?identifier:string option
+    -> ?contentFormat:[ `Plantext | `Markdown ] option
+    -> unit
+    -> params
+
+  val request : (params, response) custom_request
+end
+
+module Construct : sig
+  type params
+
+  type response =
+    { position : Range.t
+    ; result : string list
+    }
+
+  val make :
+       uri:Uri.t
+    -> position:Position.t
+    -> ?depth:int option
+    -> ?with_values:[ `None | `Local ] option
+    -> unit
+    -> params
+
+  val request : (params, response) custom_request
+end
+
+module Hover_extended : sig
+  type res
+
+  type params
+
+  type response = res list
+
+  val make :
+    uri:Uri.t -> position:Position.t -> ?verbosity:int option -> unit -> params
+
+  val request : (params, response) custom_request
+end
+
+module Merlin_jump : sig
+  type params
+
+  type response =
+    { uri : Uri.t
+    ; position : Position.t
+    }
+
+  val make : uri:Uri.t -> position:Position.t -> target:string -> unit -> params
+
+  val request : (params, response) custom_request
+end
+
+module Type_search : sig
+  type res
+
+  type params
+
+  type response = res list
+
+  val make :
+       uri:Uri.t
+    -> position:Position.t
+    -> limit:int
+    -> query:string
+    -> with_doc:bool
+    -> unit
+    -> params
+
+  val request : (params, response) custom_request
 end
