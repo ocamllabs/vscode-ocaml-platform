@@ -14,6 +14,24 @@ let send_request client req params =
 
 let ocamllsp_prefixed s = "ocamllsp/" ^ s
 
+module DocumentPosition = struct
+  type t =
+    { uri : Uri.t
+    ; position : [ `Position of Position.t | `Range of Range.t ]
+    }
+
+  let encode { uri; position } =
+    let open Jsonoo.Encode in
+    let uri = ("uri", string @@ Uri.toString uri ()) in
+    let position =
+      ( "position"
+      , match position with
+        | `Position p -> Position.json_of_t p
+        | `Range r -> Range.json_of_t r )
+    in
+    [ uri; position ]
+end
+
 let switchImplIntf =
   { meth = ocamllsp_prefixed "switchImplIntf"
   ; encode_params = Jsonoo.Encode.string
@@ -35,7 +53,7 @@ let typedHoles =
   }
 
 module Type_enclosing = struct
-  type request_params =
+  type params =
     { uri : Uri.t
     ; at : [ `Position of Position.t | `Range of Range.t ]
     ; index : int
@@ -50,16 +68,10 @@ module Type_enclosing = struct
 
   let encode_params { uri; at; index; verbosity } =
     let open Jsonoo.Encode in
-    let uri = ("uri", string @@ Uri.toString uri ()) in
-    let at =
-      match at with
-      | `Position p -> Position.json_of_t p
-      | `Range r -> Range.json_of_t r
-    in
-    let at = ("at", at) in
+    let uri_position = DocumentPosition.encode { uri; position = at } in
     let index = ("index", int index) in
     let verbosity = ("verbosity", int verbosity) in
-    object_ [ uri; at; index; verbosity ]
+    object_ (uri_position @ [ index; verbosity ])
 
   let decode_response response =
     let open Jsonoo.Decode in
@@ -68,9 +80,8 @@ module Type_enclosing = struct
     let enclosings = field "enclosings" (list Range.t_of_json) response in
     { index; type_; enclosings }
 
+  let make ~uri ~at ~index ~verbosity = { uri; at; index; verbosity }
+
   let request =
     { meth = ocamllsp_prefixed "typeEnclosing"; encode_params; decode_response }
-
-  let send ~uri ~at ~index ~verbosity client =
-    send_request client request { uri; at; index; verbosity }
 end
