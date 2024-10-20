@@ -28,7 +28,8 @@
  (depends
   (vscode
    (= :version))
-  (ocaml (>= 5.2.0))
+  (ocaml
+   (>= 5.2.0))
   (js_of_ocaml
    (>= 4.1.0))
   (gen_js_api
@@ -52,6 +53,23 @@
   (ocaml-lsp-server :with-dev-setup)))
 
 (package
+ (name vscode-interop)
+ (synopsis
+  "Interop library compatible with the vscode and vscode-node bindings")
+ (depends
+  (ocaml
+   (>= 4.13))
+  (js_of_ocaml
+   (>= 4.1.0))
+  (gen_js_api
+   (= 1.1.2))
+  (ocamlformat
+   (and
+    (= 0.26.2)
+    :with-dev-setup))
+  (ocaml-lsp-server :with-dev-setup)))
+
+(package
  (name vscode)
  (synopsis "Visual Studio Code Bindings")
  (depends
@@ -65,6 +83,31 @@
    (>= 0.3.1))
   (jsonoo
    (>= 0.2.1))
+  (vscode-interop
+   (= :version))
+  (ocamlformat
+   (and
+    (= 0.26.2)
+    :with-dev-setup))
+  (ocaml-lsp-server :with-dev-setup)))
+
+(package
+ (name vscode-node)
+ (synopsis
+  "Bindings for Node.js that are used by the Visual Studio Extension")
+ (depends
+  (ocaml
+   (>= 4.13))
+  (js_of_ocaml
+   (>= 4.1.0))
+  (gen_js_api
+   (= 1.1.2))
+  (promise_jsoo
+   (>= 0.3.1))
+  (jsonoo
+   (>= 0.2.1))
+  (vscode-interop
+   (= :version))
   (ocamlformat
    (and
     (= 0.26.2)
