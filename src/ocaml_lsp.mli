@@ -15,6 +15,8 @@ val can_handle_typed_holes : t -> bool
 
 val can_handle_type_enclosing : t -> bool
 
+val can_handle_search_by_type : t -> bool
+
 module OcamllspSettingEnable : sig
   include Ojs.T
 

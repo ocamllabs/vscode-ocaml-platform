@@ -45,6 +45,7 @@ module Experimental_capabilities = struct
     ; handleInferIntf : bool
     ; handleTypedHoles : bool
     ; handleTypeEnclosing : bool
+    ; handleSearchByType : bool
     }
 
   let default =
@@ -53,6 +54,7 @@ module Experimental_capabilities = struct
     ; handleInferIntf = false
     ; handleTypedHoles = false
     ; handleTypeEnclosing = false
+    ; handleSearchByType = false
     }
 
   (** Creates [t] given a JSON of form [{ 'handleSwitchImplIntf' : true, .... }] *)
@@ -68,11 +70,13 @@ module Experimental_capabilities = struct
       let handleInferIntf = has_capability "handleInferIntf" in
       let handleTypedHoles = has_capability "handleTypedHoles" in
       let handleTypeEnclosing = has_capability "handleTypeEnclosing" in
+      let handleSearchByType = has_capability "handleTypeSearch" in
       { interfaceSpecificLangId
       ; handleSwitchImplIntf
       ; handleInferIntf
       ; handleTypedHoles
       ; handleTypeEnclosing
+      ; handleSearchByType
       }
     with Jsonoo.Decode_error err ->
       show_message
@@ -237,3 +241,5 @@ let can_handle_typed_holes t = t.experimental_capabilities.handleTypedHoles
 
 let can_handle_type_enclosing t =
   t.experimental_capabilities.handleTypeEnclosing
+
+let can_handle_search_by_type t = t.experimental_capabilities.handleSearchByType
