@@ -534,6 +534,116 @@ module Copy_type_under_cursor = struct
     command Extension_consts.Commands.copy_type_under_cursor handler
 end
 
+module Search_by_type = struct
+  let extension_name = "Search By Type"
+
+  let ocaml_lsp_doesnt_support_search_by_type instance ocaml_lsp =
+    match
+      Ocaml_lsp.is_version_up_to_date
+        ocaml_lsp
+        (Extension_instance.ocaml_version_exn instance)
+    with
+    | Ok () -> ()
+    | Error (`Msg msg) ->
+      show_message
+        `Warn
+        "The installed version of `ocamllsp` does not support type search. %s"
+        msg
+
+  let _get_search_results ~query ~limit ~with_doc text_editor client =
+    let doc = TextEditor.document text_editor in
+    let uri = TextDocument.uri doc in
+    let selection = TextEditor.selection text_editor in
+    Custom_requests.(
+      send_request
+        client
+        Type_search.request
+        (Type_search.make
+           ~uri
+           ~position:(Range.start (Selection.to_range selection))
+           ~limit
+           ~query
+           ~with_doc
+           ()))
+
+  let _search_by_type =
+    let handler (instance : Extension_instance.t) ~args:_ =
+      let search_by_type () =
+        match Window.activeTextEditor () with
+        | None ->
+          Extension_consts.Command_errors.text_editor_must_be_active
+            extension_name
+            ~expl:"The command to search for a value by it's type"
+          |> show_message `Error "%s" |> Promise.return
+        | Some _text_editor -> (
+          match Extension_instance.lsp_client instance with
+          | None ->
+            show_message `Warn "ocamllsp is not running" |> Promise.return
+          | Some (_client, ocaml_lsp)
+            when not (Ocaml_lsp.can_handle_search_by_type ocaml_lsp) ->
+            ocaml_lsp_doesnt_support_search_by_type instance ocaml_lsp
+            |> Promise.return
+          | Some (_client, _) ->
+            let _get_query_input =
+              Vscode.(
+                Window.showInputBox
+                  ~options:
+                    (InputBoxOptions.create
+                       ~title:"Search By Type"
+                       ~prompt:
+                         "Perform a search by type request by providing a type \
+                          signature to look for"
+                       ~placeHolder:"int -> string"
+                       ~value:"int -> string"
+                       ~password:false
+                       ~ignoreFocusOut:true
+                       ())
+                  ())
+            in
+            let _get_doc_input =
+              Vscode.(
+                Window.showQuickPickItems
+                  ~choices:
+                    [ ( QuickPickItem.create ~label:"Yes" ~alwaysShow:false ()
+                      , "yes" )
+                    ; ( QuickPickItem.create ~label:"No" ~alwaysShow:false ()
+                      , "no" )
+                    ]
+                  ~options:
+                    (QuickPickOptions.create
+                       ~title:"Search By Type"
+                       ~matchOnDescription:false
+                       ~canPickMany:false
+                       ~placeHolder:
+                         "Documentation information will be attached for each \
+                          result."
+                       ~ignoreFocusOut:true
+                       ())
+                  ())
+            in
+            let _get_limit_input =
+              Vscode.(
+                Window.showInputBox
+                  ~options:
+                    (InputBoxOptions.create
+                       ~title:"Search By Type"
+                       ~prompt:"How many results should be returned"
+                       ~placeHolder:"20"
+                       ~value:"20"
+                       ~password:false
+                       ~ignoreFocusOut:true
+                       ())
+                  ())
+            in
+            show_message `Info "Type search has been performed"
+            |> Promise.return)
+      in
+      let (_ : unit Promise.t) = search_by_type () in
+      ()
+    in
+    command Extension_consts.Commands.search_by_type handler
+end
+
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in
