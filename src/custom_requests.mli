@@ -41,7 +41,7 @@ module Type_enclosing : sig
 end
 
 module Type_search : sig
-  type tpye_search_results =
+  type type_search_results =
     { name : string
     ; typ : string
     ; loc : Range.t
