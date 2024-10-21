@@ -256,7 +256,7 @@
       {
         "command": "ocaml.search-by-type",
         "category": "OCaml",
-        "title": "Peform a search by type request"
+        "title": "Search a value by type or polarity"
       }
     ],
     "configuration": {
