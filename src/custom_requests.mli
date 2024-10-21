@@ -52,7 +52,7 @@ module Type_search : sig
 
   type params
 
-  type response = tpye_search_results list
+  type response = type_search_results list
 
   val make :
        uri:Uri.t
