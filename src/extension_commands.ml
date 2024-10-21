@@ -489,12 +489,15 @@ module Copy_type_under_cursor = struct
     let doc = TextEditor.document text_editor in
     let uri = TextDocument.uri doc in
     let selection = TextEditor.selection text_editor in
-    Custom_requests.Type_enclosing.send
-      ~uri
-      ~at:(`Range (Selection.to_range selection))
-      ~index:0
-      ~verbosity:0
-      client
+    Custom_requests.(
+      send_request
+        client
+        Type_enclosing.request
+        (Type_enclosing.make
+           ~uri
+           ~at:(`Range (Selection.to_range selection))
+           ~index:0
+           ~verbosity:0))
 
   let _copy_type_under_cursor =
     let handler (instance : Extension_instance.t) ~args:_ =
