@@ -37,6 +37,9 @@ module Commands = struct
   let merlin_jump = ocaml_prefixed "jump"
   let search_by_type = ocaml_prefixed "search-by-type"
   let navigate_typed_holes = ocaml_prefixed "navigate-typed-holes"
+  let type_selection = ocaml_prefixed "type-selection"
+  let type_previous_selection = ocaml_prefixed "type-previous-selection"
+  let augment_selection_type_verbosity = ocaml_prefixed "augment-selection-type-verbosity"
 end
 
 module Command_errors = struct

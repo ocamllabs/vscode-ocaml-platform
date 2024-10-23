@@ -19,13 +19,13 @@ val switchImplIntf : (string, string array) custom_request
 val inferIntf : (string, string) custom_request
 val typedHoles : (Uri.t, Range.t list) custom_request
 
-module Type_enclosing : sig
+module Type_selection : sig
   type params
 
   type response =
     { index : int
     ; type_ : string
-    ; enclosings : Range.t list
+    ; enclosings : Range.t array
     }
 
   val make

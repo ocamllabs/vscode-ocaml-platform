@@ -272,6 +272,21 @@
         "command": "ocaml.navigate-typed-holes",
         "category": "OCaml",
         "title": "List typed holes in the file for navigation"
+      },
+      {
+        "command": "ocaml.type-selection",
+        "category": "OCaml",
+        "title": "Get the type of the selection"
+      },
+      {
+        "command": "ocaml.type-previous-selection",
+        "category": "OCaml",
+        "title": "Show previous type-selection steps."
+      },
+      {
+        "command": "ocaml.augment-selection-type-verbosity",
+        "category": "OCaml",
+        "title": "Increase the verbosity of the selection's type."
       }
     ],
     "configuration": {
@@ -310,6 +325,16 @@
           "type": "boolean",
           "default": true,
           "markdownDescription": "Enable/Disable dune diagnostics"
+        },
+        "ocaml.commands.typeSelection.outputChannelResults": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Enable/Disable type of selection results to appear in a dedicated output channel in the side panel."
+        },
+        "ocaml.commands.typeSelection.alwaysClearOutputChannel": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable clearing of the output channel before showing a new result."
         },
         "ocaml.server.syntaxDocumentation": {
           "type": "boolean",
@@ -796,6 +821,21 @@
         "command": "ocaml.search-by-type",
         "key": "Alt+F",
         "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+      },
+      {
+        "command": "ocaml.type-selection",
+        "key": "Alt+T",
+        "when": "editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface"
+      },
+      {
+        "command": "ocaml.type-previous-selection",
+        "key": "Shift+Alt+T",
+        "when": "editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface"
+      },
+      {
+        "command": "ocaml.augment-selection-type-verbosity",
+        "key": "Alt+V",
+        "when": "editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface"
       }
     ],
     "languages": [

@@ -17,20 +17,29 @@ module OcamllspSettings = struct
     [%js:
       val codelens : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
       val extendedHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+      val standardHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
       val duneDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
       val syntaxDocumentation : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
 
       val create
         :  ?codelens:OcamllspSettingEnable.t
         -> ?extendedHover:OcamllspSettingEnable.t
+        -> ?standardHover:OcamllspSettingEnable.t
         -> ?duneDiagnostics:OcamllspSettingEnable.t
         -> ?syntaxDocumentation:OcamllspSettingEnable.t
         -> unit
         -> t
       [@@js.builder]]
 
-  let create ~codelens ~extendedHover ~duneDiagnostics ~syntaxDocumentation =
-    create ?codelens ?extendedHover ?duneDiagnostics ?syntaxDocumentation ()
+  let create ~codelens ~extendedHover ~standardHover ~duneDiagnostics ~syntaxDocumentation
+    =
+    create
+      ?codelens
+      ?extendedHover
+      ?standardHover
+      ?duneDiagnostics
+      ?syntaxDocumentation
+      ()
   ;;
 end
 
@@ -239,7 +248,7 @@ let of_initialize_result (t : LanguageClient.InitializeResult.t) =
 let can_handle_switch_impl_intf t = t.experimental_capabilities.handleSwitchImplIntf
 let can_handle_infer_intf t = t.experimental_capabilities.handleInferIntf
 let can_handle_typed_holes t = t.experimental_capabilities.handleTypedHoles
-let can_handle_type_enclosing t = t.experimental_capabilities.handleTypeEnclosing
+let can_handle_type_selection t = t.experimental_capabilities.handleTypeEnclosing
 let can_handle_construct t = t.experimental_capabilities.handleConstruct
 let can_handle_merlin_jump t = t.experimental_capabilities.handleJump
 let can_handle_search_by_type t = t.experimental_capabilities.handleSearchByType
