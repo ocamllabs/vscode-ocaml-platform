@@ -13,6 +13,7 @@ type t =
   ; ast_editor_state : Ast_editor_state.t
   ; mutable codelens : bool option
   ; mutable extended_hover : bool option
+  ; mutable standard_hover : bool option
   ; mutable dune_diagnostics : bool option
   ; mutable syntax_documentation : bool option
   }
@@ -27,14 +28,18 @@ let lsp_client t = t.lsp_client
 
 let ocaml_version_exn t = Option.value_exn t.ocaml_version
 
-let send_configuration ~codelens ~extended_hover ~dune_diagnostics
-    ~syntax_documentation client =
+let send_configuration ~codelens ~extended_hover ~standard_hover
+    ~dune_diagnostics ~syntax_documentation client =
   let codelens =
     Option.map codelens ~f:(fun enable ->
         Ocaml_lsp.OcamllspSettingEnable.create ~enable)
   in
   let extendedHover =
     Option.map extended_hover ~f:(fun enable ->
+        Ocaml_lsp.OcamllspSettingEnable.create ~enable)
+  in
+  let standardHover =
+    Option.map standard_hover ~f:(fun enable ->
         Ocaml_lsp.OcamllspSettingEnable.create ~enable)
   in
   let duneDiagnostics =
@@ -49,6 +54,7 @@ let send_configuration ~codelens ~extended_hover ~dune_diagnostics
     Ocaml_lsp.OcamllspSettings.create
       ~codelens
       ~extendedHover
+      ~standardHover
       ~duneDiagnostics
       ~syntaxDocumentation
   in
@@ -65,20 +71,26 @@ let send_configuration ~codelens ~extended_hover ~dune_diagnostics
     "workspace/didChangeConfiguration"
     payload
 
-let set_configuration t ~codelens ~extended_hover ~dune_diagnostics
-    ~syntax_documentation =
-  t.codelens <- codelens;
-  t.extended_hover <- extended_hover;
-  t.dune_diagnostics <- dune_diagnostics;
-  t.syntax_documentation <- syntax_documentation;
+let set_configuration t ?codelens ?extended_hover ?standard_hover
+    ?dune_diagnostics ?syntax_documentation () =
+  Option.iter codelens ~f:(fun codelens -> t.codelens <- codelens);
+  Option.iter extended_hover ~f:(fun extended_hover ->
+      t.extended_hover <- extended_hover);
+  Option.iter standard_hover ~f:(fun standard_hover ->
+      t.standard_hover <- standard_hover);
+  Option.iter dune_diagnostics ~f:(fun dune_diagnostics ->
+      t.dune_diagnostics <- dune_diagnostics);
+  Option.iter syntax_documentation ~f:(fun syntax_documentation ->
+      t.syntax_documentation <- syntax_documentation);
   match t.lsp_client with
   | None -> ()
   | Some (client, (_ : Ocaml_lsp.t)) ->
     send_configuration
-      ~codelens
-      ~extended_hover
-      ~dune_diagnostics
-      ~syntax_documentation
+      ~codelens:t.codelens
+      ~extended_hover:t.extended_hover
+      ~standard_hover:t.standard_hover
+      ~dune_diagnostics:t.dune_diagnostics
+      ~syntax_documentation:t.syntax_documentation
       client
 
 let stop_server t =
@@ -201,6 +213,7 @@ end = struct
         client
         ~codelens:t.codelens
         ~extended_hover:t.extended_hover
+        ~standard_hover:t.standard_hover
         ~dune_diagnostics:t.dune_diagnostics
         ~syntax_documentation:t.syntax_documentation;
       Ok ()
@@ -274,6 +287,7 @@ let make () =
   ; documentation_server = None
   ; codelens = None
   ; extended_hover = None
+  ; standard_hover = None
   ; dune_diagnostics = None
   ; syntax_documentation = None
   }

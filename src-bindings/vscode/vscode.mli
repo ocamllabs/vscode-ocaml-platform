@@ -471,6 +471,38 @@ module ThemableDecorationAttachmentRenderOptions : sig
     -> t
 end
 
+module DecorationRenderOptions : sig
+  include Ojs.T
+
+  type color = ThemableDecorationAttachmentRenderOptions.color
+
+  val create :
+       ?backgroundColor:color
+    -> ?outline:string
+    -> ?outlineColor:color
+    -> ?outlineStyle:string
+    -> ?outlineWidth:string
+    -> ?border:string
+    -> ?borderColor:color
+    -> ?borderRadius:string
+    -> ?borderSpacing:string
+    -> ?borderStyle:string
+    -> ?borderWidth:string
+    -> ?fontStyle:string
+    -> ?fontWeight:string
+    -> ?textDecoration:string
+    -> ?cursor:string
+    -> ?color:color
+    -> ?opacity:string
+    -> ?letterSpacing:string
+    -> ?overviewRulerColor:color
+    -> ?before:ThemableDecorationAttachmentRenderOptions.t
+    -> ?after:ThemableDecorationAttachmentRenderOptions.t
+    -> ?isWholeLine:bool
+    -> unit
+    -> t
+end
+
 module ThemableDecorationInstanceRenderOptions : sig
   include Ojs.T
 
@@ -598,6 +630,31 @@ module TextEditor : sig
 
   val revealRange :
     t -> range:Range.t -> ?revealType:TextEditorRevealType.t -> unit -> unit
+end
+
+module TextEditorSelectionChangeKind : sig
+  type t =
+    | Keyboard
+    | Mouse
+    | Command
+
+  include Ojs.T with type t := t
+end
+
+module TextEditorSelectionChangeEvent : sig
+  include Ojs.T
+
+  val textEditor : t -> TextEditor.t
+
+  val selections : t -> Selection.t list
+
+  val kind : t -> TextEditorSelectionChangeKind.t
+
+  val create :
+       textEditor:TextEditor.t
+    -> selections:Selection.t list
+    -> kind:TextEditorSelectionChangeKind.t
+    -> t
 end
 
 module ConfigurationTarget : sig
@@ -1175,6 +1232,8 @@ module OutputChannel : sig
 
   val appendLine : t -> value:string -> unit
 
+  val replace : t -> value:string -> unit
+
   val clear : t -> unit
 
   val show : t -> ?preserveFocus:bool -> unit -> unit
@@ -1523,6 +1582,8 @@ module Hover : sig
          [ `MarkdownString of MarkdownString.t
          | `MarkdownStringArray of MarkdownString.t list
          ]
+    -> ?range:Range.t
+    -> unit
     -> t
 end
 
@@ -2300,6 +2361,9 @@ module Window : sig
 
   val onDidChangeVisibleTextEditors : unit -> TextEditor.t list Event.t
 
+  val onDidChangeTextEditorSelection :
+    unit -> TextEditorSelectionChangeEvent.t Event.t
+
   val terminals : unit -> Terminal.t List.t
 
   val activeTerminal : unit -> Terminal.t option
@@ -2322,6 +2386,9 @@ module Window : sig
     -> ?options:TextDocumentShowOptions.t
     -> unit
     -> TextEditor.t Promise.t
+
+  val createTextEditorDecorationType :
+    options:DecorationRenderOptions.t -> TextEditorDecorationType.t
 
   val showInformationMessage :
        message:string
@@ -2367,7 +2434,8 @@ module Window : sig
   val showOpenDialog :
     ?options:OpenDialogOptions.t -> unit -> Uri.t list option Promise.t
 
-  val createOutputChannel : name:string -> OutputChannel.t
+  val createOutputChannel :
+    name:string -> ?languageId:string -> unit -> OutputChannel.t
 
   val setStatusBarMessage :
     text:string -> ?hide:[ `AfterTimeout of int ] -> unit -> Disposable.t
