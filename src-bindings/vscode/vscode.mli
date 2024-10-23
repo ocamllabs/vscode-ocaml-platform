@@ -600,6 +600,31 @@ module TextEditor : sig
     t -> range:Range.t -> ?revealType:TextEditorRevealType.t -> unit -> unit
 end
 
+module TextEditorSelectionChangeKind : sig
+  type t =
+    | Keyboard
+    | Mouse
+    | Command
+
+  include Ojs.T with type t := t
+end
+
+module TextEditorSelectionChangeEvent : sig
+  include Ojs.T
+
+  val textEditor : t -> TextEditor.t
+
+  val selections : t -> Selection.t list
+
+  val kind : t -> TextEditorSelectionChangeKind.t
+
+  val create :
+       textEditor:TextEditor.t
+    -> selections:Selection.t list
+    -> kind:TextEditorSelectionChangeKind.t
+    -> t
+end
+
 module ConfigurationTarget : sig
   type t =
     | Global
@@ -2299,6 +2324,9 @@ module Window : sig
   val onDidChangeActiveTextEditor : unit -> TextEditor.t Event.t
 
   val onDidChangeVisibleTextEditors : unit -> TextEditor.t list Event.t
+
+  val onDidChangeTextEditorSelection :
+    unit -> TextEditorSelectionChangeEvent.t Event.t
 
   val terminals : unit -> Terminal.t List.t
 
