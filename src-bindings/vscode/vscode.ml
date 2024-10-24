@@ -1107,6 +1107,28 @@ module ProviderResult = struct
     else `Value (or_undefined_of_js ml_of_js js_val)
 end
 
+module InputBoxValidationSeverity = struct
+  type t =
+    | Info [@js 1]
+    | Warning [@js 2]
+    | Error [@js 3]
+  [@@js.enum] [@@js]
+end
+
+module InputBoxValidationMessage = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val message : t -> string [@@js.get]
+
+    val severity : t -> InputBoxValidationSeverity.t [@@js.get]
+
+    val create :
+      message:string -> severity:InputBoxValidationSeverity.t -> unit -> t
+    [@@js.builder]]
+end
+
 module InputBoxOptions = struct
   include Interface.Make ()
 
@@ -1141,6 +1163,75 @@ module InputBoxOptions = struct
       -> unit
       -> t
     [@@js.builder]]
+end
+
+module InputBox = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+    val title : t -> string or_undefined [@@js.get]
+
+    val set_title : t -> string or_undefined -> unit [@@js.set]
+
+    val enabled : t -> bool [@@js.get]
+
+    val set_enabled : t -> bool -> unit [@@js.set]
+
+    val busy : t -> bool [@@js.get]
+
+    val set_busy : t -> bool -> unit [@@js.set]
+
+    val ignoreFocusOut : t -> bool or_undefined [@@js.get]
+
+    val set_ignoreFocusOut : t -> bool or_undefined -> unit [@@js.set]
+
+    val onDidHide : t -> unit Event.t [@@js.get]
+
+    val value : t -> string or_undefined [@@js.get]
+
+    val set_value : t -> string or_undefined -> unit [@@js.set]
+
+    val valueSelection : t -> (int * int) or_undefined [@@js.get]
+
+    val set_valueSelection : t -> (int * int) or_undefined -> unit [@@js.set]
+
+    val placeholder : t -> string or_undefined [@@js.get]
+
+    val set_placeholder : t -> string or_undefined -> unit [@@js.set]
+
+    val password : t -> bool or_undefined [@@js.get]
+
+    val set_password : t -> bool or_undefined -> unit [@@js.set]
+
+    val onDidChangeValue : t -> string Event.t [@@js.get]
+
+    val onDidAccept : t -> unit Event.t [@@js.get]
+
+    val prompt : t -> string or_undefined [@@js.get]
+
+    val set_prompt : t -> string or_undefined -> unit [@@js.set]
+
+    val validationMessage : t -> InputBoxValidationMessage.t or_undefined
+    [@@js.get]
+
+    val set_validationMessage :
+      t -> InputBoxValidationMessage.t or_undefined -> unit
+    [@@js.set]
+
+    val show : t -> unit [@@js.call]]
+
+  let set t ?title ?ignoreFocusOut ?value ?valueSelection ?placeholder ?password
+      ?prompt ?validationMessage () =
+    set_title t title;
+    set_ignoreFocusOut t ignoreFocusOut;
+    set_value t value;
+    set_valueSelection t valueSelection;
+    set_placeholder t placeholder;
+    set_password t password;
+    set_prompt t prompt;
+    set_validationMessage t validationMessage;
+    t
 end
 
 module OpenDialogOptions = struct
@@ -3053,6 +3144,9 @@ module Window = struct
       -> unit
       -> string or_undefined Promise.t
     [@@js.global "vscode.window.showInputBox"]
+
+    val createInputBox : unit -> InputBox.t
+    [@@js.global "vscode.window.createInputBox"]
 
     val showOpenDialog :
       ?options:OpenDialogOptions.t -> unit -> Uri.t list or_undefined Promise.t

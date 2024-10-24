@@ -263,6 +263,7 @@ prefix `OCaml:`:
 | `ocaml.open-repl`              | Open REPL                                   |                    |
 | `ocaml.evaluate-selection`     | Evaluate Selection                          | `Shift+Enter`      |
 | `ocaml.copy-type-under-cursor` | Copy the type under the cursor              |                    |
+| `ocaml.search-by-type`         | Search a value by type or polarity          |                    |
 
 ## Debugging OCaml programs (experimental)
 

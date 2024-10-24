@@ -872,6 +872,26 @@ module ProviderResult : sig
   include Js.Generic with type 'a t := 'a t
 end
 
+module InputBoxValidationSeverity : sig
+  type t =
+    | Info
+    | Warning
+    | Error
+
+  include Ojs.T with type t := t
+end
+
+module InputBoxValidationMessage : sig
+  include Ojs.T
+
+  val message : t -> string
+
+  val severity : t -> InputBoxValidationSeverity.t
+
+  val create :
+    message:string -> severity:InputBoxValidationSeverity.t -> unit -> t
+end
+
 module InputBoxOptions : sig
   include Ojs.T
 
@@ -900,6 +920,72 @@ module InputBoxOptions : sig
     -> ?password:bool
     -> ?ignoreFocusOut:bool
     -> ?validateInput:(value:string -> string option Promise.t)
+    -> unit
+    -> t
+end
+
+module InputBox : sig
+  include Ojs.T
+
+  val title : t -> string option
+
+  val set_title : t -> string option -> unit
+
+  val enabled : t -> bool
+
+  val set_enabled : t -> bool -> unit
+
+  val busy : t -> bool
+
+  val set_busy : t -> bool -> unit
+
+  val ignoreFocusOut : t -> bool option
+
+  val set_ignoreFocusOut : t -> bool option -> unit
+
+  val onDidHide : t -> unit Event.t
+
+  val value : t -> string option
+
+  val set_value : t -> string option -> unit
+
+  val valueSelection : t -> (int * int) option
+
+  val set_valueSelection : t -> (int * int) option -> unit
+
+  val placeholder : t -> string option
+
+  val set_placeholder : t -> string option -> unit
+
+  val password : t -> bool option
+
+  val set_password : t -> bool option -> unit
+
+  val onDidChangeValue : t -> string Event.t
+
+  val onDidAccept : t -> unit Event.t
+
+  val prompt : t -> string option
+
+  val set_prompt : t -> string option -> unit
+
+  val validationMessage : t -> InputBoxValidationMessage.t or_undefined
+
+  val set_validationMessage :
+    t -> InputBoxValidationMessage.t or_undefined -> unit
+
+  val show : t -> unit
+
+  val set :
+       t
+    -> ?title:string
+    -> ?ignoreFocusOut:bool
+    -> ?value:string
+    -> ?valueSelection:int * int
+    -> ?placeholder:string
+    -> ?password:bool
+    -> ?prompt:string
+    -> ?validationMessage:InputBoxValidationMessage.t
     -> unit
     -> t
 end
@@ -2363,6 +2449,8 @@ module Window : sig
     -> ?token:CancellationToken.t
     -> unit
     -> string option Promise.t
+
+  val createInputBox : unit -> InputBox.t
 
   val showOpenDialog :
     ?options:OpenDialogOptions.t -> unit -> Uri.t list option Promise.t

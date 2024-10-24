@@ -2,8 +2,10 @@
 
 # Unreleased
 
-- Add `ocaml.copy-type-under-cursor` to copy, in the clipboard the type of 
+- Add `ocaml.copy-type-under-cursor` to copy, in the clipboard the type of
   the expression under the cursor (#1582)
+
+- Add `ocaml.search-by-type` to search for values using their type signature (#1626)
 
 ## 1.20.1
 

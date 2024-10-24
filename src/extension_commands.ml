@@ -534,6 +534,169 @@ module Copy_type_under_cursor = struct
     command Extension_consts.Commands.copy_type_under_cursor handler
 end
 
+module Search_by_type = struct
+  let extension_name = "Search By Type"
+
+  let ocaml_lsp_doesnt_support_search_by_type ocaml_lsp =
+    not (Ocaml_lsp.can_handle_search_by_type ocaml_lsp)
+
+  let rec remove_duplicates ~cmp = function
+    | a :: (b :: _ as t) ->
+      if cmp a b then remove_duplicates ~cmp t
+      else a :: remove_duplicates ~cmp t
+    | remaining -> remaining
+
+  let get_query_input ?previous_query () =
+    Promise.make @@ fun ~resolve ~reject:_ ->
+    let input_box =
+      let validationMessage =
+        Option.map previous_query ~f:(fun _ ->
+            InputBoxValidationMessage.create
+              ~message:
+                "No result found. Check the syntax or use a more general query."
+              ~severity:Warning
+              ())
+      in
+      InputBox.set
+        (Window.createInputBox ())
+        ~title:"Search By Type"
+        ~ignoreFocusOut:false
+        ?value:previous_query
+        ~placeholder:"int -> string / -int +string"
+        ?validationMessage
+        ~prompt:
+          "Perform a search by type request by providing a type signature to \
+           look for"
+        ()
+    in
+    let _disposable =
+      InputBox.onDidAccept
+        input_box
+        ~listener:(fun () ->
+          let query = InputBox.value input_box in
+          InputBox.set_busy input_box true;
+          InputBox.set_enabled input_box false;
+          resolve query)
+        ()
+    in
+    let _disposable =
+      InputBox.onDidChangeValue
+        input_box
+        ~listener:(fun _ -> InputBox.set_validationMessage input_box None)
+        ()
+    in
+    let _disposable =
+      InputBox.onDidHide input_box ~listener:(fun _ -> resolve None) ()
+    in
+    InputBox.show input_box
+
+  let get_search_results ~query ~limit ~with_doc ~position text_editor client =
+    let doc = TextEditor.document text_editor in
+    let uri = TextDocument.uri doc in
+    Custom_requests.(
+      send_request
+        client
+        Type_search.request
+        (Type_search.make ~uri ~position ~limit ~query ~with_doc ()))
+
+  let display_search_results results =
+    Window.showQuickPickItems
+      ~choices:
+        (List.map
+           results
+           ~f:(fun (res : Custom_requests.Type_search.type_search_result) ->
+             ( QuickPickItem.create
+                 ~label:res.name
+                 ~description:res.typ
+                 ~detail:(Option.value ~default:"" res.doc)
+                 ()
+             , res.name )))
+      ~options:
+        (QuickPickOptions.create
+           ~title:"Type/Polarity Search Results"
+           ~canPickMany:false
+           ~ignoreFocusOut:true
+           ())
+      ()
+
+  let _search_by_type =
+    let open Promise.Syntax in
+    let handler (instance : Extension_instance.t) ~args:_ =
+      let rec search_by_type ?query () =
+        match Window.activeTextEditor () with
+        | None ->
+          Extension_consts.Command_errors.text_editor_must_be_active
+            extension_name
+            ~expl:
+              "Search by type/polarity can only be run with a valid file open \
+               in the editor."
+          |> show_message `Error "%s" |> Promise.return
+        | Some text_editor -> (
+          match Extension_instance.lsp_client instance with
+          | None ->
+            show_message `Warn "ocamllsp is not running" |> Promise.return
+          | Some (_client, ocaml_lsp)
+            when ocaml_lsp_doesnt_support_search_by_type ocaml_lsp ->
+            show_message
+              `Warn
+              "The installed version of `ocamllsp` does not support type search"
+            |> Promise.return
+          | Some (client, _) -> (
+            let position =
+              TextEditor.selection text_editor |> Selection.active
+            in
+            let* query_input = get_query_input ?previous_query:query () in
+            match query_input with
+            | Some query -> (
+              let* type_search_results =
+                get_search_results
+                  ~query
+                  ~with_doc:true
+                  ~limit:100
+                  ~position
+                  text_editor
+                  client
+              in
+              match type_search_results with
+              | [] ->
+                show_message `Info "Empty type/polarity search results";
+                search_by_type ~query ()
+              | results -> (
+                let* type_picker =
+                  display_search_results
+                    (remove_duplicates
+                       ~cmp:(fun
+                           (left :
+                             Custom_requests.Type_search.type_search_result)
+                           right
+                         ->
+                         String.equal left.name right.name
+                         && left.cost = right.cost)
+                       results)
+                in
+                match type_picker with
+                | Some text ->
+                  let+ type_inserted =
+                    TextEditor.edit
+                      text_editor
+                      ~callback:(fun ~editBuilder ->
+                        TextEditorEdit.insert
+                          editBuilder
+                          ~location:position
+                          ~value:text)
+                      ()
+                  in
+                  if not type_inserted then
+                    show_message `Error "Unable to insert %s" text
+                | None -> Promise.return ()))
+            | _ -> Promise.return ()))
+      in
+      let (_ : unit Promise.t) = search_by_type () in
+      ()
+    in
+    command Extension_consts.Commands.search_by_type handler
+end
+
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in
