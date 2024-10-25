@@ -766,6 +766,62 @@ module MerlinJump = struct
     command Extension_consts.Commands.merlin_jump handler
 end
 
+module Type_enclosing = struct
+  let extension_name = "Type Enclosing"
+
+  let ocaml_lsp_doesnt_support_type_enclosing instance ocaml_lsp =
+    match
+      Ocaml_lsp.is_version_up_to_date
+        ocaml_lsp
+        (Extension_instance.ocaml_version_exn instance)
+    with
+    | Ok () -> ()
+    | Error (`Msg msg) ->
+      show_message
+        `Warn
+        "The installed version of `ocamllsp` does not support type enclosings. \
+         %s"
+        msg
+
+  let _get_enclosings text_editor client =
+    let doc = TextEditor.document text_editor in
+    let uri = TextDocument.uri doc in
+    let selection = TextEditor.selection text_editor in
+    Custom_requests.(
+      send_request
+        client
+        Type_enclosing.request
+        (Type_enclosing.make
+           ~uri
+           ~at:(`Range (Selection.to_range selection))
+           ~index:0
+           ~verbosity:0))
+
+  let _type_enclosing =
+    let handler (instance : Extension_instance.t) ~args:_ =
+      let type_enclosing () =
+        match Window.activeTextEditor () with
+        | None ->
+          Extension_consts.Command_errors.text_editor_must_be_active
+            extension_name
+            ~expl:"The command copy the type of the expression under cursor"
+          |> show_message `Error "%s" |> Promise.return
+        | Some _text_editor -> (
+          match Extension_instance.lsp_client instance with
+          | None ->
+            show_message `Warn "ocamllsp is not running" |> Promise.return
+          | Some (_, ocaml_lsp)
+            when not (Ocaml_lsp.can_handle_type_enclosing ocaml_lsp) ->
+            ocaml_lsp_doesnt_support_type_enclosing instance ocaml_lsp
+            |> Promise.return
+          | Some (_client, _) -> show_message `Info "pouet" |> Promise.return)
+      in
+      let (_ : unit Promise.t) = type_enclosing () in
+      ()
+    in
+    command Extension_consts.Commands.type_enclosing handler
+end
+
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in

@@ -72,6 +72,8 @@ module Commands = struct
   let construct = ocaml_prefixed "construct"
 
   let merlin_jump = ocaml_prefixed "jump"
+
+  let type_enclosing = ocaml_prefixed "type-enclosing"
 end
 
 module Command_errors = struct
