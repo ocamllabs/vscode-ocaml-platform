@@ -13,6 +13,16 @@ let get_enclosings text_editor selection client =
          ~index:0
          ~verbosity:0))
 
+let decorationType =
+  let options =
+    DecorationRenderOptions.create ~backgroundColor:(`String "#e0234c") ()
+  in
+  Window.createTextEditorDecorationType ~options
+
+let current_cursor_pos text_editor =
+  let selection = TextEditor.selection text_editor in
+  Selection.active selection
+
 let onDidChangeTextEditorSelection_listener instance event =
   match Extension_instance.lsp_client instance with
   | None -> show_message `Info "NO SERVER"
@@ -25,6 +35,41 @@ let onDidChangeTextEditorSelection_listener instance event =
       let _show_type =
         let open Promise.Syntax in
         let+ results = get_enclosings text_editor s client in
+        let () =
+          let range =
+            let cursor = current_cursor_pos text_editor in
+            Range.makePositions ~start:cursor ~end_:cursor
+          in
+          let decorationOptions =
+            let renderOptions =
+              let after =
+                ThemableDecorationAttachmentRenderOptions.create
+                  ~backgroundColor:(`String "white")
+                  ~border:"1px solid black"
+                  ~contentText:results.type_
+                  ~textDecoration:
+                    "none;position:absolute;bottom:100%;padding:0.3em"
+                  ()
+              in
+              let options =
+                ThemableDecorationInstanceRenderOptions.create ~after ()
+              in
+              Some
+                (DecorationInstanceRenderOptions.create
+                   ~light:options
+                   ~dark:options
+                   ())
+            in
+            DecorationOptions.create
+              ~range
+              ~hoverMessage:
+                (`MarkdownString (MarkdownString.make ~value:"POUET DBG" ()))
+              ~renderOptions
+              ()
+          in
+          let rangesOrOptions = `Options [ decorationOptions ] in
+          TextEditor.setDecorations text_editor ~decorationType ~rangesOrOptions
+        in
         show_message `Info "Selection has type: %s" results.type_
       in
       ()
