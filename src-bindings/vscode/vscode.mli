@@ -471,6 +471,38 @@ module ThemableDecorationAttachmentRenderOptions : sig
     -> t
 end
 
+module DecorationRenderOptions : sig
+  include Ojs.T
+
+  type color = ThemableDecorationAttachmentRenderOptions.color
+
+  val create :
+       ?backgroundColor:color
+    -> ?outline:string
+    -> ?outlineColor:color
+    -> ?outlineStyle:string
+    -> ?outlineWidth:string
+    -> ?border:string
+    -> ?borderColor:color
+    -> ?borderRadius:string
+    -> ?borderSpacing:string
+    -> ?borderStyle:string
+    -> ?borderWidth:string
+    -> ?fontStyle:string
+    -> ?fontWeight:string
+    -> ?textDecoration:string
+    -> ?cursor:string
+    -> ?color:color
+    -> ?opacity:string
+    -> ?letterSpacing:string
+    -> ?overviewRulerColor:color
+    -> ?before:ThemableDecorationAttachmentRenderOptions.t
+    -> ?after:ThemableDecorationAttachmentRenderOptions.t
+    -> ?isWholeLine:bool
+    -> unit
+    -> t
+end
+
 module ThemableDecorationInstanceRenderOptions : sig
   include Ojs.T
 
@@ -2350,6 +2382,9 @@ module Window : sig
     -> ?options:TextDocumentShowOptions.t
     -> unit
     -> TextEditor.t Promise.t
+
+  val createTextEditorDecorationType :
+    options:DecorationRenderOptions.t -> TextEditorDecorationType.t
 
   val showInformationMessage :
        message:string
