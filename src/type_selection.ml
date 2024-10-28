@@ -36,23 +36,24 @@ let onDidChangeTextEditorSelection_listener instance event =
         let open Promise.Syntax in
         let+ results = get_enclosings text_editor s client in
         let () =
-          let range =
+          let _range =
             let cursor = current_cursor_pos text_editor in
             Range.makePositions ~start:cursor ~end_:cursor
           in
+          let range = Selection.to_range s in
           let decorationOptions =
             let renderOptions =
-              let after =
+              let before =
                 ThemableDecorationAttachmentRenderOptions.create
                   ~backgroundColor:(`String "white")
                   ~border:"1px solid black"
                   ~contentText:results.type_
                   ~textDecoration:
-                    "none;position:absolute;bottom:100%;padding:0.3em"
+                    "none;position:absolute;z-index:1;bottom:100%;padding:0.3em"
                   ()
               in
               let options =
-                ThemableDecorationInstanceRenderOptions.create ~after ()
+                ThemableDecorationInstanceRenderOptions.create ~before ()
               in
               Some
                 (DecorationInstanceRenderOptions.create
