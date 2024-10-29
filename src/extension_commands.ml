@@ -553,6 +553,7 @@ module Search_by_type = struct
         client
         Type_search.request
         (Type_search.make ~uri ~position ~limit ~query ~with_doc ()))
+    |> Promise.catch ~rejected:(fun _ -> Promise.return [])
 
   let input_box =
     (* Re-using the same instance of the input box allows us to remember the
