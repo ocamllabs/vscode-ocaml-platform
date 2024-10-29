@@ -79,7 +79,8 @@ let onDidChangeTextEditorSelection_listener instance event =
 let register extension instance =
   let disposable =
     let listener event =
-      let listener = onDidChangeTextEditorSelection_listener instance in
+      let _listener = onDidChangeTextEditorSelection_listener instance in
+      let listener _ = () in
       Handlers.unpwrap (Handlers.w1 listener event)
     in
     Window.onDidChangeTextEditorSelection () ~listener ()
