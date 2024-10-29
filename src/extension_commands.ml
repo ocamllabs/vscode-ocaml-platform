@@ -783,19 +783,31 @@ module Type_enclosing = struct
          %s"
         msg
 
-  let _get_enclosings text_editor client =
+  let get_enclosings text_editor client ~index range =
     let doc = TextEditor.document text_editor in
     let uri = TextDocument.uri doc in
-    let selection = TextEditor.selection text_editor in
     Custom_requests.(
       send_request
         client
         Type_enclosing.request
-        (Type_enclosing.make
-           ~uri
-           ~at:(`Range (Selection.to_range selection))
-           ~index:0
-           ~verbosity:0))
+        (Type_enclosing.make ~uri ~at:(`Range range) ~index ~verbosity:0))
+
+  type state =
+    { index : int
+    ; enclosings : Range.t array
+    ; next : Range.t option
+    }
+
+  let state = ref { index = 0; enclosings = [||]; next = None }
+
+  let update_selection text_editor state =
+    let range = state.enclosings.(state.index) in
+    let new_selection =
+      Selection.makePositions
+        ~anchor:(Range.start range)
+        ~active:(Range.end_ range)
+    in
+    TextEditor.set_selection text_editor new_selection
 
   let _type_enclosing =
     let handler (instance : Extension_instance.t) ~args:_ =
@@ -804,9 +816,9 @@ module Type_enclosing = struct
         | None ->
           Extension_consts.Command_errors.text_editor_must_be_active
             extension_name
-            ~expl:"The command copy the type of the expression under cursor"
+            ~expl:"The command use the "
           |> show_message `Error "%s" |> Promise.return
-        | Some _text_editor -> (
+        | Some text_editor -> (
           match Extension_instance.lsp_client instance with
           | None ->
             show_message `Warn "ocamllsp is not running" |> Promise.return
@@ -814,7 +826,23 @@ module Type_enclosing = struct
             when not (Ocaml_lsp.can_handle_type_enclosing ocaml_lsp) ->
             ocaml_lsp_doesnt_support_type_enclosing instance ocaml_lsp
             |> Promise.return
-          | Some (_client, _) -> show_message `Info "pouet" |> Promise.return)
+          | Some (client, _) ->
+            let open Promise.Syntax in
+            let index = !state.index in
+            let range =
+              match !state.next with
+              | Some range -> range
+              | None -> TextEditor.selection text_editor |> Selection.to_range
+            in
+            let+ result = get_enclosings text_editor client ~index:0 range in
+            let enclosings = Array.of_list result.enclosings in
+            let next =
+              List.find result.enclosings ~f:(fun other ->
+                  not (Range.isEqual range ~other))
+            in
+            state := { index = 0; enclosings; next };
+            update_selection text_editor !state;
+            show_message `Info "Index: %i Type: %s" index result.type_)
       in
       let (_ : unit Promise.t) = type_enclosing () in
       ()
