@@ -793,15 +793,40 @@ module Type_enclosing = struct
         (Type_enclosing.make ~uri ~at:(`Range range) ~index ~verbosity:0))
 
   type state =
-    { index : int
-    ; enclosings : Range.t array
-    ; next : Range.t option
+    { next : Range.t option
+    ; previous : Range.t list
+    ; reset_disposable : Disposable.t
     }
 
-  let state = ref { index = 0; enclosings = [||]; next = None }
+  let initial_state =
+    { next = None; previous = []; reset_disposable = Disposable.from [] }
+
+  let state = ref initial_state
+
+  let enable_reset () =
+    let onDidChangeTextEditorSelection_listener event =
+      let selections = TextEditorSelectionChangeEvent.selections event in
+      match (!state.previous, selections) with
+      | other :: _, [ s ] when not (Range.isEqual ~other (Selection.to_range s))
+        ->
+        show_message `Info "HIDE";
+        log_value "Previous" @@ Range.t_to_js other;
+        log_value "New" @@ Range.t_to_js (Selection.to_range s);
+        Disposable.dispose !state.reset_disposable;
+        state := initial_state
+      | _ -> ()
+    in
+    let reset_disposable =
+      let listener event =
+        let listener = onDidChangeTextEditorSelection_listener in
+        Handlers.unpwrap (Handlers.w1 listener event)
+      in
+      Window.onDidChangeTextEditorSelection () ~listener ()
+    in
+    state := { !state with reset_disposable }
 
   let update_selection text_editor state =
-    let range = state.enclosings.(state.index) in
+    let range = List.hd_exn (* todo *) state.previous in
     let new_selection =
       Selection.makePositions
         ~anchor:(Range.start range)
@@ -826,23 +851,26 @@ module Type_enclosing = struct
             when not (Ocaml_lsp.can_handle_type_enclosing ocaml_lsp) ->
             ocaml_lsp_doesnt_support_type_enclosing instance ocaml_lsp
             |> Promise.return
-          | Some (client, _) ->
+          | Some (client, _) -> (
             let open Promise.Syntax in
-            let index = !state.index in
             let range =
               match !state.next with
               | Some range -> range
               | None -> TextEditor.selection text_editor |> Selection.to_range
             in
             let+ result = get_enclosings text_editor client ~index:0 range in
-            let enclosings = Array.of_list result.enclosings in
-            let next =
-              List.find result.enclosings ~f:(fun other ->
-                  not (Range.isEqual range ~other))
-            in
-            state := { index = 0; enclosings; next };
-            update_selection text_editor !state;
-            show_message `Info "Index: %i Type: %s" index result.type_)
+            match result.enclosings with
+            | current :: _ ->
+              let () = if List.is_empty !state.previous then enable_reset () in
+              let next =
+                List.find result.enclosings ~f:(fun other ->
+                    not (Range.isEqual current ~other))
+              in
+              state :=
+                { !state with next; previous = current :: !state.previous };
+              update_selection text_editor !state;
+              show_message `Info " Type: %s" result.type_
+            | [] -> show_message `Warn "No results found for that selection."))
       in
       let (_ : unit Promise.t) = type_enclosing () in
       ()
