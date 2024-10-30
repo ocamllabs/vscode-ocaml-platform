@@ -911,6 +911,8 @@ module Type_enclosing = struct
     in
     command Extension_consts.Commands.type_enclosing handler
 end
+let _type_selection =
+  command Extension_consts.Commands.type_enclosing Type_selection.handler
 
 let register extension instance = function
   | Command { id; handler } ->
