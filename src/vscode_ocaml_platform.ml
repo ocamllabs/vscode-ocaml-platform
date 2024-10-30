@@ -55,7 +55,6 @@ let activate (extension : ExtensionContext.t) =
   Treeview_help.register extension;
   Ast_editor.register extension instance;
   Cm_editor.register extension instance;
-  Type_selection.register extension instance;
   Repl.register extension instance;
   Earlybird.register extension instance;
   let sandbox_opt = Sandbox.of_settings_or_detect () in

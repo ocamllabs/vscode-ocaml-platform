@@ -805,6 +805,7 @@ module Type_enclosing = struct
 
   let enable_reset () =
     let onDidChangeTextEditorSelection_listener event =
+      let text_editor = TextEditorSelectionChangeEvent.textEditor event in
       let selections = TextEditorSelectionChangeEvent.selections event in
       match (!state.previous, selections) with
       | other :: _, [ s ] when not (Range.isEqual ~other (Selection.to_range s))
@@ -812,6 +813,10 @@ module Type_enclosing = struct
         show_message `Info "HIDE";
         log_value "Previous" @@ Range.t_to_js other;
         log_value "New" @@ Range.t_to_js (Selection.to_range s);
+        TextEditor.setDecorations
+          text_editor
+          ~decorationType:Type_selection.decorationType
+          ~rangesOrOptions:(`Options []);
         Disposable.dispose !state.reset_disposable;
         state := initial_state
       | _ -> ()
@@ -825,13 +830,42 @@ module Type_enclosing = struct
     in
     state := { !state with reset_disposable }
 
-  let update_selection text_editor state =
+  let set_decoration text_editor range type_ =
+    let decorationOptions =
+      let renderOptions =
+        let before =
+          ThemableDecorationAttachmentRenderOptions.create ~contentText:type_ ()
+        in
+        let options =
+          ThemableDecorationInstanceRenderOptions.create ~before ()
+        in
+        Some
+          (DecorationInstanceRenderOptions.create
+             ~light:options
+             ~dark:options
+             ())
+      in
+      DecorationOptions.create
+        ~range
+        ~hoverMessage:
+          (`MarkdownString (MarkdownString.make ~value:"POUET DBG" ()))
+        ~renderOptions
+        ()
+    in
+    let rangesOrOptions = `Options [ decorationOptions ] in
+    TextEditor.setDecorations
+      text_editor
+      ~decorationType:Type_selection.decorationType
+      ~rangesOrOptions
+
+  let update_selection text_editor ~type_ state =
     let range = List.hd_exn (* todo *) state.previous in
     let new_selection =
       Selection.makePositions
         ~anchor:(Range.start range)
         ~active:(Range.end_ range)
     in
+    set_decoration text_editor range type_;
     TextEditor.set_selection text_editor new_selection
 
   let _type_enclosing =
@@ -868,7 +902,7 @@ module Type_enclosing = struct
               in
               state :=
                 { !state with next; previous = current :: !state.previous };
-              update_selection text_editor !state;
+              update_selection text_editor ~type_:result.type_ !state;
               show_message `Info " Type: %s" result.type_
             | [] -> show_message `Warn "No results found for that selection."))
       in
