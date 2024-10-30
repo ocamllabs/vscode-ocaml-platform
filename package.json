@@ -781,6 +781,11 @@
         "command": "ocaml.switch-hover-mode",
         "key": "Alt+H",
         "when": "editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface"
+      },
+      {
+        "command": "ocaml.type-enclosing",
+        "key": "Alt+T",
+        "when": "editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface"
       }
     ],
     "languages": [
