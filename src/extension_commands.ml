@@ -631,6 +631,10 @@ module Search_by_type = struct
             display_search_results query results text_editor position client)
         ()
     in
+    let _disposable =
+      QuickPick.onDidHide quickPick ~listener:(fun () ->
+          QuickPick.dispose quickPick)
+    in
     QuickPick.show quickPick
 
   and show_query_input =
