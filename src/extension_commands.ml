@@ -912,7 +912,9 @@ module Type_enclosing = struct
     command Extension_consts.Commands.type_enclosing handler
 end
 let _type_selection =
-  command Extension_consts.Commands.type_selection Type_selection.handler
+  let open Type_selection in
+  command Extension_consts.Commands.type_selection handler |> ignore;
+  command Extension_consts.Commands.type_previous_selection previous_handler
 
 let register extension instance = function
   | Command { id; handler } ->

@@ -19,8 +19,6 @@ let decorationType =
   in
   Window.createTextEditorDecorationType ~options
 
-let extension_name = "Type Enclosing"
-
 let ocaml_lsp_doesnt_support_type_selection instance ocaml_lsp =
   match
     Ocaml_lsp.is_version_up_to_date
@@ -91,18 +89,12 @@ let set_decoration text_editor range type_ =
       Some
         (DecorationInstanceRenderOptions.create ~light:options ~dark:options ())
     in
-    DecorationOptions.create
-      ~range
-      ~hoverMessage:
-        (`MarkdownString (MarkdownString.make ~value:"POUET DBG" ()))
-      ~renderOptions
-      ()
+    DecorationOptions.create ~range ~renderOptions ()
   in
   let rangesOrOptions = `Options [ decorationOptions ] in
   TextEditor.setDecorations text_editor ~decorationType ~rangesOrOptions
 
-let update_selection text_editor ~type_ state =
-  let range = List.hd_exn (* todo *) state.previous in
+let update_selection text_editor ~type_ range =
   let new_selection =
     Selection.makePositions
       ~anchor:(Range.start range)
@@ -111,40 +103,63 @@ let update_selection text_editor ~type_ state =
   set_decoration text_editor range type_;
   TextEditor.set_selection text_editor new_selection
 
+let with_checks ~extension_name ~instance f =
+  match Window.activeTextEditor () with
+  | None ->
+    Extension_consts.Command_errors.text_editor_must_be_active
+      extension_name
+      ~expl:"The command relies on the current editor selection."
+    |> show_message `Error "%s" |> Promise.return
+  | Some text_editor -> (
+    match Extension_instance.lsp_client instance with
+    | None -> show_message `Warn "ocamllsp is not running" |> Promise.return
+    | Some (_, ocaml_lsp)
+      when not (Ocaml_lsp.can_handle_type_selection ocaml_lsp) ->
+      ocaml_lsp_doesnt_support_type_selection instance ocaml_lsp
+      |> Promise.return
+    | Some (client, _) -> f text_editor client)
+
+let extension_name = "Type Selection"
+
 let handler (instance : Extension_instance.t) ~args:_ =
   let type_selection () =
-    match Window.activeTextEditor () with
-    | None ->
-      Extension_consts.Command_errors.text_editor_must_be_active
-        extension_name
-        ~expl:"The command use the "
-      |> show_message `Error "%s" |> Promise.return
-    | Some text_editor -> (
-      match Extension_instance.lsp_client instance with
-      | None -> show_message `Warn "ocamllsp is not running" |> Promise.return
-      | Some (_, ocaml_lsp)
-        when not (Ocaml_lsp.can_handle_type_selection ocaml_lsp) ->
-        ocaml_lsp_doesnt_support_type_selection instance ocaml_lsp
-        |> Promise.return
-      | Some (client, _) -> (
-        let open Promise.Syntax in
-        let range =
-          match !state.next with
-          | Some range -> range
-          | None -> TextEditor.selection text_editor |> Selection.to_range
-        in
-        let+ result = get_enclosings text_editor client ~index:0 range in
-        match result.enclosings with
-        | current :: _ ->
-          let () = if List.is_empty !state.previous then enable_reset () in
-          let next =
-            List.find result.enclosings ~f:(fun other ->
-                not (Range.isEqual current ~other))
-          in
-          state := { !state with next; previous = current :: !state.previous };
-          update_selection text_editor ~type_:result.type_ !state;
-          show_message `Info " Type: %s" result.type_
-        | [] -> show_message `Warn "No results found for that selection."))
+    with_checks ~extension_name ~instance @@ fun text_editor client ->
+    let open Promise.Syntax in
+    let range =
+      match !state.next with
+      | Some range -> range
+      | None -> TextEditor.selection text_editor |> Selection.to_range
+    in
+    let+ result = get_enclosings text_editor client ~index:0 range in
+    match result.enclosings with
+    | current :: _ ->
+      let () = if List.is_empty !state.previous then enable_reset () in
+      let next =
+        List.find result.enclosings ~f:(fun other ->
+            not (Range.isEqual current ~other))
+      in
+      state := { !state with next; previous = current :: !state.previous };
+      update_selection text_editor ~type_:result.type_ current;
+      show_message `Info " Type: %s" result.type_
+    | [] -> show_message `Warn "No results found for that selection."
   in
   let (_ : unit Promise.t) = type_selection () in
+  ()
+
+let extension_name = "Type Previous Selection"
+
+let previous_handler (instance : Extension_instance.t) ~args:_ =
+  let type_previous_selection () =
+    with_checks ~extension_name ~instance @@ fun text_editor client ->
+    let open Promise.Syntax in
+    match !state.previous with
+    | [] | [ _ ] ->
+      Promise.return @@ show_message `Warn "There is no previous selection"
+    | current :: (previous :: _ as tl) ->
+      let+ result = get_enclosings text_editor client ~index:0 previous in
+      state := { !state with next = Some current; previous = tl };
+      update_selection text_editor ~type_:result.type_ previous;
+      show_message `Info " Type: %s" result.type_
+  in
+  let (_ : unit Promise.t) = type_previous_selection () in
   ()

@@ -269,9 +269,9 @@
         "title": "Get the type of the selection"
       },
       {
-        "command": "ocaml.grow-type-selection",
+        "command": "ocaml.type-previous-selection",
         "category": "OCaml",
-        "title": "Get the type of the next enclosing selection"
+        "title": "Show previous type-selection steps."
       }
     ],
     "configuration": {
@@ -785,6 +785,11 @@
       {
         "command": "ocaml.type-selection",
         "key": "Alt+T",
+        "when": "editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface"
+      },
+      {
+        "command": "ocaml.type-previous-selection",
+        "key": "Shift+Alt+T",
         "when": "editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface"
       }
     ],

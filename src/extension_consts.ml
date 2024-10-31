@@ -74,6 +74,8 @@ module Commands = struct
   let merlin_jump = ocaml_prefixed "jump"
 
   let type_selection = ocaml_prefixed "type-selection"
+
+  let type_previous_selection = ocaml_prefixed "type-previous-selection"
 end
 
 module Command_errors = struct
