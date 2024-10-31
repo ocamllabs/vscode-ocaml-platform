@@ -43,12 +43,17 @@ let get_enclosings text_editor client ~index range =
 
 type state =
   { next : Range.t option
+  ; current : Range.t option
   ; previous : Range.t list
   ; reset_disposable : Disposable.t
   }
 
 let initial_state =
-  { next = None; previous = []; reset_disposable = Disposable.from [] }
+  { next = None
+  ; current = None
+  ; previous = []
+  ; reset_disposable = Disposable.from []
+  }
 
 let state = ref initial_state
 
@@ -56,8 +61,8 @@ let enable_reset () =
   let onDidChangeTextEditorSelection_listener event =
     let text_editor = TextEditorSelectionChangeEvent.textEditor event in
     let selections = TextEditorSelectionChangeEvent.selections event in
-    match (!state.previous, selections) with
-    | other :: _, [ s ] when not (Range.isEqual ~other (Selection.to_range s))
+    match (!state.current, selections) with
+    | Some other, [ s ] when not (Range.isEqual ~other (Selection.to_range s))
       ->
       show_message `Info "HIDE";
       log_value "Previous" @@ Range.t_to_js other;
@@ -131,14 +136,28 @@ let handler (instance : Extension_instance.t) ~args:_ =
       | None -> TextEditor.selection text_editor |> Selection.to_range
     in
     let+ result = get_enclosings text_editor client ~index:0 range in
+    (* let+ result = match result.enclosings with | one :: other :: _ when
+       Range.isEqual one ~other -> get_enclosings text_editor client ~index:1
+       range | _ -> Promise.return result in *)
     match result.enclosings with
     | current :: _ ->
       let () = if List.is_empty !state.previous then enable_reset () in
-      let next =
-        List.find result.enclosings ~f:(fun other ->
-            not (Range.isEqual current ~other))
+      let next, previous =
+        match result.enclosings with
+        | one :: other :: _ when Range.isEqual one ~other -> (Some one, range)
+        | _ ->
+          let next =
+            List.find result.enclosings ~f:(fun other ->
+                not (Range.isEqual current ~other))
+          in
+          (next, range)
       in
-      state := { !state with next; previous = current :: !state.previous };
+      state :=
+        { !state with
+          next
+        ; current = Some current
+        ; previous = previous :: !state.previous
+        };
       update_selection text_editor ~type_:result.type_ current;
       show_message `Info " Type: %s" result.type_
     | [] -> show_message `Warn "No results found for that selection."
@@ -157,8 +176,14 @@ let previous_handler (instance : Extension_instance.t) ~args:_ =
       Promise.return @@ show_message `Warn "There is no previous selection"
     | current :: (previous :: _ as tl) ->
       let+ result = get_enclosings text_editor client ~index:0 previous in
-      state := { !state with next = Some current; previous = tl };
-      update_selection text_editor ~type_:result.type_ previous;
+      state :=
+        { !state with
+          next = Some current
+        ; current = Some previous
+        ; previous = tl
+        };
+      update_selection text_editor ~type_:result.type_
+      @@ List.hd_exn result.enclosings;
       show_message `Info " Type: %s" result.type_
   in
   let (_ : unit Promise.t) = type_previous_selection () in
