@@ -34,7 +34,7 @@ let typedHoles =
   ; decode_response = Jsonoo.Decode.list Range.t_of_json
   }
 
-module Type_enclosing = struct
+module Type_selection = struct
   type params =
     { uri : Uri.t
     ; at : [ `Position of Position.t | `Range of Range.t ]

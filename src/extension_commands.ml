@@ -496,7 +496,7 @@ end
 module Copy_type_under_cursor = struct
   let extension_name = "Copy Type Under Cursor"
 
-  let ocaml_lsp_doesnt_support_type_enclosing instance ocaml_lsp =
+  let ocaml_lsp_doesnt_support_type_selection instance ocaml_lsp =
     match
       Ocaml_lsp.is_version_up_to_date
         ocaml_lsp
@@ -517,8 +517,8 @@ module Copy_type_under_cursor = struct
     Custom_requests.(
       send_request
         client
-        Type_enclosing.request
-        (Type_enclosing.make
+        Type_selection.request
+        (Type_selection.make
            ~uri
            ~at:(`Range (Selection.to_range selection))
            ~index:0
@@ -538,13 +538,13 @@ module Copy_type_under_cursor = struct
           | None ->
             show_message `Warn "ocamllsp is not running" |> Promise.return
           | Some (_, ocaml_lsp)
-            when not (Ocaml_lsp.can_handle_type_enclosing ocaml_lsp) ->
-            ocaml_lsp_doesnt_support_type_enclosing instance ocaml_lsp
+            when not (Ocaml_lsp.can_handle_type_selection ocaml_lsp) ->
+            ocaml_lsp_doesnt_support_type_selection instance ocaml_lsp
             |> Promise.return
           | Some (client, _) ->
             let clipboard = Env.clipboard () in
             let open Promise.Syntax in
-            let* Custom_requests.Type_enclosing.{ type_; _ } =
+            let* Custom_requests.Type_selection.{ type_; _ } =
               get_enclosings text_editor client
             in
             if String.equal type_ "<no information>" then
@@ -912,7 +912,7 @@ module Type_enclosing = struct
     command Extension_consts.Commands.type_enclosing handler
 end
 let _type_selection =
-  command Extension_consts.Commands.type_enclosing Type_selection.handler
+  command Extension_consts.Commands.type_selection Type_selection.handler
 
 let register extension instance = function
   | Command { id; handler } ->

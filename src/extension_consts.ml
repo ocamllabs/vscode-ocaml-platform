@@ -73,7 +73,7 @@ module Commands = struct
 
   let merlin_jump = ocaml_prefixed "jump"
 
-  let type_enclosing = ocaml_prefixed "type-enclosing"
+  let type_selection = ocaml_prefixed "type-selection"
 end
 
 module Command_errors = struct

@@ -21,7 +21,7 @@ let decorationType =
 
 let extension_name = "Type Enclosing"
 
-let ocaml_lsp_doesnt_support_type_enclosing instance ocaml_lsp =
+let ocaml_lsp_doesnt_support_type_selection instance ocaml_lsp =
   match
     Ocaml_lsp.is_version_up_to_date
       ocaml_lsp
@@ -40,8 +40,8 @@ let get_enclosings text_editor client ~index range =
   Custom_requests.(
     send_request
       client
-      Type_enclosing.request
-      (Type_enclosing.make ~uri ~at:(`Range range) ~index ~verbosity:0))
+      Type_selection.request
+      (Type_selection.make ~uri ~at:(`Range range) ~index ~verbosity:0))
 
 type state =
   { next : Range.t option
@@ -112,7 +112,7 @@ let update_selection text_editor ~type_ state =
   TextEditor.set_selection text_editor new_selection
 
 let handler (instance : Extension_instance.t) ~args:_ =
-  let type_enclosing () =
+  let type_selection () =
     match Window.activeTextEditor () with
     | None ->
       Extension_consts.Command_errors.text_editor_must_be_active
@@ -123,8 +123,8 @@ let handler (instance : Extension_instance.t) ~args:_ =
       match Extension_instance.lsp_client instance with
       | None -> show_message `Warn "ocamllsp is not running" |> Promise.return
       | Some (_, ocaml_lsp)
-        when not (Ocaml_lsp.can_handle_type_enclosing ocaml_lsp) ->
-        ocaml_lsp_doesnt_support_type_enclosing instance ocaml_lsp
+        when not (Ocaml_lsp.can_handle_type_selection ocaml_lsp) ->
+        ocaml_lsp_doesnt_support_type_selection instance ocaml_lsp
         |> Promise.return
       | Some (client, _) -> (
         let open Promise.Syntax in
@@ -146,5 +146,5 @@ let handler (instance : Extension_instance.t) ~args:_ =
           show_message `Info " Type: %s" result.type_
         | [] -> show_message `Warn "No results found for that selection."))
   in
-  let (_ : unit Promise.t) = type_enclosing () in
+  let (_ : unit Promise.t) = type_selection () in
   ()

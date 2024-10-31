@@ -245,7 +245,7 @@ let can_handle_infer_intf t = t.experimental_capabilities.handleInferIntf
 
 let can_handle_typed_holes t = t.experimental_capabilities.handleTypedHoles
 
-let can_handle_type_enclosing t =
+let can_handle_type_selection t =
   t.experimental_capabilities.handleTypeEnclosing
 
 let can_handle_construct t = t.experimental_capabilities.handleConstruct

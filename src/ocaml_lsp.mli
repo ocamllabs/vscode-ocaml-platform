@@ -13,7 +13,7 @@ val can_handle_infer_intf : t -> bool
 
 val can_handle_typed_holes : t -> bool
 
-val can_handle_type_enclosing : t -> bool
+val can_handle_type_selection : t -> bool
 
 val can_handle_construct : t -> bool
 

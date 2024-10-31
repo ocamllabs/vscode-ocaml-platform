@@ -264,12 +264,12 @@
         "title": "List possible parent targets for jumping"
       },
       {
-        "command": "ocaml.type-enclosing",
+        "command": "ocaml.type-selection",
         "category": "OCaml",
         "title": "Get the type of the selection"
       },
       {
-        "command": "ocaml.grow-type-enclosing",
+        "command": "ocaml.grow-type-selection",
         "category": "OCaml",
         "title": "Get the type of the next enclosing selection"
       }
@@ -783,7 +783,7 @@
         "when": "editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface"
       },
       {
-        "command": "ocaml.type-enclosing",
+        "command": "ocaml.type-selection",
         "key": "Alt+T",
         "when": "editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface"
       }
