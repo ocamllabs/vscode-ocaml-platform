@@ -79,7 +79,7 @@ module Type_search = struct
     { name : string
     ; typ : string
     ; loc : Range.t
-    ; doc : string option
+    ; doc : MarkupContent.t option
     ; cost : int
     ; constructible : string
     }
@@ -90,11 +90,12 @@ module Type_search = struct
     ; limit : int
     ; query : string
     ; with_doc : bool
+    ; doc_format : MarkupKind.t option
     }
 
   type response = type_search_result list
 
-  let encode_params { uri; position; limit; query; with_doc } =
+  let encode_params { uri; position; limit; query; with_doc; doc_format } =
     let open Jsonoo.Encode in
     let uri =
       ("textDocument", object_ [ ("uri", string @@ Uri.toString uri ()) ])
@@ -103,7 +104,12 @@ module Type_search = struct
     let query = ("query", string query) in
     let limit = ("limit", int limit) in
     let with_doc = ("with_doc", bool with_doc) in
-    object_ [ uri; position; query; limit; with_doc ]
+    let doc_format =
+      ( "doc_format"
+      , MarkupKind.yojson_of_t
+          (Option.value ~default:MarkupKind.Markdown doc_format) )
+    in
+    object_ [ uri; position; query; limit; with_doc; doc_format ]
 
   let decode_response response =
     let open Jsonoo.Decode in
@@ -111,15 +117,16 @@ module Type_search = struct
       let name = field "name" string response in
       let typ = field "typ" string response in
       let loc = field "loc" Range.t_of_json response in
-      let doc = try_optional (field "doc" string) response in
+      let doc = try_optional (field "doc" MarkupContent.t_of_json) response in
       let cost = field "cost" int response in
       let constructible = field "constructible" string response in
       { name; typ; loc; doc; cost; constructible }
     in
     list decode_res response
 
-  let make ~uri ~position ~limit ~query ~with_doc () =
-    { uri; position; limit; query; with_doc }
+  let make ~uri ~position ~limit ~query ~with_doc
+      ?(doc_format = Some MarkupKind.Markdown) () =
+    { uri; position; limit; query; with_doc; doc_format }
 
   let request =
     { meth = ocamllsp_prefixed "typeSearch"; encode_params; decode_response }

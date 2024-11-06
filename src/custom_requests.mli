@@ -45,7 +45,7 @@ module Type_search : sig
     { name : string
     ; typ : string
     ; loc : Range.t
-    ; doc : string option
+    ; doc : MarkupContent.t option
     ; cost : int
     ; constructible : string
     }
@@ -60,6 +60,7 @@ module Type_search : sig
     -> limit:int
     -> query:string
     -> with_doc:bool
+    -> ?doc_format:MarkupKind.t option
     -> unit
     -> params
 

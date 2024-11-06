@@ -578,6 +578,12 @@ module Search_by_type = struct
     box
 
   let rec display_search_results query results text_editor position client =
+    let format_doc (doc : MarkupContent.t option) =
+      match doc with
+      | Some doc ->
+        MarkdownString.make ~value:doc.value () |> MarkdownString.value
+      | None -> ""
+    in
     let quickPickItems =
       List.map
         results
@@ -585,7 +591,7 @@ module Search_by_type = struct
           QuickPickItem.create
             ~label:res.name
             ~description:res.typ
-            ~detail:(Option.value ~default:"" res.doc)
+            ~detail:(format_doc res.doc)
             ())
     in
     let module QuickPick = Vscode.QuickPick.Make (QuickPickItem) in
