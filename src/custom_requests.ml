@@ -106,7 +106,7 @@ module Type_search = struct
     let with_doc = ("with_doc", bool with_doc) in
     let doc_format =
       ( "doc_format"
-      , MarkupKind.yojson_of_t
+      , MarkupKind.json_of_t
           (Option.value ~default:MarkupKind.Markdown doc_format) )
     in
     object_ [ uri; position; query; limit; with_doc; doc_format ]

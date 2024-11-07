@@ -171,12 +171,12 @@ module MarkupKind = struct
     | PlainText
     | Markdown
 
-  let yojson_of_t (t : t) : Jsonoo.t =
+  let json_of_t (t : t) : Jsonoo.t =
     match t with
     | PlainText -> Jsonoo.Encode.string "plaintext"
     | Markdown -> Jsonoo.Encode.string "markdown"
 
-  let t_of_yojson (json : Jsonoo.t) : t =
+  let t_of_json (json : Jsonoo.t) : t =
     match Jsonoo.Decode.string json with
     | "plaintext" -> PlainText
     | "markdown" -> Markdown
@@ -192,7 +192,7 @@ module MarkupContent = struct
 
   let t_of_json json =
     let open Jsonoo.Decode in
-    let kind = field "kind" MarkupKind.t_of_yojson json in
+    let kind = field "kind" MarkupKind.t_of_json json in
     let value = field "value" string json in
     { kind; value }
 end
