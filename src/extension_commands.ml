@@ -580,8 +580,7 @@ module Search_by_type = struct
   let rec display_search_results query results text_editor position client =
     let format_doc (doc : MarkupContent.t option) =
       match doc with
-      | Some doc ->
-        MarkdownString.make ~value:doc.value () |> MarkdownString.value
+      | Some doc -> doc.value
       | None -> ""
     in
     let quickPickItems =
