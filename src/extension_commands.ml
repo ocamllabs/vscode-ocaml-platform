@@ -717,34 +717,29 @@ module Search_by_type = struct
 
   let _search_by_type =
     let handler (instance : Extension_instance.t) ~args:_ =
-      let search_by_type () =
-        match Window.activeTextEditor () with
-        | None ->
-          Extension_consts.Command_errors.text_editor_must_be_active
-            extension_name
-            ~expl:
-              "The cursor position is used to determine the correct \
-               environment and insert the result."
-          |> show_message `Error "%s"
-        | Some text_editor
-          when not (is_valid_text_doc (TextEditor.document text_editor)) ->
+      match Window.activeTextEditor () with
+      | None ->
+        Extension_consts.Command_errors.text_editor_must_be_active
+          extension_name
+          ~expl:
+            "The cursor position is used to determine the correct environment \
+             and insert the result."
+        |> show_message `Error "%s"
+      | Some text_editor
+        when not (is_valid_text_doc (TextEditor.document text_editor)) ->
+        show_message
+          `Error
+          "Invalid file type. This command only works in ocaml files, ocaml \
+           interface files, reason files or ocamllex files."
+      | Some text_editor -> (
+        match Extension_instance.lsp_client instance with
+        | None -> show_message `Warn "ocamllsp is not running"
+        | Some (_client, ocaml_lsp)
+          when ocaml_lsp_doesnt_support_search_by_type ocaml_lsp ->
           show_message
-            `Error
-            "Invalid file type. This command only works in ocaml files, ocaml \
-             interface files, reason files or ocamllex files."
-        | Some text_editor -> (
-          match Extension_instance.lsp_client instance with
-          | None -> show_message `Warn "ocamllsp is not running"
-          | Some (_client, ocaml_lsp)
-            when ocaml_lsp_doesnt_support_search_by_type ocaml_lsp ->
-            show_message
-              `Warn
-              "The installed version of `ocamllsp` does not support type search"
-          | Some (client, _) -> show_query_input text_editor client)
-      in
-
-      let (_ : unit) = search_by_type () in
-      ()
+            `Warn
+            "The installed version of `ocamllsp` does not support type search"
+        | Some (client, _) -> show_query_input text_editor client)
     in
     command Extension_consts.Commands.search_by_type handler
 end
