@@ -5,6 +5,8 @@
 - Add `ocaml.copy-type-under-cursor` to copy, in the clipboard the type of 
   the expression under the cursor (#1582)
 
+- Make it a warning if ocamlc is missing (#1642)
+
 ## 1.20.1
 
 - This was a version bump only, there were no changes
