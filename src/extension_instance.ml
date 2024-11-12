@@ -372,7 +372,7 @@ let update_ocaml_info t =
     | `Ocamlc_missing ->
       let (_ : unit Promise.t) =
         let+ maybe_choice =
-          Window.showErrorMessage
+          Window.showWarningMessage
             ~message:
               "OCaml bytecode compiler `ocamlc` was not found in the current \
                sandbox. Do you have OCaml installed in the current sandbox?"
