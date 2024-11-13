@@ -14,7 +14,7 @@ module Dependency = struct
   let tooltip t = Sandbox.Package.synopsis t
 
   let icon _ =
-    TreeItem.LightDarkIcon.
+    LightDarkIcon.
       { light = `String (Path.asset "number-light.svg" |> Path.to_string)
       ; dark = `String (Path.asset "number-dark.svg" |> Path.to_string)
       }

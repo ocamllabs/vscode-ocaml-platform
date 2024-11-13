@@ -74,7 +74,7 @@ let show_message kind fmt =
     match kind with
     | `Warn -> Window.showWarningMessage ~message ()
     | `Info -> Window.showInformationMessage ~message ()
-    | `Error -> Window.showInformationMessage ~message ()
+    | `Error -> Window.showErrorMessage ~message ()
   in
   Printf.ksprintf
     (fun x ->
@@ -164,6 +164,37 @@ module Range = struct
     Jsonoo.Encode.(object_ [ ("start", start); ("end", end_) ])
 
   include Vscode.Range
+end
+
+module MarkupKind = struct
+  type t =
+    | PlainText
+    | Markdown
+
+  let json_of_t (t : t) : Jsonoo.t =
+    match t with
+    | PlainText -> Jsonoo.Encode.string "plaintext"
+    | Markdown -> Jsonoo.Encode.string "markdown"
+
+  let t_of_json (json : Jsonoo.t) : t =
+    match Jsonoo.Decode.string json with
+    | "plaintext" -> PlainText
+    | "markdown" -> Markdown
+    (* Default to plaintext *)
+    | _ -> PlainText
+end
+
+module MarkupContent = struct
+  type t =
+    { kind : MarkupKind.t
+    ; value : string
+    }
+
+  let t_of_json json =
+    let open Jsonoo.Decode in
+    let kind = field "kind" MarkupKind.t_of_json json in
+    let value = field "value" string json in
+    { kind; value }
 end
 
 module Promise = struct

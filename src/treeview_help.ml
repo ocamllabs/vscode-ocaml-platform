@@ -1,7 +1,7 @@
 let discord_item =
   let icon =
     `LightDark
-      Vscode.TreeItem.LightDarkIcon.
+      Vscode.LightDarkIcon.
         { light = `String (Path.asset "discord-light.svg" |> Path.to_string)
         ; dark = `String (Path.asset "discord-dark.svg" |> Path.to_string)
         }
@@ -26,7 +26,7 @@ let discord_item =
 let discuss_item =
   let icon =
     `LightDark
-      Vscode.TreeItem.LightDarkIcon.
+      Vscode.LightDarkIcon.
         { light = `String (Path.asset "chat-light.svg" |> Path.to_string)
         ; dark = `String (Path.asset "chat-dark.svg" |> Path.to_string)
         }
@@ -52,7 +52,7 @@ let discuss_item =
 let github_item =
   let icon =
     `LightDark
-      Vscode.TreeItem.LightDarkIcon.
+      Vscode.LightDarkIcon.
         { light = `String (Path.asset "github-light.svg" |> Path.to_string)
         ; dark = `String (Path.asset "github-dark.svg" |> Path.to_string)
         }

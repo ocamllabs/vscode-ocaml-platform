@@ -9,6 +9,8 @@
 - Add `1.18.0`, `1.19.0` and `1.20.0~5.3preview` to the list of known versions
   of ocamllsp (#1644)
 
+- Add `ocaml.search-by-type` to search for values using their type signature (#1626)
+
 ## 1.20.1
 
 - This was a version bump only, there were no changes

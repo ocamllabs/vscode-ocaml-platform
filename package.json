@@ -252,6 +252,11 @@
         "command": "ocaml.copy-type-under-cursor",
         "category": "OCaml",
         "title": "Copy Type Under Cursor"
+      },
+      {
+        "command": "ocaml.search-by-type",
+        "category": "OCaml",
+        "title": "Search a value by type or polarity"
       }
     ],
     "configuration": {
@@ -753,6 +758,11 @@
         "command": "ocaml.switch-hover-mode",
         "key": "Alt+H",
         "when": "editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface "
+      },
+      {
+        "command": "ocaml.search-by-type",
+        "key": "Alt+F",
+        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
       }
     ],
     "languages": [
@@ -1039,6 +1049,10 @@
         },
         {
           "command": "ocaml.copy-type-under-cursor",
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+        },
+        {
+          "command": "ocaml.search-by-type",
           "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
         }
       ],
