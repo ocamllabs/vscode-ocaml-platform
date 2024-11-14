@@ -73,3 +73,50 @@ module Type_enclosing = struct
   let request =
     { meth = ocamllsp_prefixed "typeEnclosing"; encode_params; decode_response }
 end
+
+module Construct = struct
+  type params =
+    { uri : Uri.t
+    ; position : Position.t
+    ; depth : int option
+    ; with_values : [ `None | `Local ] option
+    }
+
+  type response =
+    { position : Range.t
+    ; result : string list
+    }
+
+  let encode_params { uri; position; depth; with_values } =
+    let open Jsonoo.Encode in
+    let uri = ("uri", string @@ Uri.toString uri ()) in
+    let position = ("position", Position.json_of_t position) in
+    let depth =
+      ("depth", Option.(value ~default:null (map ~f:(fun d -> int d) depth)))
+    in
+    let with_values =
+      ( "with_values"
+      , Option.(
+          value
+            ~default:null
+            (map
+               ~f:(fun w ->
+                 match w with
+                 | `None -> string "none"
+                 | `Local -> string "local")
+               with_values)) )
+    in
+    object_ [ uri; position; depth; with_values ]
+
+  let decode_response response =
+    let open Jsonoo.Decode in
+    let position = field "position" Range.t_of_json response in
+    let result = field "result" (list string) response in
+    { position; result }
+
+  let make ~uri ~position ?(depth = None) ?(with_values = None) () =
+    { uri; position; depth; with_values }
+
+  let request =
+    { meth = ocamllsp_prefixed "construct"; encode_params; decode_response }
+end

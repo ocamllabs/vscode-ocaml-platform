@@ -534,6 +534,108 @@ module Copy_type_under_cursor = struct
     command Extension_consts.Commands.copy_type_under_cursor handler
 end
 
+module Construct = struct
+  let extension_name = "Construct"
+
+  let is_valid_text_doc textdoc =
+    match TextDocument.languageId textdoc with
+    | "ocaml" | "ocaml.interface" | "reason" | "ocaml.ocamllex" -> true
+    | _ -> false
+
+  let ocaml_lsp_doesnt_support_construct ocaml_lsp =
+    not (Ocaml_lsp.can_handle_construct ocaml_lsp)
+
+  let get_construct_results position text_editor client =
+    let doc = TextEditor.document text_editor in
+    let uri = TextDocument.uri doc in
+    Custom_requests.(
+      send_request
+        client
+        Construct.request
+        (Construct.make ~uri ~position ~depth:None ~with_values:None ()))
+
+  let rec display_results ~text_editor:_ ~position:_
+      (results : Custom_requests.Construct.response) =
+    let quickPickItems =
+      List.map results.result ~f:(fun res ->
+          (QuickPickItem.create ~label:res (), (res, results.position)))
+    in
+    let quickPickOptions =
+      QuickPickOptions.create ~title:"Construct results" ()
+    in
+    Window.showQuickPickItems
+      ~choices:quickPickItems
+      ~options:quickPickOptions
+      ()
+
+  and process_construct position text_editor client =
+    let open Promise.Syntax in
+    let* res = get_construct_results position text_editor client in
+    let+ selection = display_results ~text_editor ~position res in
+    match selection with
+    | Some (value, range) ->
+      insert_to_document text_editor range value;
+      let _ =
+        process_construct
+          (TextEditor.selection text_editor |> Selection.end_)
+          text_editor
+          client
+      in
+      ()
+    | None -> ()
+
+  and insert_to_document text_editor range value =
+    let _ =
+      TextEditor.edit
+        text_editor
+        ~callback:(fun ~editBuilder ->
+          Vscode.TextEditorEdit.replace
+            editBuilder
+            ~location:(`Range range)
+            ~value)
+        ()
+    in
+    ()
+
+  let _construct =
+    let handler (instance : Extension_instance.t) ~args:_ =
+      let construct () =
+        match Window.activeTextEditor () with
+        | None ->
+          Extension_consts.Command_errors.text_editor_must_be_active
+            extension_name
+            ~expl:
+              "The cursor position is used to determine the correct \
+               environment and insert the result."
+          |> show_message `Error "%s"
+        | Some text_editor
+          when not (is_valid_text_doc (TextEditor.document text_editor)) ->
+          show_message
+            `Error
+            "Invalid file type. This command only works in ocaml files, ocaml \
+             interface files, reason files or ocamllex files."
+        | Some text_editor -> (
+          match Extension_instance.lsp_client instance with
+          | None -> show_message `Warn "ocamllsp is not running"
+          | Some (_client, ocaml_lsp)
+            when ocaml_lsp_doesnt_support_construct ocaml_lsp ->
+            show_message
+              `Warn
+              "The installed version of `ocamllsp` does not support construct \
+               custom requests"
+          | Some (client, _) ->
+            let position =
+              TextEditor.selection text_editor |> Selection.active
+            in
+            let _ = process_construct position text_editor client in
+            ())
+      in
+      let (_ : unit) = construct () in
+      ()
+    in
+    command Extension_consts.Commands.construct handler
+end
+
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in
