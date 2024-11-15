@@ -164,7 +164,11 @@ module Holes_commands : sig
   val _jump_to_next_hole : t
 
   val hole_position :
-    TextEditor.t -> LanguageClient.t -> [< `Next | `Prev ] -> Range.t Promise.t
+       Position.t
+    -> TextEditor.t
+    -> LanguageClient.t
+    -> [< `Next | `Prev ]
+    -> Range.t Promise.t
 end = struct
   let hole_not_found_msg = "No typed hole was found in this file"
 
@@ -367,20 +371,19 @@ end = struct
               select_hole_range text_editor hole))
   end
 
-  let hole_position text_editor client direction =
+  let hole_position position text_editor client direction =
     let open Promise.Syntax in
     let (range : Range.t Promise.t) =
       let+ holes = send_request_to_lsp client text_editor in
       let sorted_holes = List.sort holes ~compare:Range.compare in
-      let current_pos = current_cursor_pos text_editor in
       match direction with
       | `Prev ->
         Prev_hole.pick_prev_hole
-          current_pos
+          position
           ~sorted_non_empty_holes_list:sorted_holes
       | `Next ->
         Next_hole.pick_next_hole
-          current_pos
+          position
           ~sorted_non_empty_holes_list:sorted_holes
     in
     range
@@ -600,7 +603,11 @@ module Construct = struct
       match value_inserted with
       | true ->
         let* new_range =
-          Holes_commands.hole_position text_editor client `Prev
+          Holes_commands.hole_position
+            (Range.start range)
+            text_editor
+            client
+            `Prev
         in
         process_construct (Range.end_ new_range) text_editor client instance
       | false -> Promise.return ())
