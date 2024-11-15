@@ -43,7 +43,31 @@ let terminal_item =
   Vscode.TreeItem.set_command item command;
   item
 
-let items = [ select_sandbox_item; terminal_item ]
+
+  let construct_item =
+    let icon =
+      `LightDark
+        Vscode.TreeItem.LightDarkIcon.
+          { light = `String (Path.asset "collection-light.svg" |> Path.to_string)
+          ; dark = `String (Path.asset "collection-dark.svg" |> Path.to_string)
+          }
+    in
+    let label =
+      `TreeItemLabel
+        (Vscode.TreeItemLabel.create ~label:"Construct" ())
+    in
+    let item = Vscode.TreeItem.make_label ~label () in
+    let command =
+      Vscode.Command.create
+        ~title:"Construct"
+        ~command:"ocaml.construct"
+        ()
+    in
+    Vscode.TreeItem.set_iconPath item icon;
+    Vscode.TreeItem.set_command item command;
+    item
+
+let items = [ select_sandbox_item; terminal_item; construct_item ]
 
 let getTreeItem ~element = `Value element
 
