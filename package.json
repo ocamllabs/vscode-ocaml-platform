@@ -719,7 +719,7 @@
         "when": "editorLangId == ocaml || editorLangId == reason"
       },
       {
-        "command": "editor.action.codeAction",
+        "command": "ocaml.construct",
         "key": "Alt+C",
         "args": {
           "kind": "construct"
