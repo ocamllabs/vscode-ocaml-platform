@@ -608,7 +608,7 @@ module Construct = struct
             (Range.start range)
             text_editor
             client
-            `Prev
+            `Next
         in
         process_construct (Range.end_ new_range) text_editor client instance
       | false -> Promise.return ())
