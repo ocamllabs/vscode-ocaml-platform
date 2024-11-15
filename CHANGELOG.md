@@ -2,6 +2,8 @@
 
 # Unreleased
 
+## 1.21.0
+
 - Add `ocaml.copy-type-under-cursor` to copy, in the clipboard the type of
   the expression under the cursor (#1582)
 - Run ocamllsp -version in workspace dir (#1641)
