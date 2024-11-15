@@ -372,6 +372,7 @@ end = struct
   end
 
   let hole_position position text_editor client direction =
+    (* We aren't checking if there's the capability to handle typed holes *)
     let open Promise.Syntax in
     let (range : Range.t Promise.t) =
       let+ holes = send_request_to_lsp client text_editor in

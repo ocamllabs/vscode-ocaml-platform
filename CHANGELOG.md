@@ -2,8 +2,9 @@
 
 # Unreleased
 
-- Add `ocaml.copy-type-under-cursor` to copy, in the clipboard the type of 
+- Add `ocaml.copy-type-under-cursor` to copy, in the clipboard the type of
   the expression under the cursor (#1582)
+- Add `ocaml.construct` to construct an expression from a typedhole. (#1646)
 
 ## 1.20.1
 
