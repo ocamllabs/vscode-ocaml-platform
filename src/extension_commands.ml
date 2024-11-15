@@ -571,31 +571,34 @@ module Construct = struct
   and process_construct position text_editor client =
     let open Promise.Syntax in
     let* res = get_construct_results position text_editor client in
-    let+ selection = display_results ~text_editor ~position res in
-    match selection with
-    | Some (value, range) ->
-      insert_to_document text_editor range value;
-      let _ =
-        process_construct
-          (TextEditor.selection text_editor |> Selection.end_)
-          text_editor
-          client
-      in
-      ()
-    | None -> ()
+    let* selected_result = display_results ~text_editor ~position res in
+    match selected_result with
+    | Some (value, range) -> (
+      let* value_inserted = insert_to_document text_editor range value in
+      match value_inserted with
+      | true -> (
+        let* hole_jump =
+          Vscode.Commands.executeCommand ~command:"ocaml.prev-hole" ~args:[]
+        in
+        match hole_jump with
+        | Some _range_ojs ->
+          let new_position =
+            TextEditor.selection text_editor |> Selection.active
+          in
+          process_construct new_position text_editor client
+        | None -> Promise.return ())
+      | false -> Promise.return ())
+    | None -> Promise.return ()
 
   and insert_to_document text_editor range value =
-    let _ =
-      TextEditor.edit
-        text_editor
-        ~callback:(fun ~editBuilder ->
-          Vscode.TextEditorEdit.replace
-            editBuilder
-            ~location:(`Range range)
-            ~value)
-        ()
-    in
-    ()
+    TextEditor.edit
+      text_editor
+      ~callback:(fun ~editBuilder ->
+        Vscode.TextEditorEdit.replace
+          editBuilder
+          ~location:(`Range range)
+          ~value)
+      ()
 
   let _construct =
     let handler (instance : Extension_instance.t) ~args:_ =
