@@ -162,6 +162,9 @@ module Holes_commands : sig
   val _jump_to_prev_hole : t
 
   val _jump_to_next_hole : t
+
+  val hole_position :
+    TextEditor.t -> LanguageClient.t -> [< `Next | `Prev ] -> Range.t Promise.t
 end = struct
   let hole_not_found_msg = "No typed hole was found in this file"
 
@@ -197,6 +200,11 @@ end = struct
       ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
       ()
 
+  let send_request_to_lsp client text_editor =
+    let doc = TextEditor.document text_editor in
+    let uri = TextDocument.uri doc in
+    Custom_requests.send_request client Custom_requests.typedHoles uri
+
   let jump_to_hole jump (instance : Extension_instance.t) ~args =
     (* this command is available (in the command palette) only when a file is
        open *)
@@ -217,9 +225,7 @@ end = struct
         let doc = TextEditor.document text_editor in
         let uri = TextDocument.uri doc in
         let (_ : unit Promise.t) =
-          let+ holes =
-            Custom_requests.send_request client Custom_requests.typedHoles uri
-          in
+          let+ holes = send_request_to_lsp client text_editor in
           jump
             ~cmd_args:args
             text_editor
@@ -362,6 +368,24 @@ end = struct
             if Range.contains in_range ~positionOrRange:(`Range hole) then
               select_hole_range text_editor hole))
   end
+
+  let hole_position text_editor client direction =
+    let open Promise.Syntax in
+    let (range : Range.t Promise.t) =
+      let+ holes = send_request_to_lsp client text_editor in
+      let sorted_holes = List.sort holes ~compare:Range.compare in
+      let current_pos = current_cursor_pos text_editor in
+      match direction with
+      | `Prev ->
+        Prev_hole.pick_prev_hole
+          current_pos
+          ~sorted_non_empty_holes_list:sorted_holes
+      | `Next ->
+        Next_hole.pick_next_hole
+          current_pos
+          ~sorted_non_empty_holes_list:sorted_holes
+    in
+    range
 
   let _jump_to_next_hole =
     command Extension_consts.Commands.next_hole (jump_to_hole Next_hole.jump)
