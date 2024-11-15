@@ -140,7 +140,13 @@ end = struct
     let ocaml_lsp_version sandbox =
       Sandbox.get_command sandbox "ocamllsp" [ "--version" ]
     in
-    Cmd.output (ocaml_lsp_version sandbox)
+    let cwd =
+      match Workspace.workspaceFolders () with
+      | [ cwd ] ->
+        Some (cwd |> WorkspaceFolder.uri |> Uri.path |> Path.of_string)
+      | _ -> None
+    in
+    Cmd.output ?cwd (ocaml_lsp_version sandbox)
     |> Promise.Result.fold
          ~ok:(fun (_ : string) -> ())
          ~error:(fun (_ : string) ->
@@ -372,7 +378,7 @@ let update_ocaml_info t =
     | `Ocamlc_missing ->
       let (_ : unit Promise.t) =
         let+ maybe_choice =
-          Window.showErrorMessage
+          Window.showWarningMessage
             ~message:
               "OCaml bytecode compiler `ocamlc` was not found in the current \
                sandbox. Do you have OCaml installed in the current sandbox?"
