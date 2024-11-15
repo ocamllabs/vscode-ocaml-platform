@@ -222,8 +222,6 @@ end = struct
         when not (Ocaml_lsp.can_handle_typed_holes ocaml_lsp) ->
         ocaml_lsp_doesn't_support_holes instance ocaml_lsp
       | Some (client, _ocaml_lsp) ->
-        let doc = TextEditor.document text_editor in
-        let uri = TextDocument.uri doc in
         let (_ : unit Promise.t) =
           let+ holes = send_request_to_lsp client text_editor in
           jump
@@ -592,7 +590,7 @@ module Construct = struct
       ~options:quickPickOptions
       ()
 
-  and process_construct position text_editor client =
+  and process_construct position text_editor client instance =
     let open Promise.Syntax in
     let* res = get_construct_results position text_editor client in
     let* selected_result = display_results ~text_editor ~position res in
@@ -600,17 +598,11 @@ module Construct = struct
     | Some (value, range) -> (
       let* value_inserted = insert_to_document text_editor range value in
       match value_inserted with
-      | true -> (
-        let* hole_jump =
-          Vscode.Commands.executeCommand ~command:"ocaml.prev-hole" ~args:[]
+      | true ->
+        let* new_range =
+          Holes_commands.hole_position text_editor client `Prev
         in
-        match hole_jump with
-        | Some _range_ojs ->
-          let new_position =
-            TextEditor.selection text_editor |> Selection.active
-          in
-          process_construct new_position text_editor client
-        | None -> Promise.return ())
+        process_construct (Range.end_ new_range) text_editor client instance
       | false -> Promise.return ())
     | None -> Promise.return ()
 
@@ -654,7 +646,7 @@ module Construct = struct
             let position =
               TextEditor.selection text_editor |> Selection.active
             in
-            let _ = process_construct position text_editor client in
+            let _ = process_construct position text_editor client instance in
             ())
       in
       let (_ : unit) = construct () in
