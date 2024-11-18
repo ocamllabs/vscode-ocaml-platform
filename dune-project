@@ -1,4 +1,4 @@
-(lang dune 3.0)
+(lang dune 3.16)
 
 (name vscode-ocaml-platform)
 
@@ -9,12 +9,9 @@
 
 (maintainers "Rudi Grinberg <me@rgrinberg.com>")
 
-(authors
- "Rudi Grinberg <me@rgrinberg.com>"
- "Sora Morimoto <sora@morimoto.io>"
- "Max Lantas <mnxndev@outlook.com>"
- "Manas <prometheansacrifice@gmail.com>"
- "Rusty Key <iam@stfoo.ru>"
+(authors "Rudi Grinberg <me@rgrinberg.com>"
+ "Sora Morimoto <sora@morimoto.io>" "Max Lantas <mnxndev@outlook.com>"
+ "Manas <prometheansacrifice@gmail.com>" "Rusty Key <iam@stfoo.ru>"
  "Louis Roché <louis@louisroche.net>"
  "Ulugbek Abdullaev <ulugbekna@gmail.com>"
  "Javier Chávarri <javier.chavarri@gmail.com>")
@@ -28,7 +25,8 @@
  (depends
   (vscode
    (= :version))
-  (ocaml (>= 5.2.0))
+  (ocaml
+   (>= 5.2.0))
   (js_of_ocaml
    (>= 4.1.0))
   (gen_js_api
