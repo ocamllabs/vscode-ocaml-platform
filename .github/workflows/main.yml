@@ -1,22 +1,8 @@
 name: Builds, tests & co
 
 on:
-  push:
-    branches:
-      - master
-    tags:
-      - "*"
-  pull_request_target:
-
-    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
-# Concurrent workflows are grouped by the PR or branch that triggered them
-# (github.ref) and the name of the workflow (github.workflow). The
-# 'cancel-in-progress' option then make sure that only one workflow is running
-# at a time. This doesn't prevent new jobs from running, rather it cancels
-# already running jobs before scheduling new jobs.
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'pull_request' || github.sha }}
-  cancel-in-progress: true
+  - push
+  - pull_request
 
 permissions: read-all
 
@@ -43,59 +29,51 @@ jobs:
           node-version: 22
           check-latest: true
 
-      - name: Add the Corepack shims
-        run: corepack enable
+      - run: corepack enable
 
       - name: Install dependencies
         run: make deps
 
-      - name: Run CI checks with Biome
-        if: runner.os == 'Linux'
+      - name: Run Biome checks
         run: yarn lint
 
       - name: Build extension
         run: opam exec -- make build-release
 
       - name: Package extension
-        if: runner.os == 'Linux'
         run: yarn package
 
       - name: Generate artifact attestation
+        if: startsWith(github.ref, 'refs/tags')
         uses: actions/attest-build-provenance@v1
         with:
           subject-path: ocaml-platform.vsix
 
       - name: Upload artifact
-        if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
           name: ocaml-platform-${{ github.sha }}
           path: ocaml-platform.vsix
 
-      - name: Test extension on Linux
-        if: runner.os == 'Linux'
+      - name: Test extension
         run: xvfb-run -a yarn test
 
-      - name: Test extension on macOS/Windows
-        if: runner.os != 'Linux'
-        run: yarn test
-
       - name: Publish extension to VSCode Marketplace
-        if: runner.os == 'Linux' && startsWith(github.ref, 'refs/tags')
+        if: startsWith(github.ref, 'refs/tags')
         continue-on-error: true
         run: yarn deploy:vsce
         env:
           VSCE_PAT: ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
 
-      - name: Publish extension to Open VSX
-        if: runner.os == 'Linux' && startsWith(github.ref, 'refs/tags')
+      - name: Publish extension to Open VSX Registry
+        if: startsWith(github.ref, 'refs/tags')
         continue-on-error: true
         run: yarn deploy:ovsx --pat "$OVSX_PAT"
         env:
           OVSX_PAT: ${{ secrets.OPEN_VSX_TOKEN }}
 
       - name: Create release
-        if: runner.os == 'Linux' && startsWith(github.ref, 'refs/tags')
+        if: startsWith(github.ref, 'refs/tags')
         continue-on-error: true
         uses: softprops/action-gh-release@v2
         with:
