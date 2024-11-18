@@ -40,16 +40,14 @@ end
 
 module Experimental_capabilities = struct
   type t =
-    { interfaceSpecificLangId : bool
-    ; handleSwitchImplIntf : bool
+    { handleSwitchImplIntf : bool
     ; handleInferIntf : bool
     ; handleTypedHoles : bool
     ; handleTypeEnclosing : bool
     }
 
   let default =
-    { interfaceSpecificLangId = false
-    ; handleSwitchImplIntf = false
+    { handleSwitchImplIntf = false
     ; handleInferIntf = false
     ; handleTypedHoles = false
     ; handleTypeEnclosing = false
@@ -63,13 +61,11 @@ module Experimental_capabilities = struct
       |> Option.value ~default:false
     in
     try
-      let interfaceSpecificLangId = has_capability "interfaceSpecificLangId" in
       let handleSwitchImplIntf = has_capability "handleSwitchImplIntf" in
       let handleInferIntf = has_capability "handleInferIntf" in
       let handleTypedHoles = has_capability "handleTypedHoles" in
       let handleTypeEnclosing = has_capability "handleTypeEnclosing" in
-      { interfaceSpecificLangId
-      ; handleSwitchImplIntf
+      { handleSwitchImplIntf
       ; handleInferIntf
       ; handleTypedHoles
       ; handleTypeEnclosing

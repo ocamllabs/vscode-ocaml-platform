@@ -93,15 +93,6 @@ module Kind = struct
     | Global
     | Custom
 
-  module Hmap = struct
-    type ('opam, 'esy, 'global, 'custom) t =
-      { opam : 'opam
-      ; esy : 'esy
-      ; global : 'global
-      ; custom : 'custom
-      }
-  end
-
   let of_string = function
     | "opam" -> Some Opam
     | "esy" -> Some Esy
@@ -182,8 +173,13 @@ module Setting = struct
     Settings.create_setting ~scope:Workspace ~key:"sandbox" ~of_json ~to_json
 end
 
-let available_sandboxes () =
-  { Kind.Hmap.opam = Opam.make (); esy = Esy.make (); global = (); custom = () }
+type available_sandboxes =
+  { opam : Opam.t option Promise.t
+  ; esy : Esy.t option Promise.t
+  }
+
+let available_sandboxes () : available_sandboxes =
+  { opam = Opam.make (); esy = Esy.make () }
 
 let of_settings () : t option Promise.t =
   let open Promise.Syntax in
