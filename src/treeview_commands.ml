@@ -44,13 +44,7 @@ let terminal_item =
   item
 
 let construct_item =
-  let icon =
-    `LightDark
-      Vscode.TreeItem.LightDarkIcon.
-        { light = `String (Path.asset "collection-light.svg" |> Path.to_string)
-        ; dark = `String (Path.asset "collection-dark.svg" |> Path.to_string)
-        }
-  in
+  let icon = `ThemeIcon (Vscode.ThemeIcon.make ~id:"tools" ()) in
   let label =
     `TreeItemLabel
       (Vscode.TreeItemLabel.create
