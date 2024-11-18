@@ -580,8 +580,7 @@ module Construct = struct
         Construct.request
         (Construct.make ~uri ~position ~depth:None ~with_values:None ()))
 
-  let rec display_results ~text_editor:_ ~position:_
-      (results : Custom_requests.Construct.response) =
+  let display_results (results : Custom_requests.Construct.response) =
     let quickPickItems =
       List.map results.result ~f:(fun res ->
           (QuickPickItem.create ~label:res (), (res, results.position)))
@@ -594,10 +593,20 @@ module Construct = struct
       ~options:quickPickOptions
       ()
 
-  and process_construct position text_editor client instance =
+  let insert_to_document text_editor range value =
+    TextEditor.edit
+      text_editor
+      ~callback:(fun ~editBuilder ->
+        Vscode.TextEditorEdit.replace
+          editBuilder
+          ~location:(`Range range)
+          ~value)
+      ()
+
+  let rec process_construct position text_editor client instance =
     let open Promise.Syntax in
     let* res = get_construct_results position text_editor client in
-    let* selected_result = display_results ~text_editor ~position res in
+    let* selected_result = display_results res in
     match selected_result with
     | Some (value, range) -> (
       let* value_inserted = insert_to_document text_editor range value in
