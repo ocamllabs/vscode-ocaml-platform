@@ -43,7 +43,23 @@ let terminal_item =
   Vscode.TreeItem.set_command item command;
   item
 
-let items = [ select_sandbox_item; terminal_item ]
+let construct_item =
+  let icon = `ThemeIcon (Vscode.ThemeIcon.make ~id:"tools" ()) in
+  let label =
+    `TreeItemLabel
+      (Vscode.TreeItemLabel.create
+         ~label:"List values that can fill the selected typed-hole"
+         ())
+  in
+  let item = Vscode.TreeItem.make_label ~label () in
+  let command =
+    Vscode.Command.create ~title:"Construct" ~command:"ocaml.construct" ()
+  in
+  Vscode.TreeItem.set_iconPath item icon;
+  Vscode.TreeItem.set_command item command;
+  item
+
+let items = [ select_sandbox_item; terminal_item; construct_item ]
 
 let getTreeItem ~element = `Value element
 

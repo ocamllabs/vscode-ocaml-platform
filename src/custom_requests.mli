@@ -39,3 +39,22 @@ module Type_enclosing : sig
 
   val request : (params, response) custom_request
 end
+
+module Construct : sig
+  type params
+
+  type response =
+    { position : Range.t
+    ; result : string list
+    }
+
+  val make :
+       uri:Uri.t
+    -> position:Position.t
+    -> ?depth:int option
+    -> ?with_values:[ `None | `Local ] option
+    -> unit
+    -> params
+
+  val request : (params, response) custom_request
+end

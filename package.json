@@ -252,6 +252,11 @@
         "command": "ocaml.copy-type-under-cursor",
         "category": "OCaml",
         "title": "Copy Type Under Cursor"
+      },
+      {
+        "command": "ocaml.construct",
+        "category": "OCaml",
+        "title": "List values that can fill the selected typed-hole"
       }
     ],
     "configuration": {
@@ -714,12 +719,12 @@
         "when": "editorLangId == ocaml || editorLangId == reason"
       },
       {
-        "command": "editor.action.codeAction",
+        "command": "ocaml.construct",
         "key": "Alt+C",
         "args": {
           "kind": "construct"
         },
-        "when": "editorLangId == ocaml"
+        "when": "editorLangId == ocaml || editorLangId == reason"
       },
       {
         "command": "editor.action.codeAction",
@@ -1039,6 +1044,10 @@
         },
         {
           "command": "ocaml.copy-type-under-cursor",
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+        },
+        {
+          "command": "ocaml.construct",
           "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
         }
       ],

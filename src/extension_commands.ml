@@ -164,6 +164,13 @@ module Holes_commands : sig
   val _jump_to_prev_hole : t
 
   val _jump_to_next_hole : t
+
+  val closest_hole :
+       Position.t
+    -> TextEditor.t
+    -> LanguageClient.t
+    -> [< `Next | `Prev ]
+    -> Range.t option Promise.t
 end = struct
   let hole_not_found_msg = "No typed hole was found in this file"
 
@@ -199,6 +206,11 @@ end = struct
       ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
       ()
 
+  let send_request_to_lsp client text_editor =
+    let doc = TextEditor.document text_editor in
+    let uri = TextDocument.uri doc in
+    Custom_requests.send_request client Custom_requests.typedHoles uri
+
   let jump_to_hole jump (instance : Extension_instance.t) ~args =
     (* this command is available (in the command palette) only when a file is
        open *)
@@ -216,12 +228,8 @@ end = struct
         when not (Ocaml_lsp.can_handle_typed_holes ocaml_lsp) ->
         ocaml_lsp_doesn't_support_holes instance ocaml_lsp
       | Some (client, _ocaml_lsp) ->
-        let doc = TextEditor.document text_editor in
-        let uri = TextDocument.uri doc in
         let (_ : unit Promise.t) =
-          let+ holes =
-            Custom_requests.send_request client Custom_requests.typedHoles uri
-          in
+          let+ holes = send_request_to_lsp client text_editor in
           jump
             ~cmd_args:args
             text_editor
@@ -364,6 +372,21 @@ end = struct
             if Range.contains in_range ~positionOrRange:(`Range hole) then
               select_hole_range text_editor hole))
   end
+
+  let closest_hole position text_editor client direction =
+    (* We aren't checking if there's the capability to handle typed holes *)
+    let open Promise.Syntax in
+    let+ holes = send_request_to_lsp client text_editor in
+    let sorted_holes = List.sort holes ~compare:Range.compare in
+    match sorted_holes with
+    | [] -> None
+    | holes ->
+      Some
+        (match direction with
+        | `Prev ->
+          Prev_hole.pick_prev_hole position ~sorted_non_empty_holes_list:holes
+        | `Next ->
+          Next_hole.pick_next_hole position ~sorted_non_empty_holes_list:holes)
 
   let _jump_to_next_hole =
     command Extension_consts.Commands.next_hole (jump_to_hole Next_hole.jump)
@@ -534,6 +557,111 @@ module Copy_type_under_cursor = struct
       ()
     in
     command Extension_consts.Commands.copy_type_under_cursor handler
+end
+
+module Construct = struct
+  let extension_name = "Construct"
+
+  let is_valid_text_doc textdoc =
+    match TextDocument.languageId textdoc with
+    | "ocaml" | "ocaml.interface" | "reason" | "ocaml.ocamllex" -> true
+    | _ -> false
+
+  let ocaml_lsp_doesnt_support_construct ocaml_lsp =
+    not (Ocaml_lsp.can_handle_construct ocaml_lsp)
+
+  let get_construct_results position text_editor client =
+    let doc = TextEditor.document text_editor in
+    let uri = TextDocument.uri doc in
+    Custom_requests.(
+      send_request
+        client
+        Construct.request
+        (Construct.make ~uri ~position ~depth:None ~with_values:None ()))
+
+  let display_results (results : Custom_requests.Construct.response) =
+    let quickPickItems =
+      List.map results.result ~f:(fun res ->
+          (QuickPickItem.create ~label:res (), (res, results.position)))
+    in
+    let quickPickOptions =
+      QuickPickOptions.create ~title:"Construct results" ()
+    in
+    Window.showQuickPickItems
+      ~choices:quickPickItems
+      ~options:quickPickOptions
+      ()
+
+  let insert_to_document text_editor range value =
+    TextEditor.edit
+      text_editor
+      ~callback:(fun ~editBuilder ->
+        Vscode.TextEditorEdit.replace
+          editBuilder
+          ~location:(`Range range)
+          ~value)
+      ()
+
+  let rec process_construct position text_editor client instance =
+    let open Promise.Syntax in
+    let* res = get_construct_results position text_editor client in
+    let* selected_result = display_results res in
+    match selected_result with
+    | Some (value, range) -> (
+      let* value_inserted = insert_to_document text_editor range value in
+      match value_inserted with
+      | true -> (
+        let* new_range =
+          Holes_commands.closest_hole
+            (Range.start range)
+            text_editor
+            client
+            `Next
+        in
+        match new_range with
+        | Some range ->
+          process_construct (Range.end_ range) text_editor client instance
+        | None -> Promise.return ())
+      | false -> Promise.return ())
+    | None -> Promise.return ()
+
+  let _construct =
+    let handler (instance : Extension_instance.t) ~args:_ =
+      let construct () =
+        match Window.activeTextEditor () with
+        | None ->
+          Extension_consts.Command_errors.text_editor_must_be_active
+            extension_name
+            ~expl:
+              "The cursor position is used to determine the correct \
+               environment and insert the result."
+          |> show_message `Error "%s"
+        | Some text_editor
+          when not (is_valid_text_doc (TextEditor.document text_editor)) ->
+          show_message
+            `Error
+            "Invalid file type. This command only works in ocaml files, ocaml \
+             interface files, reason files or ocamllex files."
+        | Some text_editor -> (
+          match Extension_instance.lsp_client instance with
+          | None -> show_message `Warn "ocamllsp is not running"
+          | Some (_client, ocaml_lsp)
+            when ocaml_lsp_doesnt_support_construct ocaml_lsp ->
+            show_message
+              `Warn
+              "The installed version of `ocamllsp` does not support construct \
+               custom requests"
+          | Some (client, _) ->
+            let position =
+              TextEditor.selection text_editor |> Selection.active
+            in
+            let _ = process_construct position text_editor client instance in
+            ())
+      in
+      let (_ : unit) = construct () in
+      ()
+    in
+    command Extension_consts.Commands.construct handler
 end
 
 let register extension instance = function

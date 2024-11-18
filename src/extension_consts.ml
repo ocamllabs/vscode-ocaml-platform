@@ -68,6 +68,8 @@ module Commands = struct
   let ask_debug_program = ocaml_prefixed "ask-debug-program"
 
   let copy_type_under_cursor = ocaml_prefixed "copy-type-under-cursor"
+
+  let construct = ocaml_prefixed "construct"
 end
 
 module Command_errors = struct
