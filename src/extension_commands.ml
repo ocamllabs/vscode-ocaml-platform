@@ -97,8 +97,10 @@ let _switch_impl_intf =
       | None -> Promise.return (show_message `Warn "ocamllsp is not running.")
       | Some (client, ocaml_lsp) ->
         (* same as for instance.client; ignore the try if it's None *)
-        if Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp then
-          Switch_impl_intf.request_switch client document
+        if
+          Ocaml_lsp.can_handle_switch_impl_intf ocaml_lsp
+          && Ocaml_lsp.can_handle_infer_intf ocaml_lsp
+        then Switch_impl_intf.request_switch client document
         else
           (* if, however, ocamllsp doesn't have the capability, recommend
              updating ocamllsp*)

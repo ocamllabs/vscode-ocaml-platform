@@ -40,8 +40,7 @@ end
 
 module Experimental_capabilities = struct
   type t =
-    { interfaceSpecificLangId : bool
-    ; handleSwitchImplIntf : bool
+    { handleSwitchImplIntf : bool
     ; handleInferIntf : bool
     ; handleTypedHoles : bool
     ; handleTypeEnclosing : bool
@@ -49,8 +48,7 @@ module Experimental_capabilities = struct
     }
 
   let default =
-    { interfaceSpecificLangId = false
-    ; handleSwitchImplIntf = false
+    { handleSwitchImplIntf = false
     ; handleInferIntf = false
     ; handleTypedHoles = false
     ; handleTypeEnclosing = false
@@ -65,14 +63,12 @@ module Experimental_capabilities = struct
       |> Option.value ~default:false
     in
     try
-      let interfaceSpecificLangId = has_capability "interfaceSpecificLangId" in
       let handleSwitchImplIntf = has_capability "handleSwitchImplIntf" in
       let handleInferIntf = has_capability "handleInferIntf" in
       let handleTypedHoles = has_capability "handleTypedHoles" in
       let handleTypeEnclosing = has_capability "handleTypeEnclosing" in
       let handleConstruct = has_capability "handleConstruct" in
-      { interfaceSpecificLangId
-      ; handleSwitchImplIntf
+      { handleSwitchImplIntf
       ; handleInferIntf
       ; handleTypedHoles
       ; handleTypeEnclosing
@@ -238,7 +234,7 @@ let of_initialize_result (t : LanguageClient.InitializeResult.t) =
 let can_handle_switch_impl_intf t =
   t.experimental_capabilities.handleSwitchImplIntf
 
-let can_handle_infer_intf t = t.experimental_capabilities.handleSwitchImplIntf
+let can_handle_infer_intf t = t.experimental_capabilities.handleInferIntf
 
 let can_handle_typed_holes t = t.experimental_capabilities.handleTypedHoles
 
