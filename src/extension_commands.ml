@@ -163,12 +163,12 @@ module Holes_commands : sig
 
   val _jump_to_next_hole : t
 
-  val hole_position :
+  val closest_hole :
        Position.t
     -> TextEditor.t
     -> LanguageClient.t
     -> [< `Next | `Prev ]
-    -> Range.t Promise.t
+    -> Range.t option Promise.t
 end = struct
   let hole_not_found_msg = "No typed hole was found in this file"
 
@@ -371,23 +371,20 @@ end = struct
               select_hole_range text_editor hole))
   end
 
-  let hole_position position text_editor client direction =
+  let closest_hole position text_editor client direction =
     (* We aren't checking if there's the capability to handle typed holes *)
     let open Promise.Syntax in
-    let (range : Range.t Promise.t) =
-      let+ holes = send_request_to_lsp client text_editor in
-      let sorted_holes = List.sort holes ~compare:Range.compare in
-      match direction with
-      | `Prev ->
-        Prev_hole.pick_prev_hole
-          position
-          ~sorted_non_empty_holes_list:sorted_holes
-      | `Next ->
-        Next_hole.pick_next_hole
-          position
-          ~sorted_non_empty_holes_list:sorted_holes
-    in
-    range
+    let+ holes = send_request_to_lsp client text_editor in
+    let sorted_holes = List.sort holes ~compare:Range.compare in
+    match sorted_holes with
+    | [] -> None
+    | holes ->
+      Some
+        (match direction with
+        | `Prev ->
+          Prev_hole.pick_prev_hole position ~sorted_non_empty_holes_list:holes
+        | `Next ->
+          Next_hole.pick_next_hole position ~sorted_non_empty_holes_list:holes)
 
   let _jump_to_next_hole =
     command Extension_consts.Commands.next_hole (jump_to_hole Next_hole.jump)
@@ -611,27 +608,20 @@ module Construct = struct
     | Some (value, range) -> (
       let* value_inserted = insert_to_document text_editor range value in
       match value_inserted with
-      | true ->
+      | true -> (
         let* new_range =
-          Holes_commands.hole_position
+          Holes_commands.closest_hole
             (Range.start range)
             text_editor
             client
             `Next
         in
-        process_construct (Range.end_ new_range) text_editor client instance
+        match new_range with
+        | Some range ->
+          process_construct (Range.end_ range) text_editor client instance
+        | None -> Promise.return ())
       | false -> Promise.return ())
     | None -> Promise.return ()
-
-  and insert_to_document text_editor range value =
-    TextEditor.edit
-      text_editor
-      ~callback:(fun ~editBuilder ->
-        Vscode.TextEditorEdit.replace
-          editBuilder
-          ~location:(`Range range)
-          ~value)
-      ()
 
   let _construct =
     let handler (instance : Extension_instance.t) ~args:_ =
