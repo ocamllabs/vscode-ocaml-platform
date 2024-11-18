@@ -256,7 +256,7 @@
       {
         "command": "ocaml.construct",
         "category": "OCaml",
-        "title": "Construct"
+        "title": "List values that can fill the selected typed-hole"
       }
     ],
     "configuration": {
