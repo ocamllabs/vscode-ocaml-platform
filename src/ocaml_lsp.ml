@@ -234,7 +234,7 @@ let of_initialize_result (t : LanguageClient.InitializeResult.t) =
 let can_handle_switch_impl_intf t =
   t.experimental_capabilities.handleSwitchImplIntf
 
-let can_handle_infer_intf t = t.experimental_capabilities.handleSwitchImplIntf
+let can_handle_infer_intf t = t.experimental_capabilities.handleInferIntf
 
 let can_handle_typed_holes t = t.experimental_capabilities.handleTypedHoles
 
