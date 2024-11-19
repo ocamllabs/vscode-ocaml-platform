@@ -2,6 +2,8 @@
 
 # Unreleased
 
+## 1.22.0
+
 - Fix formatting of cwd path on windows (#1650)
 - Add `ocaml.construct` to construct an expression from a typedhole. (#1646)
 
