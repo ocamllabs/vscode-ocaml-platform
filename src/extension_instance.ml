@@ -143,7 +143,7 @@ end = struct
     let cwd =
       match Workspace.workspaceFolders () with
       | [ cwd ] ->
-        Some (cwd |> WorkspaceFolder.uri |> Uri.path |> Path.of_string)
+        Some (cwd |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string)
       | _ -> None
     in
     Cmd.output ?cwd (ocaml_lsp_version sandbox)
