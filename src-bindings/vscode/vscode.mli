@@ -2430,7 +2430,8 @@ module Window : sig
   val showOpenDialog :
     ?options:OpenDialogOptions.t -> unit -> Uri.t list option Promise.t
 
-  val createOutputChannel : name:string -> OutputChannel.t
+  val createOutputChannel :
+    name:string -> ?languageId:string -> unit -> OutputChannel.t
 
   val setStatusBarMessage :
     text:string -> ?hide:[ `AfterTimeout of int ] -> unit -> Disposable.t

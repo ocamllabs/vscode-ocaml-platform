@@ -3128,7 +3128,8 @@ module Window = struct
       ?options:OpenDialogOptions.t -> unit -> Uri.t list or_undefined Promise.t
     [@@js.global "vscode.window.showOpenDialog"]
 
-    val createOutputChannel : name:string -> OutputChannel.t
+    val createOutputChannel :
+      name:string -> ?languageId:string -> unit -> OutputChannel.t
     [@@js.global "vscode.window.createOutputChannel"]
 
     val setStatusBarMessage :

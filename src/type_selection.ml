@@ -53,9 +53,10 @@ let state : state option ref = ref None
 
 let set_decoration text_editor range type_ =
   let decorationOptions =
+    let contentText = String.split_lines type_ |> String.concat ~sep:" " in
     let renderOptions =
       let before =
-        ThemableDecorationAttachmentRenderOptions.create ~contentText:type_ ()
+        ThemableDecorationAttachmentRenderOptions.create ~contentText ()
       in
       let options = ThemableDecorationInstanceRenderOptions.create ~before () in
       Some
@@ -66,14 +67,39 @@ let set_decoration text_editor range type_ =
   let rangesOrOptions = `Options [ decorationOptions ] in
   TextEditor.setDecorations text_editor ~decorationType ~rangesOrOptions
 
-let update_selection text_editor ~type_ range =
+let update_selection text_editor range =
   let new_selection =
     Selection.makePositions
       ~anchor:(Range.start range)
       ~active:(Range.end_ range)
   in
-  set_decoration text_editor range type_;
   TextEditor.set_selection text_editor new_selection
+
+let output_channel =
+  Window.createOutputChannel
+    ~name:"OCaml: Type of selection"
+    ~languageId:"ocaml"
+    ()
+
+let show_in_output_channel text_editor ~type_ range =
+  let doc =
+    let uri = TextEditor.document text_editor |> TextDocument.uri in
+    Uri.path uri
+  in
+  let line =
+    let pos = Range.start range in
+    Position.line pos
+  in
+  let header = Printf.sprintf "(* Line %i, file://%s *)" line doc in
+  OutputChannel.show output_channel ~preserveFocus:true ();
+  OutputChannel.appendLine output_channel ~value:header;
+  OutputChannel.appendLine output_channel ~value:type_;
+  OutputChannel.appendLine output_channel ~value:""
+
+let display_type text_editor ~type_ range =
+  update_selection text_editor range;
+  show_in_output_channel text_editor ~type_ range;
+  set_decoration text_editor range type_
 
 let with_checks ~extension_name ~instance f =
   match Window.activeTextEditor () with
@@ -109,7 +135,6 @@ let enable_reset () =
              (Range.isEqual
                 ~other:current_state.enclosings.(current_state.current_index)
                 (Selection.to_range s)) ->
-      show_message `Info "HIDE";
       TextEditor.setDecorations
         text_editor
         ~decorationType
@@ -121,7 +146,6 @@ let enable_reset () =
   let onDidChangeActiveTextEditor_listener _text_editor =
     match !state with
     | Some current_state ->
-      show_message `Info "HIDE";
       TextEditor.setDecorations
         current_state.text_editor
         ~decorationType
@@ -185,7 +209,7 @@ let handler (instance : Extension_instance.t) ~args:_ =
           enclosings
       in
       let result_range = state.enclosings.(state.current_index) in
-      update_selection text_editor ~type_:result.type_ result_range
+      display_type text_editor ~type_:result.type_ result_range
   in
   let (_ : unit Promise.t) = type_selection () in
   ()
@@ -206,7 +230,7 @@ let previous_handler (instance : Extension_instance.t) ~args:_ =
       in
       state.current_index <- index;
       let result_range = state.enclosings.(state.current_index) in
-      update_selection text_editor ~type_:result.type_ result_range
+      display_type text_editor ~type_:result.type_ result_range
   in
   let (_ : unit Promise.t) = type_previous_selection () in
   ()
