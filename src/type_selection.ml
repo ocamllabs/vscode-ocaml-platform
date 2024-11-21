@@ -92,7 +92,14 @@ let show_in_output_channel text_editor ~type_ range =
     Position.line pos
   in
   let header = Printf.sprintf "(* Line %i, file://%s *)" line doc in
-  OutputChannel.show output_channel ~preserveFocus:true ();
+  (match
+     Settings.(
+       get
+         (*~section:"ocaml.server.typeSelection"*)
+         server_typeSelection_outputChannelResults_setting)
+   with
+  | None | Some true -> OutputChannel.show output_channel ~preserveFocus:true ()
+  | Some false -> ());
   OutputChannel.appendLine output_channel ~value:header;
   OutputChannel.appendLine output_channel ~value:type_;
   OutputChannel.appendLine output_channel ~value:""

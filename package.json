@@ -316,6 +316,11 @@
           "default": true,
           "markdownDescription": "Enable/Disable dune diagnostics"
         },
+        "ocaml.server.typeSelection.outputChannelResults": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Enable/Disable type of selection results to appear in a dedicated output channel in the side panel."
+        },
         "ocaml.server.syntaxDocumentation": {
           "type": "boolean",
           "default": false,
