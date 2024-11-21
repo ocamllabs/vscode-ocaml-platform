@@ -915,6 +915,10 @@ let _type_selection =
   let open Type_selection in
   command Extension_consts.Commands.type_selection handler |> ignore;
   command Extension_consts.Commands.type_previous_selection previous_handler
+  |> ignore;
+  command
+    Extension_consts.Commands.augment_selection_type_verbosity
+    verbosity_handler
 
 let register extension instance = function
   | Command { id; handler } ->

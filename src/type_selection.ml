@@ -32,20 +32,21 @@ let ocaml_lsp_doesnt_support_type_selection instance ocaml_lsp =
       "The installed version of `ocamllsp` does not support type enclosings. %s"
       msg
 
-let get_enclosings text_editor client ~index range =
+let get_enclosings text_editor client ~index ~verbosity range =
   let doc = TextEditor.document text_editor in
   let uri = TextDocument.uri doc in
   Custom_requests.(
     send_request
       client
       Type_selection.request
-      (Type_selection.make ~uri ~at:(`Range range) ~index ~verbosity:0))
+      (Type_selection.make ~uri ~at:(`Range range) ~index ~verbosity))
 
 type state =
   { initial_range : Range.t
   ; enclosings : Range.t array
   ; text_editor : TextEditor.t
   ; mutable current_index : int
+  ; mutable current_verbosity : int
   ; mutable reset_disposable : Disposable.t
   }
 
@@ -166,7 +167,8 @@ let enable_reset () =
      Window.onDidChangeActiveTextEditor () ~listener ())
   ]
 
-let update_or_init_state ~initial_range ~current_index text_editor enclosings =
+let update_or_init_state ~initial_range ~current_index ~current_verbosity
+    text_editor enclosings =
   let enclosings = Array.of_list enclosings in
   match !state with
   | None ->
@@ -175,6 +177,7 @@ let update_or_init_state ~initial_range ~current_index text_editor enclosings =
       ; enclosings
       ; current_index
       ; text_editor
+      ; current_verbosity
       ; reset_disposable = Disposable.from @@ enable_reset ()
       }
     in
@@ -182,22 +185,26 @@ let update_or_init_state ~initial_range ~current_index text_editor enclosings =
     new_state
   | Some state ->
     state.current_index <- current_index;
+    state.current_verbosity <- current_verbosity;
     state
 
 let handler (instance : Extension_instance.t) ~args:_ =
   let type_selection () =
     with_checks ~extension_name ~instance @@ fun text_editor client ->
     let open Promise.Syntax in
-    let initial_range, index =
+    let initial_range, index, verbosity =
       match !state with
-      | Some state -> (state.initial_range, next_index state)
+      | Some state ->
+        (state.initial_range, next_index state, state.current_verbosity)
       | None ->
         let initial_range =
           TextEditor.selection text_editor |> Selection.to_range
         in
-        (initial_range, 0)
+        (initial_range, 0, 0)
     in
-    let+ result = get_enclosings text_editor client ~index initial_range in
+    let+ result =
+      get_enclosings text_editor client ~index ~verbosity initial_range
+    in
     match result.enclosings with
     | [] -> show_message `Warn "No results found for that selection."
     | enclosings ->
@@ -205,6 +212,7 @@ let handler (instance : Extension_instance.t) ~args:_ =
         update_or_init_state
           ~initial_range
           ~current_index:index
+          ~current_verbosity:0
           text_editor
           enclosings
       in
@@ -225,12 +233,37 @@ let previous_handler (instance : Extension_instance.t) ~args:_ =
       Promise.return @@ show_message `Warn "There is no previous selection"
     | Some state ->
       let index = max 0 (state.current_index - 1) in
+      let verbosity = 0 in
       let+ result =
-        get_enclosings text_editor client ~index state.initial_range
+        get_enclosings text_editor client ~index ~verbosity state.initial_range
       in
       state.current_index <- index;
+      state.current_verbosity <- verbosity;
       let result_range = state.enclosings.(state.current_index) in
       display_type text_editor ~type_:result.type_ result_range
   in
   let (_ : unit Promise.t) = type_previous_selection () in
+  ()
+
+let extension_name = "Increase Selection Type Verbosity"
+
+let verbosity_handler (instance : Extension_instance.t) ~args:_ =
+  let bump_selection_type_verbosity () =
+    with_checks ~extension_name ~instance @@ fun text_editor client ->
+    let open Promise.Syntax in
+    match !state with
+    | None ->
+      Promise.return @@ show_message `Warn "There is no previous selection"
+    | Some state ->
+      let index = state.current_index in
+      let verbosity = state.current_verbosity + 1 in
+      let+ result =
+        get_enclosings text_editor client ~index ~verbosity state.initial_range
+      in
+      state.current_index <- index;
+      state.current_verbosity <- verbosity;
+      let result_range = state.enclosings.(state.current_index) in
+      display_type text_editor ~type_:result.type_ result_range
+  in
+  let (_ : unit Promise.t) = bump_selection_type_verbosity () in
   ()

@@ -76,6 +76,9 @@ module Commands = struct
   let type_selection = ocaml_prefixed "type-selection"
 
   let type_previous_selection = ocaml_prefixed "type-previous-selection"
+
+  let augment_selection_type_verbosity =
+    ocaml_prefixed "augment-selection-type-verbosity"
 end
 
 module Command_errors = struct

@@ -272,6 +272,11 @@
         "command": "ocaml.type-previous-selection",
         "category": "OCaml",
         "title": "Show previous type-selection steps."
+      },
+      {
+        "command": "ocaml.augment-selection-type-verbosity",
+        "category": "OCaml",
+        "title": "Increase the verbosity of the selection's type."
       }
     ],
     "configuration": {
@@ -790,6 +795,11 @@
       {
         "command": "ocaml.type-previous-selection",
         "key": "Shift+Alt+T",
+        "when": "editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface"
+      },
+      {
+        "command": "ocaml.augment-selection-type-verbosity",
+        "key": "Alt+V",
         "when": "editorTextFocus && editorLangId == ocaml || editorLangId == ocaml.interface"
       }
     ],
