@@ -6,6 +6,7 @@
 
 - Fix formatting of cwd path on windows (#1650)
 - Add `ocaml.construct` to construct an expression from a typedhole. (#1646)
+- Add `ocaml.jump` to jump to a specific target. (#1654)
 
 ## 1.21.0
 
