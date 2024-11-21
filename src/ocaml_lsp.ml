@@ -45,6 +45,7 @@ module Experimental_capabilities = struct
     ; handleTypedHoles : bool
     ; handleTypeEnclosing : bool
     ; handleConstruct : bool
+    ; handleJump : bool
     }
 
   let default =
@@ -53,6 +54,7 @@ module Experimental_capabilities = struct
     ; handleTypedHoles = false
     ; handleTypeEnclosing = false
     ; handleConstruct = false
+    ; handleJump = false
     }
 
   (** Creates [t] given a JSON of form [{ 'handleSwitchImplIntf' : true, .... }] *)
@@ -68,11 +70,13 @@ module Experimental_capabilities = struct
       let handleTypedHoles = has_capability "handleTypedHoles" in
       let handleTypeEnclosing = has_capability "handleTypeEnclosing" in
       let handleConstruct = has_capability "handleConstruct" in
+      let handleJump = has_capability "handleJump" in
       { handleSwitchImplIntf
       ; handleInferIntf
       ; handleTypedHoles
       ; handleTypeEnclosing
       ; handleConstruct
+      ; handleJump
       }
     with Jsonoo.Decode_error err ->
       show_message
@@ -242,3 +246,5 @@ let can_handle_type_enclosing t =
   t.experimental_capabilities.handleTypeEnclosing
 
 let can_handle_construct t = t.experimental_capabilities.handleConstruct
+
+let can_handle_merlin_jump t = t.experimental_capabilities.handleJump

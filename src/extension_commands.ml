@@ -664,6 +664,109 @@ module Construct = struct
     command Extension_consts.Commands.construct handler
 end
 
+module MerlinJump = struct
+  let targets =
+    [ "fun"
+    ; "match"
+    ; "let"
+    ; "module"
+    ; "module-type"
+    ; "match-next-case"
+    ; "match-prev-case"
+    ]
+
+  let extension_name = "MerlinJump"
+
+  let is_valid_text_doc textdoc =
+    match TextDocument.languageId textdoc with
+    | "ocaml" | "ocaml.interface" | "reason" | "ocaml.ocamllex" -> true
+    | _ -> false
+
+  let ocaml_lsp_doesnt_support_merlin_jump ocaml_lsp =
+    not (Ocaml_lsp.can_handle_merlin_jump ocaml_lsp)
+
+  let process_jump_target position target text_editor client =
+    let doc = TextEditor.document text_editor in
+    let uri = TextDocument.uri doc in
+    Custom_requests.(
+      send_request
+        client
+        Merlin_jump.request
+        (Merlin_jump.make ~uri ~position ~target ()))
+
+  let display_results (results : Custom_requests.Merlin_jump.response list) =
+    let quickPickItems =
+      List.map results ~f:(fun res ->
+          ( QuickPickItem.create ~label:(Uri.toString res.uri ()) ()
+          , (res.uri, res.position) ))
+    in
+    let quickPickOptions =
+      QuickPickOptions.create ~title:"Merlin Jump results" ()
+    in
+    Window.showQuickPickItems
+      ~choices:quickPickItems
+      ~options:quickPickOptions
+      ()
+
+  let jump_to_position text_editor position =
+    TextEditor.set_selection
+      text_editor
+      (Selection.makePositions ~anchor:position ~active:position)
+
+  let process_jump position text_editor client =
+    let open Promise.Syntax in
+    let* successful_targets =
+      Promise.all_list
+        (List.map
+           ~f:(fun target ->
+             process_jump_target position target text_editor client)
+           targets)
+    in
+    let* selected_target = display_results successful_targets in
+    match selected_target with
+    | Some (_res, position) ->
+      jump_to_position text_editor position |> Promise.return
+    | None -> Promise.return ()
+
+  let _jump =
+    let handler (instance : Extension_instance.t) ~args:_ =
+      let jump () =
+        match Window.activeTextEditor () with
+        | None ->
+          Extension_consts.Command_errors.text_editor_must_be_active
+            extension_name
+            ~expl:
+              "The cursor position is used to determine the correct \
+               environment for the jump."
+          |> show_message `Error "%s"
+        | Some text_editor
+          when not (is_valid_text_doc (TextEditor.document text_editor)) ->
+          show_message
+            `Error
+            "Invalid file type. This command only works in ocaml files, ocaml \
+             interface files, reason files or ocamllex files."
+        | Some text_editor -> (
+          match Extension_instance.lsp_client instance with
+          | None -> show_message `Warn "ocamllsp is not running"
+          | Some (_client, ocaml_lsp)
+            when ocaml_lsp_doesnt_support_merlin_jump ocaml_lsp ->
+            show_message
+              `Warn
+              "The installed version of `ocamllsp` does not support Merlin \
+               jumps custom requests"
+          | Some (client, _) ->
+            let position =
+              TextEditor.selection text_editor |> Selection.active
+            in
+            let _ = process_jump position text_editor client in
+            ())
+      in
+      let (_ : unit) = jump () in
+      ()
+    in
+    command Extension_consts.Commands.merlin_jump handler
+end
+
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in

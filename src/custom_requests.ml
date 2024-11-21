@@ -120,3 +120,34 @@ module Construct = struct
   let request =
     { meth = ocamllsp_prefixed "construct"; encode_params; decode_response }
 end
+
+module Merlin_jump = struct
+  type params =
+    { uri : Uri.t
+    ; position : Position.t
+    ; target : string
+    }
+
+  type response =
+    { uri : Uri.t
+    ; position : Position.t
+    }
+
+  let encode_params { uri; position; target } =
+    let open Jsonoo.Encode in
+    let uri = ("uri", string @@ Uri.toString uri ()) in
+    let position = ("position", Position.json_of_t position) in
+    let target = ("target", string target) in
+    object_ [ uri; position; target ]
+
+  let decode_response response =
+    let open Jsonoo.Decode in
+    let position = field "position" Position.t_of_json response in
+    let uri = field "uri" Jsonoo.t_to_js response |> Uri.t_of_js in
+    { uri; position }
+
+  let make ~uri ~position ~target () = { uri; position; target }
+
+  let request =
+    { meth = ocamllsp_prefixed "jump"; encode_params; decode_response }
+end

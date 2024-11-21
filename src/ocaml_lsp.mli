@@ -17,6 +17,8 @@ val can_handle_type_enclosing : t -> bool
 
 val can_handle_construct : t -> bool
 
+val can_handle_merlin_jump : t -> bool
+
 module OcamllspSettingEnable : sig
   include Ojs.T
 

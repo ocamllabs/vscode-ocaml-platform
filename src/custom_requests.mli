@@ -58,3 +58,16 @@ module Construct : sig
 
   val request : (params, response) custom_request
 end
+
+module Merlin_jump : sig
+  type params
+
+  type response =
+    { uri : Uri.t
+    ; position : Position.t
+    }
+
+  val make : uri:Uri.t -> position:Position.t -> target:string -> unit -> params
+
+  val request : (params, response) custom_request
+end

@@ -257,6 +257,11 @@
         "command": "ocaml.construct",
         "category": "OCaml",
         "title": "List values that can fill the selected typed-hole"
+      },
+      {
+        "command": "ocaml.jump",
+        "category": "OCaml",
+        "title": "Jump to a specific target"
       }
     ],
     "configuration": {
@@ -723,6 +728,14 @@
         "key": "Alt+C",
         "args": {
           "kind": "construct"
+        },
+        "when": "editorLangId == ocaml || editorLangId == reason"
+      },
+      {
+        "command": "ocaml.jump",
+        "key": "Alt+J",
+        "args": {
+          "kind": "jump"
         },
         "when": "editorLangId == ocaml || editorLangId == reason"
       },
