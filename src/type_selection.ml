@@ -44,6 +44,7 @@ let get_enclosings text_editor client ~index range =
 type state =
   { initial_range : Range.t
   ; enclosings : Range.t array
+  ; text_editor : TextEditor.t
   ; mutable current_index : int
   ; mutable reset_disposable : Disposable.t
   }
@@ -96,6 +97,8 @@ let next_index state =
   let number_or_results = Array.length state.enclosings in
   min (state.current_index + 1) (number_or_results - 1)
 
+(* We should reset the state if the selection change or the user switches
+   editor *)
 let enable_reset () =
   let onDidChangeTextEditorSelection_listener event =
     let text_editor = TextEditorSelectionChangeEvent.textEditor event in
@@ -115,13 +118,31 @@ let enable_reset () =
       state := None
     | _ -> ()
   in
-  let listener event =
-    let listener = onDidChangeTextEditorSelection_listener in
-    Handlers.unpwrap (Handlers.w1 listener event)
+  let onDidChangeActiveTextEditor_listener _text_editor =
+    match !state with
+    | Some current_state ->
+      show_message `Info "HIDE";
+      TextEditor.setDecorations
+        current_state.text_editor
+        ~decorationType
+        ~rangesOrOptions:(`Options []);
+      Disposable.dispose current_state.reset_disposable;
+      state := None
+    | _ -> ()
   in
-  Window.onDidChangeTextEditorSelection () ~listener ()
+  [ (let listener event =
+       let listener = onDidChangeTextEditorSelection_listener in
+       Handlers.unpwrap (Handlers.w1 listener event)
+     in
+     Window.onDidChangeTextEditorSelection () ~listener ())
+  ; (let listener event =
+       let listener = onDidChangeActiveTextEditor_listener in
+       Handlers.unpwrap (Handlers.w1 listener event)
+     in
+     Window.onDidChangeActiveTextEditor () ~listener ())
+  ]
 
-let update_or_init_state ~initial_range ~current_index enclosings =
+let update_or_init_state ~initial_range ~current_index text_editor enclosings =
   let enclosings = Array.of_list enclosings in
   match !state with
   | None ->
@@ -129,7 +150,8 @@ let update_or_init_state ~initial_range ~current_index enclosings =
       { initial_range
       ; enclosings
       ; current_index
-      ; reset_disposable = enable_reset ()
+      ; text_editor
+      ; reset_disposable = Disposable.from @@ enable_reset ()
       }
     in
     state := Some new_state;
@@ -156,7 +178,11 @@ let handler (instance : Extension_instance.t) ~args:_ =
     | [] -> show_message `Warn "No results found for that selection."
     | enclosings ->
       let state =
-        update_or_init_state ~initial_range ~current_index:index enclosings
+        update_or_init_state
+          ~initial_range
+          ~current_index:index
+          text_editor
+          enclosings
       in
       let result_range = state.enclosings.(state.current_index) in
       update_selection text_editor ~type_:result.type_ result_range
