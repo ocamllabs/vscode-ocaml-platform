@@ -1237,7 +1237,7 @@
     "@vscode/vsce": "3.2.1",
     "esbuild": "0.24.0",
     "ovsx": "0.10.1",
-    "typescript": "5.6.3"
+    "typescript": "5.7.2"
   },
   "packageManager": "yarn@4.5.1",
   "engines": {
