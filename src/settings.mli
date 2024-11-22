@@ -45,5 +45,3 @@ val server_extendedHover_setting : bool setting
 val server_duneDiagnostics_setting : bool setting
 
 val server_syntaxDocumentation_setting : bool setting
-
-val server_typeSelection_outputChannelResults_setting : bool setting

@@ -1581,6 +1581,8 @@ module OutputChannel = struct
 
     val appendLine : t -> value:string -> unit [@@js.call]
 
+    val replace : t -> value:string -> unit [@@js.call]
+
     val clear : t -> unit [@@js.call]
 
     val show : t -> ?preserveFocus:bool -> unit -> unit [@@js.call]

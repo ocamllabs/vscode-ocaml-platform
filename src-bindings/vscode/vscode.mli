@@ -1232,6 +1232,8 @@ module OutputChannel : sig
 
   val appendLine : t -> value:string -> unit
 
+  val replace : t -> value:string -> unit
+
   val clear : t -> unit
 
   val show : t -> ?preserveFocus:bool -> unit -> unit

@@ -1,5 +1,23 @@
 open Import
 
+module Options = struct
+  open Settings
+
+  let outputChannelResults =
+    create_setting
+      ~scope:ConfigurationTarget.Workspace
+      ~key:"ocaml.server.typeSelection.outputChannelResults"
+      ~of_json:Jsonoo.Decode.bool
+      ~to_json:Jsonoo.Encode.bool
+
+  let alwaysClearOutputChannel =
+    create_setting
+      ~scope:ConfigurationTarget.Workspace
+      ~key:"ocaml.server.typeSelection.alwaysClearOutputChannel"
+      ~of_json:Jsonoo.Decode.bool
+      ~to_json:Jsonoo.Encode.bool
+end
+
 let decorationType =
   let options =
     let before =
@@ -91,16 +109,13 @@ let show_in_output_channel text_editor ~type_ range =
     let pos = Range.start range in
     Position.line pos
   in
-  let header = Printf.sprintf "(* Line %i, file://%s *)" line doc in
-  (match
-     Settings.(
-       get
-         (*~section:"ocaml.server.typeSelection"*)
-         server_typeSelection_outputChannelResults_setting)
-   with
+  let header = Printf.sprintf "(* Line %i, file://%s *)\n" line doc in
+  (match Settings.(get Options.outputChannelResults) with
   | None | Some true -> OutputChannel.show output_channel ~preserveFocus:true ()
   | Some false -> ());
-  OutputChannel.appendLine output_channel ~value:header;
+  (match Settings.(get Options.outputChannelResults) with
+  | Some true -> OutputChannel.replace output_channel ~value:header
+  | None | Some false -> OutputChannel.append output_channel ~value:header);
   OutputChannel.appendLine output_channel ~value:type_;
   OutputChannel.appendLine output_channel ~value:""
 

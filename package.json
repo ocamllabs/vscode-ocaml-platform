@@ -321,6 +321,11 @@
           "default": true,
           "markdownDescription": "Enable/Disable type of selection results to appear in a dedicated output channel in the side panel."
         },
+        "ocaml.server.typeSelection.alwaysClearOutputChannel": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable clearing of the output channel before showing a new result."
+        },
         "ocaml.server.syntaxDocumentation": {
           "type": "boolean",
           "default": false,
