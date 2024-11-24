@@ -15,7 +15,7 @@
 - Run ocamllsp -version in workspace dir (#1641)
 - Make it a warning if ocamlc is missing (#1642)
 - Add `1.18.0`, `1.19.0` and `1.20.0~5.3preview` to the list of known versions
-  of ocamllsp (#1644)
+  of ocamllsp (#1644) 
 
 ## 1.20.1
 

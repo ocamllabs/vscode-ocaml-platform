@@ -125,28 +125,33 @@ module Merlin_jump = struct
   type params =
     { uri : Uri.t
     ; position : Position.t
-    ; target : string
     }
 
-  type response =
-    { uri : Uri.t
-    ; position : Position.t
-    }
+  type response = (string * Position.t) list option
 
-  let encode_params { uri; position; target } =
+  let encode_params { uri; position } =
     let open Jsonoo.Encode in
-    let uri = ("uri", string @@ Uri.toString uri ()) in
+    let uri =
+      ("textDocument", object_ [ ("uri", string @@ Uri.toString uri ()) ])
+    in
     let position = ("position", Position.json_of_t position) in
-    let target = ("target", string target) in
-    object_ [ uri; position; target ]
+    object_ [ uri; position ]
 
-  let decode_response response =
+  let decode_response (response : Jsonoo.t) : response =
     let open Jsonoo.Decode in
-    let position = field "position" Position.t_of_json response in
-    let uri = field "uri" Jsonoo.t_to_js response |> Uri.t_of_js in
-    { uri; position }
+    match
+      field
+        "jumps"
+        (list (fun item ->
+             let target = field "target" string item in
+             let position = field "position" Position.t_of_json item in
+             (target, position)))
+        response
+    with
+    | _ :: _ as items -> Some items
+    | _ -> None
 
-  let make ~uri ~position ~target () = { uri; position; target }
+  let make ~uri ~position = { uri; position }
 
   let request =
     { meth = ocamllsp_prefixed "jump"; encode_params; decode_response }

@@ -665,16 +665,6 @@ module Construct = struct
 end
 
 module MerlinJump = struct
-  let targets =
-    [ "fun"
-    ; "match"
-    ; "let"
-    ; "module"
-    ; "module-type"
-    ; "match-next-case"
-    ; "match-prev-case"
-    ]
-
   let extension_name = "MerlinJump"
 
   let is_valid_text_doc textdoc =
@@ -685,20 +675,22 @@ module MerlinJump = struct
   let ocaml_lsp_doesnt_support_merlin_jump ocaml_lsp =
     not (Ocaml_lsp.can_handle_merlin_jump ocaml_lsp)
 
-  let process_jump_target position target text_editor client =
+  let process_jump_target position text_editor client =
     let doc = TextEditor.document text_editor in
     let uri = TextDocument.uri doc in
     Custom_requests.(
-      send_request
-        client
-        Merlin_jump.request
-        (Merlin_jump.make ~uri ~position ~target ()))
+      send_request client Merlin_jump.request (Merlin_jump.make ~uri ~position))
 
-  let display_results (results : Custom_requests.Merlin_jump.response list) =
+  let display_results (results : Custom_requests.Merlin_jump.response) =
     let quickPickItems =
-      List.map results ~f:(fun res ->
-          ( QuickPickItem.create ~label:(Uri.toString res.uri ()) ()
-          , (res.uri, res.position) ))
+      match results with
+      | Some results ->
+        List.map results ~f:(fun (target, pos) ->
+            ( (QuickPickItem.create
+                 ~label:("Jump to " ^ String.uppercase target))
+                ()
+            , (target, pos) ))
+      | None -> []
     in
     let quickPickOptions =
       QuickPickOptions.create ~title:"Merlin Jump results" ()
@@ -711,17 +703,16 @@ module MerlinJump = struct
   let jump_to_position text_editor position =
     TextEditor.set_selection
       text_editor
-      (Selection.makePositions ~anchor:position ~active:position)
+      (Selection.makePositions ~anchor:position ~active:position);
+    TextEditor.revealRange
+      text_editor
+      ~range:(Range.makePositions ~start:position ~end_:position)
+      ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
+      ()
 
   let process_jump position text_editor client =
     let open Promise.Syntax in
-    let* successful_targets =
-      Promise.all_list
-        (List.map
-           ~f:(fun target ->
-             process_jump_target position target text_editor client)
-           targets)
-    in
+    let* successful_targets = process_jump_target position text_editor client in
     let* selected_target = display_results successful_targets in
     match selected_target with
     | Some (_res, position) ->
@@ -753,7 +744,7 @@ module MerlinJump = struct
             show_message
               `Warn
               "The installed version of `ocamllsp` does not support Merlin \
-               jumps custom requests"
+               jump custom requests"
           | Some (client, _) ->
             let position =
               TextEditor.selection text_editor |> Selection.active
