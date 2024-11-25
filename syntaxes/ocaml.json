@@ -140,8 +140,8 @@
           "comment": "Cinaps comment",
           "begin": "\\(\\*\\$",
           "end": "\\*\\)",
-          "beginCaptures": [{ "name": "comment.cinaps.ocaml" }],
-          "endCaptures": [{ "name": "comment.cinaps.ocaml" }],
+          "beginCaptures": { "1": { "name": "comment.cinaps.ocaml" } },
+          "endCaptures": { "1": { "name": "comment.cinaps.ocaml" } },
           "patterns": [{ "include": "$self" }]
         },
         {
@@ -333,15 +333,15 @@
         {
           "begin": "\\b(sig)\\b",
           "end": "\\b(end)\\b",
-          "beginCaptures": [{ "name": "keyword.other.ocaml" }],
-          "endCaptures": [{ "name": "keyword.other.ocaml" }],
+          "beginCaptures": { "1": { "name": "keyword.other.ocaml" } },
+          "endCaptures": { "1": { "name": "keyword.other.ocaml" } },
           "patterns": [{ "include": "source.ocaml.interface" }]
         },
         {
           "begin": "\\b(struct)\\b",
           "end": "\\b(end)\\b",
-          "beginCaptures": [{ "name": "keyword.other.ocaml" }],
-          "endCaptures": [{ "name": "keyword.other.ocaml" }],
+          "beginCaptures": { "1": { "name": "keyword.other.ocaml" } },
+          "endCaptures": { "1": { "name": "keyword.other.ocaml" } },
           "patterns": [{ "include": "$self" }]
         }
       ]

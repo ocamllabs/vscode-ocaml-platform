@@ -593,6 +593,11 @@
         "path": "./syntaxes/dune-workspace.json"
       },
       {
+        "language": "dune-all",
+        "scopeName": "source.dune-all",
+        "path": "./syntaxes/dune-all.json"
+      },
+      {
         "language": "ocaml.merlin",
         "scopeName": "source.ocaml.merlin",
         "path": "./syntaxes/merlin.json"

@@ -135,24 +135,34 @@
         {
           "begin": "\\[\\^?",
           "end": "\\]",
-          "beginCaptures": [{ "name": "keyword.other.regex" }],
-          "endCaptures": [{ "name": "keyword.other.regex" }],
+          "beginCaptures": {
+            "1": { "name": "keyword.other.regex" }
+          },
+          "endCaptures": {
+            "1": { "name": "keyword.other.regex" }
+          },
           "contentName": "source.regex",
           "patterns": [{ "name": "keyword.other.regex", "match": "-" }]
         },
         {
           "begin": "\\((\\?[:=!])?",
           "end": "\\)",
-          "beginCaptures": [{ "name": "keyword.other.regex" }],
-          "endCaptures": [{ "name": "keyword.other.regex" }],
+          "beginCaptures": {
+            "1": { "name": "keyword.other.regex" }
+          },
+          "endCaptures": {
+            "1": { "name": "keyword.other.regex" }
+          },
           "contentName": "source.regex",
           "patterns": [{ "include": "#regex" }]
         },
         {
           "begin": "{",
           "end": "}",
-          "beginCaptures": [{ "name": "keyword.other.regex" }],
-          "endCaptures": [{ "name": "keyword.other.regex" }],
+          "beginCaptures": {
+            "1": { "name": "keyword.other.regex" }
+          },
+          "endCaptures": { "1": { "name": "keyword.other.regex" } },
           "contentName": "source.regex",
           "patterns": [
             {

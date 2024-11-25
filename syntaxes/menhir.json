@@ -13,9 +13,9 @@
     {
       "comment": "sequence of rules",
       "begin": "%%",
-      "beginCaptures": [{ "name": "keyword.other.menhir" }],
+      "beginCaptures": { "1": { "name": "keyword.other.menhir" } },
       "end": "%%",
-      "endCaptures": [{ "name": "keyword.other.menhir" }],
+      "endCaptures": { "1": { "name": "keyword.other.menhir" } },
       "patterns": [{ "include": "#comments" }, { "include": "#rules" }]
     },
     { "include": "source.ocaml" }
@@ -44,15 +44,15 @@
         {
           "comment": "ocaml header",
           "begin": "%{",
-          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "beginCaptures": { "1": { "name": "keyword.other.menhir" } },
           "end": "%}",
-          "endCaptures": [{ "name": "keyword.other.menhir" }],
+          "endCaptures": { "1": { "name": "keyword.other.menhir" } },
           "patterns": [{ "include": "source.ocaml" }]
         },
         {
           "comment": "token declaration",
           "begin": "%token\\b",
-          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "beginCaptures": { "1": { "name": "keyword.other.menhir" } },
           "end": "(?=%)",
           "patterns": [
             { "include": "#type-annotation" },
@@ -65,7 +65,7 @@
         {
           "comment": "associativity declaration",
           "begin": "%(?:nonassoc|left|right)\\b",
-          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "beginCaptures": { "1": { "name": "keyword.other.menhir" } },
           "end": "(?=%)",
           "patterns": [
             { "include": "#token-name" },
@@ -78,7 +78,7 @@
         {
           "comment": "type/start/on_error_reduce declaration",
           "begin": "%(?:type|start|on_error_reduce)\\b",
-          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "beginCaptures": { "1": { "name": "keyword.other.menhir" } },
           "end": "(?=%)",
           "patterns": [
             { "include": "#type-annotation" },
@@ -96,7 +96,7 @@
         {
           "comment": "attribute declaration",
           "begin": "%(?:attribute\\b|(?=\\[))",
-          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "beginCaptures": { "1": { "name": "keyword.other.menhir" } },
           "end": "(?=%)",
           "patterns": [
             { "include": "source.ocaml#attributes" },
@@ -113,8 +113,8 @@
           "comment": "ocaml type annotation for token",
           "begin": "<",
           "end": ">",
-          "beginCaptures": [{ "name": "keyword.other.menhir" }],
-          "endCaptures": [{ "name": "keyword.other.menhir" }],
+          "beginCaptures": { "1": { "name": "keyword.other.menhir" } },
+          "endCaptures": { "1": { "name": "keyword.other.menhir" } },
           "patterns": [{ "include": "source.ocaml" }]
         }
       }
@@ -167,7 +167,7 @@
         {
           "comment": "production",
           "begin": "[:|]",
-          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "beginCaptures": { "1": { "name": "keyword.other.menhir" } },
           "end": "(?=[{<|]|let\\b|[[:lower:]_][[:word:]]*[[:space:]]*(?:\\([^)]+\\)[[:space:]]*)?:|%(?!prec\\b))",
           "patterns": [
             { "include": "#comments" },
@@ -214,7 +214,7 @@
         {
           "comment": "production",
           "begin": "[:|]",
-          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "beginCaptures": { "1": { "name": "keyword.other.menhir" } },
           "end": "(?=[{<|]|let\\b|[[:lower:]_][[:word:]]*[[:space:]]*(?:\\([^)]+\\)[[:space:]]*)?:|%(?!prec\\b))",
           "patterns": [
             { "include": "#comments" },
@@ -238,9 +238,9 @@
       "comment": "ocaml semantic action",
       "contentName": "source.embedded-action.menhir",
       "begin": "{",
-      "beginCaptures": [{ "name": "keyword.other.menhir" }],
+      "beginCaptures": { "1": { "name": "keyword.other.menhir" } },
       "end": "}",
-      "endCaptures": [{ "name": "keyword.other.menhir" }],
+      "endCaptures": { "1": { "name": "keyword.other.menhir" } },
       "patterns": [{ "include": "source.ocaml" }]
     },
     "new-actions": {
@@ -249,9 +249,9 @@
         {
           "comment": "point-free ocaml semantic action",
           "begin": "<",
-          "beginCaptures": [{ "name": "keyword.other.menhir" }],
+          "beginCaptures": { "1": { "name": "keyword.other.menhir" } },
           "end": ">",
-          "endCaptures": [{ "name": "keyword.other.menhir" }],
+          "endCaptures": { "1": { "name": "keyword.other.menhir" } },
           "patterns": [{ "include": "source.ocaml" }]
         }
       ]
@@ -279,7 +279,7 @@
         },
         {
           "comment": "destructured semantic value capture",
-          "begin": "(?<![[:word:]][[:space:]]*)\\(",
+          "begin": "(?<!\\w)\\(",
           "end": "\\)[[:space:]]*(=)",
           "endCaptures": {
             "1": { "name": "keyword.other.menhir" }
