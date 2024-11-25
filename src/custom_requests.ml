@@ -45,7 +45,7 @@ module Type_selection = struct
   type response =
     { index : int
     ; type_ : string
-    ; enclosings : Range.t list
+    ; enclosings : Range.t array
     }
 
   let encode_params { uri; at; index; verbosity } =
@@ -65,7 +65,7 @@ module Type_selection = struct
     let open Jsonoo.Decode in
     let index = field "index" int response in
     let type_ = field "type" string response in
-    let enclosings = field "enclosings" (list Range.t_of_json) response in
+    let enclosings = field "enclosings" (array Range.t_of_json) response in
     { index; type_; enclosings }
 
   let make ~uri ~at ~index ~verbosity = { uri; at; index; verbosity }

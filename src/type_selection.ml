@@ -1,4 +1,5 @@
 open Import
+module Request = Custom_requests.Type_selection
 
 module Options = struct
   open Settings
@@ -50,25 +51,36 @@ let ocaml_lsp_doesnt_support_type_selection instance ocaml_lsp =
       "The installed version of `ocamllsp` does not support type enclosings. %s"
       msg
 
-let get_enclosings text_editor client ~index ~verbosity range =
-  let doc = TextEditor.document text_editor in
-  let uri = TextDocument.uri doc in
-  Custom_requests.(
-    send_request
-      client
-      Type_selection.request
-      (Type_selection.make ~uri ~at:(`Range range) ~index ~verbosity))
-
 type state =
   { initial_range : Range.t
-  ; enclosings : Range.t array
   ; text_editor : TextEditor.t
-  ; mutable current_index : int
+  ; mutable last_result : Request.response option
   ; mutable current_verbosity : int
   ; mutable reset_disposable : Disposable.t
   }
 
 let state : state option ref = ref None
+
+let active_range (result : Request.response) = result.enclosings.(result.index)
+
+let next_index state =
+  match state.last_result with
+  | None -> 0
+  | Some result ->
+    let number_or_enclosings = Array.length result.enclosings in
+    min (result.index + 1) (number_or_enclosings - 1)
+
+let get_enclosings ?index text_editor client state =
+  let doc = TextEditor.document text_editor in
+  let uri = TextDocument.uri doc in
+  let index = Option.value_lazy ~default:(fun () -> next_index state) index in
+  let at = `Range state.initial_range in
+  let verbosity = state.current_verbosity in
+  Custom_requests.(
+    send_request
+      client
+      Type_selection.request
+      (Type_selection.make ~uri ~at ~index ~verbosity))
 
 let set_decoration text_editor range type_ =
   let decorationOptions =
@@ -119,7 +131,8 @@ let show_in_output_channel text_editor ~type_ range =
   OutputChannel.appendLine output_channel ~value:type_;
   OutputChannel.appendLine output_channel ~value:""
 
-let display_type text_editor ~type_ range =
+let display_type text_editor ({ type_; _ } as result : Request.response) =
+  let range = active_range result in
   update_selection text_editor range;
   show_in_output_channel text_editor ~type_ range;
   set_decoration text_editor range type_
@@ -142,29 +155,27 @@ let with_checks ~extension_name ~instance f =
 
 let extension_name = "Type Selection"
 
-let next_index state =
-  let number_or_results = Array.length state.enclosings in
-  min (state.current_index + 1) (number_or_results - 1)
-
 (* We should reset the state if the selection change or the user switches
    editor *)
 let enable_reset () =
   let onDidChangeTextEditorSelection_listener event =
     let text_editor = TextEditorSelectionChangeEvent.textEditor event in
     let selections = TextEditorSelectionChangeEvent.selections event in
-    match (!state, selections) with
-    | Some current_state, [ s ]
-      when not
-             (Range.isEqual
-                ~other:current_state.enclosings.(current_state.current_index)
-                (Selection.to_range s)) ->
-      TextEditor.setDecorations
-        text_editor
-        ~decorationType
-        ~rangesOrOptions:(`Options []);
-      Disposable.dispose current_state.reset_disposable;
-      state := None
-    | _ -> ()
+    let not_last_range (result : Request.response) range =
+      let other = result.enclosings.(result.index) in
+      not (Range.isEqual ~other range)
+    in
+    Option.iter !state ~f:(fun last_state ->
+        match (last_state.last_result, selections) with
+        | Some last_result, [ s ]
+          when not_last_range last_result (Selection.to_range s) ->
+          TextEditor.setDecorations
+            text_editor
+            ~decorationType
+            ~rangesOrOptions:(`Options []);
+          Disposable.dispose last_state.reset_disposable;
+          state := None
+        | _ -> ())
   in
   let onDidChangeActiveTextEditor_listener _text_editor =
     match !state with
@@ -189,57 +200,59 @@ let enable_reset () =
      Window.onDidChangeActiveTextEditor () ~listener ())
   ]
 
-let update_or_init_state ~initial_range ~current_index ~current_verbosity
-    text_editor enclosings =
-  let enclosings = Array.of_list enclosings in
-  match !state with
-  | None ->
-    let new_state =
-      { initial_range
-      ; enclosings
-      ; current_index
-      ; text_editor
-      ; current_verbosity
-      ; reset_disposable = Disposable.from @@ enable_reset ()
-      }
-    in
-    state := Some new_state;
-    new_state
-  | Some state ->
-    state.current_index <- current_index;
-    state.current_verbosity <- current_verbosity;
-    state
+(* There might be duplicates in the enclosing list which are complex to filter
+   out on the server-side for performance reasons *)
+let is_duplicate last_result result =
+  match last_result with
+  | None -> false
+  | Some last_result ->
+    let last_range = active_range last_result in
+    let other = active_range result in
+    Range.isEqual last_range ~other
+    && String.equal last_result.type_ result.type_
+
+let last_index state =
+  match state.last_result with
+  | None -> -1
+  | Some last_result -> last_result.index
 
 let handler (instance : Extension_instance.t) ~args:_ =
-  let type_selection () =
+  let rec type_selection () =
     with_checks ~extension_name ~instance @@ fun text_editor client ->
     let open Promise.Syntax in
-    let initial_range, index, verbosity =
+    let state =
       match !state with
-      | Some state ->
-        (state.initial_range, next_index state, state.current_verbosity)
+      | Some state -> state
       | None ->
         let initial_range =
           TextEditor.selection text_editor |> Selection.to_range
         in
-        (initial_range, 0, 0)
+        let new_state =
+          { initial_range
+          ; text_editor
+          ; current_verbosity = 0
+          ; last_result = None
+          ; reset_disposable = Disposable.from @@ enable_reset ()
+          }
+        in
+        state := Some new_state;
+        new_state
     in
-    let+ result =
-      get_enclosings text_editor client ~index ~verbosity initial_range
-    in
+    let* result = get_enclosings text_editor client state in
     match result.enclosings with
-    | [] -> show_message `Warn "No results found for that selection."
-    | enclosings ->
-      let state =
-        update_or_init_state
-          ~initial_range
-          ~current_index:index
-          ~current_verbosity:0
-          text_editor
-          enclosings
-      in
-      let result_range = state.enclosings.(state.current_index) in
-      display_type text_editor ~type_:result.type_ result_range
+    | [||] ->
+      show_message `Warn "No results found for that selection.";
+      Promise.return ()
+    | _ ->
+      let previous_result = state.last_result in
+      let previous_index = last_index state in
+      state.last_result <- Some result;
+      if
+        is_duplicate previous_result result && next_index state > previous_index
+      then (
+        show_message `Error "DUPLICATE";
+        type_selection ())
+      else Promise.return (display_type text_editor result)
   in
   let (_ : unit Promise.t) = type_selection () in
   ()
@@ -254,15 +267,10 @@ let previous_handler (instance : Extension_instance.t) ~args:_ =
     | None ->
       Promise.return @@ show_message `Warn "There is no previous selection"
     | Some state ->
-      let index = max 0 (state.current_index - 1) in
-      let verbosity = 0 in
-      let+ result =
-        get_enclosings text_editor client ~index ~verbosity state.initial_range
-      in
-      state.current_index <- index;
-      state.current_verbosity <- verbosity;
-      let result_range = state.enclosings.(state.current_index) in
-      display_type text_editor ~type_:result.type_ result_range
+      let index = max 0 (last_index state - 1) in
+      let+ result = get_enclosings text_editor client ~index state in
+      state.last_result <- Some result;
+      display_type text_editor result
   in
   let (_ : unit Promise.t) = type_previous_selection () in
   ()
@@ -277,15 +285,15 @@ let verbosity_handler (instance : Extension_instance.t) ~args:_ =
     | None ->
       Promise.return @@ show_message `Warn "There is no previous selection"
     | Some state ->
-      let index = state.current_index in
-      let verbosity = state.current_verbosity + 1 in
-      let+ result =
-        get_enclosings text_editor client ~index ~verbosity state.initial_range
+      let index =
+        match state.last_result with
+        | None -> 0
+        | Some last_result -> last_result.index
       in
-      state.current_index <- index;
-      state.current_verbosity <- verbosity;
-      let result_range = state.enclosings.(state.current_index) in
-      display_type text_editor ~type_:result.type_ result_range
+      state.current_verbosity <- state.current_verbosity + 1;
+      let+ result = get_enclosings text_editor client ~index state in
+      state.last_result <- Some result;
+      display_type text_editor result
   in
   let (_ : unit Promise.t) = bump_selection_type_verbosity () in
   ()

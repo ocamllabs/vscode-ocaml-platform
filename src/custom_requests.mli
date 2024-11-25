@@ -27,7 +27,7 @@ module Type_selection : sig
   type response =
     { index : int
     ; type_ : string
-    ; enclosings : Range.t list
+    ; enclosings : Range.t array
     }
 
   val make :
