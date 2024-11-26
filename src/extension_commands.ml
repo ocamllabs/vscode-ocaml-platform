@@ -686,9 +686,7 @@ module MerlinJump = struct
       match results with
       | Some results ->
         List.map results ~f:(fun (target, pos) ->
-            ( (QuickPickItem.create
-                 ~label:("Jump to " ^ String.uppercase target))
-                ()
+            ( (QuickPickItem.create ~label:("Jump to nearest " ^ target)) ()
             , (target, pos) ))
       | None -> []
     in
@@ -708,7 +706,14 @@ module MerlinJump = struct
       text_editor
       ~range:(Range.makePositions ~start:position ~end_:position)
       ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
-      ()
+      ();
+    let _ =
+      Window.showTextDocument
+        ~document:(TextEditor.document text_editor)
+        ~preserveFocus:true
+        ()
+    in
+    ()
 
   let process_jump position text_editor client =
     let open Promise.Syntax in
