@@ -62,7 +62,7 @@ end
 module Merlin_jump : sig
   type params
 
-  type response = (string * Position.t) list option
+  type response = (string * Position.t) list
 
   val make : uri:Uri.t -> position:Position.t -> params
 
