@@ -127,7 +127,7 @@ module Merlin_jump = struct
     ; position : Position.t
     }
 
-  type response = (string * Position.t) list option
+  type response = (string * Position.t) list
 
   let encode_params { uri; position } =
     let open Jsonoo.Encode in
@@ -139,17 +139,13 @@ module Merlin_jump = struct
 
   let decode_response (response : Jsonoo.t) : response =
     let open Jsonoo.Decode in
-    match
-      field
-        "jumps"
-        (list (fun item ->
-             let target = field "target" string item in
-             let position = field "position" Position.t_of_json item in
-             (target, position)))
-        response
-    with
-    | _ :: _ as items -> Some items
-    | _ -> None
+    field
+      "jumps"
+      (list (fun item ->
+           let target = field "target" string item in
+           let position = field "position" Position.t_of_json item in
+           (target, position)))
+      response
 
   let make ~uri ~position = { uri; position }
 

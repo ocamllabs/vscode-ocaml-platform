@@ -675,7 +675,7 @@ module MerlinJump = struct
   let ocaml_lsp_doesnt_support_merlin_jump ocaml_lsp =
     not (Ocaml_lsp.can_handle_merlin_jump ocaml_lsp)
 
-  let process_jump_target position text_editor client =
+  let request_possible_targets position text_editor client =
     let doc = TextEditor.document text_editor in
     let uri = TextDocument.uri doc in
     Custom_requests.(
@@ -684,14 +684,16 @@ module MerlinJump = struct
   let display_results (results : Custom_requests.Merlin_jump.response) =
     let quickPickItems =
       match results with
-      | Some results ->
+      | [] ->
+        show_message `Info "No available targets to jump to.";
+        []
+      | results ->
         List.map results ~f:(fun (target, pos) ->
             ( (QuickPickItem.create ~label:("Jump to nearest " ^ target)) ()
             , (target, pos) ))
-      | None -> []
     in
     let quickPickOptions =
-      QuickPickOptions.create ~title:"Merlin Jump results" ()
+      QuickPickOptions.create ~title:"Available Jump Targets" ()
     in
     Window.showQuickPickItems
       ~choices:quickPickItems
@@ -699,6 +701,12 @@ module MerlinJump = struct
       ()
 
   let jump_to_position text_editor position =
+    let _ =
+      Window.showTextDocument
+        ~document:(TextEditor.document text_editor)
+        ~preserveFocus:true
+        ()
+    in
     TextEditor.set_selection
       text_editor
       (Selection.makePositions ~anchor:position ~active:position);
@@ -707,17 +715,13 @@ module MerlinJump = struct
       ~range:(Range.makePositions ~start:position ~end_:position)
       ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
       ();
-    let _ =
-      Window.showTextDocument
-        ~document:(TextEditor.document text_editor)
-        ~preserveFocus:true
-        ()
-    in
     ()
 
   let process_jump position text_editor client =
     let open Promise.Syntax in
-    let* successful_targets = process_jump_target position text_editor client in
+    let* successful_targets =
+      request_possible_targets position text_editor client
+    in
     let* selected_target = display_results successful_targets in
     match selected_target with
     | Some (_res, position) ->
@@ -740,7 +744,7 @@ module MerlinJump = struct
           show_message
             `Error
             "Invalid file type. This command only works in ocaml files, ocaml \
-             interface files, reason files or ocamllex files."
+             interface files or reason files.."
         | Some text_editor -> (
           match Extension_instance.lsp_client instance with
           | None -> show_message `Warn "ocamllsp is not running"

@@ -737,7 +737,7 @@
         "args": {
           "kind": "jump"
         },
-        "when": "editorLangId == ocaml || editorLangId == reason"
+        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason"
       },
       {
         "command": "editor.action.codeAction",
