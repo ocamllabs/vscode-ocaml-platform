@@ -701,7 +701,8 @@ module MerlinJump = struct
       ()
 
   let jump_to_position text_editor position =
-    let _ =
+    let open Promise.Syntax in
+    let* _ =
       Window.showTextDocument
         ~document:(TextEditor.document text_editor)
         ~preserveFocus:true
@@ -715,7 +716,7 @@ module MerlinJump = struct
       ~range:(Range.makePositions ~start:position ~end_:position)
       ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
       ();
-    ()
+    Promise.return ()
 
   let process_jump position text_editor client =
     let open Promise.Syntax in
@@ -724,8 +725,7 @@ module MerlinJump = struct
     in
     let* selected_target = display_results successful_targets in
     match selected_target with
-    | Some (_res, position) ->
-      jump_to_position text_editor position |> Promise.return
+    | Some (_res, position) -> jump_to_position text_editor position
     | None -> Promise.return ()
 
   let _jump =
