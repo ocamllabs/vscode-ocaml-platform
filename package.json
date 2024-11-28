@@ -261,7 +261,7 @@
       {
         "command": "ocaml.jump",
         "category": "OCaml",
-        "title": "Jump to a specific target"
+        "title": "List possible parent targets for jumping"
       }
     ],
     "configuration": {
