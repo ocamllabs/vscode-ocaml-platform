@@ -60,7 +60,7 @@ let construct_item =
   item
 
 let jump_item =
-  let icon = `ThemeIcon (Vscode.ThemeIcon.make ~id:"tools" ()) in
+  let icon = `ThemeIcon (Vscode.ThemeIcon.make ~id:"fold-up" ()) in
   let label =
     `TreeItemLabel
       (Vscode.TreeItemLabel.create ~label:"Jump to a specific target" ())
