@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Add `ocaml.jump` to jump to a specific target. (#1654)
+
 ## 1.22.0
 
 - Fix formatting of cwd path on windows (#1650)
