@@ -1,7 +1,7 @@
 {
   "name": "ocaml-platform",
   "displayName": "OCaml Platform",
-  "version": "1.22.0",
+  "version": "1.23.0",
   "private": true,
   "description": "Official OCaml language extension for VSCode",
   "categories": [
@@ -34,13 +34,13 @@
     "astexplorer"
   ],
   "scripts": {
-    "test": "vscode-test",
-    "package": "vsce package --out ocaml-platform.vsix --no-dependencies --allow-unused-files-pattern",
-    "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --no-dependencies",
-    "deploy:ovsx": "ovsx publish --packagePath ocaml-platform.vsix --no-dependencies",
     "check": "biome check",
+    "deploy:ovsx": "ovsx publish --packagePath ocaml-platform.vsix --no-dependencies",
+    "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --no-dependencies",
+    "fix": "biome check --fix",
     "lint": "biome check",
-    "fix": "biome check --fix"
+    "package": "vsce package --out ocaml-platform.vsix --no-dependencies --allow-unused-files-pattern",
+    "test": "vscode-test"
   },
   "contributes": {
     "breakpoints": [
