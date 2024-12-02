@@ -2,6 +2,8 @@
 
 # Unreleased
 
+## 1.23.0
+
 - Add `ocaml.jump` to jump to a specific target. (#1654)
 
 ## 1.22.0

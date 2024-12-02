@@ -1,4 +1,4 @@
-const assert = require("node:assert");
+const assert = require("node:assert/strict");
 
 const problemLocations = {
   'File "file.ml", line 4, characters 6-7:': [
@@ -49,7 +49,7 @@ const problemMessages = {
 };
 
 suite("basic", () => {
-  test("problem matcher", async () => {
+  test("problem matcher", () => {
     const locationRegex =
       /^\s*\bFile\b\s*"(.*)",\s*\blines?\b\s*(\d+)(?:-(\d+))?(?:,\s*\bcharacters\b\s*(\d+)-(\d+)\s*)?:\s*$/;
 
