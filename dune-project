@@ -1,4 +1,4 @@
-(lang dune 3.16)
+(lang dune 3.17)
 
 (name vscode-ocaml-platform)
 
