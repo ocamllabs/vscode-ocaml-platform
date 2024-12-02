@@ -333,7 +333,7 @@ let open_pp_doc instance ~document =
     let* doc =
       Workspace.openTextDocument
         (`Uri
-          (Uri.parse ("post-ppx: " ^ TextDocument.fileName document ^ "?") ()))
+           (Uri.parse ("post-ppx: " ^ TextDocument.fileName document ^ "?") ()))
     in
     Ast_editor_state.associate_origin_and_pp
       ast_editor_state

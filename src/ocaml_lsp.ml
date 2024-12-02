@@ -57,7 +57,8 @@ module Experimental_capabilities = struct
     ; handleJump = false
     }
 
-  (** Creates [t] given a JSON of form [{ 'handleSwitchImplIntf' : true, .... }] *)
+  (** Creates [t] given a JSON of form [{ 'handleSwitchImplIntf' : true, .... }]
+  *)
   let t_of_json (json : Jsonoo.t) =
     let experimental_caps_tbl = Jsonoo.Decode.(dict bool) json in
     let has_capability cap =
