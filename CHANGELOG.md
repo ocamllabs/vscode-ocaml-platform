@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Add `ocaml.navigate-typed-holes` to navigate to different typed holes. (#1666)
+
 ## 1.25.0
 
 - Add `ocaml.search-by-type` to search for values using their type signature (#1626)

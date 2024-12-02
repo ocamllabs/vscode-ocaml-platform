@@ -950,6 +950,113 @@ module Search_by_type = struct
   ;;
 end
 
+module Navigate_holes = struct
+  let extension_name = "Navigate between Typed Holes"
+
+  let ocaml_lsp_doesnt_support_typed_holes ocaml_lsp =
+    not (Ocaml_lsp.can_handle_typed_holes ocaml_lsp)
+  ;;
+
+  let is_valid_text_doc textdoc =
+    match TextDocument.languageId textdoc with
+    | "ocaml" | "ocaml.interface" | "reason" -> true
+    | _ -> false
+  ;;
+
+  let send_request_to_lsp client doc =
+    let uri = TextDocument.uri doc in
+    Custom_requests.send_request client Custom_requests.typedHoles uri
+  ;;
+
+  let display_results (results : Range.t list) text_document =
+    let quickPickItems =
+      List.map results ~f:(fun res ->
+        let line = Position.line @@ Range.end_ res in
+        ( QuickPickItem.create
+            ~label:(Printf.sprintf "Line %d" line)
+            ~detail:
+              (Printf.sprintf
+                 "%s"
+                 (TextLine.text @@ TextDocument.lineAt ~line text_document))
+            ()
+        , (res, ()) ))
+    in
+    let quickPickOptions = QuickPickOptions.create ~title:"Typed Holes" () in
+    Window.showQuickPickItems ~choices:quickPickItems ~options:quickPickOptions ()
+  ;;
+
+  let jump_to_hole range text_editor =
+    let open Promise.Syntax in
+    let+ _ =
+      Window.showTextDocument
+        ~document:(TextEditor.document text_editor)
+        ~preserveFocus:true
+        ()
+    in
+    let new_selection =
+      let anchor = Range.start range in
+      let active = Range.end_ range in
+      Selection.makePositions ~anchor ~active
+    in
+    TextEditor.set_selection text_editor new_selection;
+    TextEditor.revealRange
+      text_editor
+      ~range
+      ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
+      ()
+  ;;
+
+  let handle_hole_navigation text_editor client instance =
+    let open Promise.Syntax in
+    let doc = TextEditor.document text_editor in
+    let* hole_positions = send_request_to_lsp client doc in
+    match hole_positions with
+    | [] ->
+      show_message `Info "No typed holes found in the file.";
+      Promise.return ()
+    | holes ->
+      let* selected_hole = display_results holes doc in
+      (match selected_hole with
+       | Some (range, ()) ->
+         let* () = jump_to_hole range text_editor in
+         (match Settings.(get server_typedHolesConstructAfterNavigate_setting) with
+          | Some true ->
+            Construct.process_construct (Range.end_ range) text_editor client instance
+          | Some false | None -> Promise.return ())
+       | None -> Promise.return ())
+  ;;
+
+  let _holes =
+    let handler (instance : Extension_instance.t) ~args:_ =
+      match Window.activeTextEditor () with
+      | None ->
+        Extension_consts.Command_errors.text_editor_must_be_active
+          extension_name
+          ~expl:
+            "This command only works in an active editor because it's based on the \
+             content of the editor"
+        |> show_message `Error "%s"
+      | Some text_editor when not (is_valid_text_doc (TextEditor.document text_editor)) ->
+        show_message
+          `Error
+          "Invalid file type. This command only works in ocaml files, ocaml interface \
+           files, reason files."
+      | Some text_editor ->
+        (match Extension_instance.lsp_client instance with
+         | None -> show_message `Warn "ocamllsp is not running"
+         | Some (_client, ocaml_lsp) when ocaml_lsp_doesnt_support_typed_holes ocaml_lsp
+           ->
+           show_message
+             `Warn
+             "The installed version of `ocamllsp` does not support typed hole navigation"
+         | Some (client, _) ->
+           let _ = handle_hole_navigation text_editor client instance in
+           ())
+    in
+    command Extension_consts.Commands.navigate_typed_holes handler
+  ;;
+end
+
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in

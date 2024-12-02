@@ -267,6 +267,11 @@
         "command": "ocaml.search-by-type",
         "category": "OCaml",
         "title": "Search a value by type or polarity"
+      },
+      {
+        "command": "ocaml.navigate-typed-holes",
+        "category": "OCaml",
+        "title": "Lists typed holes in the file for navigation."
       }
     ],
     "configuration": {
@@ -310,6 +315,11 @@
           "type": "boolean",
           "default": false,
           "markdownDescription": "Enable/Disable syntax documentation"
+        },
+        "ocaml.commands.typedHoles.constructAfterNavigate": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "When enabled, list values that can fill a typed hole after navigating to it."
         },
         "ocaml.commands.construct.recursiveCalls": {
           "type": "boolean",
@@ -1081,6 +1091,10 @@
         {
           "command": "ocaml.search-by-type",
           "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+        },
+        {
+          "command": "ocaml.navigate-typed-holes",
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason"
         }
       ],
       "editor/title": [
