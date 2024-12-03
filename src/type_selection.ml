@@ -238,6 +238,8 @@ let handler (instance : Extension_instance.t) ~args:_ =
         state := Some new_state;
         new_state
     in
+    (* We always reset verbosity when the selection is growing *)
+    state.current_verbosity <- 0;
     let* result = get_enclosings text_editor client state in
     match result.enclosings with
     | [||] ->
@@ -249,9 +251,7 @@ let handler (instance : Extension_instance.t) ~args:_ =
       state.last_result <- Some result;
       if
         is_duplicate previous_result result && next_index state > previous_index
-      then (
-        show_message `Error "DUPLICATE";
-        type_selection ())
+      then type_selection ()
       else Promise.return (display_type text_editor result)
   in
   let (_ : unit Promise.t) = type_selection () in
