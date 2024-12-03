@@ -7,7 +7,7 @@ on:
 permissions: read-all
 
 jobs:
-  build:
+  build-and-test:
     permissions:
       attestations: write
       contents: write
@@ -32,7 +32,9 @@ jobs:
       - run: corepack enable
 
       - name: Install dependencies
-        run: make deps
+        run: |
+          yarn install --immutable
+          opam install . --deps-only --with-test
 
       - name: Run Biome checks
         run: yarn lint
