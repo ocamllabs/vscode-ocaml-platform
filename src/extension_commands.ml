@@ -765,6 +765,7 @@ module MerlinJump = struct
     in
     command Extension_consts.Commands.merlin_jump handler
 end
+
 let _type_selection =
   let open Type_selection in
   command Extension_consts.Commands.type_selection handler |> ignore;
