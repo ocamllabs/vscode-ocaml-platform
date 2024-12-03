@@ -91,5 +91,6 @@ val upgrade_packages : t -> unit Promise.t
 val ocaml_version : t -> (string, string) result Promise.t
 
 (** Focus on the command output channel. If [sandbox] is provided, the output
-    channel will only be focused if the given sandbox supports package commands. *)
+    channel will only be focused if the given sandbox supports package commands.
+*)
 val focus_on_package_command : ?sandbox:t -> unit -> unit
