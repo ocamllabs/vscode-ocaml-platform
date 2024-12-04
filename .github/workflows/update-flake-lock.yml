@@ -1,4 +1,4 @@
-name: Nix
+name: Update Nix Flake Lock
 
 on:
   workflow_dispatch:
@@ -16,7 +16,6 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
       - uses: DeterminateSystems/update-flake-lock@v24
         with:
-          pr-title: Update flake.lock
           pr-labels: |
             dependencies
             no changelog
