@@ -21,7 +21,6 @@ jobs:
         uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: 5
-          dune-cache: true
 
       - name: Set-up Node.js
         uses: actions/setup-node@v4
