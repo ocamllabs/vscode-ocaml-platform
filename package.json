@@ -306,6 +306,11 @@
           "default": false,
           "markdownDescription": "Enable/Disable syntax documentation"
         },
+        "ocaml.server.construct.chainConstruct": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable chaining construct to display values for subsequent holes."
+        },
         "ocaml.dune.autoDetect": {
           "type": "boolean",
           "default": true,

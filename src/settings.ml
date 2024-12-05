@@ -141,3 +141,10 @@ let server_syntaxDocumentation_setting =
     ~key:"ocaml.server.syntaxDocumentation"
     ~of_json:Jsonoo.Decode.bool
     ~to_json:Jsonoo.Encode.bool
+
+    let server_chainConstructResults_setting =
+      create_setting
+        ~scope:ConfigurationTarget.Workspace
+        ~key:"ocaml.server.construct.chainConstruct"
+        ~of_json:Jsonoo.Decode.bool
+        ~to_json:Jsonoo.Encode.bool
