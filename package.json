@@ -308,7 +308,7 @@
         },
         "ocaml.server.construct.chainConstruct": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "markdownDescription": "Enable/Disable chaining construct to display values for subsequent holes."
         },
         "ocaml.dune.autoDetect": {
