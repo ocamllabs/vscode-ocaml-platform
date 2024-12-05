@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 import InteractorFactory from "./Interaction/InteractorFactory";
 import ASTOutput from "./components/ASTOutput";
 import getTreeAdapter from "./parserMiddleware";
@@ -93,4 +93,6 @@ class Index extends React.Component {
   }
 }
 
-ReactDOM.render(<Index />, document.getElementById("index"));
+const root = ReactDOM.createRoot(document.getElementById("index"));
+
+root.render(<Index />);

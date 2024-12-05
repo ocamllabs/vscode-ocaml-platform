@@ -1,14 +1,13 @@
 {
   "$schema": "node_modules/@biomejs/biome/configuration_schema.json",
-  "files": {
-    "ignore": ["astexplorer", "esy.lock", "package.json"]
-  },
   "formatter": {
     "enabled": true,
+    "ignore": ["package.json"],
     "useEditorconfig": true
   },
   "linter": {
     "enabled": true,
+    "ignore": ["astexplorer"],
     "rules": {
       "recommended": true
     }

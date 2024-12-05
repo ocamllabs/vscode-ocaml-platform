@@ -1,7 +1,7 @@
 import {
+  emptyKeysFilter,
   ignoreKeysFilter,
   locationInformationFilter,
-  emptyKeysFilter,
   typeKeysFilter,
 } from "./core/TreeAdapter.js";
 
