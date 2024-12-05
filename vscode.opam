@@ -22,7 +22,7 @@ depends: [
   "gen_js_api" {= "1.1.2"}
   "promise_jsoo" {>= "0.3.1"}
   "jsonoo" {>= "0.2.1"}
-  "ocamlformat" {= "0.26.2" & with-dev-setup}
+  "ocamlformat" {= "0.27.0" & with-dev-setup}
   "ocaml-lsp-server" {with-dev-setup}
   "odoc" {with-doc}
 ]
