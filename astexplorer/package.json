@@ -6,8 +6,8 @@
   ],
   "type": "module",
   "scripts": {
-    "build": "parcel build --no-cache index.html",
-    "dev": "parcel watch --no-cache index.html"
+    "build": "parcel build index.html",
+    "dev": "parcel watch index.html"
   },
   "dependencies": {
     "font-awesome": "4.7.0",
