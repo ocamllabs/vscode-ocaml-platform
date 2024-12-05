@@ -610,7 +610,7 @@ module Construct = struct
     | Some (value, range) -> (
       let* value_inserted = insert_to_document text_editor range value in
       match Settings.(get server_chainConstructResults_setting) with
-      | Some true | None ->(
+      | Some true | None -> (
         match value_inserted with
         | true -> (
           let* new_range =
