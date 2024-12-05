@@ -7,36 +7,40 @@ module Options = struct
   let outputChannelResults =
     create_setting
       ~scope:ConfigurationTarget.Workspace
-      ~key:"ocaml.server.typeSelection.outputChannelResults"
+      ~key:"ocaml.commands.typeSelection.outputChannelResults"
       ~of_json:Jsonoo.Decode.bool
       ~to_json:Jsonoo.Encode.bool
 
   let alwaysClearOutputChannel =
     create_setting
       ~scope:ConfigurationTarget.Workspace
-      ~key:"ocaml.server.typeSelection.alwaysClearOutputChannel"
+      ~key:"ocaml.commands.typeSelection.alwaysClearOutputChannel"
       ~of_json:Jsonoo.Decode.bool
       ~to_json:Jsonoo.Encode.bool
 end
 
-let decorationType =
-  let options =
-    let before =
-      ThemableDecorationAttachmentRenderOptions.create
-        ~backgroundColor:
-          (`ThemeColor (ThemeColor.make ~id:"editorHoverWidget.background"))
-        ~color:
-          (`ThemeColor (ThemeColor.make ~id:"editorHoverWidget.foreground"))
-        ~border:"1px solid"
-        ~borderColor:
-          (`ThemeColor (ThemeColor.make ~id:"editorHoverWidget.border"))
-        ~textDecoration:
-          "none;position:absolute;z-index:1;bottom:100%;padding:0.3em"
-        ()
+let register_hover_provider ~type_ range () =
+  let provider =
+    let provideHover ~(document : TextDocument.t) ~(position : Position.t)
+        ~token:_ =
+      ignore (document, position);
+      let hover =
+        let contents =
+          let markdown_string = MarkdownString.make ~value:"" () in
+          `MarkdownString
+            (MarkdownString.appendCodeblock
+               markdown_string
+               ~value:type_
+               ~language:"ocaml"
+               ())
+        in
+        Hover.make ~contents ~range ()
+      in
+      `Value (Some hover)
     in
-    DecorationRenderOptions.create ~before ()
+    HoverProvider.create ~provideHover
   in
-  Window.createTextEditorDecorationType ~options
+  Vscode.Languages.registerHoverProvider ~selector:(`String "ocaml") ~provider
 
 let ocaml_lsp_doesnt_support_type_selection instance ocaml_lsp =
   match
@@ -82,27 +86,11 @@ let get_enclosings ?index text_editor client state =
       Type_selection.request
       (Type_selection.make ~uri ~at ~index ~verbosity))
 
-let set_decoration text_editor range type_ =
-  let decorationOptions =
-    let contentText = String.split_lines type_ |> String.concat ~sep:" " in
-    let renderOptions =
-      let before =
-        ThemableDecorationAttachmentRenderOptions.create ~contentText ()
-      in
-      let options = ThemableDecorationInstanceRenderOptions.create ~before () in
-      Some
-        (DecorationInstanceRenderOptions.create ~light:options ~dark:options ())
-    in
-    DecorationOptions.create ~range ~renderOptions ()
-  in
-  let rangesOrOptions = `Options [ decorationOptions ] in
-  TextEditor.setDecorations text_editor ~decorationType ~rangesOrOptions
-
 let update_selection text_editor range =
   let new_selection =
     Selection.makePositions
-      ~anchor:(Range.start range)
-      ~active:(Range.end_ range)
+      ~anchor:(Range.end_ range)
+      ~active:(Range.start range)
   in
   TextEditor.set_selection text_editor new_selection
 
@@ -131,11 +119,44 @@ let show_in_output_channel text_editor ~type_ range =
   OutputChannel.appendLine output_channel ~value:type_;
   OutputChannel.appendLine output_channel ~value:""
 
-let display_type text_editor ({ type_; _ } as result : Request.response) =
+(* To display customized information in the hover tooltip we need to register a
+   custom hover provider. However this does not prevent the standard hover
+   provider from showing which creates duplication and cluttering in the popup.
+
+   Ideally we should be able to un-register the default hover provider easily on
+   the client side, but that's actually not something that is possible to do
+   with the official lsp client for vscode. The "builtin" feature is [registered
+   here](
+   https://github.com/microsoft/vscode-languageserver-node/blob/906f5fb306e1f6059cbdcb1efd962647222b5867/client/src/common/client.ts#L1970)
+   and the handler is not accessible. It might be possible to use dynamic
+   registration to activate / deactivate it, but that's an initiative of the
+   server and it doesn't feel like the correct way around.
+
+   The present solution is to use an ad-hoc server option that allows the client
+   to mute the defaut hover responses (the server will answer with an empty
+   response.). *)
+let display_type instance text_editor
+    ({ type_; _ } as result : Request.response) =
+  let set_hover_active true_or_false =
+    Extension_instance.set_configuration
+      instance
+      ~standard_hover:(Some true_or_false)
+      ()
+  in
   let range = active_range result in
   update_selection text_editor range;
   show_in_output_channel text_editor ~type_ range;
-  set_decoration text_editor range type_
+
+  let () = set_hover_active false in
+  (* Mute the standard hover provider *)
+  let hover_provider_disposable = register_hover_provider ~type_ range () in
+  let open Promise.Syntax in
+  let+ _ =
+    Commands.executeCommand ~command:"editor.action.showHover" ~args:[]
+  in
+  let () = set_hover_active true in
+  (* Un-mute the standard hover provider *)
+  Disposable.dispose hover_provider_disposable
 
 let with_checks ~extension_name ~instance f =
   match Window.activeTextEditor () with
@@ -159,7 +180,6 @@ let extension_name = "Type Selection"
    editor *)
 let enable_reset () =
   let onDidChangeTextEditorSelection_listener event =
-    let text_editor = TextEditorSelectionChangeEvent.textEditor event in
     let selections = TextEditorSelectionChangeEvent.selections event in
     let not_last_range (result : Request.response) range =
       let other = result.enclosings.(result.index) in
@@ -169,10 +189,6 @@ let enable_reset () =
         match (last_state.last_result, selections) with
         | Some last_result, [ s ]
           when not_last_range last_result (Selection.to_range s) ->
-          TextEditor.setDecorations
-            text_editor
-            ~decorationType
-            ~rangesOrOptions:(`Options []);
           Disposable.dispose last_state.reset_disposable;
           state := None
         | _ -> ())
@@ -180,10 +196,6 @@ let enable_reset () =
   let onDidChangeActiveTextEditor_listener _text_editor =
     match !state with
     | Some current_state ->
-      TextEditor.setDecorations
-        current_state.text_editor
-        ~decorationType
-        ~rangesOrOptions:(`Options []);
       Disposable.dispose current_state.reset_disposable;
       state := None
     | _ -> ()
@@ -216,45 +228,43 @@ let last_index state =
   | None -> -1
   | Some last_result -> last_result.index
 
-let handler (instance : Extension_instance.t) ~args:_ =
-  let rec type_selection () =
-    with_checks ~extension_name ~instance @@ fun text_editor client ->
-    let open Promise.Syntax in
-    let state =
-      match !state with
-      | Some state -> state
-      | None ->
-        let initial_range =
-          TextEditor.selection text_editor |> Selection.to_range
-        in
-        let new_state =
-          { initial_range
-          ; text_editor
-          ; current_verbosity = 0
-          ; last_result = None
-          ; reset_disposable = Disposable.from @@ enable_reset ()
-          }
-        in
-        state := Some new_state;
-        new_state
-    in
-    (* We always reset verbosity when the selection is growing *)
-    state.current_verbosity <- 0;
-    let* result = get_enclosings text_editor client state in
-    match result.enclosings with
-    | [||] ->
-      show_message `Warn "No results found for that selection.";
-      Promise.return ()
-    | _ ->
-      let previous_result = state.last_result in
-      let previous_index = last_index state in
-      state.last_result <- Some result;
-      if
-        is_duplicate previous_result result && next_index state > previous_index
-      then type_selection ()
-      else Promise.return (display_type text_editor result)
+let rec type_selection ~instance ?(verbosity = 0) () =
+  with_checks ~extension_name ~instance @@ fun text_editor client ->
+  let open Promise.Syntax in
+  let state =
+    match !state with
+    | Some state -> state
+    | None ->
+      let initial_range =
+        TextEditor.selection text_editor |> Selection.to_range
+      in
+      let new_state =
+        { initial_range
+        ; text_editor
+        ; current_verbosity = 0
+        ; last_result = None
+        ; reset_disposable = Disposable.from @@ enable_reset ()
+        }
+      in
+      state := Some new_state;
+      new_state
   in
-  let (_ : unit Promise.t) = type_selection () in
+  state.current_verbosity <- verbosity;
+  let* result = get_enclosings text_editor client state in
+  match result.enclosings with
+  | [||] ->
+    show_message `Warn "No results found for that selection.";
+    Promise.return ()
+  | _ ->
+    let previous_result = state.last_result in
+    let previous_index = last_index state in
+    state.last_result <- Some result;
+    if is_duplicate previous_result result && next_index state > previous_index
+    then type_selection ~instance ()
+    else display_type instance text_editor result
+
+let handler (instance : Extension_instance.t) ~args:_ =
+  let (_ : unit Promise.t) = type_selection ~instance () in
   ()
 
 let extension_name = "Type Previous Selection"
@@ -268,9 +278,9 @@ let previous_handler (instance : Extension_instance.t) ~args:_ =
       Promise.return @@ show_message `Warn "There is no previous selection"
     | Some state ->
       let index = max 0 (last_index state - 1) in
-      let+ result = get_enclosings text_editor client ~index state in
+      let* result = get_enclosings text_editor client ~index state in
       state.last_result <- Some result;
-      display_type text_editor result
+      display_type instance text_editor result
   in
   let (_ : unit Promise.t) = type_previous_selection () in
   ()
@@ -282,8 +292,7 @@ let verbosity_handler (instance : Extension_instance.t) ~args:_ =
     with_checks ~extension_name ~instance @@ fun text_editor client ->
     let open Promise.Syntax in
     match !state with
-    | None ->
-      Promise.return @@ show_message `Warn "There is no previous selection"
+    | None -> type_selection ~instance ~verbosity:1 ()
     | Some state ->
       let index =
         match state.last_result with
@@ -291,9 +300,8 @@ let verbosity_handler (instance : Extension_instance.t) ~args:_ =
         | Some last_result -> last_result.index
       in
       state.current_verbosity <- state.current_verbosity + 1;
-      let+ result = get_enclosings text_editor client ~index state in
-      state.last_result <- Some result;
-      display_type text_editor result
+      let* result = get_enclosings text_editor client ~index state in
+      display_type instance text_editor result
   in
   let (_ : unit Promise.t) = bump_selection_type_verbosity () in
   ()

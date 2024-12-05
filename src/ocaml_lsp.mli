@@ -34,6 +34,8 @@ module OcamllspSettings : sig
 
   val extendedHover : t -> OcamllspSettingEnable.t option
 
+  val standardHover : t -> OcamllspSettingEnable.t option
+
   val duneDiagnostics : t -> OcamllspSettingEnable.t option
 
   val syntaxDocumentation : t -> OcamllspSettingEnable.t option
@@ -41,6 +43,7 @@ module OcamllspSettings : sig
   val create :
        codelens:OcamllspSettingEnable.t option
     -> extendedHover:OcamllspSettingEnable.t option
+    -> standardHover:OcamllspSettingEnable.t option
     -> duneDiagnostics:OcamllspSettingEnable.t option
     -> syntaxDocumentation:OcamllspSettingEnable.t option
     -> t

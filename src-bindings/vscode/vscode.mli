@@ -1582,6 +1582,8 @@ module Hover : sig
          [ `MarkdownString of MarkdownString.t
          | `MarkdownStringArray of MarkdownString.t list
          ]
+    -> ?range:Range.t
+    -> unit
     -> t
 end
 

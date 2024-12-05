@@ -2025,6 +2025,8 @@ module Hover = struct
             | `MarkdownStringArray of MarkdownString.t list
             ]
            [@js.union])
+      -> ?range:Range.t
+      -> unit
       -> t
     [@@js.new "vscode.Hover"]]
 end

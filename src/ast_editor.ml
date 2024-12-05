@@ -193,6 +193,7 @@ let on_hover custom_doc webview =
       let hover =
         Hover.make
           ~contents:(`MarkdownString (MarkdownString.make ~value:"" ()))
+          ()
       in
       `Value (Some hover)
     in
