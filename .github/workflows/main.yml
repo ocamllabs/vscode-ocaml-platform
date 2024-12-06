@@ -47,7 +47,7 @@ jobs:
 
       - name: Generate artifact attestation
         if: startsWith(github.ref, 'refs/tags')
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v2
         with:
           subject-path: ocaml-platform.vsix
 

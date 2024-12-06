@@ -226,7 +226,7 @@ the settings under `File > Preferences > Settings`.
 | `ocaml.repl.path`                         | The path of the REPL that the extension uses                                                            | `null`  |
 | `ocaml.repl.args`                         | The REPL arguments that the extension uses                                                              | `null`  |
 | `ocaml.repl.useUtop`                      | Controls whether to use Utop for the REPL if it is installed in the current switch.                     | `true`  |
-| `ocaml.commands.construct.recursiveCalls` | Controls whether construct should automatically compute for the next typed hole.                        | `true`  |
+| `ocaml.commands.construct.recursiveCalls` | When enabled, the construct command will execute again on the next hole after a value has been chosen.  | `true`  |
 
 If `ocaml.terminal.shell.*` or `ocaml.terminal.shellArgs.*` is `null`, the
 configured VSCode shell and shell arguments will be used instead.
