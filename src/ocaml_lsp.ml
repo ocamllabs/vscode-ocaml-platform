@@ -20,6 +20,8 @@ module OcamllspSettings = struct
 
     val extendedHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
 
+    val standardHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+
     val duneDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
 
     val syntaxDocumentation : t -> OcamllspSettingEnable.t or_undefined
@@ -28,14 +30,22 @@ module OcamllspSettings = struct
     val create :
          ?codelens:OcamllspSettingEnable.t
       -> ?extendedHover:OcamllspSettingEnable.t
+      -> ?standardHover:OcamllspSettingEnable.t
       -> ?duneDiagnostics:OcamllspSettingEnable.t
       -> ?syntaxDocumentation:OcamllspSettingEnable.t
       -> unit
       -> t
     [@@js.builder]]
 
-  let create ~codelens ~extendedHover ~duneDiagnostics ~syntaxDocumentation =
-    create ?codelens ?extendedHover ?duneDiagnostics ?syntaxDocumentation ()
+  let create ~codelens ~extendedHover ~standardHover ~duneDiagnostics
+      ~syntaxDocumentation =
+    create
+      ?codelens
+      ?extendedHover
+      ?standardHover
+      ?duneDiagnostics
+      ?syntaxDocumentation
+      ()
 end
 
 module Experimental_capabilities = struct
@@ -245,7 +255,7 @@ let can_handle_infer_intf t = t.experimental_capabilities.handleInferIntf
 
 let can_handle_typed_holes t = t.experimental_capabilities.handleTypedHoles
 
-let can_handle_type_enclosing t =
+let can_handle_type_selection t =
   t.experimental_capabilities.handleTypeEnclosing
 
 let can_handle_construct t = t.experimental_capabilities.handleConstruct
