@@ -609,20 +609,23 @@ module Construct = struct
     match selected_result with
     | Some (value, range) -> (
       let* value_inserted = insert_to_document text_editor range value in
-      match value_inserted with
-      | true -> (
-        let* new_range =
-          Holes_commands.closest_hole
-            (Range.start range)
-            text_editor
-            client
-            `Next
-        in
-        match new_range with
-        | Some range ->
-          process_construct (Range.end_ range) text_editor client instance
-        | None -> Promise.return ())
-      | false -> Promise.return ())
+      match Settings.(get server_constructRecursiveCalls_setting) with
+      | Some true | None -> (
+        match value_inserted with
+        | true -> (
+          let* new_range =
+            Holes_commands.closest_hole
+              (Range.start range)
+              text_editor
+              client
+              `Next
+          in
+          match new_range with
+          | Some range ->
+            process_construct (Range.end_ range) text_editor client instance
+          | None -> Promise.return ())
+        | false -> Promise.return ())
+      | Some false -> Promise.return ())
     | None -> Promise.return ()
 
   let _construct =

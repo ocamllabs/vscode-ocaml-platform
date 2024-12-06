@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Add `ocaml.commands.construct.recursiveCalls` setting to configure construct chaining. (#1673)
+
 ## 1.23.0
 
 - Add `ocaml.jump` to jump to a specific target. (#1654)

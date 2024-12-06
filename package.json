@@ -306,6 +306,11 @@
           "default": false,
           "markdownDescription": "Enable/Disable syntax documentation"
         },
+        "ocaml.commands.construct.recursiveCalls": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "When enabled, the construct command will execute again on the next hole after a value has been chosen."
+        },
         "ocaml.dune.autoDetect": {
           "type": "boolean",
           "default": true,
