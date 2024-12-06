@@ -113,7 +113,7 @@ let show_in_output_channel text_editor ~type_ range =
   (match Settings.(get Options.outputChannelResults) with
   | None | Some true -> OutputChannel.show output_channel ~preserveFocus:true ()
   | Some false -> ());
-  (match Settings.(get Options.outputChannelResults) with
+  (match Settings.(get Options.alwaysClearOutputChannel) with
   | Some true -> OutputChannel.replace output_channel ~value:header
   | None | Some false -> OutputChannel.append output_channel ~value:header);
   OutputChannel.appendLine output_channel ~value:type_;
