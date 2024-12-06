@@ -142,9 +142,9 @@ let server_syntaxDocumentation_setting =
     ~of_json:Jsonoo.Decode.bool
     ~to_json:Jsonoo.Encode.bool
 
-let server_chainConstructResults_setting =
+let server_constructRecursiveCalls_setting =
   create_setting
     ~scope:ConfigurationTarget.Workspace
-    ~key:"ocaml.server.construct.chainConstruct"
+    ~key:"ocaml.commands.construct.recursiveCalls"
     ~of_json:Jsonoo.Decode.bool
     ~to_json:Jsonoo.Encode.bool

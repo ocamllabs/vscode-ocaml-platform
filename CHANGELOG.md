@@ -2,7 +2,7 @@
 
 # Unreleased
 
-- Add `ocaml.server.construct.chainConstruct` setting to configure construct chaining. (#1673)
+- Add `ocaml.commands.construct.recursiveCalls` setting to configure construct chaining. (#1673)
 
 ## 1.23.0
 
