@@ -17,13 +17,13 @@ homepage: "https://github.com/ocamllabs/vscode-ocaml-platform"
 bug-reports: "https://github.com/ocamllabs/vscode-ocaml-platform/issues"
 depends: [
   "dune" {>= "3.17"}
-  "ocaml" {>= "4.13"}
+  "ocaml" {>= "4.08"}
   "js_of_ocaml" {>= "4.1.0"}
   "gen_js_api" {= "1.1.2"}
   "promise_jsoo" {>= "0.3.1"}
   "jsonoo" {>= "0.2.1"}
   "vscode-interop" {= version}
-  "ocamlformat" {= "0.26.2" & with-dev-setup}
+  "ocamlformat" {= "0.27.0" & with-dev-setup}
   "ocaml-lsp-server" {with-dev-setup}
   "odoc" {with-doc}
 ]
