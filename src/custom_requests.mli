@@ -9,16 +9,14 @@ open Import
 
 type ('params, 'response) custom_request
 
-val send_request :
-     LanguageClient.t
+val send_request
+  :  LanguageClient.t
   -> ('params, 'resp) custom_request
   -> 'params
   -> 'resp Promise.t
 
 val switchImplIntf : (string, string array) custom_request
-
 val inferIntf : (string, string) custom_request
-
 val typedHoles : (Uri.t, Range.t list) custom_request
 
 module Type_enclosing : sig
@@ -30,8 +28,8 @@ module Type_enclosing : sig
     ; enclosings : Range.t list
     }
 
-  val make :
-       uri:Uri.t
+  val make
+    :  uri:Uri.t
     -> at:[ `Position of Position.t | `Range of Range.t ]
     -> index:int
     -> verbosity:int
@@ -48,8 +46,8 @@ module Construct : sig
     ; result : string list
     }
 
-  val make :
-       uri:Uri.t
+  val make
+    :  uri:Uri.t
     -> position:Position.t
     -> ?depth:int option
     -> ?with_values:[ `None | `Local ] option
@@ -61,10 +59,8 @@ end
 
 module Merlin_jump : sig
   type params
-
   type response = (string * Position.t) list
 
   val make : uri:Uri.t -> position:Position.t -> params
-
   val request : (params, response) custom_request
 end

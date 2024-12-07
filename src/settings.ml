@@ -7,19 +7,19 @@ type 'a setting =
   ; scope : ConfigurationTarget.t
   }
 
-let create_setting ~scope ~key ~of_json ~to_json =
-  { scope; key; to_json; of_json }
+let create_setting ~scope ~key ~of_json ~to_json = { scope; key; to_json; of_json }
 
 let get ?section setting =
   let section = Workspace.getConfiguration ?section () in
   match WorkspaceConfiguration.get section ~section:setting.key with
   | None -> None
-  | Some v -> (
-    match setting.of_json (Jsonoo.t_of_js v) with
-    | s -> Some s
-    | exception Jsonoo.Decode_error msg ->
-      show_message `Error "Setting %s is invalid: %s" setting.key msg;
-      None)
+  | Some v ->
+    (match setting.of_json (Jsonoo.t_of_js v) with
+     | s -> Some s
+     | exception Jsonoo.Decode_error msg ->
+       show_message `Error "Setting %s is invalid: %s" setting.key msg;
+       None)
+;;
 
 let set ?section setting v =
   let section = Workspace.getConfiguration ?section () in
@@ -33,11 +33,13 @@ let set ?section setting v =
       ~value
       ~configurationTarget:(`ConfigurationTarget setting.scope)
       ()
+;;
 
 let first_workspace_folder_var = "${firstWorkspaceFolder}"
 
 let workspace_folder_var folder =
   Printf.sprintf "${workspaceFolder:%s}" (WorkspaceFolder.name folder)
+;;
 
 let workspace_folder_path folder = Uri.fsPath (WorkspaceFolder.uri folder)
 
@@ -49,10 +51,10 @@ let resolve_workspace_vars setting =
   let regexp = Js_of_ocaml.Regexp.regexp "\\$\\{workspaceFolder:([^}]+)\\}" in
   let replacer ~matched ~captures ~offset:_ ~string:_ =
     match captures with
-    | [ name ] -> (
-      match find_folder name with
-      | Some folder -> workspace_folder_path folder
-      | None -> matched)
+    | [ name ] ->
+      (match find_folder name with
+       | Some folder -> workspace_folder_path folder
+       | None -> matched)
     | _ -> assert false
     (* name will always be captured *)
   in
@@ -66,6 +68,7 @@ let resolve_workspace_vars setting =
   |> String.substr_replace_all
        ~pattern:first_workspace_folder_var
        ~with_:first_workspace_folder_path
+;;
 
 let substitute_workspace_vars setting =
   (* Windows paths are case-insensitive *)
@@ -75,10 +78,11 @@ let substitute_workspace_vars setting =
     | _ -> String.substr_replace_all
   in
   List.fold (Workspace.workspaceFolders ()) ~init:setting ~f:(fun acc folder ->
-      folder_replace_all
-        acc
-        ~pattern:(workspace_folder_path folder)
-        ~with_:(workspace_folder_var folder))
+    folder_replace_all
+      acc
+      ~pattern:(workspace_folder_path folder)
+      ~with_:(workspace_folder_var folder))
+;;
 
 module ExtraEnv = struct
   let setting =
@@ -86,21 +90,19 @@ module ExtraEnv = struct
       let dict_of_hashtbl hashtbl =
         Stdlib.Hashtbl.to_seq hashtbl |> Interop.Dict.of_seq
       in
-      Jsonoo.Decode.(
-        map (Option.map ~f:dict_of_hashtbl) (nullable (dict string)))
+      Jsonoo.Decode.(map (Option.map ~f:dict_of_hashtbl) (nullable (dict string)))
     in
     let to_json =
-      let hashtbl_of_dict json =
-        Interop.Dict.to_seq json |> Stdlib.Hashtbl.of_seq
-      in
+      let hashtbl_of_dict json = Interop.Dict.to_seq json |> Stdlib.Hashtbl.of_seq in
       Jsonoo.Encode.nullable (fun json ->
-          hashtbl_of_dict json |> Jsonoo.Encode.(dict string))
+        hashtbl_of_dict json |> Jsonoo.Encode.(dict string))
     in
     create_setting
       ~scope:ConfigurationTarget.Workspace
       ~key:"ocaml.server.extraEnv"
       ~of_json
       ~to_json
+  ;;
 
   let get () = get setting |> Option.join
 end
@@ -113,6 +115,7 @@ let server_args_setting =
     ~key:"ocaml.server.args"
     ~of_json:Jsonoo.Decode.(list string)
     ~to_json:Jsonoo.Encode.(list string)
+;;
 
 let server_codelens_setting =
   create_setting
@@ -120,6 +123,7 @@ let server_codelens_setting =
     ~key:"ocaml.server.codelens"
     ~of_json:Jsonoo.Decode.bool
     ~to_json:Jsonoo.Encode.bool
+;;
 
 let server_extendedHover_setting =
   create_setting
@@ -127,6 +131,7 @@ let server_extendedHover_setting =
     ~key:"ocaml.server.extendedHover"
     ~of_json:Jsonoo.Decode.bool
     ~to_json:Jsonoo.Encode.bool
+;;
 
 let server_duneDiagnostics_setting =
   create_setting
@@ -134,6 +139,7 @@ let server_duneDiagnostics_setting =
     ~key:"ocaml.server.duneDiagnostics"
     ~of_json:Jsonoo.Decode.bool
     ~to_json:Jsonoo.Encode.bool
+;;
 
 let server_syntaxDocumentation_setting =
   create_setting
@@ -141,6 +147,7 @@ let server_syntaxDocumentation_setting =
     ~key:"ocaml.server.syntaxDocumentation"
     ~of_json:Jsonoo.Decode.bool
     ~to_json:Jsonoo.Encode.bool
+;;
 
 let server_constructRecursiveCalls_setting =
   create_setting
@@ -148,3 +155,4 @@ let server_constructRecursiveCalls_setting =
     ~key:"ocaml.commands.construct.recursiveCalls"
     ~of_json:Jsonoo.Decode.bool
     ~to_json:Jsonoo.Encode.bool
+;;

@@ -14,9 +14,8 @@ module ServerCapabilities = struct
 
   include
     [%js:
-    val experimental : t -> Jsonoo.t or_undefined [@@js.get]
-
-    val create : ?experimental:Jsonoo.t -> unit -> t [@@js.builder]]
+      val experimental : t -> Jsonoo.t or_undefined [@@js.get]
+      val create : ?experimental:Jsonoo.t -> unit -> t [@@js.builder]]
 end
 
 module InitializeResult = struct
@@ -30,9 +29,8 @@ module InitializeResult = struct
 
   include
     [%js:
-    val capabilities : t -> ServerCapabilities.t [@@js.get]
-
-    val serverInfo : t -> serverInfo or_undefined [@@js.get]]
+      val capabilities : t -> ServerCapabilities.t [@@js.get]
+      val serverInfo : t -> serverInfo or_undefined [@@js.get]]
 end
 
 module DocumentFilter = struct
@@ -40,23 +38,28 @@ module DocumentFilter = struct
 
   include
     [%js:
-    val language : t -> string or_undefined [@@js.get]
+      val language : t -> string or_undefined [@@js.get]
+      val scheme : t -> string or_undefined [@@js.get]
+      val pattern : t -> string or_undefined [@@js.get]
 
-    val scheme : t -> string or_undefined [@@js.get]
+      val createLanguage
+        :  language:string
+        -> ?scheme:string
+        -> ?pattern:string
+        -> unit
+        -> t
+      [@@js.builder]
 
-    val pattern : t -> string or_undefined [@@js.get]
+      val createScheme : ?language:string -> scheme:string -> ?pattern:string -> unit -> t
+      [@@js.builder]
 
-    val createLanguage :
-      language:string -> ?scheme:string -> ?pattern:string -> unit -> t
-    [@@js.builder]
-
-    val createScheme :
-      ?language:string -> scheme:string -> ?pattern:string -> unit -> t
-    [@@js.builder]
-
-    val createPattern :
-      ?language:string -> ?scheme:string -> pattern:string -> unit -> t
-    [@@js.builder]]
+      val createPattern
+        :  ?language:string
+        -> ?scheme:string
+        -> pattern:string
+        -> unit
+        -> t
+      [@@js.builder]]
 end
 
 module DocumentSelector = struct
@@ -71,11 +74,13 @@ module DocumentSelector = struct
     match Ojs.type_of js_val with
     | "string" -> `String ([%js.to: string] js_val)
     | _ -> `Filter ([%js.to: DocumentFilter.t] js_val)
+  ;;
 
   type t = selector array [@@js]
 
   let language ?(scheme = "file") ?pattern l =
     `Filter (DocumentFilter.createLanguage ~language:l ~scheme ?pattern ())
+  ;;
 end
 
 module ClientOptions = struct
@@ -83,22 +88,19 @@ module ClientOptions = struct
 
   include
     [%js:
-    val documentSelector : t -> DocumentSelector.t or_undefined [@@js.get]
+      val documentSelector : t -> DocumentSelector.t or_undefined [@@js.get]
+      val outputChannel : t -> Vscode.OutputChannel.t or_undefined [@@js.get]
+      val revealOutputChannelOn : t -> RevealOutputChannelOn.t [@@js.get]
+      val initializationOptions : t -> Jsonoo.t [@@js.get]
 
-    val outputChannel : t -> Vscode.OutputChannel.t or_undefined [@@js.get]
-
-    val revealOutputChannelOn : t -> RevealOutputChannelOn.t [@@js.get]
-
-    val initializationOptions : t -> Jsonoo.t [@@js.get]
-
-    val create :
-         ?documentSelector:DocumentSelector.t
-      -> ?outputChannel:Vscode.OutputChannel.t
-      -> ?revealOutputChannelOn:RevealOutputChannelOn.t
-      -> ?initializationOptions:Jsonoo.t
-      -> unit
-      -> t
-    [@@js.builder]]
+      val create
+        :  ?documentSelector:DocumentSelector.t
+        -> ?outputChannel:Vscode.OutputChannel.t
+        -> ?revealOutputChannelOn:RevealOutputChannelOn.t
+        -> ?initializationOptions:Jsonoo.t
+        -> unit
+        -> t
+      [@@js.builder]]
 end
 
 module ExecutableOptions = struct
@@ -106,22 +108,19 @@ module ExecutableOptions = struct
 
   include
     [%js:
-    val cwd : t -> string or_undefined [@@js.get]
+      val cwd : t -> string or_undefined [@@js.get]
+      val env : t -> string Dict.t or_undefined [@@js.get]
+      val detached : t -> bool or_undefined [@@js.get]
+      val shell : t -> bool or_undefined [@@js.get]
 
-    val env : t -> string Dict.t or_undefined [@@js.get]
-
-    val detached : t -> bool or_undefined [@@js.get]
-
-    val shell : t -> bool or_undefined [@@js.get]
-
-    val create :
-         ?cwd:string
-      -> ?env:string Dict.t
-      -> ?detached:bool
-      -> ?shell:bool
-      -> unit
-      -> t
-    [@@js.builder]]
+      val create
+        :  ?cwd:string
+        -> ?env:string Dict.t
+        -> ?detached:bool
+        -> ?shell:bool
+        -> unit
+        -> t
+      [@@js.builder]]
 end
 
 module Executable = struct
@@ -129,19 +128,17 @@ module Executable = struct
 
   include
     [%js:
-    val command : t -> string [@@js.get]
+      val command : t -> string [@@js.get]
+      val args : t -> string list or_undefined [@@js.get]
+      val options : t -> ExecutableOptions.t or_undefined [@@js.get]
 
-    val args : t -> string list or_undefined [@@js.get]
-
-    val options : t -> ExecutableOptions.t or_undefined [@@js.get]
-
-    val create :
-         command:string
-      -> ?args:string list
-      -> ?options:ExecutableOptions.t
-      -> unit
-      -> t
-    [@@js.builder]]
+      val create
+        :  command:string
+        -> ?args:string list
+        -> ?options:ExecutableOptions.t
+        -> unit
+        -> t
+      [@@js.builder]]
 end
 
 module ServerOptions = Executable
@@ -151,9 +148,8 @@ module ClientCapabilities = struct
 
   include
     [%js:
-    val experimental : t -> Jsonoo.t or_undefined [@@js.get]
-
-    val set_experimental : t -> Jsonoo.t or_undefined -> unit [@@js.set]]
+      val experimental : t -> Jsonoo.t or_undefined [@@js.get]
+      val set_experimental : t -> Jsonoo.t or_undefined -> unit [@@js.set]]
 end
 
 module InitializeParams = struct
@@ -165,22 +161,21 @@ module StaticFeature = struct
 
   include
     [%js:
-    val make :
-         ?fillInitializeParams:(params:InitializeParams.t -> unit)
-      -> fillClientCapabilities:(capabilities:ClientCapabilities.t -> unit)
-      -> initialize:
-           (   capabilities:ServerCapabilities.t
-            -> documentSelector:DocumentSelector.t or_undefined
-            -> unit)
-      -> clear:(unit -> unit)
-      -> unit
-      -> t
-    [@@js.builder]]
+      val make
+        :  ?fillInitializeParams:(params:InitializeParams.t -> unit)
+        -> fillClientCapabilities:(capabilities:ClientCapabilities.t -> unit)
+        -> initialize:
+             (capabilities:ServerCapabilities.t
+              -> documentSelector:DocumentSelector.t or_undefined
+              -> unit)
+        -> clear:(unit -> unit)
+        -> unit
+        -> t
+      [@@js.builder]]
 end
 
 module DidChangeConfiguration = struct
   include Interface.Make ()
-
   include [%js: val create : settings:Ojs.t -> unit -> t [@@js.builder]]
 end
 
@@ -189,34 +184,30 @@ module LanguageClient = struct
 
   include
     [%js:
-    val make :
-         id:string
-      -> name:string
-      -> serverOptions:ServerOptions.t
-      -> clientOptions:ClientOptions.t
-      -> ?forceDebug:bool
-      -> unit
-      -> t
-    [@@js.new "vscode_languageclient.LanguageClient"]
+      val make
+        :  id:string
+        -> name:string
+        -> serverOptions:ServerOptions.t
+        -> clientOptions:ClientOptions.t
+        -> ?forceDebug:bool
+        -> unit
+        -> t
+      [@@js.new "vscode_languageclient.LanguageClient"]
 
-    val start : t -> unit Promise.t [@@js.call]
+      val start : t -> unit Promise.t [@@js.call]
+      val isRunning : t -> bool [@@js.call]
+      val stop : t -> unit Promise.t [@@js.call]
+      val initializeResult : t -> InitializeResult.t [@@js.get]
 
-    val isRunning : t -> bool [@@js.call]
+      val sendRequest
+        :  t
+        -> meth:string
+        -> data:Jsonoo.t
+        -> ?token:Vscode.CancellationToken.t
+        -> unit
+        -> Jsonoo.t Promise.t
+      [@@js.call]
 
-    val stop : t -> unit Promise.t [@@js.call]
-
-    val initializeResult : t -> InitializeResult.t [@@js.get]
-
-    val sendRequest :
-         t
-      -> meth:string
-      -> data:Jsonoo.t
-      -> ?token:Vscode.CancellationToken.t
-      -> unit
-      -> Jsonoo.t Promise.t
-    [@@js.call]
-
-    val registerFeature : t -> feature:StaticFeature.t -> unit [@@js.call]
-
-    val sendNotification : t -> string -> Ojs.t -> unit [@@js.call]]
+      val registerFeature : t -> feature:StaticFeature.t -> unit [@@js.call]
+      val sendNotification : t -> string -> Ojs.t -> unit [@@js.call]]
 end

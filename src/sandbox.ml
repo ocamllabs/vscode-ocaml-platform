@@ -11,28 +11,31 @@ module Package = struct
     | Esy of Esy.Package.t
 
   let of_opam opam_pkg = Opam opam_pkg
-
   let of_esy opam_pkg = Esy opam_pkg
 
   let name t =
     match t with
     | Opam pkg -> Opam.Package.name pkg
     | Esy pkg -> Esy.Package.name pkg
+  ;;
 
   let version t =
     match t with
     | Opam pkg -> Opam.Package.version pkg
     | Esy pkg -> Esy.Package.version pkg
+  ;;
 
   let synopsis t =
     match t with
     | Opam pkg -> Opam.Package.synopsis pkg
     | Esy pkg -> Esy.Package.synopsis pkg
+  ;;
 
   let documentation t =
     match t with
     | Opam pkg -> Opam.Package.documentation pkg
     | Esy pkg -> Esy.Package.documentation pkg
+  ;;
 
   let dependencies t =
     match t with
@@ -44,11 +47,13 @@ module Package = struct
       let open Promise.Result.Syntax in
       let+ deps = Esy.Package.dependencies pkg in
       List.map deps ~f:of_esy
+  ;;
 
   let has_dependencies t =
     match t with
     | Opam pkg -> Opam.Package.has_dependencies pkg
     | Esy pkg -> Esy.Package.has_dependencies pkg
+  ;;
 end
 
 type t =
@@ -58,19 +63,20 @@ type t =
   | Custom of string
 
 let equal t1 t2 =
-  match (t1, t2) with
+  match t1, t2 with
   | Global, Global -> true
   | Esy (e1, p1), Esy (e2, p2) -> Esy.Manifest.equal p1 p2 && Esy.equal e1 e2
   | Opam (o1, s1), Opam (o2, s2) -> Opam.Switch.equal s1 s2 && Opam.equal o1 o2
   | Custom s1, Custom s2 -> String.equal s1 s2
   | _, _ -> false
+;;
 
 let to_string = function
-  | Esy (_, root) ->
-    Printf.sprintf "esy(%s)" (Esy.Manifest.path root |> Path.to_string)
+  | Esy (_, root) -> Printf.sprintf "esy(%s)" (Esy.Manifest.path root |> Path.to_string)
   | Opam (_, switch) -> Printf.sprintf "opam(%s)" (Opam.Switch.name switch)
   | Global -> "global"
   | Custom _ -> "custom"
+;;
 
 let to_pretty_string t =
   let print_opam = Printf.sprintf "opam(%s)" in
@@ -85,6 +91,7 @@ let to_pretty_string t =
     print_opam project_name
   | Global -> "Global OCaml"
   | Custom _ -> "Custom OCaml"
+;;
 
 module Kind = struct
   type t =
@@ -99,21 +106,22 @@ module Kind = struct
     | "global" -> Some Global
     | "custom" -> Some Custom
     | _ -> None
+  ;;
 
   let of_json json =
     let open Jsonoo.Decode in
     match of_string (string json) with
     | Some s -> s
     | None ->
-      raise
-        (Jsonoo.Decode_error
-           "opam | esy | global | custom are the only valid values")
+      raise (Jsonoo.Decode_error "opam | esy | global | custom are the only valid values")
+  ;;
 
   let to_string = function
     | Opam -> "opam"
     | Esy -> "esy"
     | Global -> "global"
     | Custom -> "custom"
+  ;;
 
   let to_json s = Jsonoo.Encode.string (to_string s)
 end
@@ -130,47 +138,45 @@ module Setting = struct
     | Esy _ -> Esy
     | Global -> Global
     | Custom _ -> Custom
+  ;;
 
   let of_json json =
-    let decode_vars json =
-      Settings.resolve_workspace_vars (Jsonoo.Decode.string json)
-    in
+    let decode_vars json = Settings.resolve_workspace_vars (Jsonoo.Decode.string json) in
     let kind = Jsonoo.Decode.field "kind" Kind.of_json json in
     match (kind : Kind.t) with
     | Global -> Global
     | Esy ->
       let manifest =
         Jsonoo.Decode.field "root" decode_vars json
-        |> Path.of_string |> Esy.Manifest.of_path
+        |> Path.of_string
+        |> Esy.Manifest.of_path
       in
       Esy manifest
-    | Opam -> (
-      Jsonoo.Decode.field "switch" decode_vars json |> Opam.Switch.of_string
-      |> function
-      | Some switch -> Opam switch
-      | None -> Global)
+    | Opam ->
+      Jsonoo.Decode.field "switch" decode_vars json
+      |> Opam.Switch.of_string
+      |> (function
+       | Some switch -> Opam switch
+       | None -> Global)
     | Custom ->
       let template = Jsonoo.Decode.field "template" decode_vars json in
       Custom template
+  ;;
 
   let to_json (t : t) =
     let open Jsonoo.Encode in
     let encode_vars str = string (Settings.substitute_workspace_vars str) in
-    let kind = ("kind", Kind.to_json (kind t)) in
+    let kind = "kind", Kind.to_json (kind t) in
     match t with
     | Global -> Jsonoo.Encode.object_ [ kind ]
     | Esy manifest ->
       object_
-        [ kind
-        ; ( "root"
-          , encode_vars @@ (manifest |> Esy.Manifest.path |> Path.to_string) )
-        ]
-    | Opam switch ->
-      object_ [ kind; ("switch", encode_vars @@ Opam.Switch.name switch) ]
-    | Custom template -> object_ [ kind; ("template", string template) ]
+        [ kind; "root", encode_vars @@ (manifest |> Esy.Manifest.path |> Path.to_string) ]
+    | Opam switch -> object_ [ kind; "switch", encode_vars @@ Opam.Switch.name switch ]
+    | Custom template -> object_ [ kind; "template", string template ]
+  ;;
 
-  let t =
-    Settings.create_setting ~scope:Workspace ~key:"sandbox" ~of_json ~to_json
+  let t = Settings.create_setting ~scope:Workspace ~key:"sandbox" ~of_json ~to_json
 end
 
 type available_sandboxes =
@@ -180,6 +186,7 @@ type available_sandboxes =
 
 let available_sandboxes () : available_sandboxes =
   { opam = Opam.make (); esy = Esy.make () }
+;;
 
 let of_settings () : t option Promise.t =
   let open Promise.Syntax in
@@ -192,39 +199,39 @@ let of_settings () : t option Promise.t =
     in
     show_message
       `Warn
-      "This workspace is configured to use an %s sandbox, but %s isn't \
-       available"
+      "This workspace is configured to use an %s sandbox, but %s isn't available"
       this_
       this_
   in
   match (Settings.get ~section:"ocaml" Setting.t : Setting.t option) with
   | None -> Promise.return None
-  | Some (Esy manifest) -> (
+  | Some (Esy manifest) ->
     let+ esy = available.esy in
-    match esy with
-    | None ->
-      not_available `Esy;
-      None
-    | Some esy -> Some (Esy (esy, manifest)))
-  | Some (Opam switch) -> (
+    (match esy with
+     | None ->
+       not_available `Esy;
+       None
+     | Some esy -> Some (Esy (esy, manifest)))
+  | Some (Opam switch) ->
     let open Promise.Syntax in
     let* opam = available.opam in
-    match opam with
-    | None ->
-      not_available `Opam;
-      Promise.return None
-    | Some opam ->
-      let+ exists = Opam.switch_exists opam switch in
-      if exists then Some (Opam (opam, switch))
-      else (
-        show_message
-          `Warn
-          "Workspace is configured to use the switch %s. This switch does not \
-           exist."
-          (Opam.Switch.name switch);
-        None))
+    (match opam with
+     | None ->
+       not_available `Opam;
+       Promise.return None
+     | Some opam ->
+       let+ exists = Opam.switch_exists opam switch in
+       if exists
+       then Some (Opam (opam, switch))
+       else (
+         show_message
+           `Warn
+           "Workspace is configured to use the switch %s. This switch does not exist."
+           (Opam.Switch.name switch);
+         None))
   | Some Global -> Promise.return (Some Global)
   | Some (Custom template) -> Promise.return (Some (Custom template))
+;;
 
 (** If [Workspace.workspaceFolders()] returns a list with a single element,
     returns it; otherwise, returns [None]. *)
@@ -236,17 +243,18 @@ let workspace_root () =
   | _ ->
     (* We don't support multiple workspace roots at the moment *)
     None
+;;
 
 let detect_esy_sandbox ~project_root esy () =
   let open Promise.Option.Syntax in
-  let* esy in
+  let* esy = esy in
   let open Promise.Syntax in
   let+ esy_build_dir_exists, manifest =
     Promise.all2
       ( Fs.exists Path.(project_root / "_esy" |> Path.to_string)
       , Esy.find_manifest_in_dir project_root )
   in
-  match (esy_build_dir_exists, manifest) with
+  match esy_build_dir_exists, manifest with
   | true, Some manifest ->
     (* Esy can be used with [esy.json], [package.json], or without any of those.
        So we check if we find an [_esy] directory, which means the user created
@@ -256,20 +264,23 @@ let detect_esy_sandbox ~project_root esy () =
        wants to use Esy. *)
     Some (Esy (esy, manifest))
   | _ -> None
+;;
 
 let detect_opam_local_switch ~project_root opam () =
   let open Promise.Option.Syntax in
-  let* opam in
+  let* opam = opam in
   let* switch = Opam.switch_show ~cwd:project_root opam in
   match switch with
   | Local _ as switch -> Promise.Option.return (Opam (opam, switch))
   | Named _ -> Promise.return None
+;;
 
 let detect_opam_sandbox ~project_root opam () =
   let open Promise.Option.Syntax in
-  let* opam in
+  let* opam = opam in
   let+ switch = Opam.switch_show ~cwd:project_root opam in
   Opam (opam, switch)
+;;
 
 let detect () =
   let open Promise.Option.Syntax in
@@ -281,6 +292,7 @@ let detect () =
     ; detect_esy_sandbox ~project_root available.esy
     ; detect_opam_sandbox ~project_root available.opam
     ]
+;;
 
 let of_settings_or_detect () =
   let open Promise.Syntax in
@@ -288,6 +300,7 @@ let of_settings_or_detect () =
   match package_manager_opt with
   | Some package_manager -> Promise.return (Some package_manager)
   | None -> detect ()
+;;
 
 let save_to_settings sandbox =
   let to_setting = function
@@ -297,6 +310,7 @@ let save_to_settings sandbox =
     | Custom template -> Setting.Custom template
   in
   Settings.set ~section:"ocaml" Setting.t (to_setting sandbox)
+;;
 
 module Candidate = struct
   type nonrec t =
@@ -309,19 +323,19 @@ module Candidate = struct
     let description =
       match status with
       | Error s -> Some (Printf.sprintf "Invalid sandbox: %s" s)
-      | Ok () -> (
-        match sandbox with
-        | Opam (_, switch) ->
-          let switch_kind_s =
-            match switch with
-            | Local _ -> "Local switch"
-            | Named _ -> "Global switch"
-          in
-          if Option.exists current_switch ~f:(Opam.Switch.equal switch) then
-            Some (switch_kind_s ^ " | Currently active switch in project root")
-          else Some switch_kind_s
-        | Esy (_, _) -> Some "Esy"
-        | Global | Custom _ -> None)
+      | Ok () ->
+        (match sandbox with
+         | Opam (_, switch) ->
+           let switch_kind_s =
+             match switch with
+             | Local _ -> "Local switch"
+             | Named _ -> "Global switch"
+           in
+           if Option.exists current_switch ~f:(Opam.Switch.equal switch)
+           then Some (switch_kind_s ^ " | Currently active switch in project root")
+           else Some switch_kind_s
+         | Esy (_, _) -> Some "Esy"
+         | Global | Custom _ -> None)
     in
     match sandbox with
     | Opam (_, Named name) -> create ~label:name ?description ()
@@ -346,14 +360,13 @@ module Candidate = struct
         ~label:"Custom"
         ~detail:"Custom sandbox using a command template"
         ()
+  ;;
 
   let ok sandbox = { sandbox; status = Ok () }
 end
 
 let select_sandbox (choices : Candidate.t list) =
-  let placeHolder =
-    "Which package manager would you like to manage the sandbox?"
-  in
+  let placeHolder = "Which package manager would you like to manage the sandbox?" in
   let open Promise.Syntax in
   let* current_switch =
     let open Promise.Option.Syntax in
@@ -365,11 +378,12 @@ let select_sandbox (choices : Candidate.t list) =
     List.map
       ~f:(fun (sandbox : Candidate.t) ->
         let quick_pick = Candidate.to_quick_pick current_switch sandbox in
-        (quick_pick, sandbox))
+        quick_pick, sandbox)
       choices
   in
   let options = QuickPickOptions.create ~canPickMany:false ~placeHolder () in
   Window.showQuickPickItems ~choices ~options ()
+;;
 
 let sandbox_candidates ~workspace_folders =
   let open Promise.Syntax in
@@ -382,47 +396,46 @@ let sandbox_candidates ~workspace_folders =
       let+ esys =
         workspace_folders
         |> List.map ~f:(fun (folder : WorkspaceFolder.t) ->
-               let dir =
-                 folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string
-               in
-               Esy.discover ~dir)
+          let dir = folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string in
+          Esy.discover ~dir)
         |> Promise.all_list
       in
       List.concat esys
       |> List.map ~f:(fun ({ manifest; status } : Esy.discover) ->
-             { Candidate.sandbox = Esy (esy, manifest); status })
+        { Candidate.sandbox = Esy (esy, manifest); status })
   in
   let opam =
     let* opam = available.opam in
     match opam with
     | None -> Promise.return ([], None)
-    | Some opam -> (
+    | Some opam ->
       let* current_switch =
         match workspace_root () with
         | None -> Promise.return None
         | Some cwd -> Opam.switch_show ~cwd opam
       in
       let+ switches = Opam.switch_list opam in
-      match current_switch with
-      | None ->
-        let switches =
-          List.map switches ~f:(fun sw ->
-              let sandbox = Opam (opam, sw) in
-              { Candidate.sandbox; status = Ok () })
-        in
-        (switches, None)
-      | Some current_switch ->
-        let f sw =
-          let sandbox = Opam (opam, sw) in
-          if Opam.Switch.equal current_switch sw then None
-          else Some { Candidate.sandbox; status = Ok () }
-        in
-        let sandboxes = List.filter_map switches ~f
-        and current_switch_sandbox =
-          let sandbox = Opam (opam, current_switch) in
-          Some { Candidate.sandbox; status = Ok () }
-        in
-        (sandboxes, current_switch_sandbox))
+      (match current_switch with
+       | None ->
+         let switches =
+           List.map switches ~f:(fun sw ->
+             let sandbox = Opam (opam, sw) in
+             { Candidate.sandbox; status = Ok () })
+         in
+         switches, None
+       | Some current_switch ->
+         let f sw =
+           let sandbox = Opam (opam, sw) in
+           if Opam.Switch.equal current_switch sw
+           then None
+           else Some { Candidate.sandbox; status = Ok () }
+         in
+         let sandboxes = List.filter_map switches ~f
+         and current_switch_sandbox =
+           let sandbox = Opam (opam, current_switch) in
+           Some { Candidate.sandbox; status = Ok () }
+         in
+         sandboxes, current_switch_sandbox)
   in
   let global = Candidate.ok Global in
   let custom =
@@ -430,11 +443,11 @@ let sandbox_candidates ~workspace_folders =
     (* doesn't matter what the custom fields are set to here user will input
        custom commands in [select] *)
   in
-
   let+ esy, (opam, current_switch) = Promise.all2 (esy, opam) in
   let cs = (global :: custom :: esy) @ opam in
   Option.value_map current_switch ~default:cs ~f:(fun current_switch ->
-      current_switch :: cs)
+    current_switch :: cs)
+;;
 
 let select_sandbox () =
   let open Promise.Syntax in
@@ -461,12 +474,13 @@ let select_sandbox () =
     let* input = Window.showInputBox ~options () in
     let template = String.strip input in
     Promise.Option.return @@ Custom template
-  | { status; sandbox } -> (
-    match status with
-    | Error s ->
-      show_message `Warn "This sandbox is invalid. Error: %s" s;
-      Promise.return None
-    | Ok () -> Promise.Option.return sandbox)
+  | { status; sandbox } ->
+    (match status with
+     | Error s ->
+       show_message `Warn "This sandbox is invalid. Error: %s" s;
+       Promise.return None
+     | Ok () -> Promise.Option.return sandbox)
+;;
 
 let select_sandbox_and_save () =
   let open Promise.Option.Syntax in
@@ -474,6 +488,7 @@ let select_sandbox_and_save () =
   let open Promise.Syntax in
   let+ () = save_to_settings sandbox in
   Some sandbox
+;;
 
 let get_command sandbox bin args : Cmd.t =
   match sandbox with
@@ -484,24 +499,25 @@ let get_command sandbox bin args : Cmd.t =
     let command =
       template
       |> String.substr_replace_all ~pattern:"$prog" ~with_:(Cmd.quote bin)
-      |> String.substr_replace_all
-           ~pattern:"$args"
-           ~with_:(String.concat ~sep:" " args)
+      |> String.substr_replace_all ~pattern:"$args" ~with_:(String.concat ~sep:" " args)
       |> String.strip
     in
     Shell command
+;;
 
 let get_install_command sandbox tools =
   match sandbox with
   | Opam (opam, switch) -> Some (Opam.install opam switch ~packages:tools)
   | Esy (esy, manifest) -> Some (Esy.install esy manifest ~packages:tools)
   | _ -> None
+;;
 
 let get_exec_command sandbox tools =
   match sandbox with
   | Opam (opam, switch) -> Some (Opam.exec opam switch ~args:tools)
   | Esy (esy, manifest) -> Some (Esy.exec esy manifest ~args:tools)
   | _ -> None
+;;
 
 let ocaml_version sandbox =
   let cmd = get_command sandbox "ocamlc" [ "--version" ] in
@@ -509,6 +525,7 @@ let ocaml_version sandbox =
   let* cmd = Cmd.check cmd in
   let+ output = Cmd.output cmd in
   String.strip output
+;;
 
 let packages t =
   let open Promise.Result.Syntax in
@@ -521,6 +538,7 @@ let packages t =
   | Opam (opam, switch) ->
     let+ r = Opam.packages opam switch in
     List.map r ~f:Package.of_opam
+;;
 
 let root_packages t =
   let open Promise.Result.Syntax in
@@ -533,6 +551,7 @@ let root_packages t =
   | Opam (opam, switch) ->
     let+ r = Opam.root_packages opam switch in
     List.map r ~f:Package.of_opam
+;;
 
 let uninstall_packages t packages =
   let options =
@@ -544,20 +563,14 @@ let uninstall_packages t packages =
   in
   match t with
   | Global ->
-    show_message
-      `Error
-      "Uninstalling packages is not supported for Global sandboxes";
+    show_message `Error "Uninstalling packages is not supported for Global sandboxes";
     Promise.return ()
   | Custom _ ->
-    show_message
-      `Error
-      "Uninstalling packages is not supported for Custom sandboxes";
+    show_message `Error "Uninstalling packages is not supported for Custom sandboxes";
     Promise.return ()
   | Esy (_esy, _manifest) ->
     (* TODO: Implement Esy sandbox inspection *)
-    show_message
-      `Error
-      "Uninstalling packages is not supported for Esy sandboxes";
+    show_message `Error "Uninstalling packages is not supported for Esy sandboxes";
     Promise.return ()
   | Opam (opam, switch) ->
     let opam_packages =
@@ -577,15 +590,13 @@ let uninstall_packages t packages =
       match result with
       | Ok () -> Ojs.null
       | Error err ->
-        show_message
-          `Error
-          "An error occured while uninstalling the packages: %s"
-          err;
+        show_message `Error "An error occured while uninstalling the packages: %s" err;
         Ojs.null
     in
     let open Promise.Syntax in
     let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
     ()
+;;
 
 let install_packages t packages =
   let options =
@@ -597,14 +608,10 @@ let install_packages t packages =
   in
   match t with
   | Global ->
-    show_message
-      `Error
-      "Installing packages is not supported for Global sandboxes";
+    show_message `Error "Installing packages is not supported for Global sandboxes";
     Promise.return ()
   | Custom _ ->
-    show_message
-      `Error
-      "Installing packages is not supported for Custom sandboxes";
+    show_message `Error "Installing packages is not supported for Custom sandboxes";
     Promise.return ()
   | Esy (_esy, _manifest) ->
     (* TODO: Implement Esy sandbox inspection *)
@@ -622,15 +629,13 @@ let install_packages t packages =
       match result with
       | Ok () -> Ojs.null
       | Error err ->
-        show_message
-          `Error
-          "An error occured while installing the packages: %s"
-          err;
+        show_message `Error "An error occured while installing the packages: %s" err;
         Ojs.null
     in
     let open Promise.Syntax in
     let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
     ()
+;;
 
 let upgrade_packages t =
   let options =
@@ -642,14 +647,10 @@ let upgrade_packages t =
   in
   match t with
   | Global ->
-    show_message
-      `Error
-      "Upgrading packages is not supported for Global sandboxes";
+    show_message `Error "Upgrading packages is not supported for Global sandboxes";
     Promise.return ()
   | Custom _ ->
-    show_message
-      `Error
-      "Upgrading packages is not supported for Custom sandboxes";
+    show_message `Error "Upgrading packages is not supported for Custom sandboxes";
     Promise.return ()
   | Esy (_esy, _manifest) ->
     (* TODO: Implement Esy sandbox inspection *)
@@ -667,15 +668,13 @@ let upgrade_packages t =
       match result with
       | Ok () -> Ojs.null
       | Error err ->
-        show_message
-          `Error
-          "An error occured while upgrading the packages: %s"
-          err;
+        show_message `Error "An error occured while upgrading the packages: %s" err;
         Ojs.null
     in
     let open Promise.Syntax in
     let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
     ()
+;;
 
 let focus_on_package_command ?sandbox () =
   match sandbox with
@@ -683,3 +682,4 @@ let focus_on_package_command ?sandbox () =
     let (lazy output) = Output.command_output_channel in
     Vscode.OutputChannel.show output ()
   | _ -> ()
+;;
