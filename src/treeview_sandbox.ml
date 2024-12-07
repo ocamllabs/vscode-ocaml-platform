@@ -4,13 +4,9 @@ module Dependency = struct
   type t = Sandbox.Package.t
 
   let t_of_js : Ojs.t -> t = Stdlib.Obj.magic
-
   let t_to_js : t -> Ojs.t = Stdlib.Obj.magic
-
   let label t = Sandbox.Package.name t
-
   let description t = Promise.return (Some (Sandbox.Package.version t))
-
   let tooltip t = Sandbox.Package.synopsis t
 
   let icon _ =
@@ -18,11 +14,13 @@ module Dependency = struct
       { light = `String (Path.asset "number-light.svg" |> Path.to_string)
       ; dark = `String (Path.asset "number-dark.svg" |> Path.to_string)
       }
+  ;;
 
   let collapsible_state t =
-    if Sandbox.Package.has_dependencies t then
-      TreeItemCollapsibleState.Collapsed
+    if Sandbox.Package.has_dependencies t
+    then TreeItemCollapsibleState.Collapsed
     else TreeItemCollapsibleState.None
+  ;;
 
   let to_treeitem dependency =
     let open Promise.Syntax in
@@ -40,8 +38,9 @@ module Dependency = struct
         (description dependency)
     in
     Option.iter (tooltip dependency) ~f:(fun desc ->
-        TreeItem.set_tooltip item (`String desc));
+      TreeItem.set_tooltip item (`String desc));
     item
+  ;;
 
   let get_dependencies t =
     let open Promise.Syntax in
@@ -49,6 +48,7 @@ module Dependency = struct
     match deps with
     | Error _ -> None
     | Ok packages -> Some packages
+  ;;
 end
 
 module Command = struct
@@ -65,10 +65,7 @@ module Command = struct
             let name = Sandbox.Package.name dep in
             let version = Sandbox.Package.version dep in
             Vscode.Uri.parse
-              (Printf.sprintf
-                 "https://ocaml.org/p/%s/%s/doc/index.html"
-                 name
-                 version)
+              (Printf.sprintf "https://ocaml.org/p/%s/%s/doc/index.html" name version)
               ()
           | Some doc -> Vscode.Uri.parse doc ()
         in
@@ -84,6 +81,7 @@ module Command = struct
     Extension_commands.register
       ~id:Extension_consts.Commands.open_sandbox_documentation
       handler
+  ;;
 
   let _generate_documentation =
     let handler (instance : Extension_instance.t) ~args =
@@ -95,66 +93,62 @@ module Command = struct
         | Error error ->
           show_message `Error "%s" error;
           Promise.resolve ()
-        | Ok odig -> (
+        | Ok odig ->
           let arg = List.hd_exn args in
           let dep = Dependency.t_of_js arg in
           let package_name = Sandbox.Package.name dep in
           let options =
             ProgressOptions.create
               ~location:(`ProgressLocation Notification)
-              ~title:
-                (Printf.sprintf "Generating documentation for %s" package_name)
+              ~title:(Printf.sprintf "Generating documentation for %s" package_name)
               ~cancellable:false
               ()
           in
-          let task ~progress:_ ~token:_ =
-            Odig.odoc_exec odig ~sandbox ~package_name
-          in
+          let task ~progress:_ ~token:_ = Odig.odoc_exec odig ~sandbox ~package_name in
           let* result =
             Vscode.Window.withProgress
               (module Interop.Js.Result (Interop.Js.Unit) (Ojs.String))
               ~options
               ~task
           in
-          match result with
-          | Error _ ->
-            show_message
-              `Error
-              "Documentation could not be generated for %s. It might be \
-               because this package has no documentation."
-              package_name;
-            Promise.resolve ()
-          | Ok _ -> (
-            let+ server =
-              let html_dir = Odig.html_dir odig in
-              Extension_instance.start_documentation_server
-                instance
-                ~path:html_dir
-            in
-            match server with
-            | Error () -> ()
-            | Ok server ->
-              let (_ : Ojs.t option Promise.t) =
-                let port = Documentation_server.port server in
-                let host = Documentation_server.host server in
-                Vscode.Commands.executeCommand
-                  ~command:"simpleBrowser.show"
-                  ~args:
-                    [ Ojs.string_to_js
-                        (Printf.sprintf
-                           "http://%s:%i/%s/index.html"
-                           host
-                           port
-                           package_name)
-                    ]
-              in
-              ()))
+          (match result with
+           | Error _ ->
+             show_message
+               `Error
+               "Documentation could not be generated for %s. It might be because this \
+                package has no documentation."
+               package_name;
+             Promise.resolve ()
+           | Ok _ ->
+             let+ server =
+               let html_dir = Odig.html_dir odig in
+               Extension_instance.start_documentation_server instance ~path:html_dir
+             in
+             (match server with
+              | Error () -> ()
+              | Ok server ->
+                let (_ : Ojs.t option Promise.t) =
+                  let port = Documentation_server.port server in
+                  let host = Documentation_server.host server in
+                  Vscode.Commands.executeCommand
+                    ~command:"simpleBrowser.show"
+                    ~args:
+                      [ Ojs.string_to_js
+                          (Printf.sprintf
+                             "http://%s:%i/%s/index.html"
+                             host
+                             port
+                             package_name)
+                      ]
+                in
+                ()))
       in
       ()
     in
     Extension_commands.register
       ~id:Extension_consts.Commands.generate_sandbox_documentation
       handler
+  ;;
 
   let _uninstall =
     let handler (instance : Extension_instance.t) ~args =
@@ -166,7 +160,8 @@ module Command = struct
             "Are you sure you want to uninstall package %s?"
             (Dependency.label dep)
         in
-        with_confirmation message ~yes:"Uninstall package" @@ fun () ->
+        with_confirmation message ~yes:"Uninstall package"
+        @@ fun () ->
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
         Sandbox.focus_on_package_command ~sandbox ();
@@ -188,6 +183,7 @@ module Command = struct
     Extension_commands.register
       ~id:Extension_consts.Commands.uninstall_sandbox_package
       handler
+  ;;
 
   let _upgrade =
     let handler (instance : Extension_instance.t) ~args:_ =
@@ -210,9 +206,8 @@ module Command = struct
       in
       ()
     in
-    Extension_commands.register
-      ~id:Extension_consts.Commands.upgrade_sandbox
-      handler
+    Extension_commands.register ~id:Extension_consts.Commands.upgrade_sandbox handler
+  ;;
 
   let ask_packages () =
     let options =
@@ -222,6 +217,7 @@ module Command = struct
         ()
     in
     Window.showInputBox ~options ()
+  ;;
 
   let _install =
     let handler (instance : Extension_instance.t) ~args:_ =
@@ -249,9 +245,8 @@ module Command = struct
       in
       ()
     in
-    Extension_commands.register
-      ~id:Extension_consts.Commands.install_sandbox
-      handler
+    Extension_commands.register ~id:Extension_consts.Commands.install_sandbox handler
+  ;;
 end
 
 let getTreeItem ~element = `Promise (Dependency.to_treeitem element)
@@ -269,20 +264,17 @@ let getChildren ~instance ?element () =
       | Error _ -> None
     in
     `Promise items
+;;
 
 let register extension instance =
   let getChildren = getChildren ~instance in
-  let module EventEmitter =
-    Vscode.EventEmitter.Make (Interop.Js.Or_undefined (Dependency)) in
+  let module EventEmitter = Vscode.EventEmitter.Make (Interop.Js.Or_undefined (Dependency))
+  in
   let event_emitter = EventEmitter.make () in
   let event = EventEmitter.event event_emitter in
   let module TreeDataProvider = Vscode.TreeDataProvider.Make (Dependency) in
   let treeDataProvider =
-    TreeDataProvider.create
-      ~getTreeItem
-      ~getChildren
-      ~onDidChangeTreeData:event
-      ()
+    TreeDataProvider.create ~getTreeItem ~getChildren ~onDidChangeTreeData:event ()
   in
   let disposable =
     Vscode.Window.registerTreeDataProvider
@@ -291,10 +283,10 @@ let register extension instance =
       ~treeDataProvider
   in
   ExtensionContext.subscribe extension ~disposable;
-
   let disposable =
     Commands.registerCommand
       ~command:Extension_consts.Commands.refresh_sandbox
       ~callback:(fun ~args:_ -> EventEmitter.fire event_emitter None)
   in
   ExtensionContext.subscribe extension ~disposable
+;;

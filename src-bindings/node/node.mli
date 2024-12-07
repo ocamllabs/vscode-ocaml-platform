@@ -1,37 +1,27 @@
 val __filename : unit -> string
-
 val __dirname : unit -> string
 
 module Timeout : sig
   include Ojs.T
 
   val hasRef : t -> bool
-
   val ref : t -> t
-
   val refresh : t -> t
-
   val unref : t -> t
 end
 
 val setInterval : (unit -> unit) -> int -> Timeout.t
-
 val setTimeout : (unit -> unit) -> int -> Timeout.t
-
 val clearTimeout : Timeout.t -> unit
 
 module Process : sig
   val cwd : unit -> string
-
   val platform : string
-
   val arch : string
 
   module Env : sig
     val get : string -> string option
-
     val set : string -> string -> unit
-
     val env : unit -> string Interop.Dict.t
   end
 end
@@ -46,15 +36,12 @@ module Buffer : sig
   include Ojs.T
 
   val toString : t -> string
-
   val from : string -> t
-
   val concat : t list -> t
-
   val append : t ref -> t -> unit
 
-  val write :
-       t
+  val write
+    :  t
     -> string:string
     -> ?offset:int
     -> ?length:int
@@ -72,8 +59,8 @@ module Stream : sig
       | `Buffer of Buffer.t
       ]
 
-    val on :
-         t
+    val on
+      :  t
       -> [ `Close of unit -> unit
          | `Data of chunk:chunk -> unit
          | `End of unit -> unit
@@ -88,8 +75,8 @@ module Stream : sig
   module Writable : sig
     include Ojs.T
 
-    val on :
-         t
+    val on
+      :  t
       -> [ `Close of unit -> unit
          | `Drain of unit -> unit
          | `Error of err:JsError.t -> unit
@@ -100,24 +87,17 @@ module Stream : sig
       -> unit
 
     val write : t -> string -> unit
-
     val end_ : t -> unit
   end
 end
 
 module Path : sig
   val delimiter : char
-
   val sep : char
-
   val basename : string -> string
-
   val dirname : string -> string
-
   val extname : string -> string
-
   val isAbsolute : string -> bool
-
   val join : string list -> string
 end
 
@@ -127,9 +107,7 @@ end
 
 module Fs : sig
   val readDir : string -> (string list, string) result Promise.t
-
   val readFile : string -> string Promise.t
-
   val exists : string -> bool Promise.t
 end
 
@@ -138,17 +116,13 @@ module Net : sig
     include Ojs.T
 
     val make : unit -> t
-
     val isPaused : t -> bool
-
     val destroy : t -> unit
-
     val connect : t -> port:int -> host:string -> t
-
     val setTimeout : t -> int -> t
 
-    val on :
-         t
+    val on
+      :  t
       -> [ `Connect of unit -> unit
          | `Timeout of unit -> unit
          | `Error of err:JsError.t -> unit
@@ -177,15 +151,15 @@ module ChildProcess : sig
     | Closed
     | ProcessError of JsError.t
 
-  val exec :
-       ?logger:(event -> unit)
+  val exec
+    :  ?logger:(event -> unit)
     -> ?stdin:string
     -> ?options:Options.t
     -> string
     -> return Promise.t
 
-  val spawn :
-       ?logger:(event -> unit)
+  val spawn
+    :  ?logger:(event -> unit)
     -> ?stdin:string
     -> ?options:Options.t
     -> string

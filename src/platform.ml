@@ -11,6 +11,7 @@ let of_string = function
   | "darwin" -> Darwin
   | "linux" -> Linux
   | _ -> Other
+;;
 
 let t = of_string Process.platform
 
@@ -27,6 +28,7 @@ module Map = struct
     | Darwin -> darwin
     | Linux -> linux
     | Other -> other
+  ;;
 end
 
 type arch =
@@ -55,6 +57,7 @@ let arch_of_string = function
   | "x32" -> X32
   | "x64" -> X64
   | _ -> assert false
+;;
 
 let arch = Node.Process.arch |> arch_of_string
 
@@ -66,7 +69,7 @@ let shell =
   let sh = Sh (Path.of_string "/bin/sh") in
   let powershell =
     PowerShell
-      (Path.of_string
-         "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe")
+      (Path.of_string "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe")
   in
   Map.find { win32 = powershell; darwin = sh; linux = sh; other = sh } t
+;;

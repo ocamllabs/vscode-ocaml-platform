@@ -1,23 +1,4 @@
 # upgrading the version, don't forget to update ocamlformat version in `dune-project`
 version=0.27.0
-profile=conventional
-ocaml-version=5.2
-break-separators=before
-dock-collection-brackets=false
-break-sequences=true
-doc-comments=before
-field-space=loose
-let-and=sparse
-sequence-style=terminator
-type-decl=sparse
-wrap-comments=true
-let-and=sparse
-space-around-records
-space-around-lists
-space-around-arrays
-cases-exp-indent=2
-break-cases=fit-or-vertical
-indicate-nested-or-patterns=unsafe-no
+profile=janestreet
 parse-docstrings=true
-module-item-spacing=sparse
-wrap-fun-args=false

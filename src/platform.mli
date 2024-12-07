@@ -7,18 +7,18 @@ type t =
 val t : t
 
 module Map : sig
-  type platform
+    type platform
 
-  type 'a t =
-    { win32 : 'a
-    ; darwin : 'a
-    ; linux : 'a
-    ; other : 'a
-    }
+    type 'a t =
+      { win32 : 'a
+      ; darwin : 'a
+      ; linux : 'a
+      ; other : 'a
+      }
 
-  val find : 'a t -> platform -> 'a
-end
-with type platform := t
+    val find : 'a t -> platform -> 'a
+  end
+  with type platform := t
 
 type arch =
   | Arm

@@ -3,22 +3,20 @@ open Import
 type command =
   { id : string
   ; handler : Extension_instance.t -> args:Ojs.t list -> unit
-        (* [handler] is intended to be used partially applied; [handler
-           extension_instance] is passed as a callback to
-           [Commands.registerCommand] *)
+    (* [handler] is intended to be used partially applied; [handler extension_instance] is passed as a callback to
+       [Commands.registerCommand] *)
   }
 
 type text_editor_command =
   { id : string
   ; handler :
-         Extension_instance.t
+      Extension_instance.t
       -> textEditor:TextEditor.t
       -> edit:TextEditorEdit.t
       -> args:Ojs.t list
       -> unit
-        (* [handler] is intended to be used partially applied; [handler
-           extension_instance] is passed as a callback to
-           [Commands.registerCommand] *)
+    (* [handler] is intended to be used partially applied; [handler extension_instance] is passed as a callback to
+       [Commands.registerCommand] *)
   }
 
 type t =
@@ -32,11 +30,13 @@ let command id handler =
   let command = Command { id; handler } in
   commands := command :: !commands;
   command
+;;
 
 let text_editor_command id handler =
   let command = Text_editor_command { id; handler } in
   commands := command :: !commands;
   command
+;;
 
 let _select_sandbox =
   let handler (instance : Extension_instance.t) ~args:_ =
@@ -54,15 +54,15 @@ let _select_sandbox =
     ()
   in
   command Extension_consts.Commands.select_sandbox handler
+;;
 
 let _restart_language_server =
   let handler (instance : Extension_instance.t) ~args:_ =
-    let (_ : unit Promise.t) =
-      Extension_instance.start_language_server instance
-    in
+    let (_ : unit Promise.t) = Extension_instance.start_language_server instance in
     ()
   in
   command Extension_consts.Commands.restart_language_server handler
+;;
 
 let _select_sandbox_and_open_terminal =
   let handler _instance ~args:_ =
@@ -74,18 +74,19 @@ let _select_sandbox_and_open_terminal =
     ()
   in
   command Extension_consts.Commands.select_sandbox_and_open_terminal handler
+;;
 
 let _open_terminal =
   let handler (instance : Extension_instance.t) ~args:_ =
     Extension_instance.sandbox instance |> Extension_instance.open_terminal
   in
   command Extension_consts.Commands.open_terminal handler
+;;
 
 let _stop_documentation_server =
-  let handler instance ~args:_ =
-    Extension_instance.stop_documentation_server instance
-  in
+  let handler instance ~args:_ = Extension_instance.stop_documentation_server instance in
   command Extension_consts.Commands.stop_documentation_server handler
+;;
 
 let _switch_impl_intf =
   let handler (instance : Extension_instance.t) ~args:_ =
@@ -107,14 +108,14 @@ let _switch_impl_intf =
           Promise.return
           @@ show_message
                `Warn
-               "The installed version of ocamllsp does not support switching \
-                between implementation and interface files. Consider updating \
-                ocamllsp."
+               "The installed version of ocamllsp does not support switching between \
+                implementation and interface files. Consider updating ocamllsp."
     in
     let (_ : unit Promise.t option) = try_switching () in
     ()
   in
   command Extension_consts.Commands.switch_impl_intf handler
+;;
 
 let _open_current_dune_file =
   let handler (_instance : Extension_instance.t) ~args:_ =
@@ -126,8 +127,7 @@ let _open_current_dune_file =
       @@ Extension_consts.Command_errors.text_editor_must_be_active
            "Open Dune File"
            ~expl:
-             "The command can look for a dune file in the same folder as the \
-              open file."
+             "The command can look for a dune file in the same folder as the open file."
     | Some text_editor ->
       let doc = TextEditor.document text_editor in
       let uri = TextDocument.uri doc in
@@ -136,16 +136,13 @@ let _open_current_dune_file =
         let uri = Path.relative path "../dune" |> Path.to_string |> Uri.file in
         Uri.toString uri ()
       in
-      let (_ : TextEditor.t Promise.t) =
-        open_file_in_text_editor dune_file_uri
-      in
+      let (_ : TextEditor.t Promise.t) = open_file_in_text_editor dune_file_uri in
       ()
   in
   command Extension_consts.Commands.open_current_dune_file handler
+;;
 
-let ( _open_ocamllsp_output_pane
-    , _open_ocaml_platform_ext_pane
-    , _open_ocaml_commands_pane ) =
+let _open_ocamllsp_output_pane, _open_ocaml_platform_ext_pane, _open_ocaml_commands_pane =
   let handler output (_instance : Extension_instance.t) ~args:_ =
     let show_output (lazy output) = OutputChannel.show output () in
     show_output output
@@ -159,14 +156,14 @@ let ( _open_ocamllsp_output_pane
   , command
       Extension_consts.Commands.open_ocaml_commands_output
       (handler Output.command_output_channel) )
+;;
 
 module Holes_commands : sig
   val _jump_to_prev_hole : t
-
   val _jump_to_next_hole : t
 
-  val closest_hole :
-       Position.t
+  val closest_hole
+    :  Position.t
     -> TextEditor.t
     -> LanguageClient.t
     -> [< `Next | `Prev ]
@@ -188,10 +185,12 @@ end = struct
         `Warn
         "The installed version of `ocamllsp` does not support typed holes. %s"
         msg
+  ;;
 
   let current_cursor_pos text_editor =
     let selection = TextEditor.selection text_editor in
     Selection.active selection
+  ;;
 
   let select_hole_range text_editor hole =
     let new_selection =
@@ -205,11 +204,13 @@ end = struct
       ~range:hole
       ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
       ()
+  ;;
 
   let send_request_to_lsp client text_editor =
     let doc = TextEditor.document text_editor in
     let uri = TextDocument.uri doc in
     Custom_requests.send_request client Custom_requests.typedHoles uri
+  ;;
 
   let jump_to_hole jump (instance : Extension_instance.t) ~args =
     (* this command is available (in the command palette) only when a file is
@@ -220,22 +221,22 @@ end = struct
         "Jump to Previous/Next Typed Hole"
         ~expl:"The command looks for holes in an open file."
       |> show_message `Error "%s"
-    | Some text_editor -> (
+    | Some text_editor ->
       let open Promise.Syntax in
-      match Extension_instance.lsp_client instance with
-      | None -> show_message `Warn "ocamllsp is not running."
-      | Some (_, ocaml_lsp)
-        when not (Ocaml_lsp.can_handle_typed_holes ocaml_lsp) ->
-        ocaml_lsp_doesn't_support_holes instance ocaml_lsp
-      | Some (client, _ocaml_lsp) ->
-        let (_ : unit Promise.t) =
-          let+ holes = send_request_to_lsp client text_editor in
-          jump
-            ~cmd_args:args
-            text_editor
-            ~sorted_holes:(List.sort holes ~compare:Range.compare)
-        in
-        ())
+      (match Extension_instance.lsp_client instance with
+       | None -> show_message `Warn "ocamllsp is not running."
+       | Some (_, ocaml_lsp) when not (Ocaml_lsp.can_handle_typed_holes ocaml_lsp) ->
+         ocaml_lsp_doesn't_support_holes instance ocaml_lsp
+       | Some (client, _ocaml_lsp) ->
+         let (_ : unit Promise.t) =
+           let+ holes = send_request_to_lsp client text_editor in
+           jump
+             ~cmd_args:args
+             text_editor
+             ~sorted_holes:(List.sort holes ~compare:Range.compare)
+         in
+         ())
+  ;;
 
   module Prev_hole = struct
     (** iterate through all hole ranges and pick the one that has start position
@@ -254,13 +255,13 @@ end = struct
              end; if the current position comes before or inside the first
              range, then pick the last hole in file *)
           List.last_exn rest
-        else
+        else (
           let rec find_prev_hole prev_range = function
             | [] -> prev_range
-            | range :: rest -> (
+            | range :: rest ->
               if Range.contains range ~positionOrRange:(`Position current_pos)
               then prev_range
-              else
+              else (
                 let start = Range.start range in
                 match Position.compare current_pos start with
                 | Ordering.Less -> prev_range
@@ -270,7 +271,8 @@ end = struct
                      this range in the if-expr above *)
                   assert false)
           in
-          find_prev_hole fst_range rest
+          find_prev_hole fst_range rest)
+    ;;
 
     let jump ~cmd_args:_ text_editor ~sorted_holes =
       match sorted_holes with
@@ -279,6 +281,7 @@ end = struct
         let current_pos = current_cursor_pos text_editor in
         let hole = pick_prev_hole current_pos ~sorted_non_empty_holes_list in
         select_hole_range text_editor hole
+    ;;
   end
 
   (** [Next_hole] has a separate module because this command takes arguments,
@@ -292,20 +295,18 @@ end = struct
       | default :: _ ->
         let next_hole =
           List.find holes ~f:(fun range ->
-              match Position.compare current_pos (Range.start range) with
-              | Ordering.Less -> true
-              | Greater -> false
-              | Equal ->
-                (* we don't want the same range that we're in now; we need the
-                   next one *)
-                not
-                  (Range.contains
-                     range
-                     ~positionOrRange:(`Position current_pos)))
+            match Position.compare current_pos (Range.start range) with
+            | Ordering.Less -> true
+            | Greater -> false
+            | Equal ->
+              (* we don't want the same range that we're in now; we need the
+                 next one *)
+              not (Range.contains range ~positionOrRange:(`Position current_pos)))
         in
         (* if the current position is larger than all other ranges, we cycle
            back to first hole in the file *)
         Option.value next_hole ~default
+    ;;
 
     (** We need to be able to specify the position from which we want to look
         for the next typed hole. If the [inRange] field of the argument object
@@ -321,9 +322,9 @@ end = struct
         passed as the {i first} argument to the command because we want explicit
         names for those configurations, so object keys are useful here. *)
     type arguments =
-      { in_range : Range.t option  (** [inRange]: <Range> (optional) *)
+      { in_range : Range.t option (** [inRange]: <Range> (optional) *)
       ; should_notify_if_no_hole : bool
-            (** [shouldNotifyIfNoHole]: <bool> (default = true) *)
+        (** [shouldNotifyIfNoHole]: <bool> (default = true) *)
       }
 
     let default_args = { in_range = None; should_notify_if_no_hole = true }
@@ -333,44 +334,45 @@ end = struct
         (Jsonoo.Decode.(try_optional (field "position" Range.t_of_json)) json)
       || Option.is_some
            (Jsonoo.Decode.(try_optional (field "notify-if-no-hole" bool)) json)
+    ;;
 
     let parse_arguments args =
       match args with
       | [] -> Ok default_args
       | [ params_obj ] ->
         let json = Jsonoo.t_of_js params_obj in
-        if args_use_old_protocol json then Error `Outdated_protocol
-        else
+        if args_use_old_protocol json
+        then Error `Outdated_protocol
+        else (
           let in_range =
             Jsonoo.Decode.(try_optional (field "inRange" Range.t_of_json)) json
           in
           let should_notify_if_no_hole =
-            Jsonoo.Decode.(try_default true (field "shouldNotifyIfNoHole" bool))
-              json
+            Jsonoo.Decode.(try_default true (field "shouldNotifyIfNoHole" bool)) json
           in
-          Ok { in_range; should_notify_if_no_hole }
+          Ok { in_range; should_notify_if_no_hole })
       | _ -> (* incorrect args passed *) assert false
+    ;;
 
     let jump ~cmd_args text_editor ~sorted_holes =
       match parse_arguments cmd_args with
       | Error `Outdated_protocol -> ()
-      | Ok { in_range; should_notify_if_no_hole } -> (
-        match sorted_holes with
-        | [] ->
-          if should_notify_if_no_hole then
-            show_message `Info "%s" hole_not_found_msg
-        | sorted_non_empty_holes_list -> (
-          let start_pos =
-            Option.map in_range ~f:Range.start
-            |> Option.value_lazy ~default:(fun () ->
-                   current_cursor_pos text_editor)
-          in
-          let hole = pick_next_hole start_pos ~sorted_non_empty_holes_list in
-          match in_range with
-          | None -> select_hole_range text_editor hole
-          | Some in_range ->
-            if Range.contains in_range ~positionOrRange:(`Range hole) then
-              select_hole_range text_editor hole))
+      | Ok { in_range; should_notify_if_no_hole } ->
+        (match sorted_holes with
+         | [] ->
+           if should_notify_if_no_hole then show_message `Info "%s" hole_not_found_msg
+         | sorted_non_empty_holes_list ->
+           let start_pos =
+             Option.map in_range ~f:Range.start
+             |> Option.value_lazy ~default:(fun () -> current_cursor_pos text_editor)
+           in
+           let hole = pick_next_hole start_pos ~sorted_non_empty_holes_list in
+           (match in_range with
+            | None -> select_hole_range text_editor hole
+            | Some in_range ->
+              if Range.contains in_range ~positionOrRange:(`Range hole)
+              then select_hole_range text_editor hole))
+    ;;
   end
 
   let closest_hole position text_editor client direction =
@@ -383,21 +385,21 @@ end = struct
     | holes ->
       Some
         (match direction with
-        | `Prev ->
-          Prev_hole.pick_prev_hole position ~sorted_non_empty_holes_list:holes
-        | `Next ->
-          Next_hole.pick_next_hole position ~sorted_non_empty_holes_list:holes)
+         | `Prev -> Prev_hole.pick_prev_hole position ~sorted_non_empty_holes_list:holes
+         | `Next -> Next_hole.pick_next_hole position ~sorted_non_empty_holes_list:holes)
+  ;;
 
   let _jump_to_next_hole =
     command Extension_consts.Commands.next_hole (jump_to_hole Next_hole.jump)
+  ;;
 
   let _jump_to_prev_hole =
     command Extension_consts.Commands.prev_hole (jump_to_hole Prev_hole.jump)
+  ;;
 end
 
 module Debug_commands : sig
   val _goto_closure_code_location : t
-
   val _start_debugging : t
 end = struct
   let _start_debugging =
@@ -407,7 +409,7 @@ end = struct
         | resourceUri :: _ -> Some (Uri.t_of_js resourceUri)
         | [] ->
           Option.map (Window.activeTextEditor ()) ~f:(fun textEditor ->
-              TextDocument.uri (TextEditor.document textEditor))
+            TextDocument.uri (TextEditor.document textEditor))
       in
       match resourceUri with
       | Some uri ->
@@ -423,10 +425,7 @@ end = struct
         DebugConfiguration.set config "program" (Ojs.string_to_js fsPath);
         DebugConfiguration.set config "stopOnEntry" (Ojs.bool_to_js true);
         let (_ : bool Promise.t) =
-          Debug.startDebugging
-            ~folder
-            ~nameOrConfiguration:(`Configuration config)
-            ()
+          Debug.startDebugging ~folder ~nameOrConfiguration:(`Configuration config) ()
         in
         ()
       | None ->
@@ -434,6 +433,7 @@ end = struct
         ()
     in
     command Extension_consts.Commands.start_debugging handler
+  ;;
 
   let _goto_closure_code_location =
     let handler (_ : Extension_instance.t) ~args =
@@ -457,31 +457,23 @@ end = struct
               ~args
               ()
           in
-          let result =
-            Earlybird.VariableGetClosureCodeLocation.Result.t_of_js result
-          in
+          let result = Earlybird.VariableGetClosureCodeLocation.Result.t_of_js result in
           match result.location with
           | Some range ->
-            let* text_document =
-              Workspace.openTextDocument (`Filename range.source)
-            in
+            let* text_document = Workspace.openTextDocument (`Filename range.source) in
             let selection =
-              Earlybird.VariableGetClosureCodeLocation.Result.range_to_vscode
-                range
+              Earlybird.VariableGetClosureCodeLocation.Result.range_to_vscode range
             in
             let+ _ =
               Window.showTextDocument'
                 ~document:(`TextDocument text_document)
-                ~options:
-                  (TextDocumentShowOptions.create ~preview:true ~selection ())
+                ~options:(TextDocumentShowOptions.create ~preview:true ~selection ())
                 ()
             in
             ()
           | None ->
             let+ _ =
-              Window.showInformationMessage
-                ~message:"No closure code location"
-                ()
+              Window.showInformationMessage ~message:"No closure code location" ()
             in
             ()
         in
@@ -491,6 +483,7 @@ end = struct
         ()
     in
     command Extension_consts.Commands.goto_closure_code_location handler
+  ;;
 end
 
 module Copy_type_under_cursor = struct
@@ -506,9 +499,9 @@ module Copy_type_under_cursor = struct
     | Error (`Msg msg) ->
       show_message
         `Warn
-        "The installed version of `ocamllsp` does not support type enclosings. \
-         %s"
+        "The installed version of `ocamllsp` does not support type enclosings. %s"
         msg
+  ;;
 
   let get_enclosings text_editor client =
     let doc = TextEditor.document text_editor in
@@ -523,6 +516,7 @@ module Copy_type_under_cursor = struct
            ~at:(`Range (Selection.to_range selection))
            ~index:0
            ~verbosity:0))
+  ;;
 
   let _copy_type_under_cursor =
     let handler (instance : Extension_instance.t) ~args:_ =
@@ -532,31 +526,31 @@ module Copy_type_under_cursor = struct
           Extension_consts.Command_errors.text_editor_must_be_active
             extension_name
             ~expl:"The command copy the type of the expression under cursor"
-          |> show_message `Error "%s" |> Promise.return
-        | Some text_editor -> (
-          match Extension_instance.lsp_client instance with
-          | None ->
-            show_message `Warn "ocamllsp is not running" |> Promise.return
-          | Some (_, ocaml_lsp)
-            when not (Ocaml_lsp.can_handle_type_enclosing ocaml_lsp) ->
-            ocaml_lsp_doesnt_support_type_enclosing instance ocaml_lsp
-            |> Promise.return
-          | Some (client, _) ->
-            let clipboard = Env.clipboard () in
-            let open Promise.Syntax in
-            let* Custom_requests.Type_enclosing.{ type_; _ } =
-              get_enclosings text_editor client
-            in
-            if String.equal type_ "<no information>" then
-              show_message `Warn "No type information" |> Promise.return
-            else
-              let+ () = Clipboard.writeText clipboard type_ in
-              show_message `Info "Type copied: %s" type_)
+          |> show_message `Error "%s"
+          |> Promise.return
+        | Some text_editor ->
+          (match Extension_instance.lsp_client instance with
+           | None -> show_message `Warn "ocamllsp is not running" |> Promise.return
+           | Some (_, ocaml_lsp) when not (Ocaml_lsp.can_handle_type_enclosing ocaml_lsp)
+             ->
+             ocaml_lsp_doesnt_support_type_enclosing instance ocaml_lsp |> Promise.return
+           | Some (client, _) ->
+             let clipboard = Env.clipboard () in
+             let open Promise.Syntax in
+             let* Custom_requests.Type_enclosing.{ type_; _ } =
+               get_enclosings text_editor client
+             in
+             if String.equal type_ "<no information>"
+             then show_message `Warn "No type information" |> Promise.return
+             else
+               let+ () = Clipboard.writeText clipboard type_ in
+               show_message `Info "Type copied: %s" type_)
       in
       let (_ : unit Promise.t) = copy_type_under_cursor () in
       ()
     in
     command Extension_consts.Commands.copy_type_under_cursor handler
+  ;;
 end
 
 module Construct = struct
@@ -566,9 +560,11 @@ module Construct = struct
     match TextDocument.languageId textdoc with
     | "ocaml" | "ocaml.interface" | "reason" | "ocaml.ocamllex" -> true
     | _ -> false
+  ;;
 
   let ocaml_lsp_doesnt_support_construct ocaml_lsp =
     not (Ocaml_lsp.can_handle_construct ocaml_lsp)
+  ;;
 
   let get_construct_results position text_editor client =
     let doc = TextEditor.document text_editor in
@@ -578,55 +574,47 @@ module Construct = struct
         client
         Construct.request
         (Construct.make ~uri ~position ~depth:None ~with_values:None ()))
+  ;;
 
   let display_results (results : Custom_requests.Construct.response) =
     let quickPickItems =
       List.map results.result ~f:(fun res ->
-          (QuickPickItem.create ~label:res (), (res, results.position)))
+        QuickPickItem.create ~label:res (), (res, results.position))
     in
-    let quickPickOptions =
-      QuickPickOptions.create ~title:"Construct results" ()
-    in
-    Window.showQuickPickItems
-      ~choices:quickPickItems
-      ~options:quickPickOptions
-      ()
+    let quickPickOptions = QuickPickOptions.create ~title:"Construct results" () in
+    Window.showQuickPickItems ~choices:quickPickItems ~options:quickPickOptions ()
+  ;;
 
   let insert_to_document text_editor range value =
     TextEditor.edit
       text_editor
       ~callback:(fun ~editBuilder ->
-        Vscode.TextEditorEdit.replace
-          editBuilder
-          ~location:(`Range range)
-          ~value)
+        Vscode.TextEditorEdit.replace editBuilder ~location:(`Range range) ~value)
       ()
+  ;;
 
   let rec process_construct position text_editor client instance =
     let open Promise.Syntax in
     let* res = get_construct_results position text_editor client in
     let* selected_result = display_results res in
     match selected_result with
-    | Some (value, range) -> (
+    | Some (value, range) ->
       let* value_inserted = insert_to_document text_editor range value in
-      match Settings.(get server_constructRecursiveCalls_setting) with
-      | Some true | None -> (
-        match value_inserted with
-        | true -> (
-          let* new_range =
-            Holes_commands.closest_hole
-              (Range.start range)
-              text_editor
-              client
-              `Next
-          in
-          match new_range with
-          | Some range ->
-            process_construct (Range.end_ range) text_editor client instance
-          | None -> Promise.return ())
-        | false -> Promise.return ())
-      | Some false -> Promise.return ())
+      (match Settings.(get server_constructRecursiveCalls_setting) with
+       | Some true | None ->
+         (match value_inserted with
+          | true ->
+            let* new_range =
+              Holes_commands.closest_hole (Range.start range) text_editor client `Next
+            in
+            (match new_range with
+             | Some range ->
+               process_construct (Range.end_ range) text_editor client instance
+             | None -> Promise.return ())
+          | false -> Promise.return ())
+       | Some false -> Promise.return ())
     | None -> Promise.return ()
+  ;;
 
   let _construct =
     let handler (instance : Extension_instance.t) ~args:_ =
@@ -636,35 +624,34 @@ module Construct = struct
           Extension_consts.Command_errors.text_editor_must_be_active
             extension_name
             ~expl:
-              "The cursor position is used to determine the correct \
-               environment and insert the result."
+              "The cursor position is used to determine the correct environment and \
+               insert the result."
           |> show_message `Error "%s"
-        | Some text_editor
-          when not (is_valid_text_doc (TextEditor.document text_editor)) ->
+        | Some text_editor when not (is_valid_text_doc (TextEditor.document text_editor))
+          ->
           show_message
             `Error
-            "Invalid file type. This command only works in ocaml files, ocaml \
-             interface files, reason files or ocamllex files."
-        | Some text_editor -> (
-          match Extension_instance.lsp_client instance with
-          | None -> show_message `Warn "ocamllsp is not running"
-          | Some (_client, ocaml_lsp)
-            when ocaml_lsp_doesnt_support_construct ocaml_lsp ->
-            show_message
-              `Warn
-              "The installed version of `ocamllsp` does not support construct \
-               custom requests"
-          | Some (client, _) ->
-            let position =
-              TextEditor.selection text_editor |> Selection.active
-            in
-            let _ = process_construct position text_editor client instance in
-            ())
+            "Invalid file type. This command only works in ocaml files, ocaml interface \
+             files, reason files or ocamllex files."
+        | Some text_editor ->
+          (match Extension_instance.lsp_client instance with
+           | None -> show_message `Warn "ocamllsp is not running"
+           | Some (_client, ocaml_lsp) when ocaml_lsp_doesnt_support_construct ocaml_lsp
+             ->
+             show_message
+               `Warn
+               "The installed version of `ocamllsp` does not support construct custom \
+                requests"
+           | Some (client, _) ->
+             let position = TextEditor.selection text_editor |> Selection.active in
+             let _ = process_construct position text_editor client instance in
+             ())
       in
       let (_ : unit) = construct () in
       ()
     in
     command Extension_consts.Commands.construct handler
+  ;;
 end
 
 module MerlinJump = struct
@@ -674,15 +661,18 @@ module MerlinJump = struct
     match TextDocument.languageId textdoc with
     | "ocaml" | "ocaml.interface" | "reason" | "ocaml.ocamllex" -> true
     | _ -> false
+  ;;
 
   let ocaml_lsp_doesnt_support_merlin_jump ocaml_lsp =
     not (Ocaml_lsp.can_handle_merlin_jump ocaml_lsp)
+  ;;
 
   let request_possible_targets position text_editor client =
     let doc = TextEditor.document text_editor in
     let uri = TextDocument.uri doc in
     Custom_requests.(
       send_request client Merlin_jump.request (Merlin_jump.make ~uri ~position))
+  ;;
 
   let display_results (results : Custom_requests.Merlin_jump.response) =
     let quickPickItems =
@@ -692,16 +682,11 @@ module MerlinJump = struct
         []
       | results ->
         List.map results ~f:(fun (target, pos) ->
-            ( (QuickPickItem.create ~label:("Jump to nearest " ^ target)) ()
-            , (target, pos) ))
+          (QuickPickItem.create ~label:("Jump to nearest " ^ target)) (), (target, pos))
     in
-    let quickPickOptions =
-      QuickPickOptions.create ~title:"Available Jump Targets" ()
-    in
-    Window.showQuickPickItems
-      ~choices:quickPickItems
-      ~options:quickPickOptions
-      ()
+    let quickPickOptions = QuickPickOptions.create ~title:"Available Jump Targets" () in
+    Window.showQuickPickItems ~choices:quickPickItems ~options:quickPickOptions ()
+  ;;
 
   let jump_to_position text_editor position =
     let open Promise.Syntax in
@@ -719,16 +704,16 @@ module MerlinJump = struct
       ~range:(Range.makePositions ~start:position ~end_:position)
       ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
       ()
+  ;;
 
   let process_jump position text_editor client =
     let open Promise.Syntax in
-    let* successful_targets =
-      request_possible_targets position text_editor client
-    in
+    let* successful_targets = request_possible_targets position text_editor client in
     let* selected_target = display_results successful_targets in
     match selected_target with
     | Some (_res, position) -> jump_to_position text_editor position
     | None -> Promise.return ()
+  ;;
 
   let _jump =
     let handler (instance : Extension_instance.t) ~args:_ =
@@ -738,35 +723,34 @@ module MerlinJump = struct
           Extension_consts.Command_errors.text_editor_must_be_active
             extension_name
             ~expl:
-              "The cursor position is used to determine the correct \
-               environment for the jump."
+              "The cursor position is used to determine the correct environment for the \
+               jump."
           |> show_message `Error "%s"
-        | Some text_editor
-          when not (is_valid_text_doc (TextEditor.document text_editor)) ->
+        | Some text_editor when not (is_valid_text_doc (TextEditor.document text_editor))
+          ->
           show_message
             `Error
-            "Invalid file type. This command only works in ocaml files, ocaml \
-             interface files or reason files.."
-        | Some text_editor -> (
-          match Extension_instance.lsp_client instance with
-          | None -> show_message `Warn "ocamllsp is not running"
-          | Some (_client, ocaml_lsp)
-            when ocaml_lsp_doesnt_support_merlin_jump ocaml_lsp ->
-            show_message
-              `Warn
-              "The installed version of `ocamllsp` does not support Merlin \
-               jump custom requests"
-          | Some (client, _) ->
-            let position =
-              TextEditor.selection text_editor |> Selection.active
-            in
-            let _ = process_jump position text_editor client in
-            ())
+            "Invalid file type. This command only works in ocaml files, ocaml interface \
+             files or reason files.."
+        | Some text_editor ->
+          (match Extension_instance.lsp_client instance with
+           | None -> show_message `Warn "ocamllsp is not running"
+           | Some (_client, ocaml_lsp) when ocaml_lsp_doesnt_support_merlin_jump ocaml_lsp
+             ->
+             show_message
+               `Warn
+               "The installed version of `ocamllsp` does not support Merlin jump custom \
+                requests"
+           | Some (client, _) ->
+             let position = TextEditor.selection text_editor |> Selection.active in
+             let _ = process_jump position text_editor client in
+             ())
       in
       let (_ : unit) = jump () in
       ()
     in
     command Extension_consts.Commands.merlin_jump handler
+  ;;
 end
 
 let register extension instance = function
@@ -778,14 +762,18 @@ let register extension instance = function
     let callback = handler instance in
     let disposable = Commands.registerTextEditorCommand ~command:id ~callback in
     ExtensionContext.subscribe extension ~disposable
+;;
 
 let register_all_commands extension instance =
   List.iter ~f:(register extension instance) !commands
+;;
 
 let register ~id handler =
   let (_ : t) = command id handler in
   ()
+;;
 
 let register_text_editor ~id handler =
   let (_ : t) = text_editor_command id handler in
   ()
+;;

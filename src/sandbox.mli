@@ -18,15 +18,10 @@ module Package : sig
   type t
 
   val name : t -> string
-
   val version : t -> string
-
   val synopsis : t -> string option
-
   val documentation : t -> string option
-
   val has_dependencies : t -> bool
-
   val dependencies : t -> (t list, string) result Promise.t
 end
 
@@ -37,17 +32,11 @@ type t =
   | Custom of string
 
 val equal : t -> t -> bool
-
 val to_string : t -> string
-
 val to_pretty_string : t -> string
-
 val of_settings : unit -> t option Promise.t
-
 val detect : unit -> t option Promise.t
-
 val of_settings_or_detect : unit -> t option Promise.t
-
 val save_to_settings : t -> unit Promise.t
 
 (** [select_sandbox_and_save] requires the process environment the plugin is
@@ -91,6 +80,5 @@ val upgrade_packages : t -> unit Promise.t
 val ocaml_version : t -> (string, string) result Promise.t
 
 (** Focus on the command output channel. If [sandbox] is provided, the output
-    channel will only be focused if the given sandbox supports package commands.
-*)
+    channel will only be focused if the given sandbox supports package commands. *)
 val focus_on_package_command : ?sandbox:t -> unit -> unit

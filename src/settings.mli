@@ -18,11 +18,10 @@ type 'value setting
    API. *)
 
 val get : ?section:string -> 'value setting -> 'value option
-
 val set : ?section:string -> 'value setting -> 'value -> unit Promise.t
 
-val create_setting :
-     scope:ConfigurationTarget.t
+val create_setting
+  :  scope:ConfigurationTarget.t
   -> key:string
   -> of_json:(Jsonoo.t -> 'value)
   -> to_json:('value -> Jsonoo.t)
@@ -35,15 +34,9 @@ val resolve_workspace_vars : string -> string
 val substitute_workspace_vars : string -> string
 
 val server_extraEnv : unit -> string Interop.Dict.t option
-
 val server_args_setting : string list setting
-
 val server_codelens_setting : bool setting
-
 val server_extendedHover_setting : bool setting
-
 val server_duneDiagnostics_setting : bool setting
-
 val server_syntaxDocumentation_setting : bool setting
-
 val server_constructRecursiveCalls_setting : bool setting
