@@ -1,8 +1,11 @@
 name: Builds, tests & co
 
 on:
-  - push
-  - pull_request
+  push:
+  pull_request:
+  release:
+    types:
+      - published
 
 permissions: read-all
 
@@ -25,7 +28,7 @@ jobs:
       - name: Set-up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 23
           check-latest: true
 
       - run: corepack enable
@@ -38,14 +41,11 @@ jobs:
       - name: Run Biome checks
         run: yarn lint
 
-      - name: Build extension
-        run: opam exec -- make build-release
-
-      - name: Package extension
-        run: yarn package
+      - name: Build and Package extension
+        run: opam exec -- make pkg
 
       - name: Generate artifact attestation
-        if: startsWith(github.ref, 'refs/tags')
+        if: github.event_name == 'release'
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: ocaml-platform.vsix
@@ -58,28 +58,6 @@ jobs:
 
       - name: Test extension
         run: xvfb-run -a yarn test
-
-      - name: Publish extension to VSCode Marketplace
-        if: startsWith(github.ref, 'refs/tags')
-        continue-on-error: true
-        run: yarn deploy:vsce
-        env:
-          VSCE_PAT: ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
-
-      - name: Publish extension to Open VSX Registry
-        if: startsWith(github.ref, 'refs/tags')
-        continue-on-error: true
-        run: yarn deploy:ovsx --pat "$OVSX_PAT"
-        env:
-          OVSX_PAT: ${{ secrets.OPEN_VSX_TOKEN }}
-
-      - name: Create release
-        if: startsWith(github.ref, 'refs/tags')
-        continue-on-error: true
-        uses: softprops/action-gh-release@v2
-        with:
-          draft: true
-          files: ocaml-platform.vsix
 
   lint-opam:
     runs-on: ubuntu-latest
@@ -102,3 +80,48 @@ jobs:
         with:
           ocaml-compiler: 5
       - uses: ocaml/setup-ocaml/lint-fmt@v3
+
+  release:
+    if: github.event_name == 'release'
+    needs:
+      - build-and-test
+      - lint-opam
+      - lint-fmt
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
+
+      - name: Set-up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23
+          check-latest: true
+
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ocaml-platform-${{ github.sha }}
+
+      - name: Publish extension to VSCode Marketplace
+        continue-on-error: true
+        run: yarn deploy:vsce
+        env:
+          VSCE_PAT: ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
+
+      - name: Publish extension to Open VSX Registry
+        continue-on-error: true
+        run: yarn deploy:ovsx --pat "$OVSX_PAT"
+        env:
+          OVSX_PAT: ${{ secrets.OPEN_VSX_TOKEN }}
+
+      - name: Create release
+        continue-on-error: true
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ocaml-platform.vsix

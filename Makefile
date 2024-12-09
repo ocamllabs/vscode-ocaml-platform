@@ -21,33 +21,18 @@ create_switch:
 switch: create_switch deps ## Create an opam switch and install development dependencies
 
 .PHONY: build
-build: ## Build the project
-	dune build src/vscode_ocaml_platform.bc.js
-	yarn workspace astexplorer build
-	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
-		--bundle \
-		--packages=bundle \
-		--external:vscode \
-		--outdir=dist \
-		--platform=node \
-		--target=es2022 \
-		--sourcemap
-
-.PHONY: build-release
-build-release:
+build: clean ## Build the project
 	dune build src/vscode_ocaml_platform.bc.js --profile=release
 	yarn workspace astexplorer build
 	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
 		--bundle \
-		--packages=bundle \
 		--external:vscode \
+		--minify \
 		--outdir=dist \
+		--packages=bundle \
 		--platform=node \
 		--target=es2022 \
-		--minify-whitespace \
-		--minify-syntax \
-		--sourcemap \
-		--sources-content=false
+		--analyze
 
 .PHONY: test
 test: ## Run the unit tests
@@ -57,7 +42,7 @@ test: ## Run the unit tests
 .PHONY: clean
 clean: ## Clean build artifacts and other generated files
 	dune clean
-	rm -r dist/
+	$(RM) -r dist
 
 .PHONY: doc
 doc: ## Generate odoc documentation
@@ -73,7 +58,7 @@ watch: ## Watch for the filesystem and rebuild on every change
 	dune build @all -w --terminal-persistence=clear-on-rebuild
 
 .PHONY: pkg
-pkg: build-release # Builds and packages the extension for installment
+pkg: build # Builds and packages the extension for installment
 	yarn package
 
 .PHONY: install
