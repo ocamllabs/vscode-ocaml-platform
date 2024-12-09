@@ -64,3 +64,29 @@ module Merlin_jump : sig
   val make : uri:Uri.t -> position:Position.t -> params
   val request : (params, response) custom_request
 end
+
+module Type_search : sig
+  type type_search_result =
+    { name : string
+    ; typ : string
+    ; loc : Range.t
+    ; doc : MarkupContent.t option
+    ; cost : int
+    ; constructible : string
+    }
+
+  type params
+  type response = type_search_result list
+
+  val make
+    :  uri:Uri.t
+    -> position:Position.t
+    -> limit:int
+    -> query:string
+    -> with_doc:bool
+    -> ?doc_format:MarkupKind.t option
+    -> unit
+    -> params
+
+  val request : (params, response) custom_request
+end

@@ -10,6 +10,7 @@ val can_handle_typed_holes : t -> bool
 val can_handle_type_enclosing : t -> bool
 val can_handle_construct : t -> bool
 val can_handle_merlin_jump : t -> bool
+val can_handle_search_by_type : t -> bool
 
 module OcamllspSettingEnable : sig
   include Ojs.T

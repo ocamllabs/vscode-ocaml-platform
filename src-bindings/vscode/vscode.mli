@@ -144,6 +144,31 @@ module Uri : sig
   val equal : t -> t -> bool
 end
 
+module LightDarkIcon : sig
+  type t =
+    { light : [ `String of string | `Uri of Uri.t ]
+    ; dark : [ `String of string | `Uri of Uri.t ]
+    }
+
+  include Ojs.T with type t := t
+end
+
+module ThemeColor : sig
+  include Ojs.T
+
+  val make : id:string -> t
+end
+
+module ThemeIcon : sig
+  include Ojs.T
+
+  val make : id:string -> ?color:ThemeColor.t -> unit -> t
+  val file : t
+  val folder : t
+  val id : t -> string
+  val color : t -> ThemeColor.t option
+end
+
 module TextDocument : sig
   include Ojs.T
 
@@ -329,12 +354,6 @@ module MarkdownString : sig
   val appendText : t -> value:string -> t
   val appendMarkdown : t -> value:string -> t
   val appendCodeblock : t -> value:string -> ?language:string -> unit -> t
-end
-
-module ThemeColor : sig
-  include Ojs.T
-
-  val make : id:string -> t
 end
 
 module ThemableDecorationAttachmentRenderOptions : sig
@@ -668,6 +687,20 @@ module CustomDocument : sig
   val create : uri:Uri.t -> dispose:(unit -> unit) -> t
 end
 
+module QuickInputButton : sig
+  include Ojs.T
+
+  type iconPath =
+    [ `Uri of Uri.t
+    | `LightDark of LightDarkIcon.t
+    | `ThemeIcon of ThemeIcon.t
+    ]
+
+  val iconPath : t -> iconPath
+  val tooltip : t -> string option
+  val create : iconPath:iconPath -> ?tooltip:string -> unit -> t
+end
+
 module QuickPickItem : sig
   include Ojs.T
 
@@ -715,6 +748,77 @@ module QuickPickOptions : sig
     -> t
 end
 
+module QuickPick : sig
+  include Js.Generic
+
+  module Make (T : Ojs.T) : sig
+    type nonrec t = T.t t
+
+    val onDidAccept : t -> unit Event.t
+    val onDidChangeActive : t -> T.t list Event.t
+    val onDidChangeSelection : t -> T.t list Event.t
+    val onDidChangeValue : t -> string Event.t
+    val onDidHide : t -> unit Event.t
+    val onDidTriggerButton : t -> QuickInputButton.t Event.t
+    val activeItems : t -> T.t list option
+    val set_activeItems : t -> T.t list option -> unit
+    val busy : t -> bool option
+    val set_busy : t -> bool option -> unit
+    val buttons : t -> QuickInputButton.t list option
+    val set_buttons : t -> QuickInputButton.t list option -> unit
+    val canSelectMany : t -> bool option
+    val set_canSelectMany : t -> bool option -> unit
+    val enabled : t -> bool option
+    val set_enabled : t -> bool option -> unit
+    val ignoreFocusOut : t -> bool option
+    val set_ignoreFocusOut : t -> bool option -> unit
+    val items : t -> T.t list option
+    val set_items : t -> T.t list option -> unit
+    val keepScrollPosition : t -> bool option
+    val set_keepScrollPosition : t -> bool option -> unit
+    val matchOnDescription : t -> bool option
+    val set_matchOnDescription : t -> bool option -> unit
+    val matchOnDetail : t -> bool option
+    val set_matchOnDetail : t -> bool option -> unit
+    val placeholder : t -> string option
+    val set_placeholder : t -> string option -> unit
+    val selectedItems : t -> T.t list option
+    val set_selectedItems : t -> T.t list option -> unit
+    val step : t -> int option
+    val set_step : t -> int option -> unit
+    val title : t -> string option
+    val set_title : t -> string option -> unit
+    val totalSteps : t -> int option
+    val set_totalSteps : t -> int option -> unit
+    val value : t -> string option
+    val set_value : t -> string option -> unit
+    val dispose : t -> unit
+    val hide : t -> unit
+    val show : t -> unit
+
+    val set
+      :  t
+      -> ?activeItems:T.t list
+      -> ?busy:bool
+      -> ?buttons:QuickInputButton.t list
+      -> ?canSelectMany:bool
+      -> ?enabled:bool
+      -> ?ignoreFocusOut:bool
+      -> ?items:T.t list
+      -> ?keepScrollPosition:bool
+      -> ?matchOnDescription:bool
+      -> ?matchOnDetail:bool
+      -> ?placeholder:string
+      -> ?selectedItems:T.t list
+      -> ?step:int
+      -> ?title:string
+      -> ?totalSteps:int
+      -> ?value:string
+      -> unit
+      -> t
+  end
+end
+
 module ProviderResult : sig
   type 'a t =
     [ `Value of 'a option
@@ -722,6 +826,23 @@ module ProviderResult : sig
     ]
 
   include Js.Generic with type 'a t := 'a t
+end
+
+module InputBoxValidationSeverity : sig
+  type t =
+    | Info
+    | Warning
+    | Error
+
+  include Ojs.T with type t := t
+end
+
+module InputBoxValidationMessage : sig
+  include Ojs.T
+
+  val message : t -> string
+  val severity : t -> InputBoxValidationSeverity.t
+  val create : message:string -> severity:InputBoxValidationSeverity.t -> unit -> t
 end
 
 module InputBoxOptions : sig
@@ -745,6 +866,48 @@ module InputBoxOptions : sig
     -> ?password:bool
     -> ?ignoreFocusOut:bool
     -> ?validateInput:(value:string -> string option Promise.t)
+    -> unit
+    -> t
+end
+
+module InputBox : sig
+  include Ojs.T
+
+  val title : t -> string option
+  val set_title : t -> string option -> unit
+  val enabled : t -> bool
+  val set_enabled : t -> bool -> unit
+  val busy : t -> bool
+  val set_busy : t -> bool -> unit
+  val ignoreFocusOut : t -> bool option
+  val set_ignoreFocusOut : t -> bool option -> unit
+  val onDidHide : t -> unit Event.t
+  val value : t -> string option
+  val set_value : t -> string option -> unit
+  val valueSelection : t -> (int * int) option
+  val set_valueSelection : t -> (int * int) option -> unit
+  val placeholder : t -> string option
+  val set_placeholder : t -> string option -> unit
+  val password : t -> bool option
+  val set_password : t -> bool option -> unit
+  val onDidChangeValue : t -> string Event.t
+  val onDidAccept : t -> unit Event.t
+  val prompt : t -> string option
+  val set_prompt : t -> string option -> unit
+  val validationMessage : t -> InputBoxValidationMessage.t or_undefined
+  val set_validationMessage : t -> InputBoxValidationMessage.t or_undefined -> unit
+  val show : t -> unit
+
+  val set
+    :  t
+    -> ?title:string
+    -> ?ignoreFocusOut:bool
+    -> ?value:string
+    -> ?valueSelection:int * int
+    -> ?placeholder:string
+    -> ?password:bool
+    -> ?prompt:string
+    -> ?validationMessage:InputBoxValidationMessage.t
     -> unit
     -> t
 end
@@ -1562,16 +1725,6 @@ module TreeItemLabel : sig
   val highlights : t -> (int * int) list option
 end
 
-module ThemeIcon : sig
-  include Ojs.T
-
-  val make : id:string -> ?color:ThemeColor.t -> unit -> t
-  val file : t
-  val folder : t
-  val id : t -> string
-  val color : t -> ThemeColor.t option
-end
-
 module TreeItem : sig
   include Ojs.T
 
@@ -1579,15 +1732,6 @@ module TreeItem : sig
     [ `String of string
     | `TreeItemLabel of TreeItemLabel.t
     ]
-
-  module LightDarkIcon : sig
-    type t =
-      { light : [ `String of string | `Uri of Uri.t ]
-      ; dark : [ `String of string | `Uri of Uri.t ]
-      }
-
-    include Ojs.T with type t := t
-  end
 
   type iconPath =
     [ `String of string
@@ -1986,6 +2130,9 @@ module Window : sig
     -> unit
     -> 'a option Promise.t
 
+  val createQuickPick : 'a Js.t -> unit -> 'a QuickPick.t
+  val quickInputButtonBack : QuickInputButton.t
+
   val showQuickPick
     :  items:string list
     -> ?options:QuickPickOptions.t
@@ -1999,6 +2146,7 @@ module Window : sig
     -> unit
     -> string option Promise.t
 
+  val createInputBox : unit -> InputBox.t
   val showOpenDialog : ?options:OpenDialogOptions.t -> unit -> Uri.t list option Promise.t
   val createOutputChannel : name:string -> OutputChannel.t
 
