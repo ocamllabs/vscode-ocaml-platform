@@ -180,19 +180,17 @@ module Type_search = struct
 
   let encode_params { uri; position; limit; query; with_doc; doc_format } =
     let open Jsonoo.Encode in
-    let uri =
-      ("textDocument", object_ [ ("uri", string @@ Uri.toString uri ()) ])
-    in
-    let position = ("position", Position.json_of_t position) in
-    let query = ("query", string query) in
-    let limit = ("limit", int limit) in
-    let with_doc = ("with_doc", bool with_doc) in
+    let uri = "textDocument", object_ [ "uri", string @@ Uri.toString uri () ] in
+    let position = "position", Position.json_of_t position in
+    let query = "query", string query in
+    let limit = "limit", int limit in
+    let with_doc = "with_doc", bool with_doc in
     let doc_format =
       ( "doc_format"
-      , MarkupKind.json_of_t
-          (Option.value ~default:MarkupKind.Markdown doc_format) )
+      , MarkupKind.json_of_t (Option.value ~default:MarkupKind.Markdown doc_format) )
     in
     object_ [ uri; position; query; limit; with_doc; doc_format ]
+  ;;
 
   let decode_response response =
     let open Jsonoo.Decode in
@@ -206,11 +204,19 @@ module Type_search = struct
       { name; typ; loc; doc; cost; constructible }
     in
     list decode_res response
+  ;;
 
-  let make ~uri ~position ~limit ~query ~with_doc
-      ?(doc_format = Some MarkupKind.Markdown) () =
+  let make
+        ~uri
+        ~position
+        ~limit
+        ~query
+        ~with_doc
+        ?(doc_format = Some MarkupKind.Markdown)
+        ()
+    =
     { uri; position; limit; query; with_doc; doc_format }
+  ;;
 
-  let request =
-    { meth = ocamllsp_prefixed "typeSearch"; encode_params; decode_response }
+  let request = { meth = ocamllsp_prefixed "typeSearch"; encode_params; decode_response }
 end

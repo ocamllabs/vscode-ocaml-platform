@@ -76,11 +76,10 @@ module Type_search : sig
     }
 
   type params
-
   type response = type_search_result list
 
-  val make :
-       uri:Uri.t
+  val make
+    :  uri:Uri.t
     -> position:Position.t
     -> limit:int
     -> query:string

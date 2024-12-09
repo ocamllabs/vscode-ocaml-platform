@@ -66,22 +66,11 @@ let jump_item =
   item
 ;;
 
-let items = [ select_sandbox_item; terminal_item; construct_item; jump_item ]
-let perform_type_search =
-  let icon =
-    `LightDark
-      Vscode.LightDarkIcon.
-        { light =
-            `String (Path.asset "document-search-light.svg" |> Path.to_string)
-        ; dark =
-            `String (Path.asset "document-search-dark.svg" |> Path.to_string)
-        }
-  in
+let type_search_item =
+  let icon = `ThemeIcon (Vscode.ThemeIcon.make ~id:"search-view-icon" ()) in
   let label =
     `TreeItemLabel
-      (Vscode.TreeItemLabel.create
-         ~label:"Search a value by type or polarity"
-         ())
+      (Vscode.TreeItemLabel.create ~label:"Search a value by type or polarity" ())
   in
   let item = Vscode.TreeItem.make_label ~label () in
   let command =
@@ -93,8 +82,11 @@ let perform_type_search =
   Vscode.TreeItem.set_iconPath item icon;
   Vscode.TreeItem.set_command item command;
   item
+;;
 
-let items = [ select_sandbox_item; terminal_item; perform_type_search ]
+let items =
+  [ select_sandbox_item; terminal_item; construct_item; jump_item; type_search_item ]
+;;
 
 let getTreeItem ~element = `Value element
 

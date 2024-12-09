@@ -186,6 +186,7 @@ module MarkupKind = struct
     match t with
     | PlainText -> Jsonoo.Encode.string "plaintext"
     | Markdown -> Jsonoo.Encode.string "markdown"
+  ;;
 
   let t_of_json (json : Jsonoo.t) : t =
     match Jsonoo.Decode.string json with
@@ -193,6 +194,7 @@ module MarkupKind = struct
     | "markdown" -> Markdown
     (* Default to plaintext *)
     | _ -> PlainText
+  ;;
 end
 
 module MarkupContent = struct
@@ -206,6 +208,7 @@ module MarkupContent = struct
     let kind = field "kind" MarkupKind.t_of_json json in
     let value = field "value" string json in
     { kind; value }
+  ;;
 end
 
 module Promise = struct

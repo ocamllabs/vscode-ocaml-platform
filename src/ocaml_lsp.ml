@@ -242,5 +242,4 @@ let can_handle_typed_holes t = t.experimental_capabilities.handleTypedHoles
 let can_handle_type_enclosing t = t.experimental_capabilities.handleTypeEnclosing
 let can_handle_construct t = t.experimental_capabilities.handleConstruct
 let can_handle_merlin_jump t = t.experimental_capabilities.handleJump
-
 let can_handle_search_by_type t = t.experimental_capabilities.handleSearchByType

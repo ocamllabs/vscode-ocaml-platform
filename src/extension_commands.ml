@@ -760,9 +760,11 @@ module Search_by_type = struct
     match TextDocument.languageId textdoc with
     | "ocaml" | "ocaml.interface" | "reason" | "ocaml.ocamllex" -> true
     | _ -> false
+  ;;
 
   let ocaml_lsp_doesnt_support_search_by_type ocaml_lsp =
     not (Ocaml_lsp.can_handle_search_by_type ocaml_lsp)
+  ;;
 
   let get_search_results ~query ~limit ~with_doc ~position text_editor client =
     let doc = TextEditor.document text_editor in
@@ -773,6 +775,7 @@ module Search_by_type = struct
         Type_search.request
         (Type_search.make ~uri ~position ~limit ~query ~with_doc ()))
     |> Promise.catch ~rejected:(fun _ -> Promise.return [])
+  ;;
 
   let input_box =
     (* Re-using the same instance of the input box allows us to remember the
@@ -784,8 +787,7 @@ module Search_by_type = struct
         ~ignoreFocusOut:false
         ~placeholder:"int -> string / -int +string"
         ~prompt:
-          "Perform a search by type request by providing a type signature to \
-           look for"
+          "Perform a search by type request by providing a type signature to look for"
         ()
     in
     let _disposable =
@@ -795,6 +797,7 @@ module Search_by_type = struct
         ()
     in
     box
+  ;;
 
   let rec display_search_results query results text_editor position client =
     let format_doc (doc : MarkupContent.t option) =
@@ -803,14 +806,12 @@ module Search_by_type = struct
       | None -> ""
     in
     let quickPickItems =
-      List.map
-        results
-        ~f:(fun (res : Custom_requests.Type_search.type_search_result) ->
-          QuickPickItem.create
-            ~label:res.name
-            ~description:res.typ
-            ~detail:(format_doc res.doc)
-            ())
+      List.map results ~f:(fun (res : Custom_requests.Type_search.type_search_result) ->
+        QuickPickItem.create
+          ~label:res.name
+          ~description:res.typ
+          ~detail:(format_doc res.doc)
+          ())
     in
     let module QuickPick = Vscode.QuickPick.Make (QuickPickItem) in
     let quickPick =
@@ -844,20 +845,15 @@ module Search_by_type = struct
               Vscode.TextEditor.edit
                 text_editor
                 ~callback:(fun ~editBuilder ->
-                  Vscode.TextEditorEdit.insert
-                    editBuilder
-                    ~location:position
-                    ~value)
+                  Vscode.TextEditorEdit.insert editBuilder ~location:position ~value)
                 ()
             in
             QuickPick.hide quickPick
-          | _ ->
-            display_search_results query results text_editor position client)
+          | _ -> display_search_results query results text_editor position client)
         ()
     in
     let _disposable =
-      QuickPick.onDidHide quickPick ~listener:(fun () ->
-          QuickPick.dispose quickPick)
+      QuickPick.onDidHide quickPick ~listener:(fun () -> QuickPick.dispose quickPick)
     in
     QuickPick.show quickPick
 
@@ -872,12 +868,11 @@ module Search_by_type = struct
       in
       let _update_input_box =
         let validationMessage =
-          if empty_result then
+          if empty_result
+          then
             Some
               (InputBoxValidationMessage.create
-                 ~message:
-                   "No result found. Check the syntax or use a more general \
-                    query."
+                 ~message:"No result found. Check the syntax or use a more general query."
                  ~severity:Warning
                  ())
           else None
@@ -894,9 +889,7 @@ module Search_by_type = struct
             | Some query ->
               let () = InputBox.set_busy input_box true in
               let () = InputBox.set_enabled input_box false in
-              let position =
-                TextEditor.selection text_editor |> Selection.active
-              in
+              let position = TextEditor.selection text_editor |> Selection.active in
               ignore
                 (let+ query_results =
                    get_search_results
@@ -913,26 +906,20 @@ module Search_by_type = struct
                    let results =
                      List.remove_consecutive_duplicates
                        ~which_to_keep:`First
-                       ~equal:(fun
-                           (left :
-                             Custom_requests.Type_search.type_search_result)
-                           right
-                         ->
-                         String.equal left.name right.name
-                         && left.cost = right.cost)
+                       ~equal:
+                         (fun
+                           (left : Custom_requests.Type_search.type_search_result)
+                           right ->
+                         String.equal left.name right.name && left.cost = right.cost)
                        results
                    in
-                   display_search_results
-                     query
-                     results
-                     text_editor
-                     position
-                     client)
+                   display_search_results query results text_editor position client)
             | None -> ())
           ()
       in
       previous := Some onDidAccept_disposable;
       InputBox.show input_box
+  ;;
 
   let _search_by_type =
     let handler (instance : Extension_instance.t) ~args:_ =
@@ -941,26 +928,26 @@ module Search_by_type = struct
         Extension_consts.Command_errors.text_editor_must_be_active
           extension_name
           ~expl:
-            "The cursor position is used to determine the correct environment \
-             and insert the result."
+            "The cursor position is used to determine the correct environment and insert \
+             the result."
         |> show_message `Error "%s"
-      | Some text_editor
-        when not (is_valid_text_doc (TextEditor.document text_editor)) ->
+      | Some text_editor when not (is_valid_text_doc (TextEditor.document text_editor)) ->
         show_message
           `Error
-          "Invalid file type. This command only works in ocaml files, ocaml \
-           interface files, reason files or ocamllex files."
-      | Some text_editor -> (
-        match Extension_instance.lsp_client instance with
-        | None -> show_message `Warn "ocamllsp is not running"
-        | Some (_client, ocaml_lsp)
-          when ocaml_lsp_doesnt_support_search_by_type ocaml_lsp ->
-          show_message
-            `Warn
-            "The installed version of `ocamllsp` does not support type search"
-        | Some (client, _) -> show_query_input text_editor client)
+          "Invalid file type. This command only works in ocaml files, ocaml interface \
+           files, reason files or ocamllex files."
+      | Some text_editor ->
+        (match Extension_instance.lsp_client instance with
+         | None -> show_message `Warn "ocamllsp is not running"
+         | Some (_client, ocaml_lsp)
+           when ocaml_lsp_doesnt_support_search_by_type ocaml_lsp ->
+           show_message
+             `Warn
+             "The installed version of `ocamllsp` does not support type search"
+         | Some (client, _) -> show_query_input text_editor client)
     in
     command Extension_consts.Commands.search_by_type handler
+  ;;
 end
 
 let register extension instance = function
