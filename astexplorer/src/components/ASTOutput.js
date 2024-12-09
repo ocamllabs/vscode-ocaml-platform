@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
 import React from "react";
 import cx from "../utils/classnames.js";
-import visualizations from "./visualization";
 import { vscode } from "../vscode";
+import visualizations from "./visualization";
 
 const { useState } = React;
 

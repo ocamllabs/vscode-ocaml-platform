@@ -1,12 +1,12 @@
-import Element from "./tree/Element";
 import PropTypes from "prop-types";
 import React from "react";
-import { publish } from "../../utils/pubsub.js";
-import { logEvent } from "../../utils/logger";
 import { treeAdapterFromParseResult } from "../../core/TreeAdapter.js";
+import { logEvent } from "../../utils/logger";
+import { publish } from "../../utils/pubsub.js";
+import { vscode } from "../../vscode";
 import { SelectedNodeProvider } from "./SelectedNodeContext.js";
 import focusNodes from "./focusNodes.js";
-import { vscode } from "../../vscode";
+import Element from "./tree/Element";
 
 import "./css/tree.css";
 

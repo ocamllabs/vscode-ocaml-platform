@@ -14,7 +14,6 @@ module ServerCapabilities : sig
   include Ojs.T
 
   val experimental : t -> Jsonoo.t option
-
   val create : ?experimental:Jsonoo.t -> unit -> t
 end
 
@@ -35,19 +34,11 @@ module DocumentFilter : sig
   include Ojs.T
 
   val language : t -> string option
-
   val scheme : t -> string option
-
   val pattern : t -> string option
-
-  val createLanguage :
-    language:string -> ?scheme:string -> ?pattern:string -> unit -> t
-
-  val createScheme :
-    ?language:string -> scheme:string -> ?pattern:string -> unit -> t
-
-  val createPattern :
-    ?language:string -> ?scheme:string -> pattern:string -> unit -> t
+  val createLanguage : language:string -> ?scheme:string -> ?pattern:string -> unit -> t
+  val createScheme : ?language:string -> scheme:string -> ?pattern:string -> unit -> t
+  val createPattern : ?language:string -> ?scheme:string -> pattern:string -> unit -> t
 end
 
 module DocumentSelector : sig
@@ -67,15 +58,12 @@ module ClientOptions : sig
   include Ojs.T
 
   val documentSelector : t -> DocumentSelector.t option
-
   val outputChannel : t -> Vscode.OutputChannel.t option
-
   val revealOutputChannelOn : t -> RevealOutputChannelOn.t
-
   val initializationOptions : t -> Jsonoo.t
 
-  val create :
-       ?documentSelector:DocumentSelector.t
+  val create
+    :  ?documentSelector:DocumentSelector.t
     -> ?outputChannel:Vscode.OutputChannel.t
     -> ?revealOutputChannelOn:RevealOutputChannelOn.t
     -> ?initializationOptions:Jsonoo.t
@@ -87,15 +75,12 @@ module ExecutableOptions : sig
   include Ojs.T
 
   val cwd : t -> string option
-
   val env : t -> string Interop.Dict.t option
-
   val detached : t -> bool option
-
   val shell : t -> bool option
 
-  val create :
-       ?cwd:string
+  val create
+    :  ?cwd:string
     -> ?env:string Interop.Dict.t
     -> ?detached:bool
     -> ?shell:bool
@@ -107,13 +92,11 @@ module Executable : sig
   include Ojs.T
 
   val command : t -> string
-
   val args : t -> string list option
-
   val options : t -> ExecutableOptions.t option
 
-  val create :
-       command:string
+  val create
+    :  command:string
     -> ?args:string list
     -> ?options:ExecutableOptions.t
     -> unit
@@ -130,18 +113,17 @@ module ClientCapabilities : sig
   include Ojs.T
 
   val experimental : t -> Jsonoo.t or_undefined
-
   val set_experimental : t -> Jsonoo.t or_undefined -> unit
 end
 
 module StaticFeature : sig
   include Ojs.T
 
-  val make :
-       ?fillInitializeParams:(params:InitializeParams.t -> unit)
+  val make
+    :  ?fillInitializeParams:(params:InitializeParams.t -> unit)
     -> fillClientCapabilities:(capabilities:ClientCapabilities.t -> unit)
     -> initialize:
-         (   capabilities:ServerCapabilities.t
+         (capabilities:ServerCapabilities.t
           -> documentSelector:DocumentSelector.t or_undefined
           -> unit)
     -> clear:(unit -> unit)
@@ -158,8 +140,8 @@ end
 module LanguageClient : sig
   include Ojs.T
 
-  val make :
-       id:string
+  val make
+    :  id:string
     -> name:string
     -> serverOptions:ServerOptions.t
     -> clientOptions:ClientOptions.t
@@ -168,16 +150,14 @@ module LanguageClient : sig
     -> t
 
   val start : t -> unit Promise.t
-
   val isRunning : t -> bool
-
   val stop : t -> unit Promise.t
 
   (* TODO: the return type should be [InitializeResult.t option] *)
   val initializeResult : t -> InitializeResult.t
 
-  val sendRequest :
-       t
+  val sendRequest
+    :  t
     -> meth:string
     -> data:Jsonoo.t
     -> ?token:Vscode.CancellationToken.t
@@ -185,6 +165,5 @@ module LanguageClient : sig
     -> Jsonoo.t Promise.t
 
   val registerFeature : t -> feature:StaticFeature.t -> unit
-
   val sendNotification : t -> string -> Ojs.t -> unit
 end

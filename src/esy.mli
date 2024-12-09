@@ -9,9 +9,7 @@ module Manifest : sig
   type t
 
   val equal : t -> t -> bool
-
   val path : t -> Path.t
-
   val of_path : Path.t -> t
 end
 
@@ -22,15 +20,10 @@ module Package : sig
   (** {4 Properties} *)
 
   val name : t -> string
-
   val version : t -> string
-
   val documentation : t -> string option
-
   val synopsis : t -> string option
-
   val has_dependencies : t -> bool
-
   val dependencies : t -> (t list, string) result Promise.t
 end
 
@@ -44,9 +37,7 @@ type discover =
   }
 
 val discover : dir:Path.t -> discover list Promise.t
-
 val find_manifest_in_dir : Path.t -> Manifest.t option Promise.t
-
 val setup_sandbox : t -> Manifest.t -> unit Or_error.t Promise.t
 
 (** {4 Working with packages} *)

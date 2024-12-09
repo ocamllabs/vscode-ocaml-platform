@@ -6,21 +6,20 @@ module ShellPath = struct
   let of_json json =
     let open Jsonoo.Decode in
     nullable string json
+  ;;
 
   let to_json (t : t) =
     let open Jsonoo.Encode in
     nullable string t
+  ;;
 
   let key =
     let linux = "shell.linux" in
     let map =
-      { Platform.Map.win32 = "shell.windows"
-      ; darwin = "shell.osx"
-      ; linux
-      ; other = linux
-      }
+      { Platform.Map.win32 = "shell.windows"; darwin = "shell.osx"; linux; other = linux }
     in
     Platform.Map.find map Platform.t
+  ;;
 
   let t = Settings.create_setting ~scope:Global ~key ~of_json ~to_json
 end
@@ -31,10 +30,12 @@ module ShellArgs = struct
   let of_json json =
     let open Jsonoo.Decode in
     nullable (list string) json
+  ;;
 
   let to_json (t : t) =
     let open Jsonoo.Encode in
     nullable (list string) t
+  ;;
 
   let key =
     let linux = "shellArgs.linux" in
@@ -46,26 +47,27 @@ module ShellArgs = struct
       }
     in
     Platform.Map.find map Platform.t
+  ;;
 
   let t = Settings.create_setting ~scope:Global ~key ~of_json ~to_json
 end
 
 let get_shell_path () =
-  let shell_path =
-    Option.join (Settings.get ~section:"ocaml.terminal" ShellPath.t)
-  in
+  let shell_path = Option.join (Settings.get ~section:"ocaml.terminal" ShellPath.t) in
   match shell_path with
   | Some path -> path
   | None -> Env.shell ()
+;;
 
 let get_shell_args () =
   let get_args section = Option.join (Settings.get ~section ShellArgs.t) in
   match get_args "ocaml.terminal" with
   | Some args -> args
-  | None -> (
-    match get_args "terminal.integrated" with
-    | Some args -> args
-    | None -> [])
+  | None ->
+    (match get_args "terminal.integrated" with
+     | Some args -> args
+     | None -> [])
+;;
 
 type t = Terminal.t
 
@@ -84,11 +86,12 @@ let create ?name ?command sandbox =
   let shellPath = Path.to_string bin in
   let shellArgs = `Strings args in
   Window.createTerminal ~name ~shellPath ~shellArgs ()
+;;
 
 let dispose = Terminal.dispose
-
 let show ~preserveFocus t = Terminal.show ~preserveFocus t ()
 
 let send t text =
   let addNewLine = not (String.is_suffix text ~suffix:"\n") in
   Terminal.sendText t ~text ~addNewLine ()
+;;

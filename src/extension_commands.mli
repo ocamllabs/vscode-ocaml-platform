@@ -12,15 +12,13 @@
 (** Registers commands with vscode. Should be called in
     [Vscode_ocaml_platform.activate]. It subscribes the disposables to the
     extension context provided. *)
-val register_all_commands :
-  Vscode.ExtensionContext.t -> Extension_instance.t -> unit
+val register_all_commands : Vscode.ExtensionContext.t -> Extension_instance.t -> unit
 
-val register :
-  id:string -> (Extension_instance.t -> args:Ojs.t list -> unit) -> unit
+val register : id:string -> (Extension_instance.t -> args:Ojs.t list -> unit) -> unit
 
-val register_text_editor :
-     id:string
-  -> (   Extension_instance.t
+val register_text_editor
+  :  id:string
+  -> (Extension_instance.t
       -> textEditor:Vscode.TextEditor.t
       -> edit:Vscode.TextEditorEdit.t
       -> args:Ojs.t list

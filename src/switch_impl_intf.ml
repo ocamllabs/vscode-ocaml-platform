@@ -3,8 +3,7 @@ open Import
 let insert_inferred_intf ~source_uri client text_editor =
   let open Promise.Syntax in
   match
-    String.is_suffix source_uri ~suffix:".ml"
-    || String.is_suffix source_uri ~suffix:".re"
+    String.is_suffix source_uri ~suffix:".ml" || String.is_suffix source_uri ~suffix:".re"
   with
   | false -> Promise.return ()
   | true ->
@@ -22,8 +21,8 @@ let insert_inferred_intf ~source_uri client text_editor =
             ~value:inferred_intf)
         ()
     in
-    if not edit_applied then
-      show_message `Error "Unable to insert inferred interface"
+    if not edit_applied then show_message `Error "Unable to insert inferred interface"
+;;
 
 let request_switch client document =
   let open Promise.Syntax in
@@ -31,15 +30,12 @@ let request_switch client document =
   let fill_intf_if_empty_untitled text_editor =
     let doc = TextEditor.document text_editor in
     let is_empty_doc doc = TextDocument.getText doc () |> String.is_empty in
-    if TextDocument.isUntitled doc && is_empty_doc doc then
-      insert_inferred_intf ~source_uri client text_editor
+    if TextDocument.isUntitled doc && is_empty_doc doc
+    then insert_inferred_intf ~source_uri client text_editor
     else Promise.return ()
   in
   let* arr =
-    Custom_requests.send_request
-      client
-      Custom_requests.switchImplIntf
-      source_uri
+    Custom_requests.send_request client Custom_requests.switchImplIntf source_uri
   in
   match Array.to_list arr with
   | [] ->
@@ -48,32 +44,24 @@ let request_switch client document =
   | [ file_uri ] ->
     let* text_editor = open_file_in_text_editor file_uri in
     fill_intf_if_empty_untitled text_editor
-  | first_candidate :: other_candidates as candidates -> (
+  | first_candidate :: other_candidates as candidates ->
     let first_candidate_item =
       QuickPickItem.create
         ~label:(Stdlib.Filename.basename first_candidate)
         ~picked:true
         ()
     in
-
     let rest_candidate_items =
       List.map
-        ~f:(fun c ->
-          QuickPickItem.create ~label:(Stdlib.Filename.basename c) ())
+        ~f:(fun c -> QuickPickItem.create ~label:(Stdlib.Filename.basename c) ())
         other_candidates
     in
-
     let candidate_items_with_names =
       List.zip_exn (first_candidate_item :: rest_candidate_items) candidates
     in
-
     let file_options =
-      QuickPickOptions.create
-        ~canPickMany:false
-        ~placeHolder:"Open a file..."
-        ()
+      QuickPickOptions.create ~canPickMany:false ~placeHolder:"Open a file..." ()
     in
-
     let open Promise.Syntax in
     let* choice =
       Window.showQuickPickItems
@@ -81,8 +69,9 @@ let request_switch client document =
         ~options:file_options
         ()
     in
-    match choice with
-    | None -> Promise.return ()
-    | Some file_uri ->
-      let* text_editor = open_file_in_text_editor file_uri in
-      fill_intf_if_empty_untitled text_editor)
+    (match choice with
+     | None -> Promise.return ()
+     | Some file_uri ->
+       let* text_editor = open_file_in_text_editor file_uri in
+       fill_intf_if_empty_untitled text_editor)
+;;

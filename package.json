@@ -1,7 +1,7 @@
 {
   "name": "ocaml-platform",
   "displayName": "OCaml Platform",
-  "version": "1.20.1",
+  "version": "1.24.0",
   "private": true,
   "description": "Official OCaml language extension for VSCode",
   "categories": [
@@ -34,13 +34,13 @@
     "astexplorer"
   ],
   "scripts": {
-    "test": "vscode-test",
-    "package": "vsce package --out ocaml-platform.vsix --no-dependencies --allow-unused-files-pattern",
-    "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --no-dependencies",
-    "deploy:ovsx": "ovsx publish --packagePath ocaml-platform.vsix --no-dependencies",
     "check": "biome check",
+    "deploy:ovsx": "ovsx publish --packagePath ocaml-platform.vsix --no-dependencies",
+    "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --no-dependencies",
+    "fix": "biome check --fix",
     "lint": "biome check",
-    "fix": "biome check --fix"
+    "package": "vsce package --out ocaml-platform.vsix --no-dependencies --allow-unused-files-pattern",
+    "test": "vscode-test"
   },
   "contributes": {
     "breakpoints": [
@@ -254,6 +254,16 @@
         "title": "Copy Type Under Cursor"
       },
       {
+        "command": "ocaml.construct",
+        "category": "OCaml",
+        "title": "List values that can fill the selected typed-hole"
+      },
+      {
+        "command": "ocaml.jump",
+        "category": "OCaml",
+        "title": "List possible parent targets for jumping"
+      },
+      {
         "command": "ocaml.search-by-type",
         "category": "OCaml",
         "title": "Search a value by type or polarity"
@@ -300,6 +310,11 @@
           "type": "boolean",
           "default": false,
           "markdownDescription": "Enable/Disable syntax documentation"
+        },
+        "ocaml.commands.construct.recursiveCalls": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "When enabled, the construct command will execute again on the next hole after a value has been chosen."
         },
         "ocaml.dune.autoDetect": {
           "type": "boolean",
@@ -719,12 +734,20 @@
         "when": "editorLangId == ocaml || editorLangId == reason"
       },
       {
-        "command": "editor.action.codeAction",
+        "command": "ocaml.construct",
         "key": "Alt+C",
         "args": {
           "kind": "construct"
         },
-        "when": "editorLangId == ocaml"
+        "when": "editorLangId == ocaml || editorLangId == reason"
+      },
+      {
+        "command": "ocaml.jump",
+        "key": "Alt+J",
+        "args": {
+          "kind": "jump"
+        },
+        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason"
       },
       {
         "command": "editor.action.codeAction",
@@ -1052,6 +1075,10 @@
           "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
         },
         {
+          "command": "ocaml.construct",
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+        },
+        {
           "command": "ocaml.search-by-type",
           "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
         }
@@ -1235,16 +1262,16 @@
     "@biomejs/biome": "1.9.4",
     "@tsconfig/node22": "22.0.0",
     "@tsconfig/strictest": "2.0.5",
-    "@types/node": "22.7.8",
+    "@types/node": "22.10.1",
     "@types/vscode": "1.86.0",
     "@vscode/test-cli": "0.0.10",
     "@vscode/test-electron": "2.4.1",
-    "@vscode/vsce": "3.2.0",
+    "@vscode/vsce": "3.2.1",
     "esbuild": "0.24.0",
-    "ovsx": "0.10.0",
-    "typescript": "5.6.3"
+    "ovsx": "0.10.1",
+    "typescript": "5.7.2"
   },
-  "packageManager": "yarn@4.5.0",
+  "packageManager": "yarn@4.5.3",
   "engines": {
     "vscode": "^1.86.0"
   },

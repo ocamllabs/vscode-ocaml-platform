@@ -10,7 +10,6 @@ type t =
   | Spawn of spawn
 
 type stdout = string
-
 type stderr = string
 
 let quote str = if String.contains str ' ' then "\"" ^ str ^ "\"" else str
@@ -19,16 +18,17 @@ let to_string = function
   | Shell cmd -> cmd
   | Spawn { bin; args } ->
     Path.to_string bin :: args |> List.map ~f:quote |> String.concat ~sep:" "
+;;
 
 let to_spawn = function
   | Spawn spawn -> spawn
-  | Shell command_line -> (
-    match Platform.shell with
-    | Sh bin -> { bin; args = [ "-c"; command_line ] }
-    | PowerShell bin -> { bin; args = [ "-c"; "& " ^ command_line ] })
+  | Shell command_line ->
+    (match Platform.shell with
+     | Sh bin -> { bin; args = [ "-c"; command_line ] }
+     | PowerShell bin -> { bin; args = [ "-c"; "& " ^ command_line ] })
+;;
 
 let path_missing_from_env = "'PATH' variable not found in the environment"
-
 let append { bin; args = args1 } args2 = { bin; args = args1 @ args2 }
 
 let candidates bin =
@@ -36,21 +36,24 @@ let candidates bin =
   match Platform.t with
   | Win32 -> [ bin_ext ".exe"; bin_ext ".cmd" ]
   | _ -> [ bin ]
+;;
 
 let which path_env_var bin =
   String.split ~on:Path.delimiter path_env_var
   |> Promise.List.find_map (fun p ->
-         let p = Path.of_string p in
-         candidates bin
-         |> List.map ~f:(Path.join p)
-         |> Promise.List.find_map (fun p ->
-                let open Promise.Syntax in
-                let+ exists = Fs.exists (Path.to_string p) in
-                if exists then Some p else None))
+    let p = Path.of_string p in
+    candidates bin
+    |> List.map ~f:(Path.join p)
+    |> Promise.List.find_map (fun p ->
+      let open Promise.Syntax in
+      let+ exists = Fs.exists (Path.to_string p) in
+      if exists then Some p else None))
+;;
 
 let check_spawn ?env { bin; args } =
-  if Path.is_absolute bin then Promise.Result.return { bin; args }
-  else
+  if Path.is_absolute bin
+  then Promise.Result.return { bin; args }
+  else (
     let path =
       match env with
       | Some env -> Interop.Dict.find_opt "PATH" env
@@ -58,13 +61,13 @@ let check_spawn ?env { bin; args } =
     in
     match path with
     | None -> Error path_missing_from_env |> Promise.resolve
-    | Some path -> (
+    | Some path ->
       let open Promise.Syntax in
       let+ which_path = which path bin in
-      match which_path with
-      | None ->
-        Error (Printf.sprintf "Command %s not found" (Path.to_string bin))
-      | Some bin -> Ok { bin; args })
+      (match which_path with
+       | None -> Error (Printf.sprintf "Command %s not found" (Path.to_string bin))
+       | Some bin -> Ok { bin; args }))
+;;
 
 let check ?env t =
   match t with
@@ -73,6 +76,7 @@ let check ?env t =
     let open Promise.Result.Syntax in
     let+ s = check_spawn ?env spawn in
     Spawn s
+;;
 
 let run ?cwd ?env ?stdin cmd =
   let cwd = Option.map cwd ~f:Path.to_string in
@@ -81,21 +85,16 @@ let run ?cwd ?env ?stdin cmd =
     match event with
     | ChildProcess.Spawned ->
       Vscode.OutputChannel.appendLine output ~value:("$ " ^ to_string cmd)
-    | Stdout data | Stderr data ->
-      Vscode.OutputChannel.append output ~value:data
+    | Stdout data | Stderr data -> Vscode.OutputChannel.append output ~value:data
     | Closed -> Vscode.OutputChannel.appendLine output ~value:""
     | ProcessError err -> log_value "process error" (Node.JsError.t_to_js err)
   in
   let options = ChildProcess.Options.create ?cwd ?env () in
   match cmd with
   | Spawn { bin; args } ->
-    ChildProcess.spawn
-      (Path.to_string bin)
-      (Array.of_list args)
-      ~logger
-      ?stdin
-      ~options
+    ChildProcess.spawn (Path.to_string bin) (Array.of_list args) ~logger ?stdin ~options
   | Shell command_line -> ChildProcess.exec command_line ~logger ?stdin ~options
+;;
 
 let log ?(result : ChildProcess.return option) (t : t) =
   let open Jsonoo.Encode in
@@ -105,31 +104,33 @@ let log ?(result : ChildProcess.return option) (t : t) =
     | Some result ->
       [ ( "result"
         , object_
-            [ ("exitCode", int result.exitCode)
-            ; ("stdout", string result.stdout)
-            ; ("stderr", string result.stderr)
+            [ "exitCode", int result.exitCode
+            ; "stdout", string result.stdout
+            ; "stderr", string result.stderr
             ] )
       ]
   in
   let fields =
     match t with
     | Spawn { bin; args } ->
-      ("bin", string (Path.to_string bin))
-      :: ("args", list string args)
-      :: fields
+      ("bin", string (Path.to_string bin)) :: ("args", list string args) :: fields
     | Shell command_line -> ("shell", string command_line) :: fields
   in
   match result with
   | None -> log_fields "external command" fields
   | Some _ -> log_fields "external command (finished)" fields
+;;
 
 let output ?cwd ?env ?stdin (t : t) =
   let open Promise.Syntax in
   log t;
   let+ (result : ChildProcess.return) = run ?stdin ?cwd ?env t in
   log ~result t;
-  if result.exitCode = 0 then Ok result.stdout
+  if result.exitCode = 0
+  then Ok result.stdout
   else Error (Printf.sprintf "Command failed with error: \n%s" result.stderr)
+;;
 
 let equal_spawn s1 s2 =
   Path.equal s1.bin s2.bin && List.equal String.equal s1.args s2.args
+;;

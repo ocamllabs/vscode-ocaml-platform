@@ -1,57 +1,54 @@
 let iter_set obj field f = function
   | Some value -> Ojs.set_prop_ascii obj field (f value)
   | None -> ()
+;;
 
 let undefined = Ojs.variable "undefined"
 
 type 'a or_undefined = 'a option
 
 let or_undefined_of_js ml_of_js js_val =
-  if js_val != undefined && js_val != Ojs.null then Some (ml_of_js js_val)
-  else None
+  if js_val != undefined && js_val != Ojs.null then Some (ml_of_js js_val) else None
+;;
 
 let or_undefined_to_js ml_to_js = function
   | Some ml_val -> ml_to_js ml_val
   | None -> undefined
+;;
 
 type 'a maybe_list = 'a list
 
 let maybe_list_of_js ml_of_js js_val =
-  if js_val != undefined && js_val != Ojs.null then
-    Ojs.list_of_js ml_of_js js_val
-  else []
+  if js_val != undefined && js_val != Ojs.null then Ojs.list_of_js ml_of_js js_val else []
+;;
 
 let maybe_list_to_js ml_to_js = function
   | [] -> undefined
   | xs -> Ojs.list_to_js ml_to_js xs
+;;
 
 module Regexp = struct
   type t = Js_of_ocaml.Regexp.regexp
 
   let t_of_js : Ojs.t -> Js_of_ocaml.Regexp.regexp = Stdlib.Obj.magic
-
   let t_to_js : Js_of_ocaml.Regexp.regexp -> Ojs.t = Stdlib.Obj.magic
 
   include
     [%js:
-    val replace :
-         string
-      -> regexp:t
-      -> replacer:(string -> (Ojs.t list[@js.variadic]) -> string)
-      -> string
-    [@@js.call]]
+      val replace
+        :  string
+        -> regexp:t
+        -> replacer:(string -> (Ojs.t list[@js.variadic]) -> string)
+        -> string
+      [@@js.call]]
 
   type replacer =
-       matched:string
-    -> captures:string list
-    -> offset:int
-    -> string:string
-    -> string
+    matched:string -> captures:string list -> offset:int -> string:string -> string
 
   let replace s ~regexp ~replacer =
     let rec separate acc = function
       | offset :: string :: _ when Ojs.type_of offset = "number" ->
-        (List.rev acc, [%js.to: int] offset, [%js.to: string] string)
+        List.rev acc, [%js.to: int] offset, [%js.to: string] string
       | capture :: args -> separate ([%js.to: string] capture :: acc) args
       | _ -> assert false
       (* replacer arguments will always be terminated with a numeric offset and
@@ -62,6 +59,7 @@ module Regexp = struct
       replacer ~matched ~captures ~offset ~string
     in
     replace s ~regexp ~replacer:js_replacer
+  ;;
 end
 
 module Dict = struct
@@ -75,10 +73,12 @@ module Dict = struct
     in
     Ojs.iter_properties js_obj iter;
     !ml_map
+  ;;
 
   let t_to_js value_to_js ml_map =
-    let to_js (k, v) = (k, value_to_js v) in
+    let to_js (k, v) = k, value_to_js v in
     StringMap.to_seq ml_map |> Seq.map to_js |> Array.of_seq |> Ojs.obj
+  ;;
 
   let of_alist alist = StringMap.of_seq (List.to_seq alist)
 
@@ -92,7 +92,6 @@ module Js = struct
     type 'a t
 
     val t_to_js : ('a -> Ojs.t) -> 'a t -> Ojs.t
-
     val t_of_js : (Ojs.t -> 'a) -> Ojs.t -> 'a t
   end
 
@@ -115,6 +114,7 @@ module Js = struct
       | { case = "ok"; ok; _ } -> Ok ([%js.to: Ok.t] ok)
       | { case = "error"; error; _ } -> Error ([%js.to: Error.t] error)
       | _ -> assert false
+    ;;
 
     let t_to_js = function
       | Ok ok ->
@@ -123,6 +123,7 @@ module Js = struct
       | Error error ->
         let error = [%js.of: Error.t] error in
         js_result_to_js { case = "error"; error; ok = undefined }
+    ;;
   end
 
   module Or_undefined (T : Ojs.T) = struct

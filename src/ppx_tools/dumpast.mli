@@ -15,14 +15,14 @@ val from_structure : Parsetree.structure -> (Jsonoo.t, string) result
     simple locations coming from [str] starting from the subtree that is
     structurally different. The result should a priori always be an [Ok json],
     since all possibles cases of [Error e] are accounted for. *)
-val reparse :
-     Parsetree.structure_item list
+val reparse
+  :  Parsetree.structure_item list
   -> Parsetree.structure_item list
   -> (Jsonoo.t, string) result
 
 (** [reparse_signature sg sg'] does the same tranformation as {!reparse} but the
     starting point is [Parsetree.signature] *)
-val reparse_signature :
-     Parsetree.signature_item list
+val reparse_signature
+  :  Parsetree.signature_item list
   -> Parsetree.signature_item list
   -> (Jsonoo.t, string) result

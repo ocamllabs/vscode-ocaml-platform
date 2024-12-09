@@ -22,7 +22,7 @@ let get_formatter instance ~document ~options:_ ~token:_ =
   in
   let promise =
     let open Promise.Syntax in
-    let+ output in
+    let+ output = output in
     match output with
     | Ok newText -> Some [ TextEdit.replace ~range ~newText ]
     | Error msg ->
@@ -30,17 +30,16 @@ let get_formatter instance ~document ~options:_ ~token:_ =
       Some []
   in
   `Promise promise
+;;
 
 let register extension instance =
   [ "dune"; "dune-project"; "dune-workspace" ]
   |> List.map ~f:(fun language ->
-         let selector =
-           `Filter (DocumentFilter.create ~scheme:"file" ~language ())
-         in
-         let provider =
-           DocumentFormattingEditProvider.create
-             ~provideDocumentFormattingEdits:(get_formatter instance)
-         in
-         Languages.registerDocumentFormattingEditProvider ~selector ~provider)
-  |> List.iter ~f:(fun disposable ->
-         ExtensionContext.subscribe extension ~disposable)
+    let selector = `Filter (DocumentFilter.create ~scheme:"file" ~language ()) in
+    let provider =
+      DocumentFormattingEditProvider.create
+        ~provideDocumentFormattingEdits:(get_formatter instance)
+    in
+    Languages.registerDocumentFormattingEditProvider ~selector ~provider)
+  |> List.iter ~f:(fun disposable -> ExtensionContext.subscribe extension ~disposable)
+;;

@@ -29,15 +29,10 @@ module Package : sig
   (** {4 Properties} *)
 
   val name : t -> string
-
   val version : t -> string
-
   val documentation : t -> string option
-
   val synopsis : t -> string option
-
   val has_dependencies : t -> bool
-
   val dependencies : t -> (t list, string) result Promise.t
 end
 

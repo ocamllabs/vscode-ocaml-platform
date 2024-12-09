@@ -16,6 +16,4 @@
   vscode_languageclient
   ppxlib
   ppx_tools)
- (modes js)
- (js_of_ocaml
-  (flags --source-map --pretty)))
+ (modes js))

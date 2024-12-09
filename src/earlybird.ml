@@ -12,6 +12,7 @@ module VariableGetClosureCodeLocation = struct
 
     let position_to_vscode (line, character) =
       Position.make ~line:(line - 1) ~character:(character - 1)
+    ;;
 
     type range =
       { source : string
@@ -24,6 +25,7 @@ module VariableGetClosureCodeLocation = struct
       let start = position_to_vscode pos in
       let end_ = position_to_vscode end_ in
       Range.makePositions ~start ~end_
+    ;;
 
     type t = { location : range option } [@@js]
   end
@@ -40,9 +42,9 @@ let check_earlybird_available sandbox =
   |> Promise.Result.fold
        ~ok:(fun (_ : string) -> ())
        ~error:(fun (_ : string) ->
-         "Debugging failed: `earlybird` is not installed in the current \
-          sandbox.\n\n\
+         "Debugging failed: `earlybird` is not installed in the current sandbox.\n\n\
           Hint: $ opam install earlybird")
+;;
 
 let createDebugAdapterDescriptor ~instance ~session:_ ~executable:_ =
   let sandbox = Extension_instance.sandbox instance in
@@ -53,24 +55,18 @@ let createDebugAdapterDescriptor ~instance ~session:_ ~executable:_ =
     | Ok () ->
       let command = Sandbox.get_command sandbox "ocamlearlybird" [ "debug" ] in
       let { Cmd.bin; args } = Cmd.to_spawn command in
-      let result =
-        DebugAdapterExecutable.make ~command:(Path.to_string bin) ~args ()
-      in
+      let result = DebugAdapterExecutable.make ~command:(Path.to_string bin) ~args () in
       Promise.return (Some (`Executable result))
     | Error s -> Promise.reject (Ojs.string_to_js s)
   in
   `Promise promise
+;;
 
 let register extension instance =
   let createDebugAdapterDescriptor = createDebugAdapterDescriptor ~instance in
-  let factory =
-    DebugAdapterDescriptorFactory.create ~createDebugAdapterDescriptor
-  in
-  let disposable =
-    Debug.registerDebugAdapterDescriptorFactory ~debugType ~factory
-  in
+  let factory = DebugAdapterDescriptorFactory.create ~createDebugAdapterDescriptor in
+  let disposable = Debug.registerDebugAdapterDescriptorFactory ~debugType ~factory in
   ExtensionContext.subscribe extension ~disposable;
-
   let callback ~args:_ =
     let open Promise.Syntax in
     let defaultUri =
@@ -102,3 +98,4 @@ let register extension instance =
       ~callback
   in
   ExtensionContext.subscribe extension ~disposable
+;;

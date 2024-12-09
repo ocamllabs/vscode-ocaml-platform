@@ -1,4 +1,4 @@
-(lang dune 3.0)
+(lang dune 3.17)
 
 (name vscode-ocaml-platform)
 
@@ -9,12 +9,9 @@
 
 (maintainers "Rudi Grinberg <me@rgrinberg.com>")
 
-(authors
- "Rudi Grinberg <me@rgrinberg.com>"
- "Sora Morimoto <sora@morimoto.io>"
- "Max Lantas <mnxndev@outlook.com>"
- "Manas <prometheansacrifice@gmail.com>"
- "Rusty Key <iam@stfoo.ru>"
+(authors "Rudi Grinberg <me@rgrinberg.com>"
+ "Sora Morimoto <sora@morimoto.io>" "Max Lantas <mnxndev@outlook.com>"
+ "Manas <prometheansacrifice@gmail.com>" "Rusty Key <iam@stfoo.ru>"
  "Louis Roché <louis@louisroche.net>"
  "Ulugbek Abdullaev <ulugbekna@gmail.com>"
  "Javier Chávarri <javier.chavarri@gmail.com>")
@@ -28,7 +25,8 @@
  (depends
   (vscode
    (= :version))
-  (ocaml (>= 5.2.0))
+  (ocaml
+   (>= 5.2.0))
   (js_of_ocaml
    (>= 4.1.0))
   (gen_js_api
@@ -47,7 +45,24 @@
    (>= 2.1.2))
   (ocamlformat
    (and
-    (= 0.26.2)
+    (= 0.27.0)
+    :with-dev-setup))
+  (ocaml-lsp-server :with-dev-setup)))
+
+(package
+ (name vscode-interop)
+ (synopsis
+  "Interop library compatible with the vscode and vscode-node bindings")
+ (depends
+  (ocaml
+   (>= 4.08))
+  (js_of_ocaml
+   (>= 4.1.0))
+  (gen_js_api
+   (= 1.1.2))
+  (ocamlformat
+   (and
+    (= 0.27.0)
     :with-dev-setup))
   (ocaml-lsp-server :with-dev-setup)))
 
@@ -56,7 +71,7 @@
  (synopsis "Visual Studio Code Bindings")
  (depends
   (ocaml
-   (>= 4.13))
+   (>= 4.08))
   (js_of_ocaml
    (>= 4.1.0))
   (gen_js_api
@@ -65,8 +80,33 @@
    (>= 0.3.1))
   (jsonoo
    (>= 0.2.1))
+  (vscode-interop
+   (= :version))
   (ocamlformat
    (and
-    (= 0.26.2)
+    (= 0.27.0)
+    :with-dev-setup))
+  (ocaml-lsp-server :with-dev-setup)))
+
+(package
+ (name vscode-node)
+ (synopsis
+  "Bindings for Node.js that are used by the Visual Studio Code extension")
+ (depends
+  (ocaml
+   (>= 4.08))
+  (js_of_ocaml
+   (>= 4.1.0))
+  (gen_js_api
+   (= 1.1.2))
+  (promise_jsoo
+   (>= 0.3.1))
+  (jsonoo
+   (>= 0.2.1))
+  (vscode-interop
+   (= :version))
+  (ocamlformat
+   (and
+    (= 0.27.0)
     :with-dev-setup))
   (ocaml-lsp-server :with-dev-setup)))

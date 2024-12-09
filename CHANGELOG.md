@@ -2,10 +2,29 @@
 
 # Unreleased
 
+- Add `ocaml.search-by-type` to search for values using their type signature (#1626)
+
+## 1.24.0
+
+- Add `ocaml.commands.construct.recursiveCalls` setting to configure construct chaining. (#1673)
+
+## 1.23.0
+
+- Add `ocaml.jump` to jump to a specific target. (#1654)
+
+## 1.22.0
+
+- Fix formatting of cwd path on windows (#1650)
+- Add `ocaml.construct` to construct an expression from a typedhole. (#1646)
+
+## 1.21.0
+
 - Add `ocaml.copy-type-under-cursor` to copy, in the clipboard the type of
   the expression under the cursor (#1582)
-
-- Add `ocaml.search-by-type` to search for values using their type signature (#1626)
+- Run ocamllsp -version in workspace dir (#1641)
+- Make it a warning if ocamlc is missing (#1642)
+- Add `1.18.0`, `1.19.0` and `1.20.0~5.3preview` to the list of known versions
+  of ocamllsp (#1644)
 
 ## 1.20.1
 

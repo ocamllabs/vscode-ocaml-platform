@@ -6,19 +6,20 @@ let suggest_to_pick_sandbox () =
   let+ selection =
     Window.showInformationMessage
       ~message:
-        "OCaml Platform is using the package manager and sandbox available in \
-         the environment. Pick a particular package manager and sandbox by \
-         clicking the button below"
-      ~choices:[ (select_pm_button_text, ()) ]
+        "OCaml Platform is using the package manager and sandbox available in the \
+         environment. Pick a particular package manager and sandbox by clicking the \
+         button below"
+      ~choices:[ select_pm_button_text, () ]
       ()
   in
   Option.iter selection ~f:(fun () ->
-      let (_ : Ojs.t option Promise.t) =
-        Vscode.Commands.executeCommand
-          ~command:Extension_consts.Commands.select_sandbox
-          ~args:[]
-      in
-      ())
+    let (_ : Ojs.t option Promise.t) =
+      Vscode.Commands.executeCommand
+        ~command:Extension_consts.Commands.select_sandbox
+        ~args:[]
+    in
+    ())
+;;
 
 let notify_configuration_changes instance =
   Workspace.onDidChangeConfiguration
@@ -26,9 +27,7 @@ let notify_configuration_changes instance =
       let codelens = Settings.(get server_codelens_setting) in
       let extended_hover = Settings.(get server_extendedHover_setting) in
       let dune_diagnostics = Settings.(get server_duneDiagnostics_setting) in
-      let syntax_documentation =
-        Settings.(get server_syntaxDocumentation_setting)
-      in
+      let syntax_documentation = Settings.(get server_syntaxDocumentation_setting) in
       Extension_instance.set_configuration
         instance
         ~codelens
@@ -36,6 +35,7 @@ let notify_configuration_changes instance =
         ~dune_diagnostics
         ~syntax_documentation)
     ()
+;;
 
 let activate (extension : ExtensionContext.t) =
   let open Promise.Syntax in
@@ -43,9 +43,7 @@ let activate (extension : ExtensionContext.t) =
   ExtensionContext.subscribe
     extension
     ~disposable:(Extension_instance.disposable instance);
-  ExtensionContext.subscribe
-    extension
-    ~disposable:(notify_configuration_changes instance);
+  ExtensionContext.subscribe extension ~disposable:(notify_configuration_changes instance);
   Dune_formatter.register extension instance;
   Dune_task_provider.register extension instance;
   Extension_commands.register_all_commands extension instance;
@@ -59,7 +57,7 @@ let activate (extension : ExtensionContext.t) =
   Earlybird.register extension instance;
   let sandbox_opt = Sandbox.of_settings_or_detect () in
   let (_ : unit Promise.t) =
-    let* sandbox_opt in
+    let* sandbox_opt = sandbox_opt in
     let is_fallback = Option.is_none sandbox_opt in
     if
       is_fallback
@@ -74,7 +72,7 @@ let activate (extension : ExtensionContext.t) =
     else Promise.return ()
   in
   let (_ : unit Promise.t) =
-    let* sandbox_opt in
+    let* sandbox_opt = sandbox_opt in
     let sandbox = Option.value sandbox_opt ~default:Sandbox.Global in
     Extension_instance.set_sandbox instance sandbox;
     let* () = Extension_instance.update_ocaml_info instance in
@@ -82,9 +80,11 @@ let activate (extension : ExtensionContext.t) =
     ()
   in
   Promise.return ()
+;;
 
 (* see {{:https://code.visualstudio.com/api/references/vscode-api#Extension}
    activate() *)
 let () =
   let open Js_of_ocaml.Js in
   export "activate" (wrap_callback activate)
+;;

@@ -4,22 +4,18 @@ open Interop
 module Cm_document : sig
   include CustomDocument.T
 
-  val content :
-    t -> instance:Extension_instance.t -> (string, string) result Promise.t
-
+  val content : t -> instance:Extension_instance.t -> (string, string) result Promise.t
   val onDidChange : t -> unit Event.t
-
   val create : uri:Uri.t -> t
 end = struct
   include CustomDocument
 
   include
     [%js:
-    val onDidChange : t -> unit Event.t [@@js.get]
+      val onDidChange : t -> unit Event.t [@@js.get]
 
-    val create :
-      uri:Uri.t -> onDidChange:unit Event.t -> dispose:(unit -> unit) -> t
-    [@@js.builder]]
+      val create : uri:Uri.t -> onDidChange:unit Event.t -> dispose:(unit -> unit) -> t
+      [@@js.builder]]
 
   let content t ~instance =
     let uri = uri t in
@@ -29,6 +25,7 @@ end = struct
       Sandbox.get_command sandbox "ocamlobjinfo" [ file_path ]
     in
     Cmd.output command
+  ;;
 
   let create ~(uri : Uri.t) =
     let module EventEmitter = EventEmitter.Make (Js.Unit) in
@@ -48,11 +45,11 @@ end = struct
         ()
     in
     create ~uri ~onDidChange:onDidChange_event ~dispose:(fun () ->
-        Disposable.dispose disposable)
+      Disposable.dispose disposable)
+  ;;
 end
 
-let resolveCustomEditor instance ~document ~webviewPanel ~token:_ :
-    unit Promise.t =
+let resolveCustomEditor instance ~document ~webviewPanel ~token:_ : unit Promise.t =
   let open Promise.Syntax in
   let disposables = Stack.create () in
   let update_content document =
@@ -94,16 +91,16 @@ let resolveCustomEditor instance ~document ~webviewPanel ~token:_ :
     |> Stack.push disposables
   in
   update_content document
+;;
 
-let openCustomDocument ~(uri : Uri.t) ~openContext:_ ~token:_ :
-    Cm_document.t Promise.t =
+let openCustomDocument ~(uri : Uri.t) ~openContext:_ ~token:_ : Cm_document.t Promise.t =
   let document = Cm_document.create ~uri in
   Promise.resolve document
+;;
 
-let register (extension : ExtensionContext.t) (instance : Extension_instance.t)
-    =
-  let module CustomReadonlyEditorProvider =
-    CustomReadonlyEditorProvider.Make (Cm_document) in
+let register (extension : ExtensionContext.t) (instance : Extension_instance.t) =
+  let module CustomReadonlyEditorProvider = CustomReadonlyEditorProvider.Make (Cm_document)
+  in
   let editorProvider =
     CustomReadonlyEditorProvider.create
       ~resolveCustomEditor:(resolveCustomEditor instance)
@@ -121,3 +118,4 @@ let register (extension : ExtensionContext.t) (instance : Extension_instance.t)
       ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable
+;;
