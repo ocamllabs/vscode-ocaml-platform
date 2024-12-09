@@ -42,7 +42,7 @@ test: ## Run the unit tests
 .PHONY: clean
 clean: ## Clean build artifacts and other generated files
 	dune clean
-	$(RM) -r dist
+	$(RM) -r astexplorer/dist dist
 
 .PHONY: doc
 doc: ## Generate odoc documentation

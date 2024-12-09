@@ -2,6 +2,8 @@
 
 # Unreleased
 
+## 1.24.0
+
 - Add `ocaml.commands.construct.recursiveCalls` setting to configure construct chaining. (#1673)
 
 ## 1.23.0
