@@ -121,7 +121,7 @@ jobs:
         env:
           OVSX_PAT: ${{ secrets.OPEN_VSX_TOKEN }}
 
-      - name: Create release
+      - name: Upload artifact to GitHub release
         continue-on-error: true
         uses: softprops/action-gh-release@v2
         with:
