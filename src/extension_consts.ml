@@ -35,6 +35,7 @@ module Commands = struct
   let copy_type_under_cursor = ocaml_prefixed "copy-type-under-cursor"
   let construct = ocaml_prefixed "construct"
   let merlin_jump = ocaml_prefixed "jump"
+  let search_by_type = ocaml_prefixed "search-by-type"
 end
 
 module Command_errors = struct

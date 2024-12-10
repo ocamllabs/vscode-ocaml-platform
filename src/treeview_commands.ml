@@ -1,7 +1,7 @@
 let select_sandbox_item =
   let icon =
     `LightDark
-      Vscode.TreeItem.LightDarkIcon.
+      Vscode.LightDarkIcon.
         { light = `String (Path.asset "collection-light.svg" |> Path.to_string)
         ; dark = `String (Path.asset "collection-dark.svg" |> Path.to_string)
         }
@@ -19,7 +19,7 @@ let select_sandbox_item =
 let terminal_item =
   let icon =
     `LightDark
-      Vscode.TreeItem.LightDarkIcon.
+      Vscode.LightDarkIcon.
         { light = `String (Path.asset "terminal-light.svg" |> Path.to_string)
         ; dark = `String (Path.asset "terminal-dark.svg" |> Path.to_string)
         }
@@ -66,7 +66,28 @@ let jump_item =
   item
 ;;
 
-let items = [ select_sandbox_item; terminal_item; construct_item; jump_item ]
+let type_search_item =
+  let icon = `ThemeIcon (Vscode.ThemeIcon.make ~id:"search-view-icon" ()) in
+  let label =
+    `TreeItemLabel
+      (Vscode.TreeItemLabel.create ~label:"Search a value by type or polarity" ())
+  in
+  let item = Vscode.TreeItem.make_label ~label () in
+  let command =
+    Vscode.Command.create
+      ~title:"Search a value by type or polarity"
+      ~command:"ocaml.search-by-type"
+      ()
+  in
+  Vscode.TreeItem.set_iconPath item icon;
+  Vscode.TreeItem.set_command item command;
+  item
+;;
+
+let items =
+  [ select_sandbox_item; terminal_item; construct_item; jump_item; type_search_item ]
+;;
+
 let getTreeItem ~element = `Value element
 
 let getChildren ?element () =

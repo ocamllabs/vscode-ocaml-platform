@@ -178,6 +178,49 @@ module Uri = struct
   let equal a b = String.equal (toString a ()) (toString b ())
 end
 
+module LightDarkIcon = struct
+  type t =
+    { light : ([ `String of string | `Uri of Uri.t ][@js.union])
+    ; dark : ([ `String of string | `Uri of Uri.t ][@js.union])
+    }
+  [@@js]
+
+  let t_of_js js_val =
+    let light_js = Ojs.get_prop_ascii js_val "light" in
+    let dark_js = Ojs.get_prop_ascii js_val "dark" in
+    let light =
+      if Ojs.has_property light_js "parse"
+      then `Uri ([%js.to: Uri.t] light_js)
+      else `String ([%js.to: string] light_js)
+    in
+    let dark =
+      if Ojs.has_property dark_js "parse"
+      then `Uri ([%js.to: Uri.t] dark_js)
+      else `String ([%js.to: string] dark_js)
+    in
+    { light; dark }
+  ;;
+end
+
+module ThemeColor = struct
+  include Class.Make ()
+  include [%js: val make : id:string -> t [@@js.new "vscode.ThemeColor"]]
+end
+
+module ThemeIcon = struct
+  include Class.Make ()
+
+  include
+    [%js:
+      val make : id:string -> ?color:ThemeColor.t -> unit -> t
+      [@@js.new "vscode.ThemeIcon"]
+
+      val file : t [@@js.global "vscode.ThemeIcon.File"]
+      val folder : t [@@js.global "vscode.ThemeIcon.Folder"]
+      val id : t -> string [@@js.get]
+      val color : t -> ThemeColor.t or_undefined [@@js.get]]
+end
+
 module TextDocument = struct
   include Interface.Make ()
 
@@ -423,11 +466,6 @@ module MarkdownString = struct
       val appendText : t -> value:string -> t [@@js.call]
       val appendMarkdown : t -> value:string -> t [@@js.call]
       val appendCodeblock : t -> value:string -> ?language:string -> unit -> t [@@js.call]]
-end
-
-module ThemeColor = struct
-  include Class.Make ()
-  include [%js: val make : id:string -> t [@@js.new "vscode.ThemeColor"]]
 end
 
 module ThemableDecorationAttachmentRenderOptions = struct
@@ -897,6 +935,34 @@ module CancellationToken = struct
       [@@js.builder]]
 end
 
+module QuickInputButton = struct
+  include Interface.Make ()
+
+  type iconPath =
+    ([ `Uri of Uri.t
+     | `LightDark of LightDarkIcon.t
+     | `ThemeIcon of ThemeIcon.t
+     ]
+    [@js.union])
+  [@@js]
+
+  let iconPath_of_js js_val =
+    if Ojs.has_property js_val "path"
+    then `Uri ([%js.to: Uri.t] js_val)
+    else if Ojs.has_property js_val "id"
+    then `ThemeIcon ([%js.to: ThemeIcon.t] js_val)
+    else if Ojs.has_property js_val "light"
+    then `LightDark ([%js.to: LightDarkIcon.t] js_val)
+    else assert false
+  ;;
+
+  include
+    [%js:
+      val iconPath : t -> iconPath [@@js.get]
+      val tooltip : t -> string or_undefined [@@js.get]
+      val create : iconPath:iconPath -> ?tooltip:string -> unit -> t [@@js.builder]]
+end
+
 module QuickPickItem = struct
   include Interface.Make ()
 
@@ -958,6 +1024,98 @@ module QuickPickOptions = struct
       [@@js.builder]]
 end
 
+module QuickPick = struct
+  module G = Interface.Generic (Ojs) ()
+  include G
+
+  module Make (T : Ojs.T) = struct
+    type t = T.t G.t [@@js]
+
+    include
+      [%js:
+        val onDidAccept : t -> unit Event.t [@@js.get]
+        val onDidChangeActive : t -> T.t list Event.t [@@js.get]
+        val onDidChangeSelection : t -> T.t list Event.t [@@js.get]
+        val onDidChangeValue : t -> string Event.t [@@js.get]
+        val onDidHide : t -> unit Event.t [@@js.get]
+        val onDidTriggerButton : t -> QuickInputButton.t Event.t [@@js.get]
+        val activeItems : t -> T.t list or_undefined [@@js.get]
+        val set_activeItems : t -> T.t list or_undefined -> unit [@@js.set]
+        val busy : t -> bool or_undefined [@@js.get]
+        val set_busy : t -> bool or_undefined -> unit [@@js.set]
+        val buttons : t -> QuickInputButton.t list or_undefined [@@js.get]
+        val set_buttons : t -> QuickInputButton.t list or_undefined -> unit [@@js.set]
+        val canSelectMany : t -> bool or_undefined [@@js.get]
+        val set_canSelectMany : t -> bool or_undefined -> unit [@@js.set]
+        val enabled : t -> bool or_undefined [@@js.get]
+        val set_enabled : t -> bool or_undefined -> unit [@@js.set]
+        val ignoreFocusOut : t -> bool or_undefined [@@js.get]
+        val set_ignoreFocusOut : t -> bool or_undefined -> unit [@@js.set]
+        val items : t -> T.t list or_undefined [@@js.get]
+        val set_items : t -> T.t list or_undefined -> unit [@@js.set]
+        val keepScrollPosition : t -> bool or_undefined [@@js.get]
+        val set_keepScrollPosition : t -> bool or_undefined -> unit [@@js.set]
+        val matchOnDescription : t -> bool or_undefined [@@js.get]
+        val set_matchOnDescription : t -> bool or_undefined -> unit [@@js.set]
+        val matchOnDetail : t -> bool or_undefined [@@js.get]
+        val set_matchOnDetail : t -> bool or_undefined -> unit [@@js.set]
+        val placeholder : t -> string or_undefined [@@js.get]
+        val set_placeholder : t -> string or_undefined -> unit [@@js.set]
+        val selectedItems : t -> T.t list or_undefined [@@js.get]
+        val set_selectedItems : t -> T.t list or_undefined -> unit [@@js.set]
+        val step : t -> int or_undefined [@@js.get]
+        val set_step : t -> int or_undefined -> unit [@@js.set]
+        val title : t -> string or_undefined [@@js.get]
+        val set_title : t -> string or_undefined -> unit [@@js.set]
+        val totalSteps : t -> int or_undefined [@@js.get]
+        val set_totalSteps : t -> int or_undefined -> unit [@@js.set]
+        val value : t -> string or_undefined [@@js.get]
+        val set_value : t -> string or_undefined -> unit [@@js.set]
+        val dispose : t -> unit [@@js.call]
+        val hide : t -> unit [@@js.call]
+        val show : t -> unit [@@js.call]]
+
+    let set
+          t
+          ?activeItems
+          ?busy
+          ?buttons
+          ?canSelectMany
+          ?enabled
+          ?ignoreFocusOut
+          ?items
+          ?keepScrollPosition
+          ?matchOnDescription
+          ?matchOnDetail
+          ?placeholder
+          ?selectedItems
+          ?step
+          ?title
+          ?totalSteps
+          ?value
+          ()
+      =
+      set_activeItems t activeItems;
+      set_busy t busy;
+      set_buttons t buttons;
+      set_canSelectMany t canSelectMany;
+      set_enabled t enabled;
+      set_ignoreFocusOut t ignoreFocusOut;
+      set_items t items;
+      set_keepScrollPosition t keepScrollPosition;
+      set_matchOnDescription t matchOnDescription;
+      set_matchOnDetail t matchOnDetail;
+      set_placeholder t placeholder;
+      set_selectedItems t selectedItems;
+      set_step t step;
+      set_title t title;
+      set_totalSteps t totalSteps;
+      set_value t value;
+      t
+    ;;
+  end
+end
+
 module ProviderResult = struct
   type 'a t =
     [ `Value of 'a or_undefined
@@ -974,6 +1132,26 @@ module ProviderResult = struct
     then `Promise (Promise.t_of_js (or_undefined_of_js ml_of_js) js_val)
     else `Value (or_undefined_of_js ml_of_js js_val)
   ;;
+end
+
+module InputBoxValidationSeverity = struct
+  type t =
+    | Info [@js 1]
+    | Warning [@js 2]
+    | Error [@js 3]
+  [@@js.enum] [@@js]
+end
+
+module InputBoxValidationMessage = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val message : t -> string [@@js.get]
+      val severity : t -> InputBoxValidationSeverity.t [@@js.get]
+
+      val create : message:string -> severity:InputBoxValidationSeverity.t -> unit -> t
+      [@@js.builder]]
 end
 
 module InputBoxOptions = struct
@@ -1002,6 +1180,63 @@ module InputBoxOptions = struct
         -> unit
         -> t
       [@@js.builder]]
+end
+
+module InputBox = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val title : t -> string or_undefined [@@js.get]
+      val set_title : t -> string or_undefined -> unit [@@js.set]
+      val enabled : t -> bool [@@js.get]
+      val set_enabled : t -> bool -> unit [@@js.set]
+      val busy : t -> bool [@@js.get]
+      val set_busy : t -> bool -> unit [@@js.set]
+      val ignoreFocusOut : t -> bool or_undefined [@@js.get]
+      val set_ignoreFocusOut : t -> bool or_undefined -> unit [@@js.set]
+      val onDidHide : t -> unit Event.t [@@js.get]
+      val value : t -> string or_undefined [@@js.get]
+      val set_value : t -> string or_undefined -> unit [@@js.set]
+      val valueSelection : t -> (int * int) or_undefined [@@js.get]
+      val set_valueSelection : t -> (int * int) or_undefined -> unit [@@js.set]
+      val placeholder : t -> string or_undefined [@@js.get]
+      val set_placeholder : t -> string or_undefined -> unit [@@js.set]
+      val password : t -> bool or_undefined [@@js.get]
+      val set_password : t -> bool or_undefined -> unit [@@js.set]
+      val onDidChangeValue : t -> string Event.t [@@js.get]
+      val onDidAccept : t -> unit Event.t [@@js.get]
+      val prompt : t -> string or_undefined [@@js.get]
+      val set_prompt : t -> string or_undefined -> unit [@@js.set]
+      val validationMessage : t -> InputBoxValidationMessage.t or_undefined [@@js.get]
+
+      val set_validationMessage : t -> InputBoxValidationMessage.t or_undefined -> unit
+      [@@js.set]
+
+      val show : t -> unit [@@js.call]]
+
+  let set
+        t
+        ?title
+        ?ignoreFocusOut
+        ?value
+        ?valueSelection
+        ?placeholder
+        ?password
+        ?prompt
+        ?validationMessage
+        ()
+    =
+    set_title t title;
+    set_ignoreFocusOut t ignoreFocusOut;
+    set_value t value;
+    set_valueSelection t valueSelection;
+    set_placeholder t placeholder;
+    set_password t password;
+    set_prompt t prompt;
+    set_validationMessage t validationMessage;
+    t
+  ;;
 end
 
 module OpenDialogOptions = struct
@@ -2169,20 +2404,6 @@ module TreeItemLabel = struct
       [@@js.builder]]
 end
 
-module ThemeIcon = struct
-  include Class.Make ()
-
-  include
-    [%js:
-      val make : id:string -> ?color:ThemeColor.t -> unit -> t
-      [@@js.new "vscode.ThemeIcon"]
-
-      val file : t [@@js.global "vscode.ThemeIcon.File"]
-      val folder : t [@@js.global "vscode.ThemeIcon.Folder"]
-      val id : t -> string [@@js.get]
-      val color : t -> ThemeColor.t or_undefined [@@js.get]]
-end
-
 module TreeItem = struct
   include Class.Make ()
 
@@ -2200,30 +2421,6 @@ module TreeItem = struct
     then `TreeItemLabel ([%js.to: TreeItemLabel.t] js_val)
     else assert false
   ;;
-
-  module LightDarkIcon = struct
-    type t =
-      { light : ([ `String of string | `Uri of Uri.t ][@js.union])
-      ; dark : ([ `String of string | `Uri of Uri.t ][@js.union])
-      }
-    [@@js]
-
-    let t_of_js js_val =
-      let light_js = Ojs.get_prop_ascii js_val "light" in
-      let dark_js = Ojs.get_prop_ascii js_val "dark" in
-      let light =
-        if Ojs.has_property light_js "parse"
-        then `Uri ([%js.to: Uri.t] light_js)
-        else `String ([%js.to: string] light_js)
-      in
-      let dark =
-        if Ojs.has_property dark_js "parse"
-        then `Uri ([%js.to: Uri.t] dark_js)
-        else `String ([%js.to: string] dark_js)
-      in
-      { light; dark }
-    ;;
-  end
 
   type iconPath =
     ([ `String of string
@@ -2758,6 +2955,12 @@ module Window = struct
         -> MessageItem.t or_undefined Promise.t
       [@@js.global "vscode.window.showErrorMessage"]
 
+      val createQuickPick
+        :  ((module Ojs.T with type t = 'a)[@js])
+        -> unit
+        -> 'a QuickPick.t
+      [@@js.global "vscode.window.createQuickPick"]
+
       val showQuickPickItems
         :  choices:QuickPickItem.t list
         -> ?options:QuickPickOptions.t
@@ -2774,12 +2977,17 @@ module Window = struct
         -> string or_undefined Promise.t
       [@@js.global "vscode.window.showQuickPick"]
 
+      val quickInputButtonBack : QuickInputButton.t
+      [@@js.global "vscode.QuickInputButtons.Back"]
+
       val showInputBox
         :  ?options:InputBoxOptions.t
         -> ?token:CancellationToken.t
         -> unit
         -> string or_undefined Promise.t
       [@@js.global "vscode.window.showInputBox"]
+
+      val createInputBox : unit -> InputBox.t [@@js.global "vscode.window.createInputBox"]
 
       val showOpenDialog
         :  ?options:OpenDialogOptions.t

@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Add `ocaml.search-by-type` to search for values using their type signature (#1626)
+
 ## 1.24.0
 
 - Add `ocaml.commands.construct.recursiveCalls` setting to configure construct chaining. (#1673)

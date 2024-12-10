@@ -254,7 +254,7 @@ prefix `OCaml:`:
 ![commands](./doc/commands.png)
 
 | Name                           | Description                                 | Keyboard Shortcuts |
-| -------------------------------| ------------------------------------------- | ------------------ |
+| ------------------------------ | ------------------------------------------- | ------------------ |
 | `ocaml.select-sandbox`         | Select sandbox for this workspace           |                    |
 | `ocaml.server.restart`         | Restart language server                     |                    |
 | `ocaml.open-terminal`          | Open a terminal (current sandbox)           |                    |
@@ -264,6 +264,7 @@ prefix `OCaml:`:
 | `ocaml.open-repl`              | Open REPL                                   |                    |
 | `ocaml.evaluate-selection`     | Evaluate Selection                          | `Shift+Enter`      |
 | `ocaml.copy-type-under-cursor` | Copy the type under the cursor              |                    |
+| `ocaml.search-by-type`         | Search a value by type or polarity          | `Alt+F`            |
 
 ## Debugging OCaml programs (experimental)
 
