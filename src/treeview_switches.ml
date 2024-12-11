@@ -43,7 +43,7 @@ module Dependency = struct
     match dependency with
     | Switch _ ->
       let selected = if is_current_sandbox then "-selected" else "" in
-      TreeItem.LightDarkIcon.
+      LightDarkIcon.
         { light =
             `String
               (Path.asset @@ "dependency-light" ^ selected ^ ".svg" |> Path.to_string)
@@ -51,7 +51,7 @@ module Dependency = struct
             `String (Path.asset @@ "dependency-dark" ^ selected ^ ".svg" |> Path.to_string)
         }
     | Package _ ->
-      TreeItem.LightDarkIcon.
+      LightDarkIcon.
         { light = `String (Path.asset "number-light.svg" |> Path.to_string)
         ; dark = `String (Path.asset "number-dark.svg" |> Path.to_string)
         }

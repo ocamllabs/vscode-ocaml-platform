@@ -753,6 +753,203 @@ module MerlinJump = struct
   ;;
 end
 
+module Search_by_type = struct
+  let extension_name = "Search By Type"
+
+  let is_valid_text_doc textdoc =
+    match TextDocument.languageId textdoc with
+    | "ocaml" | "ocaml.interface" | "reason" | "ocaml.ocamllex" -> true
+    | _ -> false
+  ;;
+
+  let ocaml_lsp_doesnt_support_search_by_type ocaml_lsp =
+    not (Ocaml_lsp.can_handle_search_by_type ocaml_lsp)
+  ;;
+
+  let get_search_results ~query ~limit ~with_doc ~position text_editor client =
+    let doc = TextEditor.document text_editor in
+    let uri = TextDocument.uri doc in
+    Custom_requests.(
+      send_request
+        client
+        Type_search.request
+        (Type_search.make ~uri ~position ~limit ~query ~with_doc ()))
+    |> Promise.catch ~rejected:(fun _ -> Promise.return [])
+  ;;
+
+  let input_box =
+    (* Re-using the same instance of the input box allows us to remember the
+       last input. *)
+    let box =
+      InputBox.set
+        (Window.createInputBox ())
+        ~title:"Search By Type"
+        ~ignoreFocusOut:false
+        ~placeholder:"int -> string / -int +string"
+        ~prompt:
+          "Perform a search by type request by providing a type signature to look for"
+        ()
+    in
+    let _disposable =
+      InputBox.onDidChangeValue
+        box
+        ~listener:(fun _ -> InputBox.set_validationMessage box None)
+        ()
+    in
+    box
+  ;;
+
+  let rec display_search_results query results text_editor position client =
+    let format_doc (doc : MarkupContent.t option) =
+      match doc with
+      | Some doc -> doc.value
+      | None -> ""
+    in
+    let quickPickItems =
+      List.map results ~f:(fun (res : Custom_requests.Type_search.type_search_result) ->
+        QuickPickItem.create
+          ~label:res.name
+          ~description:res.typ
+          ~detail:(format_doc res.doc)
+          ())
+    in
+    let module QuickPick = Vscode.QuickPick.Make (QuickPickItem) in
+    let quickPick =
+      QuickPick.set
+        (Window.createQuickPick (module QuickPickItem) ())
+        ~title:"Type/Polarity Search Results"
+        ~activeItems:[]
+        ~busy:false
+        ~enabled:true
+        ~placeholder:"Select an item to insert it to the editor"
+        ~selectedItems:[]
+        ~ignoreFocusOut:false
+        ~items:quickPickItems
+        ~buttons:[ Window.quickInputButtonBack ]
+        ()
+    in
+    let _disposable =
+      QuickPick.onDidTriggerButton
+        quickPick
+        ~listener:(fun _ -> show_query_input text_editor client)
+        ()
+    in
+    let _disposable =
+      QuickPick.onDidAccept
+        quickPick
+        ~listener:(fun () ->
+          match QuickPick.selectedItems quickPick with
+          | Some (item :: _) ->
+            let value = QuickPickItem.label item in
+            let _ =
+              Vscode.TextEditor.edit
+                text_editor
+                ~callback:(fun ~editBuilder ->
+                  Vscode.TextEditorEdit.insert editBuilder ~location:position ~value)
+                ()
+            in
+            QuickPick.hide quickPick
+          | _ -> display_search_results query results text_editor position client)
+        ()
+    in
+    let _disposable =
+      QuickPick.onDidHide quickPick ~listener:(fun () -> QuickPick.dispose quickPick)
+    in
+    QuickPick.show quickPick
+
+  and show_query_input =
+    let previous : Disposable.t option ref = ref None in
+    fun ?(empty_result = false) text_editor client ->
+      let open Promise.Syntax in
+      let () =
+        match !previous with
+        | None -> ()
+        | Some disposable -> Disposable.dispose disposable
+      in
+      let _update_input_box =
+        let validationMessage =
+          if empty_result
+          then
+            Some
+              (InputBoxValidationMessage.create
+                 ~message:"No result found. Check the syntax or use a more general query."
+                 ~severity:Warning
+                 ())
+          else None
+        in
+        InputBox.set_validationMessage input_box validationMessage;
+        InputBox.set_busy input_box false;
+        InputBox.set_enabled input_box true
+      in
+      let onDidAccept_disposable =
+        InputBox.onDidAccept
+          input_box
+          ~listener:(fun () ->
+            match InputBox.value input_box with
+            | Some query ->
+              let () = InputBox.set_busy input_box true in
+              let () = InputBox.set_enabled input_box false in
+              let position = TextEditor.selection text_editor |> Selection.active in
+              ignore
+                (let+ query_results =
+                   get_search_results
+                     ~query
+                     ~with_doc:true
+                     ~limit:100
+                     ~position
+                     text_editor
+                     client
+                 in
+                 match query_results with
+                 | [] -> show_query_input ~empty_result:true text_editor client
+                 | results ->
+                   let results =
+                     List.remove_consecutive_duplicates
+                       ~which_to_keep:`First
+                       ~equal:
+                         (fun
+                           (left : Custom_requests.Type_search.type_search_result)
+                           right ->
+                         String.equal left.name right.name && left.cost = right.cost)
+                       results
+                   in
+                   display_search_results query results text_editor position client)
+            | None -> ())
+          ()
+      in
+      previous := Some onDidAccept_disposable;
+      InputBox.show input_box
+  ;;
+
+  let _search_by_type =
+    let handler (instance : Extension_instance.t) ~args:_ =
+      match Window.activeTextEditor () with
+      | None ->
+        Extension_consts.Command_errors.text_editor_must_be_active
+          extension_name
+          ~expl:
+            "The cursor position is used to determine the correct environment and insert \
+             the result."
+        |> show_message `Error "%s"
+      | Some text_editor when not (is_valid_text_doc (TextEditor.document text_editor)) ->
+        show_message
+          `Error
+          "Invalid file type. This command only works in ocaml files, ocaml interface \
+           files, reason files or ocamllex files."
+      | Some text_editor ->
+        (match Extension_instance.lsp_client instance with
+         | None -> show_message `Warn "ocamllsp is not running"
+         | Some (_client, ocaml_lsp)
+           when ocaml_lsp_doesnt_support_search_by_type ocaml_lsp ->
+           show_message
+             `Warn
+             "The installed version of `ocamllsp` does not support type search"
+         | Some (client, _) -> show_query_input text_editor client)
+    in
+    command Extension_consts.Commands.search_by_type handler
+  ;;
+end
+
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in
