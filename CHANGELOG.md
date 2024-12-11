@@ -2,6 +2,8 @@
 
 # Unreleased
 
+## 1.25.0
+
 - Add `ocaml.search-by-type` to search for values using their type signature (#1626)
 
 ## 1.24.0
