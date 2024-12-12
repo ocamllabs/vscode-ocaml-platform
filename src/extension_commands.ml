@@ -993,15 +993,9 @@ module Navigate_holes = struct
     move_to_hole range text_editor
   ;;
 
-  let display_results
-        current_position
-        (results : Range.t list)
-        text_editor
-        client
-        instance
-    =
+  let display_results (results : Range.t list) text_editor client instance =
     let open Promise.Syntax in
-    let selected_item = ref None in
+    let selected_item = ref false in
     let text_document = TextEditor.document text_editor in
     let quickPickItems =
       List.map results ~f:(fun res ->
@@ -1062,7 +1056,7 @@ module Navigate_holes = struct
                   | Some range ->
                     let range = Range.t_of_json range in
                     let* () = jump_to_hole range text_editor in
-                    selected_item := Some range;
+                    selected_item := true;
                     QuickPick.hide quickPick;
                     (match
                        Settings.(get server_typedHolesConstructAfterNavigate_setting)
@@ -1080,31 +1074,33 @@ module Navigate_holes = struct
         ()
     in
     let _disposable =
+      let initial_selection = TextEditor.selection text_editor in
       QuickPick.onDidHide
         quickPick
         ~listener:(fun () ->
-          match !selected_item with
-          | None ->
+          if !selected_item
+          then ()
+          else
             ignore
-              (let* () =
-                 jump_to_hole
-                   (Range.makePositions ~start:current_position ~end_:current_position)
-                   text_editor
-               in
-               QuickPick.dispose quickPick |> Promise.return)
-          | Some _ -> QuickPick.dispose quickPick)
+              (TextEditor.set_selection text_editor initial_selection;
+               TextEditor.revealRange
+                 text_editor
+                 ~range:(Selection.to_range initial_selection)
+                 ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
+                 ());
+          QuickPick.dispose quickPick)
         ()
     in
     QuickPick.show quickPick
   ;;
 
-  let handle_hole_navigation current_position text_editor client instance =
+  let handle_hole_navigation text_editor client instance =
     let open Promise.Syntax in
     let doc = TextEditor.document text_editor in
     let+ hole_positions = send_request_to_lsp client doc in
     match hole_positions with
     | [] -> show_message `Info "No typed holes found in the file."
-    | holes -> display_results current_position holes text_editor client instance
+    | holes -> display_results holes text_editor client instance
   ;;
 
   let _holes =
@@ -1131,8 +1127,7 @@ module Navigate_holes = struct
              `Warn
              "The installed version of `ocamllsp` does not support typed hole navigation"
          | Some (client, _) ->
-           let current_position = TextEditor.selection text_editor |> Selection.active in
-           let _ = handle_hole_navigation current_position text_editor client instance in
+           let _ = handle_hole_navigation text_editor client instance in
            ())
     in
     command Extension_consts.Commands.navigate_typed_holes handler
