@@ -968,21 +968,16 @@ module Navigate_holes = struct
     Custom_requests.send_request client Custom_requests.typedHoles uri
   ;;
 
-  let move_to_hole range text_editor =
-    let new_selection =
-      let anchor = Range.start range in
-      let active = Range.end_ range in
-      Selection.makePositions ~anchor ~active
-    in
-    TextEditor.set_selection text_editor new_selection;
+  let show_selection selection text_editor =
+    TextEditor.set_selection text_editor selection;
     TextEditor.revealRange
       text_editor
-      ~range
+      ~range:(Selection.to_range selection)
       ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
       ()
   ;;
 
-  let jump_to_hole range text_editor =
+  let jump_to_range range text_editor =
     let open Promise.Syntax in
     let+ _ =
       Window.showTextDocument
@@ -990,7 +985,12 @@ module Navigate_holes = struct
         ~preserveFocus:true
         ()
     in
-    move_to_hole range text_editor
+    let selection =
+      let anchor = Range.start range in
+      let active = Range.end_ range in
+      Selection.makePositions ~anchor ~active
+    in
+    show_selection selection text_editor
   ;;
 
   let display_results (results : Range.t list) text_editor client instance =
@@ -1028,18 +1028,20 @@ module Navigate_holes = struct
       QuickPick.onDidChangeActive
         quickPick
         ~listener:(fun selection ->
-          match selection with
-          | item :: _ ->
-            let range_string = QuickPickItem.description item in
-            (match range_string with
-             | Some r ->
-               (match Jsonoo.try_parse_opt r with
-                | Some range ->
-                  let range = Range.t_of_json range in
-                  move_to_hole range text_editor
-                | None -> ())
-             | _ -> ())
-          | _ -> ())
+          let open Option.O in
+          let _ =
+            let+ item = List.hd selection in
+            let* range_string = QuickPickItem.description item in
+            let* range_value = Jsonoo.try_parse_opt range_string in
+            let range = Range.t_of_json range_value in
+            Some
+              (show_selection
+                 (Selection.makePositions
+                    ~anchor:(Range.start range)
+                    ~active:(Range.end_ range))
+                 text_editor)
+          in
+          ())
         ()
     in
     let _disposable =
@@ -1055,7 +1057,7 @@ module Navigate_holes = struct
                  (match Jsonoo.try_parse_opt r with
                   | Some range ->
                     let range = Range.t_of_json range in
-                    let* () = jump_to_hole range text_editor in
+                    let* () = jump_to_range range text_editor in
                     selected_item := true;
                     QuickPick.hide quickPick;
                     (match
@@ -1078,16 +1080,7 @@ module Navigate_holes = struct
       QuickPick.onDidHide
         quickPick
         ~listener:(fun () ->
-          if !selected_item
-          then ()
-          else
-            ignore
-              (TextEditor.set_selection text_editor initial_selection;
-               TextEditor.revealRange
-                 text_editor
-                 ~range:(Selection.to_range initial_selection)
-                 ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
-                 ());
+          if !selected_item then () else show_selection initial_selection text_editor;
           QuickPick.dispose quickPick)
         ()
     in
