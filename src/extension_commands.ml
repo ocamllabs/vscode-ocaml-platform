@@ -1032,12 +1032,11 @@ module Navigate_holes = struct
             let range_string = QuickPickItem.description item in
             (match range_string with
              | Some r ->
-               ignore
-                 (match Jsonoo.try_parse_opt r with
-                  | Some range ->
-                    let range = Range.t_of_json range in
-                    move_to_hole range text_editor
-                  | None -> ())
+               (match Jsonoo.try_parse_opt r with
+                | Some range ->
+                  let range = Range.t_of_json range in
+                  move_to_hole range text_editor
+                | None -> ())
              | _ -> ())
           | _ -> ())
         ()
@@ -1051,12 +1050,11 @@ module Navigate_holes = struct
             let range_string = QuickPickItem.description item in
             (match range_string with
              | Some r ->
-               ignore
-                 (match Jsonoo.try_parse_opt r with
-                  | Some range ->
-                    let range = Range.t_of_json range in
-                    move_to_hole range text_editor
-                  | None -> ())
+               (match Jsonoo.try_parse_opt r with
+                | Some range ->
+                  let range = Range.t_of_json range in
+                  move_to_hole range text_editor
+                | None -> ())
              | _ -> ())
           | _ -> ())
         ()
