@@ -968,23 +968,6 @@ module Navigate_holes = struct
     Custom_requests.send_request client Custom_requests.typedHoles uri
   ;;
 
-  let display_results (results : Range.t list) text_document =
-    let quickPickItems =
-      List.map results ~f:(fun res ->
-        let line = Position.line @@ Range.end_ res in
-        ( QuickPickItem.create
-            ~label:(Printf.sprintf "Line %d" line)
-            ~detail:
-              (Printf.sprintf
-                 "%s"
-                 (TextLine.text @@ TextDocument.lineAt ~line text_document))
-            ()
-        , (res, ()) ))
-    in
-    let quickPickOptions = QuickPickOptions.create ~title:"Typed Holes" () in
-    Window.showQuickPickItems ~choices:quickPickItems ~options:quickPickOptions ()
-  ;;
-
   let jump_to_hole range text_editor =
     let open Promise.Syntax in
     let+ _ =
@@ -1006,24 +989,132 @@ module Navigate_holes = struct
       ()
   ;;
 
+  let move_to_hole range text_editor =
+    TextEditor.revealRange
+      text_editor
+      ~range
+      ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
+      ()
+  ;;
+
+  let display_results (results : Range.t list) text_editor client instance =
+    let open Promise.Syntax in
+    let text_document = TextEditor.document text_editor in
+    let quickPickItems =
+      List.map results ~f:(fun res ->
+        let line = Position.line @@ Range.end_ res in
+        QuickPickItem.create
+          ~label:(Printf.sprintf "Line %d" line)
+          ~detail:
+            (Printf.sprintf
+               "%s"
+               (TextLine.text @@ TextDocument.lineAt ~line text_document))
+          ~description:(Range.json_of_t res |> Jsonoo.stringify)
+          ())
+    in
+    let module QuickPick = Vscode.QuickPick.Make (QuickPickItem) in
+    let quickPick =
+      QuickPick.set
+        (Window.createQuickPick (module QuickPickItem) ())
+        ~title:"Typed Holes"
+        ~activeItems:[]
+        ~busy:false
+        ~enabled:true
+        ~placeholder:"Use arrow keys to preview / Select to jump to it"
+        ~selectedItems:[]
+        ~ignoreFocusOut:true
+        ~items:quickPickItems
+        ~buttons:[]
+        ()
+    in
+    let _disposable =
+      QuickPick.onDidChangeSelection
+        quickPick
+        ~listener:(fun selection ->
+          match selection with
+          | item :: _ ->
+            let range_string = QuickPickItem.description item in
+            (match range_string with
+             | Some r ->
+               ignore
+                 (match Jsonoo.try_parse_opt r with
+                  | Some range ->
+                    let range = Range.t_of_json range in
+                    move_to_hole range text_editor
+                  | None -> ())
+             | _ -> ())
+          | _ -> ())
+        ()
+    in
+    let _disposable =
+      QuickPick.onDidChangeActive
+        quickPick
+        ~listener:(fun selection ->
+          match selection with
+          | item :: _ ->
+            let range_string = QuickPickItem.description item in
+            (match range_string with
+             | Some r ->
+               ignore
+                 (match Jsonoo.try_parse_opt r with
+                  | Some range ->
+                    let range = Range.t_of_json range in
+                    move_to_hole range text_editor
+                  | None -> ())
+             | _ -> ())
+          | _ -> ())
+        ()
+    in
+    let _disposable =
+      QuickPick.onDidAccept
+        quickPick
+        ~listener:(fun () ->
+          match QuickPick.selectedItems quickPick with
+          | Some (item :: _) ->
+            let range_string = QuickPickItem.description item in
+            ignore
+              (match range_string with
+               | Some r ->
+                 (match Jsonoo.try_parse_opt r with
+                  | Some range ->
+                    let range = Range.t_of_json range in
+                    let* () = jump_to_hole range text_editor in
+                    QuickPick.hide quickPick;
+                    (match
+                       Settings.(get server_typedHolesConstructAfterNavigate_setting)
+                     with
+                     | Some true ->
+                       let+ _ =
+                         Construct.process_construct
+                           (Range.end_ range)
+                           text_editor
+                           client
+                           instance
+                       in
+                       ()
+                     | Some false | None -> Promise.return ())
+                  | None -> Promise.return ())
+               | _ -> Promise.return ())
+          | _ -> ())
+        ()
+    in
+    let _disposable =
+      QuickPick.onDidHide quickPick ~listener:(fun () -> QuickPick.dispose quickPick)
+    in
+    QuickPick.show quickPick
+  ;;
+
   let handle_hole_navigation text_editor client instance =
     let open Promise.Syntax in
     let doc = TextEditor.document text_editor in
-    let* hole_positions = send_request_to_lsp client doc in
+    let+ hole_positions = send_request_to_lsp client doc in
     match hole_positions with
     | [] ->
       show_message `Info "No typed holes found in the file.";
-      Promise.return ()
+      ()
     | holes ->
-      let* selected_hole = display_results holes doc in
-      (match selected_hole with
-       | Some (range, ()) ->
-         let* () = jump_to_hole range text_editor in
-         (match Settings.(get server_typedHolesConstructAfterNavigate_setting) with
-          | Some true ->
-            Construct.process_construct (Range.end_ range) text_editor client instance
-          | Some false | None -> Promise.return ())
-       | None -> Promise.return ())
+      let _ = display_results holes text_editor client instance in
+      ()
   ;;
 
   let _holes =
