@@ -1086,14 +1086,11 @@ module Navigate_holes = struct
                        Settings.(get server_typedHolesConstructAfterNavigate_setting)
                      with
                      | Some true ->
-                       let+ _ =
-                         Construct.process_construct
-                           (Range.end_ range)
-                           text_editor
-                           client
-                           instance
-                       in
-                       ()
+                       Construct.process_construct
+                         (Range.end_ range)
+                         text_editor
+                         client
+                         instance
                      | Some false | None -> Promise.return ())
                   | None -> Promise.return ())
                | _ -> Promise.return ())
