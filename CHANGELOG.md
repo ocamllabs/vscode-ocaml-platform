@@ -2,7 +2,7 @@
 
 # Unreleased
 
-- Add `ocaml.navigate-typed-holes` to navigate to different typed holes. (#1666)
+- Add `ocaml.navigate-typed-holes` to navigate between typed holes. (#1666)
 
 ## 1.25.0
 
