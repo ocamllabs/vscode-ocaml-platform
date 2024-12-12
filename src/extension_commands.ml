@@ -968,14 +968,7 @@ module Navigate_holes = struct
     Custom_requests.send_request client Custom_requests.typedHoles uri
   ;;
 
-  let jump_to_hole range text_editor =
-    let open Promise.Syntax in
-    let+ _ =
-      Window.showTextDocument
-        ~document:(TextEditor.document text_editor)
-        ~preserveFocus:true
-        ()
-    in
+  let move_to_hole range text_editor =
     let new_selection =
       let anchor = Range.start range in
       let active = Range.end_ range in
@@ -989,12 +982,15 @@ module Navigate_holes = struct
       ()
   ;;
 
-  let move_to_hole range text_editor =
-    TextEditor.revealRange
-      text_editor
-      ~range
-      ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
-      ()
+  let jump_to_hole range text_editor =
+    let open Promise.Syntax in
+    let+ _ =
+      Window.showTextDocument
+        ~document:(TextEditor.document text_editor)
+        ~preserveFocus:true
+        ()
+    in
+    move_to_hole range text_editor
   ;;
 
   let display_results (results : Range.t list) text_editor client instance =
