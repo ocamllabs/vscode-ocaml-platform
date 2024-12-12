@@ -88,7 +88,7 @@ let navigate_holes_item =
   let icon = `ThemeIcon (Vscode.ThemeIcon.make ~id:"breakpoints-activate" ()) in
   let label =
     `TreeItemLabel
-      (Vscode.TreeItemLabel.create ~label:"Navigate to different typed holes" ())
+      (Vscode.TreeItemLabel.create ~label:"Navigate between typed holes" ())
   in
   let item = Vscode.TreeItem.make_label ~label () in
   let command =
