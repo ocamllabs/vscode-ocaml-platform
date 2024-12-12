@@ -1124,12 +1124,8 @@ module Navigate_holes = struct
     let doc = TextEditor.document text_editor in
     let+ hole_positions = send_request_to_lsp client doc in
     match hole_positions with
-    | [] ->
-      show_message `Info "No typed holes found in the file.";
-      ()
-    | holes ->
-      let _ = display_results current_position holes text_editor client instance in
-      ()
+    | [] -> show_message `Info "No typed holes found in the file."
+    | holes -> display_results current_position holes text_editor client instance
   ;;
 
   let _holes =
