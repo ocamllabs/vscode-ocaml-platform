@@ -853,7 +853,7 @@ module Search_by_type = struct
         ()
     in
     let _disposable =
-      QuickPick.onDidHide quickPick ~listener:(fun () -> QuickPick.dispose quickPick) ()
+      QuickPick.onDidHide quickPick ~listener:(fun () -> QuickPick.dispose quickPick)
     in
     QuickPick.show quickPick
 
@@ -1028,24 +1028,6 @@ module Navigate_holes = struct
         ~ignoreFocusOut:true
         ~items:quickPickItems
         ~buttons:[]
-        ()
-    in
-    let _disposable =
-      QuickPick.onDidChangeSelection
-        quickPick
-        ~listener:(fun selection ->
-          match selection with
-          | item :: _ ->
-            let range_string = QuickPickItem.description item in
-            (match range_string with
-             | Some r ->
-               (match Jsonoo.try_parse_opt r with
-                | Some range ->
-                  let range = Range.t_of_json range in
-                  move_to_hole range text_editor
-                | None -> ())
-             | _ -> ())
-          | _ -> ())
         ()
     in
     let _disposable =
