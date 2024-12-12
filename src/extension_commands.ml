@@ -853,7 +853,7 @@ module Search_by_type = struct
         ()
     in
     let _disposable =
-      QuickPick.onDidHide quickPick ~listener:(fun () -> QuickPick.dispose quickPick)
+      QuickPick.onDidHide quickPick ~listener:(fun () -> QuickPick.dispose quickPick) ()
     in
     QuickPick.show quickPick
 
@@ -1101,18 +1101,20 @@ module Navigate_holes = struct
         ()
     in
     let _disposable =
-      QuickPick.onDidHide quickPick ~listener:(fun () ->
-        match !selected_item with
-        | None ->
-          ignore
-            (let* () =
-               jump_to_hole
-                 (Range.makePositions ~start:current_position ~end_:current_position)
-                 text_editor
-             in
-             QuickPick.dispose quickPick |> Promise.return)
-        | Some _ ->
-          QuickPick.dispose quickPick)
+      QuickPick.onDidHide
+        quickPick
+        ~listener:(fun () ->
+          match !selected_item with
+          | None ->
+            ignore
+              (let* () =
+                 jump_to_hole
+                   (Range.makePositions ~start:current_position ~end_:current_position)
+                   text_editor
+               in
+               QuickPick.dispose quickPick |> Promise.return)
+          | Some _ -> QuickPick.dispose quickPick)
+        ()
     in
     QuickPick.show quickPick
   ;;
