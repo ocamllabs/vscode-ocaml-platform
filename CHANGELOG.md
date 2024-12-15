@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Add `.re` file extension support. (#1685)
+
 ## 1.27.0
 
 - Add `ocaml.type-selection` that shows the type of the expression around the
