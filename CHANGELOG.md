@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Add `.re` file extension support. (#1685)
+
 ## 1.25.0
 
 - Add `ocaml.search-by-type` to search for values using their type signature (#1626)

@@ -45,16 +45,16 @@ let send_msg t value ~(webview : WebView.t) =
 
 module Pp_path : sig
   type kind =
-    | Structure
-    | Signature
+    | Structure of [ `Ocaml | `Reason ]
+    | Signature of [ `Ocaml | `Reason ]
     | Unknown
 
   val get_kind : document:TextDocument.t -> kind
   val get_pp_path : document:TextDocument.t -> string
 end = struct
   type kind =
-    | Structure
-    | Signature
+    | Structure of [ `Ocaml | `Reason ]
+    | Signature of [ `Ocaml | `Reason ]
     | Unknown
 
   let relative_document_path ~document =
@@ -66,8 +66,10 @@ end = struct
   let get_kind ~document =
     let relative = relative_document_path ~document in
     match Stdlib.Filename.extension relative with
-    | ".ml" -> Structure
-    | ".mli" -> Signature
+    | ".ml" -> Structure `Ocaml
+    | ".re" -> Structure `Reason
+    | ".mli" -> Signature `Ocaml
+    | ".rei" -> Signature `Reason
     | _ -> Unknown
   ;;
 
@@ -80,8 +82,12 @@ end = struct
       let fname_opt =
         match get_kind ~document with
         | Unknown -> None
-        | Structure -> Some (String.chop_suffix_exn ~suffix:".ml" relative ^ ".pp.ml")
-        | Signature -> Some (String.chop_suffix_exn ~suffix:".mli" relative ^ ".pp.mli")
+        | Structure `Ocaml ->
+          Some (String.chop_suffix_exn ~suffix:".ml" relative ^ ".pp.ml")
+        | Signature `Ocaml ->
+          Some (String.chop_suffix_exn ~suffix:".mli" relative ^ ".pp.mli")
+        | Structure `Reason -> Some (relative ^ ".pp.ml")
+        | Signature `Reason -> Some (relative ^ ".pp.mli")
       in
       (match fname_opt with
        | Some fname ->
@@ -111,8 +117,8 @@ let transform_to_ast instance ~document ~webview =
     let origin_json =
       let text = TextDocument.getText document () in
       match Pp_path.get_kind ~document with
-      | Structure -> make_value (Dumpast.transform text `Impl)
-      | Signature -> make_value (Dumpast.transform text `Intf)
+      | Structure _ -> make_value (Dumpast.transform text `Impl)
+      | Signature _ -> make_value (Dumpast.transform text `Intf)
       | Unknown -> raise (User_error "Unknown file extension")
     in
     send_msg "ast" (Jsonoo.t_to_js origin_json) ~webview
@@ -321,9 +327,16 @@ let open_pp_doc instance ~document =
   match fetch_pp_code ~document with
   | Error e -> Promise.return (Error e)
   | Ok pp_pp_str ->
+    let file_name =
+      match Pp_path.get_kind ~document with
+      | Structure `Reason ->
+        String.chop_suffix_exn ~suffix:".re" (TextDocument.fileName document) ^ ".ml"
+      | Signature `Reason ->
+        String.chop_suffix_exn ~suffix:".rei" (TextDocument.fileName document) ^ ".mli"
+      | _ -> TextDocument.fileName document
+    in
     let* doc =
-      Workspace.openTextDocument
-        (`Uri (Uri.parse ("post-ppx: " ^ TextDocument.fileName document ^ "?") ()))
+      Workspace.openTextDocument (`Uri (Uri.parse ("post-ppx: " ^ file_name ^ "?") ()))
     in
     Ast_editor_state.associate_origin_and_pp
       ast_editor_state
