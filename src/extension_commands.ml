@@ -993,26 +993,45 @@ module Navigate_holes = struct
     show_selection selection text_editor
   ;;
 
+  module QuickPickItemWithRange = struct
+    type t =
+      { item : QuickPickItem.t
+      ; range : Range.t
+      }
+
+    let t_of_js js =
+      let range = Ojs.get_prop_ascii js "pl_range" |> Range.t_of_js in
+      let item = QuickPickItem.t_of_js js in
+      { item; range }
+    ;;
+
+    let t_to_js t =
+      let item = QuickPickItem.t_to_js t.item in
+      Ojs.set_prop_ascii item "pl_range" (Range.t_to_js t.range);
+      item
+    ;;
+  end
+
+  module QuickPick = Vscode.QuickPick.Make (QuickPickItemWithRange)
+
   let display_results (results : Range.t list) text_editor client instance =
     let open Promise.Syntax in
     let selected_item = ref false in
     let text_document = TextEditor.document text_editor in
     let quickPickItems =
-      List.map results ~f:(fun res ->
-        let line = Position.line @@ Range.end_ res in
-        QuickPickItem.create
-          ~label:(Printf.sprintf "Line %d" line)
-          ~detail:
-            (Printf.sprintf
-               "%s"
-               (TextLine.text @@ TextDocument.lineAt ~line text_document))
-          ~description:(Range.json_of_t res |> Jsonoo.stringify)
-          ())
+      List.map results ~f:(fun range ->
+        let line = Position.line @@ Range.end_ range in
+        let item =
+          QuickPickItem.create
+            ~label:(Printf.sprintf "Line %d" line)
+            ~description:(TextLine.text @@ TextDocument.lineAt ~line text_document)
+            ()
+        in
+        { QuickPickItemWithRange.item; range })
     in
-    let module QuickPick = Vscode.QuickPick.Make (QuickPickItem) in
     let quickPick =
       QuickPick.set
-        (Window.createQuickPick (module QuickPickItem) ())
+        (Window.createQuickPick (module QuickPickItemWithRange) ())
         ~title:"Typed Holes"
         ~activeItems:[]
         ~busy:false
@@ -1027,21 +1046,14 @@ module Navigate_holes = struct
     let _disposable =
       QuickPick.onDidChangeActive
         quickPick
-        ~listener:(fun selection ->
-          let open Option.O in
-          let _ =
-            let+ item = List.hd selection in
-            let* range_string = QuickPickItem.description item in
-            let* range_value = Jsonoo.try_parse_opt range_string in
-            let range = Range.t_of_json range_value in
-            Some
-              (show_selection
-                 (Selection.makePositions
-                    ~anchor:(Range.start range)
-                    ~active:(Range.end_ range))
-                 text_editor)
-          in
-          ())
+        ~listener:(function
+          | { range; _ } :: _ ->
+            show_selection
+              (Selection.makePositions
+                 ~anchor:(Range.start range)
+                 ~active:(Range.end_ range))
+              text_editor
+          | _ -> ())
         ()
     in
     let _disposable =
@@ -1050,28 +1062,18 @@ module Navigate_holes = struct
         ~listener:(fun () ->
           match QuickPick.selectedItems quickPick with
           | Some (item :: _) ->
-            let range_string = QuickPickItem.description item in
             ignore
-              (match range_string with
-               | Some r ->
-                 (match Jsonoo.try_parse_opt r with
-                  | Some range ->
-                    let range = Range.t_of_json range in
-                    let* () = jump_to_range range text_editor in
-                    selected_item := true;
-                    QuickPick.hide quickPick;
-                    (match
-                       Settings.(get server_typedHolesConstructAfterNavigate_setting)
-                     with
-                     | Some true ->
-                       Construct.process_construct
-                         (Range.end_ range)
-                         text_editor
-                         client
-                         instance
-                     | Some false | None -> Promise.return ())
-                  | None -> Promise.return ())
-               | _ -> Promise.return ())
+              (let range = item.range in
+               let* () = jump_to_range range text_editor in
+               selected_item := true;
+               match Settings.(get server_typedHolesConstructAfterNavigate_setting) with
+               | Some true ->
+                 Construct.process_construct
+                   (Range.end_ range)
+                   text_editor
+                   client
+                   instance
+               | Some false | None -> Promise.return ())
           | _ -> ())
         ()
     in
