@@ -1038,7 +1038,7 @@ module Navigate_holes = struct
         ~enabled:true
         ~placeholder:"Use arrow keys to preview / Select to jump to it"
         ~selectedItems:[]
-        ~ignoreFocusOut:true
+        ~ignoreFocusOut:false
         ~items:quickPickItems
         ~buttons:[]
         ()
