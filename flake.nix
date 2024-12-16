@@ -22,9 +22,9 @@
           nativeBuildInputs = [ pkgs.ocamlPackages.gen_js_api ];
           propagatedBuildInputs =
             (with pkgs.ocamlPackages; [
+              gen_js_api
               js_of_ocaml
               js_of_ocaml-ppx
-              gen_js_api
             ]);
           duneVersion = "3";
         };
@@ -38,10 +38,10 @@
             src = ./.;
             duneVersion = "3";
             propagatedBuildInputs = with pkgs.ocamlPackages; [
-              js_of_ocaml
               gen_js_api
-              promise_jsoo
+              js_of_ocaml
               jsonoo
+              promise_jsoo
             ];
             checkInputs = with pkgs.ocamlPackages; [ ];
             doCheck = true;
@@ -51,13 +51,13 @@
             inherit (packages.vscode) src version;
             propagatedBuildInputs = [ packages.vscode jsonoo ] ++
               (with pkgs.ocamlPackages; [
-                js_of_ocaml
-                gen_js_api
                 base
-                promise_jsoo
+                gen_js_api
+                js_of_ocaml
                 ocaml-version
-                ppxlib
                 opam-file-format
+                ppxlib
+                promise_jsoo
               ]);
             duneVersion = "3";
           };
@@ -65,12 +65,11 @@
         devShells.default = pkgs.mkShell {
           inputsFrom = pkgs.lib.attrValues packages;
           buildInputs = with pkgs.ocamlPackages; [
-            pkgs.yarn-berry
             jsonoo
             ocaml-lsp
-            pkgs.ocamlformat_0_26_2
+            pkgs.ocamlformat_0_27_0
             pkgs.vscode
-            pkgs.nodePackages.parcel
+            pkgs.yarn-berry
           ];
           shellHook = ''
             make npm-deps
