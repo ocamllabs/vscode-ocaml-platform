@@ -1040,6 +1040,7 @@ module Navigate_holes = struct
         ~selectedItems:[]
         ~ignoreFocusOut:false
         ~items:quickPickItems
+        ~matchOnDescription:true
         ~buttons:[]
         ()
     in
