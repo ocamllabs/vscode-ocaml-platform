@@ -950,6 +950,186 @@ module Search_by_type = struct
   ;;
 end
 
+module Navigate_holes = struct
+  let extension_name = "Navigate between Typed Holes"
+
+  let ocaml_lsp_doesnt_support_typed_holes ocaml_lsp =
+    not (Ocaml_lsp.can_handle_typed_holes ocaml_lsp)
+  ;;
+
+  let is_valid_text_doc textdoc =
+    match TextDocument.languageId textdoc with
+    | "ocaml" | "ocaml.interface" | "reason" -> true
+    | _ -> false
+  ;;
+
+  let send_request_to_lsp client doc =
+    let uri = TextDocument.uri doc in
+    Custom_requests.send_request client Custom_requests.typedHoles uri
+  ;;
+
+  let show_selection selection text_editor =
+    TextEditor.set_selection text_editor selection;
+    TextEditor.revealRange
+      text_editor
+      ~range:(Selection.to_range selection)
+      ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
+      ()
+  ;;
+
+  let jump_to_range range text_editor =
+    let open Promise.Syntax in
+    let+ _ =
+      Window.showTextDocument
+        ~document:(TextEditor.document text_editor)
+        ~preserveFocus:true
+        ()
+    in
+    let selection =
+      let anchor = Range.start range in
+      let active = Range.end_ range in
+      Selection.makePositions ~anchor ~active
+    in
+    show_selection selection text_editor
+  ;;
+
+  module QuickPickItemWithRange = struct
+    type t =
+      { item : QuickPickItem.t
+      ; range : Range.t
+      }
+
+    let t_of_js js =
+      let range = Ojs.get_prop_ascii js "pl_range" |> Range.t_of_js in
+      let item = QuickPickItem.t_of_js js in
+      { item; range }
+    ;;
+
+    let t_to_js t =
+      let item = QuickPickItem.t_to_js t.item in
+      Ojs.set_prop_ascii item "pl_range" (Range.t_to_js t.range);
+      item
+    ;;
+  end
+
+  module QuickPick = Vscode.QuickPick.Make (QuickPickItemWithRange)
+
+  let display_results (results : Range.t list) text_editor client instance =
+    let open Promise.Syntax in
+    let selected_item = ref false in
+    let text_document = TextEditor.document text_editor in
+    let quickPickItems =
+      List.map results ~f:(fun range ->
+        let line = Position.line @@ Range.end_ range in
+        let item =
+          QuickPickItem.create
+            ~label:(Printf.sprintf "Line %d" line)
+            ~description:(TextLine.text @@ TextDocument.lineAt ~line text_document)
+            ()
+        in
+        { QuickPickItemWithRange.item; range })
+    in
+    let quickPick =
+      QuickPick.set
+        (Window.createQuickPick (module QuickPickItemWithRange) ())
+        ~title:"Typed Holes"
+        ~activeItems:[]
+        ~busy:false
+        ~enabled:true
+        ~placeholder:"Use arrow keys to preview / Select to jump to it"
+        ~selectedItems:[]
+        ~ignoreFocusOut:false
+        ~items:quickPickItems
+        ~matchOnDescription:true
+        ~buttons:[]
+        ()
+    in
+    let _disposable =
+      QuickPick.onDidChangeActive
+        quickPick
+        ~listener:(function
+          | { range; _ } :: _ ->
+            show_selection
+              (Selection.makePositions
+                 ~anchor:(Range.start range)
+                 ~active:(Range.end_ range))
+              text_editor
+          | _ -> ())
+        ()
+    in
+    let _disposable =
+      QuickPick.onDidAccept
+        quickPick
+        ~listener:(fun () ->
+          match QuickPick.selectedItems quickPick with
+          | Some (item :: _) ->
+            ignore
+              (let range = item.range in
+               let* () = jump_to_range range text_editor in
+               selected_item := true;
+               match Settings.(get server_typedHolesConstructAfterNavigate_setting) with
+               | Some true ->
+                 Construct.process_construct
+                   (Range.end_ range)
+                   text_editor
+                   client
+                   instance
+               | Some false | None -> Promise.return ())
+          | _ -> ())
+        ()
+    in
+    let _disposable =
+      let initial_selection = TextEditor.selection text_editor in
+      QuickPick.onDidHide
+        quickPick
+        ~listener:(fun () ->
+          if !selected_item then () else show_selection initial_selection text_editor;
+          QuickPick.dispose quickPick)
+        ()
+    in
+    QuickPick.show quickPick
+  ;;
+
+  let handle_hole_navigation text_editor client instance =
+    let open Promise.Syntax in
+    let doc = TextEditor.document text_editor in
+    let+ hole_positions = send_request_to_lsp client doc in
+    match hole_positions with
+    | [] -> show_message `Info "No typed holes found in the file."
+    | holes -> display_results holes text_editor client instance
+  ;;
+
+  let _holes =
+    let handler (instance : Extension_instance.t) ~args:_ =
+      match Window.activeTextEditor () with
+      | None ->
+        Extension_consts.Command_errors.text_editor_must_be_active
+          extension_name
+          ~expl:
+            "This command only works in an active editor because it's based on the \
+             content of the editor"
+        |> show_message `Error "%s"
+      | Some text_editor when not (is_valid_text_doc (TextEditor.document text_editor)) ->
+        show_message
+          `Error
+          "Invalid file type. This command only works in ocaml files, ocaml interface \
+           files, reason files."
+      | Some text_editor ->
+        (match Extension_instance.lsp_client instance with
+         | None -> show_message `Warn "ocamllsp is not running"
+         | Some (_client, ocaml_lsp) when ocaml_lsp_doesnt_support_typed_holes ocaml_lsp
+           ->
+           show_message
+             `Warn
+             "The installed version of `ocamllsp` does not support typed hole navigation"
+         | Some (client, _) ->
+           let _ = handle_hole_navigation text_editor client instance in
+           ())
+    in
+    command Extension_consts.Commands.navigate_typed_holes handler
+  ;;
+end
+
 let register extension instance = function
   | Command { id; handler } ->
     let callback = handler instance in
