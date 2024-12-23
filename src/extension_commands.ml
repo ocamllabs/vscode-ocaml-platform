@@ -853,7 +853,7 @@ module Search_by_type = struct
         ()
     in
     let _disposable =
-      QuickPick.onDidHide quickPick ~listener:(fun () -> QuickPick.dispose quickPick)
+      QuickPick.onDidHide quickPick ~listener:(fun () -> QuickPick.dispose quickPick) ()
     in
     QuickPick.show quickPick
 
