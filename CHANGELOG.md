@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Construct: display a message when construct list is empty. (#1695)
+
 ## 1.26.0
 
 - Add `ocaml.navigate-typed-holes` to navigate between typed holes. (#1666)
