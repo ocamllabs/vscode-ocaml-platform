@@ -2788,16 +2788,16 @@
           "comment": "variable",
           "begin": "%\\{",
           "end": "\\}",
-          "beginCaptures": [
-            {
+          "beginCaptures": {
+            "1": {
               "name": "keyword.operator.dune"
             }
-          ],
-          "endCaptures": [
-            {
+          },
+          "endCaptures": {
+            "1": {
               "name": "keyword.operator.dune"
             }
-          ],
+          },
           "patterns": [
             {
               "include": "#variables"
@@ -2876,16 +2876,16 @@
               "comment": "escaped variable",
               "begin": "(\\%\\{)",
               "end": "(\\})",
-              "beginCaptures": [
-                {
+              "beginCaptures": {
+                "1": {
                   "name": "constant.character.escape.dune"
                 }
-              ],
-              "endCaptures": [
-                {
+              },
+              "endCaptures": {
+                "1": {
                   "name": "constant.character.escape.dune"
                 }
-              ],
+              },
               "patterns": [
                 {
                   "include": "#variables"

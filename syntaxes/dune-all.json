@@ -1,0 +1,11 @@
+{
+  "name": "dune-all",
+  "scopeName": "source.dune-all",
+  "fileTypes": ["dune", "dune-project", "dune-workspace"],
+  "patterns": [
+    { "include": "source.dune#general" },
+    { "include": "source.dune#stanzas" },
+    { "include": "source.dune-project#stanzas" },
+    { "include": "source.dune-workspace#stanzas" }
+  ]
+}
