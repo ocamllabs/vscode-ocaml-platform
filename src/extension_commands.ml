@@ -596,24 +596,27 @@ module Construct = struct
   let rec process_construct position text_editor client instance =
     let open Promise.Syntax in
     let* res = get_construct_results position text_editor client in
-    let* selected_result = display_results res in
-    match selected_result with
-    | Some (value, range) ->
-      let* value_inserted = insert_to_document text_editor range value in
-      (match Settings.(get server_constructRecursiveCalls_setting) with
-       | Some true | None ->
-         (match value_inserted with
-          | true ->
-            let* new_range =
-              Holes_commands.closest_hole (Range.start range) text_editor client `Next
-            in
-            (match new_range with
-             | Some range ->
-               process_construct (Range.end_ range) text_editor client instance
-             | None -> Promise.return ())
-          | false -> Promise.return ())
-       | Some false -> Promise.return ())
-    | None -> Promise.return ()
+    match res.result with
+    | [] -> show_message `Info "No values to construct this typed hole." |> Promise.return
+    | _result_list ->
+      let* selected_result = display_results res in
+      (match selected_result with
+       | Some (value, range) ->
+         let* value_inserted = insert_to_document text_editor range value in
+         (match Settings.(get server_constructRecursiveCalls_setting) with
+          | Some true | None ->
+            (match value_inserted with
+             | true ->
+               let* new_range =
+                 Holes_commands.closest_hole (Range.start range) text_editor client `Next
+               in
+               (match new_range with
+                | Some range ->
+                  process_construct (Range.end_ range) text_editor client instance
+                | None -> Promise.return ())
+             | false -> Promise.return ())
+          | Some false -> Promise.return ())
+       | None -> Promise.return ())
   ;;
 
   let _construct =
