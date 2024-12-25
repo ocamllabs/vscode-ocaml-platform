@@ -2,6 +2,8 @@
 
 # Unreleased
 
+## 1.26.1
+
 - Construct: display a message when construct list is empty. (#1695)
 
 ## 1.26.0
