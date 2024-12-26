@@ -1,11 +1,6 @@
-const fs = require("node:fs");
-const { promisify } = require("node:util");
+joo_global_object.constants = require("node:constants");
 
-joo_global_object.fs = {
-  readDir: promisify(fs.readdir),
-  readFile: promisify(fs.readFile),
-  exists: promisify(fs.exists),
-};
+joo_global_object.fs = require("node:fs/promises");
 
 joo_global_object.child_process = require("node:child_process");
 
