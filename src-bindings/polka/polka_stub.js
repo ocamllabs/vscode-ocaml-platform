@@ -1,2 +1,2 @@
-joo_global_object.polka = require("polka");
-joo_global_object.sirv = require("sirv");
+globalThis.polka = require("polka");
+globalThis.sirv = require("sirv");
