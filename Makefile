@@ -9,7 +9,7 @@ npm-deps:
 	yarn install --immutable
 
 .PHONY: deps
-deps: ## Install development dependencies
+deps:
 	$(MAKE) npm-deps
 	opam install --deps-only --with-test --with-doc --with-dev-setup --yes .
 
@@ -21,7 +21,7 @@ create_switch:
 switch: create_switch deps ## Create an opam switch and install development dependencies
 
 .PHONY: build
-build: clean ## Build the project
+build: # https://github.com/ewanharris/vscode-versions
 	dune build src/vscode_ocaml_platform.bc.js --profile=release
 	yarn workspace astexplorer build
 	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
@@ -31,38 +31,38 @@ build: clean ## Build the project
 		--outdir=dist \
 		--packages=bundle \
 		--platform=node \
-		--target=es2022 \
+		--target=node22 \
 		--analyze
 
 .PHONY: test
-test: ## Run the unit tests
+test:
 	dune build @runtest
 	yarn test
 
 .PHONY: clean
-clean: ## Clean build artifacts and other generated files
+clean:
 	dune clean
 	$(RM) -r astexplorer/dist dist
 
 .PHONY: doc
-doc: ## Generate odoc documentation
+doc:
 	dune build @doc
 
 .PHONY: fmt
-fmt: ## Format the codebase with ocamlformat
+fmt:
 	dune build --auto-promote @fmt
 	yarn biome format --write
 
 .PHONY: watch
-watch: ## Watch for the filesystem and rebuild on every change
+watch:
 	dune build @all -w --terminal-persistence=clear-on-rebuild
 
 .PHONY: pkg
-pkg: build # Builds and packages the extension for installment
+pkg: clean build
 	yarn package
 
 .PHONY: install
-install: pkg # Builds, packages, and installs the extension to your VS Code
+install: pkg
 	code --force --install-extension ocaml-platform.vsix
 
 .PHONY:
