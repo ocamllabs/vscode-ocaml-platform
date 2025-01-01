@@ -148,23 +148,47 @@ module Path = struct
   ;;
 end
 
+module Constants = struct
+  type t = R_OK
+
+  include [%js: val r_ok : Ojs.t [@@js.global "constants.R_OK"]]
+
+  let t_to_js = function
+    | R_OK -> r_ok
+  ;;
+end
+
 module Fs = struct
+  module ReadFileOptions = struct
+    include Interface.Make ()
+    include [%js: val create : encoding:string -> t [@@js.builder]]
+  end
+
   include
     [%js:
-      val readDir : string -> string list Promise.t [@@js.global "fs.readDir"]
+      val access : string -> mode:Constants.t -> unit Promise.t [@@js.global "fs.access"]
+      val readdir : string -> string list Promise.t [@@js.global "fs.readdir"]
 
-      val readFile : string -> encoding:string -> string Promise.t
-      [@@js.global "fs.readFile"]
+      val readFile : string -> options:ReadFileOptions.t -> string Promise.t
+      [@@js.global "fs.readFile"]]
 
-      val exists : string -> bool Promise.t [@@js.global "fs.exists"]]
+  let exists path =
+    access path ~mode:Constants.R_OK
+    |> Promise.then_
+         ~fulfilled:(fun _ -> Promise.return true)
+         ~rejected:(fun _ -> Promise.return false)
+  ;;
 
   let readDir path =
-    readDir path
+    readdir path
     |> Promise.then_ ~fulfilled:Promise.Result.return ~rejected:(fun error ->
       Promise.return (Error (JsError.message error)))
   ;;
 
-  let readFile = readFile ~encoding:"utf8"
+  let readFile =
+    let options = ReadFileOptions.create ~encoding:"utf8" in
+    readFile ~options
+  ;;
 end
 
 module Net = struct

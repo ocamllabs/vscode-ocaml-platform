@@ -1,1 +1,1 @@
-joo_global_object.vscode = require("vscode");
+globalThis.vscode = require("vscode");
