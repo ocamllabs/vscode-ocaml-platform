@@ -158,6 +158,15 @@ let _open_ocamllsp_output_pane, _open_ocaml_platform_ext_pane, _open_ocaml_comma
       (handler Output.command_output_channel) )
 ;;
 
+let show_selection selection text_editor =
+  TextEditor.set_selection text_editor selection;
+  TextEditor.revealRange
+    text_editor
+    ~range:(Selection.to_range selection)
+    ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
+    ()
+;;
+
 module Holes_commands : sig
   val _jump_to_prev_hole : t
   val _jump_to_next_hole : t
