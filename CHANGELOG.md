@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- MerlinJump: display a message when target list is empty and allow preview of targets. (#1704)
+
 ## 1.26.1
 
 - Construct: display a message when construct list is empty. (#1695)
