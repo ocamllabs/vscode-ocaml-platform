@@ -686,20 +686,6 @@ module MerlinJump = struct
       send_request client Merlin_jump.request (Merlin_jump.make ~uri ~position))
   ;;
 
-  let display_results (results : Custom_requests.Merlin_jump.response) =
-    let quickPickItems =
-      match results with
-      | [] ->
-        show_message `Info "No available targets to jump to.";
-        []
-      | results ->
-        List.map results ~f:(fun (target, pos) ->
-          (QuickPickItem.create ~label:("Jump to nearest " ^ target)) (), (target, pos))
-    in
-    let quickPickOptions = QuickPickOptions.create ~title:"Available Jump Targets" () in
-    Window.showQuickPickItems ~choices:quickPickItems ~options:quickPickOptions ()
-  ;;
-
   let jump_to_position text_editor position =
     let open Promise.Syntax in
     let+ _ =
@@ -708,23 +694,96 @@ module MerlinJump = struct
         ~preserveFocus:true
         ()
     in
-    TextEditor.set_selection
-      text_editor
-      (Selection.makePositions ~anchor:position ~active:position);
-    TextEditor.revealRange
-      text_editor
-      ~range:(Range.makePositions ~start:position ~end_:position)
-      ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
-      ()
+    show_selection (Selection.makePositions ~anchor:position ~active:position) text_editor
+  ;;
+
+  module QuickPickItemWithPosition = struct
+    type t =
+      { item : QuickPickItem.t
+      ; position : Position.t
+      }
+
+    let t_of_js js =
+      let position = Ojs.get_prop_ascii js "position" |> Position.t_of_js in
+      let item = QuickPickItem.t_of_js js in
+      { item; position }
+    ;;
+
+    let t_to_js t =
+      let item = QuickPickItem.t_to_js t.item in
+      Ojs.set_prop_ascii item "position" (Position.t_to_js t.position);
+      item
+    ;;
+  end
+
+  module QuickPick = Vscode.QuickPick.Make (QuickPickItemWithPosition)
+
+  let display_results (results : Custom_requests.Merlin_jump.response) text_editor =
+    let open Promise.Syntax in
+    let selected_item = ref false in
+    let quickPickItems =
+      List.map results ~f:(fun (target, position) ->
+        let item = (QuickPickItem.create ~label:("Jump to nearest " ^ target)) () in
+        { QuickPickItemWithPosition.item; position })
+    in
+    let quickPick =
+      QuickPick.set
+        (Window.createQuickPick (module QuickPickItemWithPosition) ())
+        ~title:"Available Jump Targets"
+        ~activeItems:[]
+        ~busy:false
+        ~enabled:true
+        ~placeholder:"Use arrow keys to preview / Select to jump to it"
+        ~selectedItems:[]
+        ~ignoreFocusOut:false
+        ~items:quickPickItems
+        ~matchOnDescription:true
+        ~buttons:[]
+        ()
+    in
+    let _disposable =
+      QuickPick.onDidChangeActive
+        quickPick
+        ~listener:(function
+          | { position; _ } :: _ ->
+            show_selection
+              (Selection.makePositions ~anchor:position ~active:position)
+              text_editor
+          | _ -> ())
+        ()
+    in
+    let _disposable =
+      QuickPick.onDidAccept
+        quickPick
+        ~listener:(fun () ->
+          match QuickPick.selectedItems quickPick with
+          | Some (item :: _) ->
+            ignore
+              (let position = item.position in
+               let* () = jump_to_position text_editor position in
+               selected_item := true;
+               Promise.return ())
+          | _ -> ())
+        ()
+    in
+    let _disposable =
+      let initial_selection = TextEditor.selection text_editor in
+      QuickPick.onDidHide
+        quickPick
+        ~listener:(fun () ->
+          if !selected_item then () else show_selection initial_selection text_editor;
+          QuickPick.dispose quickPick)
+        ()
+    in
+    QuickPick.show quickPick
   ;;
 
   let process_jump position text_editor client =
     let open Promise.Syntax in
-    let* successful_targets = request_possible_targets position text_editor client in
-    let* selected_target = display_results successful_targets in
-    match selected_target with
-    | Some (_res, position) -> jump_to_position text_editor position
-    | None -> Promise.return ()
+    let+ successful_targets = request_possible_targets position text_editor client in
+    match successful_targets with
+    | [] -> show_message `Info "No available targets to jump to"
+    | results -> display_results results text_editor
   ;;
 
   let _jump =
@@ -978,15 +1037,6 @@ module Navigate_holes = struct
   let send_request_to_lsp client doc =
     let uri = TextDocument.uri doc in
     Custom_requests.send_request client Custom_requests.typedHoles uri
-  ;;
-
-  let show_selection selection text_editor =
-    TextEditor.set_selection text_editor selection;
-    TextEditor.revealRange
-      text_editor
-      ~range:(Selection.to_range selection)
-      ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
-      ()
   ;;
 
   let jump_to_range range text_editor =
