@@ -9,6 +9,9 @@
   can be used to shrink the selection and increase the verbosity of the
   displayed type. (#1675)
 
+- Jump and holes commands: display message when target list is empty and allow
+  preview of available targets (#1705)
+
 ## 1.26.1
 
 - Construct: display a message when construct list is empty. (#1695)
