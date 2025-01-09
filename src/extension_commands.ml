@@ -779,7 +779,7 @@ module MerlinJump = struct
       QuickPick.onDidChangeActive
         quickPick
         ~listener:(function
-          | { position; target } :: _ ->
+          | { position; target; _ } :: _ ->
             let range =
               Range.makePositions
                 ~start:position
