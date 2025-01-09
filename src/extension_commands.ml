@@ -158,13 +158,51 @@ let _open_ocamllsp_output_pane, _open_ocaml_platform_ext_pane, _open_ocaml_comma
       (handler Output.command_output_channel) )
 ;;
 
+let decorationType =
+  let options =
+    DecorationRenderOptions.create
+      ~backgroundColor:(`ThemeColor (ThemeColor.make ~id:"editorHoverWidget.foreground"))
+      ~color:(`ThemeColor (ThemeColor.make ~id:"editorHoverWidget.background"))
+      ~border:"1px solid"
+      ~borderColor:(`ThemeColor (ThemeColor.make ~id:"editorHoverWidget.border"))
+      ~isWholeLine:false
+      ()
+  in
+  Window.createTextEditorDecorationType ~options
+;;
+
+let set_decoration text_editor range =
+  let _decorationOptions =
+    let renderOptions =
+      let before = ThemableDecorationAttachmentRenderOptions.create () in
+      let options = ThemableDecorationInstanceRenderOptions.create ~before () in
+      Some (DecorationInstanceRenderOptions.create ~light:options ~dark:options ())
+    in
+    DecorationOptions.create ~range ~renderOptions ()
+  in
+  let rangesOrOptions = `Ranges [ range ] in
+  TextEditor.setDecorations text_editor ~decorationType ~rangesOrOptions
+;;
+
+let remove_decoration text_editor =
+  let rangesOrOptions = `Ranges [] in
+  TextEditor.setDecorations text_editor ~decorationType ~rangesOrOptions
+;;
+
 let show_selection selection text_editor =
   TextEditor.set_selection text_editor selection;
   TextEditor.revealRange
     text_editor
     ~range:(Selection.to_range selection)
     ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
-    ()
+    ();
+  let range =
+    TextLine.range
+      (TextDocument.lineAtPosition
+         (TextEditor.document text_editor)
+         ~position:(Selection.start selection))
+  in
+  set_decoration text_editor range
 ;;
 
 module Holes_commands : sig
@@ -772,6 +810,7 @@ module MerlinJump = struct
         quickPick
         ~listener:(fun () ->
           if !selected_item then () else show_selection initial_selection text_editor;
+          remove_decoration text_editor;
           QuickPick.dispose quickPick)
         ()
     in
