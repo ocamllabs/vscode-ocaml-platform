@@ -195,14 +195,7 @@ let show_selection selection text_editor =
     text_editor
     ~range:(Selection.to_range selection)
     ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
-    ();
-  let range =
-    TextLine.range
-      (TextDocument.lineAtPosition
-         (TextEditor.document text_editor)
-         ~position:(Selection.start selection))
-  in
-  set_decoration text_editor range
+    ()
 ;;
 
 module Holes_commands : sig
@@ -739,17 +732,20 @@ module MerlinJump = struct
     type t =
       { item : QuickPickItem.t
       ; position : Position.t
+      ; target : string
       }
 
     let t_of_js js =
       let position = Ojs.get_prop_ascii js "position" |> Position.t_of_js in
       let item = QuickPickItem.t_of_js js in
-      { item; position }
+      let target = Ojs.get_prop_ascii js "target" |> Ojs.string_of_js in
+      { item; position; target }
     ;;
 
     let t_to_js t =
       let item = QuickPickItem.t_to_js t.item in
       Ojs.set_prop_ascii item "position" (Position.t_to_js t.position);
+      Ojs.set_prop_ascii item "target" (Ojs.string_to_js t.target);
       item
     ;;
   end
@@ -762,7 +758,7 @@ module MerlinJump = struct
     let quickPickItems =
       List.map results ~f:(fun (target, position) ->
         let item = (QuickPickItem.create ~label:("Jump to nearest " ^ target)) () in
-        { QuickPickItemWithPosition.item; position })
+        { QuickPickItemWithPosition.item; position; target })
     in
     let quickPick =
       QuickPick.set
@@ -783,10 +779,19 @@ module MerlinJump = struct
       QuickPick.onDidChangeActive
         quickPick
         ~listener:(function
-          | { position; _ } :: _ ->
+          | { position; item; target } :: _ ->
+            let range =
+              Range.makePositions
+                ~start:position
+                ~end_:
+                  (Position.make
+                     ~character:(Position.character position + String.length target)
+                     ~line:(Position.line position))
+            in
             show_selection
               (Selection.makePositions ~anchor:position ~active:position)
-              text_editor
+              text_editor;
+            set_decoration text_editor range
           | _ -> ())
         ()
     in
