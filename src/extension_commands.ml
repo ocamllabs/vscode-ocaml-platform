@@ -753,7 +753,6 @@ module MerlinJump = struct
   module QuickPick = Vscode.QuickPick.Make (QuickPickItemWithPosition)
 
   let display_results (results : Custom_requests.Merlin_jump.response) text_editor =
-    let open Promise.Syntax in
     let selected_item = ref false in
     let quickPickItems =
       List.map results ~f:(fun (target, position) ->
@@ -785,7 +784,7 @@ module MerlinJump = struct
                 ~start:position
                 ~end_:
                   (Position.make
-                     ~character:(Position.character position + String.length target)
+                     ~character:(Position.character position + 1)
                      ~line:(Position.line position))
             in
             show_selection
@@ -802,8 +801,8 @@ module MerlinJump = struct
           match QuickPick.selectedItems quickPick with
           | Some (item :: _) ->
             ignore
-              (let position = item.position in
-               let* () = jump_to_position text_editor position in
+              (let open Promise.Syntax in
+               let* () = jump_to_position text_editor item.position in
                selected_item := true;
                Promise.return ())
           | _ -> ())
