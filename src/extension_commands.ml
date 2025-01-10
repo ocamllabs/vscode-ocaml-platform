@@ -180,8 +180,10 @@ let set_decoration text_editor range =
     in
     DecorationOptions.create ~range ~renderOptions ()
   in
-  let rangesOrOptions = `Ranges [ range ] in
-  TextEditor.setDecorations text_editor ~decorationType ~rangesOrOptions
+  TextEditor.setDecorations
+    text_editor
+    ~decorationType
+    ~rangesOrOptions:(`Ranges [ range ])
 ;;
 
 let remove_decoration text_editor =
@@ -790,7 +792,33 @@ module MerlinJump = struct
             show_selection
               (Selection.makePositions ~anchor:position ~active:position)
               text_editor;
-            set_decoration text_editor range
+            let text_document = TextEditor.document text_editor in
+            let range =
+              Option.value
+                (TextDocument.getWordRangeAtPosition
+                   text_document
+                   ~position:(Range.start range)
+                   ~regex:
+                     (Js_of_ocaml.Regexp.regexp
+                        "\\(?\\b(let|fun|match|module|module\\s*type|\\w+)(?=\\s*(?:->|\\s|\\)|$))")
+                   ())
+                ~default:range
+            in
+            (match
+               String.is_prefix ~prefix:"(" (TextDocument.getText text_document ~range ())
+             with
+             | false -> set_decoration text_editor range
+             | true ->
+               let start_position = Range.start range in
+               let new_start_position =
+                 Position.make
+                   ~line:(Position.line start_position)
+                   ~character:(Position.character start_position + 1)
+               in
+               let range =
+                 Range.makePositions ~start:new_start_position ~end_:(Range.end_ range)
+               in
+               set_decoration text_editor range)
           | _ -> ())
         ()
     in
