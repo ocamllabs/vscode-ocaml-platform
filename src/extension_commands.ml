@@ -736,40 +736,37 @@ module MerlinJump = struct
     show_selection (Selection.makePositions ~anchor:position ~active:position) text_editor
   ;;
 
-  module QuickPickItemWithPosition = struct
+  module JumpQuickPickItem = struct
     type t =
       { item : QuickPickItem.t
       ; position : Position.t
-      ; target : string
       }
 
     let t_of_js js =
       let position = Ojs.get_prop_ascii js "position" |> Position.t_of_js in
       let item = QuickPickItem.t_of_js js in
-      let target = Ojs.get_prop_ascii js "target" |> Ojs.string_of_js in
-      { item; position; target }
+      { item; position }
     ;;
 
     let t_to_js t =
       let item = QuickPickItem.t_to_js t.item in
       Ojs.set_prop_ascii item "position" (Position.t_to_js t.position);
-      Ojs.set_prop_ascii item "target" (Ojs.string_to_js t.target);
       item
     ;;
   end
 
-  module QuickPick = Vscode.QuickPick.Make (QuickPickItemWithPosition)
+  module QuickPick = Vscode.QuickPick.Make (JumpQuickPickItem)
 
   let display_results (results : Custom_requests.Merlin_jump.response) text_editor =
     let selected_item = ref false in
     let quickPickItems =
       List.map results ~f:(fun (target, position) ->
         let item = (QuickPickItem.create ~label:("Jump to nearest " ^ target)) () in
-        { QuickPickItemWithPosition.item; position; target })
+        { JumpQuickPickItem.item; position })
     in
     let quickPick =
       QuickPick.set
-        (Window.createQuickPick (module QuickPickItemWithPosition) ())
+        (Window.createQuickPick (module JumpQuickPickItem) ())
         ~title:"Available Jump Targets"
         ~activeItems:[]
         ~busy:false
