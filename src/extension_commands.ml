@@ -804,9 +804,6 @@ module MerlinJump = struct
                 (TextDocument.getWordRangeAtPosition
                    text_document
                    ~position:(Range.start range)
-                   ~regex:
-                     (Js_of_ocaml.Regexp.regexp
-                        "\\(?\\b(let|fun|match|module|module\\s*type|\\w+)(?=\\s*(?:->|\\s|\\)|$))")
                    ())
                 ~default:range
             in
