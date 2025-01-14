@@ -158,38 +158,44 @@ let _open_ocamllsp_output_pane, _open_ocaml_platform_ext_pane, _open_ocaml_comma
       (handler Output.command_output_channel) )
 ;;
 
-let decorationType =
-  let options =
-    DecorationRenderOptions.create
-      ~backgroundColor:(`ThemeColor (ThemeColor.make ~id:"editorHoverWidget.foreground"))
-      ~color:(`ThemeColor (ThemeColor.make ~id:"editorHoverWidget.background"))
-      ~border:"1px solid"
-      ~borderColor:(`ThemeColor (ThemeColor.make ~id:"editorHoverWidget.border"))
-      ~isWholeLine:false
-      ()
-  in
-  Window.createTextEditorDecorationType ~options
-;;
-
-let set_decoration text_editor range =
-  let _decorationOptions =
-    let renderOptions =
-      let before = ThemableDecorationAttachmentRenderOptions.create () in
-      let options = ThemableDecorationInstanceRenderOptions.create ~before () in
-      Some (DecorationInstanceRenderOptions.create ~light:options ~dark:options ())
+module Decorations = struct
+  let highlighting_decoration =
+    let options =
+      DecorationRenderOptions.create
+        ~backgroundColor:
+          (`ThemeColor (ThemeColor.make ~id:"editorHoverWidget.foreground"))
+        ~color:(`ThemeColor (ThemeColor.make ~id:"editorHoverWidget.background"))
+        ~border:"1px solid"
+        ~borderColor:(`ThemeColor (ThemeColor.make ~id:"editorHoverWidget.border"))
+        ~isWholeLine:false
+        ()
     in
-    DecorationOptions.create ~range ~renderOptions ()
-  in
-  TextEditor.setDecorations
-    text_editor
-    ~decorationType
-    ~rangesOrOptions:(`Ranges [ range ])
-;;
+    Window.createTextEditorDecorationType ~options
+  ;;
 
-let remove_decoration text_editor =
-  let rangesOrOptions = `Ranges [] in
-  TextEditor.setDecorations text_editor ~decorationType ~rangesOrOptions
-;;
+  let highlight_range text_editor range =
+    let _decorationOptions =
+      let renderOptions =
+        let before = ThemableDecorationAttachmentRenderOptions.create () in
+        let options = ThemableDecorationInstanceRenderOptions.create ~before () in
+        Some (DecorationInstanceRenderOptions.create ~light:options ~dark:options ())
+      in
+      DecorationOptions.create ~range ~renderOptions ()
+    in
+    TextEditor.setDecorations
+      text_editor
+      ~decorationType:highlighting_decoration
+      ~rangesOrOptions:(`Ranges [ range ])
+  ;;
+
+  let remove_all_highlights text_editor =
+    let rangesOrOptions = `Ranges [] in
+    TextEditor.setDecorations
+      text_editor
+      ~decorationType:highlighting_decoration
+      ~rangesOrOptions
+  ;;
+end
 
 let show_selection selection text_editor =
   TextEditor.set_selection text_editor selection;
@@ -807,7 +813,7 @@ module MerlinJump = struct
             (match
                String.is_prefix ~prefix:"(" (TextDocument.getText text_document ~range ())
              with
-             | false -> set_decoration text_editor range
+             | false -> Decorations.highlight_range text_editor range
              | true ->
                let start_position = Range.start range in
                let new_start_position =
@@ -818,7 +824,7 @@ module MerlinJump = struct
                let range =
                  Range.makePositions ~start:new_start_position ~end_:(Range.end_ range)
                in
-               set_decoration text_editor range)
+               Decorations.highlight_range text_editor range)
           | _ -> ())
         ()
     in
@@ -842,7 +848,7 @@ module MerlinJump = struct
         quickPick
         ~listener:(fun () ->
           if !selected_item then () else show_selection initial_selection text_editor;
-          remove_decoration text_editor;
+          Decorations.remove_all_highlights text_editor;
           QuickPick.dispose quickPick)
         ()
     in
