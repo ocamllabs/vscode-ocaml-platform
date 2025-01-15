@@ -206,6 +206,25 @@ let show_selection selection text_editor =
     ()
 ;;
 
+(**  If the user hits the ESC key, this should go back to the initial_selection,
+     otherwise the current position of the click *)
+let move_cursor_after_quickpick_close initial_selection () =
+  let onDidChangeTextEditorSelection_listener event =
+    let selections = TextEditorSelectionChangeEvent.selections event in
+    match TextEditorSelectionChangeEvent.kind event with
+    | TextEditorSelectionChangeKind.Keyboard ->
+      show_selection initial_selection (TextEditorSelectionChangeEvent.textEditor event)
+    | TextEditorSelectionChangeKind.Mouse ->
+      (match selections with
+       | [ selection ] ->
+         show_selection selection (TextEditorSelectionChangeEvent.textEditor event)
+       | _ -> ())
+    | _ -> ()
+  in
+  let listener = onDidChangeTextEditorSelection_listener in
+  Window.onDidChangeTextEditorSelection () ~listener ()
+;;
+
 module Holes_commands : sig
   val _jump_to_prev_hole : t
   val _jump_to_next_hole : t
@@ -800,6 +819,9 @@ module MerlinJump = struct
               Option.value
                 (TextDocument.getWordRangeAtPosition
                    text_document
+                   ~regex:
+                     (Js_of_ocaml.Regexp.regexp
+                        "\\(?\\b(let|fun|match|module|module\\s*type|\\w+)(?=\\s*(?:->|\\s|\\)|$))")
                    ~position:(Range.start range)
                    ())
                 ~default:range
@@ -841,7 +863,9 @@ module MerlinJump = struct
       QuickPick.onDidHide
         quickPick
         ~listener:(fun () ->
-          if !selected_item then () else show_selection initial_selection text_editor;
+          if !selected_item
+          then ()
+          else Disposable.dispose (move_cursor_after_quickpick_close initial_selection ());
           Decorations.remove_all_highlights text_editor;
           QuickPick.dispose quickPick)
         ()
