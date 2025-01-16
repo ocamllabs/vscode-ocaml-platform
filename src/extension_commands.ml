@@ -198,7 +198,6 @@ module Decorations = struct
 end
 
 let show_selection selection text_editor =
-  TextEditor.set_selection text_editor selection;
   TextEditor.revealRange
     text_editor
     ~range:(Selection.to_range selection)
@@ -208,13 +207,12 @@ let show_selection selection text_editor =
 
 (**  If the user hits the ESC key, this should go back to the initial_selection,
      otherwise the current position of the click *)
-let move_cursor_after_quickpick_close initial_selection () =
+let move_cursor_after_quickpick_close event_fired () =
   let onDidChangeTextEditorSelection_listener event =
+    event_fired := true;
     let selections = TextEditorSelectionChangeEvent.selections event in
     match TextEditorSelectionChangeEvent.kind event with
-    | TextEditorSelectionChangeKind.Keyboard ->
-      show_selection initial_selection (TextEditorSelectionChangeEvent.textEditor event)
-    | TextEditorSelectionChangeKind.Mouse ->
+    | TextEditorSelectionChangeKind.Keyboard | TextEditorSelectionChangeKind.Mouse ->
       (match selections with
        | [ selection ] ->
          show_selection selection (TextEditorSelectionChangeEvent.textEditor event)
@@ -744,17 +742,6 @@ module MerlinJump = struct
       send_request client Merlin_jump.request (Merlin_jump.make ~uri ~position))
   ;;
 
-  let jump_to_position text_editor position =
-    let open Promise.Syntax in
-    let+ _ =
-      Window.showTextDocument
-        ~document:(TextEditor.document text_editor)
-        ~preserveFocus:true
-        ()
-    in
-    show_selection (Selection.makePositions ~anchor:position ~active:position) text_editor
-  ;;
-
   module JumpQuickPickItem = struct
     type t =
       { item : QuickPickItem.t
@@ -852,22 +839,37 @@ module MerlinJump = struct
           | Some (item :: _) ->
             ignore
               (let open Promise.Syntax in
-               let* () = jump_to_position text_editor item.position in
                selected_item := true;
+               let+ _ =
+                 Window.showTextDocument
+                   ~document:(TextEditor.document text_editor)
+                   ~preserveFocus:true
+                   ()
+               in
+               let selection =
+                 Selection.makePositions ~anchor:item.position ~active:item.position
+               in
+               TextEditor.set_selection text_editor selection;
+               show_selection selection text_editor;
                Promise.return ())
           | _ -> ())
         ()
     in
     let _disposable =
+      let event_fired = ref false in
       let initial_selection = TextEditor.selection text_editor in
+      let selection_listener_disposable =
+        move_cursor_after_quickpick_close event_fired ()
+      in
       QuickPick.onDidHide
         quickPick
         ~listener:(fun () ->
-          if !selected_item
+          if !event_fired || !selected_item
           then ()
-          else Disposable.dispose (move_cursor_after_quickpick_close initial_selection ());
+          else show_selection initial_selection text_editor;
           Decorations.remove_all_highlights text_editor;
-          QuickPick.dispose quickPick)
+          QuickPick.dispose quickPick;
+          Disposable.dispose selection_listener_disposable)
         ()
     in
     QuickPick.show quickPick
