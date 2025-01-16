@@ -194,15 +194,9 @@ let enable_reset () =
       state := None
     | _ -> ()
   in
-  [ (let listener event =
-       let listener = onDidChangeTextEditorSelection_listener in
-       Handlers.unpwrap (Handlers.w1 listener event)
-     in
+  [ (let listener = onDidChangeTextEditorSelection_listener in
      Window.onDidChangeTextEditorSelection () ~listener ())
-  ; (let listener event =
-       let listener = onDidChangeActiveTextEditor_listener in
-       Handlers.unpwrap (Handlers.w1 listener event)
-     in
+  ; (let listener = onDidChangeActiveTextEditor_listener in
      Window.onDidChangeActiveTextEditor () ~listener ())
   ]
 ;;

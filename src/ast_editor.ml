@@ -1,5 +1,33 @@
 open Import
 
+exception User_error of string
+
+module Handlers = struct
+  let unpwrap = function
+    | `Ok () -> ()
+    | `Error err_msg -> show_message `Error "%s" err_msg
+  ;;
+
+  let w1 f x =
+    try `Ok (f x) with
+    | User_error e -> `Error e
+  ;;
+
+  let ws f x y =
+    match f x with
+    | `Ok f' ->
+      (try `Ok (f' y) with
+       | User_error e -> `Error e)
+    | `Error e -> `Error e
+  ;;
+
+  let w2 f = ws (w1 f)
+  let w3 f x = ws (w2 f x)
+  let w4 f x y = ws (w3 f x y)
+  let w5 f x y z = ws (w4 f x y z)
+  let _w6 f x y z w = ws (w5 f x y z w)
+end
+
 let read_html_file () =
   let filename = Node.__dirname () ^ "/../astexplorer/dist/index.html" in
   Fs.readFile filename
