@@ -218,7 +218,7 @@ end
 (**  If the user hits the ESC key, this should go back to the initial_selection,
      otherwise the current position of the click is used *)
 let move_cursor_after_selection_change event_fired () =
-  let onDidChangeTextEditorSelection_listener event = event_fired := true in
+  let onDidChangeTextEditorSelection_listener _event = event_fired := true in
   let listener = onDidChangeTextEditorSelection_listener in
   Window.onDidChangeTextEditorSelection () ~listener ()
 ;;
@@ -860,7 +860,7 @@ module MerlinJump = struct
       QuickPick.onDidHide
         quickPick
         ~listener:(fun () ->
-          if not(!event_fired || !selected_item)
+          if not (!event_fired || !selected_item)
           then show_selection initial_selection text_editor;
           Decorations.remove_all_highlights text_editor;
           Disposable.dispose selection_listener_disposable;
