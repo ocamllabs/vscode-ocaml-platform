@@ -864,8 +864,8 @@ module MerlinJump = struct
           then ()
           else show_selection initial_selection text_editor;
           Decorations.remove_all_highlights text_editor;
-          QuickPick.dispose quickPick;
-          Disposable.dispose selection_listener_disposable)
+          Disposable.dispose selection_listener_disposable);
+          QuickPick.dispose quickPick
         ()
     in
     QuickPick.show quickPick
