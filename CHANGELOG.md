@@ -2,6 +2,13 @@
 
 # Unreleased
 
+- Add `ocaml.type-selection` that shows the type of the expression around the
+  cursor or selection. Repeated calls show the type of larger enclosing nodes
+  around the initial selection. Additional commands
+  `ocaml.type-previous-selection` and `ocaml.augment-selection-type-verbosity`
+  can be used to shrink the selection and increase the verbosity of the
+  displayed type. (#1675)
+
 ## 1.26.1
 
 - Construct: display a message when construct list is empty. (#1695)

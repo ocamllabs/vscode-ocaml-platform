@@ -33,7 +33,8 @@ let notify_configuration_changes instance =
         ~codelens
         ~extended_hover
         ~dune_diagnostics
-        ~syntax_documentation)
+        ~syntax_documentation
+        ())
     ()
 ;;
 

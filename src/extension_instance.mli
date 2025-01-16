@@ -20,10 +20,12 @@ val start_language_server : t -> unit Promise.t
 
 val set_configuration
   :  t
-  -> codelens:bool option
-  -> extended_hover:bool option
-  -> dune_diagnostics:bool option
-  -> syntax_documentation:bool option
+  -> ?codelens:bool option
+  -> ?extended_hover:bool option
+  -> ?standard_hover:bool option
+  -> ?dune_diagnostics:bool option
+  -> ?syntax_documentation:bool option
+  -> unit
   -> unit
 
 val open_terminal : Sandbox.t -> unit

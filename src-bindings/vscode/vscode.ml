@@ -530,6 +530,41 @@ module ThemableDecorationAttachmentRenderOptions = struct
       [@@js.builder]]
 end
 
+module DecorationRenderOptions = struct
+  include Interface.Make ()
+
+  type color = ThemableDecorationAttachmentRenderOptions.color [@@js]
+
+  include
+    [%js:
+      val create
+        :  ?backgroundColor:color
+        -> ?outline:string
+        -> ?outlineColor:color
+        -> ?outlineStyle:string
+        -> ?outlineWidth:string
+        -> ?border:string
+        -> ?borderColor:color
+        -> ?borderRadius:string
+        -> ?borderSpacing:string
+        -> ?borderStyle:string
+        -> ?borderWidth:string
+        -> ?fontStyle:string
+        -> ?fontWeight:string
+        -> ?textDecoration:string
+        -> ?cursor:string
+        -> ?color:color
+        -> ?opacity:string
+        -> ?letterSpacing:string
+        -> ?overviewRulerColor:color
+        -> ?before:ThemableDecorationAttachmentRenderOptions.t
+        -> ?after:ThemableDecorationAttachmentRenderOptions.t
+        -> ?isWholeLine:bool
+        -> unit
+        -> t
+      [@@js.builder]]
+end
+
 module ThemableDecorationInstanceRenderOptions = struct
   include Interface.Make ()
 
@@ -691,6 +726,31 @@ module TextEditor = struct
     iter_set options "undoStopAfter" [%js.of: bool] undoStopAfter;
     insertSnippet this ~snippet ?location options
   ;;
+end
+
+module TextEditorSelectionChangeKind = struct
+  type t =
+    | Keyboard [@js 1]
+    | Mouse [@js 2]
+    | Command [@js 3]
+  [@@js.enum] [@@js]
+end
+
+module TextEditorSelectionChangeEvent = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val textEditor : t -> TextEditor.t [@@js.get]
+      val selections : t -> Selection.t list [@@js.get]
+      val kind : t -> TextEditorSelectionChangeKind.t [@@js.get]
+
+      val create
+        :  textEditor:TextEditor.t
+        -> selections:Selection.t list
+        -> kind:TextEditorSelectionChangeKind.t
+        -> t
+      [@@js.builder]]
 end
 
 module ConfigurationTarget = struct
@@ -1578,6 +1638,7 @@ module OutputChannel = struct
       val name : t -> string [@@js.get]
       val append : t -> value:string -> unit [@@js.call]
       val appendLine : t -> value:string -> unit [@@js.call]
+      val replace : t -> value:string -> unit [@@js.call]
       val clear : t -> unit [@@js.call]
       val show : t -> ?preserveFocus:bool -> unit -> unit [@@js.call]
       val hide : t -> unit [@@js.call]
@@ -1988,6 +2049,8 @@ module Hover = struct
               | `MarkdownStringArray of MarkdownString.t list
               ]
              [@js.union])
+        -> ?range:Range.t
+        -> unit
         -> t
       [@@js.new "vscode.Hover"]]
 end
@@ -2902,6 +2965,11 @@ module Window = struct
       val onDidChangeVisibleTextEditors : unit -> TextEditor.t list Event.t
       [@@js.get "vscode.window.onDidChangeVisibleTextEditors"]
 
+      val onDidChangeTextEditorSelection
+        :  unit
+        -> TextEditorSelectionChangeEvent.t Event.t
+      [@@js.get "vscode.window.onDidChangeTextEditorSelection"]
+
       val terminals : unit -> Terminal.t list [@@js.get "vscode.window.terminals"]
 
       val activeTerminal : unit -> Terminal.t or_undefined
@@ -2930,6 +2998,11 @@ module Window = struct
         -> unit
         -> TextEditor.t Promise.t
       [@@js.global "vscode.window.showTextDocument"]
+
+      val createTextEditorDecorationType
+        :  options:DecorationRenderOptions.t
+        -> TextEditorDecorationType.t
+      [@@js.global "vscode.window.createTextEditorDecorationType"]
 
       val showInformationMessage
         :  message:string
@@ -2987,6 +3060,13 @@ module Window = struct
         -> string or_undefined Promise.t
       [@@js.global "vscode.window.showInputBox"]
 
+      val createOutputChannel
+        :  name:string
+        -> ?languageId:string
+        -> unit
+        -> OutputChannel.t
+      [@@js.global "vscode.window.createOutputChannel"]
+
       val createInputBox : unit -> InputBox.t [@@js.global "vscode.window.createInputBox"]
 
       val showOpenDialog
@@ -2994,9 +3074,6 @@ module Window = struct
         -> unit
         -> Uri.t list or_undefined Promise.t
       [@@js.global "vscode.window.showOpenDialog"]
-
-      val createOutputChannel : name:string -> OutputChannel.t
-      [@@js.global "vscode.window.createOutputChannel"]
 
       val setStatusBarMessage
         :  text:string
