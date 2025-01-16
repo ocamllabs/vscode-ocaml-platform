@@ -206,17 +206,14 @@ let show_selection selection text_editor =
 ;;
 
 (**  If the user hits the ESC key, this should go back to the initial_selection,
-     otherwise the current position of the click *)
-let move_cursor_after_quickpick_close event_fired () =
+     otherwise the current position of the click is used *)
+let move_cursor_after_selection_change event_fired () =
   let onDidChangeTextEditorSelection_listener event =
     event_fired := true;
     let selections = TextEditorSelectionChangeEvent.selections event in
-    match TextEditorSelectionChangeEvent.kind event with
-    | TextEditorSelectionChangeKind.Keyboard | TextEditorSelectionChangeKind.Mouse ->
-      (match selections with
-       | [ selection ] ->
-         show_selection selection (TextEditorSelectionChangeEvent.textEditor event)
-       | _ -> ())
+    match selections with
+    | [ selection ] ->
+      show_selection selection (TextEditorSelectionChangeEvent.textEditor event)
     | _ -> ()
   in
   let listener = onDidChangeTextEditorSelection_listener in
@@ -859,7 +856,7 @@ module MerlinJump = struct
       let event_fired = ref false in
       let initial_selection = TextEditor.selection text_editor in
       let selection_listener_disposable =
-        move_cursor_after_quickpick_close event_fired ()
+        move_cursor_after_selection_change event_fired ()
       in
       QuickPick.onDidHide
         quickPick
