@@ -208,14 +208,7 @@ let show_selection selection text_editor =
 (**  If the user hits the ESC key, this should go back to the initial_selection,
      otherwise the current position of the click is used *)
 let move_cursor_after_selection_change event_fired () =
-  let onDidChangeTextEditorSelection_listener event =
-    event_fired := true;
-    let selections = TextEditorSelectionChangeEvent.selections event in
-    match selections with
-    | [ selection ] ->
-      show_selection selection (TextEditorSelectionChangeEvent.textEditor event)
-    | _ -> ()
-  in
+  let onDidChangeTextEditorSelection_listener event = event_fired := true in
   let listener = onDidChangeTextEditorSelection_listener in
   Window.onDidChangeTextEditorSelection () ~listener ()
 ;;
