@@ -158,6 +158,15 @@ let _open_ocamllsp_output_pane, _open_ocaml_platform_ext_pane, _open_ocaml_comma
       (handler Output.command_output_channel) )
 ;;
 
+let show_selection selection text_editor =
+  TextEditor.set_selection text_editor selection;
+  TextEditor.revealRange
+    text_editor
+    ~range:(Selection.to_range selection)
+    ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
+    ()
+;;
+
 module Decorations = struct
   let highlighting_decoration =
     let options =
@@ -188,6 +197,15 @@ module Decorations = struct
       ~rangesOrOptions:(`Ranges [ range ])
   ;;
 
+  let highlight_and_reveal_range text_editor range =
+    highlight_range text_editor range;
+    TextEditor.revealRange
+      text_editor
+      ~range
+      ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
+      ()
+  ;;
+
   let remove_all_highlights text_editor =
     let rangesOrOptions = `Ranges [] in
     TextEditor.setDecorations
@@ -196,14 +214,6 @@ module Decorations = struct
       ~rangesOrOptions
   ;;
 end
-
-let show_selection selection text_editor =
-  TextEditor.revealRange
-    text_editor
-    ~range:(Selection.to_range selection)
-    ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
-    ()
-;;
 
 (**  If the user hits the ESC key, this should go back to the initial_selection,
      otherwise the current position of the click is used *)
@@ -788,9 +798,6 @@ module MerlinJump = struct
                      ~character:(Position.character position + 1)
                      ~line:(Position.line position))
             in
-            show_selection
-              (Selection.makePositions ~anchor:position ~active:position)
-              text_editor;
             let text_document = TextEditor.document text_editor in
             let range =
               Option.value
@@ -806,7 +813,7 @@ module MerlinJump = struct
             (match
                String.is_prefix ~prefix:"(" (TextDocument.getText text_document ~range ())
              with
-             | false -> Decorations.highlight_range text_editor range
+             | false -> Decorations.highlight_and_reveal_range text_editor range
              | true ->
                let start_position = Range.start range in
                let new_start_position =
@@ -817,7 +824,7 @@ module MerlinJump = struct
                let range =
                  Range.makePositions ~start:new_start_position ~end_:(Range.end_ range)
                in
-               Decorations.highlight_range text_editor range)
+               Decorations.highlight_and_reveal_range text_editor range)
           | _ -> ())
         ()
     in
@@ -839,7 +846,6 @@ module MerlinJump = struct
                let selection =
                  Selection.makePositions ~anchor:item.position ~active:item.position
                in
-               TextEditor.set_selection text_editor selection;
                show_selection selection text_editor;
                Promise.return ())
           | _ -> ())
