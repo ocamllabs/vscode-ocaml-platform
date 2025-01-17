@@ -158,7 +158,7 @@ let _open_ocamllsp_output_pane, _open_ocaml_platform_ext_pane, _open_ocaml_comma
       (handler Output.command_output_channel) )
 ;;
 
-let show_selection selection text_editor =
+let select_and_reveal selection text_editor =
   TextEditor.set_selection text_editor selection;
   TextEditor.revealRange
     text_editor
@@ -215,9 +215,7 @@ module Decorations = struct
   ;;
 end
 
-(**  If the user hits the ESC key, this should go back to the initial_selection,
-     otherwise the current position of the click is used *)
-let move_cursor_after_selection_change event_fired () =
+let watch_selection_change event_fired =
   let onDidChangeTextEditorSelection_listener _event = event_fired := true in
   let listener = onDidChangeTextEditorSelection_listener in
   Window.onDidChangeTextEditorSelection () ~listener ()
@@ -777,7 +775,7 @@ module MerlinJump = struct
         ~activeItems:[]
         ~busy:false
         ~enabled:true
-        ~placeholder:"Use arrow keys to preview / Select to jump to it"
+        ~placeholder:"Use arrow keys to preview / Select to jump"
         ~selectedItems:[]
         ~ignoreFocusOut:false
         ~items:quickPickItems
@@ -846,22 +844,21 @@ module MerlinJump = struct
                let selection =
                  Selection.makePositions ~anchor:item.position ~active:item.position
                in
-               show_selection selection text_editor;
-               Promise.return ())
+               select_and_reveal selection text_editor)
           | _ -> ())
         ()
     in
     let _disposable =
-      let event_fired = ref false in
       let initial_selection = TextEditor.selection text_editor in
-      let selection_listener_disposable =
-        move_cursor_after_selection_change event_fired ()
-      in
+      (* We watch selection change events so that we don't jump back to the
+         original position if an external command or user action was performed. *)
+      let selection_changed = ref false in
+      let selection_listener_disposable = watch_selection_change selection_changed in
       QuickPick.onDidHide
         quickPick
         ~listener:(fun () ->
-          if not (!event_fired || !selected_item)
-          then show_selection initial_selection text_editor;
+          if not (!selection_changed || !selected_item)
+          then select_and_reveal initial_selection text_editor;
           Decorations.remove_all_highlights text_editor;
           Disposable.dispose selection_listener_disposable;
           QuickPick.dispose quickPick)
@@ -894,7 +891,7 @@ module MerlinJump = struct
           show_message
             `Error
             "Invalid file type. This command only works in ocaml files, ocaml interface \
-             files or reason files.."
+             files or reason files."
         | Some text_editor ->
           (match Extension_instance.lsp_client instance with
            | None -> show_message `Warn "ocamllsp is not running"
@@ -1144,7 +1141,7 @@ module Navigate_holes = struct
       let active = Range.end_ range in
       Selection.makePositions ~anchor ~active
     in
-    show_selection selection text_editor
+    select_and_reveal selection text_editor
   ;;
 
   module QuickPickItemWithRange = struct
@@ -1190,7 +1187,7 @@ module Navigate_holes = struct
         ~activeItems:[]
         ~busy:false
         ~enabled:true
-        ~placeholder:"Use arrow keys to preview / Select to jump to it"
+        ~placeholder:"Use arrow keys to preview / Select to jump"
         ~selectedItems:[]
         ~ignoreFocusOut:false
         ~items:quickPickItems
@@ -1228,16 +1225,16 @@ module Navigate_holes = struct
         ()
     in
     let _disposable =
-      let event_fired = ref false in
       let initial_selection = TextEditor.selection text_editor in
-      let selection_listener_disposable =
-        move_cursor_after_selection_change event_fired ()
-      in
+      (* We watch selection change events so that we don't jump back to the
+         original position if an external command or user action was performed. *)
+      let selection_changed = ref false in
+      let selection_listener_disposable = watch_selection_change selection_changed in
       QuickPick.onDidHide
         quickPick
         ~listener:(fun () ->
-          if not (!event_fired || !selected_item)
-          then show_selection initial_selection text_editor;
+          if not (!selection_changed || !selected_item)
+          then select_and_reveal initial_selection text_editor;
           Decorations.remove_all_highlights text_editor;
           Disposable.dispose selection_listener_disposable;
           QuickPick.dispose quickPick)
