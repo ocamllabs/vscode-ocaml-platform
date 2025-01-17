@@ -1202,12 +1202,7 @@ module Navigate_holes = struct
       QuickPick.onDidChangeActive
         quickPick
         ~listener:(function
-          | { range; _ } :: _ ->
-            show_selection
-              (Selection.makePositions
-                 ~anchor:(Range.start range)
-                 ~active:(Range.end_ range))
-              text_editor
+          | { range; _ } :: _ -> Decorations.highlight_and_reveal_range text_editor range
           | _ -> ())
         ()
     in
@@ -1233,11 +1228,18 @@ module Navigate_holes = struct
         ()
     in
     let _disposable =
+      let event_fired = ref false in
       let initial_selection = TextEditor.selection text_editor in
+      let selection_listener_disposable =
+        move_cursor_after_selection_change event_fired ()
+      in
       QuickPick.onDidHide
         quickPick
         ~listener:(fun () ->
-          if !selected_item then () else show_selection initial_selection text_editor;
+          if not (!event_fired || !selected_item)
+          then show_selection initial_selection text_editor;
+          Decorations.remove_all_highlights text_editor;
+          Disposable.dispose selection_listener_disposable;
           QuickPick.dispose quickPick)
         ()
     in
