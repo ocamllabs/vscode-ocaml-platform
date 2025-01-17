@@ -158,6 +158,69 @@ let _open_ocamllsp_output_pane, _open_ocaml_platform_ext_pane, _open_ocaml_comma
       (handler Output.command_output_channel) )
 ;;
 
+let select_and_reveal selection text_editor =
+  TextEditor.set_selection text_editor selection;
+  TextEditor.revealRange
+    text_editor
+    ~range:(Selection.to_range selection)
+    ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
+    ()
+;;
+
+module Decorations = struct
+  let highlighting_decoration =
+    let options =
+      DecorationRenderOptions.create
+        ~backgroundColor:
+          (`ThemeColor (ThemeColor.make ~id:"editorHoverWidget.foreground"))
+        ~color:(`ThemeColor (ThemeColor.make ~id:"editorHoverWidget.background"))
+        ~border:"1px solid"
+        ~borderColor:(`ThemeColor (ThemeColor.make ~id:"editorHoverWidget.border"))
+        ~isWholeLine:false
+        ()
+    in
+    Window.createTextEditorDecorationType ~options
+  ;;
+
+  let highlight_range text_editor range =
+    let _decorationOptions =
+      let renderOptions =
+        let before = ThemableDecorationAttachmentRenderOptions.create () in
+        let options = ThemableDecorationInstanceRenderOptions.create ~before () in
+        Some (DecorationInstanceRenderOptions.create ~light:options ~dark:options ())
+      in
+      DecorationOptions.create ~range ~renderOptions ()
+    in
+    TextEditor.setDecorations
+      text_editor
+      ~decorationType:highlighting_decoration
+      ~rangesOrOptions:(`Ranges [ range ])
+  ;;
+
+  let highlight_and_reveal_range text_editor range =
+    highlight_range text_editor range;
+    TextEditor.revealRange
+      text_editor
+      ~range
+      ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
+      ()
+  ;;
+
+  let remove_all_highlights text_editor =
+    let rangesOrOptions = `Ranges [] in
+    TextEditor.setDecorations
+      text_editor
+      ~decorationType:highlighting_decoration
+      ~rangesOrOptions
+  ;;
+end
+
+let watch_selection_change event_fired =
+  let onDidChangeTextEditorSelection_listener _event = event_fired := true in
+  let listener = onDidChangeTextEditorSelection_listener in
+  Window.onDidChangeTextEditorSelection () ~listener ()
+;;
+
 module Holes_commands : sig
   val _jump_to_prev_hole : t
   val _jump_to_next_hole : t
@@ -677,45 +740,139 @@ module MerlinJump = struct
       send_request client Merlin_jump.request (Merlin_jump.make ~uri ~position))
   ;;
 
-  let display_results (results : Custom_requests.Merlin_jump.response) =
-    let quickPickItems =
-      match results with
-      | [] ->
-        show_message `Info "No available targets to jump to.";
-        []
-      | results ->
-        List.map results ~f:(fun (target, pos) ->
-          (QuickPickItem.create ~label:("Jump to nearest " ^ target)) (), (target, pos))
-    in
-    let quickPickOptions = QuickPickOptions.create ~title:"Available Jump Targets" () in
-    Window.showQuickPickItems ~choices:quickPickItems ~options:quickPickOptions ()
-  ;;
+  module JumpQuickPickItem = struct
+    type t =
+      { item : QuickPickItem.t
+      ; position : Position.t
+      }
 
-  let jump_to_position text_editor position =
-    let open Promise.Syntax in
-    let+ _ =
-      Window.showTextDocument
-        ~document:(TextEditor.document text_editor)
-        ~preserveFocus:true
+    let t_of_js js =
+      let position = Ojs.get_prop_ascii js "position" |> Position.t_of_js in
+      let item = QuickPickItem.t_of_js js in
+      { item; position }
+    ;;
+
+    let t_to_js t =
+      let item = QuickPickItem.t_to_js t.item in
+      Ojs.set_prop_ascii item "position" (Position.t_to_js t.position);
+      item
+    ;;
+  end
+
+  module QuickPick = Vscode.QuickPick.Make (JumpQuickPickItem)
+
+  let display_results (results : Custom_requests.Merlin_jump.response) text_editor =
+    let selected_item = ref false in
+    let quickPickItems =
+      List.map results ~f:(fun (target, position) ->
+        let item = (QuickPickItem.create ~label:("Jump to nearest " ^ target)) () in
+        { JumpQuickPickItem.item; position })
+    in
+    let quickPick =
+      QuickPick.set
+        (Window.createQuickPick (module JumpQuickPickItem) ())
+        ~title:"Available Jump Targets"
+        ~activeItems:[]
+        ~busy:false
+        ~enabled:true
+        ~placeholder:"Use arrow keys to preview / Select to jump"
+        ~selectedItems:[]
+        ~ignoreFocusOut:false
+        ~items:quickPickItems
+        ~matchOnDescription:true
+        ~buttons:[]
         ()
     in
-    TextEditor.set_selection
-      text_editor
-      (Selection.makePositions ~anchor:position ~active:position);
-    TextEditor.revealRange
-      text_editor
-      ~range:(Range.makePositions ~start:position ~end_:position)
-      ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
-      ()
+    let _disposable =
+      QuickPick.onDidChangeActive
+        quickPick
+        ~listener:(function
+          | { position; _ } :: _ ->
+            let range =
+              Range.makePositions
+                ~start:position
+                ~end_:
+                  (Position.make
+                     ~character:(Position.character position + 1)
+                     ~line:(Position.line position))
+            in
+            let text_document = TextEditor.document text_editor in
+            let range =
+              Option.value
+                (TextDocument.getWordRangeAtPosition
+                   text_document
+                   ~regex:
+                     (Js_of_ocaml.Regexp.regexp
+                        "\\(?\\b(let|fun|match|module|module\\s*type|\\w+)(?=\\s*(?:->|\\s|\\)|$))")
+                   ~position:(Range.start range)
+                   ())
+                ~default:range
+            in
+            (match
+               String.is_prefix ~prefix:"(" (TextDocument.getText text_document ~range ())
+             with
+             | false -> Decorations.highlight_and_reveal_range text_editor range
+             | true ->
+               let start_position = Range.start range in
+               let new_start_position =
+                 Position.make
+                   ~line:(Position.line start_position)
+                   ~character:(Position.character start_position + 1)
+               in
+               let range =
+                 Range.makePositions ~start:new_start_position ~end_:(Range.end_ range)
+               in
+               Decorations.highlight_and_reveal_range text_editor range)
+          | _ -> ())
+        ()
+    in
+    let _disposable =
+      QuickPick.onDidAccept
+        quickPick
+        ~listener:(fun () ->
+          match QuickPick.selectedItems quickPick with
+          | Some (item :: _) ->
+            ignore
+              (let open Promise.Syntax in
+               selected_item := true;
+               let+ _ =
+                 Window.showTextDocument
+                   ~document:(TextEditor.document text_editor)
+                   ~preserveFocus:true
+                   ()
+               in
+               let selection =
+                 Selection.makePositions ~anchor:item.position ~active:item.position
+               in
+               select_and_reveal selection text_editor)
+          | _ -> ())
+        ()
+    in
+    let _disposable =
+      let initial_selection = TextEditor.selection text_editor in
+      (* We watch selection change events so that we don't jump back to the
+         original position if an external command or user action was performed. *)
+      let selection_changed = ref false in
+      let selection_listener_disposable = watch_selection_change selection_changed in
+      QuickPick.onDidHide
+        quickPick
+        ~listener:(fun () ->
+          if not (!selection_changed || !selected_item)
+          then select_and_reveal initial_selection text_editor;
+          Decorations.remove_all_highlights text_editor;
+          Disposable.dispose selection_listener_disposable;
+          QuickPick.dispose quickPick)
+        ()
+    in
+    QuickPick.show quickPick
   ;;
 
   let process_jump position text_editor client =
     let open Promise.Syntax in
-    let* successful_targets = request_possible_targets position text_editor client in
-    let* selected_target = display_results successful_targets in
-    match selected_target with
-    | Some (_res, position) -> jump_to_position text_editor position
-    | None -> Promise.return ()
+    let+ successful_targets = request_possible_targets position text_editor client in
+    match successful_targets with
+    | [] -> show_message `Info "No available targets to jump to"
+    | results -> display_results results text_editor
   ;;
 
   let _jump =
@@ -734,7 +891,7 @@ module MerlinJump = struct
           show_message
             `Error
             "Invalid file type. This command only works in ocaml files, ocaml interface \
-             files or reason files.."
+             files or reason files."
         | Some text_editor ->
           (match Extension_instance.lsp_client instance with
            | None -> show_message `Warn "ocamllsp is not running"
@@ -971,15 +1128,6 @@ module Navigate_holes = struct
     Custom_requests.send_request client Custom_requests.typedHoles uri
   ;;
 
-  let show_selection selection text_editor =
-    TextEditor.set_selection text_editor selection;
-    TextEditor.revealRange
-      text_editor
-      ~range:(Selection.to_range selection)
-      ~revealType:TextEditorRevealType.InCenterIfOutsideViewport
-      ()
-  ;;
-
   let jump_to_range range text_editor =
     let open Promise.Syntax in
     let+ _ =
@@ -993,7 +1141,7 @@ module Navigate_holes = struct
       let active = Range.end_ range in
       Selection.makePositions ~anchor ~active
     in
-    show_selection selection text_editor
+    select_and_reveal selection text_editor
   ;;
 
   module QuickPickItemWithRange = struct
@@ -1039,7 +1187,7 @@ module Navigate_holes = struct
         ~activeItems:[]
         ~busy:false
         ~enabled:true
-        ~placeholder:"Use arrow keys to preview / Select to jump to it"
+        ~placeholder:"Use arrow keys to preview / Select to jump"
         ~selectedItems:[]
         ~ignoreFocusOut:false
         ~items:quickPickItems
@@ -1051,12 +1199,7 @@ module Navigate_holes = struct
       QuickPick.onDidChangeActive
         quickPick
         ~listener:(function
-          | { range; _ } :: _ ->
-            show_selection
-              (Selection.makePositions
-                 ~anchor:(Range.start range)
-                 ~active:(Range.end_ range))
-              text_editor
+          | { range; _ } :: _ -> Decorations.highlight_and_reveal_range text_editor range
           | _ -> ())
         ()
     in
@@ -1083,10 +1226,17 @@ module Navigate_holes = struct
     in
     let _disposable =
       let initial_selection = TextEditor.selection text_editor in
+      (* We watch selection change events so that we don't jump back to the
+         original position if an external command or user action was performed. *)
+      let selection_changed = ref false in
+      let selection_listener_disposable = watch_selection_change selection_changed in
       QuickPick.onDidHide
         quickPick
         ~listener:(fun () ->
-          if !selected_item then () else show_selection initial_selection text_editor;
+          if not (!selection_changed || !selected_item)
+          then select_and_reveal initial_selection text_editor;
+          Decorations.remove_all_highlights text_editor;
+          Disposable.dispose selection_listener_disposable;
           QuickPick.dispose quickPick)
         ()
     in
