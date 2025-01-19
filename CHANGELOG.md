@@ -2,13 +2,14 @@
 
 # Unreleased
 
+## 1.27.0
+
 - Add `ocaml.type-selection` that shows the type of the expression around the
   cursor or selection. Repeated calls show the type of larger enclosing nodes
   around the initial selection. Additional commands
   `ocaml.type-previous-selection` and `ocaml.augment-selection-type-verbosity`
   can be used to shrink the selection and increase the verbosity of the
   displayed type. (#1675)
-
 - Jump and holes commands: display message when target list is empty and allow
   preview of available targets (#1705)
 

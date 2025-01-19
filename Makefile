@@ -15,10 +15,10 @@ deps:
 
 .PHONY: create_switch
 create_switch:
-	opam switch create . 5.2.1 --no-install
+	opam switch create . 5.3.0 --no-install
 
 .PHONY: switch
-switch: create_switch deps ## Create an opam switch and install development dependencies
+switch: create_switch deps
 
 .PHONY: build
 build: # https://github.com/ewanharris/vscode-versions
