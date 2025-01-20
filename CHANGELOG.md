@@ -2,6 +2,8 @@
 
 # Unreleased
 
+## 1.28.0
+
 - Add `.re` file extension support. (#1685)
 
 ## 1.27.0
