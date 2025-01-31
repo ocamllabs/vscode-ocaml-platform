@@ -282,13 +282,28 @@ let detect_opam_sandbox ~project_root opam () =
   Opam (opam, switch)
 ;;
 
+let detect_dune_pkg ~project_root () =
+  let open Promise.Syntax in
+  (* Path to the dune.lock file *)
+  let dune_lock_path = Path.join project_root (Path.of_string "dune.lock") in
+  let+ exists = Fs.exists (Path.to_string dune_lock_path) in
+  if exists
+  then (
+    show_message
+      `Info
+      "Dune Pkg detected. Configuring a custom sandbox for the workspace.";
+    Some (Custom "$prog $args"))
+  else None
+;;
+
 let detect () =
   let open Promise.Option.Syntax in
   let* project_root = workspace_root () |> Promise.return in
   let available = available_sandboxes () in
   Promise.List.find_map
     (fun f -> f ())
-    [ detect_opam_local_switch ~project_root available.opam
+    [ detect_dune_pkg ~project_root
+    ; detect_opam_local_switch ~project_root available.opam
     ; detect_esy_sandbox ~project_root available.esy
     ; detect_opam_sandbox ~project_root available.opam
     ]
