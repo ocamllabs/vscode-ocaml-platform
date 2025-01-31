@@ -29,6 +29,8 @@
 
 - Fix syntax color for odoc math blocks containing braces (#1741)
 
+- Detect Dune Pkg and auto-configure a Custom sandbox for it. (#1719)
+
 ## 1.28.0
 
 - Add `.re` file extension support. (#1685)
