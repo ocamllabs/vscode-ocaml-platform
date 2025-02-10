@@ -216,41 +216,41 @@ end = struct
     let* ocamllsp_present = check_ocaml_lsp_available t.sandbox in
     match ocamllsp_present with
     | Ok () ->
-    let+ res =
-      let client =
-        let serverOptions = server_options t.sandbox in
-        let clientOptions = client_options () in
-        LanguageClient.make
-          ~id:"ocaml"
-          ~name:"OCaml Platform VS Code extension"
-          ~serverOptions
-          ~clientOptions
-          ()
+      let+ res =
+        let client =
+          let serverOptions = server_options t.sandbox in
+          let clientOptions = client_options () in
+          LanguageClient.make
+            ~id:"ocaml"
+            ~name:"OCaml Platform VS Code extension"
+            ~serverOptions
+            ~clientOptions
+            ()
+        in
+        LanguageClient.registerFeature client ~feature:client_capabilities;
+        let open Promise.Syntax in
+        let+ () = LanguageClient.start client in
+        let initialize_result = LanguageClient.initializeResult client in
+        let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
+        t.lsp_client <- Some (client, ocaml_lsp);
+        (match Ocaml_lsp.is_version_up_to_date ocaml_lsp (ocaml_version_exn t) with
+         | Ok () -> ()
+         | Error (`Msg m) -> show_message `Warn "%s" m);
+        send_configuration
+          client
+          ~codelens:t.codelens
+          ~extended_hover:t.extended_hover
+          ~standard_hover:t.standard_hover
+          ~dune_diagnostics:t.dune_diagnostics
+          ~syntax_documentation:t.syntax_documentation;
+        Ok ()
       in
-      LanguageClient.registerFeature client ~feature:client_capabilities;
-      let open Promise.Syntax in
-      let+ () = LanguageClient.start client in
-      let initialize_result = LanguageClient.initializeResult client in
-      let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
-      t.lsp_client <- Some (client, ocaml_lsp);
-      (match Ocaml_lsp.is_version_up_to_date ocaml_lsp (ocaml_version_exn t) with
-       | Ok () -> ()
-       | Error (`Msg m) -> show_message `Warn "%s" m);
-      send_configuration
-        client
-        ~codelens:t.codelens
-        ~extended_hover:t.extended_hover
-        ~standard_hover:t.standard_hover
-        ~dune_diagnostics:t.dune_diagnostics
-        ~syntax_documentation:t.syntax_documentation;
-      Ok ()
-    in
       (match res with
-    | Ok () -> ()
-    | Error s ->
-      show_message
-        `Error
-        "An error occurred starting the language server `ocamllsp`. %s"
+       | Ok () -> ()
+       | Error s ->
+         show_message
+           `Error
+           "An error occurred starting the language server `ocamllsp`. %s"
            s)
     | Error _ ->
       let+ () = suggest_to_install_ocaml_lsp_server () in
