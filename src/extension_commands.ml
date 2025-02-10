@@ -59,7 +59,7 @@ let _select_sandbox =
 let _install_ocaml_lsp_server =
   let handler (instance : Extension_instance.t) ~args:_ =
     let open Promise.Syntax in
-    let (_ : unit Promise.t) =
+    let _ =
       let sandbox = Extension_instance.sandbox instance in
       let* ocamllsp_present = Extension_instance.check_ocaml_lsp_available sandbox in
       match ocamllsp_present with
@@ -80,7 +80,7 @@ let _install_ocaml_lsp_server =
 
 let _restart_language_server =
   let handler (instance : Extension_instance.t) ~args:_ =
-    let (_ : unit Promise.t) = Extension_instance.start_language_server instance in
+    let _ = Extension_instance.start_language_server instance in
     ()
   in
   command Extension_consts.Commands.restart_language_server handler
