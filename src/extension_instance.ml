@@ -167,21 +167,37 @@ end = struct
       LanguageClient.Executable.create ~command ~args ~options ()
   ;;
 
-  let check_ocaml_lsp_available sandbox =
-    let ocaml_lsp_version sandbox =
-      Sandbox.get_command sandbox "ocamllsp" [ "--version" ]
+  let suggest_to_install_ocaml_lsp_server () =
+    let open Promise.Syntax in
+    let install_lsp_text = "Install OCaml-LSP server" in
+    let select_different_sanbox = "Select a different Sandbox" in
+    let+ selection =
+      Window.showInformationMessage
+        ~message:
+          "Failed to start the language server. `ocaml-lsp-server` is not installed in \
+           the current sandbox."
+        ~choices:
+          [ install_lsp_text, install_lsp_text
+          ; select_different_sanbox, select_different_sanbox
+          ]
+        ()
     in
-    let cwd =
-      match Workspace.workspaceFolders () with
-      | [ cwd ] -> Some (cwd |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string)
-      | _ -> None
-    in
-    Cmd.output ?cwd (ocaml_lsp_version sandbox)
-    |> Promise.Result.fold
-         ~ok:(fun (_ : string) -> ())
-         ~error:(fun (_ : string) ->
-           "Sandbox initialization failed: `ocaml-lsp-server` is not installed in the \
-            current sandbox.")
+    match selection with
+    | Some choice when String.equal choice install_lsp_text ->
+      let (_ : Ojs.t option Promise.t) =
+        Vscode.Commands.executeCommand
+          ~command:Extension_consts.Commands.install_ocaml_lsp_server
+          ~args:[]
+      in
+      ()
+    | Some choice when String.equal choice select_different_sanbox ->
+      let (_ : Ojs.t option Promise.t) =
+        Vscode.Commands.executeCommand
+          ~command:Extension_consts.Commands.select_sandbox
+          ~args:[]
+      in
+      ()
+    | _ -> ()
   ;;
 
   let client_capabilities =
@@ -197,6 +213,9 @@ end = struct
   let start_language_server t =
     let open Promise.Syntax in
     let* () = stop_server t in
+    let* ocamllsp_present = check_ocaml_lsp_available t.sandbox in
+    match ocamllsp_present with
+    | Ok () ->
     let+ res =
       let open Promise.Result.Syntax in
       let* () = check_ocaml_lsp_available t.sandbox in
@@ -228,13 +247,16 @@ end = struct
         ~syntax_documentation:t.syntax_documentation;
       Ok ()
     in
-    match res with
+      (match res with
     | Ok () -> ()
     | Error s ->
       show_message
         `Error
         "An error occurred starting the language server `ocamllsp`. %s"
-        s
+           s)
+    | Error _ ->
+      let+ () = suggest_to_install_ocaml_lsp_server () in
+      ()
   ;;
 end
 
