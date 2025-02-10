@@ -217,8 +217,6 @@ end = struct
     match ocamllsp_present with
     | Ok () ->
     let+ res =
-      let open Promise.Result.Syntax in
-      let* () = check_ocaml_lsp_available t.sandbox in
       let client =
         let serverOptions = server_options t.sandbox in
         let clientOptions = client_options () in
@@ -276,6 +274,22 @@ let documentation_server_info () =
   StatusBarItem.set_command status_bar (`Command command);
   StatusBarItem.set_text status_bar "$(radio-tower) OCaml Documentation";
   status_bar
+;;
+
+let install_ocaml_lsp_server sandbox =
+  let open Promise.Syntax in
+  let+ () = Sandbox.install_packages sandbox [ "ocaml-lsp-server" ] in
+  let (_ : Ojs.t option Promise.t) =
+    Vscode.Commands.executeCommand
+      ~command:Extension_consts.Commands.refresh_switches
+      ~args:[]
+  in
+  let (_ : Ojs.t option Promise.t) =
+    Vscode.Commands.executeCommand
+      ~command:Extension_consts.Commands.refresh_sandbox
+      ~args:[]
+  in
+  ()
 ;;
 
 module Sandbox_info : sig

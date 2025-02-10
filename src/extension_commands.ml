@@ -56,6 +56,28 @@ let _select_sandbox =
   command Extension_consts.Commands.select_sandbox handler
 ;;
 
+let _install_ocaml_lsp_server =
+  let handler (instance : Extension_instance.t) ~args:_ =
+    let open Promise.Syntax in
+    let (_ : unit Promise.t) =
+      let sandbox = Extension_instance.sandbox instance in
+      let* ocamllsp_present = Extension_instance.check_ocaml_lsp_available sandbox in
+      match ocamllsp_present with
+      | Ok () ->
+        show_message `Info "ocaml-lsp-server is already installed and up to date."
+        |> Promise.return
+      | Error _ ->
+        show_message `Info "Installing the latest release of ocaml-lsp-server...";
+        let* () = Extension_instance.install_ocaml_lsp_server sandbox in
+        show_message `Info "Installation of ocaml-lsp-server completed successfully.";
+        let+ () = Extension_instance.start_language_server instance in
+        ()
+    in
+    ()
+  in
+  command Extension_consts.Commands.install_ocaml_lsp_server handler
+;;
+
 let _restart_language_server =
   let handler (instance : Extension_instance.t) ~args:_ =
     let (_ : unit Promise.t) = Extension_instance.start_language_server instance in
