@@ -70,8 +70,7 @@ let _install_ocaml_lsp_server =
         show_message `Info "Installing the latest release of ocaml-lsp-server...";
         let* () = Extension_instance.install_ocaml_lsp_server sandbox in
         show_message `Info "Installation of ocaml-lsp-server completed successfully.";
-        let+ () = Extension_instance.start_language_server instance in
-        ()
+        Extension_instance.start_language_server instance
     in
     ()
   in
