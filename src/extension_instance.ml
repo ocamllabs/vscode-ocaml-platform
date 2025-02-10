@@ -108,6 +108,23 @@ let stop_server t =
     else Promise.return ()
 ;;
 
+let check_ocaml_lsp_available sandbox =
+  let ocaml_lsp_version sandbox =
+    Sandbox.get_command sandbox "ocamllsp" [ "--version" ]
+  in
+  let cwd =
+    match Workspace.workspaceFolders () with
+    | [ cwd ] -> Some (cwd |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string)
+    | _ -> None
+  in
+  Cmd.output ?cwd (ocaml_lsp_version sandbox)
+  |> Promise.Result.fold
+       ~ok:(fun (_ : string) -> ())
+       ~error:(fun (_ : string) ->
+         "Sandbox initialization failed: `ocaml-lsp-server` is not installed in the \
+          current sandbox.")
+;;
+
 module Language_server_init : sig
   val start_language_server : t -> unit Promise.t
 end = struct

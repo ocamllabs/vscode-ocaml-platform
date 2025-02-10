@@ -7,6 +7,7 @@ val sandbox : t -> Sandbox.t
 val set_sandbox : t -> Sandbox.t -> unit
 val language_client : t -> LanguageClient.t option
 val ocaml_lsp : t -> Ocaml_lsp.t option
+val check_ocaml_lsp_available : Sandbox.t -> (unit, string) result Promise.t
 
 val start_documentation_server
   :  t
