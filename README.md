@@ -54,16 +54,6 @@ full without all of its dependencies.
    VSCode extension installations instructions are available
    [here](https://code.visualstudio.com/docs/editor/extension-marketplace).
 
-If you're on Mac or Linux, now you should have everything necessary installed
-and ready. You can skip the sub-section below named "Windows" and proceed to
-"Setting up the extension for your project."
-
-### On Windows
-
-Install [OCaml for Windows](https://fdopen.github.io/opam-repository-mingw/) and
-make sure the `ocaml-env` program is accessible on the PATH (`ocaml-env` is in
-the `usr/local/bin` folder relative to the installation directory).
-
 ### Setting up the extension for your project
 
 1. Open your OCaml/ReasonML project (`File > Add Folder to Workspace...`).
@@ -104,8 +94,7 @@ the `usr/local/bin` folder relative to the installation directory).
    you built your project after adding `A` or are running build in a polling
    mode, and make sure that error isn't a stale error.
 
-By this point, you should have a working OCaml development editor ready. If
-you're on Windows or use ReasonML/ReScript/BuckleScript, see subsections below.
+By this point, you should have a working OCaml development editor ready.
 
 ### ReasonML / ReScript / BuckleScript
 
@@ -222,7 +211,7 @@ the settings under `File > Preferences > Settings`.
 | `ocaml.terminal.shell.windows`            | The path of the shell that the sandbox terminal uses on Windows                                         | `null`  |
 | `ocaml.terminal.shellArgs.linux`          | The command line arguments that the sandbox terminal uses on Linux                                      | `null`  |
 | `ocaml.terminal.shellArgs.osx`            | The command line arguments that the sandbox terminal uses on macOS                                      | `null`  |
-| `ocaml.terminal.shellArgs.windows`        | The command line arguments that the sandbox terminal uses on Window                                     | `null`  |
+| `ocaml.terminal.shellArgs.windows`        | The command line arguments that the sandbox terminal uses on Windows                                    | `null`  |
 | `ocaml.repl.path`                         | The path of the REPL that the extension uses                                                            | `null`  |
 | `ocaml.repl.args`                         | The REPL arguments that the extension uses                                                              | `null`  |
 | `ocaml.repl.useUtop`                      | Controls whether to use Utop for the REPL if it is installed in the current switch.                     | `true`  |
