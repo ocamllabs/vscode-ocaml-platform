@@ -67,7 +67,6 @@ let _install_ocaml_lsp_server =
         show_message `Info "ocaml-lsp-server is already installed and up to date."
         |> Promise.return
       | Error _ ->
-        show_message `Info "Installing the latest release of ocaml-lsp-server...";
         let* () = Extension_instance.install_ocaml_lsp_server sandbox in
         show_message `Info "Installation of ocaml-lsp-server completed successfully.";
         Extension_instance.start_language_server instance
