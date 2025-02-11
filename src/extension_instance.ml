@@ -252,8 +252,7 @@ end = struct
            `Error
            "An error occurred starting the language server `ocamllsp`. %s"
            s)
-    | Error _ ->
-      suggest_to_install_ocaml_lsp_server ()
+    | Error _ -> suggest_to_install_ocaml_lsp_server ()
   ;;
 end
 
