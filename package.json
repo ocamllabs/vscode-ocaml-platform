@@ -117,7 +117,7 @@
       {
         "command": "ocaml.install-ocaml-lsp-server",
         "category": "OCaml",
-        "title": "Install OCaml-LSP Server`",
+        "title": "Install OCaml-LSP Server",
         "icon": {
           "light": "assets/plus-light.svg",
           "dark": "assets/plus-dark.svg"
