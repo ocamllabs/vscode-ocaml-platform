@@ -200,6 +200,37 @@ end = struct
     | _ -> ()
   ;;
 
+  let suggest_to_upgrade_ocaml_lsp_server err =
+    let open Promise.Syntax in
+    let upgrade_lsp_text = "Upgrade OCaml-LSP server" in
+    let select_different_sanbox = "Select a different Sandbox" in
+    let+ selection =
+      Window.showInformationMessage
+        ~message:("OCaml-LSP server is not up to date: " ^ err)
+        ~choices:
+          [ upgrade_lsp_text, upgrade_lsp_text
+          ; select_different_sanbox, select_different_sanbox
+          ]
+        ()
+    in
+    match selection with
+    | Some choice when String.equal choice upgrade_lsp_text ->
+      let (_ : Ojs.t option Promise.t) =
+        Vscode.Commands.executeCommand
+          ~command:Extension_consts.Commands.upgrade_ocaml_lsp_server
+          ~args:[]
+      in
+      ()
+    | Some choice when String.equal choice select_different_sanbox ->
+      let (_ : Ojs.t option Promise.t) =
+        Vscode.Commands.executeCommand
+          ~command:Extension_consts.Commands.select_sandbox
+          ~args:[]
+      in
+      ()
+    | _ -> ()
+  ;;
+
   let client_capabilities =
     let fillClientCapabilities ~capabilities =
       let experimental = Jsonoo.Encode.(object_ [ "jumpToNextHole", bool true ]) in
@@ -235,7 +266,9 @@ end = struct
         t.lsp_client <- Some (client, ocaml_lsp);
         (match Ocaml_lsp.is_version_up_to_date ocaml_lsp (ocaml_version_exn t) with
          | Ok () -> ()
-         | Error (`Msg m) -> show_message `Warn "%s" m);
+         | Error (`Msg (error, _latest_version)) ->
+           let _ = suggest_to_upgrade_ocaml_lsp_server error in
+           ());
         send_configuration
           client
           ~codelens:t.codelens
@@ -277,6 +310,22 @@ let documentation_server_info () =
 let install_ocaml_lsp_server sandbox =
   let open Promise.Syntax in
   let+ () = Sandbox.install_packages sandbox [ "ocaml-lsp-server" ] in
+  let (_ : Ojs.t option Promise.t) =
+    Vscode.Commands.executeCommand
+      ~command:Extension_consts.Commands.refresh_switches
+      ~args:[]
+  in
+  let (_ : Ojs.t option Promise.t) =
+    Vscode.Commands.executeCommand
+      ~command:Extension_consts.Commands.refresh_sandbox
+      ~args:[]
+  in
+  ()
+;;
+
+let upgrade_ocaml_lsp_server sandbox latest_version =
+  let open Promise.Syntax in
+  let+ () = Sandbox.install_packages sandbox [ "ocaml-lsp-server=" ^ latest_version ] in
   let (_ : Ojs.t option Promise.t) =
     Vscode.Commands.executeCommand
       ~command:Extension_consts.Commands.refresh_switches
