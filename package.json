@@ -1309,7 +1309,7 @@
   ],
   "dependencies": {
     "polka": "1.0.0-next.28",
-    "sirv": "3.0.0",
+    "sirv": "3.0.1",
     "vscode-languageclient": "9.0.1"
   },
   "devDependencies": {
