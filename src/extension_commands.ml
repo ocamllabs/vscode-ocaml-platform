@@ -64,8 +64,7 @@ let _install_ocaml_lsp_server =
       let* ocamllsp_present = Extension_instance.check_ocaml_lsp_available sandbox in
       match ocamllsp_present with
       | Ok () ->
-        show_message `Info "OCaml-LSP server is already installed."
-        |> Promise.return
+        show_message `Info "OCaml-LSP server is already installed." |> Promise.return
       | Error _ ->
         let* () = Extension_instance.install_ocaml_lsp_server sandbox in
         show_message `Info "Installation of OCaml-LSP server completed successfully.";
