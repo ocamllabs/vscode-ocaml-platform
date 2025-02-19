@@ -170,7 +170,7 @@ end = struct
   let suggest_to_install_ocaml_lsp_server () =
     let open Promise.Syntax in
     let install_lsp_text = "Install OCaml-LSP server" in
-    let select_different_sanbox = "Select a different Sandbox" in
+    let select_different_sandbox = "Select a different Sandbox" in
     let+ selection =
       Window.showInformationMessage
         ~message:
@@ -178,7 +178,7 @@ end = struct
            the current sandbox."
         ~choices:
           [ install_lsp_text, install_lsp_text
-          ; select_different_sanbox, select_different_sanbox
+          ; select_different_sandbox, select_different_sandbox
           ]
         ()
     in
@@ -190,7 +190,7 @@ end = struct
           ~args:[]
       in
       ()
-    | Some choice when String.equal choice select_different_sanbox ->
+    | Some choice when String.equal choice select_different_sandbox ->
       let (_ : Ojs.t option Promise.t) =
         Vscode.Commands.executeCommand
           ~command:Extension_consts.Commands.select_sandbox
@@ -257,8 +257,8 @@ end = struct
         t.lsp_client <- Some (client, ocaml_lsp);
         (match Ocaml_lsp.is_version_up_to_date ocaml_lsp (ocaml_version_exn t) with
          | Ok () -> ()
-         | Error (`Msg (error, _latest_version)) ->
-           let _ = suggest_to_upgrade_ocaml_lsp_server error in
+         | Error (`Msg _) ->
+           let _ = suggest_to_upgrade_ocaml_lsp_server () in
            ());
         send_configuration
           client
