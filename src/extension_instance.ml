@@ -200,17 +200,14 @@ end = struct
     | _ -> ()
   ;;
 
-  let suggest_to_upgrade_ocaml_lsp_server err =
+  let suggest_to_upgrade_ocaml_lsp_server () =
     let open Promise.Syntax in
-    let upgrade_lsp_text = "Upgrade OCaml-LSP server" in
-    let select_different_sandbox = "Select a different Sandbox" in
+    let upgrade_lsp_text = "Yes" in
+    let no_upgrade = "No" in
     let+ selection =
       Window.showInformationMessage
-        ~message:("OCaml-LSP server is not up to date: " ^ err)
-        ~choices:
-          [ upgrade_lsp_text, upgrade_lsp_text
-          ; select_different_sandbox, select_different_sandbox
-          ]
+        ~message:"OCaml-LSP server is not up to date. Do you want to upgrade it?"
+        ~choices:[ upgrade_lsp_text, upgrade_lsp_text; no_upgrade, no_upgrade ]
         ()
     in
     match selection with
@@ -221,13 +218,7 @@ end = struct
           ~args:[]
       in
       ()
-    | Some choice when String.equal choice select_different_sandbox ->
-      let (_ : Ojs.t option Promise.t) =
-        Vscode.Commands.executeCommand
-          ~command:Extension_consts.Commands.select_sandbox
-          ~args:[]
-      in
-      ()
+    | Some choice when String.equal choice no_upgrade -> ()
     | _ -> ()
   ;;
 
