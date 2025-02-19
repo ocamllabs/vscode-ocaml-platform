@@ -64,11 +64,11 @@ let _install_ocaml_lsp_server =
       let* ocamllsp_present = Extension_instance.check_ocaml_lsp_available sandbox in
       match ocamllsp_present with
       | Ok () ->
-        show_message `Info "ocaml-lsp-server is already installed and up to date."
+        show_message `Info "OCaml-LSP server is already installed."
         |> Promise.return
       | Error _ ->
         let* () = Extension_instance.install_ocaml_lsp_server sandbox in
-        show_message `Info "Installation of ocaml-lsp-server completed successfully.";
+        show_message `Info "Installation of OCaml-LSP server completed successfully.";
         Extension_instance.start_language_server instance
     in
     ()
@@ -92,7 +92,7 @@ let _upgrade_ocaml_lsp_server =
         let+ _ = Extension_instance.start_language_server instance in
         show_message
           `Info
-          "ocaml-lsp-server upgraded successfully to version %s"
+          "OCaml-LSP server upgraded successfully to version %s"
           latest_version
     in
     ()
