@@ -30,6 +30,7 @@ type t =
   | Esy of Esy.t * Esy.Manifest.t
   | Global
   | Custom of string
+  | Dune_pkg of string
 
 val equal : t -> t -> bool
 val to_string : t -> string
