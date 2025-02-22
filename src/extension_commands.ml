@@ -56,9 +56,52 @@ let _select_sandbox =
   command Extension_consts.Commands.select_sandbox handler
 ;;
 
+let _install_ocaml_lsp_server =
+  let handler (instance : Extension_instance.t) ~args:_ =
+    let open Promise.Syntax in
+    let _ =
+      let sandbox = Extension_instance.sandbox instance in
+      let* ocamllsp_present = Extension_instance.check_ocaml_lsp_available sandbox in
+      match ocamllsp_present with
+      | Ok () ->
+        show_message `Info "OCaml-LSP server is already installed." |> Promise.return
+      | Error _ ->
+        let* () = Extension_instance.install_ocaml_lsp_server sandbox in
+        show_message `Info "Installation of OCaml-LSP server completed successfully.";
+        Extension_instance.start_language_server instance
+    in
+    ()
+  in
+  command Extension_consts.Commands.install_ocaml_lsp_server handler
+;;
+
+let _upgrade_ocaml_lsp_server =
+  let handler (instance : Extension_instance.t) ~args:_ =
+    let open Promise.Syntax in
+    let (_ : unit Promise.t) =
+      let sandbox = Extension_instance.sandbox instance in
+      match
+        Ocaml_lsp.is_version_up_to_date
+          (Extension_instance.ocaml_lsp instance |> Option.value_exn)
+          (Extension_instance.ocaml_version_exn instance)
+      with
+      | Ok () -> Promise.return ()
+      | Error (`Msg (_error, latest_version)) ->
+        let* _ = Extension_instance.upgrade_ocaml_lsp_server sandbox latest_version in
+        let+ _ = Extension_instance.start_language_server instance in
+        show_message
+          `Info
+          "OCaml-LSP server upgraded successfully to version %s"
+          latest_version
+    in
+    ()
+  in
+  command Extension_consts.Commands.upgrade_ocaml_lsp_server handler
+;;
+
 let _restart_language_server =
   let handler (instance : Extension_instance.t) ~args:_ =
-    let (_ : unit Promise.t) = Extension_instance.start_language_server instance in
+    let _ = Extension_instance.start_language_server instance in
     ()
   in
   command Extension_consts.Commands.restart_language_server handler
@@ -243,7 +286,7 @@ end = struct
         (Extension_instance.ocaml_version_exn instance)
     with
     | Ok () -> ()
-    | Error (`Msg msg) ->
+    | Error (`Msg (msg, _latest_version)) ->
       show_message
         `Warn
         "The installed version of `ocamllsp` does not support typed holes. %s"
@@ -559,7 +602,7 @@ module Copy_type_under_cursor = struct
         (Extension_instance.ocaml_version_exn instance)
     with
     | Ok () -> ()
-    | Error (`Msg msg) ->
+    | Error (`Msg (msg, _latest_version)) ->
       show_message
         `Warn
         "The installed version of `ocamllsp` does not support type enclosings. %s"

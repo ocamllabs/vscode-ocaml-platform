@@ -602,7 +602,7 @@ let install_packages t packages =
   let options =
     ProgressOptions.create
       ~location:(`ProgressLocation Notification)
-      ~title:"Installing sandbox packages"
+      ~title:("Installing sandbox packages: " ^ String.concat ~sep:"," packages)
       ~cancellable:false
       ()
   in
