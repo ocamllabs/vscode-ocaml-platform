@@ -247,6 +247,221 @@ let _switch_impl_intf =
   command Command_api.Internal.switch_impl_intf callback
 ;;
 
+let _install_opam =
+  let handler (instance : Extension_instance.t) ~args:_ =
+    let options =
+      ProgressOptions.create
+        ~location:(`ProgressLocation Notification)
+        ~title:"Installing OPAM package manager"
+        ~cancellable:false
+        ()
+    in
+    let task ~progress:_ ~token:_ =
+      let open Promise.Syntax in
+      let+ result =
+        match Platform.t with
+        | Win32 ->
+          let _ =
+            let terminal =
+              Extension_instance.sandbox instance |> Terminal_sandbox.create
+            in
+            let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+            Terminal_sandbox.send terminal "winget install Git.Git OCaml.opam"
+          in
+          Ok () |> Promise.return
+        | Darwin | Linux | Other ->
+          let open Promise.Result.Syntax in
+          let+ _ =
+            let _ =
+              let terminal =
+                Extension_instance.sandbox instance |> Terminal_sandbox.create
+              in
+              let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+              Terminal_sandbox.send
+                terminal
+                "bash -c \"sh <(curl -fsSL https://opam.ocaml.org/install.sh)\""
+            in
+            Ok () |> Promise.return
+          in
+          ()
+      in
+      match result with
+      | Ok () -> Ojs.null
+      | Error err ->
+        show_message `Error "An error occured while installing opam %s" err;
+        Ojs.null
+    in
+    let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    ()
+  in
+  command Extension_consts.Commands.install_opam handler
+;;
+
+let _init_opam =
+  let handler (instance : Extension_instance.t) ~args:_ =
+    let options =
+      ProgressOptions.create
+        ~location:(`ProgressLocation Notification)
+        ~title:"Initialising OPAM"
+        ~cancellable:false
+        ()
+    in
+    let task ~progress:_ ~token:_ =
+      let open Promise.Syntax in
+      let+ result =
+        let open Promise.Result.Syntax in
+        let+ _ =
+          let _ =
+            let terminal =
+              Extension_instance.sandbox instance |> Terminal_sandbox.create
+            in
+            let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+            Terminal_sandbox.send terminal "opam init"
+          in
+          Ok () |> Promise.return
+        in
+        ()
+      in
+      match result with
+      | Ok () -> Ojs.null
+      | Error err ->
+        show_message `Error "An error occured while initializing opam %s" err;
+        Ojs.null
+    in
+    let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    ()
+  in
+  command Extension_consts.Commands.init_opam handler
+;;
+
+let _activate_opam_switch =
+  let handler (instance : Extension_instance.t) ~args:_ =
+    let options =
+      ProgressOptions.create
+        ~location:(`ProgressLocation Notification)
+        ~title:"Activate OPAM Switch"
+        ~cancellable:false
+        ()
+    in
+    let task ~progress:_ ~token:_ =
+      let open Promise.Syntax in
+      let+ result =
+        match Platform.t with
+        | Win32 ->
+          let _ =
+            let terminal =
+              Extension_instance.sandbox instance |> Terminal_sandbox.create
+            in
+            let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+            Terminal_sandbox.send
+              terminal
+              "(& opam env) -split '\r?\n' | ForEach-Object { Invoke-Expression $_ }"
+          in
+          Ok () |> Promise.return
+        | Darwin | Linux | Other ->
+          let open Promise.Result.Syntax in
+          let+ _ =
+            let _ =
+              let terminal =
+                Extension_instance.sandbox instance |> Terminal_sandbox.create
+              in
+              let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+              Terminal_sandbox.send terminal "eval $(opam env)"
+            in
+            Ok () |> Promise.return
+          in
+          ()
+      in
+      match result with
+      | Ok () -> Ojs.null
+      | Error err ->
+        show_message `Error "An error occured while activating the opam switch %s" err;
+        Ojs.null
+    in
+    let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    ()
+  in
+  command Extension_consts.Commands.activate_opam_switch handler
+;;
+
+let _install_ocaml_dev =
+  let handler (instance : Extension_instance.t) ~args:_ =
+    let options =
+      ProgressOptions.create
+        ~location:(`ProgressLocation Notification)
+        ~title:"Installing development packages"
+        ~cancellable:false
+        ()
+    in
+    let task ~progress:_ ~token:_ =
+      let open Promise.Syntax in
+      let+ result =
+        let open Promise.Result.Syntax in
+        let+ _ =
+          let _ =
+            let terminal =
+              Extension_instance.sandbox instance |> Terminal_sandbox.create
+            in
+            let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+            Terminal_sandbox.send
+              terminal
+              "opam install ocaml-lsp-server odoc ocamlformat utop"
+          in
+          Ok () |> Promise.return
+        in
+        ()
+      in
+      match result with
+      | Ok () -> Ojs.null
+      | Error err ->
+        show_message `Error "An error occured while installing packages %s" err;
+        Ojs.null
+    in
+    let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    ()
+  in
+  command Extension_consts.Commands.install_ocaml_dev handler
+;;
+
+let _open_utop =
+  let handler (instance : Extension_instance.t) ~args:_ =
+    let options =
+      ProgressOptions.create
+        ~location:(`ProgressLocation Notification)
+        ~title:"Launching utop"
+        ~cancellable:false
+        ()
+    in
+    let task ~progress:_ ~token:_ =
+      let open Promise.Syntax in
+      let+ result =
+        let open Promise.Result.Syntax in
+        let+ _ =
+          let _ =
+            let terminal =
+              Extension_instance.sandbox instance |> Terminal_sandbox.create
+            in
+            let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+            Terminal_sandbox.send
+              terminal
+              "utop"
+          in
+          Ok () |> Promise.return
+        in
+        ()
+      in
+      match result with
+      | Ok () -> Ojs.null
+      | Error err ->
+        show_message `Error "An error occured while opening utop %s" err;
+        Ojs.null
+    in
+    let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    ()
+  in
+  command Extension_consts.Commands.open_utop handler
+;;
+
 let _open_current_dune_file =
   let callback (_ : Extension_instance.t) () =
     match Vscode.Window.activeTextEditor () with
