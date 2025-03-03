@@ -1,6 +1,8 @@
 # Change Log
 
-# Unreleased
+## Unreleased
+
+## 1.28.1
 
 - Fix syntax color for odoc math blocks containing braces (#1741)
 
