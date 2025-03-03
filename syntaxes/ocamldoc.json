@@ -127,13 +127,15 @@
           "comment": "odoc inline math",
           "begin": "(?<!\\\\){m[[:space:]]",
           "end": "(?<!\\\\)\\}",
-          "name": "support.class.math.odoc markup.math.inline.odoc meta.math.inline.odoc"
+          "name": "support.class.math.odoc markup.math.inline.odoc meta.math.inline.odoc",
+          "patterns": [{ "include": "#braces" }]
         },
         {
           "comment": "odoc math block",
           "begin": "(?<!\\\\){math[[:space:]]",
           "end": "(?<!\\\\)\\}",
-          "name": "support.class.math.odoc markup.math.block.odoc meta.math.block.odoc"
+          "name": "support.class.math.odoc markup.math.block.odoc meta.math.block.odoc",
+          "patterns": [{ "include": "#braces" }]
         },
         {
           "comment": "ocamldoc simple lists",
@@ -298,6 +300,14 @@
           "comment": "table characters",
           "match": "\\||(\\-\\-\\-+)|(:\\-\\-\\-+:)|(:\\-\\-+)|(\\-\\-+:)",
           "name": "punctuation.definition.list.begin.markdown.tableheader.tablechars.ocamldoc"
+        }
+      ]
+    },
+    "braces": {
+      "patterns": [
+        {
+          "begin": "(?<!\\\\){",
+          "end": "(?<!\\\\)\\}"
         }
       ]
     }
