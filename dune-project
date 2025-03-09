@@ -26,23 +26,23 @@
   (vscode
    (= :version))
   (ocaml
-   (>= 5.3.0))
+   (>= 5.3))
   (js_of_ocaml
-   (>= 4.1.0))
+   (>= 6.0))
   (gen_js_api
-   (= 1.1.2))
+   (= 1.1.4))
   (base
-   (>= v0.14.1))
+   (>= v0.17))
   (promise_jsoo
-   (>= 0.3.1))
+   (>= 0.4.3))
   (jsonoo
-   (>= 0.2.1))
+   (>= 0.3))
   (ocaml-version
-   (>= 3.5.0))
+   (>= 3.7.3))
   (ppxlib
-   (>= 0.26.0))
+   (>= 0.35))
   (opam-file-format
-   (>= 2.1.2))
+   (>= 2.1.6))
   (ocamlformat
    (and
     (= 0.27.0)
@@ -57,9 +57,9 @@
   (ocaml
    (>= 4.08))
   (js_of_ocaml
-   (>= 4.1.0))
+   (>= 6.0))
   (gen_js_api
-   (= 1.1.2))
+   (= 1.1.4))
   (ocamlformat
    (and
     (= 0.27.0)
@@ -73,13 +73,13 @@
   (ocaml
    (>= 4.08))
   (js_of_ocaml
-   (>= 4.1.0))
+   (>= 6.0))
   (gen_js_api
-   (= 1.1.2))
+   (= 1.1.4))
   (promise_jsoo
-   (>= 0.3.1))
+   (>= 0.4.3))
   (jsonoo
-   (>= 0.2.1))
+   (>= 0.3))
   (vscode-interop
    (= :version))
   (ocamlformat
@@ -96,13 +96,13 @@
   (ocaml
    (>= 4.08))
   (js_of_ocaml
-   (>= 4.1.0))
+   (>= 6.0))
   (gen_js_api
-   (= 1.1.2))
+   (= 1.1.4))
   (promise_jsoo
-   (>= 0.3.1))
+   (>= 0.4.3))
   (jsonoo
-   (>= 0.2.1))
+   (>= 0.3))
   (vscode-interop
    (= :version))
   (ocamlformat

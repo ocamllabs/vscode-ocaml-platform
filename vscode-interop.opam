@@ -19,8 +19,8 @@ bug-reports: "https://github.com/ocamllabs/vscode-ocaml-platform/issues"
 depends: [
   "dune" {>= "3.17"}
   "ocaml" {>= "4.08"}
-  "js_of_ocaml" {>= "4.1.0"}
-  "gen_js_api" {= "1.1.2"}
+  "js_of_ocaml" {>= "6.0"}
+  "gen_js_api" {= "1.1.4"}
   "ocamlformat" {= "0.27.0" & with-dev-setup}
   "ocaml-lsp-server" {with-dev-setup}
   "odoc" {with-doc}
