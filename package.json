@@ -43,75 +43,114 @@
     "test": "vscode-test"
   },
   "contributes": {
-
-        "walkthroughs": [
+    "walkthroughs": [
+      {
+        "id": "ocaml-onboarding",
+        "title": "OCaml Onboarding",
+        "description": "Learn how to install OCaml, set up opam, and configure essential tools for development.",
+        "steps": [
           {
-            "id": "ocaml-onboarding",
-            "title": "OCaml Onboarding",
-            "description": "Learn how to install OCaml, set up opam, and configure essential tools for development.",
-            "steps": [
-              {
-                "id": "install-opam-windows",
-                "when": "isWindows",
-                "title": "Install Opam",
-                "description": "Opam is the package manager for OCaml. Installing Opam also installs the OCaml compiler. On Windows 10,11, install it using Winget:\n\nRun `winget install Git.Git OCaml.opam` in PowerShell.\n\n[Install Opam](command:ocaml.install-opam)",
-                "media": { "image": "assets/opam.png", "altText": "Opam Homepage" },
-                "completionEvents": ["onCommand:ocaml-onboarding.installOpam"]
-              },
-              {
-                "id": "install-opam-mac",
-                "when": "isMac",
-                "title": "Install Opam",
-                "description": "Opam is the package manager for OCaml. Installing Opam also installs the OCaml compiler. Install it OPAM's official script installer.\n\n[Install Opam](command:ocaml.install-opam)",
-                "media": { "image": "assets/opam.png", "altText": "Opam Homepage" },
-                "completionEvents": ["onCommand:ocaml-onboarding.installOpam"]
-              },
-              {
-                "id": "install-opam-linux",
-                "when": "isLinux",
-                "title": "Install Opam",
-                "description": "Opam is the package manager for OCaml. Installing Opam also installs the OCaml compiler. Install it OPAM's official script installer.\n\n[Install Opam](command:ocaml.install-opam)",
-                "media": { "image": "assets/opam.png", "altText": "Opam Switches" },
-                "completionEvents": ["onCommand:ocaml-onboarding.installOpam"]
-              },
-              {
-                "id": "init-opam",
-                "title": "Initialize Opam",
-                "description": "After installing OPAM, we initialise it so as to prepare your system to use it for managing OCaml packages and compilers.\n\n[Initialize Opam](command:ocaml.init-opam)",
-                "media": { "image": "assets/opam_init.png", "altText": "Utop output" },
-                "completionEvents": ["onCommand:ocaml-onboarding.initOpam"]
-              },
-              {
-                "id": "activate-opam-switch-mac",
-                "title": "Activate the opam switch",
-                "description": "An Opam switch is an isolated OCaml environment (like a Python virtual environment) where you can install different OCaml versions and packages. To activate a switch, run eval $(opam env) in your terminal.\n\n[Activate OPAM switch](command:ocaml.activate-opam-switch)",
-                "media": { "image": "assets/opam_switch.png", "altText": "Virtual environments" },
-                "completionEvents": ["onCommand:ocaml-onboarding.activateOpamSwtich"]
-              },
-              {
-                "id": "install-platform-tools",
-                "title": "Install OCaml Platform Tools",
-                "description": "Now install essential development tools:\n\n- OCaml LSP server enables editor support for OCaml, odoc generates documentation, camlformat automatically formats OCaml code, utop is an interactive REPL for OCaml and dune is the official OCaml build system.\n\n[Install Platform Tools](command:ocaml.install-ocaml-dev)",
-                "media": { "image": "assets/vscode-ocaml-commands.gif", "altText": "OCaml tools installation terminal output" },
-                "completionEvents": ["onCommand:ocaml-onboarding.installTools"]
-              },
-              {
-                "id": "check-installation",
-                "title": "Check Installation",
-                "description": "Verify your OCaml installation by running utop. If everything is set up correctly, you should see a prompt like the image on the right. \n\nTry typing \n\n 11 * 22;; \n\n and hitting Enter to test it.\n\n[Check Installation](command:ocaml.open-utop)",
-                "media": { "image": "assets/utop.png", "altText": "Utop output" },
-                "completionEvents": ["onCommand:ocaml-onboarding.checkInstallation"]
-              },
-              {
-                "id": "finish-onboarding",
-                "title": "Congratulations",
-                "description": "You now have OCaml installed and setup on your computer. Check out these free beginner tutorials to learn more about OCaml.\n\n[Free Tutorials](https://ocaml.org/docs#beginner_section)",
-                "media": { "image": "assets/tutorials.png", "altText": "Free OCaml tutorials" },
-                "completionEvents": ["onCommand:ocaml-onboarding.finsihOnboarding"]
-              }
+            "id": "install-opam-windows",
+            "when": "isWindows",
+            "title": "Install Opam",
+            "description": "Opam is the package manager for OCaml. Installing Opam also installs the OCaml compiler. On Windows 10,11, install it using Winget:\n\nRun `winget install Git.Git OCaml.opam` in PowerShell.\n\n[Install Opam](command:ocaml.install-opam)",
+            "media": {
+              "image": "assets/opam_install.jpg",
+              "altText": "Opam Homepage"
+            },
+            "completionEvents": [
+              "onCommand:ocaml-onboarding.installOpam"
+            ]
+          },
+          {
+            "id": "install-opam-mac",
+            "when": "isMac",
+            "title": "Install Opam",
+            "description": "Opam is the package manager for OCaml. Installing Opam also installs the OCaml compiler. Install it OPAM's official script installer.\n\n[Install Opam](command:ocaml.install-opam)",
+            "media": {
+              "image": "assets/opam_install.jpg",
+              "altText": "Opam Homepage"
+            },
+            "completionEvents": [
+              "onCommand:ocaml-onboarding.installOpam"
+            ]
+          },
+          {
+            "id": "install-opam-linux",
+            "when": "isLinux",
+            "title": "Install Opam",
+            "description": "Opam is the package manager for OCaml. Installing Opam also installs the OCaml compiler. Install it OPAM's official script installer.\n\n[Install Opam](command:ocaml.install-opam)",
+            "media": {
+              "image": "assets/opam_install.jpg",
+              "altText": "Opam Switches"
+            },
+            "completionEvents": [
+              "onCommand:ocaml-onboarding.installOpam"
+            ]
+          },
+          {
+            "id": "init-opam",
+            "title": "Initialize Opam",
+            "description": "After installing OPAM, we initialise it so as to prepare your system to use it for managing OCaml packages and compilers.\n\n[Initialize Opam](command:ocaml.init-opam)",
+            "media": {
+              "image": "assets/opam_init.jpg",
+              "altText": "Utop output"
+            },
+            "completionEvents": [
+              "onCommand:ocaml-onboarding.initOpam"
+            ]
+          },
+          {
+            "id": "activate-opam-switch-mac",
+            "title": "Activate the opam switch",
+            "description": "An Opam switch is an isolated OCaml environment (like a Python virtual environment) where you can install different OCaml versions and packages. To activate a switch, run eval $(opam env) in your terminal.\n\n[Activate OPAM switch](command:ocaml.activate-opam-switch)",
+            "media": {
+              "image": "assets/opam_switch.jpg",
+              "altText": "Virtual environments"
+            },
+            "completionEvents": [
+              "onCommand:ocaml-onboarding.activateOpamSwtich"
+            ]
+          },
+          {
+            "id": "install-platform-tools",
+            "title": "Install OCaml Platform Tools",
+            "description": "Now install essential development tools:\n\n- OCaml LSP server enables editor support for OCaml, odoc generates documentation, camlformat automatically formats OCaml code, utop is an interactive REPL for OCaml and dune is the official OCaml build system.\n\n[Install Platform Tools](command:ocaml.install-ocaml-dev)",
+            "media": {
+              "image": "assets/vscode-ocaml-commands.gif",
+              "altText": "OCaml tools installation terminal output"
+            },
+            "completionEvents": [
+              "onCommand:ocaml-onboarding.installTools"
+            ]
+          },
+          {
+            "id": "check-installation",
+            "title": "Check Installation",
+            "description": "Verify your OCaml installation by running utop. If everything is set up correctly, you should see a prompt like the image on the right. \n\nTry typing \n\n 11 * 22;; \n\n and hitting Enter to test it.\n\n[Check Installation](command:ocaml.open-utop)",
+            "media": {
+              "image": "assets/utop.png",
+              "altText": "Utop output"
+            },
+            "completionEvents": [
+              "onCommand:ocaml-onboarding.checkInstallation"
+            ]
+          },
+          {
+            "id": "finish-onboarding",
+            "title": "Congratulations",
+            "description": "You now have OCaml installed and setup on your computer. Check out these free beginner tutorials to learn more about OCaml.\n\n[Free Tutorials](https://ocaml.org/docs#beginner_section)",
+            "media": {
+              "image": "assets/tutorials.png",
+              "altText": "Free OCaml tutorials"
+            },
+            "completionEvents": [
+              "onCommand:ocaml-onboarding.finsihOnboarding"
             ]
           }
-        ],
+        ]
+      }
+    ],
     "breakpoints": [
       {
         "language": "ocaml"
