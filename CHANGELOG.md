@@ -43,6 +43,8 @@
 
 - Fix syntax color for odoc math blocks containing braces (#1741)
 
+- Add Ocaml onboarding welcome screen. (#1737)
+
 ## 1.28.0
 
 - Add `.re` file extension support. (#1685)
