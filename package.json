@@ -127,7 +127,7 @@
           {
             "id": "check-installation",
             "title": "Check Installation",
-            "description": "Verify your OCaml installation by running utop. If everything is set up correctly, you should see a prompt like the image on the right. \n\nTry typing \n\n 11 * 22;; \n\n and hitting Enter to test it.\n\n[Check Installation](command:ocaml.open-utop)",
+            "description": "Verify your OCaml installation by running utop. If everything is set up correctly, you should see a prompt like the image on the right. \n\n[Check Installation](command:ocaml.open-utop)",
             "media": {
               "image": "assets/utop.png",
               "altText": "Utop output"
@@ -139,10 +139,10 @@
           {
             "id": "finish-onboarding",
             "title": "Congratulations",
-            "description": "You now have OCaml installed and setup on your computer. Check out these free beginner tutorials to learn more about OCaml.\n\n[Free Tutorials](https://ocaml.org/docs#beginner_section)",
+            "description": "You now have OCaml installed and setup on your computer. Please take a few minutes to answer this short survey.\n\n[OCaml Survey](https://docs.google.com/forms/d/e/1FAIpQLSfGGFZBiw4PF7L0yt2DBX8443G5_7aFL5v6wvo6p5MwL-DW8Q/viewform?usp=pp_url&entry.454013858=Link+in+the+VSCode+plugin)",
             "media": {
-              "image": "assets/tutorials.png",
-              "altText": "Free OCaml tutorials"
+              "image": "assets/ocaml_survey.png",
+              "altText": "OCaml Survey"
             },
             "completionEvents": [
               "onCommand:ocaml-onboarding.finsihOnboarding"
