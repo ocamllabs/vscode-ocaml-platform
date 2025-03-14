@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.28.2
+
 - Update `destruct` code action command to use `destruct (enumerate cases)` (#1750)
 
 ## 1.28.1
