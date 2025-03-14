@@ -91,7 +91,7 @@
           {
             "id": "init-opam",
             "title": "Initialize Opam",
-            "description": "After installing OPAM, we initialise it so as to prepare your system to use it for managing OCaml packages and compilers.\n\n[Initialize Opam](command:ocaml.init-opam)",
+            "description": "After installing opam, we initialise it so as to prepare your system to use it for managing OCaml packages and compilers.\n\n[Initialize opam](command:ocaml.init-opam)",
             "media": {
               "image": "assets/opam_init.jpg",
               "altText": "Utop output"
