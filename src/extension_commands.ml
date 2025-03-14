@@ -122,7 +122,7 @@ let _install_opam =
     let options =
       ProgressOptions.create
         ~location:(`ProgressLocation Notification)
-        ~title:"Installing OPAM package manager"
+        ~title:"Installing opam package manager"
         ~cancellable:false
         ()
     in
