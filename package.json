@@ -764,7 +764,7 @@
         "command": "editor.action.codeAction",
         "key": "Alt+D",
         "args": {
-          "kind": "destruct"
+          "kind": "destruct (enumerate cases)"
         },
         "when": "editorLangId == ocaml || editorLangId == reason"
       },
