@@ -209,7 +209,7 @@ let _activate_opam_switch =
     let options =
       ProgressOptions.create
         ~location:(`ProgressLocation Notification)
-        ~title:"Activate OPAM Switch"
+        ~title:"Activate opam switch"
         ~cancellable:false
         ()
     in
