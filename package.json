@@ -56,7 +56,7 @@
             "description": "Opam is the package manager for OCaml. Installing Opam also installs the OCaml compiler. On Windows 10,11, install it using Winget:\n\nRun `winget install Git.Git OCaml.opam` in PowerShell.\n\n[Install Opam](command:ocaml.install-opam)",
             "media": {
               "image": "assets/opam_install.jpg",
-              "altText": "Opam Homepage"
+              "altText": "opam homepage"
             },
             "completionEvents": [
               "onCommand:ocaml-onboarding.installOpam"
