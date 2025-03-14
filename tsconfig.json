@@ -4,10 +4,6 @@
     "@tsconfig/node22/tsconfig.json"
   ],
   "compilerOptions": {
-    "isolatedModules": true,
-    "module": "NodeNext",
-    "moduleDetection": "force",
-    "moduleResolution": "NodeNext",
     "noEmit": true
   },
   "exclude": ["_build", "_opam", "astexplorer", "dist", "node_modules"]
