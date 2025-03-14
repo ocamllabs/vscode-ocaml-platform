@@ -172,7 +172,7 @@ let _init_opam =
     let options =
       ProgressOptions.create
         ~location:(`ProgressLocation Notification)
-        ~title:"Initialising OPAM"
+        ~title:"Initialising opam"
         ~cancellable:false
         ()
     in
