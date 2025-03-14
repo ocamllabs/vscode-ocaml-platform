@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Update `destruct` code action command to use `destruct (enumerate cases)` (#1750)
+
 ## 1.28.1
 
 - Fix syntax color for odoc math blocks containing braces (#1741)
