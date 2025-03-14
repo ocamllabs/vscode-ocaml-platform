@@ -56,7 +56,7 @@
             "description": "opam is the package manager for OCaml. Installing opam also installs the OCaml compiler. On Windows 10 or 11, install it using Winget:\n\nRun `winget install Git.Git OCaml.opam` in PowerShell.\n\n[Install opam](command:ocaml.install-opam)",
             "media": {
               "image": "assets/opam_install.jpg",
-              "altText": "opam homepage"
+              "altText": "Information about some prompts the user may recieve while installing opam"
             },
             "completionEvents": [
               "onCommand:ocaml-onboarding.installOpam"
@@ -69,7 +69,7 @@
             "description": "opam is the package manager for OCaml. Installing opam also installs the OCaml compiler. Install it opam's official script installer.\n\n[Install opam](command:ocaml.install-opam)",
             "media": {
               "image": "assets/opam_install.jpg",
-              "altText": "opam homepage"
+              "altText": "Information about some prompts the user may recieve while installing opam"
             },
             "completionEvents": [
               "onCommand:ocaml-onboarding.installOpam"
@@ -82,7 +82,7 @@
             "description": "opam is the package manager for OCaml. Installing opam also installs the OCaml compiler. Install it opam's official script installer.\n\n[Install opam](command:ocaml.install-opam)",
             "media": {
               "image": "assets/opam_install.jpg",
-              "altText": "opam switches"
+              "altText": "Information about some prompts the user may recieve while installing opam"
             },
             "completionEvents": [
               "onCommand:ocaml-onboarding.installOpam"
@@ -94,7 +94,7 @@
             "description": "After installing opam, we initialise it so as to prepare your system to use it for managing OCaml packages and compilers.\n\n[Initialize opam](command:ocaml.init-opam)",
             "media": {
               "image": "assets/opam_init.jpg",
-              "altText": "Utop output"
+              "altText": "Information about a prompt asking how the user prefers to setup opam."
             },
             "completionEvents": [
               "onCommand:ocaml-onboarding.initOpam"
@@ -106,7 +106,7 @@
             "description": "An opam switch is an isolated OCaml environment (like a Python virtual environment) where you can install different OCaml versions and packages. To activate a switch, run eval $(opam env) in your terminal.\n\n[Activate opam switch](command:ocaml.activate-opam-switch)",
             "media": {
               "image": "assets/opam_switch.jpg",
-              "altText": "Virtual environments"
+              "altText": "An image of tiny ocaml logos arranged in the shape of a camel"
             },
             "completionEvents": [
               "onCommand:ocaml-onboarding.activateOpamSwtich"
@@ -118,7 +118,7 @@
             "description": "Now install essential development tools:\n\n- OCaml LSP server enables editor support for OCaml, odoc generates documentation, camlformat automatically formats OCaml code, utop is an interactive REPL for OCaml and dune is the official OCaml build system.\n\n[Install Platform Tools](command:ocaml.install-ocaml-dev)",
             "media": {
               "image": "assets/vscode-ocaml-commands.gif",
-              "altText": "OCaml tools installation terminal output"
+              "altText": "A gif of how to access all commands provide by the ocaml vscode plugin"
             },
             "completionEvents": [
               "onCommand:ocaml-onboarding.installTools"
@@ -130,7 +130,7 @@
             "description": "Verify your OCaml installation by running utop. If everything is set up correctly, you should see a prompt like the image on the right. \n\n[Check Installation](command:ocaml.open-utop)",
             "media": {
               "image": "assets/utop.png",
-              "altText": "Utop output"
+              "altText": "A screenshot showing the output of running utop in a command line"
             },
             "completionEvents": [
               "onCommand:ocaml-onboarding.checkInstallation"
@@ -142,7 +142,7 @@
             "description": "You now have OCaml installed and setup on your computer. Please take a few minutes to answer this short survey.\n\n[OCaml Survey](https://docs.google.com/forms/d/e/1FAIpQLSfGGFZBiw4PF7L0yt2DBX8443G5_7aFL5v6wvo6p5MwL-DW8Q/viewform?usp=pp_url&entry.454013858=Link+in+the+VSCode+plugin)",
             "media": {
               "image": "assets/ocaml_survey.png",
-              "altText": "OCaml Survey"
+              "altText": "A screenshot of some of the various companies that use OCaml"
             },
             "completionEvents": [
               "onCommand:ocaml-onboarding.finsihOnboarding"
