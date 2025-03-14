@@ -69,7 +69,7 @@
             "description": "opam is the package manager for OCaml. Installing opam also installs the OCaml compiler. Install it opam's official script installer.\n\n[Install opam](command:ocaml.install-opam)",
             "media": {
               "image": "assets/opam_install.jpg",
-              "altText": "Opam Homepage"
+              "altText": "opam homepage"
             },
             "completionEvents": [
               "onCommand:ocaml-onboarding.installOpam"
