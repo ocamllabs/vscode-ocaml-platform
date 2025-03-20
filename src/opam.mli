@@ -47,7 +47,7 @@ val install : t -> Switch.t -> packages:string list -> Cmd.t
 val update : t -> Switch.t -> Cmd.t
 
 (** Upgrade packages in a switch *)
-val upgrade : t -> Switch.t -> Cmd.t
+val upgrade : ?packages:string list -> t -> Switch.t -> Cmd.t
 
 (* Remove a list of packages from a switch *)
 val remove : t -> Switch.t -> string list -> Cmd.t
