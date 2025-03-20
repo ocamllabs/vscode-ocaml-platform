@@ -177,20 +177,18 @@ end = struct
           "Failed to start the language server. `ocaml-lsp-server` is not installed in \
            the current sandbox."
         ~choices:
-          [ install_lsp_text, install_lsp_text
-          ; select_different_sandbox, select_different_sandbox
-          ]
+          [ install_lsp_text, `Install_lsp; select_different_sandbox, `Select_sandbox ]
         ()
     in
     match selection with
-    | Some choice when String.equal choice install_lsp_text ->
+    | Some `Install_lsp ->
       let (_ : Ojs.t option Promise.t) =
         Vscode.Commands.executeCommand
           ~command:Extension_consts.Commands.install_ocaml_lsp_server
           ~args:[]
       in
       ()
-    | Some choice when String.equal choice select_different_sandbox ->
+    | Some `Select_sandbox ->
       let (_ : Ojs.t option Promise.t) =
         Vscode.Commands.executeCommand
           ~command:Extension_consts.Commands.select_sandbox
@@ -207,18 +205,18 @@ end = struct
     let+ selection =
       Window.showInformationMessage
         ~message:"OCaml-LSP server is not up to date. Do you want to upgrade it?"
-        ~choices:[ upgrade_lsp_text, upgrade_lsp_text; no_upgrade, no_upgrade ]
+        ~choices:[ upgrade_lsp_text, `Update_lsp; no_upgrade, `No_upgrade ]
         ()
     in
     match selection with
-    | Some choice when String.equal choice upgrade_lsp_text ->
+    | Some `Update_lsp ->
       let (_ : Ojs.t option Promise.t) =
         Vscode.Commands.executeCommand
           ~command:Extension_consts.Commands.upgrade_ocaml_lsp_server
           ~args:[]
       in
       ()
-    | Some choice when String.equal choice no_upgrade -> ()
+    | Some `No_upgrade -> ()
     | _ -> ()
   ;;
 
@@ -314,9 +312,9 @@ let install_ocaml_lsp_server sandbox =
   ()
 ;;
 
-let upgrade_ocaml_lsp_server sandbox latest_version =
+let upgrade_ocaml_lsp_server sandbox =
   let open Promise.Syntax in
-  let+ () = Sandbox.install_packages sandbox [ "ocaml-lsp-server=" ^ latest_version ] in
+  let+ () = Sandbox.upgrade_packages sandbox ~packages:[ "ocaml-lsp-server" ] in
   let (_ : Ojs.t option Promise.t) =
     Vscode.Commands.executeCommand
       ~command:Extension_consts.Commands.refresh_switches
