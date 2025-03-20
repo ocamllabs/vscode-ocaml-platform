@@ -19,7 +19,7 @@ val lsp_client : t -> (LanguageClient.t * Ocaml_lsp.t) option
 val ocaml_version_exn : t -> Ocaml_version.t
 val start_language_server : t -> unit Promise.t
 val install_ocaml_lsp_server : Sandbox.t -> unit Promise.t
-val upgrade_ocaml_lsp_server : Sandbox.t -> string -> unit Promise.t
+val upgrade_ocaml_lsp_server : Sandbox.t -> unit Promise.t
 
 val set_configuration
   :  t
