@@ -230,12 +230,11 @@ let is_version_up_to_date t ocaml_v =
           | None -> sprintf "to %s" new_
           | Some old -> sprintf "from %s to %s" old new_
         in
-        ( sprintf
-            "There is a newer version of ocaml-lsp-server available. Consider upgrading \
-             %s. Hint: $ opam install ocaml-lsp-server=%s and restart the lsp server"
-            upgrade
-            new_
-        , new_ )
+        sprintf
+          "There is a newer version of ocaml-lsp-server available. Consider upgrading \
+           %s. Hint: $ opam install ocaml-lsp-server=%s and restart the lsp server"
+          upgrade
+          new_
     in
     `Msg msg)
 ;;
