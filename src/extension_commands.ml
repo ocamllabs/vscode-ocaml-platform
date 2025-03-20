@@ -86,13 +86,10 @@ let _upgrade_ocaml_lsp_server =
           (Extension_instance.ocaml_version_exn instance)
       with
       | Ok () -> Promise.return ()
-      | Error (`Msg (_error, latest_version)) ->
-        let* _ = Extension_instance.upgrade_ocaml_lsp_server sandbox latest_version in
+      | Error (`Msg _error) ->
+        let* _ = Extension_instance.upgrade_ocaml_lsp_server sandbox in
         let+ _ = Extension_instance.start_language_server instance in
-        show_message
-          `Info
-          "OCaml-LSP server upgraded successfully to version %s"
-          latest_version
+        show_message `Info "OCaml-LSP server upgraded successfully"
     in
     ()
   in
@@ -286,7 +283,7 @@ end = struct
         (Extension_instance.ocaml_version_exn instance)
     with
     | Ok () -> ()
-    | Error (`Msg (msg, _latest_version)) ->
+    | Error (`Msg msg) ->
       show_message
         `Warn
         "The installed version of `ocamllsp` does not support typed holes. %s"
@@ -602,7 +599,7 @@ module Copy_type_under_cursor = struct
         (Extension_instance.ocaml_version_exn instance)
     with
     | Ok () -> ()
-    | Error (`Msg (msg, _latest_version)) ->
+    | Error (`Msg msg) ->
       show_message
         `Warn
         "The installed version of `ocamllsp` does not support type enclosings. %s"
