@@ -125,6 +125,28 @@ let check_ocaml_lsp_available sandbox =
           current sandbox.")
 ;;
 
+let suggest_to_upgrade_ocaml_lsp_server () =
+  let open Promise.Syntax in
+  let upgrade_lsp_text = "Yes" in
+  let no_upgrade = "No" in
+  let+ selection =
+    Window.showInformationMessage
+      ~message:"OCaml-LSP server is not up to date. Do you want to upgrade it?"
+      ~choices:[ upgrade_lsp_text, `Update_lsp; no_upgrade, `No_upgrade ]
+      ()
+  in
+  match selection with
+  | Some `Update_lsp ->
+    let (_ : Ojs.t option Promise.t) =
+      Vscode.Commands.executeCommand
+        ~command:Extension_consts.Commands.upgrade_ocaml_lsp_server
+        ~args:[]
+    in
+    ()
+  | Some `No_upgrade -> ()
+  | _ -> ()
+;;
+
 module Language_server_init : sig
   val start_language_server : t -> unit Promise.t
 end = struct
@@ -195,28 +217,6 @@ end = struct
           ~args:[]
       in
       ()
-    | _ -> ()
-  ;;
-
-  let suggest_to_upgrade_ocaml_lsp_server () =
-    let open Promise.Syntax in
-    let upgrade_lsp_text = "Yes" in
-    let no_upgrade = "No" in
-    let+ selection =
-      Window.showInformationMessage
-        ~message:"OCaml-LSP server is not up to date. Do you want to upgrade it?"
-        ~choices:[ upgrade_lsp_text, `Update_lsp; no_upgrade, `No_upgrade ]
-        ()
-    in
-    match selection with
-    | Some `Update_lsp ->
-      let (_ : Ojs.t option Promise.t) =
-        Vscode.Commands.executeCommand
-          ~command:Extension_consts.Commands.upgrade_ocaml_lsp_server
-          ~args:[]
-      in
-      ()
-    | Some `No_upgrade -> ()
     | _ -> ()
   ;;
 
