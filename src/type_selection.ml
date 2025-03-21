@@ -55,7 +55,9 @@ let ocaml_lsp_doesnt_support_type_selection instance ocaml_lsp =
     show_message
       `Warn
       "The installed version of `ocamllsp` does not support type enclosings. %s"
-      msg
+      msg;
+    let _ = Extension_instance.suggest_to_upgrade_ocaml_lsp_server () in
+    ()
 ;;
 
 type state =

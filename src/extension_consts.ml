@@ -2,6 +2,8 @@ let ocaml_prefixed key = "ocaml." ^ key
 
 module Commands = struct
   let select_sandbox = ocaml_prefixed "select-sandbox"
+  let install_ocaml_lsp_server = ocaml_prefixed "install-ocaml-lsp-server"
+  let upgrade_ocaml_lsp_server = ocaml_prefixed "update-ocaml-lsp-server"
   let restart_language_server = ocaml_prefixed "server.restart"
   let select_sandbox_and_open_terminal = ocaml_prefixed "open-terminal-select"
   let open_terminal = ocaml_prefixed "open-terminal"
