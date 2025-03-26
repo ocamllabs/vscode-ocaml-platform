@@ -1834,7 +1834,45 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode/vsce@npm:3.3.0, @vscode/vsce@npm:^3.2.1":
+"@vscode/vsce@npm:3.3.1":
+  version: 3.3.1
+  resolution: "@vscode/vsce@npm:3.3.1"
+  dependencies:
+    "@azure/identity": "npm:^4.1.0"
+    "@vscode/vsce-sign": "npm:^2.0.0"
+    azure-devops-node-api: "npm:^12.5.0"
+    chalk: "npm:^2.4.2"
+    cheerio: "npm:^1.0.0-rc.9"
+    cockatiel: "npm:^3.1.2"
+    commander: "npm:^12.1.0"
+    form-data: "npm:^4.0.0"
+    glob: "npm:^11.0.0"
+    hosted-git-info: "npm:^4.0.2"
+    jsonc-parser: "npm:^3.2.0"
+    keytar: "npm:^7.7.0"
+    leven: "npm:^3.1.0"
+    markdown-it: "npm:^14.1.0"
+    mime: "npm:^1.3.4"
+    minimatch: "npm:^3.0.3"
+    parse-semver: "npm:^1.1.1"
+    read: "npm:^1.0.7"
+    semver: "npm:^7.5.2"
+    tmp: "npm:^0.2.3"
+    typed-rest-client: "npm:^1.8.4"
+    url-join: "npm:^4.0.1"
+    xml2js: "npm:^0.5.0"
+    yauzl: "npm:^2.3.1"
+    yazl: "npm:^2.2.2"
+  dependenciesMeta:
+    keytar:
+      optional: true
+  bin:
+    vsce: vsce
+  checksum: 10c0/68f773e1497dfbd27df03ff0a700828d64528baef6f3bc81ab45d7f1cbb332d75bac55ac0ece4272eb29e45f5f8355f0b0ce1ee580426d44c0b2289e0d11077d
+  languageName: node
+  linkType: hard
+
+"@vscode/vsce@npm:^3.2.1":
   version: 3.3.0
   resolution: "@vscode/vsce@npm:3.3.0"
   dependencies:
@@ -4582,7 +4620,7 @@ __metadata:
     "@types/vscode": "npm:1.86.0"
     "@vscode/test-cli": "npm:0.0.10"
     "@vscode/test-electron": "npm:2.4.1"
-    "@vscode/vsce": "npm:3.3.0"
+    "@vscode/vsce": "npm:3.3.1"
     esbuild: "npm:0.25.1"
     ovsx: "npm:0.10.1"
     polka: "npm:1.0.0-next.28"
