@@ -287,9 +287,7 @@ end = struct
       show_message
         `Warn
         "The installed version of `ocamllsp` does not support typed holes. %s"
-        msg;
-      let _ = Extension_instance.suggest_to_upgrade_ocaml_lsp_server () in
-      ()
+        msg
   ;;
 
   let current_cursor_pos text_editor =
@@ -605,9 +603,7 @@ module Copy_type_under_cursor = struct
       show_message
         `Warn
         "The installed version of `ocamllsp` does not support type enclosings. %s"
-        msg;
-      let _ = Extension_instance.suggest_to_upgrade_ocaml_lsp_server () in
-      ()
+        msg
   ;;
 
   let get_enclosings text_editor client =
@@ -1148,7 +1144,7 @@ module Search_by_type = struct
            show_message
              `Warn
              "The installed version of `ocamllsp` does not support type search";
-           let _ = Extension_instance.suggest_to_upgrade_ocaml_lsp_server () in
+           let _ = Ocaml_lsp.suggest_to_upgrade_ocaml_lsp_server () in
            ()
          | Some (client, _) -> show_query_input text_editor client)
     in
@@ -1321,7 +1317,7 @@ module Navigate_holes = struct
            show_message
              `Warn
              "The installed version of `ocamllsp` does not support typed hole navigation";
-           let _ = Extension_instance.suggest_to_upgrade_ocaml_lsp_server () in
+           let _ = Ocaml_lsp.suggest_to_upgrade_ocaml_lsp_server () in
            ()
          | Some (client, _) ->
            let _ = handle_hole_navigation text_editor client instance in

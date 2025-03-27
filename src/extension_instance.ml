@@ -125,28 +125,6 @@ let check_ocaml_lsp_available sandbox =
           current sandbox.")
 ;;
 
-let suggest_to_upgrade_ocaml_lsp_server () =
-  let open Promise.Syntax in
-  let upgrade_lsp_text = "Yes" in
-  let no_upgrade = "No" in
-  let* selection =
-    Window.showInformationMessage
-      ~message:"OCaml-LSP server is not up to date. Do you want to upgrade it?"
-      ~choices:[ upgrade_lsp_text, `Update_lsp; no_upgrade, `No_upgrade ]
-      ()
-  in
-  match selection with
-  | Some `Update_lsp ->
-    let+ (_ : Ojs.t option) =
-      Vscode.Commands.executeCommand
-        ~command:Extension_consts.Commands.upgrade_ocaml_lsp_server
-        ~args:[]
-    in
-    ()
-  | Some `No_upgrade -> Promise.return ()
-  | _ -> Promise.return ()
-;;
-
 module Language_server_init : sig
   val start_language_server : t -> unit Promise.t
 end = struct
@@ -255,9 +233,7 @@ end = struct
         t.lsp_client <- Some (client, ocaml_lsp);
         (match Ocaml_lsp.is_version_up_to_date ocaml_lsp (ocaml_version_exn t) with
          | Ok () -> ()
-         | Error (`Msg _) ->
-           let _ = suggest_to_upgrade_ocaml_lsp_server () in
-           ());
+         | Error (`Msg _) -> ());
         send_configuration
           client
           ~codelens:t.codelens
