@@ -59,7 +59,7 @@
               "altText": "Information about some prompts the user may recieve while installing opam"
             },
             "completionEvents": [
-              "onCommand:ocaml-onboarding.installOpam"
+              "onCommand:ocaml.install-opam"
             ]
           },
           {
@@ -72,7 +72,7 @@
               "altText": "Information about some prompts the user may recieve while installing opam"
             },
             "completionEvents": [
-              "onCommand:ocaml-onboarding.installOpam"
+              "onCommand:ocaml.install-opam"
             ]
           },
           {
@@ -85,7 +85,7 @@
               "altText": "Information about some prompts the user may recieve while installing opam"
             },
             "completionEvents": [
-              "onCommand:ocaml-onboarding.installOpam"
+              "onCommand:ocaml.install-opam"
             ]
           },
           {
@@ -97,7 +97,7 @@
               "altText": "Information about a prompt asking how the user prefers to setup opam."
             },
             "completionEvents": [
-              "onCommand:ocaml-onboarding.initOpam"
+              "onCommand:ocaml.init-opam"
             ]
           },
           {
@@ -109,7 +109,7 @@
               "altText": "An image of tiny ocaml logos arranged in the shape of a camel"
             },
             "completionEvents": [
-              "onCommand:ocaml-onboarding.activateOpamSwtich"
+              "onCommand:oocaml.activate-opam-switch"
             ]
           },
           {
@@ -121,7 +121,7 @@
               "altText": "A gif of how to access all commands provide by the ocaml vscode plugin"
             },
             "completionEvents": [
-              "onCommand:ocaml-onboarding.installTools"
+              "onCommand:ocaml.install-ocaml-dev"
             ]
           },
           {
@@ -133,7 +133,7 @@
               "altText": "A screenshot showing the output of running utop in a command line"
             },
             "completionEvents": [
-              "onCommand:ocaml-onboarding.checkInstallation"
+              "onCommand:ocaml.open-utop"
             ]
           },
           {
@@ -145,7 +145,7 @@
               "altText": "A screenshot of some of the various companies that use OCaml"
             },
             "completionEvents": [
-              "onCommand:ocaml-onboarding.finsihOnboarding"
+              "onLink:https://docs.google.com/forms/d/e/1FAIpQLSfGGFZBiw4PF7L0yt2DBX8443G5_7aFL5v6wvo6p5MwL-DW8Q/viewform?usp=pp_url&entry.454013858=Link+in+the+VSCode+plugin"
             ]
           }
         ]
