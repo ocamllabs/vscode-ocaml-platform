@@ -129,7 +129,7 @@ let suggest_to_upgrade_ocaml_lsp_server () =
   let open Promise.Syntax in
   let upgrade_lsp_text = "Yes" in
   let no_upgrade = "No" in
-  let+ selection =
+  let* selection =
     Window.showInformationMessage
       ~message:"OCaml-LSP server is not up to date. Do you want to upgrade it?"
       ~choices:[ upgrade_lsp_text, `Update_lsp; no_upgrade, `No_upgrade ]
@@ -137,14 +137,14 @@ let suggest_to_upgrade_ocaml_lsp_server () =
   in
   match selection with
   | Some `Update_lsp ->
-    let (_ : Ojs.t option Promise.t) =
+    let+ (_ : Ojs.t option) =
       Vscode.Commands.executeCommand
         ~command:Extension_consts.Commands.upgrade_ocaml_lsp_server
         ~args:[]
     in
     ()
-  | Some `No_upgrade -> ()
-  | _ -> ()
+  | Some `No_upgrade -> Promise.return ()
+  | _ -> Promise.return ()
 ;;
 
 module Language_server_init : sig
@@ -193,7 +193,7 @@ end = struct
     let open Promise.Syntax in
     let install_lsp_text = "Install OCaml-LSP server" in
     let select_different_sandbox = "Select a different Sandbox" in
-    let+ selection =
+    let* selection =
       Window.showInformationMessage
         ~message:
           "Failed to start the language server. `ocaml-lsp-server` is not installed in \
@@ -204,20 +204,20 @@ end = struct
     in
     match selection with
     | Some `Install_lsp ->
-      let (_ : Ojs.t option Promise.t) =
+      let+ (_ : Ojs.t option) =
         Vscode.Commands.executeCommand
           ~command:Extension_consts.Commands.install_ocaml_lsp_server
           ~args:[]
       in
       ()
     | Some `Select_sandbox ->
-      let (_ : Ojs.t option Promise.t) =
+      let+ (_ : Ojs.t option) =
         Vscode.Commands.executeCommand
           ~command:Extension_consts.Commands.select_sandbox
           ~args:[]
       in
       ()
-    | _ -> ()
+    | _ -> Promise.return ()
   ;;
 
   let client_capabilities =
@@ -298,13 +298,13 @@ let documentation_server_info () =
 
 let install_ocaml_lsp_server sandbox =
   let open Promise.Syntax in
-  let+ () = Sandbox.install_packages sandbox [ "ocaml-lsp-server" ] in
-  let (_ : Ojs.t option Promise.t) =
+  let* () = Sandbox.install_packages sandbox [ "ocaml-lsp-server" ] in
+  let* (_ : Ojs.t option) =
     Vscode.Commands.executeCommand
       ~command:Extension_consts.Commands.refresh_switches
       ~args:[]
   in
-  let (_ : Ojs.t option Promise.t) =
+  let+ (_ : Ojs.t option) =
     Vscode.Commands.executeCommand
       ~command:Extension_consts.Commands.refresh_sandbox
       ~args:[]
