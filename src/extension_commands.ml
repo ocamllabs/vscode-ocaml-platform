@@ -297,7 +297,7 @@ let _install_opam =
         in
         let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
         ()
-      | Some opam -> show_message `Info "Opam is already installed!" |> Promise.return
+      | Some _ -> show_message `Info "Opam is already installed!" |> Promise.return
     in
     let (_ : unit Promise.t) = process_installation () in
     ()
