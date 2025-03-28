@@ -249,49 +249,57 @@ let _switch_impl_intf =
 
 let _install_opam =
   let handler (instance : Extension_instance.t) ~args:_ =
-    let options =
-      ProgressOptions.create
-        ~location:(`ProgressLocation Notification)
-        ~title:"Installing opam package manager"
-        ~cancellable:false
-        ()
-    in
-    let task ~progress:_ ~token:_ =
+    let process_installation () =
       let open Promise.Syntax in
-      let+ result =
-        match Platform.t with
-        | Win32 ->
-          let _ =
-            let terminal =
-              Extension_instance.sandbox instance |> Terminal_sandbox.create
-            in
-            let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
-            Terminal_sandbox.send terminal "winget install Git.Git OCaml.opam"
-          in
-          Ok () |> Promise.return
-        | Darwin | Linux | Other ->
-          let open Promise.Result.Syntax in
-          let+ _ =
-            let _ =
-              let terminal =
-                Extension_instance.sandbox instance |> Terminal_sandbox.create
+      let* opam = Opam.make () in
+      match opam with
+      | None ->
+        let options =
+          ProgressOptions.create
+            ~location:(`ProgressLocation Notification)
+            ~title:"Installing opam package manager"
+            ~cancellable:false
+            ()
+        in
+        let task ~progress:_ ~token:_ =
+          let+ result =
+            match Platform.t with
+            | Win32 ->
+              let _ =
+                let terminal =
+                  Extension_instance.sandbox instance |> Terminal_sandbox.create
+                in
+                let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+                Terminal_sandbox.send terminal "winget install Git.Git OCaml.opam"
               in
-              let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
-              Terminal_sandbox.send
-                terminal
-                "bash -c \"sh <(curl -fsSL https://opam.ocaml.org/install.sh)\""
-            in
-            Ok () |> Promise.return
+              Ok () |> Promise.return
+            | Darwin | Linux | Other ->
+              let open Promise.Result.Syntax in
+              let+ _ =
+                let _ =
+                  let terminal =
+                    Extension_instance.sandbox instance |> Terminal_sandbox.create
+                  in
+                  let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+                  Terminal_sandbox.send
+                    terminal
+                    "bash -c \"sh <(curl -fsSL https://opam.ocaml.org/install.sh)\""
+                in
+                Ok () |> Promise.return
+              in
+              ()
           in
-          ()
-      in
-      match result with
-      | Ok () -> Ojs.null
-      | Error err ->
-        show_message `Error "An error occured while installing opam %s" err;
-        Ojs.null
+          match result with
+          | Ok () -> Ojs.null
+          | Error err ->
+            show_message `Error "An error occured while installing opam %s" err;
+            Ojs.null
+        in
+        let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+        ()
+      | Some opam -> show_message `Info "Opam is already installed!" |> Promise.return
     in
-    let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    let (_ : unit Promise.t) = process_installation () in
     ()
   in
   command Extension_consts.Commands.install_opam handler
