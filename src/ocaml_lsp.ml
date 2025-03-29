@@ -199,6 +199,28 @@ let available_versions version =
   List.Assoc.find lsp_versions ~equal:Poly.equal prefix
 ;;
 
+let suggest_to_upgrade_ocaml_lsp_server () =
+  let open Promise.Syntax in
+  let upgrade_lsp_text = "Yes" in
+  let no_upgrade = "No" in
+  let* selection =
+    Window.showInformationMessage
+      ~message:"OCaml-LSP server is not up to date. Do you want to upgrade it?"
+      ~choices:[ upgrade_lsp_text, `Update_lsp; no_upgrade, `No_upgrade ]
+      ()
+  in
+  match selection with
+  | Some `Update_lsp ->
+    let+ (_ : Ojs.t option) =
+      Vscode.Commands.executeCommand
+        ~command:Extension_consts.Commands.upgrade_ocaml_lsp_server
+        ~args:[]
+    in
+    ()
+  | Some `No_upgrade -> Promise.return ()
+  | _ -> Promise.return ()
+;;
+
 let is_version_up_to_date t ocaml_v =
   let ocamllsp_version = get_version_from_serverInfo t in
   let res =
@@ -222,6 +244,7 @@ let is_version_up_to_date t ocaml_v =
             else Error (`Newer_available (Some v, available.(last)))))
   in
   Result.map_error res ~f:(fun err ->
+    let _ = suggest_to_upgrade_ocaml_lsp_server () in
     let msg =
       match err with
       | `Newer_available (old, new_) ->
