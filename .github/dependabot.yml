@@ -14,5 +14,10 @@ updates:
     labels:
       - dependencies
       - no changelog
+    groups:
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
     ignore:
       - dependency-name: "@types/vscode"
