@@ -1325,7 +1325,7 @@
     "ovsx": "0.10.1",
     "typescript": "5.8.2"
   },
-  "packageManager": "yarn@4.8.0",
+  "packageManager": "yarn@4.8.1",
   "engines": {
     "vscode": "^1.86.0"
   },
