@@ -342,56 +342,6 @@ let _init_opam =
   command Extension_consts.Commands.init_opam handler
 ;;
 
-let _activate_opam_switch =
-  let handler (instance : Extension_instance.t) ~args:_ =
-    let options =
-      ProgressOptions.create
-        ~location:(`ProgressLocation Notification)
-        ~title:"Activate opam switch"
-        ~cancellable:false
-        ()
-    in
-    let task ~progress:_ ~token:_ =
-      let open Promise.Syntax in
-      let+ result =
-        match Platform.t with
-        | Win32 ->
-          let _ =
-            let terminal =
-              Extension_instance.sandbox instance |> Terminal_sandbox.create
-            in
-            let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
-            Terminal_sandbox.send
-              terminal
-              "(& opam env) -split '\r?\n' | ForEach-Object { Invoke-Expression $_ }"
-          in
-          Ok () |> Promise.return
-        | Darwin | Linux | Other ->
-          let open Promise.Result.Syntax in
-          let+ _ =
-            let _ =
-              let terminal =
-                Extension_instance.sandbox instance |> Terminal_sandbox.create
-              in
-              let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
-              Terminal_sandbox.send terminal "eval $(opam env)"
-            in
-            Ok () |> Promise.return
-          in
-          ()
-      in
-      match result with
-      | Ok () -> Ojs.null
-      | Error err ->
-        show_message `Error "An error occured while activating the opam switch %s" err;
-        Ojs.null
-    in
-    let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
-    ()
-  in
-  command Extension_consts.Commands.activate_opam_switch handler
-;;
-
 let _install_ocaml_dev =
   let handler (instance : Extension_instance.t) ~args:_ =
     let options =
