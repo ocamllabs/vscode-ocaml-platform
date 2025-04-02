@@ -3,7 +3,6 @@ let ocaml_prefixed key = "ocaml." ^ key
 module Commands = struct
   let install_opam = ocaml_prefixed "install-opam"
   let init_opam = ocaml_prefixed "init-opam"
-  let activate_opam_switch = ocaml_prefixed "activate-opam-switch"
   let install_ocaml_dev = ocaml_prefixed "install-ocaml-dev"
   let open_utop = ocaml_prefixed "open-utop"
   let select_sandbox = ocaml_prefixed "select-sandbox"
