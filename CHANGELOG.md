@@ -12,6 +12,8 @@
 
 - Add one-click install option for ocaml-lsp-server (#1725)
 
+- Add OCaml onboarding welcome screen. (#1737)
+
 ## 1.28.0
 
 - Add `.re` file extension support. (#1685)
