@@ -244,7 +244,6 @@ let is_version_up_to_date t ocaml_v =
             else Error (`Newer_available (Some v, available.(last)))))
   in
   Result.map_error res ~f:(fun err ->
-    let _ = suggest_to_upgrade_ocaml_lsp_server () in
     let msg =
       match err with
       | `Newer_available (old, new_) ->
