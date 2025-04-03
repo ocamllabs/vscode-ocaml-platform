@@ -108,6 +108,23 @@ let stop_server t =
     else Promise.return ()
 ;;
 
+let check_ocaml_lsp_available sandbox =
+  let ocaml_lsp_version sandbox =
+    Sandbox.get_command sandbox "ocamllsp" [ "--version" ]
+  in
+  let cwd =
+    match Workspace.workspaceFolders () with
+    | [ cwd ] -> Some (cwd |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string)
+    | _ -> None
+  in
+  Cmd.output ?cwd (ocaml_lsp_version sandbox)
+  |> Promise.Result.fold
+       ~ok:(fun (_ : string) -> ())
+       ~error:(fun (_ : string) ->
+         "Sandbox initialization failed: `ocaml-lsp-server` is not installed in the \
+          current sandbox.")
+;;
+
 module Language_server_init : sig
   val start_language_server : t -> unit Promise.t
 end = struct
@@ -150,21 +167,35 @@ end = struct
       LanguageClient.Executable.create ~command ~args ~options ()
   ;;
 
-  let check_ocaml_lsp_available sandbox =
-    let ocaml_lsp_version sandbox =
-      Sandbox.get_command sandbox "ocamllsp" [ "--version" ]
+  let suggest_to_install_ocaml_lsp_server () =
+    let open Promise.Syntax in
+    let install_lsp_text = "Install OCaml-LSP server" in
+    let select_different_sandbox = "Select a different Sandbox" in
+    let* selection =
+      Window.showInformationMessage
+        ~message:
+          "Failed to start the language server. `ocaml-lsp-server` is not installed in \
+           the current sandbox."
+        ~choices:
+          [ install_lsp_text, `Install_lsp; select_different_sandbox, `Select_sandbox ]
+        ()
     in
-    let cwd =
-      match Workspace.workspaceFolders () with
-      | [ cwd ] -> Some (cwd |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string)
-      | _ -> None
-    in
-    Cmd.output ?cwd (ocaml_lsp_version sandbox)
-    |> Promise.Result.fold
-         ~ok:(fun (_ : string) -> ())
-         ~error:(fun (_ : string) ->
-           "Sandbox initialization failed: `ocaml-lsp-server` is not installed in the \
-            current sandbox.")
+    match selection with
+    | Some `Install_lsp ->
+      let+ (_ : Ojs.t option) =
+        Vscode.Commands.executeCommand
+          ~command:Extension_consts.Commands.install_ocaml_lsp_server
+          ~args:[]
+      in
+      ()
+    | Some `Select_sandbox ->
+      let+ (_ : Ojs.t option) =
+        Vscode.Commands.executeCommand
+          ~command:Extension_consts.Commands.select_sandbox
+          ~args:[]
+      in
+      ()
+    | _ -> Promise.return ()
   ;;
 
   let client_capabilities =
@@ -180,44 +211,46 @@ end = struct
   let start_language_server t =
     let open Promise.Syntax in
     let* () = stop_server t in
-    let+ res =
-      let open Promise.Result.Syntax in
-      let* () = check_ocaml_lsp_available t.sandbox in
-      let client =
-        let serverOptions = server_options t.sandbox in
-        let clientOptions = client_options () in
-        LanguageClient.make
-          ~id:"ocaml"
-          ~name:"OCaml Platform VS Code extension"
-          ~serverOptions
-          ~clientOptions
-          ()
+    let* ocamllsp_present = check_ocaml_lsp_available t.sandbox in
+    match ocamllsp_present with
+    | Ok () ->
+      let+ res =
+        let client =
+          let serverOptions = server_options t.sandbox in
+          let clientOptions = client_options () in
+          LanguageClient.make
+            ~id:"ocaml"
+            ~name:"OCaml Platform VS Code extension"
+            ~serverOptions
+            ~clientOptions
+            ()
+        in
+        LanguageClient.registerFeature client ~feature:client_capabilities;
+        let open Promise.Syntax in
+        let+ () = LanguageClient.start client in
+        let initialize_result = LanguageClient.initializeResult client in
+        let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
+        t.lsp_client <- Some (client, ocaml_lsp);
+        (match Ocaml_lsp.is_version_up_to_date ocaml_lsp (ocaml_version_exn t) with
+         | Ok () -> ()
+         | Error (`Msg _) -> ());
+        send_configuration
+          client
+          ~codelens:t.codelens
+          ~extended_hover:t.extended_hover
+          ~standard_hover:t.standard_hover
+          ~dune_diagnostics:t.dune_diagnostics
+          ~syntax_documentation:t.syntax_documentation;
+        Ok ()
       in
-      LanguageClient.registerFeature client ~feature:client_capabilities;
-      let open Promise.Syntax in
-      let+ () = LanguageClient.start client in
-      let initialize_result = LanguageClient.initializeResult client in
-      let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
-      t.lsp_client <- Some (client, ocaml_lsp);
-      (match Ocaml_lsp.is_version_up_to_date ocaml_lsp (ocaml_version_exn t) with
+      (match res with
        | Ok () -> ()
-       | Error (`Msg m) -> show_message `Warn "%s" m);
-      send_configuration
-        client
-        ~codelens:t.codelens
-        ~extended_hover:t.extended_hover
-        ~standard_hover:t.standard_hover
-        ~dune_diagnostics:t.dune_diagnostics
-        ~syntax_documentation:t.syntax_documentation;
-      Ok ()
-    in
-    match res with
-    | Ok () -> ()
-    | Error s ->
-      show_message
-        `Error
-        "An error occurred starting the language server `ocamllsp`. %s"
-        s
+       | Error s ->
+         show_message
+           `Error
+           "An error occurred starting the language server `ocamllsp`. %s"
+           s)
+    | Error _ -> suggest_to_install_ocaml_lsp_server ()
   ;;
 end
 
@@ -237,6 +270,38 @@ let documentation_server_info () =
   StatusBarItem.set_command status_bar (`Command command);
   StatusBarItem.set_text status_bar "$(radio-tower) OCaml Documentation";
   status_bar
+;;
+
+let install_ocaml_lsp_server sandbox =
+  let open Promise.Syntax in
+  let* () = Sandbox.install_packages sandbox [ "ocaml-lsp-server" ] in
+  let* (_ : Ojs.t option) =
+    Vscode.Commands.executeCommand
+      ~command:Extension_consts.Commands.refresh_switches
+      ~args:[]
+  in
+  let+ (_ : Ojs.t option) =
+    Vscode.Commands.executeCommand
+      ~command:Extension_consts.Commands.refresh_sandbox
+      ~args:[]
+  in
+  ()
+;;
+
+let upgrade_ocaml_lsp_server sandbox =
+  let open Promise.Syntax in
+  let* () = Sandbox.upgrade_packages sandbox ~packages:[ "ocaml-lsp-server" ] in
+  let* (_ : Ojs.t option) =
+    Vscode.Commands.executeCommand
+      ~command:Extension_consts.Commands.refresh_switches
+      ~args:[]
+  in
+  let+ (_ : Ojs.t option) =
+    Vscode.Commands.executeCommand
+      ~command:Extension_consts.Commands.refresh_sandbox
+      ~args:[]
+  in
+  ()
 ;;
 
 module Sandbox_info : sig

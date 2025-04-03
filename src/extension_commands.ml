@@ -56,6 +56,46 @@ let _select_sandbox =
   command Extension_consts.Commands.select_sandbox handler
 ;;
 
+let _install_ocaml_lsp_server =
+  let handler (instance : Extension_instance.t) ~args:_ =
+    let open Promise.Syntax in
+    let (_ : unit Promise.t) =
+      let sandbox = Extension_instance.sandbox instance in
+      let* ocamllsp_present = Extension_instance.check_ocaml_lsp_available sandbox in
+      match ocamllsp_present with
+      | Ok () ->
+        show_message `Info "OCaml-LSP server is already installed." |> Promise.return
+      | Error _ ->
+        let* () = Extension_instance.install_ocaml_lsp_server sandbox in
+        show_message `Info "Installation of OCaml-LSP server completed successfully.";
+        Extension_instance.start_language_server instance
+    in
+    ()
+  in
+  command Extension_consts.Commands.install_ocaml_lsp_server handler
+;;
+
+let _upgrade_ocaml_lsp_server =
+  let handler (instance : Extension_instance.t) ~args:_ =
+    let open Promise.Syntax in
+    let (_ : unit Promise.t) =
+      let sandbox = Extension_instance.sandbox instance in
+      match
+        Ocaml_lsp.is_version_up_to_date
+          (Extension_instance.ocaml_lsp instance |> Option.value_exn)
+          (Extension_instance.ocaml_version_exn instance)
+      with
+      | Ok () -> Promise.return ()
+      | Error (`Msg _error) ->
+        let* _ = Extension_instance.upgrade_ocaml_lsp_server sandbox in
+        let+ _ = Extension_instance.start_language_server instance in
+        show_message `Info "OCaml-LSP server upgraded successfully"
+    in
+    ()
+  in
+  command Extension_consts.Commands.upgrade_ocaml_lsp_server handler
+;;
+
 let _restart_language_server =
   let handler (instance : Extension_instance.t) ~args:_ =
     let (_ : unit Promise.t) = Extension_instance.start_language_server instance in
@@ -1101,9 +1141,13 @@ module Search_by_type = struct
          | None -> show_message `Warn "ocamllsp is not running"
          | Some (_client, ocaml_lsp)
            when ocaml_lsp_doesnt_support_search_by_type ocaml_lsp ->
-           show_message
-             `Warn
-             "The installed version of `ocamllsp` does not support type search"
+           let _ =
+             Ocaml_lsp.suggest_to_upgrade_ocaml_lsp_server
+               ~message:
+                 "The installed version of `ocamllsp` does not support type search."
+               ()
+           in
+           ()
          | Some (client, _) -> show_query_input text_editor client)
     in
     command Extension_consts.Commands.search_by_type handler
@@ -1272,9 +1316,14 @@ module Navigate_holes = struct
          | None -> show_message `Warn "ocamllsp is not running"
          | Some (_client, ocaml_lsp) when ocaml_lsp_doesnt_support_typed_holes ocaml_lsp
            ->
-           show_message
-             `Warn
-             "The installed version of `ocamllsp` does not support typed hole navigation"
+           let _ =
+             Ocaml_lsp.suggest_to_upgrade_ocaml_lsp_server
+               ~message:
+                 "The installed version of `ocamllsp` does not support typed hole \
+                  navigation."
+               ()
+           in
+           ()
          | Some (client, _) ->
            let _ = handle_hole_navigation text_editor client instance in
            ())

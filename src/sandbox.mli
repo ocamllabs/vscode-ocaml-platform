@@ -73,7 +73,7 @@ val uninstall_packages : t -> Package.t list -> unit Promise.t
 val install_packages : t -> string list -> unit Promise.t
 
 (** Upgrade packages in the sandbox *)
-val upgrade_packages : t -> unit Promise.t
+val upgrade_packages : ?packages:string list -> t -> unit Promise.t
 
 (** [ocaml_version] returns the version of the ocaml compiler installed in given
     sandbox. *)

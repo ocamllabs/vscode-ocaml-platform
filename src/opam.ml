@@ -310,7 +310,11 @@ let install t switch ~packages =
 ;;
 
 let update t switch = spawn t [ "update"; switch_arg switch ]
-let upgrade t switch = spawn t [ "upgrade"; switch_arg switch; "-y" ]
+
+let upgrade ?(packages = []) t switch =
+  spawn t ("upgrade" :: switch_arg switch :: "-y" :: packages)
+;;
+
 let remove t switch packages = spawn t ("remove" :: switch_arg switch :: "-y" :: packages)
 
 let switch_compiler t switch =

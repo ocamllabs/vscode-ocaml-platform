@@ -602,7 +602,7 @@ let install_packages t packages =
   let options =
     ProgressOptions.create
       ~location:(`ProgressLocation Notification)
-      ~title:"Installing sandbox packages"
+      ~title:("Installing sandbox packages: " ^ String.concat ~sep:", " packages)
       ~cancellable:false
       ()
   in
@@ -637,7 +637,7 @@ let install_packages t packages =
     ()
 ;;
 
-let upgrade_packages t =
+let upgrade_packages ?(packages = []) t =
   let options =
     ProgressOptions.create
       ~location:(`ProgressLocation Notification)
@@ -662,7 +662,7 @@ let upgrade_packages t =
       let+ result =
         let open Promise.Result.Syntax in
         let* _ = Opam.update opam switch |> Cmd.output in
-        let+ _ = Opam.upgrade opam switch |> Cmd.output in
+        let+ _ = Opam.upgrade ~packages opam switch |> Cmd.output in
         ()
       in
       match result with
