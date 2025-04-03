@@ -290,13 +290,13 @@ let install_ocaml_lsp_server sandbox =
 
 let upgrade_ocaml_lsp_server sandbox =
   let open Promise.Syntax in
-  let+ () = Sandbox.upgrade_packages sandbox ~packages:[ "ocaml-lsp-server" ] in
-  let (_ : Ojs.t option Promise.t) =
+  let* () = Sandbox.upgrade_packages sandbox ~packages:[ "ocaml-lsp-server" ] in
+  let* (_ : Ojs.t option) =
     Vscode.Commands.executeCommand
       ~command:Extension_consts.Commands.refresh_switches
       ~args:[]
   in
-  let (_ : Ojs.t option Promise.t) =
+  let+ (_ : Ojs.t option) =
     Vscode.Commands.executeCommand
       ~command:Extension_consts.Commands.refresh_sandbox
       ~args:[]
