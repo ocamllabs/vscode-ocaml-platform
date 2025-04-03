@@ -1141,10 +1141,12 @@ module Search_by_type = struct
          | None -> show_message `Warn "ocamllsp is not running"
          | Some (_client, ocaml_lsp)
            when ocaml_lsp_doesnt_support_search_by_type ocaml_lsp ->
-           show_message
-             `Warn
-             "The installed version of `ocamllsp` does not support type search";
-           let _ = Ocaml_lsp.suggest_to_upgrade_ocaml_lsp_server () in
+           let _ =
+             Ocaml_lsp.suggest_to_upgrade_ocaml_lsp_server
+               ~message:
+                 "The installed version of `ocamllsp` does not support type search."
+               ()
+           in
            ()
          | Some (client, _) -> show_query_input text_editor client)
     in
@@ -1314,10 +1316,13 @@ module Navigate_holes = struct
          | None -> show_message `Warn "ocamllsp is not running"
          | Some (_client, ocaml_lsp) when ocaml_lsp_doesnt_support_typed_holes ocaml_lsp
            ->
-           show_message
-             `Warn
-             "The installed version of `ocamllsp` does not support typed hole navigation";
-           let _ = Ocaml_lsp.suggest_to_upgrade_ocaml_lsp_server () in
+           let _ =
+             Ocaml_lsp.suggest_to_upgrade_ocaml_lsp_server
+               ~message:
+                 "The installed version of `ocamllsp` does not support typed hole \
+                  navigation."
+               ()
+           in
            ()
          | Some (client, _) ->
            let _ = handle_hole_navigation text_editor client instance in

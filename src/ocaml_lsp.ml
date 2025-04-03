@@ -199,13 +199,16 @@ let available_versions version =
   List.Assoc.find lsp_versions ~equal:Poly.equal prefix
 ;;
 
-let suggest_to_upgrade_ocaml_lsp_server () =
+let suggest_to_upgrade_ocaml_lsp_server
+      ?(message = "OCaml-LSP server is not up to date.")
+      ()
+  =
   let open Promise.Syntax in
   let upgrade_lsp_text = "Yes" in
   let no_upgrade = "No" in
   let* selection =
     Window.showInformationMessage
-      ~message:"OCaml-LSP server is not up to date. Do you want to upgrade it?"
+      ~message:(message ^ " Do you want to upgrade it?")
       ~choices:[ upgrade_lsp_text, `Update_lsp; no_upgrade, `No_upgrade ]
       ()
   in
