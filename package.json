@@ -1332,7 +1332,7 @@
     "@vscode/vsce": "3.3.2",
     "esbuild": "0.25.2",
     "ovsx": "0.10.1",
-    "typescript": "5.8.2"
+    "typescript": "5.8.3"
   },
   "packageManager": "yarn@4.8.1",
   "engines": {
