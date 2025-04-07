@@ -1,6 +1,8 @@
-# Change Log
+# VSCode OCaml Platform Releases
 
 ## Unreleased
+
+- Add one-click install option for ocaml-lsp-server (#1725)
 
 ## 1.28.2
 
@@ -9,8 +11,6 @@
 ## 1.28.1
 
 - Fix syntax color for odoc math blocks containing braces (#1741)
-
-- Add one-click install option for ocaml-lsp-server (#1725)
 
 ## 1.28.0
 
