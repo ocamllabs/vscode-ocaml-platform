@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.29.0
+
 - Add one-click install option for ocaml-lsp-server (#1725)
 
 ## 1.28.2
