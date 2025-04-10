@@ -38,7 +38,7 @@
   (jsonoo
    (>= 0.3))
   (ocaml-version
-   (>= 3.7.3))
+   (>= 4.0))
   (ppxlib
    (>= 0.35))
   (opam-file-format

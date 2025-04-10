@@ -24,7 +24,7 @@ depends: [
   "base" {>= "v0.17"}
   "promise_jsoo" {>= "0.4.3"}
   "jsonoo" {>= "0.3"}
-  "ocaml-version" {>= "3.7.3"}
+  "ocaml-version" {>= "4.0"}
   "ppxlib" {>= "0.35"}
   "opam-file-format" {>= "2.1.6"}
   "ocamlformat" {= "0.27.0" & with-dev-setup}
