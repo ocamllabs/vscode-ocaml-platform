@@ -1729,16 +1729,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode/test-electron@npm:2.5.1":
-  version: 2.5.1
-  resolution: "@vscode/test-electron@npm:2.5.1"
+"@vscode/test-electron@npm:2.5.2":
+  version: 2.5.2
+  resolution: "@vscode/test-electron@npm:2.5.2"
   dependencies:
     http-proxy-agent: "npm:^7.0.2"
     https-proxy-agent: "npm:^7.0.5"
     jszip: "npm:^3.10.1"
     ora: "npm:^8.1.0"
     semver: "npm:^7.6.2"
-  checksum: 10c0/b7d63929069f28a80ea928f6de724c52aa96e08e17f770106049ea3113a2357518561baf1e20166287cfe729040ec541f58d398f3b2ecebb62809881c245744d
+  checksum: 10c0/30b1a30e56e14a90de9288a79e9dd71477534cda9f68dfc66f11446822c67324d8e49dbd2bfa0049a8cc9a4ddb3cafc1bae27ea6920795070fe7ae63a512ac03
   languageName: node
   linkType: hard
 
@@ -4592,7 +4592,7 @@ __metadata:
     "@types/node": "npm:22.14.0"
     "@types/vscode": "npm:1.86.0"
     "@vscode/test-cli": "npm:0.0.10"
-    "@vscode/test-electron": "npm:2.5.1"
+    "@vscode/test-electron": "npm:2.5.2"
     "@vscode/vsce": "npm:3.3.2"
     esbuild: "npm:0.25.2"
     ovsx: "npm:0.10.1"
