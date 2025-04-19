@@ -125,6 +125,37 @@ let check_ocaml_lsp_available sandbox =
           current sandbox.")
 ;;
 
+let suggest_to_run_dune_pkg_lock t =
+  let open Promise.Syntax in
+  let (_ : unit Promise.t) =
+    let+ maybe_choice =
+      Window.showWarningMessage
+        ~message:
+          "Dune Pkg is detected but no lock file is present. Do you want to run `dune \
+           pkg lock`"
+        ~choices:
+          [ ( "Run dune pkg lock"
+            , fun () ->
+                let _ =
+                  Sandbox.get_command t.sandbox "dune" [ "pkg"; "lock" ] |> Cmd.output
+                in
+                () )
+          ; ( "Pick another sandbox"
+            , fun () ->
+                let (_ : Ojs.t option Promise.t) =
+                  Vscode.Commands.executeCommand
+                    ~command:Extension_consts.Commands.select_sandbox
+                    ~args:[]
+                in
+                () )
+          ]
+        ()
+    in
+    Option.iter maybe_choice ~f:(fun f -> f ())
+  in
+  ()
+;;
+
 module Language_server_init : sig
   val start_language_server : t -> unit Promise.t
 end = struct
@@ -167,35 +198,47 @@ end = struct
       LanguageClient.Executable.create ~command ~args ~options ()
   ;;
 
-  let suggest_to_install_ocaml_lsp_server () =
+  let suggest_to_install_ocaml_lsp_server t () =
     let open Promise.Syntax in
-    let install_lsp_text = "Install OCaml-LSP server" in
-    let select_different_sandbox = "Select a different Sandbox" in
-    let* selection =
-      Window.showInformationMessage
-        ~message:
-          "Failed to start the language server. `ocaml-lsp-server` is not installed in \
-           the current sandbox."
-        ~choices:
-          [ install_lsp_text, `Install_lsp; select_different_sandbox, `Select_sandbox ]
-        ()
-    in
-    match selection with
-    | Some `Install_lsp ->
-      let+ (_ : Ojs.t option) =
-        Vscode.Commands.executeCommand
-          ~command:Extension_consts.Commands.install_ocaml_lsp_server
-          ~args:[]
+    match t.sandbox with
+    | Dune_pkg _ ->
+      let open Promise.Option.Syntax in
+      let _ =
+        let* project_root = Sandbox.workspace_root () |> Promise.return in
+        let* is_dune_pkg_locked = Sandbox.detect_dune_pkg_lock_dir ~project_root () in
+        match is_dune_pkg_locked with
+        | Dune_pkg _ -> Some () |> Promise.return
+        | _ -> Some (suggest_to_run_dune_pkg_lock t) |> Promise.return
       in
-      ()
-    | Some `Select_sandbox ->
-      let+ (_ : Ojs.t option) =
-        Vscode.Commands.executeCommand
-          ~command:Extension_consts.Commands.select_sandbox
-          ~args:[]
+      Promise.return ()
+    | _ ->
+      let install_lsp_text = "Install OCaml-LSP server" in
+      let select_different_sandbox = "Select a different Sandbox" in
+      let* selection =
+        Window.showInformationMessage
+          ~message:
+            "Failed to start the language server. `ocaml-lsp-server` is not installed in \
+             the current sandbox."
+          ~choices:
+            [ install_lsp_text, `Install_lsp; select_different_sandbox, `Select_sandbox ]
+          ()
       in
-      ()
-    | _ -> Promise.return ()
+      (match selection with
+       | Some `Install_lsp ->
+         let+ (_ : Ojs.t option) =
+           Vscode.Commands.executeCommand
+             ~command:Extension_consts.Commands.install_ocaml_lsp_server
+             ~args:[]
+         in
+         ()
+       | Some `Select_sandbox ->
+         let+ (_ : Ojs.t option) =
+           Vscode.Commands.executeCommand
+             ~command:Extension_consts.Commands.select_sandbox
+             ~args:[]
+         in
+         ()
+       | _ -> Promise.return ())
   ;;
 
   let client_capabilities =
@@ -250,7 +293,7 @@ end = struct
            `Error
            "An error occurred starting the language server `ocamllsp`. %s"
            s)
-    | Error _ -> suggest_to_install_ocaml_lsp_server ()
+    | Error _ -> suggest_to_install_ocaml_lsp_server t ()
   ;;
 end
 
@@ -434,39 +477,51 @@ let update_ocaml_info t =
   match ocaml_version with
   | Ok ocaml_version -> t.ocaml_version <- Some ocaml_version
   | Error e ->
-    (* [t.ocaml_version <- None] because we don't want [t.ocaml_version] to be
-       left over from a previous sandbox, which successfully set it *)
-    t.ocaml_version <- None;
-    (match e with
-     | `Unable_to_parse_version (`Version v, `Msg msg) ->
-       show_message
-         `Error
-         "OCaml bytecode compiler `ocamlc` version could not be parsed. Version: %s. \
-          Error %s"
-         v
-         msg
-     | `Ocamlc_missing ->
-       let (_ : unit Promise.t) =
-         let+ maybe_choice =
-           Window.showWarningMessage
-             ~message:
-               "OCaml bytecode compiler `ocamlc` was not found in the current sandbox. \
-                Do you have OCaml installed in the current sandbox?"
-             ~choices:
-               [ ( "Pick another sandbox"
-                 , fun () ->
-                     let (_ : Ojs.t option Promise.t) =
-                       Vscode.Commands.executeCommand
-                         ~command:Extension_consts.Commands.select_sandbox
-                         ~args:[]
-                     in
-                     () )
-               ]
-             ()
-         in
-         Option.iter maybe_choice ~f:(fun f -> f ())
+    (match t.sandbox with
+     | Dune_pkg _ ->
+       let open Promise.Option.Syntax in
+       let _ =
+         let+ project_root = Sandbox.workspace_root () |> Promise.return in
+         let* is_dune_pkg_locked = Sandbox.detect_dune_pkg_lock_dir ~project_root () in
+         match is_dune_pkg_locked with
+         | Dune_pkg _ -> Some () |> Promise.return
+         | _ -> Some (suggest_to_run_dune_pkg_lock t) |> Promise.return
        in
-       ())
+       ()
+     | _ ->
+       (* [t.ocaml_version <- None] because we don't want [t.ocaml_version] to be
+          left over from a previous sandbox, which successfully set it *)
+       t.ocaml_version <- None;
+       (match e with
+        | `Unable_to_parse_version (`Version v, `Msg msg) ->
+          show_message
+            `Error
+            "OCaml bytecode compiler `ocamlc` version could not be parsed. Version: %s. \
+             Error %s"
+            v
+            msg
+        | `Ocamlc_missing ->
+          let (_ : unit Promise.t) =
+            let+ maybe_choice =
+              Window.showWarningMessage
+                ~message:
+                  "OCaml bytecode compiler `ocamlc` was not found in the current \
+                   sandbox. Do you have OCaml installed in the current sandbox?"
+                ~choices:
+                  [ ( "Pick another sandbox"
+                    , fun () ->
+                        let (_ : Ojs.t option Promise.t) =
+                          Vscode.Commands.executeCommand
+                            ~command:Extension_consts.Commands.select_sandbox
+                            ~args:[]
+                        in
+                        () )
+                  ]
+                ()
+            in
+            Option.iter maybe_choice ~f:(fun f -> f ())
+          in
+          ()))
 ;;
 
 let open_terminal sandbox =
