@@ -131,8 +131,8 @@ let suggest_to_run_dune_pkg_lock t =
     let+ maybe_choice =
       Window.showWarningMessage
         ~message:
-          "Dune Pkg is detected but no lock file is present. Do you want to run `dune \
-           pkg lock`"
+          "Dune Package Manager is detected but no lock file is present. Do you want to \
+           run `dune pkg lock`"
         ~choices:
           [ ( "Run dune pkg lock"
             , fun () ->
@@ -202,12 +202,13 @@ end = struct
     let open Promise.Syntax in
     match t.sandbox with
     | Dune _ ->
-      let open Promise.Option.Syntax in
       let _ =
+        let open Promise.Option.Syntax in
         let* project_root = Sandbox.workspace_root () |> Promise.return in
+        let open Promise.Syntax in
         let* is_dune_pkg_locked = Sandbox.detect_dune_lock_dir ~project_root () in
         match is_dune_pkg_locked with
-        | Dune _ -> Some () |> Promise.return
+        | Some (Dune _) -> Some () |> Promise.return
         | _ -> Some (suggest_to_run_dune_pkg_lock t) |> Promise.return
       in
       Promise.return ()
