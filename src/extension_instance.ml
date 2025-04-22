@@ -201,13 +201,13 @@ end = struct
   let suggest_to_install_ocaml_lsp_server t () =
     let open Promise.Syntax in
     match t.sandbox with
-    | Dune_pkg _ ->
+    | Dune _ ->
       let open Promise.Option.Syntax in
       let _ =
         let* project_root = Sandbox.workspace_root () |> Promise.return in
-        let* is_dune_pkg_locked = Sandbox.detect_dune_pkg_lock_dir ~project_root () in
+        let* is_dune_pkg_locked = Sandbox.detect_dune_lock_dir ~project_root () in
         match is_dune_pkg_locked with
-        | Dune_pkg _ -> Some () |> Promise.return
+        | Dune _ -> Some () |> Promise.return
         | _ -> Some (suggest_to_run_dune_pkg_lock t) |> Promise.return
       in
       Promise.return ()
@@ -478,13 +478,13 @@ let update_ocaml_info t =
   | Ok ocaml_version -> t.ocaml_version <- Some ocaml_version
   | Error e ->
     (match t.sandbox with
-     | Dune_pkg _ ->
+     | Dune _ ->
        let open Promise.Option.Syntax in
        let _ =
          let+ project_root = Sandbox.workspace_root () |> Promise.return in
-         let* is_dune_pkg_locked = Sandbox.detect_dune_pkg_lock_dir ~project_root () in
+         let* is_dune_pkg_locked = Sandbox.detect_dune_lock_dir ~project_root () in
          match is_dune_pkg_locked with
-         | Dune_pkg _ -> Some () |> Promise.return
+         | Dune _ -> Some () |> Promise.return
          | _ -> Some (suggest_to_run_dune_pkg_lock t) |> Promise.return
        in
        ()
