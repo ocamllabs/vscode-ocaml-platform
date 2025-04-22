@@ -137,7 +137,33 @@ let suggest_to_run_dune_pkg_lock t =
           [ ( "Run dune pkg lock"
             , fun () ->
                 let _ =
-                  Sandbox.get_command t.sandbox "dune" [ "pkg"; "lock" ] |> Cmd.output
+                  let options =
+                    ProgressOptions.create
+                      ~location:(`ProgressLocation Notification)
+                      ~title:"Running `dune pkg lock`"
+                      ~cancellable:false
+                      ()
+                  in
+                  let task ~progress:_ ~token:_ =
+                    let+ result =
+                      let _ =
+                        let terminal = Terminal_sandbox.create t.sandbox in
+                        let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+                        Terminal_sandbox.send terminal "dune pkg lock"
+                      in
+                      Ok () |> Promise.return
+                    in
+                    match result with
+                    | Ok () -> Ojs.null
+                    | Error err ->
+                      show_message
+                        `Error
+                        "An error occured while running dune pkg lock: %s"
+                        err;
+                      Ojs.null
+                  in
+                  let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+                  ()
                 in
                 () )
           ; ( "Pick another sandbox"
