@@ -1,6 +1,11 @@
 # VSCode OCaml Platform
 
-[![Main workflow](https://github.com/ocamllabs/vscode-ocaml-platform/actions/workflows/main.yml/badge.svg)](https://github.com/ocamllabs/vscode-ocaml-platform/actions/workflows/main.yml)
+[![Builds, tests & co](https://github.com/ocamllabs/vscode-ocaml-platform/actions/workflows/main.yml/badge.svg)](https://github.com/ocamllabs/vscode-ocaml-platform/actions/workflows/main.yml)
+
+| Platform       | Downloads                                                                                                                                                                                           |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VS Marketplace | [![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/ocamllabs.ocaml-platform)](https://marketplace.visualstudio.com/items?itemName=ocamllabs.ocaml-platform) |
+| Open VSX       | [![Open VSX Downloads](https://img.shields.io/open-vsx/dt/ocamllabs/ocaml-platform)](https://open-vsx.org/extension/ocamllabs/ocaml-platform)                                                       |
 
 Visual Studio Code extension for OCaml and relevant tools.
 
