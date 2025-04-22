@@ -301,11 +301,7 @@ let detect_dune_lock_dir ~project_root () =
   (* Path to the dune.lock file *)
   let dune_lock_path = Path.join project_root (Path.of_string "dune.lock") in
   let+ exists = Fs.exists (Path.to_string dune_lock_path) in
-  if exists
-  then (
-    show_message `Info "Dune Package Manager detected.";
-    Some (Dune "$prog $args"))
-  else None
+  if exists then Some (Dune "$prog $args") else None
 ;;
 
 let detect () =
