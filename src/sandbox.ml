@@ -296,7 +296,7 @@ let detect_opam_sandbox ~project_root opam () =
   Opam (opam, switch)
 ;;
 
-let detect_Dune_lock_dir ~project_root () =
+let detect_dune_lock_dir ~project_root () =
   let open Promise.Syntax in
   (* Path to the dune.lock file *)
   let dune_lock_path = Path.join project_root (Path.of_string "dune.lock") in
@@ -314,7 +314,7 @@ let detect () =
   let available = available_sandboxes () in
   Promise.List.find_map
     (fun f -> f ())
-    [ detect_Dune_lock_dir ~project_root
+    [ detect_dune_lock_dir ~project_root
     ; detect_opam_local_switch ~project_root available.opam
     ; detect_esy_sandbox ~project_root available.esy
     ; detect_opam_sandbox ~project_root available.opam
