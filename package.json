@@ -1330,7 +1330,7 @@
     "@vscode/test-cli": "0.0.10",
     "@vscode/test-electron": "2.5.2",
     "@vscode/vsce": "3.3.2",
-    "esbuild": "0.25.2",
+    "esbuild": "0.25.3",
     "ovsx": "0.10.2",
     "typescript": "5.8.3"
   },
