@@ -652,7 +652,7 @@ let install_packages t packages =
   | Dune _ ->
     show_message
       `Error
-      "Installing packages is not yet supported for this Dune Package Manager";
+      "Installing packages is not yet supported for Dune Package Manager";
     Promise.return ()
   | Esy (_esy, _manifest) ->
     (* TODO: Implement Esy sandbox inspection *)
