@@ -696,7 +696,7 @@ let upgrade_packages ?(packages = []) t =
   | Dune _ ->
     show_message
       `Error
-      "Upgrading packages is not yet supported for this Dune Package Manager";
+      "Upgrading packages is not yet supported for Dune Package Manager";
     Promise.return ()
   | Esy (_esy, _manifest) ->
     (* TODO: Implement Esy sandbox inspection *)
