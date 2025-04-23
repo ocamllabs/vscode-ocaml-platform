@@ -134,7 +134,7 @@ let suggest_to_run_dune_pkg_lock t =
           "Dune Package Manager is detected but no lock file is present. Do you want to \
            run `dune pkg lock`"
         ~choices:
-          [ ( "Run dune pkg lock"
+          [ ( "Generate lockfile"
             , fun () ->
                 let _ =
                   let options =
