@@ -9,6 +9,7 @@ module Package = struct
   type t =
     | Opam of Opam.Package.t
     | Esy of Esy.Package.t
+    | Dune of Dune_pkg.Package.t
 
   let of_opam opam_pkg = Opam opam_pkg
   let of_esy opam_pkg = Esy opam_pkg
@@ -17,24 +18,28 @@ module Package = struct
     match t with
     | Opam pkg -> Opam.Package.name pkg
     | Esy pkg -> Esy.Package.name pkg
+    | Dune pkg -> Dune_pkg.Package.name pkg
   ;;
 
   let version t =
     match t with
     | Opam pkg -> Opam.Package.version pkg
     | Esy pkg -> Esy.Package.version pkg
+    | Dune pkg -> Dune_pkg.Package.version pkg
   ;;
 
   let synopsis t =
     match t with
     | Opam pkg -> Opam.Package.synopsis pkg
     | Esy pkg -> Esy.Package.synopsis pkg
+    | Dune pkg -> Dune_pkg.Package.synopsis pkg
   ;;
 
   let documentation t =
     match t with
     | Opam pkg -> Opam.Package.documentation pkg
     | Esy pkg -> Esy.Package.documentation pkg
+    | Dune pkg -> Dune_pkg.Package.documentation pkg
   ;;
 
   let dependencies t =
@@ -47,12 +52,14 @@ module Package = struct
       let open Promise.Result.Syntax in
       let+ deps = Esy.Package.dependencies pkg in
       List.map deps ~f:of_esy
+    | Dune pkg -> Dune_pkg.Package.dependencies pkg
   ;;
 
   let has_dependencies t =
     match t with
     | Opam pkg -> Opam.Package.has_dependencies pkg
     | Esy pkg -> Esy.Package.has_dependencies pkg
+    | Dune pkg -> Dune_pkg.Package.has_dependencies pkg
   ;;
 end
 
@@ -61,7 +68,7 @@ type t =
   | Esy of Esy.t * Esy.Manifest.t
   | Global
   | Custom of string
-  | Dune of string
+  | Dune of Dune_pkg.t * Dune_pkg.LockDir.t
 
 let equal t1 t2 =
   match t1, t2 with
@@ -69,7 +76,7 @@ let equal t1 t2 =
   | Esy (e1, p1), Esy (e2, p2) -> Esy.Manifest.equal p1 p2 && Esy.equal e1 e2
   | Opam (o1, s1), Opam (o2, s2) -> Opam.Switch.equal s1 s2 && Opam.equal o1 o2
   | Custom s1, Custom s2 -> String.equal s1 s2
-  | Dune s1, Dune s2 -> String.equal s1 s2
+  | Dune (_, p1), Dune (_, p2) -> Dune_pkg.equal p1 p2
   | _, _ -> false
 ;;
 
@@ -139,7 +146,7 @@ module Setting = struct
     | Esy of Esy.Manifest.t
     | Global
     | Custom of string
-    | Dune of string
+    | Dune of Dune_pkg.t
 
   let kind : t -> Kind.t = function
     | Opam _ -> Opam
@@ -171,8 +178,8 @@ module Setting = struct
       let template = Jsonoo.Decode.field "template" decode_vars json in
       Custom template
     | Dune ->
-      let template = Jsonoo.Decode.field "template" decode_vars json in
-      Dune template
+      let root_dir = Jsonoo.Decode.field "root" decode_vars json |> Path.of_string in
+      Dune root_dir
   ;;
 
   let to_json (t : t) =
@@ -186,7 +193,7 @@ module Setting = struct
         [ kind; "root", encode_vars @@ (manifest |> Esy.Manifest.path |> Path.to_string) ]
     | Opam switch -> object_ [ kind; "switch", encode_vars @@ Opam.Switch.name switch ]
     | Custom template -> object_ [ kind; "template", string template ]
-    | Dune template -> object_ [ kind; "template", string template ]
+    | Dune root -> object_ [ kind; "root", encode_vars @@ Path.to_string root ]
   ;;
 
   let t = Settings.create_setting ~scope:Workspace ~key:"sandbox" ~of_json ~to_json
@@ -195,10 +202,11 @@ end
 type available_sandboxes =
   { opam : Opam.t option Promise.t
   ; esy : Esy.t option Promise.t
+  ; dune : Dune_pkg.LockDir.t option Promise.t
   }
 
 let available_sandboxes () : available_sandboxes =
-  { opam = Opam.make (); esy = Esy.make () }
+  { dune = Dune_pkg.LockDir.make (); opam = Opam.make (); esy = Esy.make () }
 ;;
 
 let of_settings () : t option Promise.t =
@@ -209,6 +217,7 @@ let of_settings () : t option Promise.t =
       match kind with
       | `Esy -> "esy"
       | `Opam -> "opam"
+      | `Dune -> "dune"
     in
     show_message
       `Warn
@@ -244,7 +253,14 @@ let of_settings () : t option Promise.t =
          None))
   | Some Global -> Promise.return (Some Global)
   | Some (Custom template) -> Promise.return (Some (Custom template))
-  | Some (Dune template) -> Promise.return (Some (Dune template))
+  | Some (Dune dune) ->
+    let open Promise.Syntax in
+    let* dune_lock_path = available.dune in
+    (match dune_lock_path with
+     | None ->
+       not_available `Dune;
+       Promise.return None
+     | Some dune_lock_path -> Promise.return (Some (Dune (dune, dune_lock_path))))
 ;;
 
 (** If [Workspace.workspaceFolders()] returns a list with a single element,
@@ -296,12 +312,10 @@ let detect_opam_sandbox ~project_root opam () =
   Opam (opam, switch)
 ;;
 
-let detect_dune_lock_dir ~project_root () =
-  let open Promise.Syntax in
-  (* Path to the dune.lock file *)
-  let dune_lock_path = Path.join project_root (Path.of_string "dune.lock") in
-  let+ exists = Fs.exists (Path.to_string dune_lock_path) in
-  if exists then Some (Dune "$prog $args") else None
+let detect_dune_pkg ~project_root dune () =
+  let open Promise.Option.Syntax in
+  let+ dune = dune in
+  Dune (project_root, dune)
 ;;
 
 let detect () =
@@ -310,7 +324,7 @@ let detect () =
   let available = available_sandboxes () in
   Promise.List.find_map
     (fun f -> f ())
-    [ detect_dune_lock_dir ~project_root
+    [ detect_dune_pkg ~project_root available.dune
     ; detect_opam_local_switch ~project_root available.opam
     ; detect_esy_sandbox ~project_root available.esy
     ; detect_opam_sandbox ~project_root available.opam
@@ -331,7 +345,7 @@ let save_to_settings sandbox =
     | Opam (_, switch) -> Setting.Opam switch
     | Global -> Setting.Global
     | Custom template -> Setting.Custom template
-    | Dune template -> Setting.Dune template
+    | Dune (dune, _) -> Setting.Dune dune
   in
   Settings.set ~section:"ocaml" Setting.t (to_setting sandbox)
 ;;
@@ -384,12 +398,9 @@ module Candidate = struct
         ~label:"Custom"
         ~detail:"Custom sandbox using a command template"
         ()
-    | Dune _ ->
-      create
-        ?description
-        ~label:"Dune Package Manager"
-        ~detail:"Use Dune Package Management for this project"
-        ()
+    | Dune (dune, _) ->
+      let project_path = Path.to_string dune in
+      create ?description ~label:"Dune Package Manager" ~detail:project_path ()
   ;;
 
   let ok sandbox = { sandbox; status = Ok () }
@@ -473,9 +484,30 @@ let sandbox_candidates ~workspace_folders =
     (* doesn't matter what the custom fields are set to here user will input
        custom commands in [select] *)
   in
-  let dune = Candidate.ok (Dune "$prog $args") in
-  let+ esy, (opam, current_switch) = Promise.all2 (esy, opam) in
-  let cs = (dune :: global :: custom :: esy) @ opam in
+  let dune =
+    let* dune = available.dune in
+    match dune with
+    | None ->
+      (match workspace_root () with
+       | None ->
+         Promise.return [ Candidate.ok (Dune (Path.of_string "", Path.of_string "")) ]
+       | Some project_root ->
+         Promise.return [ Candidate.ok (Dune (project_root, Path.of_string "")) ])
+    | Some dune ->
+      let+ dune_projects =
+        workspace_folders
+        |> List.map ~f:(fun (folder : WorkspaceFolder.t) ->
+          let dir = folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string in
+          let* is_dune_locked = Dune_pkg.LockDir.detect dir () in
+          if is_dune_locked then Promise.return [ dir ] else Promise.return [])
+        |> Promise.all_list
+      in
+      List.concat dune_projects
+      |> List.map ~f:(fun dune_lock_dir ->
+        { Candidate.sandbox = Dune (dune, dune_lock_dir); status = Ok () })
+  in
+  let+ esy, (opam, current_switch), dune = Promise.all3 (esy, opam, dune) in
+  let cs = (global :: custom :: esy) @ opam @ dune in
   Option.value_map current_switch ~default:cs ~f:(fun current_switch ->
     current_switch :: cs)
 ;;
@@ -525,8 +557,9 @@ let get_command sandbox bin args : Cmd.t =
   match sandbox with
   | Opam (opam, switch) -> Opam.exec opam switch ~args:(bin :: args)
   | Esy (esy, manifest) -> Esy.exec esy manifest ~args:(bin :: args)
+  | Dune (_dune, _dune_lock_dir) -> Dune_pkg.exec ~args:(bin :: args)
   | Global -> Spawn { bin = Path.of_string bin; args }
-  | Custom template | Dune template ->
+  | Custom template ->
     let command =
       template
       |> String.substr_replace_all ~pattern:"$prog" ~with_:(Cmd.quote bin)
@@ -612,7 +645,7 @@ let uninstall_packages t packages =
     let opam_packages =
       List.filter_map
         ~f:(function
-          | Package.Esy _ -> None
+          | Package.Esy _ | Package.Dune _ -> None
           | Opam pkg -> Some pkg)
         packages
     in
@@ -694,9 +727,7 @@ let upgrade_packages ?(packages = []) t =
     show_message `Error "Upgrading packages is not supported for Custom sandboxes";
     Promise.return ()
   | Dune _ ->
-    show_message
-      `Error
-      "Upgrading packages is not yet supported for Dune Package Manager";
+    show_message `Error "Upgrading packages is not yet supported for Dune Package Manager";
     Promise.return ()
   | Esy (_esy, _manifest) ->
     (* TODO: Implement Esy sandbox inspection *)
