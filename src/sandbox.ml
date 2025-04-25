@@ -76,7 +76,7 @@ let equal t1 t2 =
   | Esy (e1, p1), Esy (e2, p2) -> Esy.Manifest.equal p1 p2 && Esy.equal e1 e2
   | Opam (o1, s1), Opam (o2, s2) -> Opam.Switch.equal s1 s2 && Opam.equal o1 o2
   | Custom s1, Custom s2 -> String.equal s1 s2
-  | Dune (_, p1), Dune (_, p2) -> Dune_pkg.equal p1 p2
+  | Dune (r1, p1), Dune (r2, p2) -> Dune_pkg.equal r1 r2 && Dune_pkg.equal p1 p2
   | _, _ -> false
 ;;
 
