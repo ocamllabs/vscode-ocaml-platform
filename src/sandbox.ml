@@ -13,6 +13,7 @@ module Package = struct
 
   let of_opam opam_pkg = Opam opam_pkg
   let of_esy opam_pkg = Esy opam_pkg
+  let of_dune dune_pkg = Dune dune_pkg
 
   let name t =
     match t with
@@ -52,7 +53,10 @@ module Package = struct
       let open Promise.Result.Syntax in
       let+ deps = Esy.Package.dependencies pkg in
       List.map deps ~f:of_esy
-    | Dune pkg -> Dune_pkg.Package.dependencies pkg
+    | Dune pkg ->
+      let open Promise.Result.Syntax in
+      let+ deps = Dune_pkg.Package.dependencies pkg in
+      List.map deps ~f:of_dune
   ;;
 
   let has_dependencies t =

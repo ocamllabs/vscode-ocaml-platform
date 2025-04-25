@@ -24,7 +24,6 @@ module LockDir = struct
   ;;
 
   let detect project_root () =
-    let open Promise.Syntax in
     (* Path to the dune.lock dir *)
     let dune_lock_path = Path.join project_root (Path.of_string "dune.lock") in
     Fs.exists (Path.to_string dune_lock_path)
@@ -51,7 +50,6 @@ type t = Path.t
 let binary = Path.of_string "dune"
 
 let detect_dune_ocamllsp project_root () =
-  let open Promise.Syntax in
   (* Path to the ocaml-lsp-server.pkg file *)
   let ocamllsp =
     Path.join
