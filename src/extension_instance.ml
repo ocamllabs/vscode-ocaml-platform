@@ -294,8 +294,7 @@ end = struct
     let args = Settings.(get server_args_setting) |> Option.value ~default:[] in
     let command =
       match t.sandbox with
-      | Dune (project_root, _) ->
-        Sandbox.get_command t.sandbox "tools" ("exec" :: "ocamllsp" :: args)
+      | Dune _ -> Sandbox.get_command t.sandbox "tools" ("exec" :: "ocamllsp" :: args)
       | _ -> Sandbox.get_command t.sandbox "ocamllsp" args
     in
     Cmd.log command;
