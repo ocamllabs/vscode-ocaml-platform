@@ -30,14 +30,13 @@ type t =
   | Esy of Esy.t * Esy.Manifest.t
   | Global
   | Custom of string
-  | Dune of string
+  | Dune of Dune_pkg.t * Dune_pkg.LockDir.t
 
 val workspace_root : unit -> Path.t option
 val equal : t -> t -> bool
 val to_string : t -> string
 val to_pretty_string : t -> string
 val of_settings : unit -> t option Promise.t
-val detect_dune_lock_dir : project_root:Path.t -> unit -> t option Promise.t
 val detect : unit -> t option Promise.t
 val of_settings_or_detect : unit -> t option Promise.t
 val save_to_settings : t -> unit Promise.t
