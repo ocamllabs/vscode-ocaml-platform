@@ -61,7 +61,7 @@ let _install_ocaml_lsp_server =
     let open Promise.Syntax in
     let (_ : unit Promise.t) =
       let sandbox = Extension_instance.sandbox instance in
-      let* ocamllsp_present = Extension_instance.check_ocaml_lsp_available sandbox in
+      let* ocamllsp_present = Extension_instance.check_ocaml_lsp_available instance in
       match ocamllsp_present with
       | Ok () ->
         show_message `Info "OCaml-LSP server is already installed." |> Promise.return
