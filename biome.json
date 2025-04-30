@@ -1,23 +1,29 @@
 {
   "$schema": "node_modules/@biomejs/biome/configuration_schema.json",
-  "formatter": {
+  "vcs": {
     "enabled": true,
-    "ignore": ["package.json"],
-    "useEditorconfig": true
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "master"
   },
   "linter": {
     "enabled": true,
-    "ignore": ["astexplorer"],
+    "includes": ["**", "!astexplorer/**"],
+    "domains": {
+      "project": "recommended"
+    },
     "rules": {
       "recommended": true
     }
   },
-  "organizeImports": {
-    "enabled": true
-  },
-  "vcs": {
-    "clientKind": "git",
+  "formatter": {
     "enabled": true,
-    "useIgnoreFile": true
+    "useEditorconfig": true
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "recommended": true
+    }
   }
 }

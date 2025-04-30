@@ -1,9 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import InteractorFactory from "./Interaction/InteractorFactory";
 import ASTOutput from "./components/ASTOutput";
+import InteractorFactory from "./Interaction/InteractorFactory";
 import getTreeAdapter from "./parserMiddleware";
 import newParser from "./parsers/refmt-ml";
+
 const Interactor = InteractorFactory.create();
 
 class Index extends React.Component {
