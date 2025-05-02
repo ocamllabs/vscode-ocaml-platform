@@ -1,14 +1,9 @@
 open Import
 
-type t = Path.t
-
-module LockDir : sig
-  type t = Path.t
-
-  val make : unit -> t option Promise.t
-  val detect : Path.t -> unit -> bool Promise.t
-  val equal : t -> t -> bool
-end
+type t =
+  { root : Path.t
+  ; bin : Cmd.spawn
+  }
 
 module Package : sig
   type t
@@ -21,6 +16,9 @@ module Package : sig
   val dependencies : t -> ('a list, string) result Promise.t
 end
 
+val detect_dune_lock_dir : Path.t -> unit -> bool Promise.t
 val detect_dune_ocamllsp : Path.t -> unit -> bool Promise.t
-val exec : args:string list -> Cmd.t
+val exec : t -> args:string list -> Cmd.t
 val equal : t -> t -> bool
+val make : root:Path.t -> unit -> t option Promise.t
+val root : t -> Path.t
