@@ -9,7 +9,7 @@ module Package = struct
   type t =
     | Opam of Opam.Package.t
     | Esy of Esy.Package.t
-    | Dune of Dune_pkg.Package.t
+    | Dune of Dune.Package.t
 
   let of_opam opam_pkg = Opam opam_pkg
   let of_esy opam_pkg = Esy opam_pkg
@@ -19,28 +19,28 @@ module Package = struct
     match t with
     | Opam pkg -> Opam.Package.name pkg
     | Esy pkg -> Esy.Package.name pkg
-    | Dune pkg -> Dune_pkg.Package.name pkg
+    | Dune pkg -> Dune.Package.name pkg
   ;;
 
   let version t =
     match t with
     | Opam pkg -> Opam.Package.version pkg
     | Esy pkg -> Esy.Package.version pkg
-    | Dune pkg -> Dune_pkg.Package.version pkg
+    | Dune pkg -> Dune.Package.version pkg
   ;;
 
   let synopsis t =
     match t with
     | Opam pkg -> Opam.Package.synopsis pkg
     | Esy pkg -> Esy.Package.synopsis pkg
-    | Dune pkg -> Dune_pkg.Package.synopsis pkg
+    | Dune pkg -> Dune.Package.synopsis pkg
   ;;
 
   let documentation t =
     match t with
     | Opam pkg -> Opam.Package.documentation pkg
     | Esy pkg -> Esy.Package.documentation pkg
-    | Dune pkg -> Dune_pkg.Package.documentation pkg
+    | Dune pkg -> Dune.Package.documentation pkg
   ;;
 
   let dependencies t =
@@ -55,7 +55,7 @@ module Package = struct
       List.map deps ~f:of_esy
     | Dune pkg ->
       let open Promise.Result.Syntax in
-      let+ deps = Dune_pkg.Package.dependencies pkg in
+      let+ deps = Dune.Package.dependencies pkg in
       List.map deps ~f:of_dune
   ;;
 
@@ -63,7 +63,7 @@ module Package = struct
     match t with
     | Opam pkg -> Opam.Package.has_dependencies pkg
     | Esy pkg -> Esy.Package.has_dependencies pkg
-    | Dune pkg -> Dune_pkg.Package.has_dependencies pkg
+    | Dune pkg -> Dune.Package.has_dependencies pkg
   ;;
 end
 
@@ -74,7 +74,7 @@ type t =
   | Esy of Esy.t * Esy.Manifest.t
   | Global
   | Custom of string
-  | Dune of Dune_pkg.t
+  | Dune of Dune.t
 
 let equal t1 t2 =
   match t1, t2 with
@@ -82,7 +82,7 @@ let equal t1 t2 =
   | Esy (e1, p1), Esy (e2, p2) -> Esy.Manifest.equal p1 p2 && Esy.equal e1 e2
   | Opam (o1, s1), Opam (o2, s2) -> Opam.Switch.equal s1 s2 && Opam.equal o1 o2
   | Custom s1, Custom s2 -> String.equal s1 s2
-  | Dune d1, Dune d2 -> Dune_pkg.equal d1 d2
+  | Dune d1, Dune d2 -> Dune.equal d1 d2
   | _, _ -> false
 ;;
 
@@ -208,11 +208,11 @@ end
 type available_sandboxes =
   { opam : Opam.t option Promise.t
   ; esy : Esy.t option Promise.t
-  ; dune : Dune_pkg.t option Promise.t
+  ; dune : Dune.t option Promise.t
   }
 
 let available_sandboxes ?(root = empty_root) () : available_sandboxes =
-  { dune = Dune_pkg.make ~root (); opam = Opam.make (); esy = Esy.make () }
+  { dune = Dune.make ~root (); opam = Opam.make (); esy = Esy.make () }
 ;;
 
 let of_settings () : t option Promise.t =
@@ -320,7 +320,7 @@ let detect_opam_sandbox ~project_root opam () =
 
 let detect_dune_pkg ~project_root _dune () =
   let open Promise.Option.Syntax in
-  let+ dune = Dune_pkg.make ~root:project_root () in
+  let+ dune = Dune.make ~root:project_root () in
   Dune dune
 ;;
 
@@ -351,7 +351,7 @@ let save_to_settings sandbox =
     | Opam (_, switch) -> Setting.Opam switch
     | Global -> Setting.Global
     | Custom template -> Setting.Custom template
-    | Dune dune -> Setting.Dune (Dune_pkg.root dune)
+    | Dune dune -> Setting.Dune (Dune.root dune)
   in
   Settings.set ~section:"ocaml" Setting.t (to_setting sandbox)
 ;;
@@ -405,7 +405,7 @@ module Candidate = struct
         ~detail:"Custom sandbox using a command template"
         ()
     | Dune dune ->
-      let project_path = Path.to_string (Dune_pkg.root dune) in
+      let project_path = Path.to_string (Dune.root dune) in
       create ?description ~label:"Dune Package Manager" ~detail:project_path ()
   ;;
 
@@ -495,7 +495,7 @@ let sandbox_candidates ~workspace_folders =
       workspace_folders
       |> List.map ~f:(fun (folder : WorkspaceFolder.t) ->
         let root = folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string in
-        let+ dune = Dune_pkg.make ~root () in
+        let+ dune = Dune.make ~root () in
         match dune with
         | Some dune -> [ dune ]
         | None -> [])
@@ -555,7 +555,7 @@ let get_command sandbox bin args : Cmd.t =
   match sandbox with
   | Opam (opam, switch) -> Opam.exec opam switch ~args:(bin :: args)
   | Esy (esy, manifest) -> Esy.exec esy manifest ~args:(bin :: args)
-  | Dune dune -> Dune_pkg.exec dune ~args:(bin :: args)
+  | Dune dune -> Dune.exec dune ~args:(bin :: args)
   | Global -> Spawn { bin = Path.of_string bin; args }
   | Custom template ->
     let command =

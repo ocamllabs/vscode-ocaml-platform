@@ -131,8 +131,8 @@ let suggest_to_run_dune_pkg_lock t =
                     match t.sandbox with
                     | Dune dune ->
                       let+ result =
-                        Dune_pkg.exec dune ~args:[ "pkg"; "lock" ]
-                        |> Cmd.output ~cwd:(Dune_pkg.root dune)
+                        Dune.exec dune ~args:[ "pkg"; "lock" ]
+                        |> Cmd.output ~cwd:(Dune.root dune)
                       in
                       (match result with
                        | Ok _ -> Ojs.null
@@ -168,7 +168,7 @@ let check_ocaml_lsp_available t =
   match t.sandbox with
   | Dune dune ->
     let open Promise.Syntax in
-    let+ dune_lsp_present = Dune_pkg.detect_dune_ocamllsp (Dune_pkg.root dune) () in
+    let+ dune_lsp_present = Dune.detect_dune_ocamllsp (Dune.root dune) () in
     if dune_lsp_present then Ok () else Error "Ocamllsp not present in this dune sandbox"
   | _ ->
     let ocaml_lsp_version sandbox =
@@ -210,10 +210,8 @@ let suggest_to_install_dune_lsp t =
                     in
                     let task ~progress:_ ~token:_ =
                       let+ result =
-                        Dune_pkg.exec
-                          dune
-                          ~args:[ "tools"; "exec"; "ocamllsp"; "--version" ]
-                        |> Cmd.output ~cwd:(Dune_pkg.root dune)
+                        Dune.exec dune ~args:[ "tools"; "exec"; "ocamllsp"; "--version" ]
+                        |> Cmd.output ~cwd:(Dune.root dune)
                       in
                       match result with
                       | Ok _ -> Ojs.null
@@ -225,8 +223,8 @@ let suggest_to_install_dune_lsp t =
                         Ojs.null
                     in
                     let _ =
-                      Dune_pkg.exec dune ~args:[ "tools"; "exec"; "ocamllsp" ]
-                      |> Cmd.output ~cwd:(Dune_pkg.root dune)
+                      Dune.exec dune ~args:[ "tools"; "exec"; "ocamllsp" ]
+                      |> Cmd.output ~cwd:(Dune.root dune)
                     in
                     let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
                     ()
@@ -381,7 +379,7 @@ end = struct
     | Error _ ->
       (match t.sandbox with
        | Dune dune ->
-         let+ is_dune_locked = Dune_pkg.detect_dune_lock_dir (Dune_pkg.root dune) () in
+         let+ is_dune_locked = Dune.detect_dune_lock_dir (Dune.root dune) () in
          if is_dune_locked
          then suggest_to_install_dune_lsp t
          else suggest_to_run_dune_pkg_lock t
