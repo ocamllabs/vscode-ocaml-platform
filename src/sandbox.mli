@@ -30,7 +30,7 @@ type t =
   | Esy of Esy.t * Esy.Manifest.t
   | Global
   | Custom of string
-  | Dune of Dune_pkg.t
+  | Dune of Dune.t
 
 val workspace_root : unit -> Path.t option
 val equal : t -> t -> bool
