@@ -133,10 +133,6 @@
         }
       },
       "patterns": [
-        {
-          "comment": "FIXME: seems necessary in order to properly tokenize `[[:word:]]</` boundary",
-          "match": "[[:lower:]][[:word:]]*"
-        },
         { "include": "#jsx-expression" }
       ]
     },
