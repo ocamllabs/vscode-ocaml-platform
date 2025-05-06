@@ -73,20 +73,26 @@
         { "include": "#comments" },
         { "include": "#jsx-property-name" },
         {
-          "name": "keyword.operator.ocaml",
-          "match": "="
-        },
-        { "include": "#jsx-expression" }
+          "begin": "=(\\s*)",
+          "end": "(?=\\s|/?>)",
+          "beginCaptures": {
+            "0": { "name": "keyword.operator.ocaml" }
+          },
+          "patterns": [
+            { "include": "#jsx-expression" }
+          ]
+        }
       ]
     },
     "jsx-expression": {
       "patterns": [
         { "include": "#comments" },
+        { "include": "#extensions" },
+        { "include": "#attributes" },
         { "include": "#literals" },
         { "include": "#strings" },
         { "include": "#identifiers" },
-        { "include": "#jsx" },
-        { "include": "#jsx-evaluated-code" }
+        { "include": "#jsx" }
       ]
     },
     "jsx-property-name": {
@@ -102,24 +108,6 @@
           "name": "entity.other.attribute-name.js"
         }
       }
-    },
-    "jsx-evaluated-code": {
-      "contentName": "meta.embedded.expression.js",
-      "begin": "\\(",
-      "end": "\\)",
-      "beginCaptures": {
-        "0": {
-          "name": "punctuation.section.embedded.begin.js"
-        }
-      },
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.section.embedded.end.js"
-        }
-      },
-      "patterns": [
-        { "include": "#expression" }
-      ]
     },
     "jsx-body": {
       "begin": "((>))",
