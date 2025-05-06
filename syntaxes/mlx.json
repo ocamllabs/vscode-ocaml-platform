@@ -1,0 +1,137 @@
+{
+  "name": "OCaml.mlx",
+  "scopeName": "source.ocaml.mlx",
+  "injectionSelector": "L:source.ocaml",
+  "fileTypes": [
+    "mlx"
+  ],
+  "patterns": [
+    { "include": "#jsx" }
+  ],
+  "repository": {
+    "jsx": {
+      "patterns": [{ "include": "#jsx-head" }, { "include": "#jsx-tail" }]
+    },
+    "jsx-head": {
+      "begin": "((<))(?=[_[:alpha:]])",
+      "end": "((/>))|(?=</)",
+      "beginCaptures": {
+        "1": { "comment": "meta.separator" },
+        "2": { "name": "punctuation.definition.tag.begin.js" }
+      },
+      "endCaptures": {
+        "1": { "comment": "meta.separator" },
+        "2": { "name": "punctuation.definition.tag.end.js" }
+      },
+      "patterns": [
+        {
+          "begin": "\\G",
+          "end": "(?=[[:space:]/>])[[:space:]]*+",
+          "comment": "meta.separator",
+          "patterns": [
+            {
+              "comment": "Module name",
+              "name": "entity.name.tag.inline.any.html",
+              "match": "\\b[[:upper:]][[:word:]']*('|\\b)"
+            },
+            {
+              "match": "\\b[[:lower:]][[:word:]]*\\b",
+              "name": "entity.name.tag.inline.any.html"
+            }
+          ]
+        },
+        { "include": "#jsx-attributes" },
+        { "include": "#jsx-body" }
+      ]
+    },
+    "jsx-attributes": {
+      "patterns": [
+        {
+					"include": "#comment"
+				},
+				{
+					"include": "#jsx-tag-attribute-name"
+				},
+				{
+					"include": "#jsx-tag-attribute-assignment"
+				},
+				{
+					"include": "#jsx-evaluated-code"
+				}
+      ]
+    },
+    "jsx-tag-attribute-name": {
+			"match": "(?x)\n\\s*\n([_$[:alpha:]][-_$[:alnum:]]*)\n(?=\\s|=|/?>|/\\*|//)",
+			"captures": {
+				"1": {
+					"name": "entity.other.attribute-name.namespace.js"
+				},
+				"2": {
+					"name": "punctuation.separator.namespace.js"
+				},
+				"3": {
+					"name": "entity.other.attribute-name.js"
+				}
+			}
+		},
+		"jsx-tag-attribute-assignment": {
+			"name": "keyword.operator.ocaml",
+			"match": "=(?=\\s*(?:'|\"|{|/\\*|//|\\n))"
+		},
+    "jsx-evaluated-code": {
+			"contentName": "meta.embedded.expression.js",
+			"begin": "\\{",
+			"end": "\\}",
+			"beginCaptures": {
+				"0": {
+					"name": "punctuation.section.embedded.begin.js"
+				}
+			},
+			"endCaptures": {
+				"0": {
+					"name": "punctuation.section.embedded.end.js"
+				}
+			},
+			"patterns": [
+				{
+					"include": "#expression"
+				}
+			]
+		},
+    "jsx-body": {
+      "begin": "((>))",
+      "end": "(?=</)",
+      "beginCaptures": {
+        "1": { "comment": "meta.separator" },
+        "2": { "name": "punctuation.definition.tag.end.js" }
+      },
+      "patterns": [
+        {
+          "comment": "FIXME: seems necessary in order to properly tokenize `[[:word:]]</` boundary",
+          "match": "[[:lower:]][[:word:]]*"
+        },
+        { "include": "#value-expression" }
+      ]
+    },
+    "jsx-tail": {
+      "begin": "\\G(/>)|(</)",
+      "end": "(>)",
+      "applyEndPatternLast": true,
+      "comment": "meta.separator",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.tag.end.js" },
+        "2": { "name": "punctuation.definition.tag.begin.js" }
+      },
+      "endCaptures": {
+        "1": { "name": "punctuation.definition.tag.end.js" }
+      },
+      "patterns": [
+        { "include": "#module-path-simple" },
+        {
+          "match": "\\b[[:lower:]][[:word:]]*\\b",
+          "name": "entity.name.tag.inline.any.html"
+        }
+      ]
+    }
+  }
+}
