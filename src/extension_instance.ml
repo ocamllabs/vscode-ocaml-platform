@@ -119,33 +119,10 @@ let suggest_to_run_dune_pkg_lock t =
         ~choices:
           [ ( "Generate lockfile"
             , fun () ->
-                let _ =
-                  let options =
-                    ProgressOptions.create
-                      ~location:(`ProgressLocation Notification)
-                      ~title:"Running `dune pkg lock`"
-                      ~cancellable:false
-                      ()
-                  in
-                  let task ~progress:_ ~token:_ =
-                    match t.sandbox with
-                    | Dune dune ->
-                      let+ result =
-                        Dune.exec dune ~args:[ "pkg"; "lock" ]
-                        |> Cmd.output ~cwd:(Dune.root dune)
-                      in
-                      (match result with
-                       | Ok _ -> Ojs.null
-                       | Error err ->
-                         show_message
-                           `Error
-                           "An error occured while running dune pkg lock: %s"
-                           err;
-                         Ojs.null)
-                    | _ -> Ojs.null |> Promise.return
-                  in
-                  let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
-                  ()
+                let (_ : Ojs.t option Promise.t) =
+                  Vscode.Commands.executeCommand
+                    ~command:Extension_consts.Commands.run_dune_pkg_lock
+                    ~args:[]
                 in
                 () )
           ; ( "Pick another sandbox"
@@ -169,7 +146,19 @@ let check_ocaml_lsp_available t =
   | Dune dune ->
     let open Promise.Syntax in
     let+ dune_lsp_present = Dune.detect_dune_ocamllsp (Dune.root dune) () in
-    if dune_lsp_present then Ok () else Error "Ocamllsp not present in this dune sandbox"
+    if dune_lsp_present
+    then Ok ()
+    else
+      Ok
+        (let _ =
+           let+ _ =
+             Vscode.Commands.executeCommand
+               ~command:Extension_consts.Commands.install_dune_lsp
+               ~args:[]
+           in
+           ()
+         in
+         ())
   | _ ->
     let ocaml_lsp_version sandbox =
       Sandbox.get_command sandbox "ocamllsp" [ "--version" ]
@@ -185,66 +174,6 @@ let check_ocaml_lsp_available t =
          ~error:(fun (_ : string) ->
            "Sandbox initialization failed: `ocaml-lsp-server` is not installed in the \
             current sandbox.")
-;;
-
-let suggest_to_install_dune_lsp t =
-  let open Promise.Syntax in
-  let (_ : unit Promise.t) =
-    let+ maybe_choice =
-      Window.showWarningMessage
-        ~message:
-          "Dune Package Manager is selected as the active sandbox, but `ocamllsp` server \
-           is not available. Do you want to run `dune tools exec ocamllsp`?"
-        ~choices:
-          [ ( "Setup `ocamllsp` for dune"
-            , fun () ->
-                let _ =
-                  match t.sandbox with
-                  | Dune dune ->
-                    let options =
-                      ProgressOptions.create
-                        ~location:(`ProgressLocation Notification)
-                        ~title:"Running `dune tools exec ocamllsp`"
-                        ~cancellable:false
-                        ()
-                    in
-                    let task ~progress:_ ~token:_ =
-                      let+ result =
-                        Dune.exec dune ~args:[ "tools"; "exec"; "ocamllsp"; "--version" ]
-                        |> Cmd.output ~cwd:(Dune.root dune)
-                      in
-                      match result with
-                      | Ok _ -> Ojs.null
-                      | Error err ->
-                        show_message
-                          `Error
-                          "An error occured while running `dune tools exec ocamllsp`: %s"
-                          err;
-                        Ojs.null
-                    in
-                    let _ =
-                      Dune.exec dune ~args:[ "tools"; "exec"; "ocamllsp" ]
-                      |> Cmd.output ~cwd:(Dune.root dune)
-                    in
-                    let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
-                    ()
-                  | _ -> Promise.return ()
-                in
-                () )
-          ; ( "Pick another sandbox"
-            , fun () ->
-                let (_ : Ojs.t option Promise.t) =
-                  Vscode.Commands.executeCommand
-                    ~command:Extension_consts.Commands.select_sandbox
-                    ~args:[]
-                in
-                () )
-          ]
-        ()
-    in
-    Option.iter maybe_choice ~f:(fun f -> f ())
-  in
-  ()
 ;;
 
 module Language_server_init : sig
@@ -376,14 +305,7 @@ end = struct
            `Error
            "An error occurred starting the language server `ocamllsp`. %s"
            s)
-    | Error _ ->
-      (match t.sandbox with
-       | Dune dune ->
-         let+ is_dune_locked = Dune.detect_dune_lock_dir (Dune.root dune) () in
-         if is_dune_locked
-         then suggest_to_install_dune_lsp t
-         else suggest_to_run_dune_pkg_lock t
-       | _ -> suggest_to_install_ocaml_lsp_server ())
+    | Error _ -> suggest_to_install_ocaml_lsp_server ()
   ;;
 end
 
