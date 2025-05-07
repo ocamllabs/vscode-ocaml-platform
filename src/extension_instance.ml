@@ -148,17 +148,13 @@ let check_ocaml_lsp_available t =
     let+ dune_lsp_present = Dune.detect_dune_ocamllsp (Dune.root dune) () in
     if dune_lsp_present
     then Ok ()
-    else
-      Ok
-        (let _ =
-           let+ _ =
-             Vscode.Commands.executeCommand
-               ~command:Extension_consts.Commands.install_dune_lsp
-               ~args:[]
-           in
-           ()
-         in
-         ())
+    else (
+      let (_ : Ojs.t option Promise.t) =
+        Vscode.Commands.executeCommand
+          ~command:Extension_consts.Commands.install_dune_lsp
+          ~args:[]
+      in
+      Ok ())
   | _ ->
     let ocaml_lsp_version sandbox =
       Sandbox.get_command sandbox "ocamllsp" [ "--version" ]

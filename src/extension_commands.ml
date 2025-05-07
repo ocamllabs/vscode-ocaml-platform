@@ -131,12 +131,12 @@ let _install_dune_lsp_server =
                   err;
                 Ojs.null
             in
-            let* _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+            let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
             let _ =
               Dune.exec dune ~args:[ "tools"; "exec"; "ocamllsp" ]
               |> Cmd.output ~cwd:(Dune.root dune)
             in
-            let+ _ = Extension_instance.start_language_server instance in
+            let _ = Extension_instance.start_language_server instance in
             ()
         else Extension_instance.suggest_to_run_dune_pkg_lock instance |> Promise.return
       | _ -> Promise.return ()
@@ -169,8 +169,8 @@ let _run_dune_pkg_lock =
             show_message `Error "An error occured while running dune pkg lock: %s" err;
             Ojs.null
         in
-        let* _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
-        let+ _ = Extension_instance.start_language_server instance in
+        let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+        let _ = Extension_instance.start_language_server instance in
         ()
       | _ -> Promise.return ()
     in
