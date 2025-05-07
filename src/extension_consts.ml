@@ -42,6 +42,8 @@ module Commands = struct
   let type_selection = ocaml_prefixed "type-selection"
   let type_previous_selection = ocaml_prefixed "type-previous-selection"
   let augment_selection_type_verbosity = ocaml_prefixed "augment-selection-type-verbosity"
+  let install_dune_lsp = ocaml_prefixed "install-dune-lsp"
+  let run_dune_pkg_lock = ocaml_prefixed "run_dune_pkg_lock"
 end
 
 module Command_errors = struct

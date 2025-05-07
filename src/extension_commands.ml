@@ -96,6 +96,89 @@ let _upgrade_ocaml_lsp_server =
   command Extension_consts.Commands.upgrade_ocaml_lsp_server handler
 ;;
 
+let _install_dune_lsp_server =
+  let handler (instance : Extension_instance.t) ~args:_ =
+    let open Promise.Syntax in
+    let _ =
+      match Extension_instance.sandbox instance with
+      | Dune dune ->
+        let* is_dune_locked = Dune.detect_dune_lock_dir (Dune.root dune) () in
+        if is_dune_locked
+        then
+          let* ocamllsp_present = Extension_instance.check_ocaml_lsp_available instance in
+          match ocamllsp_present with
+          | Ok () ->
+            show_message `Info "OCaml-LSP server is already installed." |> Promise.return
+          | Error _ ->
+            let options =
+              ProgressOptions.create
+                ~location:(`ProgressLocation Notification)
+                ~title:"Running `dune tools exec ocamllsp`"
+                ~cancellable:false
+                ()
+            in
+            let task ~progress:_ ~token:_ =
+              let+ result =
+                Dune.exec dune ~args:[ "tools"; "exec"; "ocamllsp"; "--version" ]
+                |> Cmd.output ~cwd:(Dune.root dune)
+              in
+              match result with
+              | Ok _ -> Ojs.null
+              | Error err ->
+                show_message
+                  `Error
+                  "An error occured while running `dune tools exec ocamllsp`: %s"
+                  err;
+                Ojs.null
+            in
+            let* _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+            let _ =
+              Dune.exec dune ~args:[ "tools"; "exec"; "ocamllsp" ]
+              |> Cmd.output ~cwd:(Dune.root dune)
+            in
+            let+ _ = Extension_instance.start_language_server instance in
+            ()
+        else Extension_instance.suggest_to_run_dune_pkg_lock instance |> Promise.return
+      | _ -> Promise.return ()
+    in
+    ()
+  in
+  command Extension_consts.Commands.install_dune_lsp handler
+;;
+
+let _run_dune_pkg_lock =
+  let handler (instance : Extension_instance.t) ~args:_ =
+    let open Promise.Syntax in
+    let _ =
+      match Extension_instance.sandbox instance with
+      | Dune dune ->
+        let options =
+          ProgressOptions.create
+            ~location:(`ProgressLocation Notification)
+            ~title:"Running `dune pkg lock`"
+            ~cancellable:false
+            ()
+        in
+        let task ~progress:_ ~token:_ =
+          let+ result =
+            Dune.exec dune ~args:[ "pkg"; "lock" ] |> Cmd.output ~cwd:(Dune.root dune)
+          in
+          match result with
+          | Ok _ -> Ojs.null
+          | Error err ->
+            show_message `Error "An error occured while running dune pkg lock: %s" err;
+            Ojs.null
+        in
+        let* _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+        let+ _ = Extension_instance.start_language_server instance in
+        ()
+      | _ -> Promise.return ()
+    in
+    ()
+  in
+  command Extension_consts.Commands.run_dune_pkg_lock handler
+;;
+
 let _restart_language_server =
   let handler (instance : Extension_instance.t) ~args:_ =
     let (_ : unit Promise.t) = Extension_instance.start_language_server instance in
