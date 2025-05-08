@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add mlx syntax highlight (#1802)
+
 ## 1.29.0
 
 - Add one-click install option for ocaml-lsp-server (#1725)
