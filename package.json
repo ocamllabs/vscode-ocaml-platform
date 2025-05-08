@@ -55,6 +55,9 @@
       },
       {
         "language": "ocaml.menhir"
+      },
+      {
+        "language": "ocaml.mlx"
       }
     ],
     "commands": [
@@ -697,6 +700,11 @@
         "path": "./syntaxes/ocamllex.json"
       },
       {
+        "language": "ocaml.mlx",
+        "scopeName": "source.ocaml.mlx",
+        "path": "./syntaxes/mlx.json"
+      },
+      {
         "scopeName": "source.action.menhir",
         "path": "./syntaxes/menhir-action.json",
         "injectTo": [
@@ -1053,6 +1061,17 @@
         "extensions": [
           ".t"
         ]
+      },
+      {
+        "id": "ocaml.mlx",
+        "aliases": [
+          "OCaml.mlx",
+          "ocaml.mlx"
+        ],
+        "extensions": [
+          ".mlx"
+        ],
+        "configuration": "./languages/ocaml.json"
       }
     ],
     "menus": {
