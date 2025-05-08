@@ -138,7 +138,7 @@ let _install_dune_lsp_server =
             in
             let _ = Extension_instance.start_language_server instance in
             ()
-        else Extension_instance.suggest_to_run_dune_pkg_lock instance |> Promise.return
+        else Extension_instance.suggest_to_run_dune_pkg_lock () |> Promise.return
       | _ -> Promise.return ()
     in
     ()

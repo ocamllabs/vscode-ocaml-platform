@@ -108,7 +108,7 @@ let stop_server t =
     else Promise.return ()
 ;;
 
-let suggest_to_run_dune_pkg_lock t =
+let suggest_to_run_dune_pkg_lock () =
   let open Promise.Syntax in
   let (_ : unit Promise.t) =
     let+ maybe_choice =
