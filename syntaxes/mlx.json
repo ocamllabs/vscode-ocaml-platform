@@ -1,7 +1,7 @@
 {
   "name": "OCaml.mlx",
   "scopeName": "source.ocaml.mlx",
-  "fileTypes": [ "mlx" ],
+  "fileTypes": ["mlx"],
   "patterns": [
     { "include": "#directives" },
     { "include": "#comments" },
@@ -20,10 +20,7 @@
   ],
   "repository": {
     "jsx": {
-      "patterns": [
-        { "include": "#jsx-head" },
-        { "include": "#jsx-tail" }
-      ]
+      "patterns": [{ "include": "#jsx-head" }, { "include": "#jsx-tail" }]
     },
     "jsx-head": {
       "begin": "((<))(?=[_[:alpha:]])",
@@ -75,9 +72,7 @@
           "beginCaptures": {
             "0": { "name": "keyword.operator.ocaml" }
           },
-          "patterns": [
-            { "include": "#jsx-expression" }
-          ]
+          "patterns": [{ "include": "#jsx-expression" }]
         }
       ]
     },
@@ -117,9 +112,7 @@
           "name": "punctuation.definition.tag.end.js"
         }
       },
-      "patterns": [
-        { "include": "#jsx-expression" }
-      ]
+      "patterns": [{ "include": "#jsx-expression" }]
     },
     "jsx-tail": {
       "begin": "\\G(/>)|(</)",
@@ -182,9 +175,7 @@
                   "name": "keyword.other.ocaml"
                 }
               },
-              "patterns": [
-                { "include": "#strings" }
-              ]
+              "patterns": [{ "include": "#strings" }]
             },
             {
               "comment": "environment queries",
@@ -251,9 +242,7 @@
               "name": "keyword.other.ocaml"
             }
           },
-          "patterns": [
-            { "include": "#strings" }
-          ]
+          "patterns": [{ "include": "#strings" }]
         },
         {
           "comment": "cppo directives",
@@ -300,9 +289,9 @@
           "name": "comment.doc.ocaml",
           "begin": "\\(\\*\\*(?!\\*)",
           "end": "\\*\\)",
-          "patterns": [ { "include": "source.ocaml.ocamldoc#markup"
-            }, { "include": "#strings-in-comments"
-            },
+          "patterns": [
+            { "include": "source.ocaml.ocamldoc#markup" },
+            { "include": "#strings-in-comments" },
             { "include": "#comments" }
           ]
         },
@@ -320,17 +309,15 @@
               "name": "comment.cinaps.ocaml"
             }
           ],
-          "patterns": [
-            { "include": "$self" }
-          ]
+          "patterns": [{ "include": "$self" }]
         },
         {
           "comment": "block comment",
           "name": "comment.block.ocaml",
           "begin": "\\(\\*",
           "end": "\\*\\)",
-          "patterns": [ { "include": "#strings-in-comments"
-            },
+          "patterns": [
+            { "include": "#strings-in-comments" },
             { "include": "#comments" }
           ]
         }
@@ -516,9 +503,7 @@
           ]
         }
       },
-      "patterns": [
-        { "include": "$self" }
-      ]
+      "patterns": [{ "include": "$self" }]
     },
     "extensions": {
       "begin": "\\[(%|%%)[[:space:]]*([[:alpha:]_]+(\\.[[:word:]']+)*)",
@@ -537,9 +522,7 @@
           ]
         }
       },
-      "patterns": [
-        { "include": "$self" }
-      ]
+      "patterns": [{ "include": "$self" }]
     },
     "modules": {
       "patterns": [
@@ -556,9 +539,7 @@
               "name": "keyword.other.ocaml"
             }
           ],
-          "patterns": [ { "include": "source.ocaml.interface"
-            }
-          ]
+          "patterns": [{ "include": "source.ocaml.interface" }]
         },
         {
           "begin": "\\b(struct)\\b",
@@ -573,9 +554,7 @@
               "name": "keyword.other.ocaml"
             }
           ],
-          "patterns": [
-            { "include": "$self" }
-          ]
+          "patterns": [{ "include": "$self" }]
         }
       ]
     },
@@ -643,9 +622,7 @@
               "name": "keyword.ocaml"
             },
             "2": {
-              "patterns": [
-                { "include": "$self" }
-              ]
+              "patterns": [{ "include": "$self" }]
             }
           }
         },
@@ -676,9 +653,7 @@
             }
           },
           "end": "\\)",
-          "patterns": [
-            { "include": "$self" }
-          ]
+          "patterns": [{ "include": "$self" }]
         },
         {
           "comment": "labeled argument with type",
@@ -692,11 +667,9 @@
             }
           },
           "end": "\\)",
-          "patterns": [
-            { "include": "$self" }
-          ]
-        }, { "include": "source.ocaml.interface#bindings"
-        }
+          "patterns": [{ "include": "$self" }]
+        },
+        { "include": "source.ocaml.interface#bindings" }
       ]
     },
     "operators": {
@@ -833,9 +806,7 @@
           "comment": "parentheses",
           "begin": "\\(",
           "end": "\\)",
-          "patterns": [
-            { "include": "$self" }
-          ]
+          "patterns": [{ "include": "$self" }]
         },
         {
           "comment": "empty array",
@@ -846,9 +817,7 @@
           "comment": "array",
           "begin": "\\[\\|",
           "end": "\\|\\]",
-          "patterns": [
-            { "include": "$self" }
-          ]
+          "patterns": [{ "include": "$self" }]
         },
         {
           "comment": "empty list",
@@ -859,17 +828,13 @@
           "comment": "list",
           "begin": "\\[",
           "end": "]",
-          "patterns": [
-            { "include": "$self" }
-          ]
+          "patterns": [{ "include": "$self" }]
         },
         {
           "comment": "braces",
           "begin": "\\{",
           "end": "\\}",
-          "patterns": [
-            { "include": "$self" }
-          ]
+          "patterns": [{ "include": "$self" }]
         }
       ]
     },
