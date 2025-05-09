@@ -105,29 +105,29 @@ __metadata:
   linkType: hard
 
 "@azure/msal-browser@npm:^4.2.0":
-  version: 4.11.1
-  resolution: "@azure/msal-browser@npm:4.11.1"
+  version: 4.12.0
+  resolution: "@azure/msal-browser@npm:4.12.0"
   dependencies:
-    "@azure/msal-common": "npm:15.5.2"
-  checksum: 10c0/0bc9e094196f0855b0cdf184df316fb917f9d4de677826481af9b109833dc8f088332b38d171ba596c105a30ad30a0e20f284b91f26893fca013c2d166c55d35
+    "@azure/msal-common": "npm:15.6.0"
+  checksum: 10c0/2aed32908eed923fccbe4947e5b7d450f6d3c25b4dd465af8d27a71151b3e610e8470777b3c53eace39981deffbf27e005296e8571b54217e3a774912b626529
   languageName: node
   linkType: hard
 
-"@azure/msal-common@npm:15.5.2":
-  version: 15.5.2
-  resolution: "@azure/msal-common@npm:15.5.2"
-  checksum: 10c0/45513b26f5b5967e12ca43c4c978205c0d3d2b1b5df5e854e6c0af0afe9788fd85946abf319ef2f1b03377cf51e1f5631633d7655e5bc0b11eaaa772e8525ef6
+"@azure/msal-common@npm:15.6.0":
+  version: 15.6.0
+  resolution: "@azure/msal-common@npm:15.6.0"
+  checksum: 10c0/2947f64b3ee5eb064c8e35ca4f4bbdd0c38c95d043ab20953acbbbb0b94e47186e88156680accfe7009557b556dae66667a1e71abff66401ab184fc0ea17c6d9
   languageName: node
   linkType: hard
 
 "@azure/msal-node@npm:^3.5.0":
-  version: 3.5.2
-  resolution: "@azure/msal-node@npm:3.5.2"
+  version: 3.5.3
+  resolution: "@azure/msal-node@npm:3.5.3"
   dependencies:
-    "@azure/msal-common": "npm:15.5.2"
+    "@azure/msal-common": "npm:15.6.0"
     jsonwebtoken: "npm:^9.0.0"
     uuid: "npm:^8.3.0"
-  checksum: 10c0/0ad10467f464fe448e4e30f979695b896d812ae3c68c0064956cbc2985a0272c0920560502389d9a26ca234ad3801f724bb61933b9e94681f31e9e497051198b
+  checksum: 10c0/65c0fc2d4b2601fb389fef8a00e6c26f2a156892eb498df703d57850bdac4cf754f8373ca7720d27ca95176cfa0015b55b5cf7440f942495b7517267209c0103
   languageName: node
   linkType: hard
 
@@ -2094,7 +2094,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"buffer-equal-constant-time@npm:1.0.1":
+"buffer-equal-constant-time@npm:^1.0.1":
   version: 1.0.1
   resolution: "buffer-equal-constant-time@npm:1.0.1"
   checksum: 10c0/fb2294e64d23c573d0dd1f1e7a466c3e978fe94a4e0f8183937912ca374619773bef8e2aceb854129d2efecbbc515bbd0cc78d2734a3e3031edb0888531bbc8e
@@ -2688,9 +2688,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.5.149":
-  version: 1.5.149
-  resolution: "electron-to-chromium@npm:1.5.149"
-  checksum: 10c0/dc9fe63d1ffb034a5c91133291b09d877b4b200b01b1235090e94aed7f75f4413637c7b4e3a783b03f03c06bee8f45bbd5f44ddb397bc35528ac8a838eb6a66d
+  version: 1.5.151
+  resolution: "electron-to-chromium@npm:1.5.151"
+  checksum: 10c0/9b3d73836a784af4fd113676b87b0d233ae51984cd4d4396f7252c7369e2f897afeca9fb53910c314e74a4b5d22b6faa4450e95304ceeb1c4fd04e8356030d4b
   languageName: node
   linkType: hard
 
@@ -3754,13 +3754,13 @@ __metadata:
   linkType: hard
 
 "jwa@npm:^1.4.1":
-  version: 1.4.1
-  resolution: "jwa@npm:1.4.1"
+  version: 1.4.2
+  resolution: "jwa@npm:1.4.2"
   dependencies:
-    buffer-equal-constant-time: "npm:1.0.1"
+    buffer-equal-constant-time: "npm:^1.0.1"
     ecdsa-sig-formatter: "npm:1.0.11"
     safe-buffer: "npm:^5.0.1"
-  checksum: 10c0/5c533540bf38702e73cf14765805a94027c66a0aa8b16bc3e89d8d905e61a4ce2791e87e21be97d1293a5ee9d4f3e5e47737e671768265ca4f25706db551d5e9
+  checksum: 10c0/210a544a42ca22203e8fc538835205155ba3af6a027753109f9258bdead33086bac3c25295af48ac1981f87f9c5f941bc8f70303670f54ea7dcaafb53993d92c
   languageName: node
   linkType: hard
 
