@@ -9,38 +9,32 @@ module Package = struct
   type t =
     | Opam of Opam.Package.t
     | Esy of Esy.Package.t
-    | Dune of Dune.Package.t
 
   let of_opam opam_pkg = Opam opam_pkg
   let of_esy opam_pkg = Esy opam_pkg
-  let of_dune dune_pkg = Dune dune_pkg
 
   let name t =
     match t with
     | Opam pkg -> Opam.Package.name pkg
     | Esy pkg -> Esy.Package.name pkg
-    | Dune pkg -> Dune.Package.name pkg
   ;;
 
   let version t =
     match t with
     | Opam pkg -> Opam.Package.version pkg
     | Esy pkg -> Esy.Package.version pkg
-    | Dune pkg -> Dune.Package.version pkg
   ;;
 
   let synopsis t =
     match t with
     | Opam pkg -> Opam.Package.synopsis pkg
     | Esy pkg -> Esy.Package.synopsis pkg
-    | Dune pkg -> Dune.Package.synopsis pkg
   ;;
 
   let documentation t =
     match t with
     | Opam pkg -> Opam.Package.documentation pkg
     | Esy pkg -> Esy.Package.documentation pkg
-    | Dune pkg -> Dune.Package.documentation pkg
   ;;
 
   let dependencies t =
@@ -53,17 +47,12 @@ module Package = struct
       let open Promise.Result.Syntax in
       let+ deps = Esy.Package.dependencies pkg in
       List.map deps ~f:of_esy
-    | Dune pkg ->
-      let open Promise.Result.Syntax in
-      let+ deps = Dune.Package.dependencies pkg in
-      List.map deps ~f:of_dune
   ;;
 
   let has_dependencies t =
     match t with
     | Opam pkg -> Opam.Package.has_dependencies pkg
     | Esy pkg -> Esy.Package.has_dependencies pkg
-    | Dune pkg -> Dune.Package.has_dependencies pkg
   ;;
 end
 
@@ -643,7 +632,7 @@ let uninstall_packages t packages =
     let opam_packages =
       List.filter_map
         ~f:(function
-          | Package.Esy _ | Package.Dune _ -> None
+          | Package.Esy _ -> None
           | Opam pkg -> Some pkg)
         packages
     in
