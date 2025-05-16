@@ -1,18 +1,5 @@
 open Import
 
-module Package = struct
-  (* TODO: Implement dune package inspection *)
-
-  type t = unit
-
-  let name _t = failwith "Dune inspection is not supported yet."
-  let version _t = failwith "Dune inspection is not supported yet."
-  let documentation _t = failwith "Dune inspection is not supported yet."
-  let synopsis _t = failwith "Dune inspection is not supported yet."
-  let has_dependencies _t = failwith "Dune inspection is not supported yet."
-  let dependencies _t = failwith "Dune inspection is not supported yet."
-end
-
 type t =
   { root : Path.t
   ; bin : Cmd.spawn
