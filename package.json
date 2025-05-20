@@ -1348,7 +1348,7 @@
     "@types/vscode": "1.86.0",
     "@vscode/test-cli": "0.0.10",
     "@vscode/test-electron": "2.5.2",
-    "@vscode/vsce": "3.4.0",
+    "@vscode/vsce": "3.4.1",
     "esbuild": "0.25.4",
     "ovsx": "0.10.2",
     "typescript": "5.8.3"
