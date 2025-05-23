@@ -7,7 +7,7 @@ val sandbox : t -> Sandbox.t
 val set_sandbox : t -> Sandbox.t -> unit
 val language_client : t -> LanguageClient.t option
 val ocaml_lsp : t -> Ocaml_lsp.t option
-val check_ocaml_lsp_available : Sandbox.t -> (unit, string) result Promise.t
+val check_ocaml_lsp_available : t -> (unit, string) result Promise.t
 
 val start_documentation_server
   :  t
@@ -20,6 +20,7 @@ val ocaml_version_exn : t -> Ocaml_version.t
 val start_language_server : t -> unit Promise.t
 val install_ocaml_lsp_server : Sandbox.t -> unit Promise.t
 val upgrade_ocaml_lsp_server : Sandbox.t -> unit Promise.t
+val suggest_to_run_dune_pkg_lock : unit -> unit
 
 val set_configuration
   :  t
