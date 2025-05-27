@@ -145,7 +145,7 @@ let check_ocaml_lsp_available t =
   match t.sandbox with
   | Dune dune ->
     let open Promise.Syntax in
-    let+ dune_lsp_present = Dune.detect_dune_ocamllsp (Dune.root dune) () in
+    let+ dune_lsp_present = Dune.detect_dune_ocamllsp dune in
     if dune_lsp_present
     then Ok ()
     else (

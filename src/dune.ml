@@ -17,17 +17,17 @@ let make ~root () =
   | Error _ -> None
 ;;
 
-let detect_dune_lock_dir project_root () =
+let detect_dune_lock_dir t =
   (* Path to the dune.lock dir *)
-  let dune_lock_path = Path.join project_root (Path.of_string "dune.lock") in
+  let dune_lock_path = Path.join t.root (Path.of_string "dune.lock") in
   Fs.exists (Path.to_string dune_lock_path)
 ;;
 
-let detect_dune_ocamllsp project_root () =
+let detect_dune_ocamllsp t =
   (* Path to the ocaml-lsp-server.pkg file *)
   let ocamllsp =
     Path.join
-      project_root
+      t.root
       (Path.join (Path.of_string "dev-tools.locks") (Path.of_string "ocaml-lsp-server"))
   in
   Fs.exists (Path.to_string ocamllsp)
