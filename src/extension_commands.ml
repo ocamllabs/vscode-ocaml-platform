@@ -61,7 +61,7 @@ let _install_ocaml_lsp_server =
     let open Promise.Syntax in
     let (_ : unit Promise.t) =
       let sandbox = Extension_instance.sandbox instance in
-      let* ocamllsp_present = Extension_instance.check_ocaml_lsp_available instance in
+      let* ocamllsp_present = Extension_instance.check_ocaml_lsp_available sandbox in
       match ocamllsp_present with
       | Ok () ->
         show_message `Info "OCaml-LSP server is already installed." |> Promise.return
@@ -100,12 +100,13 @@ let _install_dune_lsp_server =
   let handler (instance : Extension_instance.t) ~args:_ =
     let open Promise.Syntax in
     let _ =
-      match Extension_instance.sandbox instance with
+      let sandbox = Extension_instance.sandbox instance in
+      match sandbox with
       | Dune dune ->
         let* is_dune_locked = Dune.detect_dune_lock_dir dune in
         if is_dune_locked
         then
-          let* ocamllsp_present = Extension_instance.check_ocaml_lsp_available instance in
+          let* ocamllsp_present = Extension_instance.check_ocaml_lsp_available sandbox in
           match ocamllsp_present with
           | Ok () ->
             show_message `Info "OCaml-LSP server is already installed." |> Promise.return
