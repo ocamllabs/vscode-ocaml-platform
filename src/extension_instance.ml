@@ -141,8 +141,8 @@ let suggest_to_run_dune_pkg_lock () =
   ()
 ;;
 
-let check_ocaml_lsp_available t =
-  match t.sandbox with
+let check_ocaml_lsp_available (sandbox : Sandbox.t) =
+  match sandbox with
   | Dune dune ->
     let open Promise.Syntax in
     let+ dune_lsp_present = Dune.detect_dune_ocamllsp dune in
@@ -164,7 +164,7 @@ let check_ocaml_lsp_available t =
       | [ cwd ] -> Some (cwd |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string)
       | _ -> None
     in
-    Cmd.output ?cwd (ocaml_lsp_version t.sandbox)
+    Cmd.output ?cwd (ocaml_lsp_version sandbox)
     |> Promise.Result.fold
          ~ok:(fun (_ : string) -> ())
          ~error:(fun (_ : string) ->
@@ -262,7 +262,7 @@ end = struct
   let start_language_server t =
     let open Promise.Syntax in
     let* () = stop_server t in
-    let* ocamllsp_present = check_ocaml_lsp_available t in
+    let* ocamllsp_present = check_ocaml_lsp_available t.sandbox in
     match ocamllsp_present with
     | Ok () ->
       let+ res =
