@@ -102,7 +102,7 @@ let _install_dune_lsp_server =
     let _ =
       match Extension_instance.sandbox instance with
       | Dune dune ->
-        let* is_dune_locked = Dune.detect_dune_lock_dir (Dune.root dune) () in
+        let* is_dune_locked = Dune.detect_dune_lock_dir dune in
         if is_dune_locked
         then
           let* ocamllsp_present = Extension_instance.check_ocaml_lsp_available instance in
