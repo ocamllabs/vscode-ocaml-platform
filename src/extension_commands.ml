@@ -106,11 +106,11 @@ let _install_dune_lsp_server =
         let* is_dune_locked = Dune.detect_dune_lock_dir dune in
         if is_dune_locked
         then
-          let* ocamllsp_present = Extension_instance.check_ocaml_lsp_available sandbox in
-          match ocamllsp_present with
-          | Ok () ->
+          let* dune_lsp_present = Dune.detect_dune_ocamllsp dune in
+          if dune_lsp_present
+          then
             show_message `Info "OCaml-LSP server is already installed." |> Promise.return
-          | Error _ ->
+          else (
             let options =
               ProgressOptions.create
                 ~location:(`ProgressLocation Notification)
@@ -138,7 +138,7 @@ let _install_dune_lsp_server =
               |> Cmd.output ~cwd:(Dune.root dune)
             in
             let _ = Extension_instance.start_language_server instance in
-            ()
+            ())
         else Extension_instance.suggest_to_run_dune_pkg_lock () |> Promise.return
       | _ -> Promise.return ()
     in
