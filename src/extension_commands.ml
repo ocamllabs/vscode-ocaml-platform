@@ -120,6 +120,8 @@ let _install_dune_lsp_server =
             in
             let task ~progress:_ ~token:_ =
               let+ result =
+                (* We first check the version so that the process can exit, otherwise the progress indicator runs \
+                   forever as the dune tools exec command automatically starts the server hence the process never ends.*)
                 Dune.exec dune ~args:[ "tools"; "exec"; "ocamllsp"; "--version" ]
                 |> Cmd.output ~cwd:(Dune.root dune)
               in
