@@ -148,13 +148,7 @@ let check_ocaml_lsp_available (sandbox : Sandbox.t) =
     let+ dune_lsp_present = Dune.detect_dune_ocamllsp dune in
     if dune_lsp_present
     then Ok ()
-    else (
-      let (_ : Ojs.t option Promise.t) =
-        Vscode.Commands.executeCommand
-          ~command:Extension_consts.Commands.install_dune_lsp
-          ~args:[]
-      in
-      Ok ())
+    else Error "`ocaml-lsp-server` is not installed in the current dune sandbox."
   | _ ->
     let ocaml_lsp_version sandbox =
       Sandbox.get_command sandbox "ocamllsp" [ "--version" ]
@@ -218,35 +212,44 @@ end = struct
       LanguageClient.Executable.create ~command ~args ~options ()
   ;;
 
-  let suggest_to_install_ocaml_lsp_server () =
+  let suggest_or_install_ocaml_lsp_server t =
     let open Promise.Syntax in
-    let install_lsp_text = "Install OCaml-LSP server" in
-    let select_different_sandbox = "Select a different Sandbox" in
-    let* selection =
-      Window.showInformationMessage
-        ~message:
-          "Failed to start the language server. `ocaml-lsp-server` is not installed in \
-           the current sandbox."
-        ~choices:
-          [ install_lsp_text, `Install_lsp; select_different_sandbox, `Select_sandbox ]
-        ()
-    in
-    match selection with
-    | Some `Install_lsp ->
-      let+ (_ : Ojs.t option) =
+    match t.sandbox with
+    | Dune _dune ->
+      let+ _ =
         Vscode.Commands.executeCommand
-          ~command:Extension_consts.Commands.install_ocaml_lsp_server
+          ~command:Extension_consts.Commands.install_dune_lsp
           ~args:[]
       in
       ()
-    | Some `Select_sandbox ->
-      let+ (_ : Ojs.t option) =
-        Vscode.Commands.executeCommand
-          ~command:Extension_consts.Commands.select_sandbox
-          ~args:[]
+    | _ ->
+      let install_lsp_text = "Install OCaml-LSP server" in
+      let select_different_sandbox = "Select a different Sandbox" in
+      let* selection =
+        Window.showInformationMessage
+          ~message:
+            "Failed to start the language server. `ocaml-lsp-server` is not installed in \
+             the current sandbox."
+          ~choices:
+            [ install_lsp_text, `Install_lsp; select_different_sandbox, `Select_sandbox ]
+          ()
       in
-      ()
-    | _ -> Promise.return ()
+      (match selection with
+       | Some `Install_lsp ->
+         let+ (_ : Ojs.t option) =
+           Vscode.Commands.executeCommand
+             ~command:Extension_consts.Commands.install_ocaml_lsp_server
+             ~args:[]
+         in
+         ()
+       | Some `Select_sandbox ->
+         let+ (_ : Ojs.t option) =
+           Vscode.Commands.executeCommand
+             ~command:Extension_consts.Commands.select_sandbox
+             ~args:[]
+         in
+         ()
+       | _ -> Promise.return ())
   ;;
 
   let client_capabilities =
@@ -301,7 +304,7 @@ end = struct
            `Error
            "An error occurred starting the language server `ocamllsp`. %s"
            s)
-    | Error _ -> suggest_to_install_ocaml_lsp_server ()
+    | Error _ -> suggest_or_install_ocaml_lsp_server t
   ;;
 end
 
