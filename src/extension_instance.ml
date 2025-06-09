@@ -145,7 +145,7 @@ let check_ocaml_lsp_available (sandbox : Sandbox.t) =
   match sandbox with
   | Dune dune ->
     let open Promise.Syntax in
-    let+ dune_lsp_present = Dune.detect_dune_ocamllsp dune in
+    let+ dune_lsp_present = Dune.is_ocamllsp_present dune in
     if dune_lsp_present
     then Ok ()
     else Error "`ocaml-lsp-server` is not installed in the current dune sandbox."
