@@ -23,7 +23,7 @@ let is_project_locked t =
   Fs.exists (Path.to_string dune_lock_path)
 ;;
 
-let detect_dune_ocamllsp t =
+let is_ocamllsp_present t =
   (* Path to the ocaml-lsp-server.pkg file *)
   let ocamllsp =
     Path.join
