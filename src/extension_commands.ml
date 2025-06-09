@@ -103,10 +103,10 @@ let _install_dune_lsp_server =
       let sandbox = Extension_instance.sandbox instance in
       match sandbox with
       | Dune dune ->
-        let* is_dune_locked = Dune.detect_dune_lock_dir dune in
+        let* is_dune_locked = Dune.is_project_locked dune in
         if is_dune_locked
         then
-          let* dune_lsp_present = Dune.detect_dune_ocamllsp dune in
+          let* dune_lsp_present = Dune.is_ocamllsp_present dune in
           if dune_lsp_present
           then
             show_message `Info "OCaml-LSP server is already installed." |> Promise.return
