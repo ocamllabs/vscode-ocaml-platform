@@ -34,5 +34,10 @@ let is_ocamllsp_present t =
 ;;
 
 let exec t ~args = Cmd.Spawn (Cmd.append t.bin args)
+
+let exec_tool t ~tool ?(args = []) () =
+  Cmd.Spawn (Cmd.append t.bin ([ "tools"; "exec"; tool ] @ args))
+;;
+
 let equal d1 d2 = Path.equal d1.root d2.root
 let root t = t.root
