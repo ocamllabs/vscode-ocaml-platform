@@ -122,7 +122,7 @@ let _install_dune_lsp_server =
               let+ result =
                 (* We first check the version so that the process can exit, otherwise the progress indicator runs \
                    forever as the dune tools exec command automatically starts the server hence the process never ends.*)
-                Dune.exec dune ~args:[ "tools"; "exec"; "ocamllsp"; "--version" ]
+                Dune.exec_tool dune ~tool:"ocamllsp" ~args:[ "--version" ] ()
                 |> Cmd.output ~cwd:(Dune.root dune)
               in
               match result with
@@ -136,8 +136,7 @@ let _install_dune_lsp_server =
             in
             let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
             let _ =
-              Dune.exec dune ~args:[ "tools"; "exec"; "ocamllsp" ]
-              |> Cmd.output ~cwd:(Dune.root dune)
+              Dune.exec_tool dune ~tool:"ocamllsp" () |> Cmd.output ~cwd:(Dune.root dune)
             in
             let _ = Extension_instance.start_language_server instance in
             ())
