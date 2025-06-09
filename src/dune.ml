@@ -17,7 +17,7 @@ let make ~root () =
   | Error _ -> None
 ;;
 
-let detect_dune_lock_dir t =
+let is_project_locked t =
   (* Path to the dune.lock dir *)
   let dune_lock_path = Path.join t.root (Path.of_string "dune.lock") in
   Fs.exists (Path.to_string dune_lock_path)
