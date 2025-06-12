@@ -171,7 +171,7 @@ let _run_dune_pkg_lock =
         in
         let task ~progress:_ ~token:_ =
           let+ result =
-            Dune.exec dune ~args:[ "pkg"; "lock" ] |> Cmd.output ~cwd:(Dune.root dune)
+            Dune.exec_pkg dune ~cmd:"lock" () |> Cmd.output ~cwd:(Dune.root dune)
           in
           match result with
           | Ok _ -> Ojs.null
