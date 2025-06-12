@@ -141,7 +141,15 @@ let _install_dune_lsp_server =
             let _ = Extension_instance.start_language_server instance in
             ())
         else Extension_instance.suggest_to_run_dune_pkg_lock () |> Promise.return
-      | _ -> Promise.return ()
+      | _ ->
+        show_message
+          `Warn
+          "dune tools exec ocamllsp: This command can only be executed in a Dune Package \
+           Management sandbox.";
+        log
+          "install_dune_lsp: This command can only be executed in a Dune Package \
+           Management sandbox.";
+        Promise.return ()
     in
     ()
   in
@@ -174,7 +182,15 @@ let _run_dune_pkg_lock =
         let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
         let _ = Extension_instance.start_language_server instance in
         ()
-      | _ -> Promise.return ()
+      | _ ->
+        show_message
+          `Warn
+          "dune_pkg_lock: This command can only be executed in a Dune Package Management \
+           sandbox.";
+        log
+          "run_dune_pkg_lock: This command can only be executed in a Dune Package \
+           Management sandbox.";
+        Promise.return ()
     in
     ()
   in
