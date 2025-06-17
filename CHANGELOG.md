@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Add mlx syntax highlight (#1802)
+- Enhance dune syntax highlighting for ctypes and deps (#1851)
 
 ## 1.29.0
 
