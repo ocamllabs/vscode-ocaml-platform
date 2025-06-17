@@ -2863,7 +2863,7 @@
                   ]
                 },
                 {
-                  "comment": "function_description/errno_policy) ",
+                  "comment": "function_description/errno_policy",
                   "begin": "\\([[:space:]]*(errno_policy)\\b",
                   "end": "\\)",
                   "beginCaptures": {
