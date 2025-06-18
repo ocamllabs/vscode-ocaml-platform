@@ -316,13 +316,13 @@ let detect_dune_pkg ~project_root _dune () =
 let detect () =
   let open Promise.Option.Syntax in
   let* project_root = workspace_root () |> Promise.return in
-  let available ?(root = empty_root) () = available_sandboxes ~root () in
+  let available = available_sandboxes ~root:project_root () in
   Promise.List.find_map
     (fun f -> f ())
-    [ detect_dune_pkg ~project_root (available ~root:project_root ()).dune
-    ; detect_opam_local_switch ~project_root (available ()).opam
-    ; detect_esy_sandbox ~project_root (available ()).esy
-    ; detect_opam_sandbox ~project_root (available ()).opam
+    [ detect_dune_pkg ~project_root available.dune
+    ; detect_opam_local_switch ~project_root available.opam
+    ; detect_esy_sandbox ~project_root available.esy
+    ; detect_opam_sandbox ~project_root available.opam
     ]
 ;;
 
