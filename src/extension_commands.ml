@@ -122,7 +122,7 @@ let _install_dune_lsp_server =
               let+ result =
                 (* We first check the version so that the process can exit, otherwise the progress indicator runs \
                    forever as the dune tools exec command automatically starts the server hence the process never ends.*)
-                Dune.exec_tool dune ~tool:"ocamllsp" ~args:[ "--version" ] ()
+                Dune.exec_tool ~tool:"ocamllsp" ~args:[ "--version" ] dune
                 |> Cmd.output ~cwd:(Dune.root dune)
               in
               match result with
@@ -168,7 +168,7 @@ let _run_dune_pkg_lock =
         in
         let task ~progress:_ ~token:_ =
           let+ result =
-            Dune.exec_pkg dune ~cmd:"lock" () |> Cmd.output ~cwd:(Dune.root dune)
+            Dune.exec_pkg ~cmd:"lock" dune |> Cmd.output ~cwd:(Dune.root dune)
           in
           match result with
           | Ok _ -> Ojs.null

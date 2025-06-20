@@ -13,7 +13,9 @@ let get_formatter instance ~document ~options:_ ~token:_ =
   let document_text = TextDocument.getText document ~range () in
   let command =
     let sandbox = Extension_instance.sandbox instance in
-    Sandbox.get_command sandbox "dune" [ "format-dune-file" ]
+    match sandbox with
+    | Dune dune -> Dune.command dune ~args:[ "format-dune-file" ]
+    | _ -> Sandbox.get_command sandbox "dune" [ "format-dune-file" ]
   in
   let output =
     let open Promise.Result.Syntax in

@@ -192,7 +192,7 @@ end = struct
     let args = Settings.(get server_args_setting) |> Option.value ~default:[] in
     let command =
       match t.sandbox with
-      | Dune dune -> Dune.exec_tool dune ~tool:"ocamllsp" ~args ()
+      | Dune dune -> Dune.exec_tool ~tool:"ocamllsp" ~args dune
       | _ -> Sandbox.get_command t.sandbox "ocamllsp" args
     in
     Cmd.log command;
@@ -471,59 +471,62 @@ let close_repl t = t.repl <- None
 
 let update_ocaml_info t =
   let open Promise.Syntax in
-  match t.sandbox with
-  | Dune _ -> Promise.return ()
-  | _ ->
-    let+ ocaml_version =
-      let+ r = Sandbox.get_command t.sandbox "ocamlc" [ "--version" ] |> Cmd.output in
-      match r with
-      | Ok v ->
-        Ocaml_version.of_string v
-        |> Result.map_error ~f:(function m -> `Unable_to_parse_version (`Version v, m))
-      | Error e ->
-        log_chan
-          ~section:"Ocaml.version_semver"
-          `Warn
-          "Error running `ocamlc --version`: %s"
-          e;
-        Error `Ocamlc_missing
+  let+ ocaml_version =
+    let+ r =
+      match t.sandbox with
+      | Dune dune ->
+        Dune.exec dune ~args:[ "ocamlc"; "--"; "--version" ]
+        |> Cmd.output ~cwd:(Dune.root dune)
+      | _ -> Sandbox.get_command t.sandbox "ocamlc" [ "--version" ] |> Cmd.output
     in
-    (match ocaml_version with
-     | Ok ocaml_version -> t.ocaml_version <- Some ocaml_version
-     | Error e ->
-       (* [t.ocaml_version <- None] because we don't want [t.ocaml_version] to be
-          left over from a previous sandbox, which successfully set it *)
-       t.ocaml_version <- None;
-       (match e with
-        | `Unable_to_parse_version (`Version v, `Msg msg) ->
-          show_message
-            `Error
-            "OCaml bytecode compiler `ocamlc` version could not be parsed. Version: %s. \
-             Error %s"
-            v
-            msg
-        | `Ocamlc_missing ->
-          let (_ : unit Promise.t) =
-            let+ maybe_choice =
-              Window.showWarningMessage
-                ~message:
-                  "OCaml bytecode compiler `ocamlc` was not found in the current \
-                   sandbox. Do you have OCaml installed in the current sandbox?"
-                ~choices:
-                  [ ( "Pick another sandbox"
-                    , fun () ->
-                        let (_ : Ojs.t option Promise.t) =
-                          Vscode.Commands.executeCommand
-                            ~command:Extension_consts.Commands.select_sandbox
-                            ~args:[]
-                        in
-                        () )
-                  ]
-                ()
-            in
-            Option.iter maybe_choice ~f:(fun f -> f ())
-          in
-          ()))
+    match r with
+    | Ok v ->
+      Ocaml_version.of_string v
+      |> Result.map_error ~f:(function m -> `Unable_to_parse_version (`Version v, m))
+    | Error e ->
+      log_chan
+        ~section:"Ocaml.version_semver"
+        `Warn
+        "Error running `ocamlc --version`: %s"
+        e;
+      Error `Ocamlc_missing
+  in
+  match ocaml_version with
+  | Ok ocaml_version -> t.ocaml_version <- Some ocaml_version
+  | Error e ->
+    (* [t.ocaml_version <- None] because we don't want [t.ocaml_version] to be
+       left over from a previous sandbox, which successfully set it *)
+    t.ocaml_version <- None;
+    (match e with
+     | `Unable_to_parse_version (`Version v, `Msg msg) ->
+       show_message
+         `Error
+         "OCaml bytecode compiler `ocamlc` version could not be parsed. Version: %s. \
+          Error %s"
+         v
+         msg
+     | `Ocamlc_missing ->
+       let (_ : unit Promise.t) =
+         let+ maybe_choice =
+           Window.showWarningMessage
+             ~message:
+               "OCaml bytecode compiler `ocamlc` was not found in the current sandbox. \
+                Do you have OCaml installed in the current sandbox?"
+             ~choices:
+               [ ( "Pick another sandbox"
+                 , fun () ->
+                     let (_ : Ojs.t option Promise.t) =
+                       Vscode.Commands.executeCommand
+                         ~command:Extension_consts.Commands.select_sandbox
+                         ~args:[]
+                     in
+                     () )
+               ]
+             ()
+         in
+         Option.iter maybe_choice ~f:(fun f -> f ())
+       in
+       ())
 ;;
 
 let open_terminal sandbox =
