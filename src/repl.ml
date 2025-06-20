@@ -54,7 +54,7 @@ let name = "REPL"
 
 let has_utop sandbox =
   let open Promise.Syntax in
-  let cmd = Sandbox.get_command sandbox "utop" [ "-version" ] in
+  let cmd = Sandbox.get_command sandbox "utop" [ "--version" ] in
   let+ result = Cmd.output cmd in
   match result with
   | Error _ -> false
