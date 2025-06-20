@@ -42,7 +42,7 @@ let _select_sandbox =
   let handler (instance : Extension_instance.t) ~args:_ =
     let open Promise.Syntax in
     let (_ : unit Promise.t) =
-      let* sandbox = Sandbox.select_sandbox () in
+      let* sandbox = Sandbox.select_sandbox (Extension_instance.sandbox instance) in
       match sandbox with
       | None (* sandbox selection cancelled *) -> Promise.return ()
       | Some new_sandbox ->
@@ -203,10 +203,10 @@ let _restart_language_server =
 ;;
 
 let _select_sandbox_and_open_terminal =
-  let handler _instance ~args:_ =
+  let handler instance ~args:_ =
     let (_ : unit option Promise.t) =
       let open Promise.Option.Syntax in
-      let+ sandbox = Sandbox.select_sandbox () in
+      let+ sandbox = Sandbox.select_sandbox (Extension_instance.sandbox instance) in
       Extension_instance.open_terminal sandbox
     in
     ()

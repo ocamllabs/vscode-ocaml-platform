@@ -401,14 +401,17 @@ module Candidate = struct
   let ok sandbox = { sandbox; status = Ok () }
 end
 
-let select_sandbox (choices : Candidate.t list) =
+let select_sandbox (choices : Candidate.t list) t =
   let placeHolder = "Which package manager would you like to manage the sandbox?" in
   let open Promise.Syntax in
   let* current_switch =
-    let open Promise.Option.Syntax in
-    let* opam = Opam.make () in
-    let* cwd = workspace_root () |> Promise.return in
-    Opam.switch_show ~cwd opam
+    match t with
+    | Dune _ -> Promise.return None
+    | _ ->
+      let open Promise.Option.Syntax in
+      let* opam = Opam.make () in
+      let* cwd = workspace_root () |> Promise.return in
+      Opam.switch_show ~cwd opam
   in
   let choices =
     List.map
@@ -499,12 +502,12 @@ let sandbox_candidates ~workspace_folders =
     current_switch :: cs)
 ;;
 
-let select_sandbox () =
+let select_sandbox t =
   let open Promise.Syntax in
   let workspace_folders = Workspace.workspaceFolders () in
   let* candidates = sandbox_candidates ~workspace_folders in
   let open Promise.Option.Syntax in
-  let* candidate = select_sandbox candidates in
+  let* candidate = select_sandbox candidates t in
   match candidate with
   | { status = Ok (); sandbox = Custom _ } ->
     let validateInput ~value =
@@ -532,9 +535,9 @@ let select_sandbox () =
      | Ok () -> Promise.Option.return sandbox)
 ;;
 
-let select_sandbox_and_save () =
+let select_sandbox_and_save t =
   let open Promise.Option.Syntax in
-  let* sandbox = select_sandbox () in
+  let* sandbox = select_sandbox t in
   let open Promise.Syntax in
   let+ () = save_to_settings sandbox in
   Some sandbox
@@ -571,7 +574,11 @@ let get_exec_command sandbox tools =
 ;;
 
 let ocaml_version sandbox =
-  let cmd = get_command sandbox "ocamlc" [ "--version" ] in
+  let cmd =
+    match sandbox with
+    | Dune dune -> Dune.exec dune ~args:[ "ocamlc"; "--"; "--version" ]
+    | _ -> get_command sandbox "ocamlc" [ "--version" ]
+  in
   let open Promise.Result.Syntax in
   let* cmd = Cmd.check cmd in
   let+ output = Cmd.output cmd in
