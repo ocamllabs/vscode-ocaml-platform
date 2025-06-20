@@ -15,13 +15,16 @@ val is_project_locked : t -> bool Promise.t
 val is_ocamllsp_present : t -> bool Promise.t
 
 (** Generic function to execute dune commands *)
+val command : t -> args:string list -> Cmd.t
+
+(** Generic function to execute dune exec commands *)
 val exec : t -> args:string list -> Cmd.t
 
 (** Run specific `dune pkg <foo> commands*)
-val exec_pkg : t -> cmd:string -> ?args:string list -> unit -> Cmd.t
+val exec_pkg : cmd:string -> ?args:string list -> t -> Cmd.t
 
 (** Execute any `dune tools exec` command*)
-val exec_tool : t -> tool:string -> ?args:string list -> unit -> Cmd.t
+val exec_tool : tool:string -> ?args:string list -> t -> Cmd.t
 
 (** Check if amy two instances of dune pkg management projects are the equal *)
 val equal : t -> t -> bool

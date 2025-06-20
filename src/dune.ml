@@ -33,10 +33,11 @@ let is_ocamllsp_present t =
   Fs.exists (Path.to_string ocamllsp)
 ;;
 
-let exec t ~args = Cmd.Spawn (Cmd.append t.bin args)
-let exec_pkg t ~cmd ?(args = []) () = Cmd.Spawn (Cmd.append t.bin ([ "pkg"; cmd ] @ args))
+let command t ~args = Cmd.Spawn (Cmd.append t.bin args)
+let exec t ~args = Cmd.Spawn (Cmd.append t.bin ([ "exec" ] @ args))
+let exec_pkg ~cmd ?(args = []) t = Cmd.Spawn (Cmd.append t.bin ([ "pkg"; cmd ] @ args))
 
-let exec_tool t ~tool ?(args = []) () =
+let exec_tool ~tool ?(args = []) t =
   Cmd.Spawn (Cmd.append t.bin ([ "tools"; "exec"; tool; "--" ] @ args))
 ;;
 

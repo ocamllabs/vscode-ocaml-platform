@@ -52,16 +52,20 @@ let get_repl_path () = Option.join (Settings.get ~section:"ocaml.repl" Repl_path
 let get_repl_args () = Option.join (Settings.get ~section:"ocaml.repl" Repl_args.t)
 let name = "REPL"
 
-let has_utop sandbox =
+let has_utop (sandbox : Sandbox.t) =
   let open Promise.Syntax in
-  let cmd = Sandbox.get_command sandbox "utop" [ "--version" ] in
+  let cmd =
+    match sandbox with
+    | Dune dune -> Dune.exec_tool ~tool:"utop" ~args:[ "--version" ] dune
+    | _ -> Sandbox.get_command sandbox "utop" [ "--version" ]
+  in
   let+ result = Cmd.output cmd in
   match result with
   | Error _ -> false
   | Ok _ -> true
 ;;
 
-let can_build sandbox =
+let can_build (sandbox : Sandbox.t) =
   let open Promise.Syntax in
   let excludes =
     (* ignoring dune files from _build, _opam, _esy *)
@@ -77,7 +81,11 @@ let can_build sandbox =
     Promise.return false
   | el :: _ ->
     let cwd = Stdlib.Filename.dirname (Uri.fsPath el) |> Path.of_string in
-    let cmd = Sandbox.get_command sandbox "dune" [ "build" ] in
+    let cmd =
+      match sandbox with
+      | Dune dune -> Dune.command dune ~args:[ "build" ]
+      | _ -> Sandbox.get_command sandbox "dune" [ "build" ]
+    in
     let+ result = Cmd.output ~cwd cmd in
     (match result with
      | Error _ -> false
@@ -89,7 +97,10 @@ let default_repl sandbox =
   let* has_utop = has_utop sandbox in
   let+ can_build = can_build sandbox in
   match has_utop, use_utop (), can_build with
-  | true, true, true -> Sandbox.get_command sandbox "dune" [ "utop" ]
+  | true, true, true ->
+    (match sandbox with
+     | Dune dune -> Dune.command dune ~args:[ "build" ]
+     | _ -> Sandbox.get_command sandbox "dune" [ "utop" ])
   | true, true, false -> Sandbox.get_command sandbox "utop" []
   | _ -> Sandbox.get_command sandbox "ocaml" []
 ;;

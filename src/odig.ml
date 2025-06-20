@@ -2,7 +2,11 @@ open Import
 
 type t = { cache_dir : Path.t }
 
-let make_odig_cmd sandbox = Sandbox.get_command sandbox "odig"
+let make_odig_cmd (sandbox : Sandbox.t) args =
+  match sandbox with
+  | Dune dune -> Dune.exec_tool ~tool:"odig" ~args dune
+  | _ -> Sandbox.get_command sandbox "odig" args
+;;
 
 (** TODO: propose to install odig. See
     https://github.com/ocamllabs/vscode-ocaml-platform/pull/771#discussion_r765297112 *)
