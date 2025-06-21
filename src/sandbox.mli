@@ -30,7 +30,9 @@ type t =
   | Esy of Esy.t * Esy.Manifest.t
   | Global
   | Custom of string
+  | Dune of Dune.t
 
+val workspace_root : unit -> Path.t option
 val equal : t -> t -> bool
 val to_string : t -> string
 val to_pretty_string : t -> string
@@ -43,11 +45,11 @@ val save_to_settings : t -> unit Promise.t
     being run in (ie VSCode's process environment) and the project root and
     produces a promise of resources available that can later be passed on to
     [run_setup] that can be called to install the sandbox. *)
-val select_sandbox_and_save : unit -> t option Promise.t
+val select_sandbox_and_save : t -> t option Promise.t
 
 (** [select_sandbox] is the same as [select_sandbox_and_save] but does not save
     the sandbox configuration *)
-val select_sandbox : unit -> t option Promise.t
+val select_sandbox : t -> t option Promise.t
 
 (* Helper utils *)
 
