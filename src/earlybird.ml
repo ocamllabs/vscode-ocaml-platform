@@ -89,7 +89,7 @@ module Command = struct
       in
       result
     in
-    Extension_commands.register Extension_consts.Commands.ask_debug_program handler
+    Extension_commands.register Command_api.ask_debug_program handler
   ;;
 
   let _start_debugging =
@@ -117,7 +117,7 @@ module Command = struct
         let _ = Window.showErrorMessage ~message:"No active resource" () in
         ()
     in
-    Extension_commands.register Extension_consts.Commands.start_debugging handler
+    Extension_commands.register Command_api.start_debugging handler
   ;;
 
   let _goto_closure_code_location =
@@ -164,9 +164,7 @@ module Command = struct
         let _ = Window.showErrorMessage ~message:"No active debug session" () in
         ()
     in
-    Extension_commands.register
-      Extension_consts.Commands.goto_closure_code_location
-      handler
+    Extension_commands.register Command_api.goto_closure_code_location handler
   ;;
 end
 

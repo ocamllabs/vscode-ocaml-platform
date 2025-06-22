@@ -156,7 +156,7 @@ let display_type instance text_editor ({ type_; _ } as result : Request.response
 let with_checks ~extension_name ~instance f =
   match Window.activeTextEditor () with
   | None ->
-    Extension_consts.Command_errors.text_editor_must_be_active
+    Command_api.Command_errors.text_editor_must_be_active
       extension_name
       ~expl:"The command relies on the current editor selection."
     |> show_message `Error "%s"

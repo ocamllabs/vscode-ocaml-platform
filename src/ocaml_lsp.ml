@@ -214,7 +214,7 @@ let suggest_to_upgrade_ocaml_lsp_server
   in
   match selection with
   | Some `Update_lsp ->
-    let+ () = Extension_consts.(execute Commands.upgrade_ocaml_lsp_server) [] in
+    let+ () = Command_api.(execute upgrade_ocaml_lsp_server) [] in
     ()
   | Some `No_upgrade -> Promise.return ()
   | _ -> Promise.return ()

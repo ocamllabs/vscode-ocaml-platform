@@ -1,14 +1,14 @@
 open Import
 
 type 'a command =
-  { command_ref : 'a Extension_consts.command_ref
+  { command_ref : 'a Command_api.handle
   ; handler : Extension_instance.t -> args:Ojs.t list -> 'a
     (* [handler] is intended to be used partially applied; [handler extension_instance] is passed as a callback to
        [Commands.registerCommand] *)
   }
 
 type text_editor_command =
-  { command_ref : unit Extension_consts.command_ref
+  { command_ref : unit Command_api.handle
   ; handler :
       Extension_instance.t
       -> textEditor:TextEditor.t
@@ -53,7 +53,7 @@ let _select_sandbox =
     in
     ()
   in
-  command Extension_consts.Commands.select_sandbox handler
+  command Command_api.select_sandbox handler
 ;;
 
 let _install_ocaml_lsp_server =
@@ -72,7 +72,7 @@ let _install_ocaml_lsp_server =
     in
     ()
   in
-  command Extension_consts.Commands.install_ocaml_lsp_server handler
+  command Command_api.install_ocaml_lsp_server handler
 ;;
 
 let _upgrade_ocaml_lsp_server =
@@ -93,7 +93,7 @@ let _upgrade_ocaml_lsp_server =
     in
     ()
   in
-  command Extension_consts.Commands.upgrade_ocaml_lsp_server handler
+  command Command_api.upgrade_ocaml_lsp_server handler
 ;;
 
 let _restart_language_server =
@@ -101,7 +101,7 @@ let _restart_language_server =
     let (_ : unit Promise.t) = Extension_instance.start_language_server instance in
     ()
   in
-  command Extension_consts.Commands.restart_language_server handler
+  command Command_api.restart_language_server handler
 ;;
 
 let _select_sandbox_and_open_terminal =
@@ -113,19 +113,19 @@ let _select_sandbox_and_open_terminal =
     in
     ()
   in
-  command Extension_consts.Commands.select_sandbox_and_open_terminal handler
+  command Command_api.select_sandbox_and_open_terminal handler
 ;;
 
 let _open_terminal =
   let handler (instance : Extension_instance.t) ~args:_ =
     Extension_instance.sandbox instance |> Extension_instance.open_terminal
   in
-  command Extension_consts.Commands.open_terminal handler
+  command Command_api.open_terminal handler
 ;;
 
 let _stop_documentation_server =
   let handler instance ~args:_ = Extension_instance.stop_documentation_server instance in
-  command Extension_consts.Commands.stop_documentation_server handler
+  command Command_api.stop_documentation_server handler
 ;;
 
 let _switch_impl_intf =
@@ -154,7 +154,7 @@ let _switch_impl_intf =
     let (_ : unit Promise.t option) = try_switching () in
     ()
   in
-  command Extension_consts.Commands.switch_impl_intf handler
+  command Command_api.switch_impl_intf handler
 ;;
 
 let _open_current_dune_file =
@@ -164,7 +164,7 @@ let _open_current_dune_file =
       (* this command is available (in the command palette) only when a file is
          open *)
       show_message `Error "%s"
-      @@ Extension_consts.Command_errors.text_editor_must_be_active
+      @@ Command_api.Command_errors.text_editor_must_be_active
            "Open Dune File"
            ~expl:
              "The command can look for a dune file in the same folder as the open file."
@@ -179,7 +179,7 @@ let _open_current_dune_file =
       let (_ : TextEditor.t Promise.t) = open_file_in_text_editor dune_file_uri in
       ()
   in
-  command Extension_consts.Commands.open_current_dune_file handler
+  command Command_api.open_current_dune_file handler
 ;;
 
 let _open_ocamllsp_output_pane, _open_ocaml_platform_ext_pane, _open_ocaml_commands_pane =
@@ -188,14 +188,13 @@ let _open_ocamllsp_output_pane, _open_ocaml_platform_ext_pane, _open_ocaml_comma
     show_output output
   in
   ( command
-      Extension_consts.Commands.open_ocamllsp_output
+      Command_api.open_ocamllsp_output
       (handler Output.language_server_output_channel)
   , command
-      Extension_consts.Commands.open_ocaml_platform_ext_output
+      Command_api.open_ocaml_platform_ext_output
       (handler Output.extension_output_channel)
-  , command
-      Extension_consts.Commands.open_ocaml_commands_output
-      (handler Output.command_output_channel) )
+  , command Command_api.open_ocaml_commands_output (handler Output.command_output_channel)
+  )
 ;;
 
 let select_and_reveal selection text_editor =
@@ -320,7 +319,7 @@ end = struct
        open *)
     match Window.activeTextEditor () with
     | None ->
-      Extension_consts.Command_errors.text_editor_must_be_active
+      Command_api.Command_errors.text_editor_must_be_active
         "Jump to Previous/Next Typed Hole"
         ~expl:"The command looks for holes in an open file."
       |> show_message `Error "%s"
@@ -492,13 +491,8 @@ end = struct
          | `Next -> Next_hole.pick_next_hole position ~sorted_non_empty_holes_list:holes)
   ;;
 
-  let _jump_to_next_hole =
-    command Extension_consts.Commands.next_hole (jump_to_hole Next_hole.jump)
-  ;;
-
-  let _jump_to_prev_hole =
-    command Extension_consts.Commands.prev_hole (jump_to_hole Prev_hole.jump)
-  ;;
+  let _jump_to_next_hole = command Command_api.next_hole (jump_to_hole Next_hole.jump)
+  let _jump_to_prev_hole = command Command_api.prev_hole (jump_to_hole Prev_hole.jump)
 end
 
 module Copy_type_under_cursor = struct
@@ -538,7 +532,7 @@ module Copy_type_under_cursor = struct
       let copy_type_under_cursor () =
         match Window.activeTextEditor () with
         | None ->
-          Extension_consts.Command_errors.text_editor_must_be_active
+          Command_api.Command_errors.text_editor_must_be_active
             extension_name
             ~expl:"The command copy the type of the expression under cursor"
           |> show_message `Error "%s"
@@ -564,7 +558,7 @@ module Copy_type_under_cursor = struct
       let (_ : unit Promise.t) = copy_type_under_cursor () in
       ()
     in
-    command Extension_consts.Commands.copy_type_under_cursor handler
+    command Command_api.copy_type_under_cursor handler
   ;;
 end
 
@@ -639,7 +633,7 @@ module Construct = struct
       let construct () =
         match Window.activeTextEditor () with
         | None ->
-          Extension_consts.Command_errors.text_editor_must_be_active
+          Command_api.Command_errors.text_editor_must_be_active
             extension_name
             ~expl:
               "The cursor position is used to determine the correct environment and \
@@ -668,7 +662,7 @@ module Construct = struct
       let (_ : unit) = construct () in
       ()
     in
-    command Extension_consts.Commands.construct handler
+    command Command_api.construct handler
   ;;
 end
 
@@ -832,7 +826,7 @@ module MerlinJump = struct
       let jump () =
         match Window.activeTextEditor () with
         | None ->
-          Extension_consts.Command_errors.text_editor_must_be_active
+          Command_api.Command_errors.text_editor_must_be_active
             extension_name
             ~expl:
               "The cursor position is used to determine the correct environment for the \
@@ -861,7 +855,7 @@ module MerlinJump = struct
       let (_ : unit) = jump () in
       ()
     in
-    command Extension_consts.Commands.merlin_jump handler
+    command Command_api.merlin_jump handler
   ;;
 end
 
@@ -1037,7 +1031,7 @@ module Search_by_type = struct
     let handler (instance : Extension_instance.t) ~args:_ =
       match Window.activeTextEditor () with
       | None ->
-        Extension_consts.Command_errors.text_editor_must_be_active
+        Command_api.Command_errors.text_editor_must_be_active
           extension_name
           ~expl:
             "The cursor position is used to determine the correct environment and insert \
@@ -1062,7 +1056,7 @@ module Search_by_type = struct
            ()
          | Some (client, _) -> show_query_input text_editor client)
     in
-    command Extension_consts.Commands.search_by_type handler
+    command Command_api.search_by_type handler
   ;;
 end
 
@@ -1212,7 +1206,7 @@ module Navigate_holes = struct
     let handler (instance : Extension_instance.t) ~args:_ =
       match Window.activeTextEditor () with
       | None ->
-        Extension_consts.Command_errors.text_editor_must_be_active
+        Command_api.Command_errors.text_editor_must_be_active
           extension_name
           ~expl:
             "This command only works in an active editor because it's based on the \
@@ -1240,15 +1234,15 @@ module Navigate_holes = struct
            let _ = handle_hole_navigation text_editor client instance in
            ())
     in
-    command Extension_consts.Commands.navigate_typed_holes handler
+    command Command_api.navigate_typed_holes handler
   ;;
 end
 
 let _type_selection =
   let open Type_selection in
-  command Extension_consts.Commands.type_selection handler |> ignore;
-  command Extension_consts.Commands.type_previous_selection previous_handler |> ignore;
-  command Extension_consts.Commands.augment_selection_type_verbosity verbosity_handler
+  command Command_api.type_selection handler |> ignore;
+  command Command_api.type_previous_selection previous_handler |> ignore;
+  command Command_api.augment_selection_type_verbosity verbosity_handler
 ;;
 
 let register extension instance = function

@@ -182,10 +182,10 @@ end = struct
     in
     match selection with
     | Some `Install_lsp ->
-      let+ () = Extension_consts.(execute Commands.install_ocaml_lsp_server) [] in
+      let+ () = Command_api.(execute install_ocaml_lsp_server) [] in
       ()
     | Some `Select_sandbox ->
-      let+ () = Extension_consts.(execute Commands.select_sandbox) [] in
+      let+ () = Command_api.(execute select_sandbox) [] in
       ()
     | _ -> Promise.return ()
   ;;
@@ -267,16 +267,16 @@ let documentation_server_info () =
 let install_ocaml_lsp_server sandbox =
   let open Promise.Syntax in
   let* () = Sandbox.install_packages sandbox [ "ocaml-lsp-server" ] in
-  let* () = Extension_consts.(execute Commands.refresh_switches) [] in
-  let+ () = Extension_consts.(execute Commands.refresh_sandbox) [] in
+  let* () = Command_api.(execute refresh_switches) [] in
+  let+ () = Command_api.(execute refresh_sandbox) [] in
   ()
 ;;
 
 let upgrade_ocaml_lsp_server sandbox =
   let open Promise.Syntax in
   let* () = Sandbox.upgrade_packages sandbox ~packages:[ "ocaml-lsp-server" ] in
-  let* () = Extension_consts.(execute Commands.refresh_switches) [] in
-  let+ () = Extension_consts.(execute Commands.refresh_sandbox) [] in
+  let* () = Command_api.(execute refresh_switches) [] in
+  let+ () = Command_api.(execute refresh_sandbox) [] in
   ()
 ;;
 
@@ -294,9 +294,7 @@ end = struct
     in
     let status_bar_item_text = make_status_bar_item_text sandbox in
     StatusBarItem.set_text status_bar_item status_bar_item_text;
-    StatusBarItem.set_command
-      status_bar_item
-      (`String Extension_consts.Commands.select_sandbox.id);
+    StatusBarItem.set_command status_bar_item (`String Command_api.select_sandbox.id);
     StatusBarItem.show status_bar_item;
     status_bar_item
   ;;
@@ -352,8 +350,8 @@ let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
   t.sandbox <- new_sandbox;
   stop_documentation_server t;
-  let (_ : unit Promise.t) = Extension_consts.(execute Commands.refresh_sandbox) []
-  and (_ : unit Promise.t) = Extension_consts.(execute Commands.refresh_switches) [] in
+  let (_ : unit Promise.t) = Command_api.(execute refresh_sandbox) []
+  and (_ : unit Promise.t) = Command_api.(execute refresh_switches) [] in
   ()
 ;;
 
@@ -424,9 +422,7 @@ let update_ocaml_info t =
              ~choices:
                [ ( "Pick another sandbox"
                  , fun () ->
-                     let (_ : unit Promise.t) =
-                       Extension_consts.(execute Commands.select_sandbox) []
-                     in
+                     let (_ : unit Promise.t) = Command_api.(execute select_sandbox) [] in
                      () )
                ]
              ()

@@ -78,9 +78,7 @@ module Command = struct
       in
       ()
     in
-    Extension_commands.register
-      Extension_consts.Commands.open_sandbox_documentation
-      handler
+    Extension_commands.register Command_api.open_sandbox_documentation handler
   ;;
 
   let _generate_documentation =
@@ -145,9 +143,7 @@ module Command = struct
       in
       ()
     in
-    Extension_commands.register
-      Extension_consts.Commands.generate_sandbox_documentation
-      handler
+    Extension_commands.register Command_api.generate_sandbox_documentation handler
   ;;
 
   let _uninstall =
@@ -166,19 +162,13 @@ module Command = struct
         let sandbox = Extension_instance.sandbox instance in
         Sandbox.focus_on_package_command ~sandbox ();
         let+ () = Sandbox.uninstall_packages sandbox [ dep ] in
-        let (_ : unit Promise.t) =
-          Extension_consts.(execute Commands.refresh_switches) []
-        in
-        let (_ : unit Promise.t) =
-          Extension_consts.(execute Commands.refresh_sandbox) []
-        in
+        let (_ : unit Promise.t) = Command_api.(execute refresh_switches) [] in
+        let (_ : unit Promise.t) = Command_api.(execute refresh_sandbox) [] in
         ()
       in
       ()
     in
-    Extension_commands.register
-      Extension_consts.Commands.uninstall_sandbox_package
-      handler
+    Extension_commands.register Command_api.uninstall_sandbox_package handler
   ;;
 
   let _upgrade =
@@ -188,17 +178,13 @@ module Command = struct
         let sandbox = Extension_instance.sandbox instance in
         Sandbox.focus_on_package_command ~sandbox ();
         let+ () = Sandbox.upgrade_packages sandbox in
-        let (_ : unit Promise.t) =
-          Extension_consts.(execute Commands.refresh_switches) []
-        in
-        let (_ : unit Promise.t) =
-          Extension_consts.(execute Commands.refresh_sandbox) []
-        in
+        let (_ : unit Promise.t) = Command_api.(execute refresh_switches) [] in
+        let (_ : unit Promise.t) = Command_api.(execute refresh_sandbox) [] in
         ()
       in
       ()
     in
-    Extension_commands.register Extension_consts.Commands.upgrade_sandbox handler
+    Extension_commands.register Command_api.upgrade_sandbox handler
   ;;
 
   let ask_packages () =
@@ -223,17 +209,13 @@ module Command = struct
           let packages = String.split package_str ~on:' ' in
           Sandbox.focus_on_package_command ~sandbox ();
           let+ () = Sandbox.install_packages sandbox packages in
-          let (_ : unit Promise.t) =
-            Extension_consts.(execute Commands.refresh_switches) []
-          in
-          let (_ : unit Promise.t) =
-            Extension_consts.(execute Commands.refresh_sandbox) []
-          in
+          let (_ : unit Promise.t) = Command_api.(execute refresh_switches) [] in
+          let (_ : unit Promise.t) = Command_api.(execute refresh_sandbox) [] in
           ()
       in
       ()
     in
-    Extension_commands.register Extension_consts.Commands.install_sandbox handler
+    Extension_commands.register Command_api.install_sandbox handler
   ;;
 end
 
@@ -271,6 +253,6 @@ let register extension instance =
       ~treeDataProvider
   in
   ExtensionContext.subscribe extension ~disposable;
-  Extension_commands.register Extension_consts.Commands.refresh_sandbox
+  Extension_commands.register Command_api.refresh_sandbox
   @@ fun _ ~args:_ -> EventEmitter.fire event_emitter None
 ;;
