@@ -145,17 +145,13 @@ module Command = struct
           (match result with
            | Error err -> show_message `Error "%s" err
            | Ok _ ->
-             let (_ : unit Promise.t) =
-               Extension_consts.(execute Commands.refresh_switches) []
-             in
-             let (_ : unit Promise.t) =
-               Extension_consts.(execute Commands.refresh_sandbox) []
-             in
+             let (_ : unit Promise.t) = Command_api.(execute refresh_switches) [] in
+             let (_ : unit Promise.t) = Command_api.(execute refresh_sandbox) [] in
              show_message `Info "The switch has been removed successfully.")
       in
       ()
     in
-    Extension_commands.register Extension_consts.Commands.remove_switch handler
+    Extension_commands.register Command_api.remove_switch handler
   ;;
 
   let _open_documentation =
@@ -188,9 +184,7 @@ module Command = struct
       in
       ()
     in
-    Extension_commands.register
-      Extension_consts.Commands.open_switches_documentation
-      handler
+    Extension_commands.register Command_api.open_switches_documentation handler
   ;;
 end
 
@@ -232,6 +226,6 @@ let register extension instance =
     in
     ExtensionContext.subscribe extension ~disposable
   in
-  Extension_commands.register Extension_consts.Commands.refresh_switches
+  Extension_commands.register Command_api.refresh_switches
   @@ fun _ ~args:_ -> EventEmitter.fire event_emitter None
 ;;

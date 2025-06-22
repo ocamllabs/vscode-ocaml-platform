@@ -13,7 +13,7 @@ let suggest_to_pick_sandbox () =
       ()
   in
   Option.iter selection ~f:(fun () ->
-    let (_ : unit Promise.t) = Extension_consts.(execute Commands.select_sandbox) [] in
+    let (_ : unit Promise.t) = Command_api.(execute select_sandbox) [] in
     ())
 ;;
 

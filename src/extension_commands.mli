@@ -15,12 +15,12 @@
 val register_all_commands : Vscode.ExtensionContext.t -> Extension_instance.t -> unit
 
 val register
-  :  'a Extension_consts.command_ref
+  :  'a Command_api.handle
   -> (Extension_instance.t -> args:Ojs.t list -> 'a)
   -> unit
 
 val register_text_editor
-  :  unit Extension_consts.command_ref
+  :  unit Command_api.handle
   -> (Extension_instance.t
       -> textEditor:Vscode.TextEditor.t
       -> edit:Vscode.TextEditorEdit.t
