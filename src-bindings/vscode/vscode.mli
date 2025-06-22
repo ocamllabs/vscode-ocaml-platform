@@ -2282,11 +2282,6 @@ end
 module Commands : sig
   val registerCommand
     :  command:string
-    -> callback:(args:Ojs.t list -> unit)
-    -> Disposable.t
-
-  val registerCommandReturn
-    :  command:string
     -> callback:(args:Ojs.t list -> Ojs.t)
     -> Disposable.t
 
@@ -2296,7 +2291,7 @@ module Commands : sig
          (textEditor:TextEditor.t -> edit:TextEditorEdit.t -> args:Ojs.t list -> unit)
     -> Disposable.t
 
-  val executeCommand : command:string -> args:Ojs.t list -> Ojs.t option Promise.t
+  val executeCommand : command:string -> args:Ojs.t list -> Ojs.t Promise.t
   val getCommands : ?filterInternal:bool -> unit -> string list Promise.t
 end
 

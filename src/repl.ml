@@ -164,7 +164,7 @@ module Command = struct
       in
       ()
     in
-    Extension_commands.register ~id:Extension_consts.Commands.open_repl handler
+    Extension_commands.register Extension_consts.Commands.open_repl handler
   ;;
 
   let _evaluate_selection =
@@ -185,7 +185,7 @@ module Command = struct
       ()
     in
     Extension_commands.register_text_editor
-      ~id:Extension_consts.Commands.evaluate_selection
+      Extension_consts.Commands.evaluate_selection
       handler
   ;;
 end
