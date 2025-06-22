@@ -31,7 +31,7 @@ module VariableGetClosureCodeLocation = struct
   end
 end
 
-let debugType = Extension_consts.Debuggers.earlybird
+let debugType = "ocaml.earlybird"
 
 let check_earlybird_available sandbox =
   let earlybird_help =
@@ -62,40 +62,117 @@ let createDebugAdapterDescriptor ~instance ~session:_ ~executable:_ =
   `Promise promise
 ;;
 
+module Command = struct
+  let _ask_debug_program =
+    let handler _instance ~args:_ =
+      let open Promise.Syntax in
+      let defaultUri =
+        Option.map (Workspace.rootPath ()) ~f:(fun path -> Uri.parse path ())
+      in
+      let filters = Interop.Dict.singleton "OCaml Bytecode Executable" [ "bc" ] in
+      let options =
+        OpenDialogOptions.create
+          ~canSelectFiles:true
+          ~canSelectFolders:false
+          ~canSelectMany:false
+          ?defaultUri
+          ~filters
+          ~openLabel:"Debug"
+          ~title:"OCaml earlybird (experimental)"
+          ()
+      in
+      let result =
+        let+ uri = Window.showOpenDialog ~options () in
+        match uri with
+        | Some [ uri ] -> Some (Uri.fsPath uri)
+        | _ -> None
+      in
+      result
+    in
+    Extension_commands.register Extension_consts.Commands.ask_debug_program handler
+  ;;
+
+  let _start_debugging =
+    let handler (_ : Extension_instance.t) ~args =
+      let resourceUri =
+        match args with
+        | resourceUri :: _ -> Some (Uri.t_of_js resourceUri)
+        | [] ->
+          Option.map (Window.activeTextEditor ()) ~f:(fun textEditor ->
+            TextDocument.uri (TextEditor.document textEditor))
+      in
+      match resourceUri with
+      | Some uri ->
+        let folder = Workspace.getWorkspaceFolder ~uri in
+        let fsPath = Uri.fsPath uri in
+        let name = Path.basename (Path.of_string fsPath) ^ " (experimental)" in
+        let config = DebugConfiguration.create ~name ~type_:debugType ~request:"launch" in
+        DebugConfiguration.set config "program" (Ojs.string_to_js fsPath);
+        DebugConfiguration.set config "stopOnEntry" (Ojs.bool_to_js true);
+        let (_ : bool Promise.t) =
+          Debug.startDebugging ~folder ~nameOrConfiguration:(`Configuration config) ()
+        in
+        ()
+      | None ->
+        let _ = Window.showErrorMessage ~message:"No active resource" () in
+        ()
+    in
+    Extension_commands.register Extension_consts.Commands.start_debugging handler
+  ;;
+
+  let _goto_closure_code_location =
+    let handler (_ : Extension_instance.t) ~args =
+      let open Promise.Syntax in
+      match Debug.activeDebugSession () with
+      | Some debugSession ->
+        let context = List.hd_exn args in
+        let variablesReference =
+          Jsonoo.Decode.(
+            at [ "variable"; "variablesReference" ] int (Jsonoo.t_of_js context))
+        in
+        let args =
+          VariableGetClosureCodeLocation.Args.t_to_js { handle = variablesReference }
+        in
+        let (_ : unit Promise.t) =
+          let* result =
+            DebugSession.customRequest
+              debugSession
+              ~command:VariableGetClosureCodeLocation.command
+              ~args
+              ()
+          in
+          let result = VariableGetClosureCodeLocation.Result.t_of_js result in
+          match result.location with
+          | Some range ->
+            let* text_document = Workspace.openTextDocument (`Filename range.source) in
+            let selection = VariableGetClosureCodeLocation.Result.range_to_vscode range in
+            let+ _ =
+              Window.showTextDocument'
+                ~document:(`TextDocument text_document)
+                ~options:(TextDocumentShowOptions.create ~preview:true ~selection ())
+                ()
+            in
+            ()
+          | None ->
+            let+ _ =
+              Window.showInformationMessage ~message:"No closure code location" ()
+            in
+            ()
+        in
+        ()
+      | None ->
+        let _ = Window.showErrorMessage ~message:"No active debug session" () in
+        ()
+    in
+    Extension_commands.register
+      Extension_consts.Commands.goto_closure_code_location
+      handler
+  ;;
+end
+
 let register extension instance =
   let createDebugAdapterDescriptor = createDebugAdapterDescriptor ~instance in
   let factory = DebugAdapterDescriptorFactory.create ~createDebugAdapterDescriptor in
   let disposable = Debug.registerDebugAdapterDescriptorFactory ~debugType ~factory in
-  ExtensionContext.subscribe extension ~disposable;
-  let callback ~args:_ =
-    let open Promise.Syntax in
-    let defaultUri =
-      Option.map (Workspace.rootPath ()) ~f:(fun path -> Uri.parse path ())
-    in
-    let filters = Interop.Dict.singleton "OCaml Bytecode Executable" [ "bc" ] in
-    let options =
-      OpenDialogOptions.create
-        ~canSelectFiles:true
-        ~canSelectFolders:false
-        ~canSelectMany:false
-        ?defaultUri
-        ~filters
-        ~openLabel:"Debug"
-        ~title:"OCaml earlybird (experimental)"
-        ()
-    in
-    let result =
-      let+ uri = Window.showOpenDialog ~options () in
-      match uri with
-      | Some [ uri ] -> Some (Uri.fsPath uri)
-      | _ -> None
-    in
-    [%js.of: string option Promise.t] result
-  in
-  let disposable =
-    Commands.registerCommandReturn
-      ~command:Extension_consts.Commands.ask_debug_program
-      ~callback
-  in
   ExtensionContext.subscribe extension ~disposable
 ;;

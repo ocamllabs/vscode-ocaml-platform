@@ -79,7 +79,7 @@ module Command = struct
       ()
     in
     Extension_commands.register
-      ~id:Extension_consts.Commands.open_sandbox_documentation
+      Extension_consts.Commands.open_sandbox_documentation
       handler
   ;;
 
@@ -127,7 +127,7 @@ module Command = struct
              (match server with
               | Error () -> ()
               | Ok server ->
-                let (_ : Ojs.t option Promise.t) =
+                let (_ : Ojs.t Promise.t) =
                   let port = Documentation_server.port server in
                   let host = Documentation_server.host server in
                   Vscode.Commands.executeCommand
@@ -146,7 +146,7 @@ module Command = struct
       ()
     in
     Extension_commands.register
-      ~id:Extension_consts.Commands.generate_sandbox_documentation
+      Extension_consts.Commands.generate_sandbox_documentation
       handler
   ;;
 
@@ -166,22 +166,18 @@ module Command = struct
         let sandbox = Extension_instance.sandbox instance in
         Sandbox.focus_on_package_command ~sandbox ();
         let+ () = Sandbox.uninstall_packages sandbox [ dep ] in
-        let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_switches
-            ~args:[]
+        let (_ : unit Promise.t) =
+          Extension_consts.(execute Commands.refresh_switches) []
         in
-        let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_sandbox
-            ~args:[]
+        let (_ : unit Promise.t) =
+          Extension_consts.(execute Commands.refresh_sandbox) []
         in
         ()
       in
       ()
     in
     Extension_commands.register
-      ~id:Extension_consts.Commands.uninstall_sandbox_package
+      Extension_consts.Commands.uninstall_sandbox_package
       handler
   ;;
 
@@ -192,21 +188,17 @@ module Command = struct
         let sandbox = Extension_instance.sandbox instance in
         Sandbox.focus_on_package_command ~sandbox ();
         let+ () = Sandbox.upgrade_packages sandbox in
-        let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_switches
-            ~args:[]
+        let (_ : unit Promise.t) =
+          Extension_consts.(execute Commands.refresh_switches) []
         in
-        let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_sandbox
-            ~args:[]
+        let (_ : unit Promise.t) =
+          Extension_consts.(execute Commands.refresh_sandbox) []
         in
         ()
       in
       ()
     in
-    Extension_commands.register ~id:Extension_consts.Commands.upgrade_sandbox handler
+    Extension_commands.register Extension_consts.Commands.upgrade_sandbox handler
   ;;
 
   let ask_packages () =
@@ -231,21 +223,17 @@ module Command = struct
           let packages = String.split package_str ~on:' ' in
           Sandbox.focus_on_package_command ~sandbox ();
           let+ () = Sandbox.install_packages sandbox packages in
-          let (_ : Ojs.t option Promise.t) =
-            Vscode.Commands.executeCommand
-              ~command:Extension_consts.Commands.refresh_switches
-              ~args:[]
+          let (_ : unit Promise.t) =
+            Extension_consts.(execute Commands.refresh_switches) []
           in
-          let (_ : Ojs.t option Promise.t) =
-            Vscode.Commands.executeCommand
-              ~command:Extension_consts.Commands.refresh_sandbox
-              ~args:[]
+          let (_ : unit Promise.t) =
+            Extension_consts.(execute Commands.refresh_sandbox) []
           in
           ()
       in
       ()
     in
-    Extension_commands.register ~id:Extension_consts.Commands.install_sandbox handler
+    Extension_commands.register Extension_consts.Commands.install_sandbox handler
   ;;
 end
 
@@ -283,10 +271,6 @@ let register extension instance =
       ~treeDataProvider
   in
   ExtensionContext.subscribe extension ~disposable;
-  let disposable =
-    Commands.registerCommand
-      ~command:Extension_consts.Commands.refresh_sandbox
-      ~callback:(fun ~args:_ -> EventEmitter.fire event_emitter None)
-  in
-  ExtensionContext.subscribe extension ~disposable
+  Extension_commands.register Extension_consts.Commands.refresh_sandbox
+  @@ fun _ ~args:_ -> EventEmitter.fire event_emitter None
 ;;
