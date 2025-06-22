@@ -459,7 +459,7 @@ module Command = struct
       Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
     in
     Extension_commands.register_text_editor
-      Extension_consts.Commands.open_ast_explorer_to_the_side
+      Command_api.open_ast_explorer_to_the_side
       handler
   ;;
 
@@ -500,9 +500,7 @@ module Command = struct
     let handler e ~textEditor ~edit ~args =
       Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
     in
-    Extension_commands.register_text_editor
-      Extension_consts.Commands.reveal_ast_node
-      handler
+    Extension_commands.register_text_editor Command_api.reveal_ast_node handler
   ;;
 
   let _switch_hover_mode =
@@ -520,9 +518,7 @@ module Command = struct
     let handler e ~textEditor ~edit ~args =
       Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
     in
-    Extension_commands.register_text_editor
-      Extension_consts.Commands.switch_hover_mode
-      handler
+    Extension_commands.register_text_editor Command_api.switch_hover_mode handler
   ;;
 
   let _show_preprocessed_document =
@@ -540,9 +536,7 @@ module Command = struct
     let handler e ~textEditor ~edit ~args =
       Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
     in
-    Extension_commands.register_text_editor
-      Extension_consts.Commands.show_preprocessed_document
-      handler
+    Extension_commands.register_text_editor Command_api.show_preprocessed_document handler
   ;;
 
   let _open_pp_editor_and_ast_explorer =
@@ -557,7 +551,7 @@ module Command = struct
       Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
     in
     Extension_commands.register_text_editor
-      Extension_consts.Commands.open_pp_editor_and_ast_explorer
+      Command_api.open_pp_editor_and_ast_explorer
       handler
   ;;
 end
