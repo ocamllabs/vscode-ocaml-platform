@@ -10,8 +10,7 @@ type t =
     If not, user should be advised to run `dune pkg lock` *)
 val is_project_locked : t -> bool Promise.t
 
-(** Check if the dune project has ocamllsp server in its dev-tools.
-    If not, user should be advised to run `dune tools exec ocamllsp` *)
+(** Check if the dune project has ocamllsp server as a dev-tool. *)
 val is_ocamllsp_present : t -> bool Promise.t
 
 (** Generic function to execute dune commands *)
