@@ -1,14 +1,14 @@
 open Import
 
-type command =
-  { id : string
-  ; handler : Extension_instance.t -> args:Ojs.t list -> unit
+type 'a command =
+  { command_ref : 'a Extension_consts.command_ref
+  ; handler : Extension_instance.t -> args:Ojs.t list -> 'a
     (* [handler] is intended to be used partially applied; [handler extension_instance] is passed as a callback to
        [Commands.registerCommand] *)
   }
 
 type text_editor_command =
-  { id : string
+  { command_ref : unit Extension_consts.command_ref
   ; handler :
       Extension_instance.t
       -> textEditor:TextEditor.t
@@ -20,20 +20,20 @@ type text_editor_command =
   }
 
 type t =
-  | Command of command
-  | Text_editor_command of text_editor_command
+  | Command : 'a command -> t
+  | Text_editor_command : text_editor_command -> t
 
 let commands = ref []
 
 (** creates a new command and stores in a mutable [commands] list *)
-let command id handler =
-  let command = Command { id; handler } in
+let command command_ref handler =
+  let command = Command { command_ref; handler } in
   commands := command :: !commands;
   command
 ;;
 
-let text_editor_command id handler =
-  let command = Text_editor_command { id; handler } in
+let text_editor_command command_ref handler =
+  let command = Text_editor_command { command_ref; handler } in
   commands := command :: !commands;
   command
 ;;
@@ -498,94 +498,6 @@ end = struct
 
   let _jump_to_prev_hole =
     command Extension_consts.Commands.prev_hole (jump_to_hole Prev_hole.jump)
-  ;;
-end
-
-module Debug_commands : sig
-  val _goto_closure_code_location : t
-  val _start_debugging : t
-end = struct
-  let _start_debugging =
-    let handler (_ : Extension_instance.t) ~args =
-      let resourceUri =
-        match args with
-        | resourceUri :: _ -> Some (Uri.t_of_js resourceUri)
-        | [] ->
-          Option.map (Window.activeTextEditor ()) ~f:(fun textEditor ->
-            TextDocument.uri (TextEditor.document textEditor))
-      in
-      match resourceUri with
-      | Some uri ->
-        let folder = Workspace.getWorkspaceFolder ~uri in
-        let fsPath = Uri.fsPath uri in
-        let name = Path.basename (Path.of_string fsPath) ^ " (experimental)" in
-        let config =
-          DebugConfiguration.create
-            ~name
-            ~type_:Extension_consts.Debuggers.earlybird
-            ~request:"launch"
-        in
-        DebugConfiguration.set config "program" (Ojs.string_to_js fsPath);
-        DebugConfiguration.set config "stopOnEntry" (Ojs.bool_to_js true);
-        let (_ : bool Promise.t) =
-          Debug.startDebugging ~folder ~nameOrConfiguration:(`Configuration config) ()
-        in
-        ()
-      | None ->
-        let _ = Window.showErrorMessage ~message:"No active resource" () in
-        ()
-    in
-    command Extension_consts.Commands.start_debugging handler
-  ;;
-
-  let _goto_closure_code_location =
-    let handler (_ : Extension_instance.t) ~args =
-      let open Promise.Syntax in
-      match Debug.activeDebugSession () with
-      | Some debugSession ->
-        let context = List.hd_exn args in
-        let variablesReference =
-          Jsonoo.Decode.(
-            at [ "variable"; "variablesReference" ] int (Jsonoo.t_of_js context))
-        in
-        let args =
-          Earlybird.VariableGetClosureCodeLocation.Args.t_to_js
-            { handle = variablesReference }
-        in
-        let (_ : unit Promise.t) =
-          let* result =
-            DebugSession.customRequest
-              debugSession
-              ~command:Earlybird.VariableGetClosureCodeLocation.command
-              ~args
-              ()
-          in
-          let result = Earlybird.VariableGetClosureCodeLocation.Result.t_of_js result in
-          match result.location with
-          | Some range ->
-            let* text_document = Workspace.openTextDocument (`Filename range.source) in
-            let selection =
-              Earlybird.VariableGetClosureCodeLocation.Result.range_to_vscode range
-            in
-            let+ _ =
-              Window.showTextDocument'
-                ~document:(`TextDocument text_document)
-                ~options:(TextDocumentShowOptions.create ~preview:true ~selection ())
-                ()
-            in
-            ()
-          | None ->
-            let+ _ =
-              Window.showInformationMessage ~message:"No closure code location" ()
-            in
-            ()
-        in
-        ()
-      | None ->
-        let _ = Window.showErrorMessage ~message:"No active debug session" () in
-        ()
-    in
-    command Extension_consts.Commands.goto_closure_code_location handler
   ;;
 end
 
@@ -1340,13 +1252,15 @@ let _type_selection =
 ;;
 
 let register extension instance = function
-  | Command { id; handler } ->
-    let callback = handler instance in
+  | Command { command_ref = { id; js = (module T) }; handler } ->
+    let callback ~args = T.t_to_js (handler instance ~args) in
     let disposable = Commands.registerCommand ~command:id ~callback in
     ExtensionContext.subscribe extension ~disposable
-  | Text_editor_command { id; handler } ->
+  | Text_editor_command { command_ref; handler } ->
     let callback = handler instance in
-    let disposable = Commands.registerTextEditorCommand ~command:id ~callback in
+    let disposable =
+      Commands.registerTextEditorCommand ~command:command_ref.id ~callback
+    in
     ExtensionContext.subscribe extension ~disposable
 ;;
 
@@ -1354,12 +1268,12 @@ let register_all_commands extension instance =
   List.iter ~f:(register extension instance) !commands
 ;;
 
-let register ~id handler =
-  let (_ : t) = command id handler in
+let register command_ref handler =
+  let (_ : t) = command command_ref handler in
   ()
 ;;
 
-let register_text_editor ~id handler =
-  let (_ : t) = text_editor_command id handler in
+let register_text_editor command_ref handler =
+  let (_ : t) = text_editor_command command_ref handler in
   ()
 ;;
