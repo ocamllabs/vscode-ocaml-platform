@@ -25,7 +25,7 @@ val exec_pkg : cmd:string -> ?args:string list -> t -> Cmd.t
 (** Execute any `dune tools exec` command*)
 val exec_tool : tool:string -> ?args:string list -> t -> Cmd.t
 
-(** Check if amy two instances of dune pkg management projects are the equal *)
+(** Check if amy two instances of dune pkg management projects are equal *)
 val equal : t -> t -> bool
 
 val make : root:Path.t -> unit -> t option Promise.t
