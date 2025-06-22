@@ -3,6 +3,8 @@
 ## Unreleased
 
 - Add mlx syntax highlight (#1802)
+- Remove broken quoted string literal highlighting from grammar. Quoted strings
+  are already highlighted correctly by the language server. (#1860)
 
 ## 1.29.0
 
