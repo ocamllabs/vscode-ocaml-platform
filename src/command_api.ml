@@ -17,8 +17,8 @@ let execute (type a b) (handle : (a, b) handle) args =
 module Internal = struct
   let ocaml_prefixed key = "ocaml." ^ key
 
-  let unit_handle ?(transform = ocaml_prefixed) id =
-    { id = transform id
+  let unit_handle id =
+    { id = ocaml_prefixed id
     ; args_of_js = Fun.const ()
     ; args_to_js = Fun.const []
     ; return_type = (module Interop.Js.Unit)
