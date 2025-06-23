@@ -1576,7 +1576,7 @@
       "patterns": [
         {
           "comment": "dependency with name",
-          "begin": "\\(\\s*(:\\w+\\b)",
+          "begin": "\\([[:space:]]*(:[[:word:]]+\\b)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
