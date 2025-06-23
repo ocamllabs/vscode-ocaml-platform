@@ -1247,7 +1247,7 @@ let _type_selection =
 ;;
 
 let register extension instance = function
-  | Command { handle; callback; _ } ->
+  | Command { handle; callback } ->
     let (module T) = handle.return_type in
     let callback ~args = [%js.of: T.t] (callback instance (handle.args_of_js args)) in
     let disposable = Commands.registerCommand ~command:handle.id ~callback in
