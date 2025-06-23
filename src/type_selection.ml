@@ -147,7 +147,7 @@ let display_type instance text_editor ({ type_; _ } as result : Request.response
   (* Mute the standard hover provider *)
   let hover_provider_disposable = register_hover_provider ~type_ range () in
   let open Promise.Syntax in
-  let+ _ = Commands.executeCommand ~command:"editor.action.showHover" ~args:[] in
+  let+ _ = Command_api.(execute Vscode.show_hover) [] in
   let () = set_hover_active true in
   (* Un-mute the standard hover provider *)
   Disposable.dispose hover_provider_disposable

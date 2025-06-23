@@ -62,6 +62,14 @@ let type_selection = unit_command_ref "type-selection"
 let type_previous_selection = unit_command_ref "type-previous-selection"
 let augment_selection_type_verbosity = unit_command_ref "augment-selection-type-verbosity"
 
+module Vscode = struct
+  let open_ = { id = "vscode.open"; js = (module Interop.Js.Unit) }
+  let open_with = { id = "vscode.openWith"; js = (module Interop.Js.Unit) }
+  let set_context = { id = "setContext"; js = (module Interop.Js.Unit) }
+  let show_hover = { id = "editor.action.showHover"; js = (module Interop.Js.Unit) }
+  let show_simple_browser = { id = "simpleBrowser.show"; js = (module Interop.Js.Unit) }
+end
+
 module Command_errors = struct
   let text_editor_must_be_active ~expl cmd_name =
     Printf.sprintf

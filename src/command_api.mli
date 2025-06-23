@@ -46,6 +46,14 @@ val type_selection : unit handle
 val type_previous_selection : unit handle
 val augment_selection_type_verbosity : unit handle
 
+module Vscode : sig
+  val open_ : unit handle
+  val open_with : unit handle
+  val set_context : unit handle
+  val show_hover : unit handle
+  val show_simple_browser : unit handle
+end
+
 module Command_errors : sig
   val text_editor_must_be_active : expl:string -> string -> string
 end
