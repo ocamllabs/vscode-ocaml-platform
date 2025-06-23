@@ -64,7 +64,7 @@ let createDebugAdapterDescriptor ~instance ~session:_ ~executable:_ =
 
 module Command = struct
   let _ask_debug_program =
-    let handler _instance ~args:_ =
+    let callback (_ : Extension_instance.t) () =
       let open Promise.Syntax in
       let defaultUri =
         Option.map (Workspace.rootPath ()) ~f:(fun path -> Uri.parse path ())
@@ -89,11 +89,11 @@ module Command = struct
       in
       result
     in
-    Extension_commands.register Command_api.ask_debug_program handler
+    Extension_commands.register Command_api.Internal.ask_debug_program callback
   ;;
 
   let _start_debugging =
-    let handler (_ : Extension_instance.t) ~args =
+    let callback (_ : Extension_instance.t) args =
       let resourceUri =
         match args with
         | resourceUri :: _ -> Some (Uri.t_of_js resourceUri)
@@ -117,11 +117,11 @@ module Command = struct
         let _ = Window.showErrorMessage ~message:"No active resource" () in
         ()
     in
-    Extension_commands.register Command_api.start_debugging handler
+    Extension_commands.register Command_api.Internal.start_debugging callback
   ;;
 
   let _goto_closure_code_location =
-    let handler (_ : Extension_instance.t) ~args =
+    let callback (_ : Extension_instance.t) args =
       let open Promise.Syntax in
       match Debug.activeDebugSession () with
       | Some debugSession ->
@@ -164,7 +164,7 @@ module Command = struct
         let _ = Window.showErrorMessage ~message:"No active debug session" () in
         ()
     in
-    Extension_commands.register Command_api.goto_closure_code_location handler
+    Extension_commands.register Command_api.Internal.goto_closure_code_location callback
   ;;
 end
 
