@@ -1,23 +1,21 @@
 open Import
 
-type ('a, 'b) command =
-  { handle : ('a, 'b) Command_api.handle
-  ; callback : Extension_instance.t -> 'a -> 'b
-  }
-
-type 'a text_editor_command =
-  { handle : ('a, unit) Command_api.handle
-  ; callback :
-      Extension_instance.t
-      -> textEditor:TextEditor.t
-      -> edit:TextEditorEdit.t
-      -> 'a
-      -> unit
-  }
-
 type t =
-  | Command : ('a, 'b) command -> t
-  | Text_editor_command : 'a text_editor_command -> t
+  | Command :
+      { handle : ('a, 'b) Command_api.handle
+      ; callback : Extension_instance.t -> 'a -> 'b
+      }
+      -> t
+  | Text_editor_command :
+      { handle : ('a, unit) Command_api.handle
+      ; callback :
+          Extension_instance.t
+          -> textEditor:TextEditor.t
+          -> edit:TextEditorEdit.t
+          -> 'a
+          -> unit
+      }
+      -> t
 
 let commands = ref []
 
