@@ -69,11 +69,7 @@ module Command = struct
               ()
           | Some doc -> Vscode.Uri.parse doc ()
         in
-        let+ _ =
-          Vscode.Commands.executeCommand
-            ~command:"vscode.open"
-            ~args:[ Vscode.Uri.t_to_js uri ]
-        in
+        let+ _ = Command_api.(execute Vscode.open_) [ Vscode.Uri.t_to_js uri ] in
         ()
       in
       ()
@@ -125,19 +121,17 @@ module Command = struct
              (match server with
               | Error () -> ()
               | Ok server ->
-                let (_ : Ojs.t Promise.t) =
+                let (_ : unit Promise.t) =
                   let port = Documentation_server.port server in
                   let host = Documentation_server.host server in
-                  Vscode.Commands.executeCommand
-                    ~command:"simpleBrowser.show"
-                    ~args:
-                      [ Ojs.string_to_js
-                          (Printf.sprintf
-                             "http://%s:%i/%s/index.html"
-                             host
-                             port
-                             package_name)
-                      ]
+                  Command_api.(execute Vscode.show_simple_browser)
+                    [ Ojs.string_to_js
+                        (Printf.sprintf
+                           "http://%s:%i/%s/index.html"
+                           host
+                           port
+                           package_name)
+                    ]
                 in
                 ()))
       in

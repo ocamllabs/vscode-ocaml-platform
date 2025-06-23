@@ -175,11 +175,7 @@ module Command = struct
                 ()
             | Some doc -> Vscode.Uri.parse doc ()
           in
-          let+ _ =
-            Vscode.Commands.executeCommand
-              ~command:"vscode.open"
-              ~args:[ Vscode.Uri.t_to_js uri ]
-          in
+          let+ _ = Command_api.(execute Vscode.open_) [ Vscode.Uri.t_to_js uri ] in
           ()
       in
       ()
