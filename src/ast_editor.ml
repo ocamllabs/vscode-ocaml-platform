@@ -294,11 +294,7 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel 
 let open_ast_explorer ~uri =
   let open Promise.Syntax in
   let+ _ =
-    Command_api.(execute Vscode.open_with)
-      [ Uri.t_to_js uri
-      ; Ojs.string_to_js "ast-editor"
-      ; ViewColumn.t_to_js ViewColumn.Beside
-      ]
+    Command_api.(execute Vscode.open_with) (uri, "ast-editor", ViewColumn.Beside)
   in
   ()
 ;;
@@ -443,26 +439,26 @@ let open_both_ppx_ast instance ~document =
 ;;
 
 module Command = struct
-  let open_ast_explorer_handler textEditor =
+  let open_ast_explorer_callback textEditor =
     let uri = TextEditor.document textEditor |> TextDocument.uri in
     open_ast_explorer ~uri
   ;;
 
   let _open_ast_explorer_to_the_side =
-    let handler _ ~textEditor ~edit:_ ~args:_ =
-      let (_ : unit Promise.t) = open_ast_explorer_handler textEditor in
+    let callback _ ~textEditor ~edit:_ =
+      let (_ : unit Promise.t) = open_ast_explorer_callback textEditor in
       ()
     in
-    let handler e ~textEditor ~edit ~args =
-      Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
+    let callback e ~textEditor ~edit () =
+      Handlers.unpwrap (Handlers.w1 (callback ~textEditor ~edit) e)
     in
     Extension_commands.register_text_editor
-      Command_api.open_ast_explorer_to_the_side
-      handler
+      Command_api.Internal.open_ast_explorer_to_the_side
+      callback
   ;;
 
   let _reveal_ast_node =
-    let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
+    let callback (instance : Extension_instance.t) ~textEditor ~edit:_ =
       let document = TextEditor.document textEditor in
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
@@ -475,7 +471,7 @@ module Command = struct
           with
           | Some _ as r -> Promise.return r
           | None ->
-            let+ () = open_ast_explorer_handler textEditor in
+            let+ () = open_ast_explorer_callback textEditor in
             Ast_editor_state.find_webview_by_doc
               ast_editor_state
               (TextDocument.uri document)
@@ -495,14 +491,14 @@ module Command = struct
       in
       ()
     in
-    let handler e ~textEditor ~edit ~args =
-      Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
+    let callback e ~textEditor ~edit () =
+      Handlers.unpwrap (Handlers.w1 (callback ~textEditor ~edit) e)
     in
-    Extension_commands.register_text_editor Command_api.reveal_ast_node handler
+    Extension_commands.register_text_editor Command_api.Internal.reveal_ast_node callback
   ;;
 
   let _switch_hover_mode =
-    let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
+    let callback (instance : Extension_instance.t) ~textEditor ~edit:_ =
       let ast_editor_state = Extension_instance.ast_editor_state instance in
       let hover_dispoable =
         match Ast_editor_state.get_hover_disposable ast_editor_state with
@@ -513,14 +509,16 @@ module Command = struct
       in
       Ast_editor_state.set_hover_disposable ast_editor_state hover_dispoable
     in
-    let handler e ~textEditor ~edit ~args =
-      Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
+    let callback e ~textEditor ~edit () =
+      Handlers.unpwrap (Handlers.w1 (callback ~textEditor ~edit) e)
     in
-    Extension_commands.register_text_editor Command_api.switch_hover_mode handler
+    Extension_commands.register_text_editor
+      Command_api.Internal.switch_hover_mode
+      callback
   ;;
 
   let _show_preprocessed_document =
-    let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
+    let callback (instance : Extension_instance.t) ~textEditor ~edit:_ =
       let document = TextEditor.document textEditor in
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
@@ -531,26 +529,28 @@ module Command = struct
       in
       ()
     in
-    let handler e ~textEditor ~edit ~args =
-      Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
+    let callback e ~textEditor ~edit () =
+      Handlers.unpwrap (Handlers.w1 (callback ~textEditor ~edit) e)
     in
-    Extension_commands.register_text_editor Command_api.show_preprocessed_document handler
+    Extension_commands.register_text_editor
+      Command_api.Internal.show_preprocessed_document
+      callback
   ;;
 
   let _open_pp_editor_and_ast_explorer =
-    let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
+    let callback (instance : Extension_instance.t) ~textEditor ~edit:_ =
       let (_ : unit Promise.t) =
         let document = TextEditor.document textEditor in
         open_both_ppx_ast instance ~document
       in
       ()
     in
-    let handler e ~textEditor ~edit ~args =
-      Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
+    let callback e ~textEditor ~edit () =
+      Handlers.unpwrap (Handlers.w1 (callback ~textEditor ~edit) e)
     in
     Extension_commands.register_text_editor
-      Command_api.open_pp_editor_and_ast_explorer
-      handler
+      Command_api.Internal.open_pp_editor_and_ast_explorer
+      callback
   ;;
 end
 
