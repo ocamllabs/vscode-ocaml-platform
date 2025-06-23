@@ -328,10 +328,9 @@ let make () =
 
 let set_documentation_context ~running =
   let document_server_on = "ocaml.documentation-server-on" in
-  let (_ : Ojs.t Promise.t) =
-    Vscode.Commands.executeCommand
-      ~command:"setContext"
-      ~args:[ Ojs.string_to_js document_server_on; Ojs.bool_to_js running ]
+  let (_ : unit Promise.t) =
+    Command_api.(execute Vscode.set_context)
+      [ Ojs.string_to_js document_server_on; Ojs.bool_to_js running ]
   in
   ()
 ;;

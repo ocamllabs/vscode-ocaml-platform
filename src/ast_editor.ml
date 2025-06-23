@@ -294,13 +294,11 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel 
 let open_ast_explorer ~uri =
   let open Promise.Syntax in
   let+ _ =
-    Vscode.Commands.executeCommand
-      ~command:"vscode.openWith"
-      ~args:
-        [ Uri.t_to_js uri
-        ; Ojs.string_to_js "ast-editor"
-        ; ViewColumn.t_to_js ViewColumn.Beside
-        ]
+    Command_api.(execute Vscode.open_with)
+      [ Uri.t_to_js uri
+      ; Ojs.string_to_js "ast-editor"
+      ; ViewColumn.t_to_js ViewColumn.Beside
+      ]
   in
   ()
 ;;
