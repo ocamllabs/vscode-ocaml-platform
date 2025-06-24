@@ -2,10 +2,15 @@
 
 ## Unreleased
 
-- Add mlx syntax highlight (#1802)
+## 1.30.1
+
 - Enhance dune syntax highlighting for ctypes and deps (#1851)
 - Remove broken quoted string literal highlighting from grammar. Quoted strings
   are already highlighted correctly by the language server. (#1860)
+
+## 1.30.0
+
+- Add mlx syntax highlight (#1802)
 
 ## 1.29.0
 
