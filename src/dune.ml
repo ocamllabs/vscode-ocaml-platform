@@ -34,7 +34,11 @@ let is_ocamllsp_present t =
 ;;
 
 let command t ~args = Cmd.Spawn (Cmd.append t.bin args)
-let exec t ~args = Cmd.Spawn (Cmd.append t.bin ([ "exec" ] @ args))
+
+let exec ~target ?(args = []) t =
+  Cmd.Spawn (Cmd.append t.bin ([ "exec"; target; "--" ] @ args))
+;;
+
 let exec_pkg ~cmd ?(args = []) t = Cmd.Spawn (Cmd.append t.bin ([ "pkg"; cmd ] @ args))
 
 let exec_tool ~tool ?(args = []) t =
