@@ -475,7 +475,7 @@ let update_ocaml_info t =
     let+ r =
       match t.sandbox with
       | Dune dune ->
-        Dune.exec dune ~args:[ "ocamlc"; "--"; "--version" ]
+        Dune.exec ~target:"ocamlc" ~args:[ "--version" ] dune
         |> Cmd.output ~cwd:(Dune.root dune)
       | _ -> Sandbox.get_command t.sandbox "ocamlc" [ "--version" ] |> Cmd.output
     in

@@ -17,7 +17,7 @@ val is_ocamllsp_present : t -> bool Promise.t
 val command : t -> args:string list -> Cmd.t
 
 (** Generic function to execute dune exec commands *)
-val exec : t -> args:string list -> Cmd.t
+val exec : target:string -> ?args:string list -> t -> Cmd.t
 
 (** Run specific `dune pkg <foo> commands*)
 val exec_pkg : cmd:string -> ?args:string list -> t -> Cmd.t
