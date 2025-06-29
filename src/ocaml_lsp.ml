@@ -214,11 +214,7 @@ let suggest_to_upgrade_ocaml_lsp_server
   in
   match selection with
   | Some `Update_lsp ->
-    let+ (_ : Ojs.t option) =
-      Vscode.Commands.executeCommand
-        ~command:Extension_consts.Commands.upgrade_ocaml_lsp_server
-        ~args:[]
-    in
+    let+ () = Command_api.(execute Internal.upgrade_ocaml_lsp_server) () in
     ()
   | Some `No_upgrade -> Promise.return ()
   | _ -> Promise.return ()
