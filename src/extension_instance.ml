@@ -192,7 +192,8 @@ end = struct
     let args = Settings.(get server_args_setting) |> Option.value ~default:[] in
     let command =
       match t.sandbox with
-      | Dune dune -> Dune.exec_tool ~tool:"ocamllsp" ~args dune
+      | Dune dune ->
+        Cmd.Spawn (Cmd.append { Cmd.bin = Path.of_string "ocamllsp"; args = [] } [])
       | _ -> Sandbox.get_command t.sandbox "ocamllsp" args
     in
     Cmd.log command;
