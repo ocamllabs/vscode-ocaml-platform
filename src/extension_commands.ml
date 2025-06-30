@@ -114,7 +114,9 @@ let _install_dune_lsp_server =
             let options =
               ProgressOptions.create
                 ~location:(`ProgressLocation Notification)
-                ~title:"Running `dune tools exec ocamllsp`"
+                ~title:
+                  "Running ocamllsp install \
+                   [script](https://github.com/ocaml-dune/binary-distribution/blob/4456a8f870bac910e9591fe9c4b1d1438538d484/tool-wrappers/ocamllsp)"
                 ~cancellable:false
                 ()
             in
@@ -122,7 +124,10 @@ let _install_dune_lsp_server =
               let+ result =
                 (* We first check the version so that the process can exit, otherwise the progress indicator runs \
                    forever as the dune tools exec command automatically starts the server hence the process never ends.*)
-                Dune.exec_tool ~tool:"ocamllsp" ~args:[ "--version" ] dune
+                Cmd.Spawn
+                  (Cmd.append
+                     { Cmd.bin = Path.of_string "ocamllsp"; args = [] }
+                     [ "--version" ])
                 |> Cmd.output ~cwd:(Dune.root dune)
               in
               match result with
@@ -130,7 +135,9 @@ let _install_dune_lsp_server =
               | Error err ->
                 show_message
                   `Error
-                  "An error occured while running `dune tools exec ocamllsp`: %s"
+                  "An error occured while running the ocamllsp install \
+                   [script](https://github.com/ocaml-dune/binary-distribution/blob/4456a8f870bac910e9591fe9c4b1d1438538d484/tool-wrappers/ocamllsp): \
+                   %s"
                   err;
                 Ojs.null
             in
