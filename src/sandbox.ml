@@ -499,7 +499,7 @@ let sandbox_candidates ~workspace_folders =
     |> List.map ~f:(fun dune -> { Candidate.sandbox = Dune dune; status = Ok () })
   in
   let+ esy, (opam, current_switch), dune = Promise.all3 (esy, opam, dune) in
-  let cs = (global :: custom :: esy) @ opam @ dune in
+  let cs = (global :: custom :: dune) @ esy @ opam in
   Option.value_map current_switch ~default:cs ~f:(fun current_switch ->
     current_switch :: cs)
 ;;
