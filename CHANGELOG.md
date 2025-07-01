@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add support for quoted string literal brackets (`{|`, `|}`) syntax highlighting and auto-closing pairs
+
 ## 1.30.1
 
 - Enhance dune syntax highlighting for ctypes and deps (#1851)
