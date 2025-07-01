@@ -28,7 +28,7 @@ val exec_tool : tool:string -> ?args:string list -> t -> Cmd.t
 (** Check if amy two instances of dune pkg management projects are equal *)
 val equal : t -> t -> bool
 
-val make : root:Path.t -> unit -> t option Promise.t
+val make : Path.t option -> unit -> t option Promise.t
 
 (** Get the path of the project root directory *)
 val root : t -> Path.t
