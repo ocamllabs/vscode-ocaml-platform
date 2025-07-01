@@ -168,12 +168,26 @@
           "begin": "\"",
           "end": "\"",
           "patterns": [{ "match": "\\\\\\\\" }, { "match": "\\\\\"" }]
+        },
+        {
+          "comment": "quoted string literal",
+          "begin": "\\{[[:lower:]_]*\\|",
+          "end": "\\|[[:lower:]_]*\\}"
         }
       ]
     },
 
     "strings": {
       "patterns": [
+        {
+          "comment": "quoted string literal",
+          "name": "string.quoted.braced.ocaml",
+          "begin": "\\{(%%?[[:alpha:]_][[:word:]']*(\\.[[:alpha:]_][[:word:]']*)*[[:space:]]*)?[[:lower:]_]*\\|",
+          "end": "\\|[[:lower:]_]*\\}",
+          "beginCaptures": {
+            "1": { "name": "keyword.other.extension.ocaml" }
+          }
+        },
         {
           "comment": "string literal",
           "name": "string.quoted.double.ocaml",
