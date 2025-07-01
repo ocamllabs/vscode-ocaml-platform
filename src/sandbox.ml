@@ -56,7 +56,17 @@ module Package = struct
   ;;
 end
 
-let empty_root = Path.of_string ""
+(** If [Workspace.workspaceFolders()] returns a list with a single element,
+    returns it; otherwise, returns [None]. *)
+let workspace_root () =
+  match Workspace.workspaceFolders () with
+  | [] -> None
+  | [ workspace_folder ] ->
+    Some (workspace_folder |> WorkspaceFolder.uri |> Uri.path |> Path.of_string)
+  | _ ->
+    (* We don't support multiple workspace roots at the moment *)
+    None
+;;
 
 type t =
   | Opam of Opam.t * Opam.Switch.t
@@ -200,13 +210,13 @@ type available_sandboxes =
   ; dune : Dune.t option Promise.t
   }
 
-let available_sandboxes ?(root = empty_root) () : available_sandboxes =
-  { dune = Dune.make ~root (); opam = Opam.make (); esy = Esy.make () }
+let available_sandboxes () : available_sandboxes =
+  { dune = Dune.make (workspace_root ()) (); opam = Opam.make (); esy = Esy.make () }
 ;;
 
 let of_settings () : t option Promise.t =
   let open Promise.Syntax in
-  let available ?(root = empty_root) () = available_sandboxes ~root () in
+  let available = available_sandboxes () in
   let not_available kind =
     let this_ =
       match kind with
@@ -223,7 +233,7 @@ let of_settings () : t option Promise.t =
   match (Settings.get ~section:"ocaml" Setting.t : Setting.t option) with
   | None -> Promise.return None
   | Some (Esy manifest) ->
-    let+ esy = (available ()).esy in
+    let+ esy = available.esy in
     (match esy with
      | None ->
        not_available `Esy;
@@ -231,7 +241,7 @@ let of_settings () : t option Promise.t =
      | Some esy -> Some (Esy (esy, manifest)))
   | Some (Opam switch) ->
     let open Promise.Syntax in
-    let* opam = (available ()).opam in
+    let* opam = available.opam in
     (match opam with
      | None ->
        not_available `Opam;
@@ -248,26 +258,14 @@ let of_settings () : t option Promise.t =
          None))
   | Some Global -> Promise.return (Some Global)
   | Some (Custom template) -> Promise.return (Some (Custom template))
-  | Some (Dune dune) ->
+  | Some (Dune _dune) ->
     let open Promise.Syntax in
-    let* dune = (available ~root:dune ()).dune in
+    let* dune = available.dune in
     (match dune with
      | None ->
        not_available `Dune;
        Promise.return None
      | Some dune -> Promise.return (Some (Dune dune)))
-;;
-
-(** If [Workspace.workspaceFolders()] returns a list with a single element,
-    returns it; otherwise, returns [None]. *)
-let workspace_root () =
-  match Workspace.workspaceFolders () with
-  | [] -> None
-  | [ workspace_folder ] ->
-    Some (workspace_folder |> WorkspaceFolder.uri |> Uri.path |> Path.of_string)
-  | _ ->
-    (* We don't support multiple workspace roots at the moment *)
-    None
 ;;
 
 let detect_esy_sandbox ~project_root esy () =
@@ -309,20 +307,20 @@ let detect_opam_sandbox ~project_root opam () =
 
 let detect_dune_pkg ~project_root _dune () =
   let open Promise.Option.Syntax in
-  let+ dune = Dune.make ~root:project_root () in
+  let+ dune = Dune.make (Some project_root) () in
   Dune dune
 ;;
 
 let detect () =
   let open Promise.Option.Syntax in
   let* project_root = workspace_root () |> Promise.return in
-  let available = available_sandboxes ~root:project_root () in
+  let available = available_sandboxes () in
   Promise.List.find_map
     (fun f -> f ())
-    [ detect_dune_pkg ~project_root available.dune
-    ; detect_opam_local_switch ~project_root available.opam
+    [ detect_opam_local_switch ~project_root available.opam
     ; detect_esy_sandbox ~project_root available.esy
     ; detect_opam_sandbox ~project_root available.opam
+    ; detect_dune_pkg ~project_root available.dune
     ]
 ;;
 
@@ -487,7 +485,7 @@ let sandbox_candidates ~workspace_folders =
       workspace_folders
       |> List.map ~f:(fun (folder : WorkspaceFolder.t) ->
         let root = folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string in
-        let+ dune = Dune.make ~root () in
+        let+ dune = Dune.make (Some root) () in
         match dune with
         | Some dune -> [ dune ]
         | None -> [])

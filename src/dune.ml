@@ -7,14 +7,17 @@ type t =
 
 let binary = Path.of_string "dune"
 
-let make ~root () =
+let make root () =
   let open Promise.Syntax in
   (* Should we do something specific for Windows ? *)
-  let spawn = { Cmd.bin = binary; args = [] } in
-  let+ spawn = Cmd.check_spawn spawn in
-  match spawn with
-  | Ok bin -> Some { bin; root }
-  | Error _ -> None
+  match root with
+  | Some root ->
+    let spawn = { Cmd.bin = binary; args = [] } in
+    let+ spawn = Cmd.check_spawn spawn in
+    (match spawn with
+     | Ok bin -> Some { bin; root }
+     | Error _ -> None)
+  | None -> Promise.return None
 ;;
 
 let is_project_locked t =
