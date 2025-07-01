@@ -306,9 +306,13 @@ let detect_opam_sandbox ~project_root opam () =
 ;;
 
 let detect_dune_pkg ~project_root _dune () =
-  let open Promise.Option.Syntax in
-  let+ dune = Dune.make (Some project_root) () in
-  Dune dune
+  let open Promise.Syntax in
+  Dune.make (Some project_root) ()
+  >>= function
+  | Some dune ->
+    Dune.is_project_locked dune
+    >>| fun project_locked -> if project_locked then Some (Dune dune) else None
+  | None -> Promise.return None
 ;;
 
 let detect () =
