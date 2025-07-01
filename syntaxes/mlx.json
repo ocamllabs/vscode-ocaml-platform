@@ -344,8 +344,8 @@
         },
         {
           "comment": "quoted string literal",
-          "begin": "\\{[[:lower:]_]*\\|",
-          "end": "\\|[[:lower:]_]*\\}"
+          "begin": "\\{([[:lower:]_]*)\\|",
+          "end": "\\|\\1\\}"
         }
       ]
     },
@@ -354,8 +354,8 @@
         {
           "comment": "quoted string literal",
           "name": "string.quoted.braced.ocaml",
-          "begin": "\\{(%%?[[:alpha:]_][[:word:]']*(\\.[[:alpha:]_][[:word:]']*)*[[:space:]]*)?[[:lower:]_]*\\|",
-          "end": "\\|[[:lower:]_]*\\}",
+          "begin": "\\{(%%?[[:alpha:]_][[:word:]']*(\\.[[:alpha:]_][[:word:]']*)*[[:space:]]*)?([[:lower:]_]*)\\|",
+          "end": "\\|\\3\\}",
           "beginCaptures": {
             "1": {
               "name": "keyword.other.extension.ocaml"
