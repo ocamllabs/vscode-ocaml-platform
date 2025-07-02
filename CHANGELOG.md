@@ -3,7 +3,7 @@
 ## Unreleased
 
 - Add support for quoted string literal brackets (`{|`, `|}`) syntax highlighting and auto-closing pairs
-- Revert quoted string literal highlighting removal (#1871)
+- Reintroduce quoted string literal highlighting with correct ID handling (#1871)
 
 ## 1.30.1
 
