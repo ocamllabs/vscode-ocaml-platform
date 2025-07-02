@@ -105,45 +105,40 @@ let _install_dune_lsp_server =
       | Dune dune ->
         let* is_dune_locked = Dune.is_project_locked dune in
         if is_dune_locked
-        then
-          let* dune_lsp_present = Dune.is_ocamllsp_present dune in
-          if dune_lsp_present
-          then
-            show_message `Info "OCaml-LSP server is already installed." |> Promise.return
-          else (
-            let options =
-              ProgressOptions.create
-                ~location:(`ProgressLocation Notification)
-                ~title:
-                  "Running ocamllsp install \
-                   [script](https://github.com/ocaml-dune/binary-distribution/blob/4456a8f870bac910e9591fe9c4b1d1438538d484/tool-wrappers/ocamllsp)"
-                ~cancellable:false
-                ()
+        then (
+          let options =
+            ProgressOptions.create
+              ~location:(`ProgressLocation Notification)
+              ~title:
+                "Running ocamllsp install \
+                 [script](https://github.com/ocaml-dune/binary-distribution/blob/4456a8f870bac910e9591fe9c4b1d1438538d484/tool-wrappers/ocamllsp)"
+              ~cancellable:false
+              ()
+          in
+          let task ~progress:_ ~token:_ =
+            let+ result =
+              (* We first check the version so that the process can exit, otherwise the progress indicator runs forever.*)
+              Sandbox.get_command sandbox "ocamllsp" [ "--version" ] `Ocamllsp
+              |> Cmd.output ~cwd:(Dune.root dune)
             in
-            let task ~progress:_ ~token:_ =
-              let+ result =
-                (* We first check the version so that the process can exit, otherwise the progress indicator runs forever.*)
-                Sandbox.get_command sandbox "ocamllsp" [ "--version" ] `Ocamllsp
-                |> Cmd.output
-              in
-              match result with
-              | Ok _ -> Ojs.null
-              | Error err ->
-                show_message
-                  `Error
-                  "An error occured while running the ocamllsp install \
-                   [script](https://github.com/ocaml-dune/binary-distribution/blob/4456a8f870bac910e9591fe9c4b1d1438538d484/tool-wrappers/ocamllsp): \
-                   %s"
-                  err;
-                Ojs.null
-            in
-            let* _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
-            let+ _ = Extension_instance.start_language_server instance in
-            ())
+            match result with
+            | Ok _ -> Ojs.null
+            | Error err ->
+              show_message
+                `Error
+                "An error occured while running the ocamllsp install \
+                 [script](https://github.com/ocaml-dune/binary-distribution/blob/4456a8f870bac910e9591fe9c4b1d1438538d484/tool-wrappers/ocamllsp): \
+                 %s"
+                err;
+              Ojs.null
+          in
+          let* _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+          let+ _ = Extension_instance.start_language_server instance in
+          ())
         else Extension_instance.suggest_to_run_dune_pkg_lock () |> Promise.return
       | _ ->
         show_message
-          `Warn
+          `Info
           "install_dune_lsp: This command can only be executed in a Dune Package \
            Management sandbox.";
         log

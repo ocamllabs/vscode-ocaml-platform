@@ -142,28 +142,20 @@ let suggest_to_run_dune_pkg_lock () =
 ;;
 
 let check_ocaml_lsp_available (sandbox : Sandbox.t) =
-  match sandbox with
-  | Dune dune ->
-    let open Promise.Syntax in
-    let+ dune_lsp_present = Dune.is_ocamllsp_present dune in
-    if dune_lsp_present
-    then Ok ()
-    else Error "`ocaml-lsp-server` is not installed in the current dune sandbox."
-  | _ ->
-    let ocaml_lsp_version sandbox =
-      Sandbox.get_command sandbox "ocamllsp" [ "--version" ] `Ocamllsp
-    in
-    let cwd =
-      match Workspace.workspaceFolders () with
-      | [ cwd ] -> Some (cwd |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string)
-      | _ -> None
-    in
-    Cmd.output ?cwd (ocaml_lsp_version sandbox)
-    |> Promise.Result.fold
-         ~ok:(fun (_ : string) -> ())
-         ~error:(fun (_ : string) ->
-           "Sandbox initialization failed: `ocaml-lsp-server` is not installed in the \
-            current sandbox.")
+  let ocaml_lsp_version sandbox =
+    Sandbox.get_command sandbox "ocamllsp" [ "--version" ] `Ocamllsp
+  in
+  let cwd =
+    match Workspace.workspaceFolders () with
+    | [ cwd ] -> Some (cwd |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string)
+    | _ -> None
+  in
+  Cmd.output ?cwd (ocaml_lsp_version sandbox)
+  |> Promise.Result.fold
+       ~ok:(fun (_ : string) -> ())
+       ~error:(fun (_ : string) ->
+         "Sandbox initialization failed: `ocaml-lsp-server` is not installed in the \
+          current sandbox.")
 ;;
 
 module Language_server_init : sig
