@@ -30,7 +30,7 @@
   (js_of_ocaml
    (>= 6.0))
   (gen_js_api
-   (= 1.1.4))
+   (= 1.1.5))
   (base
    (>= v0.17))
   (promise_jsoo
@@ -59,7 +59,7 @@
   (js_of_ocaml
    (>= 6.0))
   (gen_js_api
-   (= 1.1.4))
+   (= 1.1.5))
   (ocamlformat
    (and
     (= 0.27.0)
@@ -75,7 +75,7 @@
   (js_of_ocaml
    (>= 6.0))
   (gen_js_api
-   (= 1.1.4))
+   (= 1.1.5))
   (promise_jsoo
    (>= 0.4.3))
   (jsonoo
@@ -98,7 +98,7 @@
   (js_of_ocaml
    (>= 6.0))
   (gen_js_api
-   (= 1.1.4))
+   (= 1.1.5))
   (promise_jsoo
    (>= 0.4.3))
   (jsonoo

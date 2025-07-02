@@ -20,7 +20,7 @@ depends: [
   "vscode" {= version}
   "ocaml" {>= "5.3"}
   "js_of_ocaml" {>= "6.0"}
-  "gen_js_api" {= "1.1.4"}
+  "gen_js_api" {= "1.1.5"}
   "base" {>= "v0.17"}
   "promise_jsoo" {>= "0.4.3"}
   "jsonoo" {>= "0.3"}
