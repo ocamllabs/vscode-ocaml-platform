@@ -545,11 +545,23 @@ let select_sandbox_and_save t =
   Some sandbox
 ;;
 
-let get_command sandbox bin args : Cmd.t =
+let get_command
+      sandbox
+      bin
+      args
+      (dune_cmd_type : [> `Tool | `Command | `Exec | `Ocamllsp ])
+  : Cmd.t
+  =
   match sandbox with
   | Opam (opam, switch) -> Opam.exec opam switch ~args:(bin :: args)
   | Esy (esy, manifest) -> Esy.exec esy manifest ~args:(bin :: args)
-  | Dune dune -> Dune.exec ~target:bin ~args dune
+  | Dune dune ->
+    (match dune_cmd_type with
+     | `Ocamllsp ->
+       Cmd.Spawn (Cmd.append { Cmd.bin = Path.of_string "ocamllsp"; args } [])
+     | `Tool -> Dune.exec_tool ~tool:bin ~args dune
+     | `Command -> Dune.command dune ~args
+     | `Exec -> Dune.exec ~target:bin ~args dune)
   | Global -> Spawn { bin = Path.of_string bin; args }
   | Custom template ->
     let command =
@@ -576,11 +588,7 @@ let get_exec_command sandbox tools =
 ;;
 
 let ocaml_version sandbox =
-  let cmd =
-    match sandbox with
-    | Dune dune -> Dune.exec dune ~target:"ocamlc" ~args:[ "--version" ]
-    | _ -> get_command sandbox "ocamlc" [ "--version" ]
-  in
+  let cmd = get_command sandbox "ocamlc" [ "--version" ] `Exec in
   let open Promise.Result.Syntax in
   let* cmd = Cmd.check cmd in
   let+ output = Cmd.output cmd in

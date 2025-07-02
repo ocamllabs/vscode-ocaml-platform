@@ -36,9 +36,7 @@ let debugType = Extension_consts.Debuggers.earlybird
 let check_earlybird_available (sandbox : Sandbox.t) =
   let earlybird_help =
     (* earlybird <= 1.1.0 doesn't have --version *)
-    match sandbox with
-    | Dune dune -> Dune.exec_tool ~tool:"ocamlearlybird" ~args:[ "--help" ] dune
-    | _ -> Sandbox.get_command sandbox "ocamlearlybird" [ "--help" ]
+    Sandbox.get_command sandbox "ocamlearlybird" [ "--help" ] `Tool
   in
   Cmd.output earlybird_help
   |> Promise.Result.fold
@@ -55,11 +53,7 @@ let createDebugAdapterDescriptor ~instance ~session:_ ~executable:_ =
     let* res = check_earlybird_available sandbox in
     match res with
     | Ok () ->
-      let command =
-        match sandbox with
-        | Dune dune -> Dune.exec_tool ~tool:"ocamlearlybird" ~args:[ "debug" ] dune
-        | _ -> Sandbox.get_command sandbox "ocamlearlybird" [ "debug" ]
-      in
+      let command = Sandbox.get_command sandbox "ocamlearlybird" [ "debug" ] `Tool in
       let { Cmd.bin; args } = Cmd.to_spawn command in
       let result = DebugAdapterExecutable.make ~command:(Path.to_string bin) ~args () in
       Promise.return (Some (`Executable result))

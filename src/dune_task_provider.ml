@@ -39,11 +39,7 @@ let folder_relative_path folders file =
 ;;
 
 let get_shell_execution (sandbox : Sandbox.t) options =
-  let command =
-    match sandbox with
-    | Dune dune -> Dune.command dune ~args:[ "build" ]
-    | _ -> Sandbox.get_command sandbox "dune" [ "build" ]
-  in
+  let command = Sandbox.get_command sandbox "dune" [ "build" ] `Command in
   Cmd.log command;
   match command with
   | Shell commandLine -> ShellExecution.makeCommandLine ~commandLine ~options ()

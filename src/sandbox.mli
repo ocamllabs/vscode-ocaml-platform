@@ -54,7 +54,12 @@ val select_sandbox : t -> t option Promise.t
 (* Helper utils *)
 
 (** Extract command to run with the sandbox *)
-val get_command : t -> string -> string list -> Cmd.t
+val get_command
+  :  t
+  -> string
+  -> string list
+  -> [ `Command | `Exec | `Tool | `Ocamllsp ]
+  -> Cmd.t
 
 (** Command to install dependencies in the sandbox *)
 val get_install_command : t -> string list -> Cmd.t option
