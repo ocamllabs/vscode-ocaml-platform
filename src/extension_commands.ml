@@ -122,8 +122,7 @@ let _install_dune_lsp_server =
             in
             let task ~progress:_ ~token:_ =
               let+ result =
-                (* We first check the version so that the process can exit, otherwise the progress indicator runs \
-                   forever as the dune tools exec command automatically starts the server hence the process never ends.*)
+                (* We first check the version so that the process can exit, otherwise the progress indicator runs forever.*)
                 Cmd.Spawn
                   (Cmd.append
                      { Cmd.bin = Path.of_string "ocamllsp"; args = [] }
@@ -148,7 +147,7 @@ let _install_dune_lsp_server =
       | _ ->
         show_message
           `Warn
-          "dune tools exec ocamllsp: This command can only be executed in a Dune Package \
+          "install_dune_lsp: This command can only be executed in a Dune Package \
            Management sandbox.";
         log
           "install_dune_lsp: This command can only be executed in a Dune Package \

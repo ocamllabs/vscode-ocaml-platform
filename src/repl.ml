@@ -54,11 +54,7 @@ let name = "REPL"
 
 let has_utop (sandbox : Sandbox.t) =
   let open Promise.Syntax in
-  let cmd =
-    match sandbox with
-    | Dune dune -> Dune.exec_tool ~tool:"utop" ~args:[ "--version" ] dune
-    | _ -> Sandbox.get_command sandbox "utop" [ "--version" ]
-  in
+  let cmd = Sandbox.get_command sandbox "utop" [ "--version" ] `Tool in
   let+ result = Cmd.output cmd in
   match result with
   | Error _ -> false
@@ -81,11 +77,7 @@ let can_build (sandbox : Sandbox.t) =
     Promise.return false
   | el :: _ ->
     let cwd = Stdlib.Filename.dirname (Uri.fsPath el) |> Path.of_string in
-    let cmd =
-      match sandbox with
-      | Dune dune -> Dune.command dune ~args:[ "build" ]
-      | _ -> Sandbox.get_command sandbox "dune" [ "build" ]
-    in
+    let cmd = Sandbox.get_command sandbox "dune" [ "build" ] `Command in
     let+ result = Cmd.output ~cwd cmd in
     (match result with
      | Error _ -> false
@@ -97,12 +89,9 @@ let default_repl sandbox =
   let* has_utop = has_utop sandbox in
   let+ can_build = can_build sandbox in
   match has_utop, use_utop (), can_build with
-  | true, true, true ->
-    (match sandbox with
-     | Dune dune -> Dune.command dune ~args:[ "build" ]
-     | _ -> Sandbox.get_command sandbox "dune" [ "utop" ])
-  | true, true, false -> Sandbox.get_command sandbox "utop" []
-  | _ -> Sandbox.get_command sandbox "ocaml" []
+  | true, true, true -> Sandbox.get_command sandbox "dune" [ "utop" ] `Command
+  | true, true, false -> Sandbox.get_command sandbox "utop" [] `Exec
+  | _ -> Sandbox.get_command sandbox "ocaml" [] `Exec
 ;;
 
 let create_terminal instance sandbox =
@@ -114,8 +103,9 @@ let create_terminal instance sandbox =
     let open Promise.Syntax in
     let* cmd =
       match get_repl_path (), get_repl_args () with
-      | Some bin, Some args -> Sandbox.get_command sandbox bin args |> Promise.return
-      | Some bin, None -> Sandbox.get_command sandbox bin [] |> Promise.return
+      | Some bin, Some args ->
+        Sandbox.get_command sandbox bin args `Exec |> Promise.return
+      | Some bin, None -> Sandbox.get_command sandbox bin [] `Exec |> Promise.return
       | None, _ -> default_repl sandbox
     in
     let* result = Cmd.check cmd in

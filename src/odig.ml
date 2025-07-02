@@ -3,9 +3,7 @@ open Import
 type t = { cache_dir : Path.t }
 
 let make_odig_cmd (sandbox : Sandbox.t) args =
-  match sandbox with
-  | Dune dune -> Dune.exec_tool ~tool:"odig" ~args dune
-  | _ -> Sandbox.get_command sandbox "odig" args
+  Sandbox.get_command sandbox "odig" args `Tool
 ;;
 
 (** TODO: propose to install odig. See

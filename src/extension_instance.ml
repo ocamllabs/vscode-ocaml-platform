@@ -151,7 +151,7 @@ let check_ocaml_lsp_available (sandbox : Sandbox.t) =
     else Error "`ocaml-lsp-server` is not installed in the current dune sandbox."
   | _ ->
     let ocaml_lsp_version sandbox =
-      Sandbox.get_command sandbox "ocamllsp" [ "--version" ]
+      Sandbox.get_command sandbox "ocamllsp" [ "--version" ] `Ocamllsp
     in
     let cwd =
       match Workspace.workspaceFolders () with
@@ -190,12 +190,7 @@ end = struct
 
   let server_options t =
     let args = Settings.(get server_args_setting) |> Option.value ~default:[] in
-    let command =
-      match t.sandbox with
-      | Dune _dune ->
-        Cmd.Spawn (Cmd.append { Cmd.bin = Path.of_string "ocamllsp"; args = [] } [])
-      | _ -> Sandbox.get_command t.sandbox "ocamllsp" args
-    in
+    let command = Sandbox.get_command t.sandbox "ocamllsp" args `Ocamllsp in
     Cmd.log command;
     let env =
       let extra_env_vars =
@@ -473,13 +468,7 @@ let close_repl t = t.repl <- None
 let update_ocaml_info t =
   let open Promise.Syntax in
   let+ ocaml_version =
-    let+ r =
-      match t.sandbox with
-      | Dune dune ->
-        Dune.exec ~target:"ocamlc" ~args:[ "--version" ] dune
-        |> Cmd.output ~cwd:(Dune.root dune)
-      | _ -> Sandbox.get_command t.sandbox "ocamlc" [ "--version" ] |> Cmd.output
-    in
+    let+ r = Sandbox.get_command t.sandbox "ocamlc" [ "--version" ] `Exec |> Cmd.output in
     match r with
     | Ok v ->
       Ocaml_version.of_string v
