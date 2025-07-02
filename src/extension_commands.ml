@@ -123,11 +123,8 @@ let _install_dune_lsp_server =
             let task ~progress:_ ~token:_ =
               let+ result =
                 (* We first check the version so that the process can exit, otherwise the progress indicator runs forever.*)
-                Cmd.Spawn
-                  (Cmd.append
-                     { Cmd.bin = Path.of_string "ocamllsp"; args = [] }
-                     [ "--version" ])
-                |> Cmd.output ~cwd:(Dune.root dune)
+                Sandbox.get_command sandbox "ocamllsp" [ "--version" ] `Ocamllsp
+                |> Cmd.output
               in
               match result with
               | Ok _ -> Ojs.null
