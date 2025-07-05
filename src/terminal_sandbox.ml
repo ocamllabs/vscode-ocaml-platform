@@ -78,7 +78,7 @@ let create ?name ?command sandbox =
     | None ->
       let shell_path = get_shell_path () in
       let shell_args = get_shell_args () in
-      let command = Sandbox.get_command sandbox shell_path shell_args in
+      let command = Sandbox.get_command sandbox shell_path shell_args `Exec in
       Cmd.to_spawn command
   in
   Cmd.log (Spawn command);

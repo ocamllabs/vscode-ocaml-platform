@@ -299,6 +299,16 @@
         "command": "ocaml.augment-selection-type-verbosity",
         "category": "OCaml",
         "title": "Increase the verbosity of the selection's type."
+      },
+      {
+        "command": "ocaml.run_dune_pkg_lock",
+        "category": "OCaml",
+        "title": "Lock a dune project (dune pkg lock)"
+      },
+      {
+        "command": "ocaml.install-dune-lsp",
+        "category": "OCaml",
+        "title": "Start the Ocaml-LSP server for Dune Package Management"
       }
     ],
     "configuration": {

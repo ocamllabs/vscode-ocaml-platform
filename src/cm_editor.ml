@@ -22,7 +22,7 @@ end = struct
     let file_path = Uri.fsPath uri in
     let command =
       let sandbox = Extension_instance.sandbox instance in
-      Sandbox.get_command sandbox "ocamlobjinfo" [ file_path ]
+      Sandbox.get_command sandbox "ocamlobjinfo" [ file_path ] `Exec
     in
     Cmd.output command
   ;;
