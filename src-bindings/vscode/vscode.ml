@@ -3201,12 +3201,6 @@ module Commands = struct
     [%js:
       val registerCommand
         :  command:string
-        -> callback:(args:(Ojs.t list[@js.variadic]) -> unit)
-        -> Disposable.t
-      [@@js.global "vscode.commands.registerCommand"]
-
-      val registerCommandReturn
-        :  command:string
         -> callback:(args:(Ojs.t list[@js.variadic]) -> Ojs.t)
         -> Disposable.t
       [@@js.global "vscode.commands.registerCommand"]
@@ -3224,7 +3218,7 @@ module Commands = struct
       val executeCommand
         :  command:string
         -> args:(Ojs.t list[@js.variadic])
-        -> Ojs.t or_undefined Promise.t
+        -> Ojs.t Promise.t
       [@@js.global "vscode.commands.executeCommand"]
 
       val getCommands : ?filterInternal:bool -> unit -> string list Promise.t
