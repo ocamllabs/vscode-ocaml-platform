@@ -114,30 +114,28 @@ let _install_dune_lsp_server =
             let options =
               ProgressOptions.create
                 ~location:(`ProgressLocation Notification)
-                ~title:
-                  "Running ocamllsp install \
-                   [script](https://github.com/ocaml-dune/binary-distribution/blob/4456a8f870bac910e9591fe9c4b1d1438538d484/tool-wrappers/ocamllsp)"
+                ~title:"Installing ocaml-lsp server using `dune tools exec ocamllsp`"
                 ~cancellable:false
                 ()
             in
             let task ~progress:_ ~token:_ =
               let+ result =
                 (* We first check the version so that the process can exit, otherwise the progress indicator runs forever.*)
-                Sandbox.get_command sandbox "ocamllsp" [ "--version" ] `Ocamllsp
-                |> Cmd.output
+                Sandbox.get_command sandbox "ocamllsp" [ "--version" ] `Tool
+                |> Cmd.output ~cwd:(Dune.root dune)
               in
               match result with
               | Ok _ -> Ojs.null
               | Error err ->
-                show_message
-                  `Error
-                  "An error occured while running the ocamllsp install \
-                   [script](https://github.com/ocaml-dune/binary-distribution/blob/4456a8f870bac910e9591fe9c4b1d1438538d484/tool-wrappers/ocamllsp): \
-                   %s"
-                  err;
+                show_message `Error "An error occured while installing ocamllsp : %s" err;
                 Ojs.null
             in
             let* _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+            (* We now just use the shim [script](https://github.com/ocaml-dune/binary-distribution/blob/4456a8f870bac910e9591fe9c4b1d1438538d484/tool-wrappers/ocamllsp) to start the server *)
+            let* _ =
+              Sandbox.get_command sandbox "ocamllsp" [ "--version" ] `Ocamllsp
+              |> Cmd.output
+            in
             let+ _ = Extension_instance.start_language_server instance in
             ())
         else Extension_instance.suggest_to_run_dune_pkg_lock () |> Promise.return
