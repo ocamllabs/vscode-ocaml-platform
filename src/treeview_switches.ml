@@ -124,10 +124,9 @@ end
 
 module Command = struct
   let _remove_switch =
-    let callback (_ : Extension_instance.t) args =
+    let callback (_ : Extension_instance.t) arg =
       let (_ : unit Promise.t) =
-        let arg = List.hd_exn args in
-        let dep = Dependency.t_of_js arg in
+        let dep = [%js.to: Dependency.t] arg in
         match dep with
         | Package _ ->
           Promise.return @@ show_message `Warn "The selected item is not an opam switch."
@@ -159,10 +158,9 @@ module Command = struct
   ;;
 
   let _open_documentation =
-    let callback (_ : Extension_instance.t) args =
+    let callback (_ : Extension_instance.t) arg =
       let (_ : unit Promise.t) =
-        let arg = List.hd_exn args in
-        let dep = Dependency.t_of_js arg in
+        let dep = [%js.to: Dependency.t] arg in
         match dep with
         | Switch _ ->
           Promise.return @@ show_message `Warn "Cannot open documentation of a switch."

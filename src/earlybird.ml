@@ -93,11 +93,11 @@ module Command = struct
   ;;
 
   let _start_debugging =
-    let callback (_ : Extension_instance.t) args =
+    let callback (_ : Extension_instance.t) resourceUri =
       let resourceUri =
-        match args with
-        | resourceUri :: _ -> Some (Uri.t_of_js resourceUri)
-        | [] ->
+        match resourceUri with
+        | Some resourceUri -> Some resourceUri
+        | None ->
           Option.map (Window.activeTextEditor ()) ~f:(fun textEditor ->
             TextDocument.uri (TextEditor.document textEditor))
       in
@@ -121,14 +121,12 @@ module Command = struct
   ;;
 
   let _goto_closure_code_location =
-    let callback (_ : Extension_instance.t) args =
+    let callback (_ : Extension_instance.t) context =
       let open Promise.Syntax in
       match Debug.activeDebugSession () with
       | Some debugSession ->
-        let context = List.hd_exn args in
         let variablesReference =
-          Jsonoo.Decode.(
-            at [ "variable"; "variablesReference" ] int (Jsonoo.t_of_js context))
+          Jsonoo.Decode.(at [ "variable"; "variablesReference" ] int context)
         in
         let args =
           VariableGetClosureCodeLocation.Args.t_to_js { handle = variablesReference }

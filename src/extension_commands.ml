@@ -371,7 +371,7 @@ end = struct
           find_prev_hole fst_range rest)
     ;;
 
-    let jump ~cmd_args:_ text_editor ~sorted_holes =
+    let jump ~cmd_args:() text_editor ~sorted_holes =
       match sorted_holes with
       | [] -> show_message `Info "%s" hole_not_found_msg
       | sorted_non_empty_holes_list ->
@@ -435,9 +435,8 @@ end = struct
 
     let parse_arguments args =
       match args with
-      | [] -> Ok default_args
-      | [ params_obj ] ->
-        let json = Jsonoo.t_of_js params_obj in
+      | None -> Ok default_args
+      | Some json ->
         if args_use_old_protocol json
         then Error `Outdated_protocol
         else (
@@ -448,7 +447,6 @@ end = struct
             Jsonoo.Decode.(try_default true (field "shouldNotifyIfNoHole" bool)) json
           in
           Ok { in_range; should_notify_if_no_hole })
-      | _ -> (* incorrect args passed *) assert false
     ;;
 
     let jump ~cmd_args text_editor ~sorted_holes =

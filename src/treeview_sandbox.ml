@@ -53,10 +53,9 @@ end
 
 module Command = struct
   let _open_documentation =
-    let callback (_ : Extension_instance.t) args =
+    let callback (_ : Extension_instance.t) arg =
       let (_ : unit Promise.t) =
-        let arg = List.hd_exn args in
-        let dep = Dependency.t_of_js arg in
+        let dep = [%js.to: Dependency.t] arg in
         let open Promise.Syntax in
         let doc = Sandbox.Package.documentation dep in
         let uri =
@@ -78,7 +77,7 @@ module Command = struct
   ;;
 
   let _generate_documentation =
-    let callback (instance : Extension_instance.t) args =
+    let callback (instance : Extension_instance.t) arg =
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
@@ -88,8 +87,7 @@ module Command = struct
           show_message `Error "%s" error;
           Promise.resolve ()
         | Ok odig ->
-          let arg = List.hd_exn args in
-          let dep = Dependency.t_of_js arg in
+          let dep = [%js.to: Dependency.t] arg in
           let package_name = Sandbox.Package.name dep in
           let options =
             ProgressOptions.create
@@ -137,10 +135,9 @@ module Command = struct
   ;;
 
   let _uninstall =
-    let callback (instance : Extension_instance.t) args =
+    let callback (instance : Extension_instance.t) arg =
       let (_ : unit Promise.t) =
-        let arg = List.hd_exn args in
-        let dep = Dependency.t_of_js arg in
+        let dep = [%js.to: Dependency.t] arg in
         let message =
           Printf.sprintf
             "Are you sure you want to uninstall package %s?"

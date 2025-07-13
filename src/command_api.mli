@@ -15,21 +15,21 @@ module Internal : sig
   val select_sandbox_and_open_terminal : (unit, unit) handle
   val open_terminal : (unit, unit) handle
   val switch_impl_intf : (unit, unit) handle
-  val remove_switch : (Ojs.t list, unit) handle
+  val remove_switch : (Ojs.t, unit) handle
   val refresh_switches : (unit, unit) handle
   val refresh_sandbox : (unit, unit) handle
   val upgrade_sandbox : (unit, unit) handle
   val install_sandbox : (unit, unit) handle
-  val uninstall_sandbox_package : (Ojs.t list, unit) handle
-  val open_switches_documentation : (Ojs.t list, unit) handle
-  val open_sandbox_documentation : (Ojs.t list, unit) handle
+  val uninstall_sandbox_package : (Ojs.t, unit) handle
+  val open_switches_documentation : (Ojs.t, unit) handle
+  val open_sandbox_documentation : (Ojs.t, unit) handle
   val stop_documentation_server : (unit, unit) handle
-  val generate_sandbox_documentation : (Ojs.t list, unit) handle
+  val generate_sandbox_documentation : (Ojs.t, unit) handle
   val open_current_dune_file : (unit, unit) handle
   val evaluate_selection : (unit, unit) handle
   val open_repl : (unit, unit) handle
-  val next_hole : (Ojs.t list, unit) handle
-  val prev_hole : (Ojs.t list, unit) handle
+  val next_hole : (Jsonoo.t option, unit) handle
+  val prev_hole : (unit, unit) handle
   val open_ast_explorer_to_the_side : (unit, unit) handle
   val reveal_ast_node : (unit, unit) handle
   val switch_hover_mode : (unit, unit) handle
@@ -38,8 +38,8 @@ module Internal : sig
   val open_ocamllsp_output : (unit, unit) handle
   val open_ocaml_platform_ext_output : (unit, unit) handle
   val open_ocaml_commands_output : (unit, unit) handle
-  val start_debugging : (Ojs.t list, unit) handle
-  val goto_closure_code_location : (Ojs.t list, unit) handle
+  val start_debugging : (Vscode.Uri.t option, unit) handle
+  val goto_closure_code_location : (Jsonoo.t, unit) handle
   val ask_debug_program : (unit, string option Promise.t) handle
   val copy_type_under_cursor : (unit, unit) handle
   val construct : (unit, unit) handle
