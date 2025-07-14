@@ -62,10 +62,10 @@ let send_configuration
   let payload =
     let settings =
       LanguageClient.DidChangeConfiguration.create
-        ~settings:(Ocaml_lsp.OcamllspSettings.t_to_js settings)
+        ~settings:([%js.of: Ocaml_lsp.OcamllspSettings.t] settings)
         ()
     in
-    LanguageClient.DidChangeConfiguration.t_to_js settings
+    [%js.of: LanguageClient.DidChangeConfiguration.t] settings
   in
   LanguageClient.sendNotification client "workspace/didChangeConfiguration" payload
 ;;
@@ -256,7 +256,7 @@ let documentation_server_info () =
     Command.create
       ~title:"Open Command Palette"
       ~command:"workbench.action.quickOpen"
-      ~arguments:[ Ojs.string_to_js ">OCaml: Stop Documentation server" ]
+      ~arguments:[ [%js.of: string] ">OCaml: Stop Documentation server" ]
       ()
   in
   StatusBarItem.set_command status_bar (`Command command);

@@ -87,7 +87,7 @@ let run ?cwd ?env ?stdin cmd =
       Vscode.OutputChannel.appendLine output ~value:("$ " ^ to_string cmd)
     | Stdout data | Stderr data -> Vscode.OutputChannel.append output ~value:data
     | Closed -> Vscode.OutputChannel.appendLine output ~value:""
-    | ProcessError err -> log_value "process error" (Node.JsError.t_to_js err)
+    | ProcessError err -> log_value "process error" @@ [%js.of: Node.JsError.t] err
   in
   let options = ChildProcess.Options.create ?cwd ?env () in
   match cmd with

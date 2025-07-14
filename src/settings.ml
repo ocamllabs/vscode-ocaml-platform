@@ -14,7 +14,7 @@ let get ?section setting =
   match WorkspaceConfiguration.get section ~section:setting.key with
   | None -> None
   | Some v ->
-    (match setting.of_json (Jsonoo.t_of_js v) with
+    (match setting.of_json @@ [%js.to: Jsonoo.t] v with
      | s -> Some s
      | exception Jsonoo.Decode_error msg ->
        show_message `Error "Setting %s is invalid: %s" setting.key msg;
@@ -26,7 +26,7 @@ let set ?section setting v =
   match Workspace.name () with
   | None -> Promise.return ()
   | Some _ ->
-    let value = Jsonoo.t_to_js (setting.to_json v) in
+    let value = [%js.of: Jsonoo.t] (setting.to_json v) in
     WorkspaceConfiguration.update
       section
       ~section:setting.key

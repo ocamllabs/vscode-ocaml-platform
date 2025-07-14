@@ -691,14 +691,14 @@ module MerlinJump = struct
       }
 
     let t_of_js js =
-      let position = Ojs.get_prop_ascii js "position" |> Position.t_of_js in
-      let item = QuickPickItem.t_of_js js in
+      let position = [%js.to: Position.t] (Ojs.get_prop_ascii js "position") in
+      let item = [%js.to: QuickPickItem.t] js in
       { item; position }
     ;;
 
     let t_to_js t =
-      let item = QuickPickItem.t_to_js t.item in
-      Ojs.set_prop_ascii item "position" (Position.t_to_js t.position);
+      let item = [%js.of: QuickPickItem.t] t.item in
+      Ojs.set_prop_ascii item "position" @@ [%js.of: Position.t] t.position;
       item
     ;;
   end
@@ -1099,14 +1099,14 @@ module Navigate_holes = struct
       }
 
     let t_of_js js =
-      let range = Ojs.get_prop_ascii js "pl_range" |> Range.t_of_js in
-      let item = QuickPickItem.t_of_js js in
+      let range = [%js.to: Range.t] (Ojs.get_prop_ascii js "pl_range") in
+      let item = [%js.to: QuickPickItem.t] js in
       { item; range }
     ;;
 
     let t_to_js t =
-      let item = QuickPickItem.t_to_js t.item in
-      Ojs.set_prop_ascii item "pl_range" (Range.t_to_js t.range);
+      let item = [%js.of: QuickPickItem.t] t.item in
+      Ojs.set_prop_ascii item "pl_range" @@ [%js.of: Range.t] t.range;
       item
     ;;
   end

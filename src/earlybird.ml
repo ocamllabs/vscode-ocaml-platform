@@ -57,7 +57,7 @@ let createDebugAdapterDescriptor ~instance ~session:_ ~executable:_ =
       let { Cmd.bin; args } = Cmd.to_spawn command in
       let result = DebugAdapterExecutable.make ~command:(Path.to_string bin) ~args () in
       Promise.return (Some (`Executable result))
-    | Error s -> Promise.reject (Ojs.string_to_js s)
+    | Error s -> Promise.reject @@ [%js.of: string] s
   in
   `Promise promise
 ;;
@@ -107,8 +107,8 @@ module Command = struct
         let fsPath = Uri.fsPath uri in
         let name = Path.basename (Path.of_string fsPath) ^ " (experimental)" in
         let config = DebugConfiguration.create ~name ~type_:debugType ~request:"launch" in
-        DebugConfiguration.set config "program" (Ojs.string_to_js fsPath);
-        DebugConfiguration.set config "stopOnEntry" (Ojs.bool_to_js true);
+        DebugConfiguration.set config "program" @@ [%js.of: string] fsPath;
+        DebugConfiguration.set config "stopOnEntry" @@ [%js.of: bool] true;
         let (_ : bool Promise.t) =
           Debug.startDebugging ~folder ~nameOrConfiguration:(`Configuration config) ()
         in
@@ -129,7 +129,7 @@ module Command = struct
           Jsonoo.Decode.(at [ "variable"; "variablesReference" ] int context)
         in
         let args =
-          VariableGetClosureCodeLocation.Args.t_to_js { handle = variablesReference }
+          [%js.of: VariableGetClosureCodeLocation.Args.t] { handle = variablesReference }
         in
         let (_ : unit Promise.t) =
           let* result =
@@ -139,7 +139,7 @@ module Command = struct
               ~args
               ()
           in
-          let result = VariableGetClosureCodeLocation.Result.t_of_js result in
+          let result = [%js.to: VariableGetClosureCodeLocation.Result.t] result in
           match result.location with
           | Some range ->
             let* text_document = Workspace.openTextDocument (`Filename range.source) in

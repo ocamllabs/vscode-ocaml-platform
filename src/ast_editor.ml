@@ -37,7 +37,7 @@ let document_eq a b = Uri.equal (TextDocument.uri a) (TextDocument.uri b)
 
 let send_msg t value ~(webview : WebView.t) =
   let msg = Ojs.empty_obj () in
-  Ojs.set_prop_ascii msg "type" (Ojs.string_to_js t);
+  Ojs.set_prop_ascii msg "type" @@ [%js.of: string] t;
   Ojs.set_prop_ascii msg "value" value;
   let (_ : bool Promise.t) = WebView.postMessage webview msg in
   ()
@@ -121,7 +121,7 @@ let transform_to_ast instance ~document ~webview =
       | Signature _ -> make_value (Dumpast.transform text `Intf)
       | Unknown -> raise (User_error "Unknown file extension")
     in
-    send_msg "ast" (Jsonoo.t_to_js origin_json) ~webview
+    send_msg "ast" ([%js.of: Jsonoo.t] origin_json) ~webview
   | Preprocessed_ast ->
     let pp_value =
       let path = Pp_path.get_pp_path ~document in
@@ -153,7 +153,7 @@ let transform_to_ast instance ~document ~webview =
          | Error err_msg -> raise (User_error err_msg)
          | Ok pp_json -> make_value (Ok pp_json))
     in
-    send_msg "pp_ast" (Jsonoo.t_to_js pp_value) ~webview
+    send_msg "pp_ast" ([%js.of: Jsonoo.t] pp_value) ~webview
 ;;
 
 let onDidChangeTextDocument_listener instance document webview event =
@@ -162,20 +162,20 @@ let onDidChangeTextDocument_listener instance document webview event =
   then (
     try transform_to_ast instance ~document ~webview with
     | User_error err_msg ->
-      send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview)
+      send_msg "error" ([%js.of: Jsonoo.t] @@ Jsonoo.Encode.string err_msg) ~webview)
 ;;
 
 let update_ast instance ~document ~webview =
   try transform_to_ast instance ~document ~webview with
   | User_error err_msg ->
-    send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview
+    send_msg "error" ([%js.of: Jsonoo.t] @@ Jsonoo.Encode.string err_msg) ~webview
 ;;
 
 let onDidReceiveMessage_listener instance webview document msg =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   let int_prop name =
     if Ojs.has_property msg name
-    then Some (Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg name)))
+    then Some (Int.of_string @@ [%js.to: string] (Ojs.get_prop_ascii msg name))
     else None
   in
   match int_prop "selectedOutput" with
@@ -227,7 +227,7 @@ let on_hover custom_doc webview =
     let provideHover ~(document : TextDocument.t) ~(position : Position.t) ~token:_ =
       let offset = TextDocument.offsetAt document ~position in
       if document_eq custom_doc document
-      then send_msg "focus" (Ojs.int_to_js offset) ~webview;
+      then send_msg "focus" ([%js.of: int] offset) ~webview;
       let hover =
         Hover.make ~contents:(`MarkdownString (MarkdownString.make ~value:"" ())) ()
       in
@@ -282,7 +282,7 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel 
   in
   (try transform_to_ast instance ~document ~webview with
    | User_error err_msg ->
-     send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview);
+     send_msg "error" ([%js.of: Jsonoo.t] @@ Jsonoo.Encode.string err_msg) ~webview);
   let p =
     let open Promise.Syntax in
     let+ r = read_html_file () in
@@ -482,7 +482,7 @@ module Command = struct
           TextDocument.offsetAt document ~position
         in
         match webview with
-        | Some webview -> send_msg "focus" (Ojs.int_to_js offset) ~webview
+        | Some webview -> send_msg "focus" ([%js.of: int] offset) ~webview
         | None ->
           raise
             (User_error
@@ -585,7 +585,7 @@ let onDidSaveTextDocument_listener_pp instance document =
 
 let onDidChangeActiveTextEditor_listener instance e =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  if not (TextEditor.t_to_js e |> Ojs.is_null)
+  if not (Ojs.is_null @@ [%js.of: TextEditor.t] e)
   then (
     let document = TextEditor.document e in
     match Ast_editor_state.pp_status ast_editor_state (TextDocument.uri document) with
