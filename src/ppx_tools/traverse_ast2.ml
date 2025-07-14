@@ -312,7 +312,7 @@ class virtual ['res] lift2 =
           self#constr "Ptyp_class" [ "longident_loc", a; "core_type list", b ]
         | Ptyp_alias (a, b), Ptyp_alias (a', b') ->
           let a = self#core_type a a' in
-          let b = self#string b b' in
+          let b = self#loc self#string b b' in
           self#constr "Ptyp_alias" [ "core_type", a; "label", b ]
         | Ptyp_variant (a, b, c), Ptyp_variant (a', b', c') ->
           let a = self#list self#row_field a a' in
@@ -331,6 +331,10 @@ class virtual ['res] lift2 =
         | Ptyp_extension a, Ptyp_extension a' ->
           let a = self#extension a a' in
           self#constr "Ptyp_extension" [ "extension", a ]
+        | Ptyp_open (a, b), Ptyp_open (a', b') ->
+          let a = self#longident_loc a a' in
+          let b = self#core_type b b' in
+          self#constr "Ptyp_open" [ "longident_loc", a; "core_type", b ]
         | _ -> Error "core_type_desc"
 
     method package_type : package_type -> package_type -> ('res, string) result =
@@ -532,17 +536,13 @@ class virtual ['res] lift2 =
           self#constr
             "Pexp_let"
             [ "rec_flag", a; "value_binding list", b; "expression", c ]
-        | Pexp_function a, Pexp_function a' ->
-          let a = self#cases a a' in
-          self#constr "Pexp_function" [ "cases", a ]
-        | Pexp_fun (a, b, c, d), Pexp_fun (a', b', c', d') ->
-          let a = self#arg_label a a' in
-          let b = self#option self#expression b b' in
-          let c = self#pattern c c' in
-          let d = self#expression d d' in
+        | Pexp_function (a, b, c), Pexp_function (a', b', c') ->
+          let a = self#list self#function_param a a' in
+          let b = self#option self#type_constraint b b' in
+          let c = self#function_body c c' in
           self#constr
-            "Pexp_fun"
-            [ "arg_label", a; "expression option", b; "pattern", c; "expression", d ]
+            "Pexp_function"
+            [ "function_param list", a; "type_constraint option", b; "function_body", c ]
         | Pexp_apply (a, b), Pexp_apply (a', b') ->
           let a = self#expression a a' in
           let b =
@@ -741,37 +741,6 @@ class virtual ['res] lift2 =
           self#constr
             "Pexp_let"
             [ "rec_flag", a; "value_binding list", b; "expression", c ]
-        (*Caused by: [fun (t39 : t39 Js_of_ocaml.Js.t) -> ...] *)
-        | ( Pexp_fun (a, b, c, d)
-          , Pexp_apply ({ pexp_desc = Pexp_fun (a', b', c', d'); _ }, _) ) ->
-          let a = self#arg_label a a' in
-          let b = self#option self#expression b b' in
-          let c = self#pattern c c' in
-          let d = self#expression d d' in
-          self#constr
-            "Pexp_fun"
-            [ "arg_label", a; "expression option", b; "pattern", c; "expression", d ]
-        (*Caused by: [fun x -> Ppx_deriving_runtime.Format.asprintf "%a" pp x] *)
-        | ( Pexp_fun (a, b, c, d)
-          , Pexp_constraint ({ pexp_desc = Pexp_fun (a', b', c', d'); _ }, _) ) ->
-          let a = self#arg_label a a' in
-          let b = self#option self#expression b b' in
-          let c = self#pattern c c' in
-          let d = self#expression d d' in
-          self#constr
-            "Pexp_fun"
-            [ "arg_label", a; "expression option", b; "pattern", c; "expression", d ]
-        (* Caused by: {[ fun env -> fun _visitors_this_0 -> fun _visitors_this_1
-           -> ]} in opams package morbig/src/CST for instance *)
-        | ( Pexp_fun (a, b, c, d)
-          , Pexp_poly ({ pexp_desc = Pexp_fun (a', b', c', d'); _ }, _) ) ->
-          let a = self#arg_label a a' in
-          let b = self#option self#expression b b' in
-          let c = self#pattern c c' in
-          let d = self#expression d d' in
-          self#constr
-            "Pexp_fun"
-            [ "arg_label", a; "expression option", b; "pattern", c; "expression", d ]
         (* Caused by this recurent piece of code: {[ ((fun (type res) -> fun
            (type t9) -> fun (type t8) -> fun (t9 : t9 Js_of_ocaml.Js.t) -> fun
            (t8 : t8) -> fun (_ : t9 -> < set: t8 -> unit ;.. >
@@ -1748,6 +1717,9 @@ class virtual ['res] lift2 =
         | Pmod_extension a, Pmod_extension a' ->
           let a = self#extension a a' in
           self#constr "Pmod_extension" [ "extension", a ]
+        | Pmod_apply_unit a, Pmod_apply_unit a' ->
+          let a = self#module_expr a a' in
+          self#constr "Pmod_apply_unit" [ "module_expr", a ]
         | _ -> Error "module_expr_desc"
 
     method structure : structure -> structure -> ('res, string) result =
@@ -1815,22 +1787,27 @@ class virtual ['res] lift2 =
         | _ -> Error "structure_item_desc"
 
     method value_binding : value_binding -> value_binding -> ('res, string) result =
-      fun { pvb_pat; pvb_expr; pvb_attributes; pvb_loc }
+      fun { pvb_pat; pvb_expr; pvb_attributes; pvb_loc; pvb_constraint }
         { pvb_pat = pvb_pat'
         ; pvb_expr = pvb_expr'
         ; pvb_attributes = pvb_attributes'
         ; pvb_loc = pvb_loc'
+        ; pvb_constraint = pvb_constraint'
         } ->
         let pvb_pat = self#pattern pvb_pat pvb_pat' in
         let pvb_expr = self#expression pvb_expr pvb_expr' in
         let pvb_attributes = self#attributes pvb_attributes pvb_attributes' in
         let pvb_loc = self#location pvb_loc pvb_loc' in
+        let pvb_constraint =
+          self#option self#value_constraint pvb_constraint pvb_constraint'
+        in
         self#record
           "value_binding"
           [ "pvb_pat", pvb_pat
           ; "pvb_expr", pvb_expr
           ; "pvb_attributes", pvb_attributes
           ; "pvb_loc", pvb_loc
+          ; "pvb_constraint", pvb_constraint
           ]
 
     method module_binding : module_binding -> module_binding -> ('res, string) result =
@@ -1904,4 +1881,78 @@ class virtual ['res] lift2 =
         | _ -> Error "directive_argument_desc"
 
     method cases : cases -> cases -> ('res, string) result = self#list self#case
+
+    method function_param : function_param -> function_param -> ('res, string) result =
+      fun { pparam_loc; pparam_desc }
+        { pparam_loc = pparam_loc'; pparam_desc = pparam_desc' } ->
+        let pparam_loc = self#location pparam_loc pparam_loc' in
+        let pparam_desc = self#function_param_desc pparam_desc pparam_desc' in
+        self#record
+          "function_param"
+          [ "pparam_loc", pparam_loc; "pparam_desc", pparam_desc ]
+
+    method function_param_desc
+      : function_param_desc -> function_param_desc -> ('res, string) result =
+      fun x x' ->
+        match x, x' with
+        | Pparam_val (a, b, c), Pparam_val (a', b', c') ->
+          let a = self#arg_label a a' in
+          let b = self#option self#expression b b' in
+          let c = self#pattern c c' in
+          self#constr
+            "Pparam_val"
+            [ "arg_label", a; "expression option", b; "pattern", c ]
+        | Pparam_newtype a, Pparam_newtype a' ->
+          let a = self#loc self#string a a' in
+          self#constr "Pparam_newtype" [ "string loc", a ]
+        | _ -> Error "function_param_desc"
+
+    method type_constraint : type_constraint -> type_constraint -> ('res, string) result =
+      fun x x' ->
+        match x, x' with
+        | Pconstraint a, Pconstraint a' ->
+          let a = self#core_type a a' in
+          self#constr "Pconstraint" [ "core_type", a ]
+        | Pcoerce (a, b), Pcoerce (a', b') ->
+          let a = self#option self#core_type a a' in
+          let b = self#core_type b b' in
+          self#constr "Pcoerce" [ "core_type option", a; "core_type", b ]
+        | _ -> Error "type_constraint"
+
+    method value_constraint
+      : value_constraint -> value_constraint -> ('res, string) result =
+      fun x x' ->
+        match x, x' with
+        | ( Pvc_constraint { locally_abstract_univars; typ }
+          , Pvc_constraint
+              { locally_abstract_univars = locally_abstract_univars'; typ = typ' } ) ->
+          let locally_abstract_univars =
+            self#list
+              (self#loc self#string)
+              locally_abstract_univars
+              locally_abstract_univars'
+          in
+          let typ = self#core_type typ typ' in
+          self#constr
+            "Pvc_constraint"
+            [ "locally_abstract_univars", locally_abstract_univars; "typ", typ ]
+        | ( Pvc_coercion { ground; coercion }
+          , Pvc_coercion { ground = ground'; coercion = coercion' } ) ->
+          let ground = self#option self#core_type ground ground' in
+          let coercion = self#core_type coercion coercion' in
+          self#constr "Pvc_coercion" [ "ground", ground; "coercion", coercion ]
+        | _ -> Error "value_constraint"
+
+    method function_body : function_body -> function_body -> ('res, string) result =
+      fun x x' ->
+        match x, x' with
+        | Pfunction_body a, Pfunction_body a' ->
+          let a = self#expression a a' in
+          self#constr "Pfunction_body" [ "expression", a ]
+        | Pfunction_cases (a, b, c), Pfunction_cases (a', b', c') ->
+          let a = self#cases a a' in
+          let b = self#location b b' in
+          let c = self#attributes c c' in
+          self#constr "Pfunction_cases" [ "cases", a; "location", b; "attributes", c ]
+        | _ -> Error "function_body"
   end
