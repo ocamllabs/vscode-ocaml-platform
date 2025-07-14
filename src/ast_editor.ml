@@ -161,14 +161,12 @@ let onDidChangeTextDocument_listener instance document webview event =
   if document_eq document changed_document
   then (
     try transform_to_ast instance ~document ~webview with
-    | User_error err_msg ->
-      send_msg "error" ([%js.of: Jsonoo.t] @@ Jsonoo.Encode.string err_msg) ~webview)
+    | User_error err_msg -> send_msg "error" ([%js.of: string] err_msg) ~webview)
 ;;
 
 let update_ast instance ~document ~webview =
   try transform_to_ast instance ~document ~webview with
-  | User_error err_msg ->
-    send_msg "error" ([%js.of: Jsonoo.t] @@ Jsonoo.Encode.string err_msg) ~webview
+  | User_error err_msg -> send_msg "error" ([%js.of: string] err_msg) ~webview
 ;;
 
 let onDidReceiveMessage_listener instance webview document msg =
@@ -281,8 +279,7 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel 
       ()
   in
   (try transform_to_ast instance ~document ~webview with
-   | User_error err_msg ->
-     send_msg "error" ([%js.of: Jsonoo.t] @@ Jsonoo.Encode.string err_msg) ~webview);
+   | User_error err_msg -> send_msg "error" ([%js.of: string] err_msg) ~webview);
   let p =
     let open Promise.Syntax in
     let+ r = read_html_file () in
