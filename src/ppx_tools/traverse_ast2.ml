@@ -742,8 +742,8 @@ class virtual ['res] lift2 =
             "Pexp_let"
             [ "rec_flag", a; "value_binding list", b; "expression", c ]
         (*Caused by: [function param -> ...] when wrapped in Pexp_apply *)
-        | ( Pexp_function (a, b, c)
-          , Pexp_apply ({ pexp_desc = Pexp_function (a', b', c'); _ }, _) ) ->
+        | ( Pexp_function ((_ :: _ as a), b, c)
+          , Pexp_apply ({ pexp_desc = Pexp_function ((_ :: _ as a'), b', c'); _ }, _) ) ->
           let a = self#list self#function_param a a' in
           let b = self#option self#type_constraint b b' in
           let c = self#function_body c c' in
@@ -751,8 +751,9 @@ class virtual ['res] lift2 =
             "Pexp_function"
             [ "function_param list", a; "type_constraint option", b; "function_body", c ]
         (*Caused by: [function param -> ...] when wrapped in Pexp_constraint *)
-        | ( Pexp_function (a, b, c)
-          , Pexp_constraint ({ pexp_desc = Pexp_function (a', b', c'); _ }, _) ) ->
+        | ( Pexp_function ((_ :: _ as a), b, c)
+          , Pexp_constraint ({ pexp_desc = Pexp_function ((_ :: _ as a'), b', c'); _ }, _)
+          ) ->
           let a = self#list self#function_param a a' in
           let b = self#option self#type_constraint b b' in
           let c = self#function_body c c' in
@@ -760,8 +761,8 @@ class virtual ['res] lift2 =
             "Pexp_function"
             [ "function_param list", a; "type_constraint option", b; "function_body", c ]
         (*Caused by: [function param -> ...] when wrapped in Pexp_poly *)
-        | ( Pexp_function (a, b, c)
-          , Pexp_poly ({ pexp_desc = Pexp_function (a', b', c'); _ }, _) ) ->
+        | ( Pexp_function ((_ :: _ as a), b, c)
+          , Pexp_poly ({ pexp_desc = Pexp_function ((_ :: _ as a'), b', c'); _ }, _) ) ->
           let a = self#list self#function_param a a' in
           let b = self#option self#type_constraint b b' in
           let c = self#function_body c c' in
