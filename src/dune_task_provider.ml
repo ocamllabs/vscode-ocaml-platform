@@ -38,8 +38,8 @@ let folder_relative_path folders file =
        | Some without_prefix -> Some (folder, without_prefix)))
 ;;
 
-let get_shell_execution sandbox options =
-  let command = Sandbox.get_command sandbox "dune" [ "build" ] in
+let get_shell_execution (sandbox : Sandbox.t) options =
+  let command = Sandbox.get_command sandbox "dune" [ "build" ] `Command in
   Cmd.log command;
   match command with
   | Shell commandLine -> ShellExecution.makeCommandLine ~commandLine ~options ()
