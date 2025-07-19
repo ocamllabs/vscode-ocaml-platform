@@ -60,7 +60,7 @@ let dispose (t : t) =
               show_message
                 `Warn
                 "Error closing server: %s"
-                (Ojs.string_of_js (Promise.error_to_js error)))
+                ([%js.to: string] @@ [%js.of: Promise.error] error))
           ()
       in
       ())
