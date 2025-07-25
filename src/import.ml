@@ -19,7 +19,7 @@ module Node = struct
   ;;
 end
 
-let property_exists json property = Ojs.has_property (Jsonoo.t_to_js json) property
+let property_exists json property = Ojs.has_property ([%js.of: Jsonoo.t] json) property
 
 include Base
 
@@ -101,7 +101,7 @@ let log_fields msg (fields : (string * Jsonoo.t) list) =
   log_json msg (Jsonoo.Encode.object_ fields)
 ;;
 
-let log_value msg (js_val : Ojs.t) = log_json msg (Jsonoo.t_of_js js_val)
+let log_value msg (js_val : Ojs.t) = log_json msg @@ [%js.to: Jsonoo.t] js_val
 
 (** given a file uri, opens the file if it exists; otherwise, creates the file
     in "draft" mode (doesn't save it on disk)

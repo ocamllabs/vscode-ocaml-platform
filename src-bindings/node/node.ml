@@ -36,8 +36,8 @@ module Process = struct
     include [%js: val env : Ojs.t [@@js.global "process.env"]]
 
     let get k = [%js.to: string or_undefined] (Ojs.get_prop_ascii env k)
-    let set k v = Ojs.set_prop_ascii env k ([%js.of: string] v)
-    let env () = Interop.Dict.t_of_js [%js.to: string] env
+    let set k v = Ojs.set_prop_ascii env k @@ [%js.of: string] v
+    let env () = [%js.to: string Interop.Dict.t] env
   end
 end
 
