@@ -231,7 +231,7 @@ class virtual ['res] lift =
           self#constr "Ptyp_class" [ "longident_loc", a; "core_type list", b ]
         | Ptyp_alias (a, b) ->
           let a = self#core_type a in
-          let b = self#string b in
+          let b = self#loc self#string b in
           self#constr "Ptyp_alias" [ "core_type", a; "label", b ]
         | Ptyp_variant (a, b, c) ->
           let a = self#list self#row_field a in
@@ -250,6 +250,10 @@ class virtual ['res] lift =
         | Ptyp_extension a ->
           let a = self#extension a in
           self#constr "Ptyp_extension" [ "extension", a ]
+        | Ptyp_open (a, b) ->
+          let a = self#longident_loc a in
+          let b = self#core_type b in
+          self#constr "Ptyp_open" [ "longident_loc", a; "core_type", b ]
 
     method package_type : package_type -> 'res =
       fun (a, b) ->
@@ -429,17 +433,13 @@ class virtual ['res] lift =
           self#constr
             "Pexp_let"
             [ "rec_flag", a; "value_binding list", b; "expression", c ]
-        | Pexp_function a ->
-          let a = self#cases a in
-          self#constr "Pexp_function" [ "cases", a ]
-        | Pexp_fun (a, b, c, d) ->
-          let a = self#arg_label a in
-          let b = self#option self#expression b in
-          let c = self#pattern c in
-          let d = self#expression d in
+        | Pexp_function (a, b, c) ->
+          let a = self#list self#function_param a in
+          let b = self#option self#type_constraint b in
+          let c = self#function_body c in
           self#constr
-            "Pexp_fun"
-            [ "arg_label", a; "expression option", b; "pattern", c; "expression", d ]
+            "Pexp_function"
+            [ "function_param list", a; "type_constraint option", b; "function_body", c ]
         | Pexp_apply (a, b) ->
           let a = self#expression a in
           let b =
@@ -1371,6 +1371,9 @@ class virtual ['res] lift =
         | Pmod_extension a ->
           let a = self#extension a in
           self#constr "Pmod_extension" [ "extension", a ]
+        | Pmod_apply_unit a ->
+          let a = self#module_expr a in
+          self#constr "Pmod_apply_unit" [ "module_expr", a ]
 
     method structure : structure -> 'res = self#list self#structure_item
 
@@ -1434,17 +1437,19 @@ class virtual ['res] lift =
           self#constr "Pstr_extension" [ "extension", a; "attributes", b ]
 
     method value_binding : value_binding -> 'res =
-      fun { pvb_pat; pvb_expr; pvb_attributes; pvb_loc } ->
+      fun { pvb_pat; pvb_expr; pvb_attributes; pvb_loc; pvb_constraint } ->
         let pvb_pat = self#pattern pvb_pat in
         let pvb_expr = self#expression pvb_expr in
         let pvb_attributes = self#attributes pvb_attributes in
         let pvb_loc = self#location pvb_loc in
+        let pvb_constraint = self#option self#value_constraint pvb_constraint in
         self#record
           "value_binding"
           [ "pvb_pat", pvb_pat
           ; "pvb_expr", pvb_expr
           ; "pvb_attributes", pvb_attributes
           ; "pvb_loc", pvb_loc
+          ; "pvb_constraint", pvb_constraint
           ]
 
     method module_binding : module_binding -> 'res =
@@ -1506,4 +1511,65 @@ class virtual ['res] lift =
           self#constr "Pdir_bool" [ "bool", a ]
 
     method cases : cases -> 'res = self#list self#case
+
+    method function_param : function_param -> 'res =
+      fun { pparam_loc; pparam_desc } ->
+        let pparam_loc = self#location pparam_loc in
+        let pparam_desc = self#function_param_desc pparam_desc in
+        self#record
+          "function_param"
+          [ "pparam_loc", pparam_loc; "pparam_desc", pparam_desc ]
+
+    method function_param_desc : function_param_desc -> 'res =
+      fun x ->
+        match x with
+        | Pparam_val (a, b, c) ->
+          let a = self#arg_label a in
+          let b = self#option self#expression b in
+          let c = self#pattern c in
+          self#constr
+            "Pparam_val"
+            [ "arg_label", a; "expression option", b; "pattern", c ]
+        | Pparam_newtype a ->
+          let a = self#loc self#string a in
+          self#constr "Pparam_newtype" [ "string loc", a ]
+
+    method type_constraint : type_constraint -> 'res =
+      fun x ->
+        match x with
+        | Pconstraint a ->
+          let a = self#core_type a in
+          self#constr "Pconstraint" [ "core_type", a ]
+        | Pcoerce (a, b) ->
+          let a = self#option self#core_type a in
+          let b = self#core_type b in
+          self#constr "Pcoerce" [ "core_type option", a; "core_type", b ]
+
+    method value_constraint : value_constraint -> 'res =
+      fun x ->
+        match x with
+        | Pvc_constraint { locally_abstract_univars; typ } ->
+          let locally_abstract_univars =
+            self#list (self#loc self#string) locally_abstract_univars
+          in
+          let typ = self#core_type typ in
+          self#constr
+            "Pvc_constraint"
+            [ "locally_abstract_univars", locally_abstract_univars; "typ", typ ]
+        | Pvc_coercion { ground; coercion } ->
+          let ground = self#option self#core_type ground in
+          let coercion = self#core_type coercion in
+          self#constr "Pvc_coercion" [ "ground", ground; "coercion", coercion ]
+
+    method function_body : function_body -> 'res =
+      fun x ->
+        match x with
+        | Pfunction_body a ->
+          let a = self#expression a in
+          self#constr "Pfunction_body" [ "expression", a ]
+        | Pfunction_cases (a, b, c) ->
+          let a = self#cases a in
+          let b = self#location b in
+          let c = self#attributes c in
+          self#constr "Pfunction_cases" [ "cases", a; "location", b; "attributes", c ]
   end
