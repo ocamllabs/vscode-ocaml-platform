@@ -20,6 +20,7 @@
 ## 1.29.0
 
 - Add one-click install option for ocaml-lsp-server (#1725)
+- Detect Dune Pkg and auto-configure a Custom sandbox for it. (#1719)
 
 ## 1.28.2
 
