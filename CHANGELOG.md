@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.31.0
+
+- Automatically configure Dune Package Management (#1791)
+
 ## 1.30.2
 
 - Add support for quoted string literal brackets (`{|`, `|}`) syntax highlighting and auto-closing pairs (#1869)
@@ -20,7 +24,6 @@
 ## 1.29.0
 
 - Add one-click install option for ocaml-lsp-server (#1725)
-- Detect Dune Pkg and auto-configure a Custom sandbox for it. (#1719)
 
 ## 1.28.2
 
