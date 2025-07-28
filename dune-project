@@ -40,9 +40,7 @@
   (ocaml-version
    (>= 4.0))
   (ppxlib
-   (and
-    (>= 0.35)
-    (< 0.36)))
+   (>= 0.36))
   (opam-file-format
    (>= 2.1.6))
   (ocamlformat
