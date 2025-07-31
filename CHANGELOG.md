@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Start ocamllsp server for DPM using dune tools exec ocamllsp (#1903)
+
 ## 1.31.0
 
 - Automatically configure Dune Package Management (#1791)
