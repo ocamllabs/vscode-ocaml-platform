@@ -131,7 +131,6 @@ let _install_dune_lsp_server =
                 Ojs.null
             in
             let* _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
-            let* _ = Sandbox.get_command sandbox "ocamllsp" [] `Tool |> Cmd.output in
             let+ _ = Extension_instance.start_language_server instance in
             ())
         else Extension_instance.suggest_to_run_dune_pkg_lock () |> Promise.return
