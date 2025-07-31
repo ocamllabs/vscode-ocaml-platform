@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Check that the dune version installed supports DPM (Dune Package Management).
+  Only if it does, add DPM to the list of available sandboxes. (#1904)
 - Fix DPM (Dune Package Management) support for users with Dune installed via
   Opam, Nix or similar. Previously, DPM support worked only when Dune was
   installed using the installation script for the Dune binary distribution. (#1903)
