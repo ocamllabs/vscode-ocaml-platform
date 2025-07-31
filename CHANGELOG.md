@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Add links to OCaml tutorials and exercises from ocaml.org (#1905)
+- In the plugin's side panel, add links to OCaml tutorials and exercises on
+  ocaml.org. (#1905)
 
 ## 1.31.0
 
