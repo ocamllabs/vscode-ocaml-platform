@@ -545,20 +545,12 @@ let select_sandbox_and_save t =
   Some sandbox
 ;;
 
-let get_command
-      sandbox
-      bin
-      args
-      (dune_cmd_type : [> `Tool | `Command | `Exec | `Ocamllsp ])
-  : Cmd.t
-  =
+let get_command sandbox bin args (dune_cmd_type : [> `Tool | `Command | `Exec ]) : Cmd.t =
   match sandbox with
   | Opam (opam, switch) -> Opam.exec opam switch ~args:(bin :: args)
   | Esy (esy, manifest) -> Esy.exec esy manifest ~args:(bin :: args)
   | Dune dune ->
     (match dune_cmd_type with
-     | `Ocamllsp ->
-       Cmd.Spawn (Cmd.append { Cmd.bin = Path.of_string "ocamllsp"; args } [])
      | `Tool -> Dune.exec_tool ~tool:bin ~args dune
      | `Command -> Dune.command dune ~args
      | `Exec -> Dune.exec ~target:bin ~args dune)
