@@ -5,6 +5,8 @@
 - Fix DPM (Dune Package Management) support for users with Dune installed via
   Opam, Nix or similar. Previously, DPM support worked only when Dune was
   installed using the installation script for the Dune binary distribution. (#1903)
+- In the plugin's side panel, add links to OCaml tutorials and exercises on
+  ocaml.org. (#1905)
 
 ## 1.31.0
 
