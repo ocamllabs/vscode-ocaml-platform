@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add links to OCaml tutorials and exercises from ocaml.org (#1905)
+
 ## 1.31.0
 
 - Automatically configure Dune Package Management (#1791)
