@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-- Start ocamllsp server for DPM using dune tools exec ocamllsp (#1903)
+- Fix DPM (Dune Package Management) support for users with Dune installed via
+  Opam, Nix or similar. Previously, DPM support worked only when Dune was
+  installed using the installation script for the Dune binary distribution. (#1903)
 
 ## 1.31.0
 
