@@ -151,7 +151,7 @@ let check_ocaml_lsp_available (sandbox : Sandbox.t) =
     else Error "`ocaml-lsp-server` is not installed in the current dune sandbox."
   | _ ->
     let ocaml_lsp_version sandbox =
-      Sandbox.get_command sandbox "ocamllsp" [ "--version" ] `Ocamllsp
+      Sandbox.get_command sandbox "ocamllsp" [ "--version" ] `Tool
     in
     let cwd =
       match Workspace.workspaceFolders () with
@@ -190,7 +190,7 @@ end = struct
 
   let server_options t =
     let args = Settings.(get server_args_setting) |> Option.value ~default:[] in
-    let command = Sandbox.get_command t.sandbox "ocamllsp" args `Ocamllsp in
+    let command = Sandbox.get_command t.sandbox "ocamllsp" args `Tool in
     Cmd.log command;
     let env =
       let extra_env_vars =
