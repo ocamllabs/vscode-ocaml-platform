@@ -131,11 +131,7 @@ let _install_dune_lsp_server =
                 Ojs.null
             in
             let* _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
-            (* We now just use the shim [script](https://github.com/ocaml-dune/binary-distribution/blob/4456a8f870bac910e9591fe9c4b1d1438538d484/tool-wrappers/ocamllsp) to start the server *)
-            let* _ =
-              Sandbox.get_command sandbox "ocamllsp" [ "--version" ] `Ocamllsp
-              |> Cmd.output
-            in
+            let* _ = Sandbox.get_command sandbox "ocamllsp" [] `Tool |> Cmd.output in
             let+ _ = Extension_instance.start_language_server instance in
             ())
         else Extension_instance.suggest_to_run_dune_pkg_lock () |> Promise.return
