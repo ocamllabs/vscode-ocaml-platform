@@ -85,13 +85,12 @@ let tools ~tool ?(args = []) t cmd =
 ;;
 
 let is_ocamllsp_present t =
-  (* use dune tools which ocamllsp *)
   let open Promise.Syntax in
-  let+ ocamllsp_path = exec_tool ~tool:"ocamllsp" t `Which |> Cmd.output ~cwd:t.root in
+  let+ ocamllsp_path = tools ~tool:"ocamllsp" t `Which |> Cmd.output ~cwd:t.root in
   match ocamllsp_path with
   | Ok _path -> true
   | Error err ->
-    log_chan `Info ~section:"dune" "Ocamllsp not found" err;
+    log_chan `Info ~section:"dune" "Ocamllsp not found with error %s" err;
     false
 ;;
 
