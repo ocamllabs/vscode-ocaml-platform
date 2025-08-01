@@ -6,15 +6,16 @@ module Dune_version = struct
     | Preview of int * int * int
 
   let parse_release_version version_str =
+    let extract_int s =
+      let digits = String.filter s ~f:Char.is_digit in
+      if String.is_empty digits then None else Some (Int.of_string digits)
+    in
     match String.split_on_chars ~on:[ '.' ] version_str with
     | [ major; minor; patch ] ->
-      (try
-         let major = Int.of_string major in
-         let minor = Int.of_string minor in
-         let patch = Int.of_string patch in
-         Some (Release (major, minor, patch))
-       with
-       | Failure _ -> None)
+      (match extract_int major, extract_int minor, extract_int patch with
+       | Some major, Some minor, Some patch_num ->
+         Some (Release (major, minor, patch_num))
+       | _ -> None)
     | _ -> None
   ;;
 
