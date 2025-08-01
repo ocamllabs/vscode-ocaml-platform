@@ -1,5 +1,4 @@
 open Import
-open Base
 
 module Dune_version = struct
   type t =
@@ -19,9 +18,6 @@ module Dune_version = struct
     | _ -> None
   ;;
 
-  (** Parses a developer preview string to extract the build timestamp.
-      Example: "Dune Developer Preview: build 2025-07-29T03:07:10Z, ..."
-      Returns None if the format is invalid or the timestamp cannot be parsed. *)
   let parse_preview_version preview_str =
     let prefix = "Dune Developer Preview: build " in
     if String.is_prefix preview_str ~prefix
@@ -65,12 +61,12 @@ module Dune_version = struct
       else parse_release_version str
   ;;
 
-(* Released versions >= 3.19.1 and preview versions with a timestamp on or
-   after 2025-07-29 support everything needed for VSCode to support DPM,
-   e.g. `dune lock`, `dune tools exec`, support of various Dune dev tools etc.
-   The last feature needed was implemented on 2025-07-29 and ensures that
-   other Dune dev tools (in particular ocamlformat) are included in the PATH
-   of the `ocamllsp` process. *)
+  (* Released versions >= 3.19.1 and preview versions with a timestamp on or
+     after 2025-07-29 support everything needed for VSCode to support DPM,
+     e.g. `dune lock`, `dune tools exec`, support of various Dune dev tools etc.
+     The last feature needed was implemented on 2025-07-29 and ensures that
+     other Dune dev tools (in particular ocamlformat) are included in the PATH
+     of the `ocamllsp` process. *)
   let is_valid version =
     match version with
     | Release (major, minor, patch) ->
