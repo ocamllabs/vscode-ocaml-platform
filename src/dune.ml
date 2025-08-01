@@ -117,6 +117,7 @@ let make root () =
        in
        (match dune_version_output with
         | Ok v ->
+          log_chan ~section:"dune" `Info "Dune version: %s" v;
           (match Dune_version.from_string v with
            | Some version when Dune_version.is_valid version -> Some { bin; root }
            | _ -> None)
