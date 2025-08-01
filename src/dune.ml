@@ -38,6 +38,7 @@ let tools ~tool ?(args = []) t cmd =
   match cmd with
   | `Exec_ -> Cmd.Spawn (Cmd.append t.bin ([ "tools"; "exec"; tool; "--" ] @ args))
   | `Which -> Cmd.Spawn (Cmd.append t.bin ([ "tools"; "which"; tool ] @ args))
+  | `Install -> Cmd.Spawn (Cmd.append t.bin ([ "tools"; "install"; tool ] @ args))
 ;;
 
 let equal d1 d2 = Path.equal d1.root d2.root
