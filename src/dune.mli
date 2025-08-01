@@ -23,7 +23,12 @@ val exec : target:string -> ?args:string list -> t -> Cmd.t
 val exec_pkg : cmd:string -> ?args:string list -> t -> Cmd.t
 
 (** Run `dune tools <exec/which>` *)
-val tools : tool:string -> ?args:string list -> t -> [< `Exec_ | `Which ] -> Cmd.t
+val tools
+  :  tool:string
+  -> ?args:string list
+  -> t
+  -> [< `Exec_ | `Which | `Install ]
+  -> Cmd.t
 
 (** Check if amy two instances of dune pkg management projects are equal *)
 val equal : t -> t -> bool

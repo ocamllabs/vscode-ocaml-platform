@@ -545,12 +545,19 @@ let select_sandbox_and_save t =
   Some sandbox
 ;;
 
-let get_command sandbox bin args (dune_cmd_type : [> `Tool | `Command | `Exec ]) : Cmd.t =
+let get_command
+      sandbox
+      bin
+      args
+      (dune_cmd_type : [> `Tool | `Command | `Exec | `Install ])
+  : Cmd.t
+  =
   match sandbox with
   | Opam (opam, switch) -> Opam.exec opam switch ~args:(bin :: args)
   | Esy (esy, manifest) -> Esy.exec esy manifest ~args:(bin :: args)
   | Dune dune ->
     (match dune_cmd_type with
+     | `Install -> Dune.tools ~tool:bin ~args dune `Install
      | `Tool -> Dune.tools ~tool:bin ~args dune `Exec_
      | `Command -> Dune.command dune ~args
      | `Exec -> Dune.exec ~target:bin ~args dune)
