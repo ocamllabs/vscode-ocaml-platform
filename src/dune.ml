@@ -48,17 +48,7 @@ module Dune_version = struct
     | Some version -> Some version
     | None ->
       (* If that fails, try parsing as a standard release *)
-      let prefix = "Dune " in
-      if String.is_prefix str ~prefix
-      then (
-        let version_part =
-          String.sub
-            ~pos:(String.length prefix)
-            ~len:(String.length str - String.length prefix)
-            str
-        in
-        parse_release_version version_part)
-      else parse_release_version str
+      parse_release_version str
   ;;
 
   (* Released versions >= 3.19.1 and preview versions with a timestamp on or
