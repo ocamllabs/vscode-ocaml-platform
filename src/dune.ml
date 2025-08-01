@@ -102,6 +102,9 @@ let root t = t.root
 
 let make root () =
   let open Promise.Syntax in
+  let dune_version_output bin root =
+    command { root; bin } ~args:[ "--version" ] |> Cmd.output ~cwd:root
+  in
   (* Should we do something specific for Windows ? *)
   match root with
   | Some root ->
@@ -109,13 +112,17 @@ let make root () =
     let* spawn = Cmd.check_spawn spawn in
     (match spawn with
      | Ok bin ->
-       let+ dune_version_output =
-         command { root; bin } ~args:[ "--version" ] |> Cmd.output ~cwd:root
-       in
+       let+ dune_version_output = dune_version_output bin root in
        (match dune_version_output with
         | Ok v ->
           (match Dune_version.from_string v with
-           | Some version when Dune_version.is_valid version -> Some { bin; root }
+           | Some version when Dune_version.is_valid version ->
+             show_message
+               `Info
+               "Dune Package Management selected with dune from %s, version %s."
+               (Path.to_string binary)
+               v;
+             Some { bin; root }
            | _ ->
              log_chan ~section:"dune" `Error "Dune version %s is not supported for DPM." v;
              None)
@@ -124,6 +131,47 @@ let make root () =
           None)
      | Error err ->
        log_chan ~section:"dune" `Error "Dune binary not found with error: %s" err;
-       Promise.return None)
+       let* check_if_dune_is_installed_with_opam =
+         command
+           { root; bin = { Cmd.bin = Path.of_string "opam"; args = [] } }
+           ~args:[ "exec"; "--"; "which"; "dune" ]
+         |> Cmd.output ~cwd:root
+       in
+       (match check_if_dune_is_installed_with_opam with
+        | Error err ->
+          log_chan
+            ~section:"dune"
+            `Error
+            "Failed to check if Dune is installed with opam: %s"
+            err;
+          Promise.return None
+        | Ok path when String.is_empty path -> Promise.return None
+        | Ok path ->
+          let bin = { Cmd.bin = Path.of_string path; args = [] } in
+          let* dune_version_output = dune_version_output bin root in
+          (match dune_version_output with
+           | Ok v ->
+             (match Dune_version.from_string v with
+              | Some version when Dune_version.is_valid version ->
+                show_message
+                  `Info
+                  "Dune Package Management selected with dune from %s, version %s."
+                  path
+                  v;
+                Promise.return (Some { bin; root })
+              | _ ->
+                log_chan
+                  ~section:"dune"
+                  `Error
+                  "Dune version %s is not supported for DPM."
+                  v;
+                Promise.return None)
+           | Error err ->
+             log_chan
+               ~section:"dune"
+               `Error
+               "Dune version check failed with error: %s"
+               err;
+             Promise.return None)))
   | None -> Promise.return None
 ;;
