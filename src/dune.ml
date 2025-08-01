@@ -78,7 +78,7 @@ let exec ~target ?(args = []) t =
 
 let exec_pkg ~cmd ?(args = []) t = Cmd.Spawn (Cmd.append t.bin ([ "pkg"; cmd ] @ args))
 
-let exec_tool ~tool ?(args = []) t cmd =
+let tools ~tool ?(args = []) t cmd =
   match cmd with
   | `Exec_ -> Cmd.Spawn (Cmd.append t.bin ([ "tools"; "exec"; tool; "--" ] @ args))
   | `Which -> Cmd.Spawn (Cmd.append t.bin ([ "tools"; "which"; tool ] @ args))
