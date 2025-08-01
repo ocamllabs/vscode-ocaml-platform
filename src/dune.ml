@@ -12,7 +12,6 @@ module Dune_version = struct
     in
     match String.split_on_chars ~on:[ '.' ] version_str with
     | [ major; minor; patch ] ->
-      (* Extract major, minor, and patch versions as integers *)
       (match extract_int major, extract_int minor, extract_int patch with
        | Some major, Some minor, Some patch_num ->
          Some (Release (major, minor, patch_num))
@@ -21,7 +20,6 @@ module Dune_version = struct
   ;;
 
   let parse_preview_version rest =
-    (* The timestamp is expected to be in the format "YYYY-MM-DDTHH:MM:SSZ" *)
     match String.split_on_chars ~on:[ ',' ] rest with
     | timestamp_str :: _ ->
       (try
@@ -34,7 +32,6 @@ module Dune_version = struct
     | _ -> None
   ;;
 
-  (** Parses the raw output of `dune --version`. *)
   let from_string str =
     let prefix = "\"Dune Developer Preview: build " in
     if String.is_prefix str ~prefix
@@ -42,9 +39,7 @@ module Dune_version = struct
       let rest = String.drop_prefix str (String.length prefix) in
       match parse_preview_version rest with
       | Some version -> Some version
-      | None ->
-        (* If that fails, try parsing as a standard release *)
-        parse_release_version str)
+      | None -> parse_release_version str)
     else parse_release_version str
   ;;
 
