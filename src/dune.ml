@@ -57,8 +57,8 @@ module Dune_version = struct
   let is_valid version =
     match version with
     | Release (major, minor, patch) ->
-      Stdlib.compare (major, minor, patch) (3, 19, 1) >= 0
-    | Preview (y, m, d) -> Stdlib.compare (y, m, d) (2025, 7, 29) >= 0
+      Stdlib.compare (major, minor, patch) (3, 20, 0) >= 0
+    | Preview (y, m, d) -> Stdlib.compare (y, m, d) (2025, 7, 30) >= 0
   ;;
 end
 
