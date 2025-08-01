@@ -48,8 +48,8 @@ module Dune_version = struct
     else parse_release_version str
   ;;
 
-  (* Released versions >= 3.19.1 and preview versions with a timestamp on or
-     after 2025-07-29 support everything needed for VSCode to support DPM,
+  (* Released versions >= 3.20.0 and preview versions with a timestamp on or
+     after 2025-07-30 support everything needed for VSCode to support DPM,
      e.g. `dune lock`, `dune tools exec`, support of various Dune dev tools etc.
      The last feature needed was implemented on 2025-07-29 and ensures that
      other Dune dev tools (in particular ocamlformat) are included in the PATH
