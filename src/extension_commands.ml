@@ -114,14 +114,14 @@ let _install_dune_lsp_server =
             let options =
               ProgressOptions.create
                 ~location:(`ProgressLocation Notification)
-                ~title:"Installing ocaml-lsp server using `dune tools exec ocamllsp`"
+                ~title:"Installing ocaml-lsp server using `dune tools install ocamllsp`"
                 ~cancellable:false
                 ()
             in
             let task ~progress:_ ~token:_ =
               let+ result =
                 (* We first check the version so that the process can exit, otherwise the progress indicator runs forever.*)
-                Sandbox.get_command sandbox "ocamllsp" [ "--version" ] `Tool
+                Sandbox.get_command sandbox "ocamllsp" [] `Install
                 |> Cmd.output ~cwd:(Dune.root dune)
               in
               match result with
