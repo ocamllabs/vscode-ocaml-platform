@@ -12,6 +12,7 @@ module Dune_version = struct
     in
     match String.split_on_chars ~on:[ '.' ] version_str with
     | [ major; minor; patch ] ->
+      (* Extract major, minor, and patch versions as integers *)
       (match extract_int major, extract_int minor, extract_int patch with
        | Some major, Some minor, Some patch_num ->
          Some (Release (major, minor, patch_num))
@@ -19,37 +20,32 @@ module Dune_version = struct
     | _ -> None
   ;;
 
-  let parse_preview_version preview_str =
-    let prefix = "Dune Developer Preview: build " in
-    if String.is_prefix preview_str ~prefix
-    then (
-      let rest =
-        String.sub
-          ~pos:(String.length prefix)
-          ~len:(String.length preview_str - String.length prefix)
-          preview_str
-      in
-      match String.split_on_chars ~on:[ ',' ] rest with
-      | timestamp_str :: _ ->
-        (try
-           Stdlib.Scanf.sscanf
-             (String.strip timestamp_str)
-             "%d-%d-%dT%d:%d:%dZ"
-             (fun y m d _h _min _s -> Some (Preview (y, m, d)))
-         with
-         | Stdlib.Scanf.Scan_failure _ | End_of_file -> None)
-      | _ -> None)
-    else None
+  let parse_preview_version rest =
+    (* The timestamp is expected to be in the format "YYYY-MM-DDTHH:MM:SSZ" *)
+    match String.split_on_chars ~on:[ ',' ] rest with
+    | timestamp_str :: _ ->
+      (try
+         Stdlib.Scanf.sscanf
+           (String.strip timestamp_str)
+           "%d-%d-%dT%d:%d:%dZ"
+           (fun y m d _h _min _s -> Some (Preview (y, m, d)))
+       with
+       | Stdlib.Scanf.Scan_failure _ | End_of_file -> None)
+    | _ -> None
   ;;
 
   (** Parses the raw output of `dune --version`. *)
   let from_string str =
-    let str = String.strip str in
-    match parse_preview_version str with
-    | Some version -> Some version
-    | None ->
-      (* If that fails, try parsing as a standard release *)
-      parse_release_version str
+    let prefix = "\"Dune Developer Preview: build " in
+    if String.is_prefix str ~prefix
+    then (
+      let rest = String.drop_prefix str (String.length prefix) in
+      match parse_preview_version rest with
+      | Some version -> Some version
+      | None ->
+        (* If that fails, try parsing as a standard release *)
+        parse_release_version str)
+    else parse_release_version str
   ;;
 
   (* Released versions >= 3.19.1 and preview versions with a timestamp on or
@@ -118,11 +114,16 @@ let make root () =
        in
        (match dune_version_output with
         | Ok v ->
-          log_chan ~section:"dune" `Info "Dune version: %s" v;
           (match Dune_version.from_string v with
            | Some version when Dune_version.is_valid version -> Some { bin; root }
-           | _ -> None)
-        | Error _ -> None)
-     | Error _ -> Promise.return None)
+           | _ ->
+             log_chan ~section:"dune" `Error "Dune version %s is not supported for DPM." v;
+             None)
+        | Error err ->
+          log_chan ~section:"dune" `Error "Dune version check failed with error: %s" err;
+          None)
+     | Error err ->
+       log_chan ~section:"dune" `Error "Dune binary not found with error: %s" err;
+       Promise.return None)
   | None -> Promise.return None
 ;;
