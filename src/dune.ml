@@ -70,16 +70,6 @@ let is_project_locked t =
   Fs.exists (Path.to_string dune_lock_path)
 ;;
 
-let is_ocamllsp_present t =
-  (* Path to the ocaml-lsp-server.pkg file *)
-  let ocamllsp =
-    Path.join
-      t.root
-      (Path.join (Path.of_string "dev-tools.locks") (Path.of_string "ocaml-lsp-server"))
-  in
-  Fs.exists (Path.to_string ocamllsp)
-;;
-
 let command t ~args = Cmd.Spawn (Cmd.append t.bin args)
 
 let exec ~target ?(args = []) t =
@@ -88,8 +78,21 @@ let exec ~target ?(args = []) t =
 
 let exec_pkg ~cmd ?(args = []) t = Cmd.Spawn (Cmd.append t.bin ([ "pkg"; cmd ] @ args))
 
-let exec_tool ~tool ?(args = []) t =
-  Cmd.Spawn (Cmd.append t.bin ([ "tools"; "exec"; tool; "--" ] @ args))
+let exec_tool ~tool ?(args = []) t cmd =
+  match cmd with
+  | `Exec_ -> Cmd.Spawn (Cmd.append t.bin ([ "tools"; "exec"; tool; "--" ] @ args))
+  | `Which -> Cmd.Spawn (Cmd.append t.bin ([ "tools"; "which"; tool ] @ args))
+;;
+
+let is_ocamllsp_present t =
+  (* use dune tools which ocamllsp *)
+  let open Promise.Syntax in
+  let+ ocamllsp_path = exec_tool ~tool:"ocamllsp" t `Which |> Cmd.output ~cwd:t.root in
+  match ocamllsp_path with
+  | Ok _path -> true
+  | Error err ->
+    log_chan `Error ~section:"dune" "Ocamllsp not found: %s" err;
+    false
 ;;
 
 let equal d1 d2 = Path.equal d1.root d2.root
