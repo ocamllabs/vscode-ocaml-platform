@@ -118,14 +118,9 @@ let make root () =
                (Path.to_string binary)
                v;
              Some { bin; root }
-           | _ ->
-             log_chan ~section:"dune" `Error "Dune version %s is not supported for DPM." v;
-             None)
-        | Error err ->
-          log_chan ~section:"dune" `Error "Dune version check failed with error: %s" err;
-          None)
-     | Error err ->
-       log_chan ~section:"dune" `Error "Dune binary not found with error: %s" err;
+           | _ -> None)
+        | Error _err -> None)
+     | Error _err ->
        let* check_if_dune_is_installed_with_opam =
          command
            { root; bin = { Cmd.bin = Path.of_string "opam"; args = [] } }
@@ -133,13 +128,7 @@ let make root () =
          |> Cmd.output ~cwd:root
        in
        (match check_if_dune_is_installed_with_opam with
-        | Error err ->
-          log_chan
-            ~section:"dune"
-            `Error
-            "Failed to check if Dune is installed with opam: %s"
-            err;
-          Promise.return None
+        | Error _err -> Promise.return None
         | Ok path when String.is_empty path -> Promise.return None
         | Ok path ->
           let bin = { Cmd.bin = Path.of_string path; args = [] } in
@@ -154,19 +143,7 @@ let make root () =
                   path
                   v;
                 Promise.return (Some { bin; root })
-              | _ ->
-                log_chan
-                  ~section:"dune"
-                  `Error
-                  "Dune version %s is not supported for DPM."
-                  v;
-                Promise.return None)
-           | Error err ->
-             log_chan
-               ~section:"dune"
-               `Error
-               "Dune version check failed with error: %s"
-               err;
-             Promise.return None)))
+              | _ -> Promise.return None)
+           | Error _err -> Promise.return None)))
   | None -> Promise.return None
 ;;
