@@ -50,6 +50,6 @@ let is_ocamllsp_present t =
   match ocamllsp_path with
   | Ok _path -> true
   | Error err ->
-    log_chan `Error ~section:"dune" "Ocamllsp not found: %s" err;
+    log_chan `Info ~section:"dune" "Ocamllsp not found" err;
     false
 ;;
