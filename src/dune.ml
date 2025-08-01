@@ -65,9 +65,12 @@ module Dune_version = struct
       else parse_release_version str
   ;;
 
-  (** Checks if the parsed version is valid.
-      - A release version is valid if it is >= 3.19.1.
-      - A preview version is valid if its timestamp is on or after 2025-07-29. *)
+(* Released versions >= 3.19.1 and preview versions with a timestamp on or
+   after 2025-07-29 support everything needed for VSCode to support DPM,
+   e.g. `dune lock`, `dune tools exec`, support of various Dune dev tools etc.
+   The last feature needed was implemented on 2025-07-29 and ensures that
+   other Dune dev tools (in particular ocamlformat) are included in the PATH
+   of the `ocamllsp` process. *)
   let is_valid version =
     match version with
     | Release (major, minor, patch) ->
