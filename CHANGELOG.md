@@ -9,7 +9,6 @@
   installed using the installation script for the Dune binary distribution. (#1903)
 - In the plugin's side panel, add links to OCaml tutorials and exercises on
   ocaml.org. (#1905)
-- Use `dune tools which ocamllsp` to check for the presence of ocamllsp in DPM (#1907)
 
 ## 1.31.0
 
