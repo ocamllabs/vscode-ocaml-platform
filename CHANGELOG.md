@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.32.0
+
 - Check that the dune version installed supports DPM (Dune Package Management).
   Only if it does, add DPM to the list of available sandboxes. (#1904)
 - Fix DPM (Dune Package Management) support for users with Dune installed via
