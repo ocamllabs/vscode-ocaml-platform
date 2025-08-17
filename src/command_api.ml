@@ -151,6 +151,8 @@ module Internal = struct
   let type_selection = unit_handle "type-selection"
   let type_previous_selection = unit_handle "type-previous-selection"
   let augment_selection_type_verbosity = unit_handle "augment-selection-type-verbosity"
+  let install_dune_lsp = unit_handle "install-dune-lsp"
+  let run_dune_pkg_lock = unit_handle "run_dune_pkg_lock"
 end
 
 module Vscode = struct

@@ -46,6 +46,26 @@ let discuss_item =
   item
 ;;
 
+let tutorials_item =
+  let label =
+    `TreeItemLabel
+      (Vscode.TreeItemLabel.create ~label:"Explore OCaml exercises and tutorials" ())
+  in
+  let icon = `ThemeIcon (Vscode.ThemeIcon.make ~id:"book" ()) in
+  let item = Vscode.TreeItem.make_label ~label () in
+  let command =
+    Vscode.Command.create
+      ~title:"Open"
+      ~command:"vscode.open"
+      ~arguments:
+        [ Vscode.Uri.parse "https://ocaml.org/exercises" () |> Vscode.Uri.t_to_js ]
+      ()
+  in
+  Vscode.TreeItem.set_iconPath item icon;
+  Vscode.TreeItem.set_command item command;
+  item
+;;
+
 let github_item =
   let icon =
     `LightDark
@@ -73,7 +93,7 @@ let github_item =
   item
 ;;
 
-let items = [ discord_item; discuss_item; github_item ]
+let items = [ discord_item; discuss_item; github_item; tutorials_item ]
 let getTreeItem ~element = `Value element
 
 let getChildren ?element () =

@@ -108,21 +108,58 @@ let stop_server t =
     else Promise.return ()
 ;;
 
-let check_ocaml_lsp_available sandbox =
-  let ocaml_lsp_version sandbox =
-    Sandbox.get_command sandbox "ocamllsp" [ "--version" ]
+let suggest_to_run_dune_pkg_lock () =
+  let open Promise.Syntax in
+  let (_ : unit Promise.t) =
+    let+ maybe_choice =
+      Window.showWarningMessage
+        ~message:
+          "Dune Package Manager is selected as the active sandbox, but no lock file is \
+           present. Do you want to run dune pkg lock?"
+        ~choices:
+          [ ( "Generate lockfile"
+            , fun () ->
+                let (_ : unit Promise.t) =
+                  Command_api.(execute Internal.run_dune_pkg_lock) ()
+                in
+                () )
+          ; ( "Pick another sandbox"
+            , fun () ->
+                let (_ : unit Promise.t) =
+                  Command_api.(execute Internal.select_sandbox) ()
+                in
+                () )
+          ]
+        ()
+    in
+    Option.iter maybe_choice ~f:(fun f -> f ())
   in
-  let cwd =
-    match Workspace.workspaceFolders () with
-    | [ cwd ] -> Some (cwd |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string)
-    | _ -> None
-  in
-  Cmd.output ?cwd (ocaml_lsp_version sandbox)
-  |> Promise.Result.fold
-       ~ok:(fun (_ : string) -> ())
-       ~error:(fun (_ : string) ->
-         "Sandbox initialization failed: `ocaml-lsp-server` is not installed in the \
-          current sandbox.")
+  ()
+;;
+
+let check_ocaml_lsp_available (sandbox : Sandbox.t) =
+  match sandbox with
+  | Dune dune ->
+    let open Promise.Syntax in
+    let+ dune_lsp_present = Dune.is_ocamllsp_present dune in
+    if dune_lsp_present
+    then Ok ()
+    else Error "`ocaml-lsp-server` is not installed in the current dune sandbox."
+  | _ ->
+    let ocaml_lsp_version sandbox =
+      Sandbox.get_command sandbox "ocamllsp" [ "--version" ] `Tool
+    in
+    let cwd =
+      match Workspace.workspaceFolders () with
+      | [ cwd ] -> Some (cwd |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string)
+      | _ -> None
+    in
+    Cmd.output ?cwd (ocaml_lsp_version sandbox)
+    |> Promise.Result.fold
+         ~ok:(fun (_ : string) -> ())
+         ~error:(fun (_ : string) ->
+           "Sandbox initialization failed: `ocaml-lsp-server` is not installed in the \
+            current sandbox.")
 ;;
 
 module Language_server_init : sig
@@ -147,9 +184,9 @@ end = struct
       ()
   ;;
 
-  let server_options sandbox =
+  let server_options t =
     let args = Settings.(get server_args_setting) |> Option.value ~default:[] in
-    let command = Sandbox.get_command sandbox "ocamllsp" args in
+    let command = Sandbox.get_command t.sandbox "ocamllsp" args `Tool in
     Cmd.log command;
     let env =
       let extra_env_vars =
@@ -167,27 +204,32 @@ end = struct
       LanguageClient.Executable.create ~command ~args ~options ()
   ;;
 
-  let suggest_to_install_ocaml_lsp_server () =
+  let suggest_or_install_ocaml_lsp_server t =
     let open Promise.Syntax in
-    let install_lsp_text = "Install OCaml-LSP server" in
-    let select_different_sandbox = "Select a different Sandbox" in
-    let* selection =
-      Window.showInformationMessage
-        ~message:
-          "Failed to start the language server. `ocaml-lsp-server` is not installed in \
-           the current sandbox."
-        ~choices:
-          [ install_lsp_text, `Install_lsp; select_different_sandbox, `Select_sandbox ]
-        ()
-    in
-    match selection with
-    | Some `Install_lsp ->
-      let+ () = Command_api.(execute Internal.install_ocaml_lsp_server) () in
+    match t.sandbox with
+    | Dune _dune ->
+      let+ () = Command_api.(execute Internal.install_dune_lsp) () in
       ()
-    | Some `Select_sandbox ->
-      let+ () = Command_api.(execute Internal.select_sandbox) () in
-      ()
-    | _ -> Promise.return ()
+    | _ ->
+      let install_lsp_text = "Install OCaml-LSP server" in
+      let select_different_sandbox = "Select a different Sandbox" in
+      let* selection =
+        Window.showInformationMessage
+          ~message:
+            "Failed to start the language server. `ocaml-lsp-server` is not installed in \
+             the current sandbox."
+          ~choices:
+            [ install_lsp_text, `Install_lsp; select_different_sandbox, `Select_sandbox ]
+          ()
+      in
+      (match selection with
+       | Some `Install_lsp ->
+         let+ () = Command_api.(execute Internal.install_ocaml_lsp_server) () in
+         ()
+       | Some `Select_sandbox ->
+         let+ () = Command_api.(execute Internal.select_sandbox) () in
+         ()
+       | _ -> Promise.return ())
   ;;
 
   let client_capabilities =
@@ -208,7 +250,7 @@ end = struct
     | Ok () ->
       let+ res =
         let client =
-          let serverOptions = server_options t.sandbox in
+          let serverOptions = server_options t in
           let clientOptions = client_options () in
           LanguageClient.make
             ~id:"ocaml"
@@ -242,7 +284,7 @@ end = struct
            `Error
            "An error occurred starting the language server `ocamllsp`. %s"
            s)
-    | Error _ -> suggest_to_install_ocaml_lsp_server ()
+    | Error _ -> suggest_or_install_ocaml_lsp_server t
   ;;
 end
 
@@ -385,7 +427,7 @@ let close_repl t = t.repl <- None
 let update_ocaml_info t =
   let open Promise.Syntax in
   let+ ocaml_version =
-    let+ r = Sandbox.get_command t.sandbox "ocamlc" [ "--version" ] |> Cmd.output in
+    let+ r = Sandbox.get_command t.sandbox "ocamlc" [ "--version" ] `Exec |> Cmd.output in
     match r with
     | Ok v ->
       Ocaml_version.of_string v

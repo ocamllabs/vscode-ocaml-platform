@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## 1.32.0
+
+- Check that the dune version installed supports DPM (Dune Package Management).
+  Only if it does, add DPM to the list of available sandboxes. (#1904)
+- Fix DPM (Dune Package Management) support for users with Dune installed via
+  Opam, Nix or similar. Previously, DPM support worked only when Dune was
+  installed using the installation script for the Dune binary distribution. (#1903)
+- In the plugin's side panel, add links to OCaml tutorials and exercises on
+  ocaml.org. (#1905)
+
+## 1.31.0
+
+- Automatically configure Dune Package Management (#1791)
+
 ## 1.30.2
 
 - Add support for quoted string literal brackets (`{|`, `|}`) syntax highlighting and auto-closing pairs (#1869)

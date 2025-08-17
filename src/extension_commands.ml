@@ -36,7 +36,7 @@ let _select_sandbox =
   let callback (instance : Extension_instance.t) () =
     let open Promise.Syntax in
     let (_ : unit Promise.t) =
-      let* sandbox = Sandbox.select_sandbox () in
+      let* sandbox = Sandbox.select_sandbox (Extension_instance.sandbox instance) in
       match sandbox with
       | None (* sandbox selection cancelled *) -> Promise.return ()
       | Some new_sandbox ->
@@ -90,6 +90,100 @@ let _upgrade_ocaml_lsp_server =
   command Command_api.Internal.upgrade_ocaml_lsp_server callback
 ;;
 
+let _install_dune_lsp_server =
+  let callback (instance : Extension_instance.t) () =
+    let open Promise.Syntax in
+    let _ =
+      let sandbox = Extension_instance.sandbox instance in
+      match sandbox with
+      | Dune dune ->
+        let* is_dune_locked = Dune.is_project_locked dune in
+        if is_dune_locked
+        then
+          let* dune_lsp_present = Dune.is_ocamllsp_present dune in
+          if dune_lsp_present
+          then
+            show_message `Info "OCaml-LSP server is already installed." |> Promise.return
+          else (
+            let options =
+              ProgressOptions.create
+                ~location:(`ProgressLocation Notification)
+                ~title:"Installing ocaml-lsp server using `dune tools install ocamllsp`"
+                ~cancellable:false
+                ()
+            in
+            let task ~progress:_ ~token:_ =
+              let+ result =
+                (* We first check the version so that the process can exit, otherwise the progress indicator runs forever.*)
+                Sandbox.get_command sandbox "ocamllsp" [] `Install
+                |> Cmd.output ~cwd:(Dune.root dune)
+              in
+              match result with
+              | Ok _ -> Ojs.null
+              | Error err ->
+                show_message `Error "An error occured while installing ocamllsp : %s" err;
+                Ojs.null
+            in
+            let* _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+            let+ _ = Extension_instance.start_language_server instance in
+            ())
+        else Extension_instance.suggest_to_run_dune_pkg_lock () |> Promise.return
+      | _ ->
+        show_message
+          `Warn
+          "install_dune_lsp: This command can only be executed in a Dune Package \
+           Management sandbox.";
+        log
+          "install_dune_lsp: This command can only be executed in a Dune Package \
+           Management sandbox.";
+        Promise.return ()
+    in
+    ()
+  in
+  command Command_api.Internal.install_dune_lsp callback
+;;
+
+let _run_dune_pkg_lock =
+  let callback (instance : Extension_instance.t) () =
+    let open Promise.Syntax in
+    let _ =
+      match Extension_instance.sandbox instance with
+      | Dune dune ->
+        let options =
+          ProgressOptions.create
+            ~location:(`ProgressLocation Notification)
+            ~title:"Running `dune pkg lock`"
+            ~cancellable:false
+            ()
+        in
+        let task ~progress:_ ~token:_ =
+          let+ result =
+            Dune.exec_pkg ~cmd:"lock" dune |> Cmd.output ~cwd:(Dune.root dune)
+          in
+          match result with
+          | Ok _ -> Ojs.null
+          | Error err ->
+            show_message `Error "An error occurred while running dune pkg lock: %s" err;
+            Ojs.null
+        in
+        let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+        let _ = Extension_instance.start_language_server instance in
+        ()
+      | _ ->
+        show_message
+          `Warn
+          "dune_pkg_lock: This command can only be executed in a Dune Package Management \
+           sandbox.";
+        log
+          "run_dune_pkg_lock: This command can only be executed in a Dune Package \
+           Management sandbox.";
+        Promise.return ()
+    in
+    ()
+  in
+  command Command_api.Internal.run_dune_pkg_lock callback
+;;
+
 let _restart_language_server =
   let callback (instance : Extension_instance.t) () =
     let (_ : unit Promise.t) = Extension_instance.start_language_server instance in
@@ -99,10 +193,10 @@ let _restart_language_server =
 ;;
 
 let _select_sandbox_and_open_terminal =
-  let callback (_ : Extension_instance.t) () =
+  let callback (instance : Extension_instance.t) () =
     let (_ : unit option Promise.t) =
       let open Promise.Option.Syntax in
-      let+ sandbox = Sandbox.select_sandbox () in
+      let+ sandbox = Sandbox.select_sandbox (Extension_instance.sandbox instance) in
       Extension_instance.open_terminal sandbox
     in
     ()
@@ -118,7 +212,9 @@ let _open_terminal =
 ;;
 
 let _stop_documentation_server =
-  let callback instance () = Extension_instance.stop_documentation_server instance in
+  let callback (instance : Extension_instance.t) () =
+    Extension_instance.stop_documentation_server instance
+  in
   command Command_api.Internal.stop_documentation_server callback
 ;;
 

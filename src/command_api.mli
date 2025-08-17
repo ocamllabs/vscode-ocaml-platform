@@ -49,6 +49,8 @@ module Internal : sig
   val type_selection : (unit, unit) handle
   val type_previous_selection : (unit, unit) handle
   val augment_selection_type_verbosity : (unit, unit) handle
+  val install_dune_lsp : (unit, unit) handle
+  val run_dune_pkg_lock : (unit, unit) handle
 end
 
 module Vscode : sig

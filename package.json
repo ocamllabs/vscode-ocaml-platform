@@ -1,7 +1,7 @@
 {
   "name": "ocaml-platform",
   "displayName": "OCaml Platform",
-  "version": "1.30.2",
+  "version": "1.32.0",
   "private": true,
   "description": "Official OCaml language extension for VSCode",
   "categories": [
@@ -299,6 +299,16 @@
         "command": "ocaml.augment-selection-type-verbosity",
         "category": "OCaml",
         "title": "Increase the verbosity of the selection's type."
+      },
+      {
+        "command": "ocaml.run_dune_pkg_lock",
+        "category": "OCaml",
+        "title": "Lock a dune project (dune pkg lock)"
+      },
+      {
+        "command": "ocaml.install-dune-lsp",
+        "category": "OCaml",
+        "title": "Start the Ocaml-LSP server for Dune Package Management"
       }
     ],
     "configuration": {
@@ -1341,17 +1351,17 @@
     "vscode-languageclient": "9.0.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.1.2",
+    "@biomejs/biome": "^2.2.0",
     "@tsconfig/node24": "24.0.1",
     "@tsconfig/strictest": "2.0.5",
-    "@types/node": "24.1.0",
+    "@types/node": "24.3.0",
     "@types/vscode": "1.86.0",
     "@vscode/test-cli": "0.0.11",
     "@vscode/test-electron": "2.5.2",
     "@vscode/vsce": "3.6.0",
-    "esbuild": "0.25.8",
+    "esbuild": "0.25.9",
     "ovsx": "0.10.5",
-    "typescript": "5.8.3"
+    "typescript": "5.9.2"
   },
   "packageManager": "yarn@4.9.2",
   "engines": {
