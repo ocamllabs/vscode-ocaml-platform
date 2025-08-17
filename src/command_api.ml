@@ -51,18 +51,13 @@ module Internal = struct
     typed_handle id ~args_of_js ~args_to_js ~return_type:(module Interop.Js.Unit)
   ;;
 
-  let exactly_one_handle id ~t_to_js ~t_of_js =
+  let at_least_one_handle id ~t_to_js ~t_of_js =
     let args_to_js arg = [ t_to_js arg ] in
     let args_of_js = function
-      | [ arg ] -> t_of_js arg
-      | args ->
-        let message =
-          Printf.sprintf
-            "command %s: expected exactly 1 argument, got %d"
-            id
-            (List.length args)
-        in
-        log_chan `Error ~section:"Command_api.Internal.exactly_one_handle" "%s" message;
+      | arg :: _ -> t_of_js arg
+      | [] ->
+        let message = "command %s: expected at least 1 argument, got 0" in
+        log_chan `Error ~section:"Command_api.Internal.at_least_one_handle" "%s" message;
         raise (Invalid_argument message)
     in
     typed_handle id ~args_of_js ~args_to_js ~return_type:(module Interop.Js.Unit)
@@ -75,28 +70,28 @@ module Internal = struct
   let select_sandbox_and_open_terminal = unit_handle "open-terminal-select"
   let open_terminal = unit_handle "open-terminal"
   let switch_impl_intf = unit_handle "switch-impl-intf"
-  let remove_switch = exactly_one_handle "remove-switch" ~t_to_js:Fn.id ~t_of_js:Fn.id
+  let remove_switch = at_least_one_handle "remove-switch" ~t_to_js:Fn.id ~t_of_js:Fn.id
   let refresh_switches = unit_handle "refresh-switches"
   let refresh_sandbox = unit_handle "refresh-sandbox"
   let upgrade_sandbox = unit_handle "upgrade-sandbox"
   let install_sandbox = unit_handle "install-sandbox"
 
   let uninstall_sandbox_package =
-    exactly_one_handle "uninstall-sandbox-package" ~t_to_js:Fn.id ~t_of_js:Fn.id
+    at_least_one_handle "uninstall-sandbox-package" ~t_to_js:Fn.id ~t_of_js:Fn.id
   ;;
 
   let open_switches_documentation =
-    exactly_one_handle "open-switches-documentation" ~t_to_js:Fn.id ~t_of_js:Fn.id
+    at_least_one_handle "open-switches-documentation" ~t_to_js:Fn.id ~t_of_js:Fn.id
   ;;
 
   let open_sandbox_documentation =
-    exactly_one_handle "open-sandbox-documentation" ~t_to_js:Fn.id ~t_of_js:Fn.id
+    at_least_one_handle "open-sandbox-documentation" ~t_to_js:Fn.id ~t_of_js:Fn.id
   ;;
 
   let stop_documentation_server = unit_handle "stop-documentation-server"
 
   let generate_sandbox_documentation =
-    exactly_one_handle "generate-sandbox-documentation" ~t_to_js:Fn.id ~t_of_js:Fn.id
+    at_least_one_handle "generate-sandbox-documentation" ~t_to_js:Fn.id ~t_of_js:Fn.id
   ;;
 
   let open_current_dune_file = unit_handle "current-dune-file"
@@ -125,7 +120,7 @@ module Internal = struct
   ;;
 
   let goto_closure_code_location =
-    exactly_one_handle
+    at_least_one_handle
       "goto-closure-code-location"
       ~t_to_js:[%js.of: Jsonoo.t]
       ~t_of_js:[%js.to: Jsonoo.t]
