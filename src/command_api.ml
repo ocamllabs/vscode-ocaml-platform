@@ -56,7 +56,7 @@ module Internal = struct
     let args_of_js = function
       | arg :: _ -> t_of_js arg
       | [] ->
-        let message = "command %s: expected at least 1 argument, got 0" in
+        let message = Printf.sprintf "command %s: expected at least 1 argument, got 0" id in
         log_chan `Error ~section:"Command_api.Internal.at_least_one_handle" "%s" message;
         raise (Invalid_argument message)
     in
