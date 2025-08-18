@@ -1,45 +1,39 @@
 open Import
 
-type command =
-  { id : string
-  ; handler : Extension_instance.t -> args:Ojs.t list -> unit
-    (* [handler] is intended to be used partially applied; [handler extension_instance] is passed as a callback to
-       [Commands.registerCommand] *)
-  }
-
-type text_editor_command =
-  { id : string
-  ; handler :
-      Extension_instance.t
-      -> textEditor:TextEditor.t
-      -> edit:TextEditorEdit.t
-      -> args:Ojs.t list
-      -> unit
-    (* [handler] is intended to be used partially applied; [handler extension_instance] is passed as a callback to
-       [Commands.registerCommand] *)
-  }
-
 type t =
-  | Command of command
-  | Text_editor_command of text_editor_command
+  | Command :
+      { handle : ('a, 'b) Command_api.handle
+      ; callback : Extension_instance.t -> 'a -> 'b
+      }
+      -> t
+  | Text_editor_command :
+      { handle : ('a, unit) Command_api.handle
+      ; callback :
+          Extension_instance.t
+          -> textEditor:TextEditor.t
+          -> edit:TextEditorEdit.t
+          -> 'a
+          -> unit
+      }
+      -> t
 
 let commands = ref []
 
 (** creates a new command and stores in a mutable [commands] list *)
-let command id handler =
-  let command = Command { id; handler } in
+let command handle callback =
+  let command = Command { handle; callback } in
   commands := command :: !commands;
   command
 ;;
 
-let text_editor_command id handler =
-  let command = Text_editor_command { id; handler } in
+let text_editor_command handle callback =
+  let command = Text_editor_command { handle; callback } in
   commands := command :: !commands;
   command
 ;;
 
 let _select_sandbox =
-  let handler (instance : Extension_instance.t) ~args:_ =
+  let callback (instance : Extension_instance.t) () =
     let open Promise.Syntax in
     let (_ : unit Promise.t) =
       let* sandbox = Sandbox.select_sandbox (Extension_instance.sandbox instance) in
@@ -53,11 +47,11 @@ let _select_sandbox =
     in
     ()
   in
-  command Extension_consts.Commands.select_sandbox handler
+  command Command_api.Internal.select_sandbox callback
 ;;
 
 let _install_ocaml_lsp_server =
-  let handler (instance : Extension_instance.t) ~args:_ =
+  let callback (instance : Extension_instance.t) () =
     let open Promise.Syntax in
     let (_ : unit Promise.t) =
       let sandbox = Extension_instance.sandbox instance in
@@ -72,11 +66,11 @@ let _install_ocaml_lsp_server =
     in
     ()
   in
-  command Extension_consts.Commands.install_ocaml_lsp_server handler
+  command Command_api.Internal.install_ocaml_lsp_server callback
 ;;
 
 let _upgrade_ocaml_lsp_server =
-  let handler (instance : Extension_instance.t) ~args:_ =
+  let callback (instance : Extension_instance.t) () =
     let open Promise.Syntax in
     let (_ : unit Promise.t) =
       let sandbox = Extension_instance.sandbox instance in
@@ -93,11 +87,11 @@ let _upgrade_ocaml_lsp_server =
     in
     ()
   in
-  command Extension_consts.Commands.upgrade_ocaml_lsp_server handler
+  command Command_api.Internal.upgrade_ocaml_lsp_server callback
 ;;
 
 let _install_dune_lsp_server =
-  let handler (instance : Extension_instance.t) ~args:_ =
+  let callback (instance : Extension_instance.t) () =
     let open Promise.Syntax in
     let _ =
       let sandbox = Extension_instance.sandbox instance in
@@ -146,11 +140,11 @@ let _install_dune_lsp_server =
     in
     ()
   in
-  command Extension_consts.Commands.install_dune_lsp handler
+  command Command_api.Internal.install_dune_lsp callback
 ;;
 
 let _run_dune_pkg_lock =
-  let handler (instance : Extension_instance.t) ~args:_ =
+  let callback (instance : Extension_instance.t) () =
     let open Promise.Syntax in
     let _ =
       match Extension_instance.sandbox instance with
@@ -169,7 +163,7 @@ let _run_dune_pkg_lock =
           match result with
           | Ok _ -> Ojs.null
           | Error err ->
-            show_message `Error "An error occured while running dune pkg lock: %s" err;
+            show_message `Error "An error occurred while running dune pkg lock: %s" err;
             Ojs.null
         in
         let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
@@ -187,19 +181,19 @@ let _run_dune_pkg_lock =
     in
     ()
   in
-  command Extension_consts.Commands.run_dune_pkg_lock handler
+  command Command_api.Internal.run_dune_pkg_lock callback
 ;;
 
 let _restart_language_server =
-  let handler (instance : Extension_instance.t) ~args:_ =
+  let callback (instance : Extension_instance.t) () =
     let (_ : unit Promise.t) = Extension_instance.start_language_server instance in
     ()
   in
-  command Extension_consts.Commands.restart_language_server handler
+  command Command_api.Internal.restart_language_server callback
 ;;
 
 let _select_sandbox_and_open_terminal =
-  let handler instance ~args:_ =
+  let callback (instance : Extension_instance.t) () =
     let (_ : unit option Promise.t) =
       let open Promise.Option.Syntax in
       let+ sandbox = Sandbox.select_sandbox (Extension_instance.sandbox instance) in
@@ -207,23 +201,25 @@ let _select_sandbox_and_open_terminal =
     in
     ()
   in
-  command Extension_consts.Commands.select_sandbox_and_open_terminal handler
+  command Command_api.Internal.select_sandbox_and_open_terminal callback
 ;;
 
 let _open_terminal =
-  let handler (instance : Extension_instance.t) ~args:_ =
+  let callback (instance : Extension_instance.t) () =
     Extension_instance.sandbox instance |> Extension_instance.open_terminal
   in
-  command Extension_consts.Commands.open_terminal handler
+  command Command_api.Internal.open_terminal callback
 ;;
 
 let _stop_documentation_server =
-  let handler instance ~args:_ = Extension_instance.stop_documentation_server instance in
-  command Extension_consts.Commands.stop_documentation_server handler
+  let callback (instance : Extension_instance.t) () =
+    Extension_instance.stop_documentation_server instance
+  in
+  command Command_api.Internal.stop_documentation_server callback
 ;;
 
 let _switch_impl_intf =
-  let handler (instance : Extension_instance.t) ~args:_ =
+  let callback (instance : Extension_instance.t) () =
     let try_switching () =
       let open Option.O in
       let+ editor = Window.activeTextEditor () in
@@ -248,17 +244,17 @@ let _switch_impl_intf =
     let (_ : unit Promise.t option) = try_switching () in
     ()
   in
-  command Extension_consts.Commands.switch_impl_intf handler
+  command Command_api.Internal.switch_impl_intf callback
 ;;
 
 let _open_current_dune_file =
-  let handler (_instance : Extension_instance.t) ~args:_ =
+  let callback (_ : Extension_instance.t) () =
     match Vscode.Window.activeTextEditor () with
     | None ->
       (* this command is available (in the command palette) only when a file is
          open *)
       show_message `Error "%s"
-      @@ Extension_consts.Command_errors.text_editor_must_be_active
+      @@ Command_api.Command_errors.text_editor_must_be_active
            "Open Dune File"
            ~expl:
              "The command can look for a dune file in the same folder as the open file."
@@ -273,23 +269,23 @@ let _open_current_dune_file =
       let (_ : TextEditor.t Promise.t) = open_file_in_text_editor dune_file_uri in
       ()
   in
-  command Extension_consts.Commands.open_current_dune_file handler
+  command Command_api.Internal.open_current_dune_file callback
 ;;
 
 let _open_ocamllsp_output_pane, _open_ocaml_platform_ext_pane, _open_ocaml_commands_pane =
-  let handler output (_instance : Extension_instance.t) ~args:_ =
+  let callback output (_ : Extension_instance.t) () =
     let show_output (lazy output) = OutputChannel.show output () in
     show_output output
   in
   ( command
-      Extension_consts.Commands.open_ocamllsp_output
-      (handler Output.language_server_output_channel)
+      Command_api.Internal.open_ocamllsp_output
+      (callback Output.language_server_output_channel)
   , command
-      Extension_consts.Commands.open_ocaml_platform_ext_output
-      (handler Output.extension_output_channel)
+      Command_api.Internal.open_ocaml_platform_ext_output
+      (callback Output.extension_output_channel)
   , command
-      Extension_consts.Commands.open_ocaml_commands_output
-      (handler Output.command_output_channel) )
+      Command_api.Internal.open_ocaml_commands_output
+      (callback Output.command_output_channel) )
 ;;
 
 let select_and_reveal selection text_editor =
@@ -409,12 +405,12 @@ end = struct
     Custom_requests.send_request client Custom_requests.typedHoles uri
   ;;
 
-  let jump_to_hole jump (instance : Extension_instance.t) ~args =
+  let jump_to_hole jump (instance : Extension_instance.t) args =
     (* this command is available (in the command palette) only when a file is
        open *)
     match Window.activeTextEditor () with
     | None ->
-      Extension_consts.Command_errors.text_editor_must_be_active
+      Command_api.Command_errors.text_editor_must_be_active
         "Jump to Previous/Next Typed Hole"
         ~expl:"The command looks for holes in an open file."
       |> show_message `Error "%s"
@@ -471,7 +467,7 @@ end = struct
           find_prev_hole fst_range rest)
     ;;
 
-    let jump ~cmd_args:_ text_editor ~sorted_holes =
+    let jump ~cmd_args:() text_editor ~sorted_holes =
       match sorted_holes with
       | [] -> show_message `Info "%s" hole_not_found_msg
       | sorted_non_empty_holes_list ->
@@ -535,9 +531,8 @@ end = struct
 
     let parse_arguments args =
       match args with
-      | [] -> Ok default_args
-      | [ params_obj ] ->
-        let json = Jsonoo.t_of_js params_obj in
+      | None -> Ok default_args
+      | Some json ->
         if args_use_old_protocol json
         then Error `Outdated_protocol
         else (
@@ -548,7 +543,6 @@ end = struct
             Jsonoo.Decode.(try_default true (field "shouldNotifyIfNoHole" bool)) json
           in
           Ok { in_range; should_notify_if_no_hole })
-      | _ -> (* incorrect args passed *) assert false
     ;;
 
     let jump ~cmd_args text_editor ~sorted_holes =
@@ -587,99 +581,11 @@ end = struct
   ;;
 
   let _jump_to_next_hole =
-    command Extension_consts.Commands.next_hole (jump_to_hole Next_hole.jump)
+    command Command_api.Internal.next_hole (jump_to_hole Next_hole.jump)
   ;;
 
   let _jump_to_prev_hole =
-    command Extension_consts.Commands.prev_hole (jump_to_hole Prev_hole.jump)
-  ;;
-end
-
-module Debug_commands : sig
-  val _goto_closure_code_location : t
-  val _start_debugging : t
-end = struct
-  let _start_debugging =
-    let handler (_ : Extension_instance.t) ~args =
-      let resourceUri =
-        match args with
-        | resourceUri :: _ -> Some (Uri.t_of_js resourceUri)
-        | [] ->
-          Option.map (Window.activeTextEditor ()) ~f:(fun textEditor ->
-            TextDocument.uri (TextEditor.document textEditor))
-      in
-      match resourceUri with
-      | Some uri ->
-        let folder = Workspace.getWorkspaceFolder ~uri in
-        let fsPath = Uri.fsPath uri in
-        let name = Path.basename (Path.of_string fsPath) ^ " (experimental)" in
-        let config =
-          DebugConfiguration.create
-            ~name
-            ~type_:Extension_consts.Debuggers.earlybird
-            ~request:"launch"
-        in
-        DebugConfiguration.set config "program" (Ojs.string_to_js fsPath);
-        DebugConfiguration.set config "stopOnEntry" (Ojs.bool_to_js true);
-        let (_ : bool Promise.t) =
-          Debug.startDebugging ~folder ~nameOrConfiguration:(`Configuration config) ()
-        in
-        ()
-      | None ->
-        let _ = Window.showErrorMessage ~message:"No active resource" () in
-        ()
-    in
-    command Extension_consts.Commands.start_debugging handler
-  ;;
-
-  let _goto_closure_code_location =
-    let handler (_ : Extension_instance.t) ~args =
-      let open Promise.Syntax in
-      match Debug.activeDebugSession () with
-      | Some debugSession ->
-        let context = List.hd_exn args in
-        let variablesReference =
-          Jsonoo.Decode.(
-            at [ "variable"; "variablesReference" ] int (Jsonoo.t_of_js context))
-        in
-        let args =
-          Earlybird.VariableGetClosureCodeLocation.Args.t_to_js
-            { handle = variablesReference }
-        in
-        let (_ : unit Promise.t) =
-          let* result =
-            DebugSession.customRequest
-              debugSession
-              ~command:Earlybird.VariableGetClosureCodeLocation.command
-              ~args
-              ()
-          in
-          let result = Earlybird.VariableGetClosureCodeLocation.Result.t_of_js result in
-          match result.location with
-          | Some range ->
-            let* text_document = Workspace.openTextDocument (`Filename range.source) in
-            let selection =
-              Earlybird.VariableGetClosureCodeLocation.Result.range_to_vscode range
-            in
-            let+ _ =
-              Window.showTextDocument'
-                ~document:(`TextDocument text_document)
-                ~options:(TextDocumentShowOptions.create ~preview:true ~selection ())
-                ()
-            in
-            ()
-          | None ->
-            let+ _ =
-              Window.showInformationMessage ~message:"No closure code location" ()
-            in
-            ()
-        in
-        ()
-      | None ->
-        let _ = Window.showErrorMessage ~message:"No active debug session" () in
-        ()
-    in
-    command Extension_consts.Commands.goto_closure_code_location handler
+    command Command_api.Internal.prev_hole (jump_to_hole Prev_hole.jump)
   ;;
 end
 
@@ -716,11 +622,11 @@ module Copy_type_under_cursor = struct
   ;;
 
   let _copy_type_under_cursor =
-    let handler (instance : Extension_instance.t) ~args:_ =
+    let callback (instance : Extension_instance.t) () =
       let copy_type_under_cursor () =
         match Window.activeTextEditor () with
         | None ->
-          Extension_consts.Command_errors.text_editor_must_be_active
+          Command_api.Command_errors.text_editor_must_be_active
             extension_name
             ~expl:"The command copy the type of the expression under cursor"
           |> show_message `Error "%s"
@@ -746,7 +652,7 @@ module Copy_type_under_cursor = struct
       let (_ : unit Promise.t) = copy_type_under_cursor () in
       ()
     in
-    command Extension_consts.Commands.copy_type_under_cursor handler
+    command Command_api.Internal.copy_type_under_cursor callback
   ;;
 end
 
@@ -817,11 +723,11 @@ module Construct = struct
   ;;
 
   let _construct =
-    let handler (instance : Extension_instance.t) ~args:_ =
+    let callback (instance : Extension_instance.t) () =
       let construct () =
         match Window.activeTextEditor () with
         | None ->
-          Extension_consts.Command_errors.text_editor_must_be_active
+          Command_api.Command_errors.text_editor_must_be_active
             extension_name
             ~expl:
               "The cursor position is used to determine the correct environment and \
@@ -850,7 +756,7 @@ module Construct = struct
       let (_ : unit) = construct () in
       ()
     in
-    command Extension_consts.Commands.construct handler
+    command Command_api.Internal.construct callback
   ;;
 end
 
@@ -881,14 +787,14 @@ module MerlinJump = struct
       }
 
     let t_of_js js =
-      let position = Ojs.get_prop_ascii js "position" |> Position.t_of_js in
-      let item = QuickPickItem.t_of_js js in
+      let position = [%js.to: Position.t] (Ojs.get_prop_ascii js "position") in
+      let item = [%js.to: QuickPickItem.t] js in
       { item; position }
     ;;
 
     let t_to_js t =
-      let item = QuickPickItem.t_to_js t.item in
-      Ojs.set_prop_ascii item "position" (Position.t_to_js t.position);
+      let item = [%js.of: QuickPickItem.t] t.item in
+      Ojs.set_prop_ascii item "position" @@ [%js.of: Position.t] t.position;
       item
     ;;
   end
@@ -1010,11 +916,11 @@ module MerlinJump = struct
   ;;
 
   let _jump =
-    let handler (instance : Extension_instance.t) ~args:_ =
+    let callback (instance : Extension_instance.t) () =
       let jump () =
         match Window.activeTextEditor () with
         | None ->
-          Extension_consts.Command_errors.text_editor_must_be_active
+          Command_api.Command_errors.text_editor_must_be_active
             extension_name
             ~expl:
               "The cursor position is used to determine the correct environment for the \
@@ -1043,7 +949,7 @@ module MerlinJump = struct
       let (_ : unit) = jump () in
       ()
     in
-    command Extension_consts.Commands.merlin_jump handler
+    command Command_api.Internal.merlin_jump callback
   ;;
 end
 
@@ -1216,10 +1122,10 @@ module Search_by_type = struct
   ;;
 
   let _search_by_type =
-    let handler (instance : Extension_instance.t) ~args:_ =
+    let callback (instance : Extension_instance.t) () =
       match Window.activeTextEditor () with
       | None ->
-        Extension_consts.Command_errors.text_editor_must_be_active
+        Command_api.Command_errors.text_editor_must_be_active
           extension_name
           ~expl:
             "The cursor position is used to determine the correct environment and insert \
@@ -1244,7 +1150,7 @@ module Search_by_type = struct
            ()
          | Some (client, _) -> show_query_input text_editor client)
     in
-    command Extension_consts.Commands.search_by_type handler
+    command Command_api.Internal.search_by_type callback
   ;;
 end
 
@@ -1289,14 +1195,14 @@ module Navigate_holes = struct
       }
 
     let t_of_js js =
-      let range = Ojs.get_prop_ascii js "pl_range" |> Range.t_of_js in
-      let item = QuickPickItem.t_of_js js in
+      let range = [%js.to: Range.t] (Ojs.get_prop_ascii js "pl_range") in
+      let item = [%js.to: QuickPickItem.t] js in
       { item; range }
     ;;
 
     let t_to_js t =
-      let item = QuickPickItem.t_to_js t.item in
-      Ojs.set_prop_ascii item "pl_range" (Range.t_to_js t.range);
+      let item = [%js.of: QuickPickItem.t] t.item in
+      Ojs.set_prop_ascii item "pl_range" @@ [%js.of: Range.t] t.range;
       item
     ;;
   end
@@ -1391,10 +1297,10 @@ module Navigate_holes = struct
   ;;
 
   let _holes =
-    let handler (instance : Extension_instance.t) ~args:_ =
+    let callback (instance : Extension_instance.t) () =
       match Window.activeTextEditor () with
       | None ->
-        Extension_consts.Command_errors.text_editor_must_be_active
+        Command_api.Command_errors.text_editor_must_be_active
           extension_name
           ~expl:
             "This command only works in an active editor because it's based on the \
@@ -1422,25 +1328,29 @@ module Navigate_holes = struct
            let _ = handle_hole_navigation text_editor client instance in
            ())
     in
-    command Extension_consts.Commands.navigate_typed_holes handler
+    command Command_api.Internal.navigate_typed_holes callback
   ;;
 end
 
 let _type_selection =
   let open Type_selection in
-  command Extension_consts.Commands.type_selection handler |> ignore;
-  command Extension_consts.Commands.type_previous_selection previous_handler |> ignore;
-  command Extension_consts.Commands.augment_selection_type_verbosity verbosity_handler
+  command Command_api.Internal.type_selection callback |> ignore;
+  command Command_api.Internal.type_previous_selection previous_callback |> ignore;
+  command Command_api.Internal.augment_selection_type_verbosity verbosity_callback
+  |> ignore
 ;;
 
 let register extension instance = function
-  | Command { id; handler } ->
-    let callback = handler instance in
-    let disposable = Commands.registerCommand ~command:id ~callback in
+  | Command { handle; callback } ->
+    let (module T) = handle.return_type in
+    let callback ~args = [%js.of: T.t] (callback instance (handle.args_of_js args)) in
+    let disposable = Commands.registerCommand ~command:handle.id ~callback in
     ExtensionContext.subscribe extension ~disposable
-  | Text_editor_command { id; handler } ->
-    let callback = handler instance in
-    let disposable = Commands.registerTextEditorCommand ~command:id ~callback in
+  | Text_editor_command { handle; callback } ->
+    let callback ~textEditor ~edit ~args =
+      callback instance ~textEditor ~edit (handle.args_of_js args)
+    in
+    let disposable = Commands.registerTextEditorCommand ~command:handle.id ~callback in
     ExtensionContext.subscribe extension ~disposable
 ;;
 
@@ -1448,12 +1358,12 @@ let register_all_commands extension instance =
   List.iter ~f:(register extension instance) !commands
 ;;
 
-let register ~id handler =
-  let (_ : t) = command id handler in
+let register handle callback =
+  let (_ : t) = command handle callback in
   ()
 ;;
 
-let register_text_editor ~id handler =
-  let (_ : t) = text_editor_command id handler in
+let register_text_editor handle callback =
+  let (_ : t) = text_editor_command handle callback in
   ()
 ;;

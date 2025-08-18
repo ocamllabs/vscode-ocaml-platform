@@ -153,7 +153,7 @@ let prepare_code code =
 
 module Command = struct
   let _open_repl =
-    let handler (instance : Extension_instance.t) ~args:_ =
+    let callback (instance : Extension_instance.t) () =
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
@@ -165,11 +165,11 @@ module Command = struct
       in
       ()
     in
-    Extension_commands.register ~id:Extension_consts.Commands.open_repl handler
+    Extension_commands.register Command_api.Internal.open_repl callback
   ;;
 
   let _evaluate_selection =
-    let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
+    let callback (instance : Extension_instance.t) ~textEditor ~edit:_ () =
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
@@ -186,8 +186,8 @@ module Command = struct
       ()
     in
     Extension_commands.register_text_editor
-      ~id:Extension_consts.Commands.evaluate_selection
-      handler
+      Command_api.Internal.evaluate_selection
+      callback
   ;;
 end
 

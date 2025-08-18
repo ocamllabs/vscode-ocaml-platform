@@ -14,13 +14,13 @@
     extension context provided. *)
 val register_all_commands : Vscode.ExtensionContext.t -> Extension_instance.t -> unit
 
-val register : id:string -> (Extension_instance.t -> args:Ojs.t list -> unit) -> unit
+val register : ('a, 'b) Command_api.handle -> (Extension_instance.t -> 'a -> 'b) -> unit
 
 val register_text_editor
-  :  id:string
+  :  (unit, unit) Command_api.handle
   -> (Extension_instance.t
       -> textEditor:Vscode.TextEditor.t
       -> edit:Vscode.TextEditorEdit.t
-      -> args:Ojs.t list
+      -> unit
       -> unit)
   -> unit

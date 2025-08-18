@@ -53,10 +53,9 @@ end
 
 module Command = struct
   let _open_documentation =
-    let handler (_ : Extension_instance.t) ~args =
+    let callback (_ : Extension_instance.t) arg =
       let (_ : unit Promise.t) =
-        let arg = List.hd_exn args in
-        let dep = Dependency.t_of_js arg in
+        let dep = [%js.to: Dependency.t] arg in
         let open Promise.Syntax in
         let doc = Sandbox.Package.documentation dep in
         let uri =
@@ -69,22 +68,16 @@ module Command = struct
               ()
           | Some doc -> Vscode.Uri.parse doc ()
         in
-        let+ _ =
-          Vscode.Commands.executeCommand
-            ~command:"vscode.open"
-            ~args:[ Vscode.Uri.t_to_js uri ]
-        in
+        let+ _ = Command_api.(execute Vscode.open_) uri in
         ()
       in
       ()
     in
-    Extension_commands.register
-      ~id:Extension_consts.Commands.open_sandbox_documentation
-      handler
+    Extension_commands.register Command_api.Internal.open_sandbox_documentation callback
   ;;
 
   let _generate_documentation =
-    let handler (instance : Extension_instance.t) ~args =
+    let callback (instance : Extension_instance.t) arg =
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
@@ -94,8 +87,7 @@ module Command = struct
           show_message `Error "%s" error;
           Promise.resolve ()
         | Ok odig ->
-          let arg = List.hd_exn args in
-          let dep = Dependency.t_of_js arg in
+          let dep = [%js.to: Dependency.t] arg in
           let package_name = Sandbox.Package.name dep in
           let options =
             ProgressOptions.create
@@ -127,34 +119,25 @@ module Command = struct
              (match server with
               | Error () -> ()
               | Ok server ->
-                let (_ : Ojs.t option Promise.t) =
+                let (_ : unit Promise.t) =
                   let port = Documentation_server.port server in
                   let host = Documentation_server.host server in
-                  Vscode.Commands.executeCommand
-                    ~command:"simpleBrowser.show"
-                    ~args:
-                      [ Ojs.string_to_js
-                          (Printf.sprintf
-                             "http://%s:%i/%s/index.html"
-                             host
-                             port
-                             package_name)
-                      ]
+                  Command_api.(execute Vscode.show_simple_browser)
+                    (Printf.sprintf "http://%s:%i/%s/index.html" host port package_name)
                 in
                 ()))
       in
       ()
     in
     Extension_commands.register
-      ~id:Extension_consts.Commands.generate_sandbox_documentation
-      handler
+      Command_api.Internal.generate_sandbox_documentation
+      callback
   ;;
 
   let _uninstall =
-    let handler (instance : Extension_instance.t) ~args =
+    let callback (instance : Extension_instance.t) arg =
       let (_ : unit Promise.t) =
-        let arg = List.hd_exn args in
-        let dep = Dependency.t_of_js arg in
+        let dep = [%js.to: Dependency.t] arg in
         let message =
           Printf.sprintf
             "Are you sure you want to uninstall package %s?"
@@ -166,47 +149,29 @@ module Command = struct
         let sandbox = Extension_instance.sandbox instance in
         Sandbox.focus_on_package_command ~sandbox ();
         let+ () = Sandbox.uninstall_packages sandbox [ dep ] in
-        let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_switches
-            ~args:[]
-        in
-        let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_sandbox
-            ~args:[]
-        in
+        let (_ : unit Promise.t) = Command_api.(execute Internal.refresh_switches) () in
+        let (_ : unit Promise.t) = Command_api.(execute Internal.refresh_sandbox) () in
         ()
       in
       ()
     in
-    Extension_commands.register
-      ~id:Extension_consts.Commands.uninstall_sandbox_package
-      handler
+    Extension_commands.register Command_api.Internal.uninstall_sandbox_package callback
   ;;
 
   let _upgrade =
-    let handler (instance : Extension_instance.t) ~args:_ =
+    let callback (instance : Extension_instance.t) () =
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let sandbox = Extension_instance.sandbox instance in
         Sandbox.focus_on_package_command ~sandbox ();
         let+ () = Sandbox.upgrade_packages sandbox in
-        let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_switches
-            ~args:[]
-        in
-        let (_ : Ojs.t option Promise.t) =
-          Vscode.Commands.executeCommand
-            ~command:Extension_consts.Commands.refresh_sandbox
-            ~args:[]
-        in
+        let (_ : unit Promise.t) = Command_api.(execute Internal.refresh_switches) () in
+        let (_ : unit Promise.t) = Command_api.(execute Internal.refresh_sandbox) () in
         ()
       in
       ()
     in
-    Extension_commands.register ~id:Extension_consts.Commands.upgrade_sandbox handler
+    Extension_commands.register Command_api.Internal.upgrade_sandbox callback
   ;;
 
   let ask_packages () =
@@ -220,7 +185,7 @@ module Command = struct
   ;;
 
   let _install =
-    let handler (instance : Extension_instance.t) ~args:_ =
+    let callback (instance : Extension_instance.t) () =
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
         let* package_str_opt = ask_packages () in
@@ -231,21 +196,13 @@ module Command = struct
           let packages = String.split package_str ~on:' ' in
           Sandbox.focus_on_package_command ~sandbox ();
           let+ () = Sandbox.install_packages sandbox packages in
-          let (_ : Ojs.t option Promise.t) =
-            Vscode.Commands.executeCommand
-              ~command:Extension_consts.Commands.refresh_switches
-              ~args:[]
-          in
-          let (_ : Ojs.t option Promise.t) =
-            Vscode.Commands.executeCommand
-              ~command:Extension_consts.Commands.refresh_sandbox
-              ~args:[]
-          in
+          let (_ : unit Promise.t) = Command_api.(execute Internal.refresh_switches) () in
+          let (_ : unit Promise.t) = Command_api.(execute Internal.refresh_sandbox) () in
           ()
       in
       ()
     in
-    Extension_commands.register ~id:Extension_consts.Commands.install_sandbox handler
+    Extension_commands.register Command_api.Internal.install_sandbox callback
   ;;
 end
 
@@ -283,10 +240,6 @@ let register extension instance =
       ~treeDataProvider
   in
   ExtensionContext.subscribe extension ~disposable;
-  let disposable =
-    Commands.registerCommand
-      ~command:Extension_consts.Commands.refresh_sandbox
-      ~callback:(fun ~args:_ -> EventEmitter.fire event_emitter None)
-  in
-  ExtensionContext.subscribe extension ~disposable
+  Extension_commands.register Command_api.Internal.refresh_sandbox
+  @@ fun (_ : Extension_instance.t) () -> EventEmitter.fire event_emitter None
 ;;

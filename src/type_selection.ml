@@ -147,7 +147,7 @@ let display_type instance text_editor ({ type_; _ } as result : Request.response
   (* Mute the standard hover provider *)
   let hover_provider_disposable = register_hover_provider ~type_ range () in
   let open Promise.Syntax in
-  let+ _ = Commands.executeCommand ~command:"editor.action.showHover" ~args:[] in
+  let+ _ = Command_api.(execute Vscode.show_hover) () in
   let () = set_hover_active true in
   (* Un-mute the standard hover provider *)
   Disposable.dispose hover_provider_disposable
@@ -156,7 +156,7 @@ let display_type instance text_editor ({ type_; _ } as result : Request.response
 let with_checks ~extension_name ~instance f =
   match Window.activeTextEditor () with
   | None ->
-    Extension_consts.Command_errors.text_editor_must_be_active
+    Command_api.Command_errors.text_editor_must_be_active
       extension_name
       ~expl:"The command relies on the current editor selection."
     |> show_message `Error "%s"
@@ -253,14 +253,14 @@ let rec type_selection ~instance ?(verbosity = 0) () =
     else display_type instance text_editor result
 ;;
 
-let handler (instance : Extension_instance.t) ~args:_ =
+let callback (instance : Extension_instance.t) () =
   let (_ : unit Promise.t) = type_selection ~instance () in
   ()
 ;;
 
 let extension_name = "Type Previous Selection"
 
-let previous_handler (instance : Extension_instance.t) ~args:_ =
+let previous_callback (instance : Extension_instance.t) () =
   let type_previous_selection () =
     with_checks ~extension_name ~instance
     @@ fun text_editor client ->
@@ -279,7 +279,7 @@ let previous_handler (instance : Extension_instance.t) ~args:_ =
 
 let extension_name = "Increase Selection Type Verbosity"
 
-let verbosity_handler (instance : Extension_instance.t) ~args:_ =
+let verbosity_callback (instance : Extension_instance.t) () =
   let bump_selection_type_verbosity () =
     with_checks ~extension_name ~instance
     @@ fun text_editor client ->

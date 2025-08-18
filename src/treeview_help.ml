@@ -13,7 +13,7 @@ let discord_item =
       ~title:"Open"
       ~command:"vscode.open"
       ~arguments:
-        [ Vscode.Uri.parse "https://discord.gg/cCYQbqN" () |> Vscode.Uri.t_to_js ]
+        [ [%js.of: Vscode.Uri.t] @@ Vscode.Uri.parse "https://discord.gg/cCYQbqN" () ]
       ()
   in
   Vscode.TreeItem.set_iconPath item icon;
@@ -38,7 +38,7 @@ let discuss_item =
       ~title:"Open"
       ~command:"vscode.open"
       ~arguments:
-        [ Vscode.Uri.parse "https://discuss.ocaml.org/" () |> Vscode.Uri.t_to_js ]
+        [ [%js.of: Vscode.Uri.t] @@ Vscode.Uri.parse "https://discuss.ocaml.org/" () ]
       ()
   in
   Vscode.TreeItem.set_iconPath item icon;
@@ -83,8 +83,8 @@ let github_item =
       ~title:"Open"
       ~command:"vscode.open"
       ~arguments:
-        [ Vscode.Uri.parse "https://github.com/ocamllabs/vscode-ocaml-platform" ()
-          |> Vscode.Uri.t_to_js
+        [ [%js.of: Vscode.Uri.t]
+          @@ Vscode.Uri.parse "https://github.com/ocamllabs/vscode-ocaml-platform" ()
         ]
       ()
   in

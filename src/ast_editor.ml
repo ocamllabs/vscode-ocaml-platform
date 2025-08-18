@@ -37,7 +37,7 @@ let document_eq a b = Uri.equal (TextDocument.uri a) (TextDocument.uri b)
 
 let send_msg t value ~(webview : WebView.t) =
   let msg = Ojs.empty_obj () in
-  Ojs.set_prop_ascii msg "type" (Ojs.string_to_js t);
+  Ojs.set_prop_ascii msg "type" @@ [%js.of: string] t;
   Ojs.set_prop_ascii msg "value" value;
   let (_ : bool Promise.t) = WebView.postMessage webview msg in
   ()
@@ -121,7 +121,7 @@ let transform_to_ast instance ~document ~webview =
       | Signature _ -> make_value (Dumpast.transform text `Intf)
       | Unknown -> raise (User_error "Unknown file extension")
     in
-    send_msg "ast" (Jsonoo.t_to_js origin_json) ~webview
+    send_msg "ast" ([%js.of: Jsonoo.t] origin_json) ~webview
   | Preprocessed_ast ->
     let pp_value =
       let path = Pp_path.get_pp_path ~document in
@@ -153,7 +153,7 @@ let transform_to_ast instance ~document ~webview =
          | Error err_msg -> raise (User_error err_msg)
          | Ok pp_json -> make_value (Ok pp_json))
     in
-    send_msg "pp_ast" (Jsonoo.t_to_js pp_value) ~webview
+    send_msg "pp_ast" ([%js.of: Jsonoo.t] pp_value) ~webview
 ;;
 
 let onDidChangeTextDocument_listener instance document webview event =
@@ -161,21 +161,19 @@ let onDidChangeTextDocument_listener instance document webview event =
   if document_eq document changed_document
   then (
     try transform_to_ast instance ~document ~webview with
-    | User_error err_msg ->
-      send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview)
+    | User_error err_msg -> send_msg "error" ([%js.of: string] err_msg) ~webview)
 ;;
 
 let update_ast instance ~document ~webview =
   try transform_to_ast instance ~document ~webview with
-  | User_error err_msg ->
-    send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview
+  | User_error err_msg -> send_msg "error" ([%js.of: string] err_msg) ~webview
 ;;
 
 let onDidReceiveMessage_listener instance webview document msg =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   let int_prop name =
     if Ojs.has_property msg name
-    then Some (Int.of_string (Ojs.string_of_js (Ojs.get_prop_ascii msg name)))
+    then Some (Int.of_string @@ [%js.to: string] (Ojs.get_prop_ascii msg name))
     else None
   in
   match int_prop "selectedOutput" with
@@ -227,7 +225,7 @@ let on_hover custom_doc webview =
     let provideHover ~(document : TextDocument.t) ~(position : Position.t) ~token:_ =
       let offset = TextDocument.offsetAt document ~position in
       if document_eq custom_doc document
-      then send_msg "focus" (Ojs.int_to_js offset) ~webview;
+      then send_msg "focus" ([%js.of: int] offset) ~webview;
       let hover =
         Hover.make ~contents:(`MarkdownString (MarkdownString.make ~value:"" ())) ()
       in
@@ -281,8 +279,7 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel 
       ()
   in
   (try transform_to_ast instance ~document ~webview with
-   | User_error err_msg ->
-     send_msg "error" (Jsonoo.Encode.string err_msg |> Jsonoo.t_to_js) ~webview);
+   | User_error err_msg -> send_msg "error" ([%js.of: string] err_msg) ~webview);
   let p =
     let open Promise.Syntax in
     let+ r = read_html_file () in
@@ -294,13 +291,7 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel 
 let open_ast_explorer ~uri =
   let open Promise.Syntax in
   let+ _ =
-    Vscode.Commands.executeCommand
-      ~command:"vscode.openWith"
-      ~args:
-        [ Uri.t_to_js uri
-        ; Ojs.string_to_js "ast-editor"
-        ; ViewColumn.t_to_js ViewColumn.Beside
-        ]
+    Command_api.(execute Vscode.open_with) (uri, "ast-editor", ViewColumn.Beside)
   in
   ()
 ;;
@@ -445,26 +436,26 @@ let open_both_ppx_ast instance ~document =
 ;;
 
 module Command = struct
-  let open_ast_explorer_handler textEditor =
+  let open_ast_explorer_callback textEditor =
     let uri = TextEditor.document textEditor |> TextDocument.uri in
     open_ast_explorer ~uri
   ;;
 
   let _open_ast_explorer_to_the_side =
-    let handler _ ~textEditor ~edit:_ ~args:_ =
-      let (_ : unit Promise.t) = open_ast_explorer_handler textEditor in
+    let callback _ ~textEditor ~edit:_ =
+      let (_ : unit Promise.t) = open_ast_explorer_callback textEditor in
       ()
     in
-    let handler e ~textEditor ~edit ~args =
-      Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
+    let callback e ~textEditor ~edit () =
+      Handlers.unpwrap (Handlers.w1 (callback ~textEditor ~edit) e)
     in
     Extension_commands.register_text_editor
-      ~id:Extension_consts.Commands.open_ast_explorer_to_the_side
-      handler
+      Command_api.Internal.open_ast_explorer_to_the_side
+      callback
   ;;
 
   let _reveal_ast_node =
-    let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
+    let callback (instance : Extension_instance.t) ~textEditor ~edit:_ =
       let document = TextEditor.document textEditor in
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
@@ -477,7 +468,7 @@ module Command = struct
           with
           | Some _ as r -> Promise.return r
           | None ->
-            let+ () = open_ast_explorer_handler textEditor in
+            let+ () = open_ast_explorer_callback textEditor in
             Ast_editor_state.find_webview_by_doc
               ast_editor_state
               (TextDocument.uri document)
@@ -488,7 +479,7 @@ module Command = struct
           TextDocument.offsetAt document ~position
         in
         match webview with
-        | Some webview -> send_msg "focus" (Ojs.int_to_js offset) ~webview
+        | Some webview -> send_msg "focus" ([%js.of: int] offset) ~webview
         | None ->
           raise
             (User_error
@@ -497,16 +488,14 @@ module Command = struct
       in
       ()
     in
-    let handler e ~textEditor ~edit ~args =
-      Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
+    let callback e ~textEditor ~edit () =
+      Handlers.unpwrap (Handlers.w1 (callback ~textEditor ~edit) e)
     in
-    Extension_commands.register_text_editor
-      ~id:Extension_consts.Commands.reveal_ast_node
-      handler
+    Extension_commands.register_text_editor Command_api.Internal.reveal_ast_node callback
   ;;
 
   let _switch_hover_mode =
-    let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
+    let callback (instance : Extension_instance.t) ~textEditor ~edit:_ =
       let ast_editor_state = Extension_instance.ast_editor_state instance in
       let hover_dispoable =
         match Ast_editor_state.get_hover_disposable ast_editor_state with
@@ -517,16 +506,16 @@ module Command = struct
       in
       Ast_editor_state.set_hover_disposable ast_editor_state hover_dispoable
     in
-    let handler e ~textEditor ~edit ~args =
-      Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
+    let callback e ~textEditor ~edit () =
+      Handlers.unpwrap (Handlers.w1 (callback ~textEditor ~edit) e)
     in
     Extension_commands.register_text_editor
-      ~id:Extension_consts.Commands.switch_hover_mode
-      handler
+      Command_api.Internal.switch_hover_mode
+      callback
   ;;
 
   let _show_preprocessed_document =
-    let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
+    let callback (instance : Extension_instance.t) ~textEditor ~edit:_ =
       let document = TextEditor.document textEditor in
       let (_ : unit Promise.t) =
         let open Promise.Syntax in
@@ -537,28 +526,28 @@ module Command = struct
       in
       ()
     in
-    let handler e ~textEditor ~edit ~args =
-      Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
+    let callback e ~textEditor ~edit () =
+      Handlers.unpwrap (Handlers.w1 (callback ~textEditor ~edit) e)
     in
     Extension_commands.register_text_editor
-      ~id:Extension_consts.Commands.show_preprocessed_document
-      handler
+      Command_api.Internal.show_preprocessed_document
+      callback
   ;;
 
   let _open_pp_editor_and_ast_explorer =
-    let handler (instance : Extension_instance.t) ~textEditor ~edit:_ ~args:_ =
+    let callback (instance : Extension_instance.t) ~textEditor ~edit:_ =
       let (_ : unit Promise.t) =
         let document = TextEditor.document textEditor in
         open_both_ppx_ast instance ~document
       in
       ()
     in
-    let handler e ~textEditor ~edit ~args =
-      Handlers.unpwrap (Handlers.w1 (handler ~textEditor ~edit ~args) e)
+    let callback e ~textEditor ~edit () =
+      Handlers.unpwrap (Handlers.w1 (callback ~textEditor ~edit) e)
     in
     Extension_commands.register_text_editor
-      ~id:Extension_consts.Commands.open_pp_editor_and_ast_explorer
-      handler
+      Command_api.Internal.open_pp_editor_and_ast_explorer
+      callback
   ;;
 end
 
@@ -593,7 +582,7 @@ let onDidSaveTextDocument_listener_pp instance document =
 
 let onDidChangeActiveTextEditor_listener instance e =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  if not (TextEditor.t_to_js e |> Ojs.is_null)
+  if not (Ojs.is_null @@ [%js.of: TextEditor.t] e)
   then (
     let document = TextEditor.document e in
     match Ast_editor_state.pp_status ast_editor_state (TextDocument.uri document) with

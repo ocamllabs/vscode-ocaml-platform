@@ -13,11 +13,7 @@ let suggest_to_pick_sandbox () =
       ()
   in
   Option.iter selection ~f:(fun () ->
-    let (_ : Ojs.t option Promise.t) =
-      Vscode.Commands.executeCommand
-        ~command:Extension_consts.Commands.select_sandbox
-        ~args:[]
-    in
+    let (_ : unit Promise.t) = Command_api.(execute Internal.select_sandbox) () in
     ())
 ;;
 
@@ -47,7 +43,6 @@ let activate (extension : ExtensionContext.t) =
   ExtensionContext.subscribe extension ~disposable:(notify_configuration_changes instance);
   Dune_formatter.register extension instance;
   Dune_task_provider.register extension instance;
-  Extension_commands.register_all_commands extension instance;
   Treeview_switches.register extension instance;
   Treeview_sandbox.register extension instance;
   Treeview_commands.register extension;
@@ -56,6 +51,9 @@ let activate (extension : ExtensionContext.t) =
   Cm_editor.register extension instance;
   Repl.register extension instance;
   Earlybird.register extension instance;
+  (* Extension_commands.register_all_commands registers all commands that were
+     added in the register functions above. It must be called last. *)
+  Extension_commands.register_all_commands extension instance;
   let sandbox_opt = Sandbox.of_settings_or_detect () in
   let (_ : unit Promise.t) =
     let* sandbox_opt = sandbox_opt in
