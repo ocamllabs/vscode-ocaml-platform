@@ -51,6 +51,8 @@ let activate (extension : ExtensionContext.t) =
   Cm_editor.register extension instance;
   Repl.register extension instance;
   Earlybird.register extension instance;
+  (* Extension_commands.register_all_commands registers all commands that were
+     added in the register functions above. It must be called last. *)
   Extension_commands.register_all_commands extension instance;
   let sandbox_opt = Sandbox.of_settings_or_detect () in
   let (_ : unit Promise.t) =
