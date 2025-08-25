@@ -400,7 +400,7 @@ let _open_utop =
               Extension_instance.sandbox instance |> Terminal_sandbox.create
             in
             let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
-            Terminal_sandbox.send terminal "utop"
+            Terminal_sandbox.send terminal "opam exec -- utop"
           in
           Ok () |> Promise.return
         in
