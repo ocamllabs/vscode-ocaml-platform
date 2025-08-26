@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add OCaml onboarding welcome screen. (#1737)
+
 ## 1.32.0
 
 - Check that the dune version installed supports DPM (Dune Package Management).
@@ -42,8 +44,6 @@
 ## 1.28.1
 
 - Fix syntax color for odoc math blocks containing braces (#1741)
-
-- Add OCaml onboarding welcome screen. (#1737)
 
 ## 1.28.0
 
