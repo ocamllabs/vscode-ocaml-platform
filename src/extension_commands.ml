@@ -247,6 +247,21 @@ let _switch_impl_intf =
   command Command_api.Internal.switch_impl_intf callback
 ;;
 
+let walkthrough_terminal_instance = ref None
+
+let walkthrough_terminal instance =
+  match !walkthrough_terminal_instance with
+  | Some t -> t
+  | None ->
+    let t =
+      Terminal_sandbox.create
+        ~name:"OCaml Platform Walkthrough"
+        (Extension_instance.sandbox instance)
+    in
+    walkthrough_terminal_instance := Some t;
+    t
+;;
+
 let _install_opam =
   let callback (instance : Extension_instance.t) () =
     let process_installation () =
@@ -277,9 +292,7 @@ let _install_opam =
               let open Promise.Result.Syntax in
               let+ _ =
                 let _ =
-                  let terminal =
-                    Extension_instance.sandbox instance |> Terminal_sandbox.create
-                  in
+                  let terminal = walkthrough_terminal instance in
                   let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
                   Terminal_sandbox.send
                     terminal
@@ -320,9 +333,7 @@ let _init_opam =
         let open Promise.Result.Syntax in
         let+ _ =
           let _ =
-            let terminal =
-              Extension_instance.sandbox instance |> Terminal_sandbox.create
-            in
+            let terminal = walkthrough_terminal instance in
             let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
             Terminal_sandbox.send terminal "opam init"
           in
@@ -357,9 +368,7 @@ let _install_ocaml_dev =
         let open Promise.Result.Syntax in
         let+ _ =
           let _ =
-            let terminal =
-              Extension_instance.sandbox instance |> Terminal_sandbox.create
-            in
+            let terminal = walkthrough_terminal instance in
             let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
             Terminal_sandbox.send
               terminal
@@ -396,9 +405,7 @@ let _open_utop =
         let open Promise.Result.Syntax in
         let+ _ =
           let _ =
-            let terminal =
-              Extension_instance.sandbox instance |> Terminal_sandbox.create
-            in
+            let terminal = walkthrough_terminal instance in
             let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
             Terminal_sandbox.send terminal "opam exec -- utop"
           in
