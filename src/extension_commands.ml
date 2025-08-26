@@ -248,7 +248,7 @@ let _switch_impl_intf =
 ;;
 
 let _install_opam =
-  let handler (instance : Extension_instance.t) ~args:_ =
+  let callback (instance : Extension_instance.t) () =
     let process_installation () =
       let open Promise.Syntax in
       let* opam = Opam.make () in
@@ -302,11 +302,11 @@ let _install_opam =
     let (_ : unit Promise.t) = process_installation () in
     ()
   in
-  command Extension_consts.Commands.install_opam handler
+  command Command_api.Internal.install_opam callback
 ;;
 
 let _init_opam =
-  let handler (instance : Extension_instance.t) ~args:_ =
+  let callback (instance : Extension_instance.t) () =
     let options =
       ProgressOptions.create
         ~location:(`ProgressLocation Notification)
@@ -339,11 +339,11 @@ let _init_opam =
     let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
     ()
   in
-  command Extension_consts.Commands.init_opam handler
+  command Command_api.Internal.init_opam callback
 ;;
 
 let _install_ocaml_dev =
-  let handler (instance : Extension_instance.t) ~args:_ =
+  let callback (instance : Extension_instance.t) () =
     let options =
       ProgressOptions.create
         ~location:(`ProgressLocation Notification)
@@ -378,11 +378,11 @@ let _install_ocaml_dev =
     let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
     ()
   in
-  command Extension_consts.Commands.install_ocaml_dev handler
+  command Command_api.Internal.install_ocaml_dev callback
 ;;
 
 let _open_utop =
-  let handler (instance : Extension_instance.t) ~args:_ =
+  let callback (instance : Extension_instance.t) () =
     let options =
       ProgressOptions.create
         ~location:(`ProgressLocation Notification)
@@ -415,7 +415,7 @@ let _open_utop =
     let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
     ()
   in
-  command Extension_consts.Commands.open_utop handler
+  command Command_api.Internal.open_utop callback
 ;;
 
 let _open_current_dune_file =

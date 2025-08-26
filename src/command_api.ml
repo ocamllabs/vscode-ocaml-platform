@@ -150,6 +150,10 @@ module Internal = struct
   let augment_selection_type_verbosity = unit_handle "augment-selection-type-verbosity"
   let install_dune_lsp = unit_handle "install-dune-lsp"
   let run_dune_pkg_lock = unit_handle "run_dune_pkg_lock"
+  let install_opam = unit_handle "install-opam"
+  let init_opam = unit_handle "init-opam"
+  let install_ocaml_dev = unit_handle "install-ocaml-dev"
+  let open_utop = unit_handle "open-utop"
 end
 
 module Vscode = struct
