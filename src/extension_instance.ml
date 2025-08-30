@@ -144,7 +144,7 @@ let check_ocaml_lsp_available (sandbox : Sandbox.t) =
     let+ dune_lsp_present = Dune.is_ocamllsp_present dune in
     if dune_lsp_present
     then Ok ()
-    else Error "`ocaml-lsp-server` is not installed in the current dune sandbox."
+    else Error "\"ocaml-lsp-server\" is not installed in the current dune sandbox."
   | _ ->
     let ocaml_lsp_version sandbox =
       Sandbox.get_command sandbox "ocamllsp" [ "--version" ] `Tool
@@ -154,7 +154,7 @@ let check_ocaml_lsp_available (sandbox : Sandbox.t) =
     |> Promise.Result.fold
          ~ok:(fun (_ : string) -> ())
          ~error:(fun (_ : string) ->
-           "Sandbox initialization failed: `ocaml-lsp-server` is not installed in the \
+           "Sandbox initialization failed: \"ocaml-lsp-server\" is not installed in the \
             current sandbox.")
 ;;
 
@@ -212,8 +212,8 @@ end = struct
       let* selection =
         Window.showInformationMessage
           ~message:
-            "Failed to start the language server. `ocaml-lsp-server` is not installed in \
-             the current sandbox."
+            "Failed to start the language server. \"ocaml-lsp-server\" is not installed \
+             in the current sandbox."
           ~choices:
             [ install_lsp_text, `Install_lsp; select_different_sandbox, `Select_sandbox ]
           ()
@@ -278,7 +278,7 @@ end = struct
        | Error s ->
          show_message
            `Error
-           "An error occurred starting the language server `ocamllsp`. %s"
+           "An error occurred starting the language server \"ocamllsp\". %s"
            s)
     | Error _ -> suggest_or_install_ocaml_lsp_server t
   ;;
@@ -435,7 +435,7 @@ let update_ocaml_info t =
       log_chan
         ~section:"Ocaml.version_semver"
         `Warn
-        "Error running `ocamlc -version`: %s"
+        "Error running \"ocamlc -version\": %s"
         e;
       Error `Ocamlc_missing
   in
@@ -449,7 +449,7 @@ let update_ocaml_info t =
      | `Unable_to_parse_version (`Version v, `Msg msg) ->
        show_message
          `Error
-         "OCaml bytecode compiler `ocamlc` version could not be parsed. Version: %s. \
+         "OCaml bytecode compiler \"ocamlc\" version could not be parsed. Version: %s. \
           Error %s"
          v
          msg
@@ -458,7 +458,7 @@ let update_ocaml_info t =
          let+ maybe_choice =
            Window.showWarningMessage
              ~message:
-               "OCaml bytecode compiler `ocamlc` was not found in the current sandbox. \
+               "OCaml bytecode compiler \"ocamlc\" was not found in the current sandbox. \
                 Do you have OCaml installed in the current sandbox?"
              ~choices:
                [ ( "Pick another sandbox"
