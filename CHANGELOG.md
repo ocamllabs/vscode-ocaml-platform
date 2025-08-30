@@ -15,6 +15,9 @@
   `utop --version`, `ocamlearlybird --help`, `odig --version`,
   `ocamlobjinfo <file>`). This ensures commands resolve correctly under Dune
   Package Management. (#1925)
+- Replace Markdown backticks in notifications and message popups with double
+  quotes, since VS Code does not render Markdown in
+  `showInformationMessage`/`showWarningMessage`/`showErrorMessage`. (#1926)
 
 ## 1.32.0
 
