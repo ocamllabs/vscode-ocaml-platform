@@ -149,11 +149,7 @@ let check_ocaml_lsp_available (sandbox : Sandbox.t) =
     let ocaml_lsp_version sandbox =
       Sandbox.get_command sandbox "ocamllsp" [ "--version" ] `Tool
     in
-    let cwd =
-      match Workspace.workspaceFolders () with
-      | [ cwd ] -> Some (cwd |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string)
-      | _ -> None
-    in
+    let cwd = Sandbox.workspace_root () in
     Cmd.output ?cwd (ocaml_lsp_version sandbox)
     |> Promise.Result.fold
          ~ok:(fun (_ : string) -> ())
@@ -427,7 +423,10 @@ let close_repl t = t.repl <- None
 let update_ocaml_info t =
   let open Promise.Syntax in
   let+ ocaml_version =
-    let+ r = Sandbox.get_command t.sandbox "ocamlc" [ "--version" ] `Exec |> Cmd.output in
+    let cwd = Sandbox.workspace_root () in
+    let+ r =
+      Sandbox.get_command t.sandbox "ocamlc" [ "--version" ] `Exec |> Cmd.output ?cwd
+    in
     match r with
     | Ok v ->
       Ocaml_version.of_string v
