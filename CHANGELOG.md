@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.32.1
+
 - Fix DPM error when invoking `ocamlc --version` without a working directory by
   providing an explicit cwd. (#1925)
 - Prefer POSIX-style flags for OCaml compiler (e.g. use `-version` instead of
