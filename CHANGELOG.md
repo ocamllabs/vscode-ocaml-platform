@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Fix DPM error when invoking `ocamlc --version` without a working directory by
+  providing an explicit cwd. (#1925)
+- Prefer POSIX-style flags for OCaml compiler (e.g. use `-version` instead of
+  `--version`) to maintain compatibility with older OCaml compilers (< 4.02).
+  (#1925)
+- Unify cwd detection for `Cmd.output` calls by using
+  `Sandbox.workspace_root ()` where commands depend on the workspace context.
+  This removes ad-hoc `Workspace.workspaceFolders()` handling and improves
+  consistency. (#1925)
+- Add explicit cwd for tool presence checks executed via the sandbox (e.g.
+  `utop --version`, `ocamlearlybird --help`, `odig --version`,
+  `ocamlobjinfo <file>`). This ensures commands resolve correctly under Dune
+  Package Management. (#1925)
+
 ## 1.32.0
 
 - Check that the dune version installed supports DPM (Dune Package Management).
