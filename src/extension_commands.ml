@@ -108,7 +108,7 @@ let _install_dune_lsp_server =
             let options =
               ProgressOptions.create
                 ~location:(`ProgressLocation Notification)
-                ~title:"Installing ocaml-lsp server using `dune tools install ocamllsp`"
+            ~title:"Installing ocaml-lsp server using \"dune tools install ocamllsp\""
                 ~cancellable:false
                 ()
             in
@@ -152,7 +152,7 @@ let _run_dune_pkg_lock =
         let options =
           ProgressOptions.create
             ~location:(`ProgressLocation Notification)
-            ~title:"Running `dune pkg lock`"
+            ~title:"Running \"dune pkg lock\""
             ~cancellable:false
             ()
         in
@@ -376,7 +376,7 @@ end = struct
     | Error (`Msg msg) ->
       show_message
         `Warn
-        "The installed version of `ocamllsp` does not support typed holes. %s"
+        "The installed version of \"ocamllsp\" does not support typed holes. %s"
         msg
   ;;
 
@@ -602,7 +602,7 @@ module Copy_type_under_cursor = struct
     | Error (`Msg msg) ->
       show_message
         `Warn
-        "The installed version of `ocamllsp` does not support type enclosings. %s"
+        "The installed version of \"ocamllsp\" does not support type enclosings. %s"
         msg
   ;;
 
@@ -1144,7 +1144,7 @@ module Search_by_type = struct
            let _ =
              Ocaml_lsp.suggest_to_upgrade_ocaml_lsp_server
                ~message:
-                 "The installed version of `ocamllsp` does not support type search."
+                 "The installed version of \"ocamllsp\" does not support type search."
                ()
            in
            ()

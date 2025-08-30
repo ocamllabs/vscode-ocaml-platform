@@ -54,7 +54,7 @@ let ocaml_lsp_doesnt_support_type_selection instance ocaml_lsp =
   | Error (`Msg msg) ->
     show_message
       `Warn
-      "The installed version of `ocamllsp` does not support type enclosings. %s"
+      "The installed version of \"ocamllsp\" does not support type enclosings. %s"
       msg
 ;;
 
