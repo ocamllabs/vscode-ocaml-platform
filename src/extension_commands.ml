@@ -108,7 +108,7 @@ let _install_dune_lsp_server =
             let options =
               ProgressOptions.create
                 ~location:(`ProgressLocation Notification)
-            ~title:"Installing ocaml-lsp server using \"dune tools install ocamllsp\""
+                ~title:"Installing ocaml-lsp server using \"dune tools install ocamllsp\""
                 ~cancellable:false
                 ()
             in

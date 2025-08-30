@@ -212,8 +212,8 @@ end = struct
       let* selection =
         Window.showInformationMessage
           ~message:
-            "Failed to start the language server. \"ocaml-lsp-server\" is not installed in \
-             the current sandbox."
+            "Failed to start the language server. \"ocaml-lsp-server\" is not installed \
+             in the current sandbox."
           ~choices:
             [ install_lsp_text, `Install_lsp; select_different_sandbox, `Select_sandbox ]
           ()
