@@ -12,10 +12,11 @@ let of_sandbox (sandbox : Sandbox.t) =
   let make_odig_cmd = make_odig_cmd sandbox in
   let odig_version = make_odig_cmd [ "--version" ] in
   let open Promise.Syntax in
-  let* output = Cmd.output odig_version in
+  let cwd = Sandbox.workspace_root () in
+  let* output = Cmd.output ?cwd odig_version in
   match output with
   | Ok _ ->
-    let+ cache_dir = Cmd.output (make_odig_cmd [ "cache"; "path" ]) in
+    let+ cache_dir = Cmd.output ?cwd (make_odig_cmd [ "cache"; "path" ]) in
     (match cache_dir with
      | Ok cache_dir ->
        let cache_dir = cache_dir |> String.strip |> Path.of_string in
@@ -28,7 +29,11 @@ let of_sandbox (sandbox : Sandbox.t) =
           generate documentation.")
 ;;
 
-let cmd_output ~sandbox ~args = Cmd.output (make_odig_cmd sandbox args)
+let cmd_output ~sandbox ~args =
+  let cwd = Sandbox.workspace_root () in
+  Cmd.output ?cwd (make_odig_cmd sandbox args)
+;;
+
 let html_dir t = Path.(t.cache_dir / "/html/")
 
 let odoc_exec t ~sandbox ~package_name =
