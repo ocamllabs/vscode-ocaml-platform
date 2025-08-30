@@ -425,7 +425,7 @@ let update_ocaml_info t =
   let+ ocaml_version =
     let cwd = Sandbox.workspace_root () in
     let+ r =
-      Sandbox.get_command t.sandbox "ocamlc" [ "--version" ] `Exec |> Cmd.output ?cwd
+      Sandbox.get_command t.sandbox "ocamlc" [ "-version" ] `Exec |> Cmd.output ?cwd
     in
     match r with
     | Ok v ->
@@ -435,7 +435,7 @@ let update_ocaml_info t =
       log_chan
         ~section:"Ocaml.version_semver"
         `Warn
-        "Error running `ocamlc --version`: %s"
+        "Error running `ocamlc -version`: %s"
         e;
       Error `Ocamlc_missing
   in
