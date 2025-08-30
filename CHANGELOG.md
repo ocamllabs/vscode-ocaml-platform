@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fix DPM error when invoking `ocamlc --version` without a working directory by
+  providing an explicit cwd. (#1925)
+
 ## 1.32.0
 
 - Check that the dune version installed supports DPM (Dune Package Management).
