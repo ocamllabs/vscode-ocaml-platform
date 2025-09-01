@@ -247,6 +247,241 @@ let _switch_impl_intf =
   command Command_api.Internal.switch_impl_intf callback
 ;;
 
+let walkthrough_terminal_instance = ref None
+
+let walkthrough_terminal title instance =
+  match !walkthrough_terminal_instance with
+  | Some t -> t
+  | None ->
+    let t = Terminal_sandbox.create ~name:title (Extension_instance.sandbox instance) in
+    walkthrough_terminal_instance := Some t;
+    t
+;;
+
+let _install_dune =
+  let callback (instance : Extension_instance.t) () =
+    let process_installation () =
+      let open Promise.Syntax in
+      let* dune = Dune.make (Sandbox.workspace_root ()) () in
+      match dune with
+      | None ->
+        let options =
+          ProgressOptions.create
+            ~location:(`ProgressLocation Notification)
+            ~title:"Installing Dune Package Management"
+            ~cancellable:false
+            ()
+        in
+        let task ~progress:_ ~token:_ =
+          let+ result =
+            match Platform.t with
+            | Win32 ->
+              let _ =
+                show_message
+                  `Info
+                  "Dune Package Management is not supported on Windows yet!"
+              in
+              Ok () |> Promise.return
+            | Darwin | Linux | Other ->
+              let open Promise.Result.Syntax in
+              let+ _ =
+                let _ =
+                  let terminal =
+                    walkthrough_terminal "Dune Package Management Installer" instance
+                  in
+                  let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+                  Terminal_sandbox.send
+                    terminal
+                    "bash -c \"sh <(curl -fsSL \
+                     https://github.com/ocaml-dune/dune-bin-install/releases/download/v2/install.sh)\""
+                in
+                Ok () |> Promise.return
+              in
+              ()
+          in
+          match result with
+          | Ok () -> Ojs.null
+          | Error err ->
+            show_message `Error "An error occured while installing dune %s" err;
+            Ojs.null
+        in
+        let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+        ()
+      | Some _ ->
+        show_message `Info "Dune Package Management is already installed!"
+        |> Promise.return
+    in
+    let (_ : unit Promise.t) = process_installation () in
+    ()
+  in
+  command Command_api.Internal.install_dune callback
+;;
+
+let _install_opam =
+  let callback (instance : Extension_instance.t) () =
+    let process_installation () =
+      let open Promise.Syntax in
+      let* opam = Opam.make () in
+      match opam with
+      | None ->
+        let options =
+          ProgressOptions.create
+            ~location:(`ProgressLocation Notification)
+            ~title:"Installing opam package manager"
+            ~cancellable:false
+            ()
+        in
+        let task ~progress:_ ~token:_ =
+          let+ result =
+            match Platform.t with
+            | Win32 ->
+              let _ =
+                let terminal =
+                  Extension_instance.sandbox instance |> Terminal_sandbox.create
+                in
+                let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+                Terminal_sandbox.send terminal "winget install Git.Git OCaml.opam"
+              in
+              Ok () |> Promise.return
+            | Darwin | Linux | Other ->
+              let open Promise.Result.Syntax in
+              let+ _ =
+                let _ =
+                  let terminal =
+                    walkthrough_terminal "OCaml Platform Walkthrough" instance
+                  in
+                  let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+                  Terminal_sandbox.send
+                    terminal
+                    "bash -c \"sh <(curl -fsSL https://opam.ocaml.org/install.sh)\""
+                in
+                Ok () |> Promise.return
+              in
+              ()
+          in
+          match result with
+          | Ok () -> Ojs.null
+          | Error err ->
+            show_message `Error "An error occured while installing opam %s" err;
+            Ojs.null
+        in
+        let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+        ()
+      | Some _ -> show_message `Info "Opam is already installed!" |> Promise.return
+    in
+    let (_ : unit Promise.t) = process_installation () in
+    ()
+  in
+  command Command_api.Internal.install_opam callback
+;;
+
+let _init_opam =
+  let callback (instance : Extension_instance.t) () =
+    let options =
+      ProgressOptions.create
+        ~location:(`ProgressLocation Notification)
+        ~title:"Initialising opam"
+        ~cancellable:false
+        ()
+    in
+    let task ~progress:_ ~token:_ =
+      let open Promise.Syntax in
+      let+ result =
+        let open Promise.Result.Syntax in
+        let+ _ =
+          let _ =
+            let terminal = walkthrough_terminal "OCaml Platform Walkthrough" instance in
+            let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+            Terminal_sandbox.send terminal "opam init"
+          in
+          Ok () |> Promise.return
+        in
+        ()
+      in
+      match result with
+      | Ok () -> Ojs.null
+      | Error err ->
+        show_message `Error "An error occured while initializing opam %s" err;
+        Ojs.null
+    in
+    let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    ()
+  in
+  command Command_api.Internal.init_opam callback
+;;
+
+let _install_ocaml_dev =
+  let callback (instance : Extension_instance.t) () =
+    let options =
+      ProgressOptions.create
+        ~location:(`ProgressLocation Notification)
+        ~title:"Installing development packages"
+        ~cancellable:false
+        ()
+    in
+    let task ~progress:_ ~token:_ =
+      let open Promise.Syntax in
+      let+ result =
+        let open Promise.Result.Syntax in
+        let+ _ =
+          let _ =
+            let terminal = walkthrough_terminal "OCaml Platform Walkthrough" instance in
+            let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+            Terminal_sandbox.send
+              terminal
+              "opam install ocaml-lsp-server odoc ocamlformat utop"
+          in
+          Ok () |> Promise.return
+        in
+        ()
+      in
+      match result with
+      | Ok () -> Ojs.null
+      | Error err ->
+        show_message `Error "An error occured while installing packages %s" err;
+        Ojs.null
+    in
+    let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    ()
+  in
+  command Command_api.Internal.install_ocaml_dev callback
+;;
+
+let _open_utop =
+  let callback (instance : Extension_instance.t) () =
+    let options =
+      ProgressOptions.create
+        ~location:(`ProgressLocation Notification)
+        ~title:"Launching utop"
+        ~cancellable:false
+        ()
+    in
+    let task ~progress:_ ~token:_ =
+      let open Promise.Syntax in
+      let+ result =
+        let open Promise.Result.Syntax in
+        let+ _ =
+          let _ =
+            let terminal = walkthrough_terminal "OCaml Platform Walkthrough" instance in
+            let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+            Terminal_sandbox.send terminal "opam exec -- utop"
+          in
+          Ok () |> Promise.return
+        in
+        ()
+      in
+      match result with
+      | Ok () -> Ojs.null
+      | Error err ->
+        show_message `Error "An error occured while opening utop %s" err;
+        Ojs.null
+    in
+    let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    ()
+  in
+  command Command_api.Internal.open_utop callback
+;;
+
 let _open_current_dune_file =
   let callback (_ : Extension_instance.t) () =
     match Vscode.Window.activeTextEditor () with
