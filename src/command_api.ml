@@ -154,6 +154,7 @@ module Internal = struct
   let init_opam = unit_handle "init-opam"
   let install_ocaml_dev = unit_handle "install-ocaml-dev"
   let open_utop = unit_handle "open-utop"
+  let install_dune = unit_handle "install-dune"
 end
 
 module Vscode = struct
