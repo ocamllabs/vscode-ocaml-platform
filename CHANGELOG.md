@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Reword DPM notification to inform users DPM is available and not selected. (#1930)
+
 ## 1.32.1
 
 - Fix DPM error when invoking `ocamlc --version` without a working directory by
