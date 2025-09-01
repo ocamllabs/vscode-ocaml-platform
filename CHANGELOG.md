@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fix Windows LSP server startup failure by using `Uri.fsPath` instead of
+  `Uri.path` for filesystem API calls. (#1929)
+
 ## 1.32.1
 
 - Fix DPM error when invoking `ocamlc --version` without a working directory by
