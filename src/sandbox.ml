@@ -62,7 +62,7 @@ let workspace_root () =
   match Workspace.workspaceFolders () with
   | [] -> None
   | [ workspace_folder ] ->
-    Some (workspace_folder |> WorkspaceFolder.uri |> Uri.path |> Path.of_string)
+    Some (workspace_folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string)
   | _ ->
     (* We don't support multiple workspace roots at the moment *)
     None
