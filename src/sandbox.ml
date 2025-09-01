@@ -62,7 +62,7 @@ let workspace_root () =
   match Workspace.workspaceFolders () with
   | [] -> None
   | [ workspace_folder ] ->
-    Some (workspace_folder |> WorkspaceFolder.uri |> Uri.path |> Path.of_string)
+    Some (workspace_folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string)
   | _ ->
     (* We don't support multiple workspace roots at the moment *)
     None
@@ -587,8 +587,8 @@ let get_exec_command sandbox tools =
 ;;
 
 let ocaml_version sandbox =
-  let cmd = get_command sandbox "ocamlc" [ "--version" ] `Exec in
   let open Promise.Result.Syntax in
+  let cmd = get_command sandbox "ocamlc" [ "-version" ] `Exec in
   let* cmd = Cmd.check cmd in
   let+ output = Cmd.output cmd in
   String.strip output

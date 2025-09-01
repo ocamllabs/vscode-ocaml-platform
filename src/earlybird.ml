@@ -38,7 +38,8 @@ let check_earlybird_available (sandbox : Sandbox.t) =
     (* earlybird <= 1.1.0 doesn't have --version *)
     Sandbox.get_command sandbox "ocamlearlybird" [ "--help" ] `Tool
   in
-  Cmd.output earlybird_help
+  let cwd = Sandbox.workspace_root () in
+  Cmd.output ?cwd earlybird_help
   |> Promise.Result.fold
        ~ok:(fun (_ : string) -> ())
        ~error:(fun (_ : string) ->

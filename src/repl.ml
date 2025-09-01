@@ -55,7 +55,8 @@ let name = "REPL"
 let has_utop (sandbox : Sandbox.t) =
   let open Promise.Syntax in
   let cmd = Sandbox.get_command sandbox "utop" [ "--version" ] `Tool in
-  let+ result = Cmd.output cmd in
+  let cwd = Sandbox.workspace_root () in
+  let+ result = Cmd.output ?cwd cmd in
   match result with
   | Error _ -> false
   | Ok _ -> true

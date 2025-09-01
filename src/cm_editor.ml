@@ -24,7 +24,8 @@ end = struct
       let sandbox = Extension_instance.sandbox instance in
       Sandbox.get_command sandbox "ocamlobjinfo" [ file_path ] `Exec
     in
-    Cmd.output command
+    let cwd = Sandbox.workspace_root () in
+    Cmd.output ?cwd command
   ;;
 
   let create ~(uri : Uri.t) =

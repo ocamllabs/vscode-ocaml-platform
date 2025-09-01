@@ -17,7 +17,7 @@ license: "ISC"
 homepage: "https://github.com/ocamllabs/vscode-ocaml-platform"
 bug-reports: "https://github.com/ocamllabs/vscode-ocaml-platform/issues"
 depends: [
-  "dune" {>= "3.19"}
+  "dune" {>= "3.20"}
   "ocaml" {>= "4.08"}
   "js_of_ocaml" {>= "6.0"}
   "gen_js_api" {= "1.1.5"}
