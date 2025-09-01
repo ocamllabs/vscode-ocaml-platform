@@ -117,7 +117,7 @@ let make root () =
            | Some version when Dune_version.is_valid version ->
              show_message
                `Info
-               "Dune Package Management selected with dune from %s, version %s."
+               "Dune Package Management is available with dune from %s, version %s."
                (Path.to_string binary)
                v;
              Some { bin; root }
@@ -142,7 +142,7 @@ let make root () =
               | Some version when Dune_version.is_valid version ->
                 show_message
                   `Info
-                  "Dune Package Management selected with dune from %s, version %s."
+                  "Dune Package Management is available with dune from %s, version %s."
                   path
                   v;
                 Promise.return (Some { bin; root })
