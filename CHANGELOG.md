@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-- Fix Windows LSP server startup failure by using `Uri.fsPath` instead of
-  `Uri.path` for filesystem API calls. (#1929)
+- Fix Windows path handling regression introduced in 1.32.1 by using
+  `Uri.fsPath` instead of `Uri.path` in workspace root detection, preventing
+  LSP start failures (`ENOENT -4058`). (#1929)
 
 ## 1.32.1
 
