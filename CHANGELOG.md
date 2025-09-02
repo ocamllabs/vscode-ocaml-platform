@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.32.2
+
 - Reword DPM notification to inform users DPM is available and not selected. (#1930)
 - Fix Windows path handling regression introduced in 1.32.1 by using
   `Uri.fsPath` instead of `Uri.path` in workspace root detection, preventing
