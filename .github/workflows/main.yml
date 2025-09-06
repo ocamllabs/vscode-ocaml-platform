@@ -29,6 +29,7 @@ jobs:
         with:
           node-version: 24
           check-latest: true
+          package-manager-cache: false
 
       - run: corepack enable
 
@@ -98,6 +99,7 @@ jobs:
         with:
           node-version: 24
           check-latest: true
+          package-manager-cache: false
 
       - run: corepack enable
 
