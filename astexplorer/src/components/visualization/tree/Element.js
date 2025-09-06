@@ -257,11 +257,11 @@ const Element = React.memo(
           valueOutput = (
             <span className="tokenName nc" onClick={onToggleClick}>
               {nodeName}{" "}
-              {selected
-                ? <span className="ge" style={{ fontSize: "0.8em" }}>
-                    {" = $node"}
-                  </span>
-                : null}
+              {selected ? (
+                <span className="ge" style={{ fontSize: "0.8em" }}>
+                  {" = $node"}
+                </span>
+              ) : null}
             </span>
           );
         }
@@ -332,13 +332,13 @@ const Element = React.memo(
         onMouseOver={onMouseOver}
         onMouseLeave={onMouseLeave}
       >
-        {name
-          ? <PropertyName
-              name={name}
-              computed={computed}
-              onClick={onToggleClick}
-            />
-          : null}
+        {name ? (
+          <PropertyName
+            name={name}
+            computed={computed}
+            onClick={onToggleClick}
+          />
+        ) : null}
         <span className="value">{valueOutput}</span>
         {prefix ? <span className="prefix p">&nbsp;{prefix}</span> : null}
         {content}
@@ -423,12 +423,12 @@ const FunctionElement = React.memo(function FunctionElement(props) {
           (...)
         </span>
       </span>
-      {error
-        ? <span>
-            {" "}
-            <i title={error.message} className="fa fa-exclamation-triangle" />
-          </span>
-        : null}
+      {error ? (
+        <span>
+          {" "}
+          <i title={error.message} className="fa fa-exclamation-triangle" />
+        </span>
+      ) : null}
     </li>
   );
 });
