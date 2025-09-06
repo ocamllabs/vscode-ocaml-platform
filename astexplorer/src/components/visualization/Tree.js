@@ -70,28 +70,32 @@ export default function Tree({ parseResult, position, error, selectedOutput }) {
     <div className="tree-visualization">
       <div className="toolbar">
         {treeAdapter.getConfigurableFilters().map((filter) =>
-          filter.key != "hideTypeKeys"
-            ? <span key={filter.key}>
-                <label>
-                  {makeCheckbox(filter.key, settings, updateSettings)}
-                  {filter.label}
-                </label>
-                &#8203;
-              </span>
-            : "",
+          filter.key != "hideTypeKeys" ? (
+            <span key={filter.key}>
+              <label>
+                {makeCheckbox(filter.key, settings, updateSettings)}
+                {filter.label}
+              </label>
+              &#8203;
+            </span>
+          ) : (
+            ""
+          ),
         )}
-        {selectedOutput == 1
-          ? <button
-              className={""}
-              onClick={() => {
-                vscode.postMessage({
-                  refresh_pp_webview: selectedOutput.toString(),
-                });
-              }}
-            >
-              Reload AST
-            </button>
-          : ""}
+        {selectedOutput == 1 ? (
+          <button
+            className={""}
+            onClick={() => {
+              vscode.postMessage({
+                refresh_pp_webview: selectedOutput.toString(),
+              });
+            }}
+          >
+            Reload AST
+          </button>
+        ) : (
+          ""
+        )}
       </div>
       <ul
         ref={rootElement}
