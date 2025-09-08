@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Fix utop detection by using `-version` flag instead of `--version` to align
+  with OCaml toolchain conventions. This ensures the extension properly detects
+  and uses utop when running code selections. (#1938)
+
 ## 1.32.2
 
 - Reword DPM notification to inform users DPM is available and not selected. (#1930)
