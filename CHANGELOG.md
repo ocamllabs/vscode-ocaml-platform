@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.32.3
+
 - Fix utop detection by using `-version` flag instead of `--version` to align
   with OCaml toolchain conventions. This ensures the extension properly detects
   and uses utop when running code selections. (#1938)
