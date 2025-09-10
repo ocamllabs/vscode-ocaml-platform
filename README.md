@@ -25,37 +25,7 @@ Below we first install the extension dependencies and then the extension itself.
 You can reverse the order; it's just that the extension will not work to its
 full without all of its dependencies.
 
-1. Prerequisites
-
-   For development, you'll need Node.js and yarn. The extension development
-   requires Node.js 20 or later (Node.js 22 LTS is recommended).
-
-   Install Node.js using [nvm](https://github.com/nvm-sh/nvm) (recommended):
-
-   ```bash
-   # Install nvm (if not already installed)
-   # See https://github.com/nvm-sh/nvm#installing-and-updating for latest instructions
-   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-   
-   # Install and use Node.js 22 LTS
-   nvm install 22
-   nvm use 22
-   
-   # Enable corepack to use the project's yarn version
-   corepack enable
-   ```
-
-   Alternatively, you can install Node.js directly from [nodejs.org](https://nodejs.org/)
-   and then enable corepack:
-
-   ```bash
-   corepack enable
-   ```
-
-   > **Note**: This project uses yarn@4.9.4 as specified in package.json. Running
-   > `corepack enable` ensures you use the correct yarn version automatically.
-
-2. Installing extension dependencies
+1. Installing extension dependencies
 
    This VS Code for most of its OCaml language support functionality requires
    OCaml Language Server (often called `ocaml-lsp` or `ocamllsp`). Install
@@ -84,7 +54,7 @@ full without all of its dependencies.
      [ocamlformat](https://github.com/ocaml-ppx/ocamlformat#installation) to get
      nicely formatted types.
 
-3. Install this extension from the VSCode
+2. Install this extension from the VSCode
    [Marketplace](https://marketplace.visualstudio.com/items?itemName=ocamllabs.ocaml-platform).
    VSCode extension installations instructions are available
    [here](https://code.visualstudio.com/docs/editor/extension-marketplace).
