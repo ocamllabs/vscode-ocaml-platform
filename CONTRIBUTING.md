@@ -5,7 +5,7 @@
 ### Prerequisites
 
 For development, you'll need Node.js and yarn. The extension development
-requires Node.js 20 or later (Node.js 24 LTS is recommended).
+requires Node.js 24 LTS.
 
 Install Node.js using [nvm](https://github.com/nvm-sh/nvm) (recommended):
 
