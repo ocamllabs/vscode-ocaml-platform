@@ -204,21 +204,39 @@ let suggest_to_upgrade_ocaml_lsp_server
       ()
   =
   let open Promise.Syntax in
-  let upgrade_lsp_text = "Yes" in
-  let no_upgrade = "No" in
-  let* selection =
-    Window.showInformationMessage
-      ~message:(message ^ " Do you want to upgrade it?")
-      ~choices:[ upgrade_lsp_text, `Update_lsp; no_upgrade, `No_upgrade ]
-      ()
-  in
-  match selection with
-  | Some `Update_lsp ->
-    let+ () = Command_api.(execute Internal.upgrade_ocaml_lsp_server) () in
-    ()
-  | Some `No_upgrade -> Promise.return ()
-  | _ -> Promise.return ()
-;;
+  (* Check if user has suppressed notifications *)
+  (match Settings.(get server_suppressVersionNotifications_setting) with
+   | Some true -> Promise.return ()
+   | _ ->
+     let upgrade_lsp_text = "Yes" in
+     let no_upgrade = "No" in
+     let dont_show_again = "Don't show again" in
+     let updated_message =
+       message
+       ^ " Do you want to upgrade it? Note: Using an older version may result in \
+          missing features or compatibility issues."
+     in
+     let* selection =
+       Window.showInformationMessage
+         ~message:updated_message
+         ~choices:
+           [ upgrade_lsp_text, `Update_lsp
+           ; no_upgrade, `No_upgrade
+           ; dont_show_again, `Dont_show_again
+           ]
+         ()
+     in
+     (match selection with
+      | Some `Update_lsp ->
+        let+ () = Command_api.(execute Internal.upgrade_ocaml_lsp_server) () in
+        ()
+      | Some `Dont_show_again ->
+        let+ () =
+          Settings.(set server_suppressVersionNotifications_setting) true
+        in
+        ()
+      | Some `No_upgrade -> Promise.return ()
+      | _ -> Promise.return ()))
 
 let is_version_up_to_date t ocaml_v =
   let ocamllsp_version = get_version_from_serverInfo t in

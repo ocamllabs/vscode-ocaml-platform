@@ -465,6 +465,11 @@
           "type": "boolean",
           "default": true,
           "description": "Controls whether to use Utop for the REPL if it is installed in the current switch."
+        },
+        "ocaml.server.suppressVersionNotifications": {
+          "type": "boolean",
+          "default": false,
+          "description": "Controls whether to suppress notifications about newer versions of OCaml LSP server being available."
         }
       }
     },

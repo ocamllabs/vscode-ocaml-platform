@@ -164,3 +164,11 @@ let server_constructRecursiveCalls_setting =
     ~of_json:Jsonoo.Decode.bool
     ~to_json:Jsonoo.Encode.bool
 ;;
+
+let server_suppressVersionNotifications_setting =
+  create_setting
+    ~scope:ConfigurationTarget.Workspace
+    ~key:"ocaml.server.suppressVersionNotifications"
+    ~of_json:Jsonoo.Decode.bool
+    ~to_json:Jsonoo.Encode.bool
+;;

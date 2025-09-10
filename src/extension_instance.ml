@@ -262,8 +262,14 @@ end = struct
         let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
         t.lsp_client <- Some (client, ocaml_lsp);
         (match Ocaml_lsp.is_version_up_to_date ocaml_lsp (ocaml_version_exn t) with
-         | Ok () -> ()
-         | Error (`Msg _) -> ());
+         | Ok () -> 
+           Sandbox_info.update_lsp_status t.sandbox_info ~lsp_status:`UpToDate
+         | Error (`Msg msg) ->
+           Sandbox_info.update_lsp_status t.sandbox_info ~lsp_status:`OutOfDate;
+           let (_ : unit Promise.t) =
+             Ocaml_lsp.suggest_to_upgrade_ocaml_lsp_server ~message:msg ()
+           in
+           ());
         send_configuration
           client
           ~codelens:t.codelens
@@ -321,16 +327,18 @@ let upgrade_ocaml_lsp_server sandbox =
 module Sandbox_info : sig
   val make : Sandbox.t -> StatusBarItem.t
   val update : StatusBarItem.t -> new_sandbox:Sandbox.t -> unit
+  val update_lsp_status : StatusBarItem.t -> lsp_status:[`UpToDate | `OutOfDate] -> unit
 end = struct
-  let make_status_bar_item_text sandbox =
-    Printf.sprintf "$(package) %s" @@ Sandbox.to_pretty_string sandbox
+  let make_status_bar_item_text sandbox ?(lsp_outdated = false) () =
+    let icon = if lsp_outdated then "$(warning)" else "$(package)" in
+    Printf.sprintf "%s %s" icon @@ Sandbox.to_pretty_string sandbox
   ;;
 
   let make sandbox =
     let status_bar_item =
       Window.createStatusBarItem ~alignment:StatusBarAlignment.Left ()
     in
-    let status_bar_item_text = make_status_bar_item_text sandbox in
+    let status_bar_item_text = make_status_bar_item_text sandbox () in
     StatusBarItem.set_text status_bar_item status_bar_item_text;
     StatusBarItem.set_command
       status_bar_item
@@ -340,8 +348,32 @@ end = struct
   ;;
 
   let update sandbox_info ~new_sandbox =
-    let status_bar_item_text = make_status_bar_item_text new_sandbox in
+    let status_bar_item_text = make_status_bar_item_text new_sandbox () in
     StatusBarItem.set_text sandbox_info status_bar_item_text
+  ;;
+
+  let update_lsp_status sandbox_info ~lsp_status =
+    (* We need to get current sandbox to update the text properly *)
+    let current_text = StatusBarItem.text sandbox_info in
+    let sandbox_name = 
+      (* Extract sandbox name from current text, removing icon *)
+      String.chop_prefix_exn current_text ~prefix:"$(package) "
+      |> (fun s -> 
+          match String.chop_prefix s ~prefix:"$(warning) " with
+          | Some name -> name
+          | None -> s)
+    in
+    let is_outdated = match lsp_status with `OutOfDate -> true | `UpToDate -> false in
+    let icon = if is_outdated then "$(warning)" else "$(package)" in
+    let new_text = Printf.sprintf "%s %s" icon sandbox_name in
+    StatusBarItem.set_text sandbox_info new_text;
+    (* Update background color to indicate warning when outdated *)
+    let backgroundColor = 
+      if is_outdated then 
+        Some (`ThemeColor (ThemeColor.make ~id:"statusBarItem.warningBackground"))
+      else None
+    in
+    StatusBarItem.set_backgroundColor sandbox_info backgroundColor
   ;;
 end
 

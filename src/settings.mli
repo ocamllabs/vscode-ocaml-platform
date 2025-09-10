@@ -41,3 +41,4 @@ val server_duneDiagnostics_setting : bool setting
 val server_syntaxDocumentation_setting : bool setting
 val server_typedHolesConstructAfterNavigate_setting : bool setting
 val server_constructRecursiveCalls_setting : bool setting
+val server_suppressVersionNotifications_setting : bool setting
