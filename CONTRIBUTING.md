@@ -2,6 +2,35 @@
 
 ## Setup your development environment
 
+### Prerequisites
+
+For development, you'll need Node.js and yarn. The extension development
+requires Node.js 24 LTS.
+
+Install Node.js using [nvm](https://github.com/nvm-sh/nvm) (recommended):
+
+```bash
+# Install nvm (if not already installed)
+# See https://github.com/nvm-sh/nvm#installing-and-updating for latest instructions
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
+# Install and use Node.js 24 LTS
+nvm install 24
+nvm use 24
+
+# Enable corepack to use the project's yarn version
+corepack enable
+```
+
+Alternatively, you can install Node.js directly from [nodejs.org](https://nodejs.org/)
+and then enable corepack:
+
+```bash
+corepack enable
+```
+
+### OCaml Setup
+
 You need Opam, you can install it by following
 [Opam's documentation](https://opam.ocaml.org/doc/Install.html).
 
