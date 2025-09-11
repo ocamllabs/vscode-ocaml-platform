@@ -118,7 +118,7 @@
             "description": "Now install essential development tools:\n\n- OCaml LSP server enables editor support for OCaml, odoc generates documentation, camlformat automatically formats OCaml code, utop is an interactive REPL for OCaml and dune is the official OCaml build system.\n\n[Install Platform Tools](command:ocaml.install-ocaml-dev)",
             "media": {
               "image": "assets/vscode-ocaml-commands.gif",
-              "altText": "A gif of how to access all commands provide by the ocaml vscode plugin which can be accessed by pressing Ctrl+Alt+P and typing ocaml"
+              "altText": "A gif of how to access all commands provided by the OCaml VSCode plugin, which can be accessed by pressing Ctrl+Alt+P and typing ocaml"
             },
             "completionEvents": [
               "onCommand:ocaml.install-ocaml-dev"
