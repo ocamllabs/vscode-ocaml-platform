@@ -66,7 +66,7 @@
             "id": "install-opam-mac",
             "when": "isMac",
             "title": "Install opam",
-            "description": "opam is the package manager for OCaml. Installing opam also installs the OCaml compiler. Install it opam's official script installer.\n\n[Open a terminal and run the opam install script](command:ocaml.install-opam)",
+            "description": "opam is the package manager for OCaml. Installing opam also installs the OCaml compiler. Install it via opam's official script installer.\n\n[Open a terminal and run the opam install script](command:ocaml.install-opam)",
             "media": {
               "image": "assets/opam_install.jpg",
               "altText": "While installing opam, you'll be asked a series of questions: (1) Where should opam be installed? You can press enter and use the default location, unless you wish to install it somehwere else. (2) Sometimes it may request administrator write access, you should enter your password to authorize the installer."
