@@ -47,7 +47,7 @@
       {
         "id": "ocaml-onboarding",
         "title": "OCaml: Setup opam dev environment (manual)",
-        "description": "A guided, terminal based, installation of OCaml and essential tools with the opam package manager.",
+        "description": "A guided, terminal based, installation of OCaml and its essential tools with the opam package manager.",
         "steps": [
           {
             "id": "install-opam-windows",
