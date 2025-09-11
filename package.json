@@ -94,7 +94,7 @@
             "description": "After installing opam, we initialise it so as to prepare your system to use it for managing OCaml packages and compilers.\n\n[Open a terminal and run opam init](command:ocaml.init-opam)",
             "media": {
               "image": "assets/opam_init.jpg",
-              "altText": "For the different options: (1) → Updates ~/.profile to automatically configure opam for future shell sessions. (2) → Does not update shell configs; requires manual eval $(opam env) after switching. (3) → Allows selecting a different shell (e.g., zsh, fish) for configuration. (4) → Lets you specify a custom config file instead of ~/.profile.5 → No automatic setup; you must manually run eval $(opam env) when needed."
+              "altText": "For the different options: (1) → (recommended) Updates ~/.profile to automatically configure opam for future shell sessions. (2) → Does not update shell configs; requires manual eval $(opam env) after switching. (3) → Allows selecting a different shell (e.g., zsh, fish) for configuration. (4) → Lets you specify a custom config file instead of ~/.profile.5 → No automatic setup; you must manually run eval $(opam env) when needed."
             },
             "completionEvents": [
               "onCommand:ocaml.init-opam"
