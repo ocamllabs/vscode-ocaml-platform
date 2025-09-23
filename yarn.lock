@@ -2160,10 +2160,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tsconfig/strictest@npm:2.0.5":
-  version: 2.0.5
-  resolution: "@tsconfig/strictest@npm:2.0.5"
-  checksum: 10c0/cfc86da2d57f7b4b0827701b132c37a4974284e5c40649656c0e474866dfd8a69f57c6718230d8a8139967e2a95438586b8224c13ab0ff9d3a43eda771c50cc4
+"@tsconfig/strictest@npm:2.0.6":
+  version: 2.0.6
+  resolution: "@tsconfig/strictest@npm:2.0.6"
+  checksum: 10c0/b8a0c89a8936e65d4b4ad1420a17abe51f9576eff68cea1755f003deb2f5436600708fe0f1e0d26f56aeec0584e91753007ff9a634c67e39cf915eef1b25fc7f
   languageName: node
   linkType: hard
 
@@ -5172,7 +5172,7 @@ __metadata:
   dependencies:
     "@biomejs/biome": "npm:^2.2.4"
     "@tsconfig/node24": "npm:24.0.1"
-    "@tsconfig/strictest": "npm:2.0.5"
+    "@tsconfig/strictest": "npm:2.0.6"
     "@types/node": "npm:24.5.2"
     "@types/vscode": "npm:1.86.0"
     "@vscode/test-cli": "npm:0.0.11"
