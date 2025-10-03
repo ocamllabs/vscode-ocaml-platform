@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add mlx language support to document selector
+- Enable AST editor for mlx files
+- Enable switching between implementation and interface for mlx files
+- Add keybindings for OCaml.mlx language
+
 ## 1.32.3
 
 - Fix utop detection by using `-version` flag instead of `--version` to align
