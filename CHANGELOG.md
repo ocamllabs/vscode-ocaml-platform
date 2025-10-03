@@ -2,7 +2,10 @@
 
 ## Unreleased
 
-- Add MLX language support to document selector
+- Add mlx language support to document selector
+- Enable AST editor for mlx files
+- Enable switching between implementation and interface for mlx files
+- Add keybindings for OCaml.mlx language
 
 ## 1.32.3
 
