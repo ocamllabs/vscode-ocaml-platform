@@ -169,6 +169,7 @@ end = struct
          ; language "ocaml.ocamllex"
          ; language "ocaml.menhir"
          ; language "reason"
+         ; language "ocaml.mlx"
         |]
     in
     let (lazy outputChannel) = Output.language_server_output_channel in
