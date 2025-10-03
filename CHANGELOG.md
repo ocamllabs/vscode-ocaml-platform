@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add MLX language support to document selector
+
 ## 1.32.3
 
 - Fix utop detection by using `-version` flag instead of `--version` to align
