@@ -68,6 +68,7 @@ end = struct
     match Stdlib.Filename.extension relative with
     | ".ml" -> Structure `Ocaml
     | ".re" -> Structure `Reason
+    | ".mlx" -> Structure `Ocaml
     | ".mli" -> Signature `Ocaml
     | ".rei" -> Signature `Reason
     | _ -> Unknown
