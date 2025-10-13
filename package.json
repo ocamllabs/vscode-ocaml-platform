@@ -1354,7 +1354,7 @@
     "@biomejs/biome": "^2.2.6",
     "@tsconfig/node24": "24.0.1",
     "@tsconfig/strictest": "2.0.6",
-    "@types/node": "24.7.1",
+    "@types/node": "24.7.2",
     "@types/vscode": "1.86.0",
     "@vscode/test-cli": "0.0.12",
     "@vscode/test-electron": "2.5.2",
