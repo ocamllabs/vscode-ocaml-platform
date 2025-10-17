@@ -2190,12 +2190,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:24.8.0":
-  version: 24.8.0
-  resolution: "@types/node@npm:24.8.0"
+"@types/node@npm:24.8.1":
+  version: 24.8.1
+  resolution: "@types/node@npm:24.8.1"
   dependencies:
     undici-types: "npm:~7.14.0"
-  checksum: 10c0/6ba1a268dec49b46c3301193394bfe6203a8d44453e32d6666e5daa35d2b5251425e7ac81444edae4c7f5bd12feed3324eba338c52b5630b258ff0e5040cd646
+  checksum: 10c0/d185f2f14aa26cc2b482aa730bfc452943f9636df37aad6ceed80aa397f1278f894043336bd72f74c47b3dbef23e772ac9b1a256168984aa8aee26836132d290
   languageName: node
   linkType: hard
 
@@ -5180,7 +5180,7 @@ __metadata:
     "@biomejs/biome": "npm:^2.2.6"
     "@tsconfig/node24": "npm:24.0.1"
     "@tsconfig/strictest": "npm:2.0.6"
-    "@types/node": "npm:24.8.0"
+    "@types/node": "npm:24.8.1"
     "@types/vscode": "npm:1.86.0"
     "@vscode/test-cli": "npm:0.0.12"
     "@vscode/test-electron": "npm:2.5.2"
