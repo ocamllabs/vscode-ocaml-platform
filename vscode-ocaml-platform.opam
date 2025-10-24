@@ -27,7 +27,7 @@ depends: [
   "ocaml-version" {>= "4.0"}
   "ppxlib" {>= "0.36"}
   "opam-file-format" {>= "2.1.6"}
-  "ocamlformat" {= "0.27.0" & with-dev-setup}
+  "ocamlformat" {= "0.28.0" & with-dev-setup}
   "ocaml-lsp-server" {with-dev-setup}
   "odoc" {with-doc}
 ]

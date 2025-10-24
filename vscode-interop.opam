@@ -21,7 +21,7 @@ depends: [
   "ocaml" {>= "4.08"}
   "js_of_ocaml" {>= "6.0"}
   "gen_js_api" {= "1.1.5"}
-  "ocamlformat" {= "0.27.0" & with-dev-setup}
+  "ocamlformat" {= "0.28.0" & with-dev-setup}
   "ocaml-lsp-server" {with-dev-setup}
   "odoc" {with-doc}
 ]
