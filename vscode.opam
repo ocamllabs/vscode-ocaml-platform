@@ -23,7 +23,7 @@ depends: [
   "promise_jsoo" {>= "0.4.3"}
   "jsonoo" {>= "0.3"}
   "vscode-interop" {= version}
-  "ocamlformat" {= "0.28.0" & with-dev-setup}
+  "ocamlformat" {= "0.28.1" & with-dev-setup}
   "ocaml-lsp-server" {with-dev-setup}
   "odoc" {with-doc}
 ]
