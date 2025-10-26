@@ -827,12 +827,12 @@
       {
         "command": "ocaml.next-hole",
         "key": "Alt+Y",
-        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason"
       },
       {
         "command": "ocaml.prev-hole",
         "key": "Shift+Alt+Y",
-        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason"
       },
       {
         "command": "ocaml.reveal-ast-node",
@@ -847,7 +847,7 @@
       {
         "command": "ocaml.search-by-type",
         "key": "Alt+F",
-        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason"
       },
       {
         "command": "ocaml.type-selection",
@@ -1104,11 +1104,11 @@
         },
         {
           "command": "ocaml.next-hole",
-          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason"
         },
         {
           "command": "ocaml.prev-hole",
-          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason"
         },
         {
           "command": "ocaml.refresh-switches",
@@ -1160,15 +1160,15 @@
         },
         {
           "command": "ocaml.copy-type-under-cursor",
-          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason"
         },
         {
           "command": "ocaml.construct",
-          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason"
         },
         {
           "command": "ocaml.search-by-type",
-          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason"
         },
         {
           "command": "ocaml.navigate-typed-holes",
