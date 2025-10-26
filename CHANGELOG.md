@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Fix editor focus condition for interface file keybindings. Previously,
+  keybindings for `ocaml.interface` files were active even when the editor
+  did not have focus due to operator precedence in the when clauses. (#1983)
+
 ## 1.32.3
 
 - Fix utop detection by using `-version` flag instead of `--version` to align
