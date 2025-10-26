@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.32.4
+
 - Fix editor focus condition for interface file keybindings. Previously,
   keybindings for `ocaml.interface` files were active even when the editor
   did not have focus due to operator precedence in the when clauses. (#1983)
