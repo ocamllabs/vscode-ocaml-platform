@@ -5,6 +5,12 @@
 - Fix editor focus condition for interface file keybindings. Previously,
   keybindings for `ocaml.interface` files were active even when the editor
   did not have focus due to operator precedence in the when clauses. (#1983)
+- Remove `ocaml.ocamllex` from type-dependent command conditions. OCamllex
+  files use a specialised lexer definition syntax and do not have full LSP
+  support with type information. Commands requiring type information
+  (`construct`, `next-hole`, `prev-hole`, `search-by-type`,
+  `copy-type-under-cursor`) were incorrectly enabled for `.mll` files and
+  have been removed. (#1984)
 
 ## 1.32.3
 
