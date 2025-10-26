@@ -11,6 +11,11 @@
   (`construct`, `next-hole`, `prev-hole`, `search-by-type`,
   `copy-type-under-cursor`) were incorrectly enabled for `.mll` files and
   have been removed. (#1984)
+- Fix keybinding conditions to ensure correct language support. Explicitly add
+  `editorTextFocus` to each language condition to clarify operator precedence.
+  Remove `ocaml.ocamllex` and `ocaml.menhir` from `switch-impl-intf` and
+  `evaluate-selection` commands as these languages are not supported by those
+  features. (#1985)
 
 ## 1.32.3
 
