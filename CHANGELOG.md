@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Add `ocaml.server.codelens.forNestedBindings` setting to control whether
+  CodeLens should be displayed for nested bindings. Defaults to `false`,
+  showing CodeLens only for top-level bindings.
+  - ⚠️ This is a **breaking change** for users who have already used
+    `ocaml.server.codelens`. The existing `ocaml.server.codelens` setting has
+    been renamed to `ocaml.server.codelens.enable`. (#1990)
+
 ## 1.32.4
 
 - Fix editor focus condition for interface file keybindings. Previously,
