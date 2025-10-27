@@ -21,8 +21,8 @@ let notify_configuration_changes instance =
   Workspace.onDidChangeConfiguration
     ~listener:(fun _event ->
       let codelens = Settings.(get server_codelens_setting) in
-      let codelens_nested_bindings =
-        Settings.(get server_codelens_nested_bindings_setting)
+      let codelens_for_nested_bindings =
+        Settings.(get server_codelens_for_nested_bindings_setting)
       in
       let extended_hover = Settings.(get server_extendedHover_setting) in
       let dune_diagnostics = Settings.(get server_duneDiagnostics_setting) in
@@ -30,7 +30,7 @@ let notify_configuration_changes instance =
       Extension_instance.set_configuration
         instance
         ~codelens
-        ~codelens_nested_bindings
+        ~codelens_for_nested_bindings
         ~extended_hover
         ~dune_diagnostics
         ~syntax_documentation

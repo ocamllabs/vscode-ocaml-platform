@@ -125,7 +125,7 @@ let server_codelens_setting =
     ~to_json:Jsonoo.Encode.bool
 ;;
 
-let server_codelens_nested_bindings_setting =
+let server_codelens_for_nested_bindings_setting =
   create_setting
     ~scope:ConfigurationTarget.Workspace
     ~key:"ocaml.server.codelens.forNestedBindings"
