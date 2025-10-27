@@ -87,8 +87,8 @@ let set_configuration
       ()
   =
   Option.iter codelens ~f:(fun codelens -> t.codelens <- codelens);
-  Option.iter codelens_for_nested_bindings ~f:(fun codelens ->
-    t.codelens_for_nested_bindings <- codelens);
+  Option.iter codelens_for_nested_bindings ~f:(fun codelens_for_nested_bindings ->
+    t.codelens_for_nested_bindings <- codelens_for_nested_bindings);
   Option.iter extended_hover ~f:(fun extended_hover -> t.extended_hover <- extended_hover);
   Option.iter standard_hover ~f:(fun standard_hover -> t.standard_hover <- standard_hover);
   Option.iter dune_diagnostics ~f:(fun dune_diagnostics ->
