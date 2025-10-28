@@ -25,7 +25,7 @@ module OcamllspSettingCodeLens : sig
 
   val enable : t -> bool option
   val forNestedBindings : t -> bool option
-  val create : ?for_nested_bindings:bool -> enable:bool -> unit -> t
+  val create : ?forNestedBindings:bool -> enable:bool -> unit -> t
 end
 
 module OcamllspSettings : sig

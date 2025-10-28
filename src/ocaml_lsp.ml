@@ -17,7 +17,7 @@ module OcamllspSettingCodeLens = struct
     [%js:
       val enable : t -> bool or_undefined [@@js.get]
       val forNestedBindings : t -> bool or_undefined [@@js.get]
-      val create : ?for_nested_bindings:bool -> enable:bool -> unit -> t [@@js.builder]]
+      val create : ?forNestedBindings:bool -> enable:bool -> unit -> t [@@js.builder]]
 end
 
 module OcamllspSettings = struct

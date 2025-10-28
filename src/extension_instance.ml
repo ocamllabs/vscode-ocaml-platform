@@ -37,7 +37,7 @@ let send_configuration
   let codelens =
     Option.map codelens ~f:(fun enable ->
       Ocaml_lsp.OcamllspSettingCodeLens.create
-        ?for_nested_bindings:codelens_for_nested_bindings
+        ?forNestedBindings:codelens_for_nested_bindings
         ~enable
         ())
   in
