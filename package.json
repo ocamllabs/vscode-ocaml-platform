@@ -1351,7 +1351,7 @@
     "vscode-languageclient": "9.0.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.1",
+    "@biomejs/biome": "^2.3.2",
     "@tsconfig/node24": "24.0.1",
     "@tsconfig/strictest": "2.0.6",
     "@types/node": "24.9.1",
