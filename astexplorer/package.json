@@ -14,11 +14,11 @@
     "json-stringify-safe": "5.0.1",
     "process": "0.11.10",
     "prop-types": "15.8.1",
-    "react": "19.1.1",
-    "react-dom": "19.1.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
     "react-redux": "9.2.0"
   },
   "devDependencies": {
-    "parcel": "2.15.4"
+    "parcel": "2.16.0"
   }
 }
