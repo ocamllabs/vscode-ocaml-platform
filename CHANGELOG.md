@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add OCaml onboarding welcome screen. (#1737)
+
 ## 1.32.4
 
 - Fix editor focus condition for interface file keybindings. Previously,

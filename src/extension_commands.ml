@@ -247,6 +247,233 @@ let _switch_impl_intf =
   command Command_api.Internal.switch_impl_intf callback
 ;;
 
+let walkthrough_terminal_instance = ref None
+
+let walkthrough_terminal instance =
+  match !walkthrough_terminal_instance with
+  | Some t -> t
+  | None ->
+    let t =
+      Terminal_sandbox.create
+        ~name:"OCaml Platform Walkthrough"
+        (Extension_instance.sandbox instance)
+    in
+    walkthrough_terminal_instance := Some t;
+    t
+;;
+
+let _install_opam =
+  let outdated_opam = ref false in
+  let callback (instance : Extension_instance.t) () =
+    let process_installation () =
+      let open Promise.Syntax in
+      let* opam = Opam.make () in
+      match opam, !outdated_opam with
+      | None, true | Some _, true | None, false ->
+        let options =
+          ProgressOptions.create
+            ~location:(`ProgressLocation Notification)
+            ~title:"Installing opam package manager"
+            ~cancellable:false
+            ()
+        in
+        let task ~progress:_ ~token:_ =
+          let+ result =
+            match Platform.t with
+            | Win32 ->
+              let _ =
+                let terminal =
+                  Extension_instance.sandbox instance |> Terminal_sandbox.create
+                in
+                let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+                Terminal_sandbox.send terminal "winget install Git.Git OCaml.opam"
+              in
+              Ok () |> Promise.return
+            | Darwin | Linux | Other ->
+              let open Promise.Result.Syntax in
+              let+ _ =
+                let _ =
+                  let terminal = walkthrough_terminal instance in
+                  let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+                  Terminal_sandbox.send
+                    terminal
+                    "bash -c \"sh <(curl -fsSL https://opam.ocaml.org/install.sh)\""
+                in
+                Ok () |> Promise.return
+              in
+              ()
+          in
+          match result with
+          | Ok () -> Ojs.null
+          | Error err ->
+            show_message `Error "An error occured while installing opam %s" err;
+            Ojs.null
+        in
+        let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+        ()
+      | Some opam, _ ->
+        let* latest_version =
+          Cmd.output
+            ?cwd:(Sandbox.workspace_root ())
+            (Cmd.Shell
+               "curl -s -H \"Accept: application/vnd.github+json\" \
+                https://api.github.com/repos/ocaml/opam/releases/latest | jq -r \
+                '.tag_name'")
+        in
+        let cwd = Sandbox.workspace_root () in
+        let+ installed_version = Cmd.output ?cwd (Opam.version opam) in
+        let comb =
+          Result.combine
+            latest_version
+            installed_version
+            ~ok:(fun lv iv ->
+              String.compare lv iv
+              |> Int.is_positive
+              |> fun is_outdated -> is_outdated, lv, iv)
+            ~err:(fun e1 e2 -> e1 ^ ", " ^ e2)
+        in
+        (match comb with
+         | Ok (false, _latest_version, installed_version) ->
+           show_message
+             `Info
+             "opam is already installed and up to date (version %s)."
+             installed_version
+         | Ok (true, latest_version, installed_version) ->
+           outdated_opam := true;
+           let _ =
+             let+ selection =
+               Window.showInformationMessage
+                 ~message:
+                   (Printf.sprintf
+                      "opam is already installed (version %s). A newer version (%s) is \
+                       available."
+                      installed_version
+                      latest_version)
+                 ~choices:[ "Update opam", () ]
+                 ()
+             in
+             Option.iter selection ~f:(fun () ->
+               let (_ : unit Promise.t) =
+                 Command_api.(execute Internal.install_opam) ()
+               in
+               ())
+           in
+           ()
+         | Error err -> show_message `Warn "Could not determine opam version: %s" err)
+    in
+    let (_ : unit Promise.t) = process_installation () in
+    ()
+  in
+  command Command_api.Internal.install_opam callback
+;;
+
+let _init_opam =
+  let callback (instance : Extension_instance.t) () =
+    let options =
+      ProgressOptions.create
+        ~location:(`ProgressLocation Notification)
+        ~title:"Initialising opam"
+        ~cancellable:false
+        ()
+    in
+    let task ~progress:_ ~token:_ =
+      let open Promise.Syntax in
+      let+ result =
+        let open Promise.Result.Syntax in
+        let+ _ =
+          let _ =
+            let terminal = walkthrough_terminal instance in
+            let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+            Terminal_sandbox.send terminal "opam init"
+          in
+          Ok () |> Promise.return
+        in
+        ()
+      in
+      match result with
+      | Ok () -> Ojs.null
+      | Error err ->
+        show_message `Error "An error occured while initializing opam %s" err;
+        Ojs.null
+    in
+    let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    ()
+  in
+  command Command_api.Internal.init_opam callback
+;;
+
+let _install_ocaml_dev =
+  let callback (instance : Extension_instance.t) () =
+    let options =
+      ProgressOptions.create
+        ~location:(`ProgressLocation Notification)
+        ~title:"Installing development packages"
+        ~cancellable:false
+        ()
+    in
+    let task ~progress:_ ~token:_ =
+      let open Promise.Syntax in
+      let+ result =
+        let open Promise.Result.Syntax in
+        let+ _ =
+          let _ =
+            let terminal = walkthrough_terminal instance in
+            let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+            Terminal_sandbox.send
+              terminal
+              "opam install ocaml-lsp-server odoc ocamlformat utop"
+          in
+          Ok () |> Promise.return
+        in
+        ()
+      in
+      match result with
+      | Ok () -> Ojs.null
+      | Error err ->
+        show_message `Error "An error occured while installing packages %s" err;
+        Ojs.null
+    in
+    let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    ()
+  in
+  command Command_api.Internal.install_ocaml_dev callback
+;;
+
+let _open_utop =
+  let callback (instance : Extension_instance.t) () =
+    let options =
+      ProgressOptions.create
+        ~location:(`ProgressLocation Notification)
+        ~title:"Launching utop"
+        ~cancellable:false
+        ()
+    in
+    let task ~progress:_ ~token:_ =
+      let open Promise.Syntax in
+      let+ result =
+        let open Promise.Result.Syntax in
+        let+ _ =
+          let _ =
+            let terminal = walkthrough_terminal instance in
+            let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
+            Terminal_sandbox.send terminal "opam exec -- utop"
+          in
+          Ok () |> Promise.return
+        in
+        ()
+      in
+      match result with
+      | Ok () -> Ojs.null
+      | Error err ->
+        show_message `Error "An error occured while opening utop %s" err;
+        Ojs.null
+    in
+    let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    ()
+  in
+  command Command_api.Internal.open_utop callback
+;;
+
 let _open_current_dune_file =
   let callback (_ : Extension_instance.t) () =
     match Vscode.Window.activeTextEditor () with

@@ -51,6 +51,10 @@ module Internal : sig
   val augment_selection_type_verbosity : (unit, unit) handle
   val install_dune_lsp : (unit, unit) handle
   val run_dune_pkg_lock : (unit, unit) handle
+  val install_opam : (unit, unit) handle
+  val init_opam : (unit, unit) handle
+  val install_ocaml_dev : (unit, unit) handle
+  val open_utop : (unit, unit) handle
 end
 
 module Vscode : sig

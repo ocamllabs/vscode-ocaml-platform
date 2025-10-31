@@ -316,6 +316,7 @@ let upgrade ?(packages = []) t switch =
 ;;
 
 let remove t switch packages = spawn t ("remove" :: switch_arg switch :: "-y" :: packages)
+let version t = spawn t [ "--version" ]
 
 let switch_compiler t switch =
   let open Promise.Syntax in

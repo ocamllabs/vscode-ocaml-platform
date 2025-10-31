@@ -52,6 +52,9 @@ val upgrade : ?packages:string list -> t -> Switch.t -> Cmd.t
 (* Remove a list of packages from a switch *)
 val remove : t -> Switch.t -> string list -> Cmd.t
 
+(* Get the version of opam installed *)
+val version : t -> Cmd.t
+
 (* Initialize a new Opam environment. *)
 val init : t -> Cmd.t
 
