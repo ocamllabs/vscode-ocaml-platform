@@ -263,12 +263,13 @@ let walkthrough_terminal instance =
 ;;
 
 let _install_opam =
+  let outdated_opam = ref false in
   let callback (instance : Extension_instance.t) () =
     let process_installation () =
       let open Promise.Syntax in
       let* opam = Opam.make () in
-      match opam with
-      | None ->
+      match opam, !outdated_opam with
+      | None, true | Some _, true | None, false ->
         let options =
           ProgressOptions.create
             ~location:(`ProgressLocation Notification)
@@ -310,7 +311,55 @@ let _install_opam =
         in
         let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
         ()
-      | Some _ -> show_message `Info "Opam is already installed!" |> Promise.return
+      | Some opam, _ ->
+        let* latest_version =
+          Cmd.output
+            ?cwd:(Sandbox.workspace_root ())
+            (Cmd.Shell
+               "curl -s -H \"Accept: application/vnd.github+json\" \
+                https://api.github.com/repos/ocaml/opam/releases/latest | jq -r \
+                '.tag_name'")
+        in
+        let cwd = Sandbox.workspace_root () in
+        let+ installed_version = Cmd.output ?cwd (Opam.version opam) in
+        let comb =
+          Result.combine
+            latest_version
+            installed_version
+            ~ok:(fun lv iv ->
+              String.compare lv iv
+              |> Int.is_positive
+              |> fun is_outdated -> is_outdated, lv, iv)
+            ~err:(fun e1 e2 -> e1 ^ ", " ^ e2)
+        in
+        (match comb with
+         | Ok (false, _latest_version, installed_version) ->
+           show_message
+             `Info
+             "opam is already installed and up to date (version %s)."
+             installed_version
+         | Ok (true, latest_version, installed_version) ->
+           outdated_opam := true;
+           let _ =
+             let+ selection =
+               Window.showInformationMessage
+                 ~message:
+                   (Printf.sprintf
+                      "opam is already installed (version %s). A newer version (%s) is \
+                       available."
+                      installed_version
+                      latest_version)
+                 ~choices:[ "Update opam", () ]
+                 ()
+             in
+             Option.iter selection ~f:(fun () ->
+               let (_ : unit Promise.t) =
+                 Command_api.(execute Internal.install_opam) ()
+               in
+               ())
+           in
+           ()
+         | Error err -> show_message `Warn "Could not determine opam version: %s" err)
     in
     let (_ : unit Promise.t) = process_installation () in
     ()
