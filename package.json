@@ -333,10 +333,15 @@
           "default": [],
           "markdownDescription": "Extra arguments to pass to ocamllsp."
         },
-        "ocaml.server.codelens": {
+        "ocaml.server.codelens.enable": {
           "type": "boolean",
           "default": true,
           "markdownDescription": "Enable/Disable codelens"
+        },
+        "ocaml.server.codelens.forNestedBindings": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable codelens for nested let bindings"
         },
         "ocaml.server.extendedHover": {
           "type": "boolean",

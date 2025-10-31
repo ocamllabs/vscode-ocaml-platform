@@ -10,19 +10,29 @@ module OcamllspSettingEnable = struct
       val create : enable:bool -> t [@@js.builder]]
 end
 
+module OcamllspSettingCodeLens = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val enable : t -> bool or_undefined [@@js.get]
+      val forNestedBindings : t -> bool or_undefined [@@js.get]
+      val create : ?forNestedBindings:bool -> enable:bool -> unit -> t [@@js.builder]]
+end
+
 module OcamllspSettings = struct
   include Interface.Make ()
 
   include
     [%js:
-      val codelens : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+      val codelens : t -> OcamllspSettingCodeLens.t or_undefined [@@js.get]
       val extendedHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
       val standardHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
       val duneDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
       val syntaxDocumentation : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
 
       val create
-        :  ?codelens:OcamllspSettingEnable.t
+        :  ?codelens:OcamllspSettingCodeLens.t
         -> ?extendedHover:OcamllspSettingEnable.t
         -> ?standardHover:OcamllspSettingEnable.t
         -> ?duneDiagnostics:OcamllspSettingEnable.t

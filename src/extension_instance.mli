@@ -25,6 +25,7 @@ val suggest_to_run_dune_pkg_lock : unit -> unit
 val set_configuration
   :  t
   -> ?codelens:bool option
+  -> ?codelens_for_nested_bindings:bool option
   -> ?extended_hover:bool option
   -> ?standard_hover:bool option
   -> ?dune_diagnostics:bool option

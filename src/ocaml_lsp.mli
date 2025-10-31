@@ -20,17 +20,25 @@ module OcamllspSettingEnable : sig
   val create : enable:bool -> t
 end
 
+module OcamllspSettingCodeLens : sig
+  include Ojs.T
+
+  val enable : t -> bool option
+  val forNestedBindings : t -> bool option
+  val create : ?forNestedBindings:bool -> enable:bool -> unit -> t
+end
+
 module OcamllspSettings : sig
   include Ojs.T
 
-  val codelens : t -> OcamllspSettingEnable.t option
+  val codelens : t -> OcamllspSettingCodeLens.t option
   val extendedHover : t -> OcamllspSettingEnable.t option
   val standardHover : t -> OcamllspSettingEnable.t option
   val duneDiagnostics : t -> OcamllspSettingEnable.t option
   val syntaxDocumentation : t -> OcamllspSettingEnable.t option
 
   val create
-    :  codelens:OcamllspSettingEnable.t option
+    :  codelens:OcamllspSettingCodeLens.t option
     -> extendedHover:OcamllspSettingEnable.t option
     -> standardHover:OcamllspSettingEnable.t option
     -> duneDiagnostics:OcamllspSettingEnable.t option
