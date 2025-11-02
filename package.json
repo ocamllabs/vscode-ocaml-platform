@@ -785,7 +785,7 @@
       {
         "command": "ocaml.switch-impl-intf",
         "key": "Alt+O",
-        "when": "editorTextFocus && (editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir || editorLangId == ocaml.mlx)"
+        "when": "editorTextFocus && (editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.mlx)"
       },
       {
         "command": "editor.action.codeAction",
