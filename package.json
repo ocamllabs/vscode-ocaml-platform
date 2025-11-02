@@ -1,7 +1,7 @@
 {
   "name": "ocaml-platform",
   "displayName": "OCaml Platform",
-  "version": "1.32.3",
+  "version": "1.32.4",
   "private": true,
   "description": "Official OCaml language extension for VSCode",
   "categories": [
@@ -785,7 +785,7 @@
       {
         "command": "ocaml.switch-impl-intf",
         "key": "Alt+O",
-        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir || editorLangId == ocaml.mlx"
+        "when": "editorTextFocus && (editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir || editorLangId == ocaml.mlx)"
       },
       {
         "command": "editor.action.codeAction",
@@ -793,7 +793,7 @@
         "args": {
           "kind": "destruct (enumerate cases)"
         },
-        "when": "editorLangId == ocaml || editorLangId == reason || editorLangId == ocaml.mlx"
+        "when": "editorTextFocus && (editorLangId == ocaml || editorLangId == reason || editorLangId == ocaml.mlx)"
       },
       {
         "command": "ocaml.construct",
@@ -801,7 +801,7 @@
         "args": {
           "kind": "construct"
         },
-        "when": "editorLangId == ocaml || editorLangId == reason || editorLangId == ocaml.mlx"
+        "when": "editorTextFocus && (editorLangId == ocaml || editorLangId == reason || editorLangId == ocaml.mlx)"
       },
       {
         "command": "ocaml.jump",
@@ -809,7 +809,7 @@
         "args": {
           "kind": "jump"
         },
-        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.mlx"
+        "when": "editorTextFocus && (editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.mlx)"
       },
       {
         "command": "editor.action.codeAction",
@@ -817,22 +817,22 @@
         "args": {
           "kind": "inferred_intf"
         },
-        "when": "editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.mlx"
+        "when": "editorTextFocus && (editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.mlx)"
       },
       {
         "command": "ocaml.evaluate-selection",
         "key": "Shift+Enter",
-        "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir || editorTextFocus && editorLangId == ocaml.mlx"
+        "when": "editorTextFocus && (editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.mlx)"
       },
       {
         "command": "ocaml.next-hole",
         "key": "Alt+Y",
-        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.mlx"
+        "when": "editorTextFocus && (editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.mlx)"
       },
       {
         "command": "ocaml.prev-hole",
         "key": "Shift+Alt+Y",
-        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.mlx"
+        "when": "editorTextFocus && (editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.mlx)"
       },
       {
         "command": "ocaml.reveal-ast-node",
@@ -847,7 +847,7 @@
       {
         "command": "ocaml.search-by-type",
         "key": "Alt+F",
-        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.mlx"
+        "when": "editorTextFocus && (editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.mlx)"
       },
       {
         "command": "ocaml.type-selection",
@@ -1089,7 +1089,7 @@
         {
           "command": "ocaml.evaluate-selection",
           "group": "OCaml",
-          "when": "editorTextFocus && editorLangId == ocaml || editorTextFocus && editorLangId == ocaml.interface || editorTextFocus && editorLangId == reason || editorTextFocus && editorLangId == ocaml.ocamllex || editorTextFocus && editorLangId == ocaml.menhir || editorTextFocus && editorLangId == ocaml.mlx"
+          "when": "editorTextFocus && (editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.mlx)"
         },
         {
           "command": "ocaml.reveal-ast-node",
@@ -1104,11 +1104,11 @@
         },
         {
           "command": "ocaml.next-hole",
-          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.mlx"
+        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.mlx"
         },
         {
           "command": "ocaml.prev-hole",
-          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.mlx"
+        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.mlx"
         },
         {
           "command": "ocaml.refresh-switches",
@@ -1160,15 +1160,15 @@
         },
         {
           "command": "ocaml.copy-type-under-cursor",
-          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason"
         },
         {
           "command": "ocaml.construct",
-          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex"
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason"
         },
         {
           "command": "ocaml.search-by-type",
-          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.mlx"
+        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.mlx"
         },
         {
           "command": "ocaml.navigate-typed-holes",
@@ -1179,7 +1179,7 @@
         {
           "command": "ocaml.switch-impl-intf",
           "key": "Alt+O",
-          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.menhir",
+          "when": "editorTextFocus && (editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.mlx)",
           "group": "navigation"
         }
       ],
@@ -1351,15 +1351,15 @@
     "vscode-languageclient": "9.0.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.2.5",
+    "@biomejs/biome": "^2.3.2",
     "@tsconfig/node24": "24.0.1",
-    "@tsconfig/strictest": "2.0.6",
-    "@types/node": "24.6.2",
+    "@tsconfig/strictest": "2.0.7",
+    "@types/node": "24.9.2",
     "@types/vscode": "1.86.0",
-    "@vscode/test-cli": "0.0.11",
+    "@vscode/test-cli": "0.0.12",
     "@vscode/test-electron": "2.5.2",
     "@vscode/vsce": "3.6.2",
-    "esbuild": "0.25.10",
+    "esbuild": "0.25.12",
     "ovsx": "0.10.6",
     "typescript": "5.9.3"
   },

@@ -7,6 +7,23 @@
 - Enable switching between implementation and interface for mlx files
 - Add keybindings for OCaml.mlx language
 
+## 1.32.4
+
+- Fix editor focus condition for interface file keybindings. Previously,
+  keybindings for `ocaml.interface` files were active even when the editor
+  did not have focus due to operator precedence in the when clauses. (#1983)
+- Remove `ocaml.ocamllex` from type-dependent command conditions. OCamllex
+  files use a specialised lexer definition syntax and do not have full LSP
+  support with type information. Commands requiring type information
+  (`construct`, `next-hole`, `prev-hole`, `search-by-type`,
+  `copy-type-under-cursor`) were incorrectly enabled for `.mll` files and
+  have been removed. (#1984)
+- Fix keybinding conditions to ensure correct language support. Explicitly add
+  `editorTextFocus` to each language condition to clarify operator precedence.
+  Remove `ocaml.ocamllex` and `ocaml.menhir` from `switch-impl-intf` and
+  `evaluate-selection` commands as these languages are not supported by those
+  features. (#1985)
+
 ## 1.32.3
 
 - Fix utop detection by using `-version` flag instead of `--version` to align

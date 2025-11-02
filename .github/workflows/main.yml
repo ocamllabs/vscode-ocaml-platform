@@ -24,14 +24,8 @@ jobs:
         with:
           ocaml-compiler: 5
 
-      - name: Set-up Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: 24
-          check-latest: true
-          package-manager-cache: false
-
-      - run: corepack enable
+      - name: Set-up Mise
+        uses: jdx/mise-action@v3
 
       - name: Install dependencies
         run: |
@@ -51,7 +45,7 @@ jobs:
           subject-path: ocaml-platform.vsix
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ocaml-platform-${{ github.sha }}
           path: ocaml-platform.vsix
@@ -94,20 +88,14 @@ jobs:
       - name: Checkout tree
         uses: actions/checkout@v5
 
-      - name: Set-up Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: 24
-          check-latest: true
-          package-manager-cache: false
-
-      - run: corepack enable
+      - name: Set-up Mise
+        uses: jdx/mise-action@v3
 
       - name: Install dependencies
         run: yarn install --immutable
 
       - name: Download artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: ocaml-platform-${{ github.sha }}
 
