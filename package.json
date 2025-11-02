@@ -1108,7 +1108,7 @@
         },
         {
           "command": "ocaml.prev-hole",
-        "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.mlx"
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.mlx"
         },
         {
           "command": "ocaml.refresh-switches",
