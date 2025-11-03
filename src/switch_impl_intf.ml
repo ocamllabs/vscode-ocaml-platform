@@ -4,7 +4,7 @@ let insert_inferred_intf ~source_uri client text_editor =
   let open Promise.Syntax in
   match Stdlib.Filename.extension source_uri with
   | ".ml" | ".mlx" | ".re" ->
-    (* If the source file was a .ml or .re, infer the interface *)
+    (* If the source file was a .ml, .mlx or .re, infer the interface *)
     let* inferred_intf =
       Custom_requests.send_request client Custom_requests.inferIntf source_uri
     in
