@@ -661,7 +661,7 @@ module Construct = struct
 
   let is_valid_text_doc textdoc =
     match TextDocument.languageId textdoc with
-    | "ocaml" | "ocaml.interface" | "reason" | "ocaml.ocamllex" -> true
+    | "ocaml" | "ocaml.interface" | "ocaml.ocamllex" | "reason" -> true
     | _ -> false
   ;;
 
@@ -765,7 +765,7 @@ module MerlinJump = struct
 
   let is_valid_text_doc textdoc =
     match TextDocument.languageId textdoc with
-    | "ocaml" | "ocaml.interface" | "reason" | "ocaml.ocamllex" -> true
+    | "ocaml" | "ocaml.interface" | "ocaml.ocamllex" | "reason" -> true
     | _ -> false
   ;;
 
@@ -958,7 +958,7 @@ module Search_by_type = struct
 
   let is_valid_text_doc textdoc =
     match TextDocument.languageId textdoc with
-    | "ocaml" | "ocaml.interface" | "reason" | "ocaml.ocamllex" -> true
+    | "ocaml" | "ocaml.interface" | "ocaml.ocamllex" | "reason" -> true
     | _ -> false
   ;;
 

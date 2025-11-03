@@ -4,8 +4,8 @@ let insert_inferred_intf ~source_uri client text_editor =
   let open Promise.Syntax in
   match
     String.is_suffix source_uri ~suffix:".ml"
-    || String.is_suffix source_uri ~suffix:".re"
     || String.is_suffix source_uri ~suffix:".mlx"
+    || String.is_suffix source_uri ~suffix:".re"
   with
   | false -> Promise.return ()
   | true ->

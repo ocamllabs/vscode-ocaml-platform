@@ -67,9 +67,9 @@ end = struct
     let relative = relative_document_path ~document in
     match Stdlib.Filename.extension relative with
     | ".ml" -> Structure `Ocaml
-    | ".re" -> Structure `Reason
-    | ".mlx" -> Structure `Ocaml
     | ".mli" -> Signature `Ocaml
+    | ".mlx" -> Structure `Ocaml
+    | ".re" -> Structure `Reason
     | ".rei" -> Signature `Reason
     | _ -> Unknown
   ;;
