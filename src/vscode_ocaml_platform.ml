@@ -30,7 +30,7 @@ let notify_configuration_changes instance =
       Extension_instance.set_configuration
         instance
         ~codelens
-        ?codelens_for_nested_bindings
+        ~codelens_for_nested_bindings
         ~extended_hover
         ~dune_diagnostics
         ~syntax_documentation
