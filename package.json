@@ -1168,7 +1168,7 @@
         },
         {
           "command": "ocaml.search-by-type",
-          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.ocamllex || editorLangId == ocaml.mlx"
+          "when": "editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == reason || editorLangId == ocaml.mlx"
         },
         {
           "command": "ocaml.navigate-typed-holes",
