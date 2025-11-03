@@ -1341,6 +1341,7 @@
     "workspaceContains:**/*.mli",
     "workspaceContains:**/*.mll",
     "workspaceContains:**/*.mly",
+    "workspaceContains:**/*.mlx",
     "workspaceContains:**/*.re",
     "workspaceContains:**/*.rei",
     "onDebugResolve:ocaml.earlybird"
