@@ -661,7 +661,7 @@ module Construct = struct
 
   let is_valid_text_doc textdoc =
     match TextDocument.languageId textdoc with
-    | "ocaml" | "ocaml.interface" | "reason" | "ocaml.ocamllex" -> true
+    | "ocaml" | "ocaml.interface" | "ocaml.ocamllex" | "ocaml.mlx" | "reason" -> true
     | _ -> false
   ;;
 
@@ -738,7 +738,7 @@ module Construct = struct
           show_message
             `Error
             "Invalid file type. This command only works in ocaml files, ocaml interface \
-             files, reason files or ocamllex files."
+             files, ocamllex files, mlx files or reason files."
         | Some text_editor ->
           (match Extension_instance.lsp_client instance with
            | None -> show_message `Warn "ocamllsp is not running"
@@ -765,7 +765,7 @@ module MerlinJump = struct
 
   let is_valid_text_doc textdoc =
     match TextDocument.languageId textdoc with
-    | "ocaml" | "ocaml.interface" | "reason" | "ocaml.ocamllex" -> true
+    | "ocaml" | "ocaml.interface" | "ocaml.ocamllex" | "ocaml.mlx" | "reason" -> true
     | _ -> false
   ;;
 
@@ -931,7 +931,7 @@ module MerlinJump = struct
           show_message
             `Error
             "Invalid file type. This command only works in ocaml files, ocaml interface \
-             files or reason files."
+             files, ocamllex files, mlx files or reason files."
         | Some text_editor ->
           (match Extension_instance.lsp_client instance with
            | None -> show_message `Warn "ocamllsp is not running"
@@ -958,7 +958,7 @@ module Search_by_type = struct
 
   let is_valid_text_doc textdoc =
     match TextDocument.languageId textdoc with
-    | "ocaml" | "ocaml.interface" | "reason" | "ocaml.ocamllex" -> true
+    | "ocaml" | "ocaml.interface" | "ocaml.ocamllex" | "ocaml.mlx" | "reason" -> true
     | _ -> false
   ;;
 
@@ -1135,7 +1135,7 @@ module Search_by_type = struct
         show_message
           `Error
           "Invalid file type. This command only works in ocaml files, ocaml interface \
-           files, reason files or ocamllex files."
+           files, ocamllex files, mlx files or reason files."
       | Some text_editor ->
         (match Extension_instance.lsp_client instance with
          | None -> show_message `Warn "ocamllsp is not running"

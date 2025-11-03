@@ -168,8 +168,8 @@ end = struct
          ; language "ocaml.interface"
          ; language "ocaml.ocamllex"
          ; language "ocaml.menhir"
-         ; language "reason"
          ; language "ocaml.mlx"
+         ; language "reason"
         |]
     in
     let (lazy outputChannel) = Output.language_server_output_channel in

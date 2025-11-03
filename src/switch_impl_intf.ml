@@ -2,14 +2,9 @@ open Import
 
 let insert_inferred_intf ~source_uri client text_editor =
   let open Promise.Syntax in
-  match
-    String.is_suffix source_uri ~suffix:".ml"
-    || String.is_suffix source_uri ~suffix:".re"
-    || String.is_suffix source_uri ~suffix:".mlx"
-  with
-  | false -> Promise.return ()
-  | true ->
-    (* If the source file was a .ml or .re, infer the interface *)
+  match Stdlib.Filename.extension source_uri with
+  | ".ml" | ".mlx" | ".re" ->
+    (* If the source file was a .ml, .mlx or .re, infer the interface *)
     let* inferred_intf =
       Custom_requests.send_request client Custom_requests.inferIntf source_uri
     in
@@ -24,6 +19,7 @@ let insert_inferred_intf ~source_uri client text_editor =
         ()
     in
     if not edit_applied then show_message `Error "Unable to insert inferred interface"
+  | _ -> Promise.return ()
 ;;
 
 let request_switch client document =
