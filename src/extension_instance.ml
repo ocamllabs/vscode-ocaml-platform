@@ -178,6 +178,7 @@ end = struct
          ; language "ocaml.interface"
          ; language "ocaml.ocamllex"
          ; language "ocaml.menhir"
+         ; language "ocaml.mlx"
          ; language "reason"
         |]
     in
