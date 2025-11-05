@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add OCaml onboarding welcome screen. (#1737)
 - Add `ocaml.server.codelens.forNestedBindings` setting to control whether
   CodeLens should be displayed for nested bindings. Defaults to `false`,
   showing CodeLens only for top-level bindings.
