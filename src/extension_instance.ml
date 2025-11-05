@@ -12,6 +12,7 @@ type t =
   ; sandbox_info : StatusBarItem.t
   ; ast_editor_state : Ast_editor_state.t
   ; mutable codelens : bool option
+  ; mutable codelens_for_nested_bindings : bool option
   ; mutable extended_hover : bool option
   ; mutable standard_hover : bool option
   ; mutable dune_diagnostics : bool option
@@ -26,6 +27,7 @@ let ocaml_version_exn t = Option.value_exn t.ocaml_version
 
 let send_configuration
       ~codelens
+      ~codelens_for_nested_bindings
       ~extended_hover
       ~standard_hover
       ~dune_diagnostics
@@ -33,7 +35,11 @@ let send_configuration
       client
   =
   let codelens =
-    Option.map codelens ~f:(fun enable -> Ocaml_lsp.OcamllspSettingEnable.create ~enable)
+    Option.map codelens ~f:(fun enable ->
+      Ocaml_lsp.OcamllspSettingCodeLens.create
+        ?forNestedBindings:codelens_for_nested_bindings
+        ~enable
+        ())
   in
   let extendedHover =
     Option.map extended_hover ~f:(fun enable ->
@@ -73,6 +79,7 @@ let send_configuration
 let set_configuration
       t
       ?codelens
+      ?codelens_for_nested_bindings
       ?extended_hover
       ?standard_hover
       ?dune_diagnostics
@@ -80,6 +87,8 @@ let set_configuration
       ()
   =
   Option.iter codelens ~f:(fun codelens -> t.codelens <- codelens);
+  Option.iter codelens_for_nested_bindings ~f:(fun codelens_for_nested_bindings ->
+    t.codelens_for_nested_bindings <- codelens_for_nested_bindings);
   Option.iter extended_hover ~f:(fun extended_hover -> t.extended_hover <- extended_hover);
   Option.iter standard_hover ~f:(fun standard_hover -> t.standard_hover <- standard_hover);
   Option.iter dune_diagnostics ~f:(fun dune_diagnostics ->
@@ -91,6 +100,7 @@ let set_configuration
   | Some (client, (_ : Ocaml_lsp.t)) ->
     send_configuration
       ~codelens:t.codelens
+      ~codelens_for_nested_bindings:t.codelens_for_nested_bindings
       ~extended_hover:t.extended_hover
       ~standard_hover:t.standard_hover
       ~dune_diagnostics:t.dune_diagnostics
@@ -268,6 +278,7 @@ end = struct
         send_configuration
           client
           ~codelens:t.codelens
+          ~codelens_for_nested_bindings:t.codelens_for_nested_bindings
           ~extended_hover:t.extended_hover
           ~standard_hover:t.standard_hover
           ~dune_diagnostics:t.dune_diagnostics
@@ -360,6 +371,7 @@ let make () =
   ; ast_editor_state
   ; documentation_server = None
   ; codelens = None
+  ; codelens_for_nested_bindings = None
   ; extended_hover = None
   ; standard_hover = None
   ; dune_diagnostics = None
