@@ -16,6 +16,7 @@ type t =
   ; mutable standard_hover : bool option
   ; mutable dune_diagnostics : bool option
   ; mutable syntax_documentation : bool option
+  ; mutable prompted_for_ocamlmerlin_mlx : bool
   }
 
 let sandbox t = t.sandbox
@@ -384,6 +385,7 @@ let make () =
   ; standard_hover = None
   ; dune_diagnostics = None
   ; syntax_documentation = None
+  ; prompted_for_ocamlmerlin_mlx = false
   }
 ;;
 
@@ -527,8 +529,9 @@ let suggest_or_install_ocamlmerlin_mlx t =
 
 let check_mlx_file_opened t (document : TextDocument.t) =
   let file_name = TextDocument.fileName document in
-  if String.is_suffix file_name ~suffix:".mlx"
+  if String.is_suffix file_name ~suffix:".mlx" && not t.prompted_for_ocamlmerlin_mlx
   then (
+    t.prompted_for_ocamlmerlin_mlx <- true;
     let (_ : unit Promise.t) =
       let open Promise.Syntax in
       let* ocamlmerlin_mlx_present = check_ocamlmerlin_mlx_available t.sandbox in
