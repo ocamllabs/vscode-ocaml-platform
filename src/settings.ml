@@ -130,7 +130,7 @@ let server_codelens_for_nested_bindings_setting =
     ~scope:ConfigurationTarget.Workspace
     ~key:"ocaml.server.codelens"
     ~of_json:Jsonoo.Decode.(try_default false (field "forNestedBindings" bool))
-    ~to_json:Jsonoo.Encode.(bool)
+    ~to_json:Jsonoo.Encode.bool
 ;;
 
 let server_extendedHover_setting =
