@@ -3,6 +3,26 @@
 ## Unreleased
 
 - Add OCaml onboarding welcome screen. (#1737)
+- Add `ocaml.server.codelens.forNestedBindings` setting to control whether
+  CodeLens should be displayed for nested bindings. Defaults to `false`,
+  showing CodeLens only for top-level bindings.
+  - ⚠️ This is a **breaking change** for users who have already used
+    `ocaml.server.codelens`. The existing `ocaml.server.codelens` setting has
+    been renamed to `ocaml.server.codelens.enable`. (#1990)
+- Add `ocaml.mlx` language support to document selector. (#1964)
+- Enable AST editor for MLX files. (#1964)
+- Enable switching between implementation and interface for MLX files. (#1964)
+- Add keybindings for `ocaml.mlx` language. (#1964)
+- Standardise file extension and language ID ordering across all configuration
+  and source files. All comprehensive lists now follow the canonical order:
+  `.ml`, `.mli`, `.mll`, `.mly`, `.mlx`, `.re`, `.rei`. When only a subset of
+  extensions is relevant (e.g., in pattern matches), the same relative order is
+  used, but some extensions may be omitted as appropriate. This affects activation
+  events, keybindings, menus, language server configuration and pattern matching. (#1999)
+- Add `.mlx` workspace detection to `activationEvents` to ensure the extension
+  activates when MLX files are present in the workspace. (#1999)
+- Add `ocaml.mlx` language support to `construct`, `jump` and `search-by-type`
+  commands. These commands now correctly validate and work with MLX files. (#1999)
 
 ## 1.32.4
 

@@ -36,6 +36,7 @@ val substitute_workspace_vars : string -> string
 val server_extraEnv : unit -> string Interop.Dict.t option
 val server_args_setting : string list setting
 val server_codelens_setting : bool setting
+val server_codelens_for_nested_bindings_setting : bool setting
 val server_extendedHover_setting : bool setting
 val server_duneDiagnostics_setting : bool setting
 val server_syntaxDocumentation_setting : bool setting

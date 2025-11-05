@@ -120,8 +120,16 @@ let server_args_setting =
 let server_codelens_setting =
   create_setting
     ~scope:ConfigurationTarget.Workspace
-    ~key:"ocaml.server.codelens"
+    ~key:"ocaml.server.codelens.enable"
     ~of_json:Jsonoo.Decode.bool
+    ~to_json:Jsonoo.Encode.bool
+;;
+
+let server_codelens_for_nested_bindings_setting =
+  create_setting
+    ~scope:ConfigurationTarget.Workspace
+    ~key:"ocaml.server.codelens"
+    ~of_json:Jsonoo.Decode.(try_default false (field "forNestedBindings" bool))
     ~to_json:Jsonoo.Encode.bool
 ;;
 
