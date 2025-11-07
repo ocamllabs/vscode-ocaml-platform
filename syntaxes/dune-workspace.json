@@ -39,6 +39,180 @@
         },
 
         {
+          "comment": "lock_dir",
+          "begin": "\\([[:space:]]*(lock_dir)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-workspace" }
+          },
+          "patterns": [
+            {
+              "comment": "path",
+              "begin": "\\([[:space:]]*(path)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-workspace" }
+              },
+              "patterns": [{ "include": "source.dune#general" }]
+            },
+            {
+              "comment": "repositories",
+              "begin": "\\([[:space:]]*(repositories)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-workspace" }
+              },
+              "patterns": [{ "include": "source.dune#general" }]
+            },
+            {
+              "comment": "solver_env",
+              "begin": "\\([[:space:]]*(solver_env)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-workspace" }
+              },
+              "patterns": [{ "include": "source.dune#general" }]
+            },
+            {
+              "comment": "unset_variables",
+              "begin": "\\([[:space:]]*(unset_variables)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-workspace" }
+              },
+              "patterns": [{ "include": "source.dune#general" }]
+            },
+            {
+              "comment": "pins",
+              "begin": "\\([[:space:]]*(pins)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-workspace" }
+              },
+              "patterns": [{ "include": "source.dune#general" }]
+            },
+            {
+              "comment": "version_preference",
+              "begin": "\\([[:space:]]*(version_preference)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-workspace" }
+              },
+              "patterns": [
+                {
+                  "comment": "newest/oldest",
+                  "name": "variable.other.declaration.dune-project",
+                  "match": "\\b(newest|oldest)\\b"
+                },
+                { "include": "source.dune#general" }
+              ]
+            },
+            {
+              "comment": "constraints",
+              "begin": "\\([[:space:]]*(constraints)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-workspace" }
+              },
+              "patterns": [{ "include": "source.dune#general" }]
+            },
+            {
+              "comment": "depopts",
+              "begin": "\\([[:space:]]*(depopts)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-workspace" }
+              },
+              "patterns": [{ "include": "source.dune#general" }]
+            },
+            { "include": "source.dune#general" }
+          ]
+        },
+
+        {
+          "comment": "pin",
+          "begin": "\\([[:space:]]*(pin)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-workspace" }
+          },
+          "patterns": [
+            {
+              "comment": "url",
+              "begin": "\\([[:space:]]*(url)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-workspace" }
+              },
+              "patterns": [{ "include": "source.dune#general" }]
+            },
+            {
+              "comment": "package",
+              "begin": "\\([[:space:]]*(package)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-workspace" }
+              },
+              "patterns": [
+                {
+                  "comment": "name",
+                  "begin": "\\([[:space:]]*(name)\\b",
+                  "end": "\\)",
+                  "beginCaptures": {
+                    "1": { "name": "keyword.language.dune-workspace" }
+                  },
+                  "contentName": "variable.other.declaration.dune-project",
+                  "patterns": [{ "include": "source.dune#general" }]
+                },
+                {
+                  "comment": "version",
+                  "begin": "\\([[:space:]]*(version)\\b",
+                  "end": "\\)",
+                  "beginCaptures": {
+                    "1": { "name": "keyword.language.dune-workspace" }
+                  },
+                  "contentName": "constant.language.dune-project",
+                  "patterns": [{ "include": "source.dune#general" }]
+                },
+                { "include": "source.dune#general" }
+              ]
+            },
+            { "include": "source.dune#general" }
+          ]
+        },
+
+        {
+          "comment": "repository",
+          "begin": "\\([[:space:]]*(repository)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-workspace" }
+          },
+          "patterns": [
+            {
+              "comment": "name",
+              "begin": "\\([[:space:]]*(name)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-workspace" }
+              },
+              "contentName": "variable.other.declaration.dune-project",
+              "patterns": [{ "include": "source.dune#general" }]
+            },
+            {
+              "comment": "url",
+              "begin": "\\([[:space:]]*(url)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-workspace" }
+              },
+              "patterns": [{ "include": "source.dune#general" }]
+            },
+            { "include": "source.dune#general" }
+          ]
+        },
+
+        {
           "comment": "context",
           "begin": "\\([[:space:]]*(context)\\b",
           "end": "\\)",
@@ -304,6 +478,36 @@
               "comment": "preserve/clear-on-rebuild/clear-on-rebuild-and-flush-history",
               "name": "variable.other.declaration.dune-project",
               "match": "\\b(preserve|clear-on-rebuild-and-flush-history|clear-on-rebuild)\\b"
+            },
+            { "include": "source.dune#general" }
+          ]
+        },
+        {
+          "comment": "config:project_defaults",
+          "begin": "\\([[:space:]]*(project_defaults)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-workspace" }
+          },
+          "patterns": [
+            {
+              "comment": "authors/maintainers",
+              "begin": "\\([[:space:]]*(authors|maintainers)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-workspace" }
+              },
+              "patterns": [{ "include": "source.dune#general" }]
+            },
+            {
+              "comment": "license",
+              "begin": "\\([[:space:]]*(license)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-workspace" }
+              },
+              "contentName": "constant.language.dune-project",
+              "patterns": [{ "include": "source.dune#general" }]
             },
             { "include": "source.dune#general" }
           ]
