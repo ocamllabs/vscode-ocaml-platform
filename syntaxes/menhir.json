@@ -1,7 +1,7 @@
 {
   "name": "Menhir",
   "scopeName": "source.ocaml.menhir",
-  "fileTypes": ["mly"],
+  "fileTypes": ["mly", "vy"],
   "patterns": [
     { "include": "#comments" },
     {
