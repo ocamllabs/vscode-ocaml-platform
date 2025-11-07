@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Update syntaxes. (#2004)
+
 ## 2.0.0
 
 - Add OCaml onboarding welcome screen. (#1737)
