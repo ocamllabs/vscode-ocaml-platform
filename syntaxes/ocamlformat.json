@@ -57,15 +57,15 @@
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(?<!-)(leading-nested-match-parens|let-and|let-binding-indent|let-binding-spacing|let-module|let-open|line-endings)(?!-)\\b"
+          "match": "\\b(?<!-)(leading-nested-match-parens|let-and|let-binding-deindent-fun|let-binding-indent|let-binding-spacing|let-module|let-open|letop-punning|line-endings)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(?<!-)(margin|margin-check|match-indent|match-indent-nested|max-indent|max-iters|module-item-spacing)(?!-)\\b"
+          "match": "\\b(?<!-)(margin|margin-check|match-indent|match-indent-nested|max-indent|max-iters|module-indent|module-item-spacing)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
-          "match": "\\b(?<!-)(name|nested-match|no-break-infix-before-func|no-break-sequences|no-comment-check|no-debug|no-disable|no-disable-conf-attrs|no-disambiguate-non-breaking-match|no-dock-collection-brackets|no-leading-nested-match-parens|no-margin-check|no-ocp-indent-compat|no-parens-ite|no-parse-docstrings|no-parse-toplevel-phrases|no-quiet|no-space-around-arrays|no-space-around-lists|no-space-around-records|no-space-around-variants|no-version-check|no-wrap-comments|no-wrap-fun-args)(?!-)\\b"
+          "match": "\\b(?<!-)(name|nested-match|no-break-infix-before-func|no-break-sequences|no-comment-check|no-debug|no-disable|no-disable-conf-attrs|no-disambiguate-non-breaking-match|no-dock-collection-brackets|no-leading-nested-match-parens|no-let-binding-deindent-fun|no-margin-check|no-ocp-indent-compat|no-parens-ite|no-parse-docstrings|no-parse-toplevel-phrases|no-quiet|no-space-around-arrays|no-space-around-lists|no-space-around-records|no-space-around-variants|no-version-check|no-wrap-comments|no-wrap-fun-args)(?!-)\\b"
         },
         {
           "name": "keyword.other.ocamlformat",
@@ -208,6 +208,10 @@
         {
           "name": "string.other.ocamlformat",
           "match": "\\b(?<!-)(compact|preserve|sparse)(?!-)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(?<!-)(preserve|always|never)(?!-)\\b"
         },
         {
           "name": "string.other.ocamlformat",
