@@ -1473,7 +1473,7 @@
     "@vscode/test-cli": "0.0.12",
     "@vscode/test-electron": "2.5.2",
     "@vscode/vsce": "3.6.2",
-    "esbuild": "0.25.12",
+    "esbuild": "0.27.0",
     "ovsx": "0.10.6",
     "typescript": "5.9.3"
   },
