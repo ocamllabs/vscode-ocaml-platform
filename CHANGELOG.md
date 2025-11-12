@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 2.0.1
+
 - Update syntaxes. (#2004)
 
 ## 2.0.0
