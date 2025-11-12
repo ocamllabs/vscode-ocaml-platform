@@ -295,9 +295,6 @@
                       },
                       "patterns": [
                         {
-                          "include": "#predicate_language"
-                        },
-                        {
                           "include": "#general"
                         }
                       ]
@@ -1029,6 +1026,146 @@
             },
             {
               "include": "#library"
+            },
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "cram",
+          "begin": "\\([[:space:]]*(cram)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "comment": "deps",
+              "begin": "\\([[:space:]]*(deps)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#dependencies"
+                },
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "comment": "applies_to",
+              "begin": "\\([[:space:]]*(applies_to)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "comment": "enabled_if",
+              "begin": "\\([[:space:]]*(enabled_if)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "comment": "alias",
+              "begin": "\\([[:space:]]*(alias)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "contentName": "variable.other.declaration.dune",
+              "patterns": [
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "comment": "locks",
+              "begin": "\\([[:space:]]*(locks)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "comment": "package",
+              "begin": "\\([[:space:]]*(package)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "contentName": "variable.other.declaration.dune",
+              "patterns": [
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "comment": "runtest_alias",
+              "begin": "\\([[:space:]]*(runtest_alias)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "comment": "timeout",
+              "begin": "\\([[:space:]]*(timeout)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#general"
+                }
+              ]
             },
             {
               "include": "#general"
@@ -3076,7 +3213,7 @@
         {
           "comment": "symbol",
           "name": "entity.name.function.action.dune",
-          "match": "(:[[:alpha:]-]+)\\b"
+          "match": "(:[[:word:]_-]+)\\b"
         },
         {
           "comment": "number or version",

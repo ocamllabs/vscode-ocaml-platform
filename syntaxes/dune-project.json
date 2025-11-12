@@ -342,6 +342,66 @@
           },
           "patterns": [{ "include": "source.dune#general" }]
         },
+        {
+          "comment": "maintenance_intent",
+          "begin": "\\([[:space:]]*(maintenance_intent)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-project" }
+          },
+          "patterns": [{ "include": "source.dune#general" }]
+        },
+        {
+          "comment": "pin",
+          "begin": "\\([[:space:]]*(pin)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-project" }
+          },
+          "patterns": [
+            {
+              "comment": "url",
+              "begin": "\\([[:space:]]*(url)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-project" }
+              },
+              "patterns": [{ "include": "source.dune#general" }]
+            },
+            {
+              "comment": "package",
+              "begin": "\\([[:space:]]*(package)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-project" }
+              },
+              "patterns": [
+                {
+                  "comment": "name",
+                  "begin": "\\([[:space:]]*(name)\\b",
+                  "end": "\\)",
+                  "beginCaptures": {
+                    "1": { "name": "keyword.language.dune-project" }
+                  },
+                  "contentName": "variable.other.declaration.dune-project",
+                  "patterns": [{ "include": "source.dune#general" }]
+                },
+                {
+                  "comment": "version",
+                  "begin": "\\([[:space:]]*(version)\\b",
+                  "end": "\\)",
+                  "beginCaptures": {
+                    "1": { "name": "keyword.language.dune-project" }
+                  },
+                  "contentName": "constant.language.dune-project",
+                  "patterns": [{ "include": "source.dune#general" }]
+                },
+                { "include": "source.dune#general" }
+              ]
+            },
+            { "include": "source.dune#general" }
+          ]
+        },
 
         { "include": "#opam-metadata" }
       ]
@@ -410,6 +470,16 @@
         {
           "comment": "bug_reports/homepage/documentation",
           "begin": "\\([[:space:]]*(bug_reports|homepage|documentation)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.language.dune-project" }
+          },
+          "patterns": [{ "include": "source.dune#general" }]
+        },
+
+        {
+          "comment": "maintenance_intent",
+          "begin": "\\([[:space:]]*(maintenance_intent)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-project" }
