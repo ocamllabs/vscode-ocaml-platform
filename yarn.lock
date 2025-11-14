@@ -2153,10 +2153,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tsconfig/node24@npm:24.0.1":
-  version: 24.0.1
-  resolution: "@tsconfig/node24@npm:24.0.1"
-  checksum: 10c0/18e2ad5946bc6ddc9fbe37c4537439245da16eb8a5888641a1cdbc412a465ee321b5fa7c0ffc489c929d65c8bd0698ece9e8f3c52ae2596433ad0e866857bc83
+"@tsconfig/node24@npm:24.0.2":
+  version: 24.0.2
+  resolution: "@tsconfig/node24@npm:24.0.2"
+  checksum: 10c0/6298a4b97409bc5c2e4b148dd83fe629178f55fa5f2d7a0462f13d6ee319e6118fcb4576a67e9b22bfafda98ae9d71ad65b7688e3555dbfb8923e958870a12d9
   languageName: node
   linkType: hard
 
@@ -5177,7 +5177,7 @@ __metadata:
   resolution: "ocaml-platform@workspace:."
   dependencies:
     "@biomejs/biome": "npm:2.3.5"
-    "@tsconfig/node24": "npm:24.0.1"
+    "@tsconfig/node24": "npm:24.0.2"
     "@tsconfig/strictest": "npm:2.0.8"
     "@types/node": "npm:24.10.1"
     "@types/vscode": "npm:1.86.0"
