@@ -2369,7 +2369,50 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode/vsce@npm:3.7.0, @vscode/vsce@npm:^3.2.1":
+"@vscode/vsce@npm:3.7.1":
+  version: 3.7.1
+  resolution: "@vscode/vsce@npm:3.7.1"
+  dependencies:
+    "@azure/identity": "npm:^4.1.0"
+    "@secretlint/node": "npm:^10.1.2"
+    "@secretlint/secretlint-formatter-sarif": "npm:^10.1.2"
+    "@secretlint/secretlint-rule-no-dotenv": "npm:^10.1.2"
+    "@secretlint/secretlint-rule-preset-recommend": "npm:^10.1.2"
+    "@vscode/vsce-sign": "npm:^2.0.0"
+    azure-devops-node-api: "npm:^12.5.0"
+    chalk: "npm:^4.1.2"
+    cheerio: "npm:^1.0.0-rc.9"
+    cockatiel: "npm:^3.1.2"
+    commander: "npm:^12.1.0"
+    form-data: "npm:^4.0.0"
+    glob: "npm:^11.0.0"
+    hosted-git-info: "npm:^4.0.2"
+    jsonc-parser: "npm:^3.2.0"
+    keytar: "npm:^7.7.0"
+    leven: "npm:^3.1.0"
+    markdown-it: "npm:^14.1.0"
+    mime: "npm:^1.3.4"
+    minimatch: "npm:^3.0.3"
+    parse-semver: "npm:^1.1.1"
+    read: "npm:^1.0.7"
+    secretlint: "npm:^10.1.2"
+    semver: "npm:^7.5.2"
+    tmp: "npm:^0.2.3"
+    typed-rest-client: "npm:^1.8.4"
+    url-join: "npm:^4.0.1"
+    xml2js: "npm:^0.5.0"
+    yauzl: "npm:^2.3.1"
+    yazl: "npm:^2.2.2"
+  dependenciesMeta:
+    keytar:
+      optional: true
+  bin:
+    vsce: vsce
+  checksum: 10c0/97a930ddef3c1827b1887fc0385b8cc98cee3d2683fadc2576df32dea0d0e3da10df2b666b2dcfee7cd8bace46929d92522b614204d22d830997e1f2bd93d3fd
+  languageName: node
+  linkType: hard
+
+"@vscode/vsce@npm:^3.2.1":
   version: 3.7.0
   resolution: "@vscode/vsce@npm:3.7.0"
   dependencies:
@@ -5183,7 +5226,7 @@ __metadata:
     "@types/vscode": "npm:1.86.0"
     "@vscode/test-cli": "npm:0.0.12"
     "@vscode/test-electron": "npm:2.5.2"
-    "@vscode/vsce": "npm:3.7.0"
+    "@vscode/vsce": "npm:3.7.1"
     esbuild: "npm:0.27.0"
     ovsx: "npm:0.10.7"
     polka: "npm:1.0.0-next.28"
