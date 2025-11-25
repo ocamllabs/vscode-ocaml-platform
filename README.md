@@ -101,29 +101,34 @@ full without all of its dependencies.
 
 By this point, you should have a working OCaml development editor ready.
 
-### 🧱 Dune Package Management (DPM)
+### Dune Package Management (DPM)
 
-This extension now supports **Dune Package Management (DPM)** as a sandbox for your OCaml projects.
+This extension now supports **Dune Package Management (DPM)** as a sandbox for
+your OCaml projects.
 
 DPM becomes available when your system has:
 
-- **Dune version ≥ 3.20.0**, or  
+- **Dune version ≥ 3.20.0**, or
 - A **Dune preview build dated 2025-07-30 or later**.
 
-A final required feature was implemented on **2025-07-29**, enabling full support for Dune development tools (`dune lock`, `dune tools exec`, and tools like `ocamlformat`) inside the `ocamllsp` sandbox environment.
+A final required feature was implemented on **2025-07-29**, enabling full
+support for Dune development tools (`dune lock`, `dune tools exec`, and tools
+like `ocamlformat`) inside the `ocamllsp` sandbox environment.
 
-#### 🔔 Automatic Detection
+#### Automatic Detection
 
 When a compatible Dune version is detected:
 
 - The extension automatically recognizes that your environment supports DPM.
-- A popup notification informs you that **Dune Package Management is available**.
-- If your project is **not yet locked**, the extension will prompt you to lock the project.
+- A popup notification informs you that **Dune Package Management is
+  available**.
+- If your project is **not yet locked**, the extension will prompt you to lock
+  the project.
 
+- Once the project is locked, the extension will automatically configure
+  `ocamllsp` to use the DPM sandbox.
 
-- Once the project is locked, the extension will automatically configure `ocamllsp` to use the DPM sandbox.
-
-#### 🛠 Using Dune Package Management
+#### Using Dune Package Management
 
 To manually enable DPM for your project at any time:
 
@@ -131,8 +136,8 @@ To manually enable DPM for your project at any time:
 2. In the status bar (bottom-right), click the **sandbox selector**.
 3. Choose **“Dune Package Management”** from the list of available sandboxes.
 
-The extension then configures `ocamllsp` to run inside the DPM sandbox, ensuring that all Dune dev tools are available in the sandboxed `PATH`.
-
+The extension then configures `ocamllsp` to run inside the DPM sandbox, ensuring
+that all Dune dev tools are available in the sandboxed `PATH`.
 
 ### ReasonML / ReScript / BuckleScript
 
@@ -362,7 +367,7 @@ of this repository):
 
 1. Set the `ocaml.trace.server` setting to `verbose` in VS Code settings.
 
-![trace verbose](doc/trace_verbose.png)
+![trace verbose](./doc/trace_verbose.png)
 
 2. Invoke command `OCaml: Show OCaml Language Server Output` from the VS Code
    Command Palette. This command shows requests and responses exchanged between
