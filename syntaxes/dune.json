@@ -845,8 +845,8 @@
                   ]
                 },
                 {
-                  "comment": "env/coq",
-                  "begin": "\\([[:space:]]*(coq)\\b",
+                  "comment": "env/rocq",
+                  "begin": "\\([[:space:]]*(coq|rocq)\\b",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -855,7 +855,7 @@
                   },
                   "patterns": [
                     {
-                      "comment": "coq/flags",
+                      "comment": "rocq/flags",
                       "begin": "\\([[:space:]]*(flags)\\b",
                       "end": "\\)",
                       "beginCaptures": {
@@ -1370,8 +1370,8 @@
           ]
         },
         {
-          "comment": "coq.theory",
-          "begin": "\\([[:space:]]*(coq.theory)\\b",
+          "comment": "rocq.theory",
+          "begin": "\\([[:space:]]*((coq|rocq).theory)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1396,8 +1396,18 @@
               ]
             },
             {
-              "comment": "synopsis/modules/libraries/flags/mode/theories",
-              "begin": "\\([[:space:]]*(synopsis|modules|libraries|flags|mode|theories)\\b",
+              "comment": "generate_project_file",
+              "begin": "\\([[:space:]]*(generate_project_file)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              }
+            },
+            {
+              "comment": "synopsis/modules/libraries/flags/mode/theories/plugins/modules_flags/rocqdep_flags/rocqdoc_flags/rocqdoc_header/rocqdoc_footer",
+              "begin": "\\([[:space:]]*(synopsis|modules|libraries|flags|mode|theories|plugins|modules_flags|rocqdep_flags|rocqdoc_flags|rocqdoc_header|rocqdoc_footer)\\b",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1411,13 +1421,30 @@
               ]
             },
             {
+              "comment": "stdlib",
+              "begin": "\\([[:space:]]*(stdlib)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "comment": "yes/no",
+                  "match": "\\b(yes|no)\\b",
+                  "name": "constant.language.dune"
+                }
+              ]
+            },
+            {
               "include": "#general"
             }
           ]
         },
         {
-          "comment": "coq.pp",
-          "begin": "\\([[:space:]]*(coq.pp)\\b",
+          "comment": "rocq.pp",
+          "begin": "\\([[:space:]]*((coq|rocq).pp)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1446,8 +1473,8 @@
           ]
         },
         {
-          "comment": "coq.extraction",
-          "begin": "\\([[:space:]]*(coq.extraction)\\b",
+          "comment": "rocq.extraction",
+          "begin": "\\([[:space:]]*((coq|rocq).extraction)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": {
