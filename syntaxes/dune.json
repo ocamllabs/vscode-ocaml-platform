@@ -1871,6 +1871,21 @@
               ]
             },
             {
+              "comment": "entries",
+              "begin": "\\([[:space:]]*(entries)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
               "include": "#library"
             },
             {
