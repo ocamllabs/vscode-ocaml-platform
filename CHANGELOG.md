@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add syntax highlighting support for Rocq 9.0 dune plugin. (#2026)
+
 ## 2.0.1
 
 - Update syntaxes. (#2004)
