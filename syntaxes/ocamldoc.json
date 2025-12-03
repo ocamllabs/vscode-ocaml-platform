@@ -191,14 +191,21 @@
           "patterns": [{ "include": "#lighttable" }]
         },
         {
-          "comment": "ocamldoc links",
-          "begin": "(?<!\\\\){({:[[:space:]].*?})",
+          "comment": "ocamldoc links with alt-text",
+          "begin": "(?<!\\\\){({:.*?})",
           "beginCaptures": {
             "1": { "name": "string.other.link.title.markdown.ocamldoc" }
           },
           "end": "(?<!\\\\)\\}",
           "patterns": [{ "include": "#markup" }],
           "name": "markup.underline.link.ocamldoc meta.link.ocamldoc"
+        },
+        {
+          "comment": "ocamldoc links",
+          "match": "(?<!\\\\)({:.*?})",
+          "captures": {
+            "1": { "name": "string.other.link.title.markdown.ocamldoc" }
+          }
         },
         {
           "comment": "ocamldoc latex",
