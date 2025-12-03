@@ -307,7 +307,8 @@
       "patterns": [
         {
           "begin": "(?<!\\\\){",
-          "end": "(?<!\\\\)\\}"
+          "end": "(?<!\\\\)\\}",
+          "patterns": [{ "include": "#braces" }]
         }
       ]
     }
