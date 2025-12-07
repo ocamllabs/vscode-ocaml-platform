@@ -5,6 +5,7 @@
 - Add syntax highlighting support for Rocq 9.0 dune plugin. (#2026)
 - Add dune syntax highlighting for `melange.emit` stanza and
   `melange.runtime_deps` library field (#2027)
+- Fix syntax highlighting for odoc links and odoc math blocks with deeply nested braces (#2029)
 
 ## 2.0.1
 
