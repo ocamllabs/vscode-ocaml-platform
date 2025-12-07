@@ -1732,6 +1732,159 @@
           ]
         },
         {
+          "comment": "melange.emit",
+          "begin": "\\([[:space:]]*(melange)(\\.)((emit))\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            },
+            "2": {
+              "name": "keyword.operator.dune"
+            },
+            "3": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "comment": "target",
+              "begin": "\\([[:space:]]*(target)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "contentName": "variable.other.declaration.dune",
+              "patterns": [
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "comment": "alias",
+              "begin": "\\([[:space:]]*(alias)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "comment": "module_systems",
+              "begin": "\\([[:space:]]*(module_systems)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "comment": "es6/commonjs",
+                  "match": "\\b(es6|commonjs)\\b",
+                  "name": "variable.other.declaration.dune"
+                },
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "comment": "runtime_deps",
+              "begin": "\\([[:space:]]*(runtime_deps)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#dependencies"
+                },
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "comment": "emit_stdlib",
+              "begin": "\\([[:space:]]*(emit_stdlib)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "comment": "promote",
+              "begin": "\\([[:space:]]*(promote)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "comment": "until-clean/into/only",
+                  "begin": "\\([[:space:]]*(until-clean|into|only)\\b",
+                  "end": "\\)",
+                  "beginCaptures": {
+                    "1": {
+                      "name": "keyword.language.dune"
+                    }
+                  },
+                  "patterns": [
+                    {
+                      "include": "#general"
+                    }
+                  ]
+                },
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "comment": "compile_flags",
+              "begin": "\\([[:space:]]*(compile_flags)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "include": "#library"
+            },
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
           "include": "#general"
         }
       ]
@@ -2233,6 +2386,30 @@
             }
           },
           "patterns": [
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "melange.runtime_deps",
+          "begin": "\\([[:space:]]*(melange)(\\.)((runtime_deps))\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            },
+            "2": {
+              "name": "keyword.operator.dune"
+            },
+            "3": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#dependencies"
+            },
             {
               "include": "#general"
             }
