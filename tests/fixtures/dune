@@ -378,7 +378,7 @@
    (bin/main.exe as bar))
   (inline_tests enabled)
   (odoc <fields>)
-  (coq
+  (rocq
    (flags <flags>))
   (formatting
    disabled
@@ -414,29 +414,37 @@
    bar
    (echo baz))))
 
-(using coq 0.2)
+(using rocq 0.11)
 
-(coq.theory
+(rocq.theory
  (name module_prefix)
  (package package)
  (synopsis text)
- (modules ordered_set_lang)
+ (plugins ocaml_plugins)
  (libraries ocaml_libraries)
- (flags coq_flags)
- (mode coq_native_mode)
- (theories coq_theories))
+ (flags rocq_flags)
+ (modules_flags flags_map)
+ (generate_project_file)
+ (rocqdep_flags rocqdep_flags)
+ (rocqdoc_flags rocqdoc_flags)
+ (rocqdoc_header rocqdoc_header)
+ (rocqdoc_footer rocqdoc_footer)
+ (modules ordered_set_lang)
+ (stdlib yes)
+ (mode rocq_native_mode)
+ (theories rocq_theories))
 
-(coq.pp
+(rocq.pp
  (modules mlg_list))
 
-(coq.extraction
+(rocq.extraction
  (prelude name)
  (extracted_modules names)
  (flags test)
  (theories test)
  (libraries test)
  ; Does not exist
- (mode coq_native_mode)
+ (mode rocq_native_mode)
  (public_name name))
 
 (using mdx 0.1)

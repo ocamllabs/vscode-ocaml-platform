@@ -1,4 +1,4 @@
 [tools]
 node = "25"
 opam = "2.4.1"
-yarn = "4.10.3"
+yarn = "4"
