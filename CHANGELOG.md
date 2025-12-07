@@ -3,6 +3,8 @@
 ## Unreleased
 
 - Add syntax highlighting support for Rocq 9.0 dune plugin. (#2026)
+- Fix syntax highlighting for odoc links and odoc math blocks with deeply nested
+  braces (#2029)
 
 ## 2.0.1
 
