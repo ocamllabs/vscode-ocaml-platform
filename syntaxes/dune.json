@@ -1569,10 +1569,16 @@
         },
         {
           "comment": "melange.emit",
-          "begin": "\\([[:space:]]*(melange\\.emit)\\b",
+          "begin": "\\([[:space:]]*(melange)(\\.)((emit))\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": {
+              "name": "keyword.language.dune"
+            },
+            "2": {
+              "name": "keyword.operator.dune"
+            },
+            "3": {
               "name": "keyword.language.dune"
             }
           },
@@ -2223,10 +2229,16 @@
         },
         {
           "comment": "melange.runtime_deps",
-          "begin": "\\([[:space:]]*(melange\\.runtime_deps)\\b",
+          "begin": "\\([[:space:]]*(melange)(\\.)((runtime_deps))\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": {
+              "name": "keyword.language.dune"
+            },
+            "2": {
+              "name": "keyword.operator.dune"
+            },
+            "3": {
               "name": "keyword.language.dune"
             }
           },
