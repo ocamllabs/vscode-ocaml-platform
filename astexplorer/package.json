@@ -19,6 +19,6 @@
     "react-redux": "9.2.0"
   },
   "devDependencies": {
-    "parcel": "2.16.1"
+    "parcel": "2.16.3"
   }
 }
