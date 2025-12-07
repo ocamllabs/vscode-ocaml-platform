@@ -10,40 +10,58 @@ module Dune_version = struct
       let digits = String.filter s ~f:Char.is_digit in
       if String.is_empty digits then None else Some (Int.of_string digits)
     in
-    match String.split_on_chars ~on:[ '.' ] version_str with
-    | [ major; minor; patch ] ->
-      (match extract_int major, extract_int minor, extract_int patch with
-       | Some major, Some minor, Some patch_num ->
-         Some (Release (major, minor, patch_num))
+    (* When building from source, dune versions look like 3.20.2-744-gfefffb8,
+       and we only care about the prefix before the '-'. *)
+    match String.split_on_chars ~on:[ '-' ] version_str with
+    | [] -> None
+    | version_prefix :: _ ->
+      (match String.split_on_chars ~on:[ '.' ] version_prefix with
+       | [ major; minor; patch ] ->
+         (match extract_int major, extract_int minor, extract_int patch with
+          | Some major, Some minor, Some patch_num ->
+            Some (Release (major, minor, patch_num))
+          | _ -> None)
        | _ -> None)
-    | _ -> None
   ;;
 
-  let parse_preview_version rest =
-    match String.split_on_chars ~on:[ ',' ] rest with
-    | timestamp_str :: _ ->
-      (try
-         Stdlib.Scanf.sscanf
-           (String.strip timestamp_str)
-           "%d-%d-%dT%d:%d:%dZ"
-           (fun y m d _h _min _s -> Some (Preview (y, m, d)))
-       with
-       | Stdlib.Scanf.Scan_failure _ | End_of_file -> None)
-    | _ -> None
+  let parse_preview_version str =
+    (* NOTE: This is coupled with the CD configuration for building the nightly at
+       https://github.com/ocaml-dune/binary-distribution/blob/de7bc19e5557451856e12d3561a88daf1e14da5a/.github/workflows/binary.yaml#L88 *)
+    let legacy_preview_prefix =
+      (* This was the prefix used prior to 2025-11-25 *)
+      "\"Dune Developer Preview: build"
+    in
+    let nightly_prefix = "\"Nightly build " in
+    let suffix =
+      match String.chop_prefix ~prefix:legacy_preview_prefix str with
+      | Some suffix -> Some suffix
+      | None ->
+        (match String.chop_prefix ~prefix:nightly_prefix str with
+         | Some suffix -> Some suffix
+         | None -> None)
+    in
+    match suffix with
+    | None -> None
+    | Some rest ->
+      (match String.split_on_chars ~on:[ ',' ] rest with
+       | timestamp_str :: _ ->
+         (try
+            Stdlib.Scanf.sscanf
+              (String.strip timestamp_str)
+              "%d-%d-%dT%d:%d:%dZ"
+              (fun y m d _h _min _s -> Some (Preview (y, m, d)))
+          with
+          | Stdlib.Scanf.Scan_failure _ | End_of_file -> None)
+       | [] -> None)
   ;;
 
   let from_string str =
-    let prefix = "\"Dune Developer Preview: build " in
-    if String.is_prefix str ~prefix
-    then (
-      let rest = String.drop_prefix str (String.length prefix) in
-      match parse_preview_version rest with
-      | Some version -> Some version
-      | None -> parse_release_version str)
-    else parse_release_version str
+    match parse_preview_version str with
+    | Some version -> Some version
+    | None -> parse_release_version str
   ;;
 
-  (* Released versions >= 3.20.0 and preview versions with a timestamp on or
+  (* Versions >= 3.20.0 and preview versions with a timestamp on or
      after 2025-07-30 support everything needed for VSCode to support DPM,
      e.g. `dune lock`, `dune tools exec`, support of various Dune dev tools etc.
      The last feature needed was implemented on 2025-07-29 and ensures that
