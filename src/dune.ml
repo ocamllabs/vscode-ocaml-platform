@@ -115,11 +115,6 @@ let make root () =
         | Ok v ->
           (match Dune_version.from_string v with
            | Some version when Dune_version.is_valid version ->
-             show_message
-               `Info
-               "Dune Package Management is available with dune from %s, version %s."
-               (Path.to_string binary)
-               v;
              Some { bin; root }
            | _ -> None)
         | Error _err -> None)
@@ -140,11 +135,6 @@ let make root () =
            | Ok v ->
              (match Dune_version.from_string v with
               | Some version when Dune_version.is_valid version ->
-                show_message
-                  `Info
-                  "Dune Package Management is available with dune from %s, version %s."
-                  path
-                  v;
                 Promise.return (Some { bin; root })
               | _ -> Promise.return None)
            | Error _err -> Promise.return None)))
