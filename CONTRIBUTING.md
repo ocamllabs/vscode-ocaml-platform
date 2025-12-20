@@ -55,10 +55,15 @@ make build
 
 ### Running the extension
 
-After building the project, you can run the extension from VSCode by going in
-the "Run and Debug" tab (`Shift + Cmd + D`) and running the `Extension` task.
-This will open a new VSCode window with only the `vscode-ocaml` extension
-activated.
+After running
+
+```bash
+make install
+```
+
+you can run the extension from VSCode by going in the "Run and Debug" tab
+(`Shift + Cmd + D`) and running the `Extension` task.  This will open a new
+VSCode window with only the `vscode-ocaml` extension activated.
 
 ### Running Tests
 
