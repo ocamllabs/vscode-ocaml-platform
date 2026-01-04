@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Disable constant dune availability announcements. (#2037)
 - Add syntax highlighting support for Rocq 9.0 dune plugin. (#2026)
 - Add dune syntax highlighting for `melange.emit` stanza and
   `melange.runtime_deps` library field (#2027)
