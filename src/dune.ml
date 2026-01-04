@@ -114,8 +114,7 @@ let make root () =
        (match dune_version_output with
         | Ok v ->
           (match Dune_version.from_string v with
-           | Some version when Dune_version.is_valid version ->
-             Some { bin; root }
+           | Some version when Dune_version.is_valid version -> Some { bin; root }
            | _ -> None)
         | Error _err -> None)
      | Error _err ->
