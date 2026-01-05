@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fix version parsing for nightly and dev builds of dune. This resolves
+  compatibility with the new "Nightly build" prefix format and versions
+  installed from source via `opam pin dune --dev-repo`. (#2034)
 - Disable constant dune availability announcements. (#2037)
 - Add syntax highlighting support for Rocq 9.0 dune plugin. (#2026)
 - Add dune syntax highlighting for `melange.emit` stanza and
