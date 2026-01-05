@@ -1,0 +1,5 @@
+{
+  "enabledPlugins": {
+    "ocaml-dev@ocaml-claude-marketplace": true
+  }
+}
