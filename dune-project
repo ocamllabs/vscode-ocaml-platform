@@ -26,11 +26,11 @@
   (vscode
    (= :version))
   (ocaml
-   (>= 5.3))
+   (>= 5.4))
   (js_of_ocaml
    (>= 6.0))
   (gen_js_api
-   (= 1.1.5))
+   (= 1.1.6))
   (base
    (>= v0.17))
   (promise_jsoo
@@ -59,7 +59,7 @@
   (js_of_ocaml
    (>= 6.0))
   (gen_js_api
-   (= 1.1.5))
+   (= 1.1.6))
   (ocamlformat
    (and
     (= 0.28.1)
@@ -75,7 +75,7 @@
   (js_of_ocaml
    (>= 6.0))
   (gen_js_api
-   (= 1.1.5))
+   (= 1.1.6))
   (promise_jsoo
    (>= 0.4.3))
   (jsonoo
@@ -98,7 +98,7 @@
   (js_of_ocaml
    (>= 6.0))
   (gen_js_api
-   (= 1.1.5))
+   (= 1.1.6))
   (promise_jsoo
    (>= 0.4.3))
   (jsonoo
