@@ -1,5 +1,13 @@
 {
   "enabledPlugins": {
     "ocaml-dev@ocaml-claude-marketplace": true
+  },
+  "extraKnownMarketplaces": {
+    "ocaml-claude-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "avsm/ocaml-claude-marketplace"
+      }
+    }
   }
 }
