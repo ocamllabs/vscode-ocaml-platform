@@ -1465,7 +1465,7 @@
     "vscode-languageclient": "9.0.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.3.11",
+    "@biomejs/biome": "2.3.13",
     "@types/node": "25.0.10",
     "@types/vscode": "1.86.0",
     "@vscode/test-cli": "0.0.12",
