@@ -2355,7 +2355,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode/vsce@npm:3.7.1, @vscode/vsce@npm:^3.2.1":
+"@vscode/vsce@npm:3.7.1, @vscode/vsce@npm:^3.7.1":
   version: 3.7.1
   resolution: "@vscode/vsce@npm:3.7.1"
   dependencies:
@@ -5149,7 +5149,7 @@ __metadata:
     "@vscode/test-electron": "npm:2.5.2"
     "@vscode/vsce": "npm:3.7.1"
     esbuild: "npm:0.27.2"
-    ovsx: "npm:0.10.8"
+    ovsx: "npm:0.10.9"
     polka: "npm:1.0.0-next.28"
     sirv: "npm:3.0.2"
     vscode-languageclient: "npm:9.0.1"
@@ -5210,11 +5210,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ovsx@npm:0.10.8":
-  version: 0.10.8
-  resolution: "ovsx@npm:0.10.8"
+"ovsx@npm:0.10.9":
+  version: 0.10.9
+  resolution: "ovsx@npm:0.10.9"
   dependencies:
-    "@vscode/vsce": "npm:^3.2.1"
+    "@vscode/vsce": "npm:^3.7.1"
     commander: "npm:^6.2.1"
     follow-redirects: "npm:^1.14.6"
     is-ci: "npm:^2.0.0"
@@ -5223,8 +5223,8 @@ __metadata:
     tmp: "npm:^0.2.3"
     yauzl-promise: "npm:^4.0.0"
   bin:
-    ovsx: lib/ovsx
-  checksum: 10c0/3b0e64c8e47bcd1024267ff5efbaa1a5fe4bc92da6ffae53685c72448805210f6b6fbdea48a1900d48aff494689617a177d0d17a61791cdf459a5fed0ca17d10
+    ovsx: bin/ovsx
+  checksum: 10c0/67e7c5e22d328eddd02ca8e90ef2cf2b78fa64bae62ba0fb2d1d105628af61bc6ade169ffa87d7b0776886c4ad1fb418dd780475859a8049226b5c91df375d9b
   languageName: node
   linkType: hard
 
