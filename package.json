@@ -1471,7 +1471,7 @@
     "@vscode/test-cli": "0.0.12",
     "@vscode/test-electron": "2.5.2",
     "@vscode/vsce": "3.7.1",
-    "esbuild": "0.27.2",
+    "esbuild": "0.27.3",
     "ovsx": "0.10.9"
   },
   "packageManager": "yarn@4.12.0",
