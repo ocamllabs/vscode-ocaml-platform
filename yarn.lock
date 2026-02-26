@@ -2176,12 +2176,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:25.3.0":
-  version: 25.3.0
-  resolution: "@types/node@npm:25.3.0"
+"@types/node@npm:25.3.1":
+  version: 25.3.1
+  resolution: "@types/node@npm:25.3.1"
   dependencies:
     undici-types: "npm:~7.18.0"
-  checksum: 10c0/7b2b18c9d68047157367fc2f786d4f166d22dc0ad9f82331ca02fb16f2f391854123dbe604dcb938cda119c87051e4bb71dcb9ece44a579f483a6f96d4bd41de
+  checksum: 10c0/f4714e3f2c393434cdefbf207f3fe470bcf4d6c5717298c3fc9239e362a57cd25e59603c60e9c956e7d5d0dfb97cf2e037b37cf6dc2f3876f6a963146f7adc6d
   languageName: node
   linkType: hard
 
@@ -5143,7 +5143,7 @@ __metadata:
   resolution: "ocaml-platform@workspace:."
   dependencies:
     "@biomejs/biome": "npm:2.4.4"
-    "@types/node": "npm:25.3.0"
+    "@types/node": "npm:25.3.1"
     "@types/vscode": "npm:1.86.0"
     "@vscode/test-cli": "npm:0.0.12"
     "@vscode/test-electron": "npm:2.5.2"
