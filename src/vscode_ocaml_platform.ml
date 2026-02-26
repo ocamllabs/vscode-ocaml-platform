@@ -45,6 +45,7 @@ let activate (extension : ExtensionContext.t) =
     extension
     ~disposable:(Extension_instance.disposable instance);
   ExtensionContext.subscribe extension ~disposable:(notify_configuration_changes instance);
+  ExtensionContext.subscribe extension ~disposable:(Extension_instance.register_mlx_check instance);
   Dune_formatter.register extension instance;
   Dune_task_provider.register extension instance;
   Treeview_switches.register extension instance;

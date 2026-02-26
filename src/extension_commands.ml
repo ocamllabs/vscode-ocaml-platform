@@ -90,6 +90,27 @@ let _upgrade_ocaml_lsp_server =
   command Command_api.Internal.upgrade_ocaml_lsp_server callback
 ;;
 
+let _install_ocamlmerlin_mlx =
+  let callback (instance : Extension_instance.t) () =
+    let open Promise.Syntax in
+    let (_ : unit Promise.t) =
+      let sandbox = Extension_instance.sandbox instance in
+      let* ocamlmerlin_mlx_present =
+        Extension_instance.check_ocamlmerlin_mlx_available sandbox
+      in
+      match ocamlmerlin_mlx_present with
+      | Ok () ->
+        show_message `Info "ocamlmerlin-mlx is already installed." |> Promise.return
+      | Error _ ->
+        let* () = Extension_instance.install_ocamlmerlin_mlx sandbox in
+        show_message `Info "Installation of ocamlmerlin-mlx completed successfully.";
+        Extension_instance.start_language_server instance
+    in
+    ()
+  in
+  command Command_api.Internal.install_ocamlmerlin_mlx callback
+;;
+
 let _install_dune_lsp_server =
   let callback (instance : Extension_instance.t) () =
     let open Promise.Syntax in

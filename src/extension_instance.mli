@@ -8,6 +8,7 @@ val set_sandbox : t -> Sandbox.t -> unit
 val language_client : t -> LanguageClient.t option
 val ocaml_lsp : t -> Ocaml_lsp.t option
 val check_ocaml_lsp_available : Sandbox.t -> (unit, string) result Promise.t
+val check_ocamlmerlin_mlx_available : Sandbox.t -> (unit, string) result Promise.t
 
 val start_documentation_server
   :  t
@@ -20,6 +21,7 @@ val ocaml_version_exn : t -> Ocaml_version.t
 val start_language_server : t -> unit Promise.t
 val install_ocaml_lsp_server : Sandbox.t -> unit Promise.t
 val upgrade_ocaml_lsp_server : Sandbox.t -> unit Promise.t
+val install_ocamlmerlin_mlx : Sandbox.t -> unit Promise.t
 val suggest_to_run_dune_pkg_lock : unit -> unit
 
 val set_configuration
@@ -35,6 +37,7 @@ val set_configuration
 
 val open_terminal : Sandbox.t -> unit
 val disposable : t -> Disposable.t
+val register_mlx_check : t -> Disposable.t
 val repl : t -> Terminal_sandbox.t option
 val set_repl : t -> Terminal.t -> unit
 val close_repl : t -> unit
