@@ -45,7 +45,7 @@ jobs:
           subject-path: ocaml-platform.vsix
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ocaml-platform-${{ github.sha }}
           path: ocaml-platform.vsix
