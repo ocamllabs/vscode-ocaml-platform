@@ -5149,7 +5149,7 @@ __metadata:
     "@vscode/test-electron": "npm:2.5.2"
     "@vscode/vsce": "npm:3.7.1"
     esbuild: "npm:0.27.4"
-    ovsx: "npm:0.10.9"
+    ovsx: "npm:0.10.10"
     polka: "npm:1.0.0-next.28"
     sirv: "npm:3.0.2"
     vscode-languageclient: "npm:9.0.1"
@@ -5210,9 +5210,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ovsx@npm:0.10.9":
-  version: 0.10.9
-  resolution: "ovsx@npm:0.10.9"
+"ovsx@npm:0.10.10":
+  version: 0.10.10
+  resolution: "ovsx@npm:0.10.10"
   dependencies:
     "@vscode/vsce": "npm:^3.7.1"
     commander: "npm:^6.2.1"
@@ -5224,7 +5224,7 @@ __metadata:
     yauzl-promise: "npm:^4.0.0"
   bin:
     ovsx: bin/ovsx
-  checksum: 10c0/67e7c5e22d328eddd02ca8e90ef2cf2b78fa64bae62ba0fb2d1d105628af61bc6ade169ffa87d7b0776886c4ad1fb418dd780475859a8049226b5c91df375d9b
+  checksum: 10c0/af226e28d3fae93d689c896373398b9107a20fe4acc2ad1c0457a4ec5408d99c337a0ce10f1b23338eae88237683d2646eac2ceff5f3e64f809dc9a13f5eb731
   languageName: node
   linkType: hard
 
