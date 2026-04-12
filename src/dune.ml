@@ -121,7 +121,6 @@ let make root () =
   let dune_version_output bin root =
     command { root; bin } ~args:[ "--version" ] |> Cmd.output ~cwd:root
   in
-  (* Should we do something specific for Windows ? *)
   match root with
   | Some root ->
     let spawn = { Cmd.bin = binary; args = [] } in
@@ -136,24 +135,14 @@ let make root () =
            | _ -> None)
         | Error _err -> None)
      | Error _err ->
-       let* check_if_dune_is_installed_with_opam =
-         command
-           { root; bin = { Cmd.bin = Path.of_string "opam"; args = [] } }
-           ~args:[ "exec"; "--"; "which"; "dune" ]
-         |> Cmd.output ~cwd:root
-       in
-       (match check_if_dune_is_installed_with_opam with
-        | Error _err -> Promise.return None
-        | Ok path when String.is_empty path -> Promise.return None
-        | Ok path ->
-          let bin = { Cmd.bin = Path.of_string path; args = [] } in
-          let* dune_version_output = dune_version_output bin root in
-          (match dune_version_output with
-           | Ok v ->
-             (match Dune_version.from_string v with
-              | Some version when Dune_version.is_valid version ->
-                Promise.return (Some { bin; root })
-              | _ -> Promise.return None)
-           | Error _err -> Promise.return None)))
+       let bin = { Cmd.bin = Path.of_string "opam"; args = [ "exec"; "--"; "dune" ] } in
+       let* dune_version_output = dune_version_output bin root in
+       (match dune_version_output with
+        | Ok v ->
+          (match Dune_version.from_string v with
+           | Some version when Dune_version.is_valid version ->
+             Promise.return (Some { bin; root })
+           | _ -> Promise.return None)
+        | Error _err -> Promise.return None))
   | None -> Promise.return None
 ;;
