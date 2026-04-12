@@ -9,7 +9,7 @@ VS Code extension for OCaml, written in OCaml and compiled to JavaScript via js_
 ## Build Commands
 
 ```bash
-make build   # Build extension (dune + esbuild + astexplorer)
+make build   # Build extension (dune + bun + astexplorer)
 make test    # Run OCaml tests (@runtest) and JavaScript tests
 make fmt     # Format OCaml (ocamlformat) and JS (biome)
 make pkg     # Clean, build, and package to VSIX
@@ -26,7 +26,7 @@ This project uses Dune Package Management (DPM). Requires nightly dune from <htt
 curl -fsSL https://get.dune.build/install | sh
 
 # Install npm dependencies
-yarn install
+bun install --frozen-lockfile
 
 # Build (automatically fetches OCaml dependencies from dune.lock)
 dune build
@@ -48,9 +48,9 @@ dune tools install ocamlformat # Install formatter
 ### Linting
 
 ```bash
-yarn check # Run biome linter checks
-yarn lint  # Biome linting
-yarn fix   # Auto-fix with biome
+bun check # Run biome linter checks
+bun lint  # Biome linting
+bun fix   # Auto-fix with biome
 ```
 
 ## Architecture
@@ -75,7 +75,7 @@ yarn fix   # Auto-fix with biome
 
 ### Compilation Pipeline
 
-OCaml source → js_of_ocaml (produces `.bc.js`) → esbuild (bundles to `dist/`)
+OCaml source → js_of_ocaml (produces `.bc.js`) → bun build (bundles to `dist/`)
 
 ## Code Patterns
 

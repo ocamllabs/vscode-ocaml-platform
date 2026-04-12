@@ -69,7 +69,7 @@
             ocaml-lsp
             pkgs.ocamlformat_0_27_0
             pkgs.vscode
-            pkgs.yarn-berry
+            pkgs.bun
           ];
           shellHook = ''
             make npm-deps

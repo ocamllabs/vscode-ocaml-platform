@@ -6,8 +6,8 @@
   ],
   "type": "module",
   "scripts": {
-    "build": "parcel build --no-cache index.html",
-    "dev": "parcel watch --no-cache index.html"
+    "build": "bun build --production --outdir=dist index.html",
+    "dev": "bun build --watch --outdir=dist index.html"
   },
   "dependencies": {
     "font-awesome": "4.7.0",
@@ -17,8 +17,5 @@
     "react": "19.2.5",
     "react-dom": "19.2.5",
     "react-redux": "9.2.0"
-  },
-  "devDependencies": {
-    "parcel": "2.16.4"
   }
 }

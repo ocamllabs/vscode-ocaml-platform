@@ -6,7 +6,7 @@ all:
 
 .PHONY: npm-deps
 npm-deps:
-	yarn install --immutable
+	bun install --frozen-lockfile
 
 .PHONY: deps
 deps:
@@ -23,21 +23,19 @@ switch: create_switch deps
 .PHONY: build
 build: # https://github.com/ewanharris/vscode-versions
 	dune build src/vscode_ocaml_platform.bc.js --profile=release
-	yarn workspace astexplorer build
-	yarn esbuild _build/default/src/vscode_ocaml_platform.bc.js \
-		--bundle \
-		--external:vscode \
-		--minify \
+	bun run --filter astexplorer build
+	bun build \
+		--production \
+		--target=node \
 		--outdir=dist \
-		--packages=bundle \
-		--platform=node \
-		--target=node22 \
-		--analyze
+		--format=cjs \
+		--external vscode \
+		_build/default/src/vscode_ocaml_platform.bc.js
 
 .PHONY: test
 test:
 	dune build @runtest
-	yarn test
+	bun run test
 
 .PHONY: clean
 clean:
@@ -51,7 +49,7 @@ doc:
 .PHONY: fmt
 fmt:
 	dune build --auto-promote @fmt
-	yarn biome format --write
+	bunx biome format --write
 
 .PHONY: watch
 watch:
@@ -59,7 +57,7 @@ watch:
 
 .PHONY: pkg
 pkg: clean build
-	yarn package
+	bun run package
 
 .PHONY: install
 install: pkg

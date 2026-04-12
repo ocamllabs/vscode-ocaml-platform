@@ -1,0 +1,3 @@
+[install]
+exact = true
+linker = "isolated"
