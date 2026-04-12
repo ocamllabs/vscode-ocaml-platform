@@ -113,6 +113,6 @@ jobs:
 
       - name: Upload artifact to GitHub release
         continue-on-error: true
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: ocaml-platform.vsix
