@@ -1,11 +1,11 @@
 open Interop
 
 let __filename () =
-  Js_of_ocaml.Js.Unsafe.eval_string "__filename" |> Js_of_ocaml.Js.to_string
+  Js_of_ocaml.Js.Unsafe.pure_js_expr "__filename" |> Js_of_ocaml.Js.to_string
 ;;
 
 let __dirname () =
-  Js_of_ocaml.Js.Unsafe.eval_string "__dirname" |> Js_of_ocaml.Js.to_string
+  Js_of_ocaml.Js.Unsafe.pure_js_expr "__dirname" |> Js_of_ocaml.Js.to_string
 ;;
 
 module Timeout = struct

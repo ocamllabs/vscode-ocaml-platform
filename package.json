@@ -39,7 +39,7 @@
     "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --no-dependencies",
     "fix": "biome check --fix",
     "lint": "biome check",
-    "package": "vsce package --out ocaml-platform.vsix --no-dependencies --allow-unused-files-pattern",
+    "package": "vsce package --out ocaml-platform.vsix --no-dependencies",
     "test": "vscode-test"
   },
   "contributes": {
@@ -1471,10 +1471,8 @@
     "@vscode/test-cli": "0.0.12",
     "@vscode/test-electron": "2.5.2",
     "@vscode/vsce": "3.7.1",
-    "esbuild": "0.28.0",
     "ovsx": "0.10.10"
   },
-  "packageManager": "yarn@4.12.0",
   "engines": {
     "vscode": "^1.86.0"
   },

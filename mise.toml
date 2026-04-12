@@ -1,4 +1,3 @@
 [tools]
-node = "25"
-opam = "2.4.1"
-yarn = "4"
+bun = "latest"
+opam = "latest"

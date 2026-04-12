@@ -15,7 +15,6 @@ _build/
 _opam/
 
 # npm stuff
-.yarn/
 node_modules/
 
 # VSCode settings
@@ -28,6 +27,3 @@ dist/
 
 # DS_Store
 .DS_Store
-
-# build cache
-.parcel-cache/
