@@ -421,7 +421,7 @@ let _install_ocaml_dev =
             let _ = Terminal_sandbox.show ~preserveFocus:true terminal in
             Terminal_sandbox.send
               terminal
-              "opam install ocaml-lsp-server odoc ocamlformat utop"
+              "opam install dune ocaml-lsp-server odoc ocamlformat utop"
           in
           Ok () |> Promise.return
         in
