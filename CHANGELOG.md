@@ -1,6 +1,7 @@
 # VSCode OCaml Platform Releases
 
 ## Unreleased
+- Add dune installation when ocaml walkthrough is installing platoform tools (#2136)
 
 ## 2.1.0
 
