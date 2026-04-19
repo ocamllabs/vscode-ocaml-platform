@@ -3,6 +3,9 @@
 ## Unreleased
 - Add dune installation when ocaml walkthrough is installing platoform tools (#2136)
 
+- Fix dune detection failing on Windows when `which` is unavailable by
+  running dune directly through `opam exec` instead. (#2131)
+
 ## 2.1.0
 
 - Fix version parsing for nightly and dev builds of dune. This resolves
