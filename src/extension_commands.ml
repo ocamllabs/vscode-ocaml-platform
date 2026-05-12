@@ -1566,6 +1566,151 @@ module Navigate_holes = struct
   ;;
 end
 
+module Ocamlgrep = struct
+  let extension_name = "OCamlgrep"
+
+  let is_valid_text_doc textdoc =
+    match TextDocument.languageId textdoc with
+    | "ocaml" | "ocaml.interface" | "ocaml.ocamllex" | "ocaml.mlx" | "reason" -> true
+    | _ -> false
+  ;;
+
+  let input_box =
+    InputBox.set
+      (Window.createInputBox ())
+      ~title:"OCamlgrep: Search OCaml Expressions"
+      ~ignoreFocusOut:false
+      ~placeholder:"List.filter __ __"
+      ~prompt:
+        "Enter an OCaml expression pattern. Use __ as a wildcard, __1/__2 for \
+         metavariables, and (e : t) to constrain types."
+      ()
+  ;;
+
+  let navigate_to_finding (finding : Custom_requests.Ocamlgrep.finding) =
+    let open Promise.Syntax in
+    let options =
+      TextDocumentShowOptions.create ~selection:finding.range ~preserveFocus:false ()
+    in
+    let+ _ = Window.showTextDocument' ~document:(`Uri finding.uri) ~options () in
+    ()
+  ;;
+
+  let display_results (findings : Custom_requests.Ocamlgrep.finding list) =
+    match findings with
+    | [] -> show_message `Info "ocamlgrep: no matches found."
+    | _ ->
+      (* Pair each finding with a QuickPickItem; keep the association for navigation. *)
+      let indexed =
+        List.mapi findings ~f:(fun i (f : Custom_requests.Ocamlgrep.finding) ->
+          let file = Uri.fsPath f.uri in
+          let line = (Range.start f.range |> Position.line) + 1 in
+          let label = Printf.sprintf "%d: %s:%d" i file line in
+          let detail = String.concat ~sep:" " f.lines in
+          let item = QuickPickItem.create ~label ~detail () in
+          item, f)
+      in
+      let module QuickPick = Vscode.QuickPick.Make (QuickPickItem) in
+      let quickPick =
+        QuickPick.set
+          (Window.createQuickPick (module QuickPickItem) ())
+          ~title:"OCamlgrep Results"
+          ~items:(List.map ~f:fst indexed)
+          ~ignoreFocusOut:false
+          ()
+      in
+      let _on_accept =
+        QuickPick.onDidAccept
+          quickPick
+          ~listener:(fun () ->
+            match QuickPick.selectedItems quickPick with
+            | Some (item :: _) ->
+              let selected_label = QuickPickItem.label item in
+              let finding =
+                List.find_map indexed ~f:(fun (it, f) ->
+                  if String.equal (QuickPickItem.label it) selected_label
+                  then Some f
+                  else None)
+              in
+              (match finding with
+               | Some f ->
+                 QuickPick.hide quickPick;
+                 ignore (navigate_to_finding f)
+               | None -> ())
+            | _ -> ())
+          ()
+      in
+      let _on_hide =
+        QuickPick.onDidHide quickPick ~listener:(fun () -> QuickPick.dispose quickPick) ()
+      in
+      QuickPick.show quickPick
+  ;;
+
+  let show_query_input =
+    let previous : Disposable.t option ref = ref None in
+    fun text_editor client ->
+      let () =
+        match !previous with
+        | None -> ()
+        | Some d -> Disposable.dispose d
+      in
+      let uri = TextEditor.document text_editor |> TextDocument.uri in
+      let disposable =
+        InputBox.onDidAccept
+          input_box
+          ~listener:(fun () ->
+            match InputBox.value input_box with
+            | Some query when String.length query > 0 ->
+              InputBox.hide input_box;
+              let open Promise.Syntax in
+              ignore
+                (let+ findings =
+                   Custom_requests.send_request
+                     client
+                     Custom_requests.Ocamlgrep.request
+                     (Custom_requests.Ocamlgrep.make ~uri ~query)
+                   |> Promise.catch ~rejected:(fun _e ->
+                        show_message `Error "ocamlgrep request failed.";
+                        Promise.return [])
+                 in
+                 display_results findings)
+            | _ -> ())
+          ()
+      in
+      previous := Some disposable;
+      InputBox.show input_box
+  ;;
+
+  let _ocamlgrep =
+    let callback (instance : Extension_instance.t) () =
+      match Window.activeTextEditor () with
+      | None ->
+        Command_api.Command_errors.text_editor_must_be_active
+          extension_name
+          ~expl:"An OCaml file must be open to determine the project root."
+        |> show_message `Error "%s"
+      | Some text_editor when not (is_valid_text_doc (TextEditor.document text_editor)) ->
+        show_message
+          `Error
+          "Invalid file type. This command only works in OCaml source files."
+      | Some text_editor ->
+        (match Extension_instance.lsp_client instance with
+         | None -> show_message `Warn "ocamllsp is not running"
+         | Some (_client, ocaml_lsp) when not (Ocaml_lsp.can_handle_ocamlgrep ocaml_lsp)
+           ->
+           let _ =
+             Ocaml_lsp.suggest_to_upgrade_ocaml_lsp_server
+               ~message:
+                 "The installed version of \"ocamllsp\" does not support ocamlgrep."
+               ()
+           in
+           ()
+         | Some (client, _) -> show_query_input text_editor client)
+    in
+    command Command_api.Internal.ocamlgrep callback
+  ;;
+end
+
 let _type_selection =
   let open Type_selection in
   command Command_api.Internal.type_selection callback |> ignore;

@@ -300,6 +300,11 @@
         "title": "Search a value by type or polarity"
       },
       {
+        "command": "ocaml.ocamlgrep",
+        "category": "OCaml",
+        "title": "Search expressions with ocamlgrep"
+      },
+      {
         "command": "ocaml.navigate-typed-holes",
         "category": "OCaml",
         "title": "List typed holes in the file for navigation"

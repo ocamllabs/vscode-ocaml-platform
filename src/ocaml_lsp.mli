@@ -17,6 +17,7 @@ val can_handle_type_selection : t -> bool
 val can_handle_construct : t -> bool
 val can_handle_merlin_jump : t -> bool
 val can_handle_search_by_type : t -> bool
+val can_handle_ocamlgrep : t -> bool
 val suggest_to_upgrade_ocaml_lsp_server : ?message:string -> unit -> unit Promise.t
 
 module OcamllspSettingEnable : sig

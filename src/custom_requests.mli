@@ -65,6 +65,20 @@ module Merlin_jump : sig
   val request : (params, response) custom_request
 end
 
+module Ocamlgrep : sig
+  type finding =
+    { uri : Uri.t
+    ; range : Range.t
+    ; lines : string list
+    }
+
+  type params
+  type response = finding list
+
+  val make : uri:Uri.t -> query:string -> params
+  val request : (params, response) custom_request
+end
+
 module Type_search : sig
   type type_search_result =
     { name : string

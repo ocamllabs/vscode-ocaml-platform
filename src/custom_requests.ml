@@ -157,6 +157,42 @@ module Merlin_jump = struct
   let request = { meth = ocamllsp_prefixed "jump"; encode_params; decode_response }
 end
 
+module Ocamlgrep = struct
+  type finding =
+    { uri : Uri.t
+    ; range : Range.t
+    ; lines : string list
+    }
+
+  type params =
+    { uri : Uri.t
+    ; query : string
+    }
+
+  type response = finding list
+
+  let encode_params { uri; query } =
+    let open Jsonoo.Encode in
+    let textDocument = "textDocument", object_ [ "uri", string @@ Uri.toString uri () ] in
+    let query = "query", string query in
+    object_ [ textDocument; query ]
+  ;;
+
+  let decode_response response =
+    let open Jsonoo.Decode in
+    let decode_finding json =
+      let uri = Uri.parse (field "uri" string json) () in
+      let range = field "range" Range.t_of_json json in
+      let lines = field "lines" (list string) json in
+      { uri; range; lines }
+    in
+    field "findings" (list decode_finding) response
+  ;;
+
+  let make ~uri ~query = { uri; query }
+  let request = { meth = ocamllsp_prefixed "ocamlgrep"; encode_params; decode_response }
+end
+
 module Type_search = struct
   type type_search_result =
     { name : string
