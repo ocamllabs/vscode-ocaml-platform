@@ -1598,7 +1598,7 @@ module Ocamlgrep = struct
 
   let log_to_output lines =
     let channel = Lazy.force Output.extension_output_channel in
-    List.iter lines ~f:(OutputChannel.appendLine channel ~value:)
+    List.iter lines ~f:(fun line -> OutputChannel.appendLine channel ~value:line)
   ;;
 
   let display_results query (response : Custom_requests.Ocamlgrep.response) =
