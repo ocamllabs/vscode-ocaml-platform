@@ -46,7 +46,6 @@ module Internal : sig
   val merlin_jump : (unit, unit) handle
   val search_by_type : (unit, unit) handle
   val ocamlgrep : (unit, unit) handle
-  val ocamlgrep_test : (unit, unit) handle
   val navigate_typed_holes : (unit, unit) handle
   val type_selection : (unit, unit) handle
   val type_previous_selection : (unit, unit) handle

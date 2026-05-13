@@ -145,7 +145,6 @@ module Internal = struct
   let merlin_jump = unit_handle "jump"
   let search_by_type = unit_handle "search-by-type"
   let ocamlgrep = unit_handle "ocamlgrep"
-  let ocamlgrep_test = unit_handle "ocamlgrep-test"
   let navigate_typed_holes = unit_handle "navigate-typed-holes"
   let type_selection = unit_handle "type-selection"
   let type_previous_selection = unit_handle "type-previous-selection"
