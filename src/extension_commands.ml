@@ -1670,10 +1670,9 @@ module Ocamlgrep = struct
                      (Custom_requests.Ocamlgrep.make ~uri ~query)
                    |> Promise.catch ~rejected:(fun e ->
                         let msg =
-                          match Ojs.has_property e "message" with
-                          | true ->
-                            [%js.to: string] (Ojs.get_prop_ascii e "message")
-                          | false -> Ojs.to_string e
+                          if Ojs.has_property e "message"
+                          then [%js.to: string] (Ojs.get_prop_ascii e "message")
+                          else [%js.to: string] e
                         in
                         show_message `Error "ocamlgrep: %s" msg;
                         Promise.return [])
