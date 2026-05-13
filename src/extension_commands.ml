@@ -1677,6 +1677,7 @@ module Ocamlgrep = struct
           ~listener:(fun () ->
             match InputBox.value input_box with
             | Some query when String.length query > 0 ->
+              InputBox.hide input_box;
               let open Promise.Syntax in
               ignore
                 (let+ response =

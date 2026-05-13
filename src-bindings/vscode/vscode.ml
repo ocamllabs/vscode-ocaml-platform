@@ -1282,7 +1282,8 @@ module InputBox = struct
       val set_validationMessage : t -> InputBoxValidationMessage.t or_undefined -> unit
       [@@js.set]
 
-      val show : t -> unit [@@js.call]]
+      val show : t -> unit [@@js.call]
+      val hide : t -> unit [@@js.call]]
 
   let set
         t
