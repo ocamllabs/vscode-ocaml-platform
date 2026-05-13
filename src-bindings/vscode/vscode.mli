@@ -961,6 +961,7 @@ module InputBox : sig
   val validationMessage : t -> InputBoxValidationMessage.t or_undefined
   val set_validationMessage : t -> InputBoxValidationMessage.t or_undefined -> unit
   val show : t -> unit
+  val hide : t -> unit
 
   val set
     :  t
