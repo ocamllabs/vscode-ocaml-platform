@@ -305,6 +305,11 @@
         "title": "Search expressions with ocamlgrep"
       },
       {
+        "command": "ocaml.ocamlgrep-test",
+        "category": "OCaml",
+        "title": "Test QuickPick (ocamlgrep debug)"
+      },
+      {
         "command": "ocaml.navigate-typed-holes",
         "category": "OCaml",
         "title": "List typed holes in the file for navigation"

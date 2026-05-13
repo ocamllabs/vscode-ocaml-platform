@@ -1566,6 +1566,30 @@ module Navigate_holes = struct
   ;;
 end
 
+let _ocamlgrep_quickpick_test =
+  let callback (_instance : Extension_instance.t) () =
+    let module QuickPick = Vscode.QuickPick.Make (QuickPickItem) in
+    let items =
+      List.map
+        ~f:(fun s -> QuickPickItem.create ~label:s ())
+        [ "item one"; "item two"; "item three" ]
+    in
+    let qp =
+      QuickPick.set
+        (Window.createQuickPick (module QuickPickItem) ())
+        ~title:"QuickPick test"
+        ~items
+        ~ignoreFocusOut:true
+        ()
+    in
+    let _dispose =
+      QuickPick.onDidHide qp ~listener:(fun () -> QuickPick.dispose qp) ()
+    in
+    QuickPick.show qp
+  in
+  command (Command_api.Internal.unit_handle "ocamlgrep-test") callback
+;;
+
 module Ocamlgrep = struct
   let extension_name = "OCamlgrep"
 
