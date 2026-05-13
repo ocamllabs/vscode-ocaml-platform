@@ -1587,7 +1587,7 @@ let _ocamlgrep_quickpick_test =
     in
     QuickPick.show qp
   in
-  command (Command_api.Internal.unit_handle "ocamlgrep-test") callback
+  command Command_api.Internal.ocamlgrep_test callback
 ;;
 
 module Ocamlgrep = struct
