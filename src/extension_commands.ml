@@ -1596,9 +1596,27 @@ module Ocamlgrep = struct
     ()
   ;;
 
-  let display_results (findings : Custom_requests.Ocamlgrep.finding list) =
+  let log_to_output lines =
+    let channel = Lazy.force Output.extension_output_channel in
+    List.iter lines ~f:(OutputChannel.appendLine channel ~value:)
+  ;;
+
+  let display_results query (response : Custom_requests.Ocamlgrep.response) =
+    let { Custom_requests.Ocamlgrep.findings; warnings } = response in
+    (* Always log warnings to the output channel so the user can see coverage info. *)
+    if not (List.is_empty warnings) then begin
+      log_to_output
+        (Printf.sprintf "ocamlgrep %S:" query
+         :: List.map warnings ~f:(fun w -> "  " ^ w));
+      OutputChannel.show (Lazy.force Output.extension_output_channel) ~preserveFocus:true ()
+    end;
     match findings with
-    | [] -> show_message `Info "ocamlgrep: no matches found."
+    | [] ->
+      let hint =
+        if List.is_empty warnings then ""
+        else " (see 'OCaml Platform Extension' output for coverage details)"
+      in
+      show_message `Info "ocamlgrep: no matches found%s." hint
     | _ ->
       (* Pair each finding with a QuickPickItem; keep the association for navigation. *)
       let indexed =
@@ -1663,7 +1681,7 @@ module Ocamlgrep = struct
             | Some query when String.length query > 0 ->
               let open Promise.Syntax in
               ignore
-                (let+ findings =
+                (let+ response =
                    Custom_requests.send_request
                      client
                      Custom_requests.Ocamlgrep.request
@@ -1675,9 +1693,12 @@ module Ocamlgrep = struct
                           else [%js.to: string] e
                         in
                         show_message `Error "ocamlgrep: %s" msg;
-                        Promise.return [])
+                        Promise.return
+                          { Custom_requests.Ocamlgrep.findings = []
+                          ; warnings = []
+                          })
                  in
-                 display_results findings)
+                 display_results query response)
             | _ -> ())
           ()
       in

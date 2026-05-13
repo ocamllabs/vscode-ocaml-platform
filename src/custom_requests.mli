@@ -72,8 +72,12 @@ module Ocamlgrep : sig
     ; lines : string list
     }
 
+  type response =
+    { findings : finding list
+    ; warnings : string list
+    }
+
   type params
-  type response = finding list
 
   val make : uri:Uri.t -> query:string -> params
   val request : (params, response) custom_request

@@ -164,12 +164,15 @@ module Ocamlgrep = struct
     ; lines : string list
     }
 
+  type response =
+    { findings : finding list
+    ; warnings : string list
+    }
+
   type params =
     { uri : Uri.t
     ; query : string
     }
-
-  type response = finding list
 
   let encode_params { uri; query } =
     let open Jsonoo.Encode in
@@ -186,7 +189,9 @@ module Ocamlgrep = struct
       let lines = field "lines" (list string) json in
       { uri; range; lines }
     in
-    field "findings" (list decode_finding) response
+    let findings = field "findings" (list decode_finding) response in
+    let warnings = field "warnings" (list string) response in
+    { findings; warnings }
   ;;
 
   let make ~uri ~query = { uri; query }
