@@ -1604,12 +1604,10 @@ module Ocamlgrep = struct
   let display_results query (response : Custom_requests.Ocamlgrep.response) =
     let { Custom_requests.Ocamlgrep.findings; warnings } = response in
     (* Always log warnings to the output channel so the user can see coverage info. *)
-    if not (List.is_empty warnings) then begin
-      log_to_output
-        (Printf.sprintf "ocamlgrep %S:" query
-         :: List.map warnings ~f:(fun w -> "  " ^ w));
-      OutputChannel.show (Lazy.force Output.extension_output_channel) ~preserveFocus:true ()
-    end;
+    log_to_output
+      (Printf.sprintf "ocamlgrep %S: %d finding(s)" query (List.length findings)
+       :: List.map warnings ~f:(fun w -> "  " ^ w));
+    OutputChannel.show (Lazy.force Output.extension_output_channel) ~preserveFocus:true ();
     match findings with
     | [] ->
       let hint =
