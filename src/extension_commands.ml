@@ -1584,6 +1584,7 @@ let _ocamlgrep_quickpick_test =
         ~busy:false
         ~enabled:true
         ~ignoreFocusOut:true
+        ~buttons:[]
         ()
     in
     let _dispose =
@@ -1665,6 +1666,7 @@ module Ocamlgrep = struct
           ~busy:false
           ~enabled:true
           ~ignoreFocusOut:true
+          ~buttons:[]
           ()
       in
       let _on_accept =
