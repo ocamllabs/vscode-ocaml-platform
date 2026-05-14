@@ -1566,6 +1566,21 @@ module Navigate_holes = struct
   ;;
 end
 
+(* ocamlgrep: project-wide search for OCaml expression patterns.
+
+   The user enters a pattern (an OCaml expression with [__] wildcards and
+   optional type constraints) via an InputBox.  Results are shown in a
+   transient QuickPick list; selecting an entry opens the file at the matched
+   location.
+
+   Work in progress — the QuickPick disappears as soon as focus leaves it,
+   which makes it hard to browse results while reading the code.  A better
+   design would show results in a persistent panel (e.g. a custom tree-view
+   or the built-in References panel via [vscode.commands.executeCommand
+   "editor.action.showReferences"]).  The latter would be the least-effort
+   improvement: convert each finding to a [Location.t] and call
+   [showReferences] with the list, which gives a persistent, navigable panel
+   for free. *)
 module Ocamlgrep = struct
   let extension_name = "OCamlgrep"
 
@@ -1710,7 +1725,12 @@ module Ocamlgrep = struct
       InputBox.show input_box
   ;;
 
-  let _ocamlgrep =
+  (* The [_ocamlgrep] binding registers the command via the side effect of
+     calling [command].  The leading underscore suppresses the OCaml
+     unused-value warning; the value itself is a [t] (command descriptor)
+     that is kept alive by the global [commands] list maintained by
+     [command]. *)
+  let _ocamlgrep : t =
     let callback (instance : Extension_instance.t) () =
       match Window.activeTextEditor () with
       | None ->
