@@ -1602,23 +1602,19 @@ module Ocamlgrep = struct
       ()
   ;;
 
-  let navigate_to_finding (finding : Custom_requests.Ocamlgrep.finding) =
-    let open Promise.Syntax in
-    let options =
-      TextDocumentShowOptions.create ~selection:finding.range ~preserveFocus:false ()
-    in
-    let+ _ = Window.showTextDocument' ~document:(`Uri finding.uri) ~options () in
-    ()
-  ;;
-
   let log_to_output lines =
     let channel = Lazy.force Output.extension_output_channel in
     List.iter lines ~f:(fun line -> OutputChannel.appendLine channel ~value:line)
   ;;
 
-  let display_results query (response : Custom_requests.Ocamlgrep.response) =
+  (* Show findings in VS Code's built-in References panel.
+     This is persistent — it stays open while the user navigates between files,
+     unlike a QuickPick which closes on focus loss.
+     The panel title says "references" (VS Code hardcodes this) but the UX is
+     otherwise ideal: results grouped by file, source context visible, keyboard
+     navigable. *)
+  let display_results query text_editor (response : Custom_requests.Ocamlgrep.response) =
     let { Custom_requests.Ocamlgrep.findings; warnings } = response in
-    (* Always log warnings to the output channel so the user can see coverage info. *)
     log_to_output
       (Printf.sprintf "ocamlgrep %S: %d finding(s)" query (List.length findings)
        :: List.map warnings ~f:(fun w -> "  " ^ w));
@@ -1631,55 +1627,21 @@ module Ocamlgrep = struct
       in
       show_message `Info "ocamlgrep: no matches found%s." hint
     | _ ->
-      (* Pair each finding with a QuickPickItem; keep the association for navigation. *)
-      let indexed =
-        List.mapi findings ~f:(fun i (f : Custom_requests.Ocamlgrep.finding) ->
-          let file = Uri.fsPath f.uri in
-          let line = (Range.start f.range |> Position.line) + 1 in
-          let label = Printf.sprintf "%d: %s:%d" i file line in
-          let detail = String.concat ~sep:" " f.lines in
-          let item = QuickPickItem.create ~label ~detail () in
-          item, f)
+      let anchor_uri = TextEditor.document text_editor |> TextDocument.uri in
+      let anchor_pos = TextEditor.selection text_editor |> Selection.active in
+      let locations =
+        Array.of_list
+          (List.map findings ~f:(fun (f : Custom_requests.Ocamlgrep.finding) ->
+             Location.make ~uri:f.uri ~rangeOrPosition:(`Range f.range)))
       in
-      let module QuickPick = Vscode.QuickPick.Make (QuickPickItem) in
-      let quickPick =
-        QuickPick.set
-          (Window.createQuickPick (module QuickPickItem) ())
-          ~title:"OCamlgrep Results"
-          ~items:(List.map ~f:fst indexed)
-          ~activeItems:[]
-          ~selectedItems:[]
-          ~busy:false
-          ~enabled:true
-          ~ignoreFocusOut:false
-          ~buttons:[]
-          ()
-      in
-      let _on_accept =
-        QuickPick.onDidAccept
-          quickPick
-          ~listener:(fun () ->
-            match QuickPick.selectedItems quickPick with
-            | Some (item :: _) ->
-              let selected_label = QuickPickItem.label item in
-              let finding =
-                List.find_map indexed ~f:(fun (it, f) ->
-                  if String.equal (QuickPickItem.label it) selected_label
-                  then Some f
-                  else None)
-              in
-              (match finding with
-               | Some f ->
-                 QuickPick.hide quickPick;
-                 ignore (navigate_to_finding f)
-               | None -> ())
-            | _ -> ())
-          ()
-      in
-      let _on_hide =
-        QuickPick.onDidHide quickPick ~listener:(fun () -> QuickPick.dispose quickPick) ()
-      in
-      QuickPick.show quickPick
+      ignore
+        (Commands.executeCommand
+           ~command:"editor.action.showReferences"
+           ~args:
+             [ [%js.of: Uri.t] anchor_uri
+             ; [%js.of: Position.t] anchor_pos
+             ; [%js.of: Location.t array] locations
+             ])
   ;;
 
   let show_query_input =
@@ -1717,7 +1679,7 @@ module Ocamlgrep = struct
                           ; warnings = []
                           })
                  in
-                 display_results query response)
+                 display_results query text_editor response)
             | _ -> ())
           ()
       in
