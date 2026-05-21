@@ -75,6 +75,7 @@ module Ocamlgrep : sig
   type response =
     { findings : finding list
     ; warnings : string list
+    ; errors : string list
     }
 
   type params

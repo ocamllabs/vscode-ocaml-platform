@@ -1614,13 +1614,19 @@ module Ocamlgrep = struct
      otherwise ideal: results grouped by file, source context visible, keyboard
      navigable. *)
   let display_results query text_editor (response : Custom_requests.Ocamlgrep.response) =
-    let { Custom_requests.Ocamlgrep.findings; warnings } = response in
+    let { Custom_requests.Ocamlgrep.findings; warnings; errors } = response in
     log_to_output
       (Printf.sprintf "ocamlgrep %S: %d finding(s)" query (List.length findings)
-       :: List.map warnings ~f:(fun w -> "  " ^ w));
+       :: List.map warnings ~f:(fun w -> "  " ^ w)
+       @ List.map errors ~f:(fun e -> "  Error: " ^ e));
     OutputChannel.show (Lazy.force Output.extension_output_channel) ~preserveFocus:true ();
-    match findings with
-    | [] ->
+    match errors, findings with
+    | _ :: _, _ ->
+      (* User-facing errors (e.g. project root not found) — shown as a plain
+         warning, not a scary error popup. Full text is in the output channel. *)
+      show_message `Warn "ocamlgrep: %s (see output panel for details)"
+        (List.hd_exn errors)
+    | [], [] ->
       let hint =
         if List.is_empty warnings then ""
         else " (see 'OCaml Platform Extension' output for coverage details)"
@@ -1677,6 +1683,7 @@ module Ocamlgrep = struct
                         Promise.return
                           { Custom_requests.Ocamlgrep.findings = []
                           ; warnings = []
+                          ; errors = []
                           })
                  in
                  display_results query text_editor response)

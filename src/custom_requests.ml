@@ -167,6 +167,7 @@ module Ocamlgrep = struct
   type response =
     { findings : finding list
     ; warnings : string list
+    ; errors : string list
     }
 
   type params =
@@ -191,7 +192,8 @@ module Ocamlgrep = struct
     in
     let findings = field "findings" (list decode_finding) response in
     let warnings = field "warnings" (list string) response in
-    { findings; warnings }
+    let errors = field "errors" (list string) response in
+    { findings; warnings; errors }
   ;;
 
   let make ~uri ~query = { uri; query }
