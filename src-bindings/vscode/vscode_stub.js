@@ -1,1 +1,4 @@
-globalThis.vscode = require("vscode");
+'use strict';
+
+//Provides: vscode
+var vscode = require("vscode");

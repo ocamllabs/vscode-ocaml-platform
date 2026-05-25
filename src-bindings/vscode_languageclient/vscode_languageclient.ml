@@ -192,7 +192,7 @@ module LanguageClient = struct
         -> ?forceDebug:bool
         -> unit
         -> t
-      [@@js.new "vscode_languageclient.LanguageClient"]
+      [@@js.new "@vscode_languageclient.LanguageClient"]
 
       val start : t -> unit Promise.t [@@js.call]
       val isRunning : t -> bool [@@js.call]
