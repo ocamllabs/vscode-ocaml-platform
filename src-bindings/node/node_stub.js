@@ -1,5 +1,3 @@
-"use strict";
-
 //Provides: vscode_node_child_process
 var vscode_node_child_process = require("node:child_process");
 void vscode_node_child_process;
