@@ -135,7 +135,9 @@ module Path = struct
       val dirname : string -> string [@@js.global "@vscode_node_path.dirname"]
       val extname : string -> string [@@js.global "@vscode_node_path.extname"]
       val isAbsolute : string -> bool [@@js.global "@vscode_node_path.isAbsolute"]
-      val join : (string list[@js.variadic]) -> string [@@js.global "@vscode_node_path.join"]]
+
+      val join : (string list[@js.variadic]) -> string
+      [@@js.global "@vscode_node_path.join"]]
 
   let delimiter =
     assert (String.length delimiter = 1);
@@ -166,8 +168,11 @@ module Fs = struct
 
   include
     [%js:
-      val access : string -> mode:Constants.t -> unit Promise.t [@@js.global "@vscode_node_fs.access"]
-      val readdir : string -> string list Promise.t [@@js.global "@vscode_node_fs.readdir"]
+      val access : string -> mode:Constants.t -> unit Promise.t
+      [@@js.global "@vscode_node_fs.access"]
+
+      val readdir : string -> string list Promise.t
+      [@@js.global "@vscode_node_fs.readdir"]
 
       val readFile : string -> options:ReadFileOptions.t -> string Promise.t
       [@@js.global "@vscode_node_fs.readFile"]]

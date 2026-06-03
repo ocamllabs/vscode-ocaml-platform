@@ -3067,7 +3067,8 @@ module Window = struct
         -> OutputChannel.t
       [@@js.global "@vscode.window.createOutputChannel"]
 
-      val createInputBox : unit -> InputBox.t [@@js.global "@vscode.window.createInputBox"]
+      val createInputBox : unit -> InputBox.t
+      [@@js.global "@vscode.window.createInputBox"]
 
       val showOpenDialog
         :  ?options:OpenDialogOptions.t
