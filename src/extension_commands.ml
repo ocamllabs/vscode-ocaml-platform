@@ -1650,8 +1650,11 @@ module Ocamlgrep = struct
              ])
   ;;
 
-  (* Run 'ocamlgrep --format json <query> <root>' in each workspace folder and
-     merge the results.  Exit code 1 ("no matches") is not an error. *)
+  (* Run 'ocamlgrep --format json <query>' with cwd=<folder> for each
+     workspace folder and merge the results.  Running with cwd set to the
+     folder lets dune locate the project root automatically, the same way
+     the CLI works when invoked from the terminal.
+     Exit code 1 ("no matches") is not an error. *)
   let search_all_folders query =
     let open Promise.Syntax in
     let folders = Workspace.workspaceFolders () in
@@ -1664,10 +1667,10 @@ module Ocamlgrep = struct
                Cmd.(
                  Spawn
                    { bin = Path.of_string "ocamlgrep"
-                   ; args = [ "--format"; "json"; query; root ]
+                   ; args = [ "--format"; "json"; query ]
                    })
              in
-             let+ result = Cmd.run cmd in
+             let+ result = Cmd.run ~cwd:(Path.of_string root) cmd in
              if result.ChildProcess.exitCode = 2
              then
                { Custom_requests.Ocamlgrep.findings = []
