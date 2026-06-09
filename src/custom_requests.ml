@@ -158,6 +158,9 @@ module Merlin_jump = struct
 end
 
 module Ocamlgrep = struct
+  (* Mirrors the JSON schema produced by [ocamlgrep --format json]
+     (generated from Export.atd in the ocamlgrep library).
+     Positions are 0-indexed rows/columns; location.file is an absolute path. *)
   type finding =
     { uri : Uri.t
     ; range : Range.t
@@ -172,18 +175,27 @@ module Ocamlgrep = struct
 
   let decode_response response =
     let open Jsonoo.Decode in
+    let decode_pos json =
+      let row = field "row" int json in
+      let col = field "column" int json in
+      Position.make ~line:row ~character:col
+    in
     let decode_finding json =
-      let uri = Uri.parse (field "uri" string json) () in
-      let range = field "range" Range.t_of_json json in
+      let loc = field "location" Fun.id json in
+      let file = field "file" string loc in
+      let uri = Uri.file file in
+      let start = field "start" decode_pos loc in
+      let end_ = field "end" decode_pos loc in
+      let range = Range.makePositions ~start ~end_ in
       let lines = field "lines" (list string) json in
       { uri; range; lines }
     in
     let findings = field "findings" (list decode_finding) response in
     let warnings = field "warnings" (list string) response in
     let errors =
-      (* errors field absent in CLI JSON output; default to empty *)
-      (try Jsonoo.Decode.(field "errors" (list string) response) with
-       | Jsonoo.Decode_error _ -> [])
+      match field "error" (nullable string) response with
+      | Some msg -> [ msg ]
+      | None -> []
     in
     { findings; warnings; errors }
   ;;

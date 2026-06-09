@@ -1650,7 +1650,7 @@ module Ocamlgrep = struct
              ])
   ;;
 
-  (* Run 'ocamlgrep --format json <root> <query>' in each workspace folder and
+  (* Run 'ocamlgrep --format json <query> <root>' in each workspace folder and
      merge the results.  Exit code 1 ("no matches") is not an error. *)
   let search_all_folders query =
     let open Promise.Syntax in
@@ -1664,7 +1664,7 @@ module Ocamlgrep = struct
                Cmd.(
                  Spawn
                    { bin = Path.of_string "ocamlgrep"
-                   ; args = [ "--format"; "json"; root; query ]
+                   ; args = [ "--format"; "json"; query; root ]
                    })
              in
              let+ result = Cmd.run cmd in
