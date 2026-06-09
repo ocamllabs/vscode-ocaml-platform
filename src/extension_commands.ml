@@ -1650,15 +1650,71 @@ module Ocamlgrep = struct
              ])
   ;;
 
+  (* Run 'ocamlgrep --format json <root> <query>' in each workspace folder and
+     merge the results.  Exit code 1 ("no matches") is not an error. *)
+  let search_all_folders query =
+    let open Promise.Syntax in
+    let folders = Workspace.workspaceFolders () in
+    let* parts =
+      Promise.all_list
+        (List.map
+           ~f:(fun (folder : WorkspaceFolder.t) ->
+             let root = folder |> WorkspaceFolder.uri |> Uri.fsPath in
+             let cmd =
+               Cmd.(
+                 Spawn
+                   { bin = Path.of_string "ocamlgrep"
+                   ; args = [ "--format"; "json"; root; query ]
+                   })
+             in
+             let+ result = Cmd.run cmd in
+             if result.ChildProcess.exitCode = 2
+             then
+               { Custom_requests.Ocamlgrep.findings = []
+               ; warnings = []
+               ; errors =
+                   [ Printf.sprintf
+                       "ocamlgrep failed in %s: %s"
+                       root
+                       (String.trim result.ChildProcess.stderr)
+                   ]
+               }
+             else (
+               match
+                 Jsonoo.try_parse_opt result.ChildProcess.stdout
+                 |> Option.map ~f:Custom_requests.Ocamlgrep.decode_response
+               with
+               | Some r -> r
+               | None ->
+                 { Custom_requests.Ocamlgrep.findings = []
+                 ; warnings = []
+                 ; errors =
+                     [ Printf.sprintf
+                         "ocamlgrep: unexpected output from %s"
+                         root
+                     ]
+                 }))
+           folders)
+    in
+    let merge acc (r : Custom_requests.Ocamlgrep.response) =
+      { Custom_requests.Ocamlgrep.findings =
+          acc.Custom_requests.Ocamlgrep.findings @ r.findings
+      ; warnings = acc.warnings @ r.warnings
+      ; errors = acc.errors @ r.errors
+      }
+    in
+    Promise.return
+      (List.fold_left ~init:Custom_requests.Ocamlgrep.empty_response ~f:merge parts)
+  ;;
+
   let show_query_input =
     let previous : Disposable.t option ref = ref None in
-    fun text_editor client ->
+    fun text_editor ->
       let () =
         match !previous with
         | None -> ()
         | Some d -> Disposable.dispose d
       in
-      let uri = TextEditor.document text_editor |> TextDocument.uri in
       let disposable =
         InputBox.onDidAccept
           input_box
@@ -1669,10 +1725,7 @@ module Ocamlgrep = struct
               let open Promise.Syntax in
               ignore
                 (let+ response =
-                   Custom_requests.send_request
-                     client
-                     Custom_requests.Ocamlgrep.request
-                     (Custom_requests.Ocamlgrep.make ~uri ~query)
+                   search_all_folders query
                    |> Promise.catch ~rejected:(fun e ->
                         let msg =
                           if Ojs.has_property e "message"
@@ -1680,11 +1733,7 @@ module Ocamlgrep = struct
                           else [%js.to: string] e
                         in
                         show_message `Error "ocamlgrep: %s" msg;
-                        Promise.return
-                          { Custom_requests.Ocamlgrep.findings = []
-                          ; warnings = []
-                          ; errors = []
-                          })
+                        Promise.return Custom_requests.Ocamlgrep.empty_response)
                  in
                  display_results query text_editor response)
             | _ -> ())
@@ -1700,7 +1749,7 @@ module Ocamlgrep = struct
      that is kept alive by the global [commands] list maintained by
      [command]. *)
   let _ocamlgrep : t =
-    let callback (instance : Extension_instance.t) () =
+    let callback (_instance : Extension_instance.t) () =
       match Window.activeTextEditor () with
       | None ->
         Command_api.Command_errors.text_editor_must_be_active
@@ -1711,19 +1760,7 @@ module Ocamlgrep = struct
         show_message
           `Error
           "Invalid file type. This command only works in OCaml source files."
-      | Some text_editor ->
-        (match Extension_instance.lsp_client instance with
-         | None -> show_message `Warn "ocamllsp is not running"
-         | Some (_client, ocaml_lsp) when not (Ocaml_lsp.can_handle_ocamlgrep ocaml_lsp)
-           ->
-           let _ =
-             Ocaml_lsp.suggest_to_upgrade_ocaml_lsp_server
-               ~message:
-                 "The installed version of \"ocamllsp\" does not support ocamlgrep."
-               ()
-           in
-           ()
-         | Some (client, _) -> show_query_input text_editor client)
+      | Some text_editor -> show_query_input text_editor
     in
     command Command_api.Internal.ocamlgrep callback
   ;;

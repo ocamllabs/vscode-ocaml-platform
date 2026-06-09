@@ -170,18 +170,6 @@ module Ocamlgrep = struct
     ; errors : string list
     }
 
-  type params =
-    { uri : Uri.t
-    ; query : string
-    }
-
-  let encode_params { uri; query } =
-    let open Jsonoo.Encode in
-    let textDocument = "textDocument", object_ [ "uri", string @@ Uri.toString uri () ] in
-    let query = "query", string query in
-    object_ [ textDocument; query ]
-  ;;
-
   let decode_response response =
     let open Jsonoo.Decode in
     let decode_finding json =
@@ -192,12 +180,15 @@ module Ocamlgrep = struct
     in
     let findings = field "findings" (list decode_finding) response in
     let warnings = field "warnings" (list string) response in
-    let errors = field "errors" (list string) response in
+    let errors =
+      (* errors field absent in CLI JSON output; default to empty *)
+      (try Jsonoo.Decode.(field "errors" (list string) response) with
+       | Jsonoo.Decode_error _ -> [])
+    in
     { findings; warnings; errors }
   ;;
 
-  let make ~uri ~query = { uri; query }
-  let request = { meth = ocamllsp_prefixed "ocamlgrep"; encode_params; decode_response }
+  let empty_response = { findings = []; warnings = []; errors = [] }
 end
 
 module Type_search = struct
