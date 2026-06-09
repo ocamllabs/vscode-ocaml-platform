@@ -193,7 +193,7 @@ module Ocamlgrep = struct
     let findings = field "findings" (list decode_finding) response in
     let warnings = field "warnings" (list string) response in
     let errors =
-      match field "error" (nullable string) response with
+      match try_optional (field "error" string) response with
       | Some msg -> [ msg ]
       | None -> []
     in
