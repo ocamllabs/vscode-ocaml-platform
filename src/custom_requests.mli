@@ -78,10 +78,8 @@ module Ocamlgrep : sig
     ; errors : string list
     }
 
-  type params
-
-  val make : uri:Uri.t -> query:string -> params
-  val request : (params, response) custom_request
+  val decode_response : Jsonoo.t -> response
+  val empty_response : response
 end
 
 module Type_search : sig

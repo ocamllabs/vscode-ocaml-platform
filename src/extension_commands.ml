@@ -1676,7 +1676,7 @@ module Ocamlgrep = struct
                    [ Printf.sprintf
                        "ocamlgrep failed in %s: %s"
                        root
-                       (String.trim result.ChildProcess.stderr)
+                       (String.strip result.ChildProcess.stderr)
                    ]
                }
              else (
