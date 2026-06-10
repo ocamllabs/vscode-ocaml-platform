@@ -1682,10 +1682,16 @@ module Ocamlgrep = struct
                        (String.strip result.ChildProcess.stderr)
                    ]
                }
-             else (
-               match
+             else
+               let resolve_path path =
+                 if Filename.is_relative path
+                 then Uri.file (Filename.concat root path)
+                 else Uri.file path
+               in
+               (match
                  Jsonoo.try_parse_opt result.ChildProcess.stdout
-                 |> Option.map ~f:Custom_requests.Ocamlgrep.decode_response
+                 |> Option.map
+                      ~f:(Custom_requests.Ocamlgrep.decode_response ~resolve_path)
                with
                | Some r -> r
                | None ->

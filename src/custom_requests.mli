@@ -78,7 +78,7 @@ module Ocamlgrep : sig
     ; errors : string list
     }
 
-  val decode_response : Jsonoo.t -> response
+  val decode_response : resolve_path:(string -> Uri.t) -> Jsonoo.t -> response
   val empty_response : response
 end
 

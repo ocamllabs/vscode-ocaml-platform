@@ -173,7 +173,7 @@ module Ocamlgrep = struct
     ; errors : string list
     }
 
-  let decode_response response =
+  let decode_response ~resolve_path response =
     let open Jsonoo.Decode in
     let decode_pos json =
       let row = field "row" int json in
@@ -183,7 +183,7 @@ module Ocamlgrep = struct
     let decode_finding json =
       let loc = field "location" Fun.id json in
       let file = field "file" string loc in
-      let uri = Uri.file file in
+      let uri = resolve_path file in
       let start = field "start" decode_pos loc in
       let end_ = field "end" decode_pos loc in
       let range = Range.makePositions ~start ~end_ in
