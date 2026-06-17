@@ -6,6 +6,9 @@
     "useIgnoreFile": true,
     "defaultBranch": "master"
   },
+  "files": {
+    "includes": ["**", "!**/*.svg"]
+  },
   "linter": {
     "enabled": true,
     "includes": ["**", "!astexplorer/**"],
@@ -13,7 +16,7 @@
       "project": "recommended"
     },
     "rules": {
-      "recommended": true
+      "preset": "recommended"
     }
   },
   "formatter": {
