@@ -28,7 +28,7 @@
   (ocaml
    (>= 5.4))
   (js_of_ocaml
-   (>= 6.3.0))
+   (>= 6.3))
   (gen_js_api
    (= 1.1.7))
   (base
@@ -57,7 +57,7 @@
   (ocaml
    (>= 4.08))
   (js_of_ocaml
-   (>= 6.3.0))
+   (>= 6.3))
   (gen_js_api
    (= 1.1.7))
   (ocamlformat
@@ -73,7 +73,7 @@
   (ocaml
    (>= 4.08))
   (js_of_ocaml
-   (>= 6.3.0))
+   (>= 6.3))
   (gen_js_api
    (= 1.1.7))
   (promise_jsoo
@@ -96,7 +96,7 @@
   (ocaml
    (>= 4.08))
   (js_of_ocaml
-   (>= 6.3.0))
+   (>= 6.3))
   (gen_js_api
    (= 1.1.7))
   (promise_jsoo
