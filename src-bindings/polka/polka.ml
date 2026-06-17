@@ -40,7 +40,7 @@ end
 
 include
   [%js:
-    val create : unit -> polka [@@js.global "polka"]
+    val create : unit -> polka [@@js.global "@polka"]
 
     val listen_
       :  polka
@@ -68,5 +68,5 @@ module Sirv = struct
   include
     [%js:
       val serve : string -> ?options:Options.t -> unit -> (Middleware.t[@js.dummy])
-      [@@js.global "sirv"]]
+      [@@js.global "@sirv"]]
 end

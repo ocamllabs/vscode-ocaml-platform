@@ -41,7 +41,7 @@ module Process = struct
   end
 end
 
-module Os = [%js: val homedir : unit -> string [@@js.global "@vscode_node_os.homedir"]]
+module Os = [%js: val homedir : unit -> string [@@js.global "@node_os.homedir"]]
 
 module JsError = struct
   type t = Promise.error [@@js]
@@ -129,15 +129,13 @@ end
 module Path = struct
   include
     [%js:
-      val delimiter : string [@@js.global "@vscode_node_path.delimiter"]
-      val sep : string [@@js.global "@vscode_node_path.sep"]
-      val basename : string -> string [@@js.global "@vscode_node_path.basename"]
-      val dirname : string -> string [@@js.global "@vscode_node_path.dirname"]
-      val extname : string -> string [@@js.global "@vscode_node_path.extname"]
-      val isAbsolute : string -> bool [@@js.global "@vscode_node_path.isAbsolute"]
-
-      val join : (string list[@js.variadic]) -> string
-      [@@js.global "@vscode_node_path.join"]]
+      val delimiter : string [@@js.global "@node_path.delimiter"]
+      val sep : string [@@js.global "@node_path.sep"]
+      val basename : string -> string [@@js.global "@node_path.basename"]
+      val dirname : string -> string [@@js.global "@node_path.dirname"]
+      val extname : string -> string [@@js.global "@node_path.extname"]
+      val isAbsolute : string -> bool [@@js.global "@node_path.isAbsolute"]
+      val join : (string list[@js.variadic]) -> string [@@js.global "@node_path.join"]]
 
   let delimiter =
     assert (String.length delimiter = 1);
@@ -153,7 +151,7 @@ end
 module Constants = struct
   type t = R_OK
 
-  include [%js: val r_ok : Ojs.t [@@js.global "@vscode_node_constants.R_OK"]]
+  include [%js: val r_ok : Ojs.t [@@js.global "@node_constants.R_OK"]]
 
   let t_to_js = function
     | R_OK -> r_ok
@@ -169,13 +167,12 @@ module Fs = struct
   include
     [%js:
       val access : string -> mode:Constants.t -> unit Promise.t
-      [@@js.global "@vscode_node_fs.access"]
+      [@@js.global "@node_fs.access"]
 
-      val readdir : string -> string list Promise.t
-      [@@js.global "@vscode_node_fs.readdir"]
+      val readdir : string -> string list Promise.t [@@js.global "@node_fs.readdir"]
 
       val readFile : string -> options:ReadFileOptions.t -> string Promise.t
-      [@@js.global "@vscode_node_fs.readFile"]]
+      [@@js.global "@node_fs.readFile"]]
 
   let exists path =
     access path ~mode:Constants.R_OK
@@ -202,7 +199,7 @@ module Net = struct
 
     include
       [%js:
-        val make : unit -> t [@@js.new "@vscode_node_net.Socket"]
+        val make : unit -> t [@@js.new "@node_net.Socket"]
         val isPaused : t -> bool [@@js.call]
         val destroy : t -> unit [@@js.call]
         val connect : t -> port:int -> host:string -> t [@@js.call]
@@ -237,10 +234,10 @@ module ChildProcess = struct
         -> ?callback:(exec_result or_undefined -> string -> string -> unit)
         -> unit
         -> t
-      [@@js.global "@vscode_node_child_process.exec"]
+      [@@js.global "@node_child_process.exec"]
 
       val spawn : string -> string array -> ?options:Options.t -> unit -> t
-      [@@js.global "@vscode_node_child_process.spawn"]
+      [@@js.global "@node_child_process.spawn"]
 
       val get_stdout : t -> Stream.Readable.t [@@js.get "stdout"]
       val get_stderr : t -> Stream.Readable.t [@@js.get "stderr"]
