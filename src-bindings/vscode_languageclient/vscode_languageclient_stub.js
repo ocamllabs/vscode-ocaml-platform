@@ -1,1 +1,4 @@
-globalThis.vscode_languageclient = require("vscode-languageclient");
+// biome-ignore-all lint/correctness/noUnusedVariables: js_of_ocaml runtime primitives are referenced through // Provides annotations, not from JavaScript
+
+// Provides: vscode_languageclient
+const vscode_languageclient = require("vscode-languageclient");

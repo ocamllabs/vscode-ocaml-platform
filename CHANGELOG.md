@@ -1,6 +1,8 @@
 # VSCode OCaml Platform Releases
 
 ## Unreleased
+- Stop mutating `globalThis` in generated JS bindings by switching to `gen_js_api`
+  runtime primitives. (#1617)
 - Add dune installation when ocaml walkthrough is installing platoform tools (#2136)
 
 - Fix dune detection failing on Windows when `which` is unavailable by

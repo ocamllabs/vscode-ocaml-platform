@@ -28,9 +28,9 @@
   (ocaml
    (>= 5.4))
   (js_of_ocaml
-   (>= 6.0))
+   (>= 6.3))
   (gen_js_api
-   (= 1.1.6))
+   (= 1.1.7))
   (base
    (>= v0.17))
   (promise_jsoo
@@ -57,9 +57,9 @@
   (ocaml
    (>= 4.08))
   (js_of_ocaml
-   (>= 6.0))
+   (>= 6.3))
   (gen_js_api
-   (= 1.1.6))
+   (= 1.1.7))
   (ocamlformat
    (and
     (= 0.28.1)
@@ -73,9 +73,9 @@
   (ocaml
    (>= 4.08))
   (js_of_ocaml
-   (>= 6.0))
+   (>= 6.3))
   (gen_js_api
-   (= 1.1.6))
+   (= 1.1.7))
   (promise_jsoo
    (>= 0.4.3))
   (jsonoo
@@ -96,9 +96,9 @@
   (ocaml
    (>= 4.08))
   (js_of_ocaml
-   (>= 6.0))
+   (>= 6.3))
   (gen_js_api
-   (= 1.1.6))
+   (= 1.1.7))
   (promise_jsoo
    (>= 0.4.3))
   (jsonoo

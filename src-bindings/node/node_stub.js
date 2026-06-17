@@ -1,6 +1,19 @@
-globalThis.child_process = require("node:child_process");
-globalThis.constants = require("node:constants");
-globalThis.fs = require("node:fs/promises");
-globalThis.net = require("node:net");
-globalThis.os = require("node:os");
-globalThis.path = require("node:path");
+// biome-ignore-all lint/correctness/noUnusedVariables: js_of_ocaml runtime primitives are referenced through // Provides annotations, not from JavaScript
+
+// Provides: node_child_process
+const node_child_process = require("node:child_process");
+
+// Provides: node_constants
+const node_constants = require("node:constants");
+
+// Provides: node_fs
+const node_fs = require("node:fs/promises");
+
+// Provides: node_net
+const node_net = require("node:net");
+
+// Provides: node_os
+const node_os = require("node:os");
+
+// Provides: node_path
+const node_path = require("node:path");
