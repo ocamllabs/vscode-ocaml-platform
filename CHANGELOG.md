@@ -1,10 +1,12 @@
 # VSCode OCaml Platform Releases
 
 ## Unreleased
+
+## 2.2.0
+
 - Stop mutating `globalThis` in generated JS bindings by switching to `gen_js_api`
   runtime primitives. (#1617)
 - Add dune installation when ocaml walkthrough is installing platoform tools (#2136)
-
 - Fix dune detection failing on Windows when `which` is unavailable by
   running dune directly through `opam exec` instead. (#2131)
 
@@ -430,7 +432,7 @@
   Currently supported artifacts include `.cmi`, `.cmt(i)`, `.cmo`, `.cma`,
   `.cmx(a/s)`, and `.bc` files.
 
-  To learn more about these files, see: https://ocaml.org/manual/comp.html
+  To learn more about these files, see: <https://ocaml.org/manual/comp.html>
 
 - Warn if the extension sees not the latest OCaml-LSP version compatible with
   the OCaml distribution installed in the current sandbox.
