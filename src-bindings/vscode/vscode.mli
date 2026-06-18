@@ -1199,6 +1199,13 @@ module OutputChannel : sig
   val disposable : t -> Disposable.t
 end
 
+module OutputChannelOptions : sig
+  include Ojs.T
+
+  val log : t -> bool
+  val create : log:bool -> t
+end
+
 module Memento : sig
   include Ojs.T
 
@@ -2212,6 +2219,11 @@ module Window : sig
   val createInputBox : unit -> InputBox.t
   val showOpenDialog : ?options:OpenDialogOptions.t -> unit -> Uri.t list option Promise.t
   val createOutputChannel : name:string -> ?languageId:string -> unit -> OutputChannel.t
+
+  val createOutputChannelWithOptions
+    :  name:string
+    -> options:OutputChannelOptions.t
+    -> OutputChannel.t
 
   val setStatusBarMessage
     :  text:string
