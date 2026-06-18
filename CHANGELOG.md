@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fix `outputChannel.error is not a function` error by creating the language
+  server output channel as a log output channel. (#2174)
+
 ## 2.2.0
 
 - Stop mutating `globalThis` in generated JS bindings by switching to `gen_js_api`

@@ -1647,6 +1647,15 @@ module OutputChannel = struct
   let disposable this = Disposable.make ~dispose:(fun () -> dispose this)
 end
 
+module OutputChannelOptions = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val log : t -> bool [@@js.get]
+      val create : log:bool -> t [@@js.builder]]
+end
+
 module Memento = struct
   include Interface.Make ()
 
@@ -3064,6 +3073,12 @@ module Window = struct
         :  name:string
         -> ?languageId:string
         -> unit
+        -> OutputChannel.t
+      [@@js.global "@vscode.window.createOutputChannel"]
+
+      val createOutputChannelWithOptions
+        :  name:string
+        -> options:OutputChannelOptions.t
         -> OutputChannel.t
       [@@js.global "@vscode.window.createOutputChannel"]
 
