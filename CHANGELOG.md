@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 2.2.1
+
 - Fix `outputChannel.error is not a function` error by creating the language
   server output channel as a log output channel. (#2174)
 
