@@ -32,7 +32,7 @@ jobs:
           bun install --frozen-lockfile
           opam install . --deps-only --with-test
 
-      - name: Run biome checks
+      - name: Run Oxlint and Oxfmt checks
         run: bun run lint
 
       - name: Build and package extension

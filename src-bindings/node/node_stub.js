@@ -1,4 +1,4 @@
-// biome-ignore-all lint/correctness/noUnusedVariables: js_of_ocaml runtime primitives are referenced through // Provides annotations, not from JavaScript
+// oxlint-disable no-unused-vars
 
 // Provides: node_child_process
 const node_child_process = require("node:child_process");

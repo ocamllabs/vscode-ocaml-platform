@@ -49,7 +49,7 @@ doc:
 .PHONY: fmt
 fmt:
 	dune build --auto-promote @fmt
-	bunx biome format --write
+	bun run fix
 
 .PHONY: watch
 watch:

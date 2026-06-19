@@ -189,10 +189,7 @@
                   "name": "keyword.other.ocaml"
                 }
               },
-              "patterns": [
-                { "include": "#types" },
-                { "include": "#identifiers" }
-              ]
+              "patterns": [{ "include": "#types" }, { "include": "#identifiers" }]
             },
             {
               "comment": "pretty-printing, tracing",
@@ -206,10 +203,7 @@
                   "name": "keyword.other.ocaml"
                 }
               },
-              "patterns": [
-                { "include": "#literals" },
-                { "include": "#identifiers" }
-              ]
+              "patterns": [{ "include": "#literals" }, { "include": "#identifiers" }]
             },
             {
               "comment": "compiler options",
@@ -223,10 +217,7 @@
                   "name": "keyword.other.ocaml"
                 }
               },
-              "patterns": [
-                { "include": "#strings" },
-                { "include": "#literals" }
-              ]
+              "patterns": [{ "include": "#strings" }, { "include": "#literals" }]
             }
           ]
         },
@@ -316,10 +307,7 @@
           "name": "comment.block.ocaml",
           "begin": "\\(\\*",
           "end": "\\*\\)",
-          "patterns": [
-            { "include": "#strings-in-comments" },
-            { "include": "#comments" }
-          ]
+          "patterns": [{ "include": "#strings-in-comments" }, { "include": "#comments" }]
         }
       ]
     },

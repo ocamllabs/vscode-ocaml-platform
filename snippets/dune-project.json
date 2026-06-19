@@ -19,8 +19,6 @@
   },
   "package": {
     "prefix": "package",
-    "body": [
-      "(package\n (name $1)\n (synopsis \"$2\")\n (description \"$3\")\n (depends $4))"
-    ]
+    "body": ["(package\n (name $1)\n (synopsis \"$2\")\n (description \"$3\")\n (depends $4))"]
   }
 }

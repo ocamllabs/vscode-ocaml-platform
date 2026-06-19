@@ -11,7 +11,7 @@ VS Code extension for OCaml, written in OCaml and compiled to JavaScript via js_
 ```bash
 make build   # Build extension (dune + bun + astexplorer)
 make test    # Run OCaml tests (@runtest) and JavaScript tests
-make fmt     # Format OCaml (ocamlformat) and JS (biome)
+make fmt     # Format OCaml (ocamlformat) and lint-fix + format JS (Oxlint + Oxfmt)
 make pkg     # Clean, build, and package to VSIX
 make install # Package and install extension via `code` CLI
 make watch   # Watch mode for development
@@ -48,9 +48,8 @@ dune tools install ocamlformat # Install formatter
 ### Linting
 
 ```bash
-bun check # Run biome linter checks
-bun lint  # Biome linting
-bun fix   # Auto-fix with biome
+bun run lint # Run Oxlint then check formatting with Oxfmt
+bun run fix  # Auto-fix with Oxlint and rewrite files with Oxfmt
 ```
 
 ## Architecture

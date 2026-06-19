@@ -15,15 +15,7 @@ suite("opam", () => {
       vscode.Uri.file(path.join(sampleOpamSrc, "main.ml")),
     );
 
-    assert.strictEqual(
-      foo.languageId,
-      "ocaml",
-      "Must be identified as an OCaml document",
-    );
-    assert.strictEqual(
-      main.languageId,
-      "ocaml",
-      "Must be identified as an OCaml document",
-    );
+    assert.strictEqual(foo.languageId, "ocaml", "Must be identified as an OCaml document");
+    assert.strictEqual(main.languageId, "ocaml", "Must be identified as an OCaml document");
   });
 });

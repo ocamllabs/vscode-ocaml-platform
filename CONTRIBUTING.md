@@ -40,7 +40,7 @@ make install
 ```
 
 you can run the extension from VSCode by going in the "Run and Debug" tab
-(`Shift + Cmd + D`) and running the `Extension` task.  This will open a new
+(`Shift + Cmd + D`) and running the `Extension` task. This will open a new
 VSCode window with only the `vscode-ocaml` extension activated.
 
 ### Running Tests
@@ -61,8 +61,8 @@ To format the code, you can run:
 make fmt
 ```
 
-This will format the OCaml source code with `ocamlformat` and the JavaScript
-source code with `biome`.
+This will format the OCaml source code with `ocamlformat`, then lint-fix and
+format the JavaScript source code with `oxlint` and `oxfmt`.
 
 ## Submitting a PR
 

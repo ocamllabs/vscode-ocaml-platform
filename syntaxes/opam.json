@@ -1,11 +1,7 @@
 {
   "scopeName": "source.ocaml.opam",
   "fileTypes": ["opam"],
-  "patterns": [
-    { "include": "#comments" },
-    { "include": "#fields" },
-    { "include": "#values" }
-  ],
+  "patterns": [{ "include": "#comments" }, { "include": "#fields" }, { "include": "#values" }],
   "repository": {
     "comments": {
       "patterns": [

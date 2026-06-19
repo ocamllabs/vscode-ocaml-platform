@@ -5,22 +5,22 @@
   "private": true,
   "description": "Official OCaml language extension for VSCode",
   "categories": [
-    "Programming Languages",
-    "Debuggers"
+    "Debuggers",
+    "Programming Languages"
   ],
   "homepage": "https://github.com/ocamllabs/vscode-ocaml-platform",
   "bugs": {
     "url": "https://github.com/ocamllabs/vscode-ocaml-platform/issues"
   },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ocamllabs/vscode-ocaml-platform.git"
   },
-  "license": "MIT",
   "publisher": "ocamllabs",
-  "sideEffects": false,
-  "type": "commonjs",
-  "main": "./dist/vscode_ocaml_platform.bc.js",
+  "workspaces": [
+    "astexplorer"
+  ],
   "files": [
     "assets",
     "astexplorer/dist",
@@ -30,17 +30,31 @@
     "snippets",
     "syntaxes"
   ],
-  "workspaces": [
-    "astexplorer"
-  ],
+  "type": "commonjs",
+  "sideEffects": false,
+  "main": "./dist/vscode_ocaml_platform.bc.js",
   "scripts": {
-    "check": "biome check",
     "deploy:ovsx": "ovsx publish --packagePath ocaml-platform.vsix --no-dependencies",
     "deploy:vsce": "vsce publish --packagePath ocaml-platform.vsix --no-dependencies",
-    "fix": "biome check --fix",
-    "lint": "biome check",
+    "fix": "oxlint --fix && oxfmt",
+    "lint": "oxlint && oxfmt --check",
     "package": "vsce package --out ocaml-platform.vsix --no-dependencies",
     "test": "vscode-test"
+  },
+  "dependencies": {
+    "oxfmt": "0.55.0",
+    "oxlint": "1.70.0",
+    "polka": "1.0.0-next.28",
+    "sirv": "3.0.2",
+    "vscode-languageclient": "10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "25.9.3",
+    "@types/vscode": "1.86.0",
+    "@vscode/test-cli": "0.0.12",
+    "@vscode/test-electron": "3.0.0",
+    "@vscode/vsce": "3.9.2",
+    "ovsx": "1.0.1"
   },
   "contributes": {
     "breakpoints": [
@@ -1444,41 +1458,27 @@
     ]
   },
   "activationEvents": [
-    "onLanguage:cram",
     "onCommand:ocaml.ask-debug-program",
-    "workspaceContains:**/dune-workspace",
-    "workspaceContains:**/dune",
-    "workspaceContains:**/dune-project",
-    "workspaceContains:**/*.opam",
+    "onDebugResolve:ocaml.earlybird",
+    "onLanguage:cram",
     "workspaceContains:**/*.ml",
     "workspaceContains:**/*.mli",
     "workspaceContains:**/*.mll",
-    "workspaceContains:**/*.mly",
     "workspaceContains:**/*.mlx",
+    "workspaceContains:**/*.mly",
+    "workspaceContains:**/*.opam",
     "workspaceContains:**/*.re",
     "workspaceContains:**/*.rei",
-    "onDebugResolve:ocaml.earlybird"
+    "workspaceContains:**/dune",
+    "workspaceContains:**/dune-project",
+    "workspaceContains:**/dune-workspace"
   ],
-  "dependencies": {
-    "polka": "1.0.0-next.28",
-    "sirv": "3.0.2",
-    "vscode-languageclient": "10.0.0"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.5.0",
-    "@types/node": "25.9.3",
-    "@types/vscode": "1.86.0",
-    "@vscode/test-cli": "0.0.12",
-    "@vscode/test-electron": "3.0.0",
-    "@vscode/vsce": "3.9.2",
-    "ovsx": "1.0.1"
-  },
-  "engines": {
-    "vscode": "^1.86.0"
-  },
   "icon": "assets/logo.png",
   "galleryBanner": {
     "color": "#f29100",
     "theme": "light"
+  },
+  "engines": {
+    "vscode": "^1.86.0"
   }
 }

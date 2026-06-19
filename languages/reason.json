@@ -6,7 +6,11 @@
     { "open": "\"", "close": "\"", "notIn": ["string"] },
     { "open": "/**", "close": " */", "notIn": ["string"] }
   ],
-  "brackets": [["{", "}"], ["[", "]"], ["(", ")"]],
+  "brackets": [
+    ["{", "}"],
+    ["[", "]"],
+    ["(", ")"]
+  ],
   "comments": {
     "lineComment": "//",
     "blockComment": ["/*", "*/"]
