@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 2.3.0
+
 - Fix syntax highlighting for the per-package `version` field in the `package`
   stanza of `dune-project`. (#2182)
 - Use the Node.js entry point for `vscode-languageclient` to avoid loading the

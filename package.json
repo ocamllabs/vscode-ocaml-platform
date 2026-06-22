@@ -1,7 +1,7 @@
 {
   "name": "ocaml-platform",
   "displayName": "OCaml Platform",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "private": true,
   "description": "Official OCaml language extension for VSCode",
   "categories": [
@@ -42,8 +42,8 @@
     "test": "vscode-test"
   },
   "dependencies": {
-    "oxfmt": "0.55.0",
-    "oxlint": "1.70.0",
+    "oxfmt": "0.56.0",
+    "oxlint": "1.71.0",
     "polka": "1.0.0-next.28",
     "sirv": "3.0.2",
     "vscode-languageclient": "10.0.0"
