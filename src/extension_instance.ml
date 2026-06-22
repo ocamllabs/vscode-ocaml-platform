@@ -11,12 +11,7 @@ type t =
   ; documentation_server_info : StatusBarItem.t
   ; sandbox_info : StatusBarItem.t
   ; ast_editor_state : Ast_editor_state.t
-  ; mutable codelens : bool option
-  ; mutable codelens_for_nested_bindings : bool option
-  ; mutable extended_hover : bool option
   ; mutable standard_hover : bool option
-  ; mutable dune_diagnostics : bool option
-  ; mutable syntax_documentation : bool option
   }
 
 let sandbox t = t.sandbox
@@ -25,38 +20,26 @@ let ocaml_lsp t = Option.map ~f:snd t.lsp_client
 let lsp_client t = t.lsp_client
 let ocaml_version_exn t = Option.value_exn t.ocaml_version
 
-let send_configuration
-      ~codelens
-      ~codelens_for_nested_bindings
-      ~extended_hover
-      ~standard_hover
-      ~dune_diagnostics
-      ~syntax_documentation
-      client
-  =
+let send_configuration t client =
+  let enable_setting setting =
+    Option.map (Settings.get setting) ~f:(fun enable ->
+      Ocaml_lsp.OcamllspSettingEnable.create ~enable)
+  in
   let codelens =
-    Option.map codelens ~f:(fun enable ->
+    Option.map (Settings.get Settings.server_codelens_setting) ~f:(fun enable ->
       Ocaml_lsp.OcamllspSettingCodeLens.create
-        ?forNestedBindings:codelens_for_nested_bindings
+        ?forNestedBindings:
+          (Settings.get Settings.server_codelens_for_nested_bindings_setting)
         ~enable
         ())
   in
-  let extendedHover =
-    Option.map extended_hover ~f:(fun enable ->
-      Ocaml_lsp.OcamllspSettingEnable.create ~enable)
-  in
+  let extendedHover = enable_setting Settings.server_extendedHover_setting in
   let standardHover =
-    Option.map standard_hover ~f:(fun enable ->
+    Option.map t.standard_hover ~f:(fun enable ->
       Ocaml_lsp.OcamllspSettingEnable.create ~enable)
   in
-  let duneDiagnostics =
-    Option.map dune_diagnostics ~f:(fun enable ->
-      Ocaml_lsp.OcamllspSettingEnable.create ~enable)
-  in
-  let syntaxDocumentation =
-    Option.map syntax_documentation ~f:(fun enable ->
-      Ocaml_lsp.OcamllspSettingEnable.create ~enable)
-  in
+  let duneDiagnostics = enable_setting Settings.server_duneDiagnostics_setting in
+  let syntaxDocumentation = enable_setting Settings.server_syntaxDocumentation_setting in
   let settings =
     Ocaml_lsp.OcamllspSettings.create
       ~codelens
@@ -76,36 +59,11 @@ let send_configuration
   LanguageClient.sendNotification client "workspace/didChangeConfiguration" payload
 ;;
 
-let set_configuration
-      t
-      ?codelens
-      ?codelens_for_nested_bindings
-      ?extended_hover
-      ?standard_hover
-      ?dune_diagnostics
-      ?syntax_documentation
-      ()
-  =
-  Option.iter codelens ~f:(fun codelens -> t.codelens <- codelens);
-  Option.iter codelens_for_nested_bindings ~f:(fun codelens_for_nested_bindings ->
-    t.codelens_for_nested_bindings <- codelens_for_nested_bindings);
-  Option.iter extended_hover ~f:(fun extended_hover -> t.extended_hover <- extended_hover);
+let set_configuration t ?standard_hover () =
   Option.iter standard_hover ~f:(fun standard_hover -> t.standard_hover <- standard_hover);
-  Option.iter dune_diagnostics ~f:(fun dune_diagnostics ->
-    t.dune_diagnostics <- dune_diagnostics);
-  Option.iter syntax_documentation ~f:(fun syntax_documentation ->
-    t.syntax_documentation <- syntax_documentation);
   match t.lsp_client with
   | None -> ()
-  | Some (client, (_ : Ocaml_lsp.t)) ->
-    send_configuration
-      ~codelens:t.codelens
-      ~codelens_for_nested_bindings:t.codelens_for_nested_bindings
-      ~extended_hover:t.extended_hover
-      ~standard_hover:t.standard_hover
-      ~dune_diagnostics:t.dune_diagnostics
-      ~syntax_documentation:t.syntax_documentation
-      client
+  | Some (client, (_ : Ocaml_lsp.t)) -> send_configuration t client
 ;;
 
 let stop_server t =
@@ -275,14 +233,7 @@ end = struct
         (match Ocaml_lsp.is_version_up_to_date ocaml_lsp (ocaml_version_exn t) with
          | Ok () -> ()
          | Error (`Msg _) -> ());
-        send_configuration
-          client
-          ~codelens:t.codelens
-          ~codelens_for_nested_bindings:t.codelens_for_nested_bindings
-          ~extended_hover:t.extended_hover
-          ~standard_hover:t.standard_hover
-          ~dune_diagnostics:t.dune_diagnostics
-          ~syntax_documentation:t.syntax_documentation;
+        send_configuration t client;
         Ok ()
       in
       (match res with
@@ -370,12 +321,7 @@ let make () =
   ; ocaml_version = None
   ; ast_editor_state
   ; documentation_server = None
-  ; codelens = None
-  ; codelens_for_nested_bindings = None
-  ; extended_hover = None
   ; standard_hover = None
-  ; dune_diagnostics = None
-  ; syntax_documentation = None
   }
 ;;
 

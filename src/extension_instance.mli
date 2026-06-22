@@ -21,18 +21,7 @@ val start_language_server : t -> unit Promise.t
 val install_ocaml_lsp_server : Sandbox.t -> unit Promise.t
 val upgrade_ocaml_lsp_server : Sandbox.t -> unit Promise.t
 val suggest_to_run_dune_pkg_lock : unit -> unit
-
-val set_configuration
-  :  t
-  -> ?codelens:bool option
-  -> ?codelens_for_nested_bindings:bool option
-  -> ?extended_hover:bool option
-  -> ?standard_hover:bool option
-  -> ?dune_diagnostics:bool option
-  -> ?syntax_documentation:bool option
-  -> unit
-  -> unit
-
+val set_configuration : t -> ?standard_hover:bool option -> unit -> unit
 val open_terminal : Sandbox.t -> unit
 val disposable : t -> Disposable.t
 val repl : t -> Terminal_sandbox.t option

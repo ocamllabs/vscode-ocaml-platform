@@ -5,6 +5,9 @@
 - Fix an infinite loop of error notifications when `dune tools install ocamllsp`
   fails (e.g. with no opam switch installed) by only restarting the language
   server after a successful installation. (#2183)
+- Fix the language server not receiving the workspace configuration on startup,
+  so settings such as codelens are correctly applied when the extension host
+  (re)starts instead of sending an empty configuration. (#2185)
 
 ## 2.3.0
 
