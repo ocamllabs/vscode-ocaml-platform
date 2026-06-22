@@ -5,11 +5,11 @@
 - Fix syntax highlighting for the per-package `version` field in the `package`
   stanza of `dune-project`. (#2182)
 - Use the Node.js entry point for `vscode-languageclient` to avoid loading the
-  browser bundle in the extension host.
+  browser bundle in the extension host. (#2177)
 - Rewrite the AST explorer webview in TypeScript with React Compiler, Vite and
   Tailwind CSS, replacing the legacy JavaScript fork. The tree now follows the
   active VS Code color theme and is served under a strict Content-Security-Policy
-  with a per-render nonce.
+  with a per-render nonce. (#2180)
 
 ## 2.2.1
 
