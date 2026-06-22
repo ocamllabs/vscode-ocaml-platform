@@ -68,6 +68,7 @@ module Internal = struct
   let select_sandbox = unit_handle "select-sandbox"
   let install_ocaml_lsp_server = unit_handle "install-ocaml-lsp-server"
   let upgrade_ocaml_lsp_server = unit_handle "update-ocaml-lsp-server"
+  let install_ocamlmerlin_mlx = unit_handle "install-ocamlmerlin-mlx"
   let restart_language_server = unit_handle "server.restart"
   let select_sandbox_and_open_terminal = unit_handle "open-terminal-select"
   let open_terminal = unit_handle "open-terminal"

@@ -17,6 +17,7 @@ type t =
   ; mutable standard_hover : bool option
   ; mutable dune_diagnostics : bool option
   ; mutable syntax_documentation : bool option
+  ; mutable prompted_for_ocamlmerlin_mlx : bool
   }
 
 let sandbox t = t.sandbox
@@ -166,6 +167,18 @@ let check_ocaml_lsp_available (sandbox : Sandbox.t) =
          ~error:(fun (_ : string) ->
            "Sandbox initialization failed: \"ocaml-lsp-server\" is not installed in the \
             current sandbox.")
+;;
+
+let check_ocamlmerlin_mlx_available (sandbox : Sandbox.t) =
+  let ocamlmerlin_mlx_version sandbox =
+    Sandbox.get_command sandbox "ocamlmerlin-mlx" [ "--version" ] `Tool
+  in
+  let cwd = Sandbox.workspace_root () in
+  Cmd.output ?cwd (ocamlmerlin_mlx_version sandbox)
+  |> Promise.Result.fold
+       ~ok:(fun (_ : string) -> ())
+       ~error:(fun (_ : string) ->
+         "\"ocamlmerlin-mlx\" is not installed in the current sandbox.")
 ;;
 
 module Language_server_init : sig
@@ -330,6 +343,14 @@ let upgrade_ocaml_lsp_server sandbox =
   ()
 ;;
 
+let install_ocamlmerlin_mlx sandbox =
+  let open Promise.Syntax in
+  let* () = Sandbox.install_packages sandbox [ "ocamlmerlin-mlx" ] in
+  let* () = Command_api.(execute Internal.refresh_switches) () in
+  let+ () = Command_api.(execute Internal.refresh_sandbox) () in
+  ()
+;;
+
 module Sandbox_info : sig
   val make : Sandbox.t -> StatusBarItem.t
   val update : StatusBarItem.t -> new_sandbox:Sandbox.t -> unit
@@ -376,6 +397,7 @@ let make () =
   ; standard_hover = None
   ; dune_diagnostics = None
   ; syntax_documentation = None
+  ; prompted_for_ocamlmerlin_mlx = false
   }
 ;;
 
@@ -494,6 +516,48 @@ let open_terminal sandbox =
 ;;
 
 let ast_editor_state t = t.ast_editor_state
+
+let suggest_or_install_ocamlmerlin_mlx t =
+  let open Promise.Syntax in
+  let install_mlx_text = "Install ocamlmerlin-mlx" in
+  let select_different_sandbox = "Select a different Sandbox" in
+  let* selection =
+    Window.showInformationMessage
+      ~message:
+        "MLX support requires \"ocamlmerlin-mlx\". Without it, the language server may crash \
+         when opening .mlx files."
+      ~choices:[ install_mlx_text, `Install_mlx; select_different_sandbox, `Select_sandbox ]
+      ()
+  in
+  match selection with
+  | Some `Install_mlx ->
+    let+ () = Command_api.(execute Internal.install_ocamlmerlin_mlx) () in
+    ()
+  | Some `Select_sandbox ->
+    let+ () = Command_api.(execute Internal.select_sandbox) () in
+    ()
+  | _ -> Promise.return ()
+;;
+
+let check_mlx_file_opened t (document : TextDocument.t) =
+  let file_name = TextDocument.fileName document in
+  if String.is_suffix file_name ~suffix:".mlx" && not t.prompted_for_ocamlmerlin_mlx
+  then (
+    t.prompted_for_ocamlmerlin_mlx <- true;
+    let (_ : unit Promise.t) =
+      let open Promise.Syntax in
+      let* ocamlmerlin_mlx_present = check_ocamlmerlin_mlx_available t.sandbox in
+      match ocamlmerlin_mlx_present with
+      | Ok () -> Promise.return ()
+      | Error _ -> suggest_or_install_ocamlmerlin_mlx t
+    in
+    ())
+;;
+
+let register_mlx_check t =
+  let listener document = check_mlx_file_opened t document in
+  Workspace.onDidOpenTextDocument ~listener ()
+;;
 
 let disposable t =
   Disposable.make ~dispose:(fun () ->
