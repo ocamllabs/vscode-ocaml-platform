@@ -164,6 +164,17 @@
             },
 
             {
+              "comment": "version",
+              "begin": "\\([[:space:]]*(version)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": { "name": "keyword.language.dune-project" }
+              },
+              "contentName": "constant.language.dune-project",
+              "patterns": [{ "include": "source.dune#general" }]
+            },
+
+            {
               "comment": "synopsis/description",
               "begin": "\\([[:space:]]*(synopsis|description)\\b",
               "end": "\\)",

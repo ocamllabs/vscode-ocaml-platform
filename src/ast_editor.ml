@@ -28,9 +28,22 @@ module Handlers = struct
   let _w6 f x y z w = ws (w5 f x y z w)
 end
 
-let read_html_file () =
-  let filename = Node.__dirname () ^ "/../astexplorer/dist/index.html" in
-  Fs.readFile filename
+let get_nonce () =
+  Node.Crypto.randomUUID () |> String.filter ~f:(fun c -> not (Char.equal c '-'))
+;;
+
+let read_html_file ~(webview : WebView.t) ~extension () =
+  let open Promise.Syntax in
+  let filename =
+    Uri.joinPath
+      (ExtensionContext.extensionUri extension)
+      ~pathSegments:[ "astexplorer"; "dist"; "index.html" ]
+    |> Uri.fsPath
+  in
+  let+ raw = Fs.readFile filename in
+  raw
+  |> String.substr_replace_all ~pattern:"__NONCE__" ~with_:(get_nonce ())
+  |> String.substr_replace_all ~pattern:"__CSPSOURCE__" ~with_:(WebView.cspSource webview)
 ;;
 
 let document_eq a b = Uri.equal (TextDocument.uri a) (TextDocument.uri b)
@@ -246,11 +259,25 @@ let activate_hover_mode instance ~document =
   | None -> raise (User_error "No open AST editor was found.")
 ;;
 
-let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel ~token:_
+let resolveCustomTextEditor
+      instance
+      extension
+      ~(document : TextDocument.t)
+      ~webviewPanel
+      ~token:_
   : CustomTextEditorProvider.ResolvedEditor.t
   =
   let webview = WebviewPanel.webview webviewPanel in
-  WebView.set_options webview (WebviewOptions.create ~enableScripts:true ());
+  WebView.set_options
+    webview
+    (WebviewOptions.create
+       ~enableScripts:true
+       ~localResourceRoots:
+         [ Uri.joinPath
+             (ExtensionContext.extensionUri extension)
+             ~pathSegments:[ "astexplorer"; "dist" ]
+         ]
+       ());
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   Ast_editor_state.set_webview ast_editor_state (TextDocument.uri document) webview;
   let (_ : Disposable.t) =
@@ -283,7 +310,7 @@ let resolveCustomTextEditor instance ~(document : TextDocument.t) ~webviewPanel 
    | User_error err_msg -> send_msg "error" ([%js.of: string] err_msg) ~webview);
   let p =
     let open Promise.Syntax in
-    let+ r = read_html_file () in
+    let+ r = read_html_file ~webview ~extension () in
     WebView.set_html webview r
   in
   `Promise p
@@ -611,12 +638,18 @@ let register extension instance =
   (*Register custom editor provider that is the AST explorer. *)
   let editorProvider =
     CustomTextEditorProvider.create
-      ~resolveCustomTextEditor:(resolveCustomTextEditor instance)
+      ~resolveCustomTextEditor:(resolveCustomTextEditor instance extension)
   in
   let disposable =
+    let options =
+      RegisterCustomEditorProviderOptions.create
+        ~webviewOptions:(WebviewPanelOptions.create ~retainContextWhenHidden:true ())
+        ()
+    in
     Vscode.Window.registerCustomTextEditorProvider
       ~viewType:"ast-editor"
       ~provider:editorProvider
+      ~options
       ()
   in
   Vscode.ExtensionContext.subscribe extension ~disposable;
