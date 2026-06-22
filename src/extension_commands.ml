@@ -119,13 +119,15 @@ let _install_dune_lsp_server =
                 |> Cmd.output ~cwd:(Dune.root dune)
               in
               match result with
-              | Ok _ -> Ojs.bool_to_js true
+              | Ok _ -> true
               | Error err ->
                 show_message `Error "An error occured while installing ocamllsp : %s" err;
-                Ojs.bool_to_js false
+                false
             in
-            let* installed = Vscode.Window.withProgress (module Ojs) ~options ~task in
-            if Ojs.bool_of_js installed
+            let* installed =
+              Vscode.Window.withProgress (module Interop.Js.Bool) ~options ~task
+            in
+            if installed
             then
               let+ _ = Extension_instance.start_language_server instance in
               ()

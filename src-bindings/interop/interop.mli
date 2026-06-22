@@ -41,6 +41,7 @@ module Js : sig
   end
 
   module Unit : Ojs.T with type t = unit
+  module Bool : Ojs.T with type t = bool
   module Result (Ok : Ojs.T) (Error : Ojs.T) : Ojs.T with type t = (Ok.t, Error.t) result
   module Or_undefined (T : Ojs.T) : Ojs.T with type t = T.t or_undefined
   module Dict (T : Ojs.T) : Ojs.T with type t = T.t Dict.t
