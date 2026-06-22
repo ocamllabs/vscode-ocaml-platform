@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-separator: var(--separator);
+  --color-selection: var(--selection);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-hover: var(--secondary-hover);
+
+  --color-button-border: var(--button-border);
+
+  --color-input: var(--input);
+  --color-input-border: var(--input-border);
+
+  --color-accent: var(--accent);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+
+  --color-type: var(--type);
+  --color-string: var(--string);
+
+  --font-sans: var(--vscode-font-family, sans-serif);
+  --font-mono: var(--vscode-editor-font-family);
+}
+
+:root {
+  --background: var(--vscode-editor-background);
+  --foreground: var(--vscode-foreground);
+  --muted: var(--vscode-descriptionForeground);
+
+  --surface: var(--vscode-editorWidget-background);
+  --border: var(--vscode-widget-border);
+  --separator: var(--vscode-panel-border);
+  --selection: var(--vscode-editor-selectionHighlightBackground);
+
+  --primary: var(--vscode-button-background);
+  --primary-foreground: var(--vscode-button-foreground);
+  --primary-hover: var(--vscode-button-hoverBackground);
+
+  --secondary: var(--vscode-button-secondaryBackground);
+  --secondary-foreground: var(--vscode-button-secondaryForeground);
+  --secondary-hover: var(--vscode-button-secondaryHoverBackground);
+
+  --button-border: var(--vscode-button-border);
+
+  --input: var(--vscode-checkbox-background);
+  --input-border: var(--vscode-checkbox-border);
+
+  --accent: var(--vscode-toolbar-hoverBackground);
+  --ring: var(--vscode-focusBorder);
+  --destructive: var(--vscode-errorForeground);
+
+  --type: var(--vscode-symbolIcon-classForeground);
+  --string: var(--vscode-debugTokenExpression-string);
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}

@@ -2743,7 +2743,10 @@ module WebviewPanelOptions = struct
   include
     [%js:
       val enableFindWidget : t -> bool or_undefined [@@js.get]
-      val retainContextWhenHidden : t -> bool or_undefined [@@js.get]]
+      val retainContextWhenHidden : t -> bool or_undefined [@@js.get]
+
+      val create : ?enableFindWidget:bool -> ?retainContextWhenHidden:bool -> unit -> t
+      [@@js.builder]]
 end
 
 module WebviewPortMapping = struct
@@ -2956,7 +2959,14 @@ module RegisterCustomEditorProviderOptions = struct
   include
     [%js:
       val supportsMultipleEditorsPerDocument : t -> bool or_undefined [@@js.get]
-      val create : ?supportsMultipleEditorsPerDocument:bool -> unit -> t [@@js.builder]]
+      val webviewOptions : t -> WebviewPanelOptions.t or_undefined [@@js.get]
+
+      val create
+        :  ?supportsMultipleEditorsPerDocument:bool
+        -> ?webviewOptions:WebviewPanelOptions.t
+        -> unit
+        -> t
+      [@@js.builder]]
 end
 
 module Window = struct

@@ -1,5 +1,24 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "ignorePatterns": [".claude", "astexplorer"],
-  "plugins": ["eslint", "unicorn", "oxc", "import", "jsdoc", "node", "promise"]
+  "ignorePatterns": [".claude"],
+  "options": {
+    "typeAware": true,
+    "typeCheck": true
+  },
+  "plugins": [
+    "eslint",
+    "typescript",
+    "unicorn",
+    "react",
+    "react-perf",
+    "oxc",
+    "import",
+    "jsdoc",
+    "jsx-a11y",
+    "node",
+    "promise"
+  ],
+  "rules": {
+    "react/react-compiler": "error"
+  }
 }

@@ -43,6 +43,9 @@ end
 
 module Os = [%js: val homedir : unit -> string [@@js.global "@node_os.homedir"]]
 
+module Crypto =
+  [%js: val randomUUID : unit -> string [@@js.global "@node_crypto.randomUUID"]]
+
 module JsError = struct
   type t = Promise.error [@@js]
 

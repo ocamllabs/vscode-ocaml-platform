@@ -1963,6 +1963,7 @@ module WebviewPanelOptions : sig
 
   val enableFindWidget : t -> bool option
   val retainContextWhenHidden : t -> bool option
+  val create : ?enableFindWidget:bool -> ?retainContextWhenHidden:bool -> unit -> t
 end
 
 module WebviewPortMapping : sig
@@ -2140,7 +2141,13 @@ module RegisterCustomEditorProviderOptions : sig
   include Ojs.T
 
   val supportsMultipleEditorsPerDocument : t -> bool or_undefined
-  val create : ?supportsMultipleEditorsPerDocument:bool -> unit -> t
+  val webviewOptions : t -> WebviewPanelOptions.t or_undefined
+
+  val create
+    :  ?supportsMultipleEditorsPerDocument:bool
+    -> ?webviewOptions:WebviewPanelOptions.t
+    -> unit
+    -> t
 end
 
 module Window : sig

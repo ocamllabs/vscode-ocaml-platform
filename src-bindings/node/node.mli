@@ -105,6 +105,10 @@ module Os : sig
   val homedir : unit -> string
 end
 
+module Crypto : sig
+  val randomUUID : unit -> string
+end
+
 module Fs : sig
   val readDir : string -> (string list, string) result Promise.t
   val readFile : string -> string Promise.t

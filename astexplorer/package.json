@@ -1,21 +1,32 @@
 {
   "name": "astexplorer",
   "private": true,
-  "sideEffects": [
-    "./src/index.js"
-  ],
   "type": "module",
   "scripts": {
-    "build": "bun build --production --outdir=dist index.html",
-    "dev": "bun build --watch --outdir=dist index.html"
+    "build": "vite build",
+    "dev": "vite build --watch"
   },
   "dependencies": {
-    "font-awesome": "4.7.0",
-    "json-stringify-safe": "5.0.1",
-    "process": "0.11.10",
-    "prop-types": "15.8.1",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "react-redux": "9.3.0"
+    "react-error-boundary": "6.1.2",
+    "tailwind-merge": "3.6.0"
+  },
+  "devDependencies": {
+    "@babel/core": "8.0.1",
+    "@rolldown/plugin-babel": "0.2.3",
+    "@tailwindcss/vite": "4.3.1",
+    "@types/babel__core": "7.20.5",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@types/vscode-webview": "1.57.5",
+    "@vitejs/plugin-react": "6.0.2",
+    "babel-plugin-react-compiler": "1.0.0",
+    "tailwindcss": "4.3.1",
+    "typescript": "6.0.3",
+    "vite": "8.0.16",
+    "vite-plugin-singlefile": "2.3.3"
   }
 }
