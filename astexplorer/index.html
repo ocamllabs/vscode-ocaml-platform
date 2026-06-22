@@ -3,11 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; img-src __CSPSOURCE__ data:; style-src __CSPSOURCE__ 'nonce-__NONCE__'; script-src 'nonce-__NONCE__'; font-src __CSPSOURCE__;"
+    />
     <title>AST explorer</title>
-    <link rel="stylesheet" href="./css/style.css" />
   </head>
   <body>
     <section id="index"></section>
-    <script src="./src/index.js" type="module"></script>
+    <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>
