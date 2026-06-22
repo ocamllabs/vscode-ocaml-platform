@@ -6,6 +6,9 @@ const node_child_process = require("node:child_process");
 // Provides: node_constants
 const node_constants = require("node:constants");
 
+// Provides: node_crypto
+const node_crypto = require("node:crypto");
+
 // Provides: node_fs
 const node_fs = require("node:fs/promises");
 

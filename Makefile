@@ -56,7 +56,7 @@ watch:
 	dune build @all -w --terminal-persistence=clear-on-rebuild
 
 .PHONY: pkg
-pkg: clean build
+pkg: build
 	bun run package
 
 .PHONY: install

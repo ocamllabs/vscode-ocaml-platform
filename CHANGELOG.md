@@ -4,6 +4,10 @@
 
 - Use the Node.js entry point for `vscode-languageclient` to avoid loading the
   browser bundle in the extension host.
+- Rewrite the AST explorer webview in TypeScript with React Compiler, Vite and
+  Tailwind CSS, replacing the legacy JavaScript fork. The tree now follows the
+  active VS Code color theme and is served under a strict Content-Security-Policy
+  with a per-render nonce.
 
 ## 2.2.1
 
