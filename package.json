@@ -56,6 +56,9 @@
     "@vscode/vsce": "3.9.2",
     "ovsx": "1.0.1"
   },
+  "overrides": {
+    "is-unicode-supported": "0.1.0"
+  },
   "contributes": {
     "breakpoints": [
       {
