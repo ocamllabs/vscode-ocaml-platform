@@ -660,13 +660,12 @@ let uninstall_packages t packages =
         ()
       in
       match result with
-      | Ok () -> Ojs.null
+      | Ok () -> ()
       | Error err ->
-        show_message `Error "An error occured while uninstalling the packages: %s" err;
-        Ojs.null
+        show_message `Error "An error occured while uninstalling the packages: %s" err
     in
     let open Promise.Syntax in
-    let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    let+ () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
     ()
 ;;
 
@@ -704,13 +703,12 @@ let install_packages t packages =
         ()
       in
       match result with
-      | Ok () -> Ojs.null
+      | Ok () -> ()
       | Error err ->
-        show_message `Error "An error occured while installing the packages: %s" err;
-        Ojs.null
+        show_message `Error "An error occured while installing the packages: %s" err
     in
     let open Promise.Syntax in
-    let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    let+ () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
     ()
 ;;
 
@@ -746,13 +744,12 @@ let upgrade_packages ?(packages = []) t =
         ()
       in
       match result with
-      | Ok () -> Ojs.null
+      | Ok () -> ()
       | Error err ->
-        show_message `Error "An error occured while upgrading the packages: %s" err;
-        Ojs.null
+        show_message `Error "An error occured while upgrading the packages: %s" err
     in
     let open Promise.Syntax in
-    let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    let+ () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
     ()
 ;;
 

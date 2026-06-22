@@ -166,12 +166,11 @@ let _run_dune_pkg_lock =
             Dune.exec_pkg ~cmd:"lock" dune |> Cmd.output ~cwd:(Dune.root dune)
           in
           match result with
-          | Ok _ -> Ojs.null
+          | Ok _ -> ()
           | Error err ->
-            show_message `Error "An error occurred while running dune pkg lock: %s" err;
-            Ojs.null
+            show_message `Error "An error occurred while running dune pkg lock: %s" err
         in
-        let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+        let+ () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
         let _ = Extension_instance.start_language_server instance in
         ()
       | _ ->
@@ -309,12 +308,11 @@ let _install_opam =
               ()
           in
           match result with
-          | Ok () -> Ojs.null
+          | Ok () -> ()
           | Error err ->
-            show_message `Error "An error occured while installing opam %s" err;
-            Ojs.null
+            show_message `Error "An error occured while installing opam %s" err
         in
-        let+ _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+        let+ () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
         ()
       | Some opam, _ ->
         let* latest_version =
@@ -396,12 +394,12 @@ let _init_opam =
         ()
       in
       match result with
-      | Ok () -> Ojs.null
-      | Error err ->
-        show_message `Error "An error occured while initializing opam %s" err;
-        Ojs.null
+      | Ok () -> ()
+      | Error err -> show_message `Error "An error occured while initializing opam %s" err
     in
-    let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    let (_ : unit Promise.t) =
+      Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task
+    in
     ()
   in
   command Command_api.Internal.init_opam callback
@@ -433,12 +431,13 @@ let _install_ocaml_dev =
         ()
       in
       match result with
-      | Ok () -> Ojs.null
+      | Ok () -> ()
       | Error err ->
-        show_message `Error "An error occured while installing packages %s" err;
-        Ojs.null
+        show_message `Error "An error occured while installing packages %s" err
     in
-    let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    let (_ : unit Promise.t) =
+      Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task
+    in
     ()
   in
   command Command_api.Internal.install_ocaml_dev callback
@@ -468,12 +467,12 @@ let _open_utop =
         ()
       in
       match result with
-      | Ok () -> Ojs.null
-      | Error err ->
-        show_message `Error "An error occured while opening utop %s" err;
-        Ojs.null
+      | Ok () -> ()
+      | Error err -> show_message `Error "An error occured while opening utop %s" err
     in
-    let _ = Vscode.Window.withProgress (module Ojs) ~options ~task in
+    let (_ : unit Promise.t) =
+      Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task
+    in
     ()
   in
   command Command_api.Internal.open_utop callback
