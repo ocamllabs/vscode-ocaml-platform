@@ -99,6 +99,14 @@ module Js = struct
     type t = unit [@@js]
   end
 
+  module Bool = struct
+    type t = bool [@@js]
+  end
+
+  module String = struct
+    type t = string [@@js]
+  end
+
   module Result (Ok : Ojs.T) (Error : Ojs.T) = struct
     type t = (Ok.t, Error.t) result
 

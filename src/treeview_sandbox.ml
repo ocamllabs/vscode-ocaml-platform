@@ -99,7 +99,7 @@ module Command = struct
           let task ~progress:_ ~token:_ = Odig.odoc_exec odig ~sandbox ~package_name in
           let* result =
             Vscode.Window.withProgress
-              (module Interop.Js.Result (Interop.Js.Unit) (Ojs.String))
+              (module Interop.Js.Result (Interop.Js.Unit) (Interop.Js.String))
               ~options
               ~task
           in
