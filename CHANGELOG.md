@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fix syntax highlighting for the per-package `version` field in the `package`
+  stanza of `dune-project`. (#2182)
 - Use the Node.js entry point for `vscode-languageclient` to avoid loading the
   browser bundle in the extension host.
 - Rewrite the AST explorer webview in TypeScript with React Compiler, Vite and
