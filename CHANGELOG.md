@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Fix an infinite loop of error notifications when `dune tools install ocamllsp`
+  fails (e.g. with no opam switch installed) by only restarting the language
+  server after a successful installation. (#2183)
+
 ## 2.3.0
 
 - Fix syntax highlighting for the per-package `version` field in the `package`
