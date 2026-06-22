@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Use the Node.js entry point for `vscode-languageclient` to avoid loading the
+  browser bundle in the extension host.
+
 ## 2.2.1
 
 - Fix `outputChannel.error is not a function` error by creating the language
