@@ -48,6 +48,24 @@
           ]
         },
         {
+          "comment": "library_parameter",
+          "begin": "\\([[:space:]]*(library_parameter)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#library"
+            },
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
           "comment": "foreign_library",
           "begin": "\\([[:space:]]*(foreign_library)\\b",
           "end": "\\)",
@@ -2273,10 +2291,70 @@
           },
           "patterns": [
             {
-              "include": "#general"
+              "include": "#library_dependencies"
             },
             {
-              "include": "#library_dependencies"
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "parameters",
+          "begin": "\\([[:space:]]*(parameters)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "implements",
+          "begin": "\\([[:space:]]*(implements)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "default_implementation",
+          "begin": "\\([[:space:]]*(default_implementation)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "virtual_modules",
+          "begin": "\\([[:space:]]*(virtual_modules)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#general"
             }
           ]
         },
@@ -2416,6 +2494,120 @@
           ]
         },
         {
+          "comment": "melange.libraries",
+          "begin": "\\([[:space:]]*(melange)(\\.)((libraries))\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            },
+            "2": {
+              "name": "keyword.operator.dune"
+            },
+            "3": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#library_dependencies"
+            },
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "melange.modules",
+          "begin": "\\([[:space:]]*(melange)(\\.)((modules))\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            },
+            "2": {
+              "name": "keyword.operator.dune"
+            },
+            "3": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "melange.ppx_runtime_libraries",
+          "begin": "\\([[:space:]]*(melange)(\\.)((ppx_runtime_libraries))\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            },
+            "2": {
+              "name": "keyword.operator.dune"
+            },
+            "3": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "melange.preprocessor_deps",
+          "begin": "\\([[:space:]]*(melange)(\\.)((preprocessor_deps))\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            },
+            "2": {
+              "name": "keyword.operator.dune"
+            },
+            "3": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#dependencies"
+            },
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "melange.preprocess",
+          "begin": "\\([[:space:]]*(melange)(\\.)((preprocess))\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            },
+            "2": {
+              "name": "keyword.operator.dune"
+            },
+            "3": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#preprocessing_specs"
+            },
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
           "comment": "optional",
           "begin": "\\([[:space:]]*(optional)\\b",
           "end": "\\)",
@@ -2424,6 +2616,222 @@
               "name": "keyword.language.dune"
             }
           }
+        },
+        {
+          "comment": "empty_module_interface_if_absent",
+          "begin": "\\([[:space:]]*(empty_module_interface_if_absent)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          }
+        },
+        {
+          "comment": "public_headers",
+          "begin": "\\([[:space:]]*(public_headers)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "allow_unused_libraries",
+          "begin": "\\([[:space:]]*(allow_unused_libraries)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "lint",
+          "begin": "\\([[:space:]]*(lint)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#preprocessing_specs"
+            },
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "instrumentation",
+          "begin": "\\([[:space:]]*(instrumentation)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "comment": "backend",
+              "begin": "\\([[:space:]]*(backend)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "comment": "flags/deps",
+              "begin": "\\([[:space:]]*(flags|deps)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#dependencies"
+                },
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "extra_objects",
+          "begin": "\\([[:space:]]*(extra_objects)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "comment": "files/archives",
+              "begin": "\\([[:space:]]*(files|archives)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "stdlib",
+          "begin": "\\([[:space:]]*(stdlib)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "comment": "modules_before_stdlib/exit_module/internal_modules/experimental_building_ocaml_compiler_with_dune",
+              "begin": "\\([[:space:]]*(modules_before_stdlib|exit_module|internal_modules|experimental_building_ocaml_compiler_with_dune)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "special_builtin_support",
+          "begin": "\\([[:space:]]*(special_builtin_support)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "comment": "findlib_dynload",
+              "match": "\\b(findlib_dynload)\\b",
+              "name": "variable.other.declaration.dune"
+            },
+            {
+              "comment": "build_info/configurator/dune_site",
+              "begin": "\\([[:space:]]*(build_info|configurator|dune_site)\\b",
+              "end": "\\)",
+              "beginCaptures": {
+                "1": {
+                  "name": "keyword.language.dune"
+                }
+              },
+              "patterns": [
+                {
+                  "comment": "data_module/api_version/plugins",
+                  "begin": "\\([[:space:]]*(data_module|api_version|plugins)\\b",
+                  "end": "\\)",
+                  "beginCaptures": {
+                    "1": {
+                      "name": "keyword.language.dune"
+                    }
+                  },
+                  "patterns": [
+                    {
+                      "include": "#general"
+                    }
+                  ]
+                },
+                {
+                  "include": "#general"
+                }
+              ]
+            },
+            {
+              "include": "#general"
+            }
+          ]
         },
         {
           "comment": "foreign_archives",
@@ -2585,6 +2993,11 @@
           },
           "patterns": [
             {
+              "comment": "byte/native/best/melange atoms",
+              "match": "\\b(byte|native|best|melange)\\b",
+              "name": "variable.other.declaration.dune"
+            },
+            {
               "comment": "byte/native/best",
               "begin": "\\([[:space:]]*(byte|native|best)\\b",
               "end": "\\)",
@@ -2629,6 +3042,11 @@
             }
           },
           "patterns": [
+            {
+              "comment": "normal/parameter/virtual/ppx_rewriter/ppx_deriver",
+              "match": "\\b(normal|parameter|virtual|ppx_rewriter|ppx_deriver)\\b",
+              "name": "variable.other.declaration.dune"
+            },
             {
               "comment": "normal/ppx_rewriter/ppx_deriver/cookies",
               "begin": "\\([[:space:]]*(normal|ppx_rewriter|ppx_deriver|cookies)\\b",
@@ -2742,6 +3160,10 @@
         {
           "comment": "js_of_ocaml",
           "include": "#js_of_ocaml"
+        },
+        {
+          "comment": "wasm_of_ocaml",
+          "include": "#wasm_of_ocaml"
         },
         {
           "comment": "inline_tests",
@@ -2922,6 +3344,26 @@
     },
     "library_dependencies": {
       "patterns": [
+        {
+          "comment": "instantiated_dependencies",
+          "begin": "\\([[:space:]]*(instantiate)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "comment": "instantiate/:as",
+              "match": ":as\\b",
+              "name": "keyword.language.dune"
+            },
+            {
+              "include": "#general"
+            }
+          ]
+        },
         {
           "comment": "alternative_dependencies",
           "patterns": [
@@ -3363,8 +3805,38 @@
       },
       "patterns": [
         {
-          "comment": "javascript_files/flags/build_runtime_flags/link_flags",
-          "begin": "\\([[:space:]]*(javascript_files|flags|build_runtime_flags|link_flags)\\b",
+          "comment": "javascript_files/wasm_files/flags/build_runtime_flags/link_flags/enabled_if/compilation_mode/sourcemap",
+          "begin": "\\([[:space:]]*(javascript_files|wasm_files|flags|build_runtime_flags|link_flags|enabled_if|compilation_mode|sourcemap)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "include": "#general"
+        }
+      ]
+    },
+    "wasm_of_ocaml": {
+      "comment": "wasm_of_ocaml",
+      "begin": "\\([[:space:]]*(wasm_of_ocaml)\\b",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.language.dune"
+        }
+      },
+      "patterns": [
+        {
+          "comment": "javascript_files/wasm_files/flags/build_runtime_flags/link_flags/enabled_if/compilation_mode/sourcemap",
+          "begin": "\\([[:space:]]*(javascript_files|wasm_files|flags|build_runtime_flags|link_flags|enabled_if|compilation_mode|sourcemap)\\b",
           "end": "\\)",
           "beginCaptures": {
             "1": {
