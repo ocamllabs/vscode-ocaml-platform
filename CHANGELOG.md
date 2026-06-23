@@ -6,6 +6,13 @@
   `library_parameter` stanza, the `parameters` and `implements` library fields,
   and the `(instantiate ...)` dependency form together with its `:as` keyword.
   (#2187)
+- Complete syntax highlighting for the remaining `library` stanza fields: the
+  `(kind parameter)`/`(kind virtual)` and bare `(modes byte native best melange)`
+  values, `virtual_modules`, `default_implementation`, `public_headers`,
+  `allow_unused_libraries`, `empty_module_interface_if_absent`, `instrumentation`,
+  `lint`, `extra_objects`, `stdlib`, `special_builtin_support`, `wasm_of_ocaml`,
+  and the `melange.libraries`, `melange.modules`, `melange.ppx_runtime_libraries`,
+  `melange.preprocess` and `melange.preprocessor_deps` fields. (#2187)
 - Fix an infinite loop of error notifications when `dune tools install ocamllsp`
   fails (e.g. with no opam switch installed) by only restarting the language
   server after a successful installation. (#2183)
