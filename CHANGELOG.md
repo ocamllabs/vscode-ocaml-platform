@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add syntax highlighting for Dune's parameterised library keywords: the
+  `library_parameter` stanza, the `parameters` and `implements` library fields,
+  and the `(instantiate ...)` dependency form together with its `:as` keyword.
+  (#2187)
 - Fix an infinite loop of error notifications when `dune tools install ocamllsp`
   fails (e.g. with no opam switch installed) by only restarting the language
   server after a successful installation. (#2183)

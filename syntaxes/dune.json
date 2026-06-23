@@ -48,6 +48,24 @@
           ]
         },
         {
+          "comment": "library_parameter",
+          "begin": "\\([[:space:]]*(library_parameter)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#library"
+            },
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
           "comment": "foreign_library",
           "begin": "\\([[:space:]]*(foreign_library)\\b",
           "end": "\\)",
@@ -2273,10 +2291,40 @@
           },
           "patterns": [
             {
-              "include": "#general"
+              "include": "#library_dependencies"
             },
             {
-              "include": "#library_dependencies"
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "parameters",
+          "begin": "\\([[:space:]]*(parameters)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#general"
+            }
+          ]
+        },
+        {
+          "comment": "implements",
+          "begin": "\\([[:space:]]*(implements)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#general"
             }
           ]
         },
@@ -2922,6 +2970,26 @@
     },
     "library_dependencies": {
       "patterns": [
+        {
+          "comment": "instantiated_dependencies",
+          "begin": "\\([[:space:]]*(instantiate)\\b",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune"
+            }
+          },
+          "patterns": [
+            {
+              "comment": "instantiate/:as",
+              "match": ":as\\b",
+              "name": "keyword.language.dune"
+            },
+            {
+              "include": "#general"
+            }
+          ]
+        },
         {
           "comment": "alternative_dependencies",
           "patterns": [
