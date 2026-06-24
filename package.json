@@ -54,7 +54,7 @@
     "@vscode/test-cli": "0.0.12",
     "@vscode/test-electron": "3.0.0",
     "@vscode/vsce": "3.9.2",
-    "ovsx": "1.0.1",
+    "ovsx": "1.0.2",
     "oxlint-tsgolint": "0.23.0",
     "typescript": "6.0.3"
   },
