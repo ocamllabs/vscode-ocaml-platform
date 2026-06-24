@@ -46,7 +46,7 @@
     "oxlint": "1.71.0",
     "polka": "1.0.0-next.28",
     "sirv": "3.0.2",
-    "vscode-languageclient": "10.0.0"
+    "vscode-languageclient": "10.0.1"
   },
   "devDependencies": {
     "@types/node": "26.0.0",
