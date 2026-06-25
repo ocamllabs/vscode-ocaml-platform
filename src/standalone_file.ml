@@ -168,13 +168,3 @@ let register extension instance =
     ~disposable:
       (Disposable.from [ dispose_channel; dispose_debug_adapter; dispose_provider ])
 ;;
-
-(*
-   Résumé:
-   - boutton qui s'affiche que sur les éditeurs ocaml actifs
-   - approximation optimiste
-   - Si dune-project repéré à la racine du workspace alors exécuter dune exec le nom du binaire ? dune describe
-
-   TODO:
-   - Tester sur macOS et windows avec et sans Opam
-*)

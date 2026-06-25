@@ -128,13 +128,6 @@ module Internal = struct
       ~t_of_js:[%js.to: Jsonoo.t]
   ;;
 
-  let start_run =
-    optional_handle
-      "start-run"
-      ~t_to_js:[%js.of: Vscode.Uri.t]
-      ~t_of_js:[%js.to: Vscode.Uri.t]
-  ;;
-
   let ask_debug_program =
     let module Return = struct
       type t = string option Promise.t [@@js]
