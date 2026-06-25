@@ -39,8 +39,10 @@ module Internal : sig
   val open_ocaml_platform_ext_output : (unit, unit) handle
   val open_ocaml_commands_output : (unit, unit) handle
   val start_debugging : (Vscode.Uri.t option, unit) handle
+  val start_run : (Vscode.Uri.t option, unit) handle
   val goto_closure_code_location : (Jsonoo.t, unit) handle
   val ask_debug_program : (unit, string option Promise.t) handle
+  val ask_run_program : (unit, string option Promise.t) handle
   val copy_type_under_cursor : (unit, unit) handle
   val construct : (unit, unit) handle
   val merlin_jump : (unit, unit) handle
@@ -55,6 +57,7 @@ module Internal : sig
   val init_opam : (unit, unit) handle
   val install_ocaml_dev : (unit, unit) handle
   val open_utop : (unit, unit) handle
+  val run_standalone_file : (unit, unit) handle
 end
 
 module Vscode : sig

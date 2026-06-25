@@ -39,6 +39,7 @@ let activate (extension : ExtensionContext.t) =
   Ast_editor.register extension instance;
   Cm_editor.register extension instance;
   Repl.register extension instance;
+  Standalone_file.register extension instance;
   Earlybird.register extension instance;
   (* Extension_commands.register_all_commands registers all commands that were
      added in the register functions above. It must be called last. *)

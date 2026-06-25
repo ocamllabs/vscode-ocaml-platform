@@ -128,6 +128,13 @@ module Internal = struct
       ~t_of_js:[%js.to: Jsonoo.t]
   ;;
 
+  let start_run =
+    optional_handle
+      "start-run"
+      ~t_to_js:[%js.of: Vscode.Uri.t]
+      ~t_of_js:[%js.to: Vscode.Uri.t]
+  ;;
+
   let ask_debug_program =
     let module Return = struct
       type t = string option Promise.t [@@js]
@@ -135,6 +142,18 @@ module Internal = struct
     in
     typed_handle
       "ask-debug-program"
+      ~args_of_js:(Fn.const ())
+      ~args_to_js:(Fn.const [])
+      ~return_type:(module Return)
+  ;;
+
+  let ask_run_program =
+    let module Return = struct
+      type t = string option Promise.t [@@js]
+    end
+    in
+    typed_handle
+      "ask-run-program"
       ~args_of_js:(Fn.const ())
       ~args_to_js:(Fn.const [])
       ~return_type:(module Return)
@@ -154,6 +173,7 @@ module Internal = struct
   let init_opam = unit_handle "init-opam"
   let install_ocaml_dev = unit_handle "install-ocaml-dev"
   let open_utop = unit_handle "open-utop"
+  let run_standalone_file = unit_handle "run-standalone-file"
 end
 
 module Vscode = struct
