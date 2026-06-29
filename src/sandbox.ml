@@ -310,8 +310,7 @@ let detect_dune_pkg ~project_root _dune () =
   Dune.make (Some project_root) ()
   >>= function
   | Some dune ->
-    Dune.is_project_locked dune
-    >>| fun project_locked -> if project_locked then Some (Dune dune) else None
+    Dune.is_dpm_enabled dune >>| fun dpm -> if dpm then Some (Dune dune) else None
   | None -> Promise.return None
 ;;
 
