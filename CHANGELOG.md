@@ -19,6 +19,7 @@
 - Fix the language server not receiving the workspace configuration on startup,
   so settings such as codelens are correctly applied when the extension host
   (re)starts instead of sending an empty configuration. (#2185)
+- Update dune cut-off version to 3.24.0 and nightly build from 11/06/2026 for DPM (#2192)
 
 ## 2.3.0
 
