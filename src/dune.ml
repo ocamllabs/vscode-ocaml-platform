@@ -61,17 +61,14 @@ module Dune_version = struct
     | None -> parse_release_version str
   ;;
 
-  (* Versions >= 3.20.0 and preview versions with a timestamp on or
-     after 2025-07-30 support everything needed for VSCode to support DPM,
-     e.g. `dune lock`, `dune tools exec`, support of various Dune dev tools etc.
-     The last feature needed was implemented on 2025-07-29 and ensures that
-     other Dune dev tools (in particular ocamlformat) are included in the PATH
-     of the `ocamllsp` process. *)
+  (* Versions >= 3.24.0 and preview versions with a timestamp on or
+     after 2026-06-11 support everything needed for VSCode to support DPM,
+     e.g. `dune lock`, `dune tools exec`, support of various Dune dev tools etc. *)
   let is_valid version =
     match version with
     | Release (major, minor, patch) ->
-      Stdlib.compare (major, minor, patch) (3, 20, 0) >= 0
-    | Preview (y, m, d) -> Stdlib.compare (y, m, d) (2025, 7, 30) >= 0
+      Stdlib.compare (major, minor, patch) (3, 24, 0) >= 0
+    | Preview (y, m, d) -> Stdlib.compare (y, m, d) (2026, 6, 11) >= 0
   ;;
 end
 
@@ -81,13 +78,6 @@ type t =
   }
 
 let binary = Path.of_string "dune"
-
-let is_project_locked t =
-  (* Path to the dune.lock dir *)
-  let dune_lock_path = Path.join t.root (Path.of_string "dune.lock") in
-  Fs.exists (Path.to_string dune_lock_path)
-;;
-
 let command t ~args = Cmd.Spawn (Cmd.append t.bin args)
 
 let exec ~target ?(args = []) t =
@@ -95,6 +85,12 @@ let exec ~target ?(args = []) t =
 ;;
 
 let exec_pkg ~cmd ?(args = []) t = Cmd.Spawn (Cmd.append t.bin ([ "pkg"; cmd ] @ args))
+
+let is_dpm_enabled t =
+  let open Promise.Syntax in
+  let+ { exitCode; _ } = Cmd.run (exec_pkg ~cmd:"enabled" t) in
+  Int.equal exitCode 0
+;;
 
 let tools ~tool ?(args = []) t cmd =
   match cmd with

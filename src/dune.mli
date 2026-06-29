@@ -6,9 +6,8 @@ type t =
   ; bin : Cmd.spawn
   }
 
-(** Check if a dune project has been locked.
-    If not, user should be advised to run `dune pkg lock` *)
-val is_project_locked : t -> bool Promise.t
+(** Check if dune package management is enable. *)
+val is_dpm_enabled : t -> bool Promise.t
 
 (** Generic function to execute dune commands *)
 val command : t -> args:string list -> Cmd.t
