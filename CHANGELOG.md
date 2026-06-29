@@ -19,6 +19,7 @@
 - Fix the language server not receiving the workspace configuration on startup,
   so settings such as codelens are correctly applied when the extension host
   (re)starts instead of sending an empty configuration. (#2185)
+- Fix the launch of Utop REPL in context of Dune Package Management. (#2198)
 
 ## 2.3.0
 
