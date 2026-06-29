@@ -51,7 +51,7 @@
   "devDependencies": {
     "@types/node": "26.0.1",
     "@types/vscode": "1.86.0",
-    "@vscode/test-cli": "0.0.12",
+    "@vscode/test-cli": "0.0.15",
     "@vscode/test-electron": "3.0.0",
     "@vscode/vsce": "3.9.2",
     "ovsx": "1.0.2",
