@@ -97,8 +97,8 @@ let _install_dune_lsp_server =
       let sandbox = Extension_instance.sandbox instance in
       match sandbox with
       | Dune dune ->
-        let* is_dune_locked = Dune.is_project_locked dune in
-        if is_dune_locked
+        let* dpm = Dune.is_dpm_enabled dune in
+        if dpm
         then
           let* dune_lsp_present = Dune.is_ocamllsp_present dune in
           if dune_lsp_present

@@ -78,13 +78,6 @@ type t =
   }
 
 let binary = Path.of_string "dune"
-
-let is_project_locked t =
-  (* Path to the dune.lock dir *)
-  let dune_lock_path = Path.join t.root (Path.of_string "dune.lock") in
-  Fs.exists (Path.to_string dune_lock_path)
-;;
-
 let command t ~args = Cmd.Spawn (Cmd.append t.bin args)
 
 let exec ~target ?(args = []) t =
@@ -92,6 +85,12 @@ let exec ~target ?(args = []) t =
 ;;
 
 let exec_pkg ~cmd ?(args = []) t = Cmd.Spawn (Cmd.append t.bin ([ "pkg"; cmd ] @ args))
+
+let is_dpm_enabled t =
+  let open Promise.Syntax in
+  let+ { exitCode; _ } = Cmd.run (exec_pkg ~cmd:"enabled" t) in
+  Int.equal exitCode 0
+;;
 
 let tools ~tool ?(args = []) t cmd =
   match cmd with
