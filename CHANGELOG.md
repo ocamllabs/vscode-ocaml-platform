@@ -21,6 +21,7 @@
   (re)starts instead of sending an empty configuration. (#2185)
 - Update dune cut-off version to 3.24.0 and nightly build from 11/06/2026 for DPM (#2192)
 - Fix the detection of Dune Package Management to use the recommended `dune pkg enabled` command. Previously, we were checking to see if a `dune.lock` file exists. (#2193)
+- Fix the launch of Utop REPL in context of Dune Package Management. (#2198)
 
 ## 2.3.0
 
