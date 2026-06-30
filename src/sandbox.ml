@@ -90,7 +90,10 @@ let to_string = function
   | Opam (_, switch) -> Printf.sprintf "opam(%s)" (Opam.Switch.name switch)
   | Global -> "global"
   | Custom _ -> "custom"
-  | Dune _ -> "dune"
+  | Dune dune ->
+    (match dune.bin with
+     | `Global bin -> Printf.sprintf "dune(%s)" (Path.basename bin.bin)
+     | `Switch (_, switch) -> Printf.sprintf "dune(%s)" (Opam.Switch.name switch))
 ;;
 
 let to_pretty_string t =
@@ -151,7 +154,7 @@ module Setting = struct
     | Esy of Esy.Manifest.t
     | Global
     | Custom of string
-    | Dune of Path.t
+    | Dune of Dune.scope * string * Path.t
 
   let kind : t -> Kind.t = function
     | Opam _ -> Opam
@@ -184,7 +187,11 @@ module Setting = struct
       Custom template
     | Dune ->
       let root = Jsonoo.Decode.field "root" decode_vars json |> Path.of_string in
-      Dune root
+      let path = Jsonoo.Decode.field "path" decode_vars json in
+      let scope = Jsonoo.Decode.field "scope" Dune.scope_of_json json in
+      (match scope with
+       | `Global -> Dune (Dune.Global, path, root)
+       | `Switch -> Dune (Dune.Switch, path, root))
   ;;
 
   let to_json (t : t) =
@@ -198,7 +205,18 @@ module Setting = struct
         [ kind; "root", encode_vars @@ (manifest |> Esy.Manifest.path |> Path.to_string) ]
     | Opam switch -> object_ [ kind; "switch", encode_vars @@ Opam.Switch.name switch ]
     | Custom template -> object_ [ kind; "template", string template ]
-    | Dune dune -> object_ [ kind; "root", encode_vars @@ Path.to_string dune ]
+    | Dune (scope, path, root) ->
+      let scope_json =
+        match scope with
+        | Global -> "global"
+        | Switch -> "switch"
+      in
+      object_
+        [ kind
+        ; "scope", string scope_json
+        ; "path", string path
+        ; "root", string (Path.to_string root)
+        ]
   ;;
 
   let t = Settings.create_setting ~scope:Workspace ~key:"sandbox" ~of_json ~to_json
@@ -207,11 +225,10 @@ end
 type available_sandboxes =
   { opam : Opam.t option Promise.t
   ; esy : Esy.t option Promise.t
-  ; dune : Dune.t option Promise.t
   }
 
 let available_sandboxes () : available_sandboxes =
-  { dune = Dune.make (workspace_root ()) (); opam = Opam.make (); esy = Esy.make () }
+  { opam = Opam.make (); esy = Esy.make () }
 ;;
 
 let of_settings () : t option Promise.t =
@@ -258,14 +275,15 @@ let of_settings () : t option Promise.t =
          None))
   | Some Global -> Promise.return (Some Global)
   | Some (Custom template) -> Promise.return (Some (Custom template))
-  | Some (Dune _dune) ->
-    let open Promise.Syntax in
-    let* dune = available.dune in
-    (match dune with
-     | None ->
-       not_available `Dune;
-       Promise.return None
-     | Some dune -> Promise.return (Some (Dune dune)))
+  | Some (Dune (scope, path, root)) ->
+    let open Promise.Option.Syntax in
+    let scope =
+      match scope with
+      | Global -> `Global
+      | Switch -> `Switch
+    in
+    let* dune = Dune.make ~root ~path scope in
+    Promise.return (Some (Dune dune))
 ;;
 
 let detect_esy_sandbox ~project_root esy () =
@@ -305,9 +323,9 @@ let detect_opam_sandbox ~project_root opam () =
   Opam (opam, switch)
 ;;
 
-let detect_dune_pkg ~project_root _dune () =
+let detect_dune_pkg ~project_root () =
   let open Promise.Syntax in
-  Dune.make (Some project_root) ()
+  Dune.make ~root:project_root ~path:(Path.to_string project_root) `Global
   >>= function
   | Some dune ->
     Dune.is_dpm_enabled dune >>| fun dpm -> if dpm then Some (Dune dune) else None
@@ -320,10 +338,10 @@ let detect () =
   let available = available_sandboxes () in
   Promise.List.find_map
     (fun f -> f ())
-    [ detect_opam_local_switch ~project_root available.opam
+    [ detect_dune_pkg ~project_root
+    ; detect_opam_local_switch ~project_root available.opam
     ; detect_esy_sandbox ~project_root available.esy
     ; detect_opam_sandbox ~project_root available.opam
-    ; detect_dune_pkg ~project_root available.dune
     ]
 ;;
 
@@ -341,7 +359,10 @@ let save_to_settings sandbox =
     | Opam (_, switch) -> Setting.Opam switch
     | Global -> Setting.Global
     | Custom template -> Setting.Custom template
-    | Dune dune -> Setting.Dune (Dune.root dune)
+    | Dune dune ->
+      let root = Dune.root dune in
+      let path, scope = Dune.path_scope dune in
+      Setting.Dune (scope, path, root)
   in
   Settings.set ~section:"ocaml" Setting.t (to_setting sandbox)
 ;;
@@ -369,7 +390,8 @@ module Candidate = struct
            then Some (switch_kind_s ^ " | Currently active switch in project root")
            else Some switch_kind_s
          | Esy (_, _) -> Some "Esy"
-         | Global | Custom _ | Dune _ -> None)
+         | Dune _ -> Some "Use Dune Package Management in this project"
+         | Global | Custom _ -> None)
     in
     match sandbox with
     | Opam (_, Named name) -> create ~label:name ?description ()
@@ -394,25 +416,65 @@ module Candidate = struct
         ~label:"Custom"
         ~detail:"Custom sandbox using a command template"
         ()
-    | Dune dune ->
-      let project_path = Path.to_string (Dune.root dune) in
-      create ?description ~label:"Dune Package Manager" ~detail:project_path ()
+    | Dune _ -> create ~label:"Dune Package Manager" ()
   ;;
 
   let ok sandbox = { sandbox; status = Ok () }
 end
 
+let select_dune_binary () =
+  let open Promise.Syntax in
+  match workspace_root () with
+  | None -> Promise.return None
+  | Some root ->
+    let* opam = Opam.make () in
+    let create = QuickPickItem.create in
+    let* global_dune, opam_dunes = Dune.get_dune_binaries (Some root) opam () in
+    let global_dune_item =
+      match global_dune with
+      | Some (binary, version) ->
+        [ ( create
+              ~label:
+                (Printf.sprintf
+                   "Dune, %s, available"
+                   (Dune.Dune_version.to_string version))
+              ~detail:(Path.to_string binary.bin)
+              ()
+          , Dune.make ~root ~path:(Path.to_string binary.bin) `Global )
+        ]
+      | None -> []
+    in
+    let opam_dune_items =
+      List.map
+        ~f:(fun (switch, version) ->
+          ( create
+              ~label:
+                (Printf.sprintf
+                   "Dune, %s, available via opam switch"
+                   (Dune.Dune_version.to_string version))
+              ~detail:(Printf.sprintf "Switch: %s" (Opam.Switch.name switch))
+              ()
+          , Dune.make ~root ~path:(Opam.Switch.name switch) `Switch ))
+        opam_dunes
+    in
+    let options =
+      QuickPickOptions.create
+        ~canPickMany:false
+        ~placeHolder:"Which dune binary do you want to use for Dune Package Management?"
+        ()
+    in
+    let choices = global_dune_item @ opam_dune_items in
+    Window.showQuickPickItems ~choices ~options ()
+;;
+
 let select_sandbox (choices : Candidate.t list) t =
   let placeHolder = "Which package manager would you like to manage the sandbox?" in
   let open Promise.Syntax in
   let* current_switch =
-    match t with
-    | Dune _ -> Promise.return None
-    | _ ->
-      let open Promise.Option.Syntax in
-      let* opam = Opam.make () in
-      let* cwd = workspace_root () |> Promise.return in
-      Opam.switch_show ~cwd opam
+    let open Promise.Option.Syntax in
+    let* opam = Opam.make () in
+    let* cwd = workspace_root () |> Promise.return in
+    Opam.switch_show ~cwd opam
   in
   let choices =
     List.map
@@ -484,21 +546,13 @@ let sandbox_candidates ~workspace_folders =
        custom commands in [select] *)
   in
   let dune =
-    let+ dune_projects =
-      workspace_folders
-      |> List.map ~f:(fun (folder : WorkspaceFolder.t) ->
-        let root = folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string in
-        let+ dune = Dune.make (Some root) () in
-        match dune with
-        | Some dune -> [ dune ]
-        | None -> [])
-      |> Promise.all_list
-    in
-    List.concat dune_projects
-    |> List.map ~f:(fun dune -> { Candidate.sandbox = Dune dune; status = Ok () })
+    let+ dummy_dune = Dune.make ~root:(Path.of_string "") ~path:"" `Global in
+    match dummy_dune with
+    | Some dummy_dune -> { Candidate.sandbox = Dune dummy_dune; status = Ok () }
+    | None -> Candidate.ok Global
   in
   let+ esy, (opam, current_switch), dune = Promise.all3 (esy, opam, dune) in
-  let cs = (global :: custom :: dune) @ esy @ opam in
+  let cs = (global :: custom :: dune :: esy) @ opam in
   Option.value_map current_switch ~default:cs ~f:(fun current_switch ->
     current_switch :: cs)
 ;;
@@ -528,6 +582,10 @@ let select_sandbox t =
     let* input = Window.showInputBox ~options () in
     let template = String.strip input in
     Promise.Option.return @@ Custom template
+  | { status = Ok (); sandbox = Dune _ } ->
+    let* dune = select_dune_binary () in
+    let+ dune = dune in
+    Dune dune
   | { status; sandbox } ->
     (match status with
      | Error s ->

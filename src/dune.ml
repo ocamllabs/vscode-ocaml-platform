@@ -5,6 +5,24 @@ module Dune_version = struct
     | Release of int * int * int
     | Preview of int * int * int
 
+  let to_string t =
+    match t with
+    | Release (major, minor, patch) -> Printf.sprintf "release-%d.%d.%d" major minor patch
+    | Preview (y, m, d) -> Printf.sprintf "nightly-%d-%d-%d" y m d
+  ;;
+
+  let compare v1 v2 =
+    match v1, v2 with
+    | Release (major1, minor1, patch1), Release (major2, minor2, patch2) ->
+      let open Stdlib in
+      compare (major1, minor1, patch1) (major2, minor2, patch2) |> Ordering.of_int
+    | Preview (y1, m1, d1), Preview (y2, m2, d2) ->
+      let open Stdlib in
+      compare (y1, m1, d1) (y2, m2, d2) |> Ordering.of_int
+    | Release _, Preview _ -> Ordering.of_int 1
+    | Preview _, Release _ -> Ordering.of_int (-1)
+  ;;
+
   let parse_release_version version_str =
     let extract_int s =
       let digits = String.filter s ~f:Char.is_digit in
@@ -72,19 +90,87 @@ module Dune_version = struct
   ;;
 end
 
+type scope =
+  | Global
+  | Switch
+
 type t =
   { root : Path.t
-  ; bin : Cmd.spawn
+  ; bin : [ `Global of Cmd.spawn | `Switch of Opam.t * Opam.Switch.t ]
   }
 
 let binary = Path.of_string "dune"
-let command t ~args = Cmd.Spawn (Cmd.append t.bin args)
 
-let exec ~target ?(args = []) t =
-  Cmd.Spawn (Cmd.append t.bin ([ "exec"; target; "--" ] @ args))
+let scope_of_string = function
+  | "global" -> Some `Global
+  | "switch" -> Some `Switch
+  | _ -> None
 ;;
 
-let exec_pkg ~cmd ?(args = []) t = Cmd.Spawn (Cmd.append t.bin ([ "pkg"; cmd ] @ args))
+let scope_of_json json =
+  let open Jsonoo.Decode in
+  match scope_of_string (string json) with
+  | Some s -> s
+  | None -> raise (Jsonoo.Decode_error "global | switch are the only valid values")
+;;
+
+let make_scope path scope =
+  match scope with
+  | `Global -> `Global { Cmd.bin = Path.of_string path; args = [] }
+  | `Switch ->
+    (match Opam.Switch.of_string path with
+     | None -> `Global { Cmd.bin = Path.of_string path; args = [] }
+     | Some switch -> `Switch (Opam.make (), switch))
+;;
+
+let make ~root ~path scope =
+  let open Promise.Syntax in
+  match scope with
+  | `Global ->
+    let* spawn = Cmd.check_spawn { Cmd.bin = Path.of_string path; args = [] } in
+    (match spawn with
+     | Ok bin -> Promise.return (Some { root; bin = `Global bin })
+     | Error _ ->
+       log_chan
+         `Error
+         ~section:"dune package management"
+         "Dune not found in the environment.";
+       Promise.return None)
+  | `Switch ->
+    (match Opam.Switch.of_string path with
+     | None ->
+       log_chan `Error ~section:"dune package management" "Invalid switch path: %s" path;
+       Promise.return None
+     | Some switch ->
+       let open Promise.Option.Syntax in
+       let* opam = Opam.make () in
+       Promise.return (Some { root; bin = `Switch (opam, switch) }))
+;;
+
+let is_project_locked t =
+  (* Path to the dune.lock dir *)
+  let dune_lock_path = Path.join t.root (Path.of_string "dune.lock") in
+  Fs.exists (Path.to_string dune_lock_path)
+;;
+
+let command t ~args =
+  match t.bin with
+  | `Global bin -> Cmd.Spawn (Cmd.append bin args)
+  | `Switch (opam, switch) -> Opam.exec opam switch ~args:([ "dune" ] @ args)
+;;
+
+let exec ~target ?(args = []) t =
+  match t.bin with
+  | `Global bin -> Cmd.Spawn (Cmd.append bin ([ "exec"; target; "--" ] @ args))
+  | `Switch (opam, switch) ->
+    Opam.exec opam switch ~args:([ "dune"; "exec"; target; "--" ] @ args)
+;;
+
+let exec_pkg ~cmd ?(args = []) t =
+  match t.bin with
+  | `Global bin -> Cmd.Spawn (Cmd.append bin ([ "pkg"; cmd ] @ args))
+  | `Switch (opam, switch) -> Opam.exec opam switch ~args:([ "dune"; "pkg"; cmd ] @ args)
+;;
 
 let is_dpm_enabled t =
   let open Promise.Syntax in
@@ -93,10 +179,18 @@ let is_dpm_enabled t =
 ;;
 
 let tools ~tool ?(args = []) t cmd =
-  match cmd with
-  | `Exec_ -> Cmd.Spawn (Cmd.append t.bin ([ "tools"; "exec"; tool; "--" ] @ args))
-  | `Which -> Cmd.Spawn (Cmd.append t.bin ([ "tools"; "which"; tool ] @ args))
-  | `Install -> Cmd.Spawn (Cmd.append t.bin ([ "tools"; "install"; tool ] @ args))
+  match t.bin with
+  | `Global bin ->
+    (match cmd with
+     | `Exec_ -> Cmd.Spawn (Cmd.append bin ([ "tools"; "exec"; tool; "--" ] @ args))
+     | `Which -> Cmd.Spawn (Cmd.append bin ([ "tools"; "which"; tool ] @ args))
+     | `Install -> Cmd.Spawn (Cmd.append bin ([ "tools"; "install"; tool ] @ args)))
+  | `Switch (opam, switch) ->
+    (match cmd with
+     | `Exec_ -> exec ~target:tool ~args t
+     | `Which -> Opam.exec opam switch ~args:([ "dune"; "tools"; "which"; tool ] @ args)
+     | `Install ->
+       Opam.exec opam switch ~args:([ "dune"; "tools"; "install"; tool ] @ args))
 ;;
 
 let is_ocamllsp_present t =
@@ -109,10 +203,44 @@ let is_ocamllsp_present t =
     false
 ;;
 
-let equal d1 d2 = Path.equal d1.root d2.root
+let equal d1 d2 =
+  let dune_bin =
+    match d1.bin, d2.bin with
+    | `Global bin1, `Global bin2 -> Path.equal bin1.bin bin2.bin
+    | `Switch (opam1, switch1), `Switch (opam2, switch2) ->
+      Opam.Switch.equal switch1 switch2 && Opam.equal opam1 opam2
+    | _ -> false
+  in
+  let root_equal = Path.equal d1.root d2.root in
+  dune_bin && root_equal
+;;
+
 let root t = t.root
 
-let make root () =
+let path_scope t =
+  match t.bin with
+  | `Global bin -> Path.to_string bin.bin, Global
+  | `Switch (_, switch) -> Opam.Switch.name switch, Switch
+;;
+
+let is_dune_in_switch opam switch =
+  let open Promise.Syntax in
+  Opam.exec opam switch ~args:[ "dune"; "--version" ]
+  |> Cmd.output
+  >>| function
+  | Ok v ->
+    (match Dune_version.from_string v with
+     | Some version when Dune_version.is_valid version -> Some (switch, version)
+     | _ -> None)
+  | Error _err -> None
+;;
+
+let all_opam_switches_with_dune opam switches =
+  let open Promise.Syntax in
+  Promise.List.filter_map (fun switch -> is_dune_in_switch opam switch) switches
+;;
+
+let get_dune_binaries root opam () =
   let open Promise.Syntax in
   let dune_version_output bin root =
     command { root; bin } ~args:[ "--version" ] |> Cmd.output ~cwd:root
@@ -121,24 +249,30 @@ let make root () =
   | Some root ->
     let spawn = { Cmd.bin = binary; args = [] } in
     let* spawn = Cmd.check_spawn spawn in
-    (match spawn with
-     | Ok bin ->
-       let+ dune_version_output = dune_version_output bin root in
-       (match dune_version_output with
-        | Ok v ->
-          (match Dune_version.from_string v with
-           | Some version when Dune_version.is_valid version -> Some { bin; root }
-           | _ -> None)
-        | Error _err -> None)
-     | Error _err ->
-       let bin = { Cmd.bin = Path.of_string "opam"; args = [ "exec"; "--"; "dune" ] } in
-       let* dune_version_output = dune_version_output bin root in
-       (match dune_version_output with
-        | Ok v ->
-          (match Dune_version.from_string v with
-           | Some version when Dune_version.is_valid version ->
-             Promise.return (Some { bin; root })
-           | _ -> Promise.return None)
-        | Error _err -> Promise.return None))
-  | None -> Promise.return None
+    let* global_dune =
+      match spawn with
+      | Ok bin ->
+        let+ output = dune_version_output (`Global bin) root in
+        (match output with
+         | Ok v ->
+           (match Dune_version.from_string v with
+            | Some version when Dune_version.is_valid version -> Some (bin, version)
+            | _ -> None)
+         | Error _err -> None)
+      | Error _err -> Promise.return None
+    in
+    let* opam_dunes =
+      match opam with
+      | Some opam ->
+        let* opam_switches = Opam.switch_list opam in
+        all_opam_switches_with_dune opam opam_switches
+      | None -> Promise.return []
+    in
+    let sorted_opam_dunes =
+      List.sort opam_dunes ~compare:(fun (_, v1) (_, v2) ->
+        (* Sort descending: most recent version first *)
+        Dune_version.compare v2 v1)
+    in
+    Promise.return (global_dune, sorted_opam_dunes)
+  | None -> Promise.return (None, [])
 ;;
