@@ -7,16 +7,10 @@ module Dune_version : sig
   val to_string : t -> string
 end
 
-type scope =
-  | Global
-  | Switch
-
 type t =
   { root : Path.t
-  ; bin : [ `Global of Cmd.spawn | `Switch of Opam.t * Opam.Switch.t ]
+  ; bin : Cmd.spawn
   }
-
-val scope_of_json : Jsonoo.t -> [> `Global | `Switch ]
 
 (** Check if dune package management is enable. *)
 val is_dpm_enabled : t -> bool Promise.t
@@ -44,7 +38,7 @@ val is_ocamllsp_present : t -> bool Promise.t
 (** Check if amy two instances of dune pkg management projects are equal *)
 val equal : t -> t -> bool
 
-val make : root:Path.t -> path:string -> [< `Global | `Switch ] -> t option Promise.t
+val make : root:Path.t -> path:Path.t -> t option Promise.t
 
 val get_dune_binaries
   :  Path.t option
@@ -56,4 +50,4 @@ val get_dune_binaries
 (** Get the path of the project root directory *)
 val root : t -> Path.t
 
-val path_scope : t -> string * scope
+val dune_path : t -> Path.t

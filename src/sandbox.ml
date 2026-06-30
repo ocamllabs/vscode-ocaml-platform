@@ -90,10 +90,8 @@ let to_string = function
   | Opam (_, switch) -> Printf.sprintf "opam(%s)" (Opam.Switch.name switch)
   | Global -> "global"
   | Custom _ -> "custom"
-  | Dune dune ->
-    (match dune.bin with
-     | `Global bin -> Printf.sprintf "dune(%s)" (Path.basename bin.bin)
-     | `Switch (_, switch) -> Printf.sprintf "dune(%s)" (Opam.Switch.name switch))
+  (* TODO: it should be dune(<version>) *)
+  | Dune dune -> "dune"
 ;;
 
 let to_pretty_string t =
@@ -154,7 +152,7 @@ module Setting = struct
     | Esy of Esy.Manifest.t
     | Global
     | Custom of string
-    | Dune of Dune.scope * string * Path.t
+    | Dune of Path.t (* path to dune *)
 
   let kind : t -> Kind.t = function
     | Opam _ -> Opam
@@ -186,12 +184,8 @@ module Setting = struct
       let template = Jsonoo.Decode.field "template" decode_vars json in
       Custom template
     | Dune ->
-      let root = Jsonoo.Decode.field "root" decode_vars json |> Path.of_string in
       let path = Jsonoo.Decode.field "path" decode_vars json in
-      let scope = Jsonoo.Decode.field "scope" Dune.scope_of_json json in
-      (match scope with
-       | `Global -> Dune (Dune.Global, path, root)
-       | `Switch -> Dune (Dune.Switch, path, root))
+      Dune (Path.of_string path)
   ;;
 
   let to_json (t : t) =
@@ -205,18 +199,7 @@ module Setting = struct
         [ kind; "root", encode_vars @@ (manifest |> Esy.Manifest.path |> Path.to_string) ]
     | Opam switch -> object_ [ kind; "switch", encode_vars @@ Opam.Switch.name switch ]
     | Custom template -> object_ [ kind; "template", string template ]
-    | Dune (scope, path, root) ->
-      let scope_json =
-        match scope with
-        | Global -> "global"
-        | Switch -> "switch"
-      in
-      object_
-        [ kind
-        ; "scope", string scope_json
-        ; "path", string path
-        ; "root", string (Path.to_string root)
-        ]
+    | Dune path -> object_ [ kind; "path", string (Path.to_string path) ]
   ;;
 
   let t = Settings.create_setting ~scope:Workspace ~key:"sandbox" ~of_json ~to_json
@@ -275,14 +258,10 @@ let of_settings () : t option Promise.t =
          None))
   | Some Global -> Promise.return (Some Global)
   | Some (Custom template) -> Promise.return (Some (Custom template))
-  | Some (Dune (scope, path, root)) ->
+  | Some (Dune path) ->
     let open Promise.Option.Syntax in
-    let scope =
-      match scope with
-      | Global -> `Global
-      | Switch -> `Switch
-    in
-    let* dune = Dune.make ~root ~path scope in
+    let* root = workspace_root () |> Promise.return in
+    let* dune = Dune.make ~root ~path in
     Promise.return (Some (Dune dune))
 ;;
 
@@ -325,7 +304,7 @@ let detect_opam_sandbox ~project_root opam () =
 
 let detect_dune_pkg ~project_root () =
   let open Promise.Syntax in
-  Dune.make ~root:project_root ~path:(Path.to_string project_root) `Global
+  Dune.make ~root:project_root ~path:project_root
   >>= function
   | Some dune ->
     Dune.is_dpm_enabled dune >>| fun dpm -> if dpm then Some (Dune dune) else None
@@ -360,9 +339,8 @@ let save_to_settings sandbox =
     | Global -> Setting.Global
     | Custom template -> Setting.Custom template
     | Dune dune ->
-      let root = Dune.root dune in
-      let path, scope = Dune.path_scope dune in
-      Setting.Dune (scope, path, root)
+      let path = Dune.dune_path dune in
+      Setting.Dune path
   in
   Settings.set ~section:"ocaml" Setting.t (to_setting sandbox)
 ;;
@@ -440,7 +418,7 @@ let select_dune_binary () =
                    (Dune.Dune_version.to_string version))
               ~detail:(Path.to_string binary.bin)
               ()
-          , Dune.make ~root ~path:(Path.to_string binary.bin) `Global )
+          , Dune.make ~root ~path:binary.bin )
         ]
       | None -> []
     in
@@ -454,7 +432,7 @@ let select_dune_binary () =
                    (Dune.Dune_version.to_string version))
               ~detail:(Printf.sprintf "Switch: %s" (Opam.Switch.name switch))
               ()
-          , Dune.make ~root ~path:(Opam.Switch.name switch) `Switch ))
+          , Dune.make ~root ~path:(Path.of_string (Opam.Switch.name switch)) ))
         opam_dunes
     in
     let options =
@@ -546,7 +524,8 @@ let sandbox_candidates ~workspace_folders =
        custom commands in [select] *)
   in
   let dune =
-    let+ dummy_dune = Dune.make ~root:(Path.of_string "") ~path:"" `Global in
+    let dummy_path = Path.of_string "" in
+    let+ dummy_dune = Dune.make ~root:dummy_path ~path:dummy_path in
     match dummy_dune with
     | Some dummy_dune -> { Candidate.sandbox = Dune dummy_dune; status = Ok () }
     | None -> Candidate.ok Global

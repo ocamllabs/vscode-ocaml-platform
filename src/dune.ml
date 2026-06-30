@@ -85,66 +85,29 @@ module Dune_version = struct
   let is_valid version =
     match version with
     | Release (major, minor, patch) ->
-      Stdlib.compare (major, minor, patch) (3, 24, 0) >= 0
+      Stdlib.compare (major, minor, patch) (3, 20, 0) >= 0
     | Preview (y, m, d) -> Stdlib.compare (y, m, d) (2026, 6, 11) >= 0
   ;;
 end
 
-type scope =
-  | Global
-  | Switch
-
 type t =
   { root : Path.t
-  ; bin : [ `Global of Cmd.spawn | `Switch of Opam.t * Opam.Switch.t ]
+  ; bin : Cmd.spawn
   }
 
 let binary = Path.of_string "dune"
 
-let scope_of_string = function
-  | "global" -> Some `Global
-  | "switch" -> Some `Switch
-  | _ -> None
-;;
-
-let scope_of_json json =
-  let open Jsonoo.Decode in
-  match scope_of_string (string json) with
-  | Some s -> s
-  | None -> raise (Jsonoo.Decode_error "global | switch are the only valid values")
-;;
-
-let make_scope path scope =
-  match scope with
-  | `Global -> `Global { Cmd.bin = Path.of_string path; args = [] }
-  | `Switch ->
-    (match Opam.Switch.of_string path with
-     | None -> `Global { Cmd.bin = Path.of_string path; args = [] }
-     | Some switch -> `Switch (Opam.make (), switch))
-;;
-
-let make ~root ~path scope =
+let make ~root ~path =
   let open Promise.Syntax in
-  match scope with
-  | `Global ->
-    let* spawn = Cmd.check_spawn { Cmd.bin = Path.of_string path; args = [] } in
-    (match spawn with
-     | Ok bin -> Promise.return (Some { root; bin = `Global bin })
-     | Error _ ->
-       log_chan
-         `Error
-         ~section:"dune package management"
-         "Dune not found in the environment.";
-       Promise.return None)
-  | `Switch ->
-    (match Opam.Switch.of_string path with
-     | None ->
-       log_chan `Error ~section:"dune package management" "Invalid switch path: %s" path;
-       Promise.return None
-     | Some switch ->
-       let open Promise.Option.Syntax in
-       let* opam = Opam.make () in
-       Promise.return (Some { root; bin = `Switch (opam, switch) }))
+  let* spawn = Cmd.check_spawn { Cmd.bin = path; args = [] } in
+  match spawn with
+  | Ok bin -> Promise.return (Some { root; bin })
+  | Error _ ->
+    log_chan
+      `Error
+      ~section:"dune package management"
+      "Dune not found in the environment.";
+    Promise.return None
 ;;
 
 let is_project_locked t =
@@ -153,24 +116,13 @@ let is_project_locked t =
   Fs.exists (Path.to_string dune_lock_path)
 ;;
 
-let command t ~args =
-  match t.bin with
-  | `Global bin -> Cmd.Spawn (Cmd.append bin args)
-  | `Switch (opam, switch) -> Opam.exec opam switch ~args:([ "dune" ] @ args)
-;;
+let command t ~args = Cmd.Spawn (Cmd.append t.bin args)
 
 let exec ~target ?(args = []) t =
-  match t.bin with
-  | `Global bin -> Cmd.Spawn (Cmd.append bin ([ "exec"; target; "--" ] @ args))
-  | `Switch (opam, switch) ->
-    Opam.exec opam switch ~args:([ "dune"; "exec"; target; "--" ] @ args)
+  Cmd.Spawn (Cmd.append t.bin ([ "exec"; target; "--" ] @ args))
 ;;
 
-let exec_pkg ~cmd ?(args = []) t =
-  match t.bin with
-  | `Global bin -> Cmd.Spawn (Cmd.append bin ([ "pkg"; cmd ] @ args))
-  | `Switch (opam, switch) -> Opam.exec opam switch ~args:([ "dune"; "pkg"; cmd ] @ args)
-;;
+let exec_pkg ~cmd ?(args = []) t = Cmd.Spawn (Cmd.append t.bin ([ "pkg"; cmd ] @ args))
 
 let is_dpm_enabled t =
   let open Promise.Syntax in
@@ -179,18 +131,10 @@ let is_dpm_enabled t =
 ;;
 
 let tools ~tool ?(args = []) t cmd =
-  match t.bin with
-  | `Global bin ->
-    (match cmd with
-     | `Exec_ -> Cmd.Spawn (Cmd.append bin ([ "tools"; "exec"; tool; "--" ] @ args))
-     | `Which -> Cmd.Spawn (Cmd.append bin ([ "tools"; "which"; tool ] @ args))
-     | `Install -> Cmd.Spawn (Cmd.append bin ([ "tools"; "install"; tool ] @ args)))
-  | `Switch (opam, switch) ->
-    (match cmd with
-     | `Exec_ -> exec ~target:tool ~args t
-     | `Which -> Opam.exec opam switch ~args:([ "dune"; "tools"; "which"; tool ] @ args)
-     | `Install ->
-       Opam.exec opam switch ~args:([ "dune"; "tools"; "install"; tool ] @ args))
+  match cmd with
+  | `Exec_ -> Cmd.Spawn (Cmd.append t.bin ([ "tools"; "exec"; tool; "--" ] @ args))
+  | `Which -> Cmd.Spawn (Cmd.append t.bin ([ "tools"; "which"; tool ] @ args))
+  | `Install -> Cmd.Spawn (Cmd.append t.bin ([ "tools"; "install"; tool ] @ args))
 ;;
 
 let is_ocamllsp_present t =
@@ -204,24 +148,13 @@ let is_ocamllsp_present t =
 ;;
 
 let equal d1 d2 =
-  let dune_bin =
-    match d1.bin, d2.bin with
-    | `Global bin1, `Global bin2 -> Path.equal bin1.bin bin2.bin
-    | `Switch (opam1, switch1), `Switch (opam2, switch2) ->
-      Opam.Switch.equal switch1 switch2 && Opam.equal opam1 opam2
-    | _ -> false
-  in
+  let dune_bin = Path.equal d1.bin.bin d2.bin.bin in
   let root_equal = Path.equal d1.root d2.root in
   dune_bin && root_equal
 ;;
 
 let root t = t.root
-
-let path_scope t =
-  match t.bin with
-  | `Global bin -> Path.to_string bin.bin, Global
-  | `Switch (_, switch) -> Opam.Switch.name switch, Switch
-;;
+let dune_path t = t.bin.bin
 
 let is_dune_in_switch opam switch =
   let open Promise.Syntax in
@@ -252,7 +185,7 @@ let get_dune_binaries root opam () =
     let* global_dune =
       match spawn with
       | Ok bin ->
-        let+ output = dune_version_output (`Global bin) root in
+        let+ output = dune_version_output bin root in
         (match output with
          | Ok v ->
            (match Dune_version.from_string v with
