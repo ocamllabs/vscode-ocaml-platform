@@ -140,6 +140,18 @@ module Internal = struct
       ~return_type:(module Return)
   ;;
 
+  let ask_run_program =
+    let module Return = struct
+      type t = string option Promise.t [@@js]
+    end
+    in
+    typed_handle
+      "ask-run-program"
+      ~args_of_js:(Fn.const ())
+      ~args_to_js:(Fn.const [])
+      ~return_type:(module Return)
+  ;;
+
   let copy_type_under_cursor = unit_handle "copy-type-under-cursor"
   let construct = unit_handle "construct"
   let merlin_jump = unit_handle "jump"
@@ -154,6 +166,7 @@ module Internal = struct
   let init_opam = unit_handle "init-opam"
   let install_ocaml_dev = unit_handle "install-ocaml-dev"
   let open_utop = unit_handle "open-utop"
+  let run_standalone_file = unit_handle "run-standalone-file"
 end
 
 module Vscode = struct
