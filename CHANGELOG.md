@@ -22,6 +22,8 @@
 - Update dune cut-off version to 3.24.0 and nightly build from 11/06/2026 for DPM (#2192)
 - Fix the detection of Dune Package Management to use the recommended `dune pkg enabled` command. Previously, we were checking to see if a `dune.lock` file exists. (#2193)
 - Fix the launch of Utop REPL in context of Dune Package Management. (#2198)
+- Redesign how Dune Package Manager is handled. Users now use a two step process, first to select DPM as a sandbox and then to select which dune binary they wish to use in the project (#2199)
+- Enforce that users either enable dune package management by generating a lockfile (as recommended by the dune team) or select a different sandbox. Pressing the escape key will display the select sandbox ui. (2208)
 
 ## 2.3.0
 

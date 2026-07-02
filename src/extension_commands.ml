@@ -132,7 +132,7 @@ let _install_dune_lsp_server =
               let+ _ = Extension_instance.start_language_server instance in
               ()
             else Promise.return ())
-        else Extension_instance.suggest_to_run_dune_pkg_lock () |> Promise.return
+        else Sandbox.suggest_to_run_dune_pkg_lock () |> Promise.return
       | _ ->
         show_message
           `Warn
