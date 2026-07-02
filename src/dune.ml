@@ -106,7 +106,7 @@ let make ~root_dir ~dune_path =
   | Ok bin -> Promise.return (Some { root = root_dir; bin })
   | Error _ ->
     log_chan
-      `Error
+      `Info
       ~section:"dune package management"
       "Dune not found in the environment.";
     Promise.return None
