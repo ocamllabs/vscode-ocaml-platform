@@ -97,5 +97,8 @@ val package_remove : t -> Switch.t -> Package.t list -> Cmd.t
 (** Execute an opam sub-command with in the given switch. *)
 val exec : t -> Switch.t -> args:string list -> Cmd.t
 
+(** Execute opam var command. *)
+val var : t -> Switch.t -> args:string list -> Cmd.t
+
 (** Check that two instances of [Opam] are equal. *)
 val equal : t -> t -> bool

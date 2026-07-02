@@ -1,6 +1,16 @@
 (** Provide an interface to Dune pkg management.*)
 open Import
 
+module Dune_version : sig
+  type t
+
+  val to_string : t -> string
+  val from_string : string -> t option
+  val is_valid : t -> bool
+end
+
+val construct_dune_path : string -> Path.t
+
 type t =
   { root : Path.t
   ; bin : Cmd.spawn
@@ -15,7 +25,7 @@ val command : t -> args:string list -> Cmd.t
 (** Generic function to execute dune exec commands *)
 val exec : target:string -> ?args:string list -> t -> Cmd.t
 
-(** Run specific `dune pkg <foo> commands*)
+(** Run specific `dune pkg <foo> commands` *)
 val exec_pkg : cmd:string -> ?args:string list -> t -> Cmd.t
 
 (** Run `dune tools <exec/which>` *)
@@ -32,7 +42,15 @@ val is_ocamllsp_present : t -> bool Promise.t
 (** Check if amy two instances of dune pkg management projects are equal *)
 val equal : t -> t -> bool
 
-val make : Path.t option -> unit -> t option Promise.t
+val make : working_dir:Path.t -> dune_path:Path.t -> t option Promise.t
+
+val get_opam_dunes
+  :  Opam.t option
+  -> (string * Opam.Switch.t * Dune_version.t) list Promise.t
+
+val get_system_dune_path : unit -> (string * Dune_version.t) option Promise.t
 
 (** Get the path of the project root directory *)
 val root : t -> Path.t
+
+val dune_path : t -> Path.t
