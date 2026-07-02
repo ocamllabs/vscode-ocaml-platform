@@ -220,9 +220,9 @@ let get_system_dune_path () =
        See: https://github.com/ocaml/dune/issues/11161 *)
     Promise.return None
   | Darwin | Linux | Other ->
-    let bash_script =
-      "if command -v opam >/dev/null 2>&1; then eval $(opam env --revert || true); fi; "
-      ^ "command -v dune && dune --version"
+    let shell_script =
+      "if which opam >/dev/null 2>&1; then eval $(opam env --revert || true); fi; "
+      ^ "which dune && dune --version"
     in
-    run_cmd "bash" [ "-c"; bash_script ]
+    run_cmd "sh" [ "-c"; shell_script ]
 ;;
