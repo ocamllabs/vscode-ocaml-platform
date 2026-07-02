@@ -3048,7 +3048,7 @@ module Window = struct
         -> MessageItem.t or_undefined Promise.t
       [@@js.global "@vscode.window.showWarningMessage"]
 
-      val showErrorMessage
+      val errorMessage
         :  message:string
         -> ?options:MessageOptions.t
         -> items:(MessageItem.t list[@js.variadic])
@@ -3209,7 +3209,7 @@ module Window = struct
   let showErrorMessage ~message ?options ?(choices = []) () =
     let choices = getChoices choices in
     let open Promise.Option.Syntax in
-    let+ item = showErrorMessage ~message ?options ~items:(List.map fst choices) () in
+    let+ item = errorMessage ~message ?options ~items:(List.map fst choices) () in
     List.assoc item choices
   ;;
 
