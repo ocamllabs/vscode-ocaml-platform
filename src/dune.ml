@@ -105,10 +105,7 @@ let make ~working_dir ~dune_path =
   match spawn with
   | Ok bin -> Promise.return (Some { root = working_dir; bin })
   | Error _ ->
-    log_chan
-      `Info
-      ~section:"dune package management"
-      "Dune not found in the environment.";
+    log_chan `Info ~section:"dune package management" "Dune not found in the environment.";
     Promise.return None
 ;;
 

@@ -259,7 +259,7 @@ let of_settings () : t option Promise.t =
   | Some (Custom template) -> Promise.return (Some (Custom template))
   | Some (Dune path) ->
     let open Promise.Option.Syntax in
-    let* root = workspace_root () |> Promise.return in
+    let* root = Promise.return (workspace_root ()) in
     let* dune = Dune.make ~working_dir:root ~dune_path:path in
     Promise.return (Some (Dune dune))
 ;;
@@ -683,7 +683,9 @@ let sandbox_candidates ~workspace_folders =
          (match dune_path with
           | None -> Promise.return None
           | Some dune_path ->
-            let+ dune = Dune.make ~working_dir:root ~dune_path:(Path.of_string dune_path) in
+            let+ dune =
+              Dune.make ~working_dir:root ~dune_path:(Path.of_string dune_path)
+            in
             (match dune with
              | Some dune -> Some { Candidate.sandbox = Dune dune; status = Ok () }
              | None -> None)))
