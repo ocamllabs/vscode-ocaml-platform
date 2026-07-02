@@ -90,7 +90,6 @@ let to_string = function
   | Opam (_, switch) -> Printf.sprintf "opam(%s)" (Opam.Switch.name switch)
   | Global -> "global"
   | Custom _ -> "custom"
-  (* TODO: it should be dune(<version>) *)
   | Dune _ -> "dune"
 ;;
 
@@ -261,7 +260,7 @@ let of_settings () : t option Promise.t =
   | Some (Dune path) ->
     let open Promise.Option.Syntax in
     let* root = workspace_root () |> Promise.return in
-    let* dune = Dune.make ~root ~path in
+    let* dune = Dune.make ~root_dir:root ~dune_path:path in
     Promise.return (Some (Dune dune))
 ;;
 
@@ -304,7 +303,7 @@ let detect_opam_sandbox ~project_root opam () =
 
 let detect_dune_pkg ~project_root () =
   let open Promise.Syntax in
-  Dune.make ~root:project_root ~path:project_root
+  Dune.make ~root_dir:project_root ~dune_path:project_root
   >>= function
   | Some dune ->
     Dune.is_dpm_enabled dune >>| fun dpm -> if dpm then Some (Dune dune) else None
@@ -400,6 +399,121 @@ module Candidate = struct
   let ok sandbox = { sandbox; status = Ok () }
 end
 
+let find_all_dune_binaries root opam () =
+  let open Promise.Syntax in
+  let* opam_dunes = Dune.get_opam_dunes opam in
+  let* current_switch =
+    let open Promise.Option.Syntax in
+    let* opam = Promise.return opam in
+    Opam.switch_show ~cwd:root opam
+  in
+  let+ system_dune = Dune.get_system_dune_path () in
+  opam_dunes, current_switch, system_dune
+;;
+
+let custom_dune_input_validation root =
+  let open Promise.Syntax in
+  let validateInput ~value =
+    let path = Path.of_string value in
+    let* exists = Fs.exists (Path.to_string path) in
+    if not exists
+    then Promise.return (Some "Provided path does not exist")
+    else (
+      let cmd = Cmd.Spawn { bin = path; args = [ "--version" ] } in
+      let+ output = Cmd.output cmd ~cwd:(Path.of_string "") in
+      match output with
+      | Error _ -> Some "Provided path is not a valid dune executable"
+      | Ok v ->
+        (match Dune.Dune_version.from_string v with
+         | None -> Some "Unable to parse dune version"
+         | Some version when Dune.Dune_version.is_valid version -> None
+         | Some version ->
+           let msg =
+             Printf.sprintf
+               "Dune version %s is not supported. Please use a more recent version."
+               (Dune.Dune_version.to_string version)
+           in
+           Some msg))
+  in
+  let options =
+    InputBoxOptions.create
+      ~prompt:"Input the path to the dune executable"
+      ~validateInput
+      ()
+  in
+  let* input = Window.showInputBox ~options () in
+  match input with
+  | None -> Promise.return None
+  | Some path_str ->
+    Dune.make ~root_dir:root ~dune_path:(Path.of_string (String.strip path_str))
+;;
+
+let get_active_switch_for_dpm opam_dunes = function
+  | None -> None
+  | Some active ->
+    List.find_map opam_dunes ~f:(fun (path, switch, version) ->
+      if Opam.Switch.equal switch active
+      then (
+        let switch_kind_s =
+          match switch with
+          | Opam.Switch.Local _ -> "Local switch"
+          | Opam.Switch.Named _ -> "Global switch"
+        in
+        let switch_name =
+          match switch with
+          | Opam.Switch.Local p -> Path.basename p
+          | Opam.Switch.Named n -> n
+        in
+        let label =
+          Printf.sprintf
+            "Dune %s, via opam switch %s"
+            (Dune.Dune_version.to_string version)
+            switch_name
+        in
+        let description = switch_kind_s ^ " | Currently active switch in project root" in
+        Some
+          ( QuickPickItem.create
+              ~label
+              ~description
+              ~detail:
+                (Printf.sprintf "%s" (Path.to_string (Dune.construct_dune_path path)))
+              ()
+          , `Opam_dune (Dune.construct_dune_path path) ))
+      else None)
+;;
+
+let get_non_active_opam_dunes opam_dunes current_switch =
+  let inactive_dunes =
+    List.filter opam_dunes ~f:(fun (_path, switch, _version) ->
+      match current_switch with
+      | Some active -> not (Opam.Switch.equal switch active)
+      | None -> true)
+  in
+  let global_dunes, local_dunes =
+    List.partition_tf inactive_dunes ~f:(fun (_, switch, _) ->
+      match switch with
+      | Opam.Switch.Named _ -> true
+      | Opam.Switch.Local _ -> false)
+  in
+  let to_item (path, switch, version) =
+    let switch_name =
+      match switch with
+      | Opam.Switch.Local p -> Path.basename p
+      | Opam.Switch.Named n -> n
+    in
+    ( QuickPickItem.create
+        ~label:
+          (Printf.sprintf
+             "Dune %s, via opam switch %s"
+             (Dune.Dune_version.to_string version)
+             switch_name)
+        ~detail:(Printf.sprintf "%s" (Path.to_string (Dune.construct_dune_path path)))
+        ()
+    , `Opam_dune (Dune.construct_dune_path path) )
+  in
+  List.map ~f:to_item global_dunes, List.map ~f:to_item local_dunes
+;;
+
 let select_dune_binary () =
   let open Promise.Syntax in
   match workspace_root () with
@@ -416,85 +530,18 @@ let select_dune_binary () =
         ()
     in
     let task ~progress:_ ~token:_ =
-      let* opam_dunes = Dune.get_opam_dunes opam in
-      let* current_switch =
-        let open Promise.Option.Syntax in
-        let* opam = Promise.return opam in
-        Opam.switch_show ~cwd:root opam
+      let+ opam_dunes, current_switch, system_dune =
+        find_all_dune_binaries root opam ()
       in
-      let* system_dune = Dune.get_system_dune_path () in
-      data := Some (opam_dunes, current_switch, system_dune);
-      Promise.return ()
+      data := Some (opam_dunes, current_switch, system_dune)
     in
     let* () = Window.withProgress (module Interop.Js.Unit) ~options ~task in
     (match !data with
      | None -> Promise.return None
      | Some (opam_dunes, current_switch, system_dune) ->
-       let active_switch_item =
-         match current_switch with
-         | None -> None
-         | Some active ->
-           List.find_map opam_dunes ~f:(fun (path, switch, version) ->
-             if Opam.Switch.equal switch active
-             then (
-               let switch_kind_s =
-                 match switch with
-                 | Opam.Switch.Local _ -> "Local switch"
-                 | Opam.Switch.Named _ -> "Global switch"
-               in
-               let switch_name =
-                 match switch with
-                 | Opam.Switch.Local p -> Path.basename p
-                 | Opam.Switch.Named n -> n
-               in
-               let label =
-                 Printf.sprintf
-                   "Dune %s, via opam switch %s"
-                   (Dune.Dune_version.to_string version)
-                   switch_name
-               in
-               let description =
-                 switch_kind_s ^ " | Currently active switch in project root"
-               in
-               Some
-                 ( create
-                     ~label
-                     ~description
-                     ~detail:(Printf.sprintf "%s" (Stdlib.String.trim path ^ "/dune"))
-                     ()
-                 , `Opam_dune Path.(of_string (Stdlib.String.trim path) / "dune") ))
-             else None)
-       in
+       let active_switch_item = get_active_switch_for_dpm opam_dunes current_switch in
        let global_dune_items, other_local_dune_items =
-         let inactive_dunes =
-           List.filter opam_dunes ~f:(fun (_path, switch, _version) ->
-             match current_switch with
-             | Some active -> not (Opam.Switch.equal switch active)
-             | None -> true)
-         in
-         let global_dunes, local_dunes =
-           List.partition_tf inactive_dunes ~f:(fun (_, switch, _) ->
-             match switch with
-             | Opam.Switch.Named _ -> true
-             | Opam.Switch.Local _ -> false)
-         in
-         let to_item (path, switch, version) =
-           let switch_name =
-             match switch with
-             | Opam.Switch.Local p -> Path.basename p
-             | Opam.Switch.Named n -> n
-           in
-           ( create
-               ~label:
-                 (Printf.sprintf
-                    "Dune %s, via opam switch %s"
-                    (Dune.Dune_version.to_string version)
-                    switch_name)
-               ~detail:(Printf.sprintf "%s" (Stdlib.String.trim path ^ "/dune"))
-               ()
-           , `Opam_dune Path.(of_string (Stdlib.String.trim path) / "dune") )
-         in
-         List.map ~f:to_item global_dunes, List.map ~f:to_item local_dunes
+         get_non_active_opam_dunes opam_dunes current_switch
        in
        let system_dune_item =
          match system_dune with
@@ -536,45 +583,8 @@ let select_dune_binary () =
        let* choice = Window.showQuickPickItems ~choices ~options () in
        (match choice with
         | None | Some `Separator -> Promise.return None
-        | Some (`Opam_dune path) -> Dune.make ~root ~path
-        | Some `Custom_dune ->
-          let validateInput ~value =
-            let open Promise.Syntax in
-            let path = Path.of_string value in
-            let* exists = Fs.exists (Path.to_string path) in
-            if not exists
-            then Promise.return (Some "Provided path does not exist")
-            else (
-              let cmd = Cmd.Spawn { bin = path; args = [ "--version" ] } in
-              let* output = Cmd.output cmd ~cwd:(Path.of_string "") in
-              match output with
-              | Error _ ->
-                Promise.return (Some "Provided path is not a valid dune executable")
-              | Ok v ->
-                (match Dune.Dune_version.from_string v with
-                 | None -> Promise.return (Some "Unable to parse dune version")
-                 | Some version when Dune.Dune_version.is_valid version ->
-                   Promise.return None
-                 | Some version ->
-                   let msg =
-                     Printf.sprintf
-                       "Dune version %s is not supported. Please use a more recent \
-                        version."
-                       (Dune.Dune_version.to_string version)
-                   in
-                   Promise.return (Some msg)))
-          in
-          let options =
-            InputBoxOptions.create
-              ~prompt:"Input the path to the dune executable"
-              ~validateInput
-              ()
-          in
-          let* input = Window.showInputBox ~options () in
-          (match input with
-           | None -> Promise.return None
-           | Some path_str ->
-             Dune.make ~root ~path:(Path.of_string (String.strip path_str)))))
+        | Some (`Opam_dune path) -> Dune.make ~root_dir:root ~dune_path:path
+        | Some `Custom_dune -> custom_dune_input_validation root))
 ;;
 
 let select_sandbox (choices : Candidate.t list) _t =
@@ -659,11 +669,24 @@ let sandbox_candidates ~workspace_folders =
     match Platform.t with
     | Win32 -> Promise.return None
     | Darwin | Linux | Other ->
-      let dummy_path = Path.of_string "" in
-      let+ dummy_dune = Dune.make ~root:dummy_path ~path:dummy_path in
-      (match dummy_dune with
-       | Some dummy_dune -> Some { Candidate.sandbox = Dune dummy_dune; status = Ok () }
-       | None -> None)
+      let* opam = available.opam in
+      (match workspace_root () with
+       | None -> Promise.return None
+       | Some root ->
+         let* dune_binary = find_all_dune_binaries root opam () in
+         let dune_path =
+           match dune_binary with
+           | _, _, Some (path, _) -> Some path
+           | (path, _, _) :: _, _, _ -> Some path
+           | _ -> None
+         in
+         (match dune_path with
+          | None -> Promise.return None
+          | Some dune_path ->
+            let+ dune = Dune.make ~root_dir:root ~dune_path:(Path.of_string dune_path) in
+            (match dune with
+             | Some dune -> Some { Candidate.sandbox = Dune dune; status = Ok () }
+             | None -> None)))
   in
   let+ esy, (opam, current_switch), dune = Promise.all3 (esy, opam, dune) in
   let cs = global :: custom :: (Option.to_list dune @ esy @ opam) in

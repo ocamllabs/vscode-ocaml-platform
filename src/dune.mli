@@ -9,6 +9,8 @@ module Dune_version : sig
   val is_valid : t -> bool
 end
 
+val construct_dune_path : string -> Path.t
+
 type t =
   { root : Path.t
   ; bin : Cmd.spawn
@@ -40,7 +42,7 @@ val is_ocamllsp_present : t -> bool Promise.t
 (** Check if amy two instances of dune pkg management projects are equal *)
 val equal : t -> t -> bool
 
-val make : root:Path.t -> path:Path.t -> t option Promise.t
+val make : root_dir:Path.t -> dune_path:Path.t -> t option Promise.t
 
 val get_opam_dunes
   :  Opam.t option

@@ -92,16 +92,18 @@ module Dune_version = struct
   ;;
 end
 
+let construct_dune_path path = Path.(of_string (String.strip path) / "dune")
+
 type t =
   { root : Path.t
   ; bin : Cmd.spawn
   }
 
-let make ~root ~path =
+let make ~root_dir ~dune_path =
   let open Promise.Syntax in
-  let* spawn = Cmd.check_spawn { Cmd.bin = path; args = [] } in
+  let* spawn = Cmd.check_spawn { Cmd.bin = dune_path; args = [] } in
   match spawn with
-  | Ok bin -> Promise.return (Some { root; bin })
+  | Ok bin -> Promise.return (Some { root = root_dir; bin })
   | Error _ ->
     log_chan
       `Error
@@ -157,7 +159,7 @@ let is_dune_in_switch opam switch =
   >>= function
   | Error err ->
     log_chan
-      `Error
+      `Info
       ~section:"dune package management"
       "Dune is not installed in switch %s: %s"
       (Opam.Switch.name switch)
@@ -166,7 +168,7 @@ let is_dune_in_switch opam switch =
   | Ok path ->
     command
       { root = Path.of_string ""
-      ; bin = { Cmd.bin = Path.(of_string (Stdlib.String.trim path) / "dune"); args = [] }
+      ; bin = { Cmd.bin = construct_dune_path path; args = [] }
       }
       ~args:[ "--version" ]
     |> Cmd.output
