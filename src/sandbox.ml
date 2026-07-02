@@ -260,7 +260,7 @@ let of_settings () : t option Promise.t =
   | Some (Dune path) ->
     let open Promise.Option.Syntax in
     let* root = workspace_root () |> Promise.return in
-    let* dune = Dune.make ~root_dir:root ~dune_path:path in
+    let* dune = Dune.make ~working_dir:root ~dune_path:path in
     Promise.return (Some (Dune dune))
 ;;
 
@@ -303,7 +303,7 @@ let detect_opam_sandbox ~project_root opam () =
 
 let detect_dune_pkg ~project_root () =
   let open Promise.Syntax in
-  Dune.make ~root_dir:project_root ~dune_path:project_root
+  Dune.make ~working_dir:project_root ~dune_path:project_root
   >>= function
   | Some dune ->
     Dune.is_dpm_enabled dune >>| fun dpm -> if dpm then Some (Dune dune) else None
@@ -445,7 +445,7 @@ let custom_dune_input_validation root =
   match input with
   | None -> Promise.return None
   | Some path_str ->
-    Dune.make ~root_dir:root ~dune_path:(Path.of_string (String.strip path_str))
+    Dune.make ~working_dir:root ~dune_path:(Path.of_string (String.strip path_str))
 ;;
 
 let get_active_switch_for_dpm opam_dunes = function
@@ -583,7 +583,7 @@ let select_dune_binary () =
        let* choice = Window.showQuickPickItems ~choices ~options () in
        (match choice with
         | None | Some `Separator -> Promise.return None
-        | Some (`Opam_dune path) -> Dune.make ~root_dir:root ~dune_path:path
+        | Some (`Opam_dune path) -> Dune.make ~working_dir:root ~dune_path:path
         | Some `Custom_dune -> custom_dune_input_validation root))
 ;;
 
@@ -683,7 +683,7 @@ let sandbox_candidates ~workspace_folders =
          (match dune_path with
           | None -> Promise.return None
           | Some dune_path ->
-            let+ dune = Dune.make ~root_dir:root ~dune_path:(Path.of_string dune_path) in
+            let+ dune = Dune.make ~working_dir:root ~dune_path:(Path.of_string dune_path) in
             (match dune with
              | Some dune -> Some { Candidate.sandbox = Dune dune; status = Ok () }
              | None -> None)))

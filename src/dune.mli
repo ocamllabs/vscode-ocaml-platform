@@ -42,7 +42,7 @@ val is_ocamllsp_present : t -> bool Promise.t
 (** Check if amy two instances of dune pkg management projects are equal *)
 val equal : t -> t -> bool
 
-val make : root_dir:Path.t -> dune_path:Path.t -> t option Promise.t
+val make : working_dir:Path.t -> dune_path:Path.t -> t option Promise.t
 
 val get_opam_dunes
   :  Opam.t option

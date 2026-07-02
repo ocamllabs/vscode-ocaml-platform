@@ -99,11 +99,11 @@ type t =
   ; bin : Cmd.spawn
   }
 
-let make ~root_dir ~dune_path =
+let make ~working_dir ~dune_path =
   let open Promise.Syntax in
   let* spawn = Cmd.check_spawn { Cmd.bin = dune_path; args = [] } in
   match spawn with
-  | Ok bin -> Promise.return (Some { root = root_dir; bin })
+  | Ok bin -> Promise.return (Some { root = working_dir; bin })
   | Error _ ->
     log_chan
       `Info
