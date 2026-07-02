@@ -91,7 +91,7 @@ let to_string = function
   | Global -> "global"
   | Custom _ -> "custom"
   (* TODO: it should be dune(<version>) *)
-  | Dune dune -> "dune"
+  | Dune _ -> "dune"
 ;;
 
 let to_pretty_string t =
@@ -577,7 +577,7 @@ let select_dune_binary () =
              Dune.make ~root ~path:(Path.of_string (String.strip path_str)))))
 ;;
 
-let select_sandbox (choices : Candidate.t list) t =
+let select_sandbox (choices : Candidate.t list) _t =
   let placeHolder = "Which package manager would you like to manage the sandbox?" in
   let open Promise.Syntax in
   let* current_switch =

@@ -97,8 +97,6 @@ type t =
   ; bin : Cmd.spawn
   }
 
-let binary = Path.of_string "dune"
-
 let make ~root ~path =
   let open Promise.Syntax in
   let* spawn = Cmd.check_spawn { Cmd.bin = path; args = [] } in
@@ -110,12 +108,6 @@ let make ~root ~path =
       ~section:"dune package management"
       "Dune not found in the environment.";
     Promise.return None
-;;
-
-let is_project_locked t =
-  (* Path to the dune.lock dir *)
-  let dune_lock_path = Path.join t.root (Path.of_string "dune.lock") in
-  Fs.exists (Path.to_string dune_lock_path)
 ;;
 
 let command t ~args = Cmd.Spawn (Cmd.append t.bin args)
