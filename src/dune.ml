@@ -202,17 +202,17 @@ let get_system_dune_path () =
   let open Promise.Syntax in
   let run_cmd bin args =
     let cmd = Cmd.Spawn { bin = Path.of_string bin; args } in
-    let* output = Cmd.output cmd ~cwd:(Path.of_string "") in
+    let+ output = Cmd.output cmd ~cwd:(Path.of_string "") in
     match output with
     | Ok output ->
       (match String.split_lines (String.strip output) with
        | [ path; version_str ] ->
          let version = Dune_version.from_string (String.strip version_str) in
          (match version with
-          | Some v -> Promise.return (Some (String.strip path, v))
-          | None -> Promise.return None)
-       | _ -> Promise.return None)
-    | Error _ -> Promise.return None
+          | Some v -> Some (String.strip path, v)
+          | None -> None)
+       | _ -> None)
+    | Error _ -> None
   in
   match Platform.t with
   | Win32 ->
