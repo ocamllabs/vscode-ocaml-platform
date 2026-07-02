@@ -5,6 +5,8 @@ module Dune_version : sig
   type t
 
   val to_string : t -> string
+  val from_string : string -> t option
+  val is_valid : t -> bool
 end
 
 type t =
@@ -21,7 +23,7 @@ val command : t -> args:string list -> Cmd.t
 (** Generic function to execute dune exec commands *)
 val exec : target:string -> ?args:string list -> t -> Cmd.t
 
-(** Run specific `dune pkg <foo> commands*)
+(** Run specific `dune pkg <foo> commands` *)
 val exec_pkg : cmd:string -> ?args:string list -> t -> Cmd.t
 
 (** Run `dune tools <exec/which>` *)
@@ -40,12 +42,11 @@ val equal : t -> t -> bool
 
 val make : root:Path.t -> path:Path.t -> t option Promise.t
 
-val get_dune_binaries
-  :  Path.t option
-  -> Opam.t option
-  -> unit
-  -> ((Cmd.spawn * Dune_version.t) option * (Opam.Switch.t * Dune_version.t) list)
-       Promise.t
+val get_opam_dunes
+  :  Opam.t option
+  -> (string * Opam.Switch.t * Dune_version.t) list Promise.t
+
+val get_system_dune_path : unit -> (string * Dune_version.t) option Promise.t
 
 (** Get the path of the project root directory *)
 val root : t -> Path.t

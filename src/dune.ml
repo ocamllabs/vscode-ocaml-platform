@@ -7,20 +7,22 @@ module Dune_version = struct
 
   let to_string t =
     match t with
-    | Release (major, minor, patch) -> Printf.sprintf "release-%d.%d.%d" major minor patch
-    | Preview (y, m, d) -> Printf.sprintf "nightly-%d-%d-%d" y m d
+    | Release (major, minor, patch) ->
+      Printf.sprintf "(release) %d.%d.%d" major minor patch
+    | Preview (y, m, d) -> Printf.sprintf "(nightly) %d-%d-%d" y m d
   ;;
 
   let compare v1 v2 =
+    let open Stdlib in
     match v1, v2 with
     | Release (major1, minor1, patch1), Release (major2, minor2, patch2) ->
-      let open Stdlib in
       compare (major1, minor1, patch1) (major2, minor2, patch2) |> Ordering.of_int
     | Preview (y1, m1, d1), Preview (y2, m2, d2) ->
-      let open Stdlib in
       compare (y1, m1, d1) (y2, m2, d2) |> Ordering.of_int
-    | Release _, Preview _ -> Ordering.of_int 1
-    | Preview _, Release _ -> Ordering.of_int (-1)
+    | Release _, Preview _ ->
+      Ordering.of_int (-1)
+      (* we assume that users using a preview version are using a more recent version or updating the  nightly previews frequently *)
+    | Preview _, Release _ -> Ordering.of_int 1
   ;;
 
   let parse_release_version version_str =
@@ -158,14 +160,30 @@ let dune_path t = t.bin.bin
 
 let is_dune_in_switch opam switch =
   let open Promise.Syntax in
-  Opam.exec opam switch ~args:[ "dune"; "--version" ]
+  Opam.var opam switch ~args:[ "dune:bin" ]
   |> Cmd.output
-  >>| function
-  | Ok v ->
-    (match Dune_version.from_string v with
-     | Some version when Dune_version.is_valid version -> Some (switch, version)
-     | _ -> None)
-  | Error _err -> None
+  >>= function
+  | Error err ->
+    log_chan
+      `Error
+      ~section:"dune package management"
+      "Dune is not installed in switch %s: %s"
+      (Opam.Switch.name switch)
+      err;
+    Promise.return None
+  | Ok path ->
+    command
+      { root = Path.of_string ""
+      ; bin = { Cmd.bin = Path.(of_string (Stdlib.String.trim path) / "dune"); args = [] }
+      }
+      ~args:[ "--version" ]
+    |> Cmd.output
+    >>| (function
+     | Ok v ->
+       (match Dune_version.from_string v with
+        | Some version when Dune_version.is_valid version -> Some (path, switch, version)
+        | _ -> None)
+     | Error _err -> None)
 ;;
 
 let all_opam_switches_with_dune opam switches =
@@ -173,39 +191,48 @@ let all_opam_switches_with_dune opam switches =
   Promise.List.filter_map (fun switch -> is_dune_in_switch opam switch) switches
 ;;
 
-let get_dune_binaries root opam () =
+let get_opam_dunes opam =
   let open Promise.Syntax in
-  let dune_version_output bin root =
-    command { root; bin } ~args:[ "--version" ] |> Cmd.output ~cwd:root
+  let* opam_dunes =
+    match opam with
+    | Some opam ->
+      let* opam_switches = Opam.switch_list opam in
+      all_opam_switches_with_dune opam opam_switches
+    | None -> Promise.return []
   in
-  match root with
-  | Some root ->
-    let spawn = { Cmd.bin = binary; args = [] } in
-    let* spawn = Cmd.check_spawn spawn in
-    let* global_dune =
-      match spawn with
-      | Ok bin ->
-        let+ output = dune_version_output bin root in
-        (match output with
-         | Ok v ->
-           (match Dune_version.from_string v with
-            | Some version when Dune_version.is_valid version -> Some (bin, version)
-            | _ -> None)
-         | Error _err -> None)
-      | Error _err -> Promise.return None
+  let sorted_opam_dunes =
+    List.sort opam_dunes ~compare:(fun (_, _, v1) (_, _, v2) ->
+      (* Sort descending: most recent version first *)
+      Dune_version.compare v2 v1)
+  in
+  Promise.return sorted_opam_dunes
+;;
+
+let get_system_dune_path () =
+  let open Promise.Syntax in
+  let run_cmd bin args =
+    let cmd = Cmd.Spawn { bin = Path.of_string bin; args } in
+    let* output = Cmd.output cmd ~cwd:(Path.of_string "") in
+    match output with
+    | Ok output ->
+      (match String.split_lines (String.strip output) with
+       | [ path; version_str ] ->
+         let version = Dune_version.from_string (String.strip version_str) in
+         (match version with
+          | Some v -> Promise.return (Some (String.strip path, v))
+          | None -> Promise.return None)
+       | _ -> Promise.return None)
+    | Error _ -> Promise.return None
+  in
+  match Platform.t with
+  | Win32 ->
+    (* Dune package management is not supported on Windows at the moment
+       See: https://github.com/ocaml/dune/issues/11161 *)
+    Promise.return None
+  | Darwin | Linux | Other ->
+    let bash_script =
+      "if command -v opam >/dev/null 2>&1; then eval $(opam env --revert || true); fi; "
+      ^ "command -v dune && dune --version"
     in
-    let* opam_dunes =
-      match opam with
-      | Some opam ->
-        let* opam_switches = Opam.switch_list opam in
-        all_opam_switches_with_dune opam opam_switches
-      | None -> Promise.return []
-    in
-    let sorted_opam_dunes =
-      List.sort opam_dunes ~compare:(fun (_, v1) (_, v2) ->
-        (* Sort descending: most recent version first *)
-        Dune_version.compare v2 v1)
-    in
-    Promise.return (global_dune, sorted_opam_dunes)
-  | None -> Promise.return (None, [])
+    run_cmd "bash" [ "-c"; bash_script ]
 ;;
