@@ -179,7 +179,6 @@ let is_dune_in_switch opam switch =
 ;;
 
 let all_opam_switches_with_dune opam switches =
-  let open Promise.Syntax in
   Promise.List.filter_map (fun switch -> is_dune_in_switch opam switch) switches
 ;;
 
