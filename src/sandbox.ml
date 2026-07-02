@@ -331,17 +331,54 @@ let of_settings_or_detect () =
   | None -> detect ()
 ;;
 
-let save_to_settings sandbox =
-  let to_setting = function
-    | Esy (_, root) -> Setting.Esy root
-    | Opam (_, switch) -> Setting.Opam switch
-    | Global -> Setting.Global
-    | Custom template -> Setting.Custom template
-    | Dune dune ->
-      let path = Dune.dune_path dune in
-      Setting.Dune path
+let suggest_to_run_dune_pkg_lock () =
+  let open Promise.Syntax in
+  let (_ : unit Promise.t) =
+    let* maybe_choice =
+      Window.errorMessage
+        ~options:(MessageOptions.create ~modal:true ())
+        ~message:
+          "Dune Package Manager is selected as the active sandbox, but dune package \
+           management is not enabled in your workspace. One way of enabling it is \
+           generate a lock file. Do you want to run dune pkg lock?"
+        ~items:
+          [ MessageItem.create ~title:"Generate lockfile" ()
+          ; MessageItem.create
+              ~isCloseAffordance:true
+              ~title:"Select a different sandbox"
+              ()
+          ]
+        ()
+    in
+    match maybe_choice with
+    | Some item when Option.value ~default:false (MessageItem.isCloseAffordance item) ->
+      Command_api.(execute Internal.select_sandbox) ()
+    | None | Some _ -> Command_api.(execute Internal.run_dune_pkg_lock) ()
   in
-  Settings.set ~section:"ocaml" Setting.t (to_setting sandbox)
+  ()
+;;
+
+let save_to_settings sandbox =
+  let open Promise.Syntax in
+  let save_setting =
+    let to_setting = function
+      | Esy (_, root) -> Setting.Esy root
+      | Opam (_, switch) -> Setting.Opam switch
+      | Global -> Setting.Global
+      | Custom template -> Setting.Custom template
+      | Dune dune ->
+        let path = Dune.dune_path dune in
+        Setting.Dune path
+    in
+    Settings.set ~section:"ocaml" Setting.t (to_setting sandbox)
+  in
+  match sandbox with
+  | Dune dune ->
+    Dune.is_dpm_enabled dune
+    >>= (function
+     | true -> save_setting
+     | false -> Promise.return (suggest_to_run_dune_pkg_lock ()))
+  | _ -> save_setting
 ;;
 
 module Candidate = struct
