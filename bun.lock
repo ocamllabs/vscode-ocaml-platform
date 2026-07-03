@@ -9,7 +9,7 @@
         "oxlint": "1.72.0",
         "polka": "1.0.0-next.28",
         "sirv": "3.0.2",
-        "vscode-languageclient": "10.0.1",
+        "vscode-languageclient": "10.1.0",
       },
       "devDependencies": {
         "@types/node": "26.1.0",
@@ -1118,11 +1118,11 @@
 
     "vite-plugin-singlefile": ["vite-plugin-singlefile@2.3.3", "", { "dependencies": { "micromatch": "^4.0.8" }, "peerDependencies": { "rollup": "^4.59.0", "vite": "^5.4.21 || ^6.0.0 || ^7.0.0 || ^8.0.0" }, "optionalPeers": ["rollup"] }, "sha512-XVnGH0QzbOa8fxRSsHdCarVN1BSBXNi7uLMQYlrGRN5apdHkk62XQWRJhVever0lnfuyBkwn+kvVChdm/OoOUg=="],
 
-    "vscode-jsonrpc": ["vscode-jsonrpc@9.0.0", "", {}, "sha512-+VvMmQPJhtvJ+8O+zu2JKIRiLxXF8NW7krWgyMGeOHrp4Cn23T5hc0v2LknNeopDOB70wghHAds7mKtcZ0I4Sg=="],
+    "vscode-jsonrpc": ["vscode-jsonrpc@9.0.1", "", {}, "sha512-rfuA6T75H6m5EkbhtEPzre9pT0HPcDI2MMy4+nPFIBks5J8JBAUHD4tRYSgaBOijIEC7SRkC1kKyXTLqbmh9jw=="],
 
-    "vscode-languageclient": ["vscode-languageclient@10.0.1", "", { "dependencies": { "minimatch": "^10.2.5", "semver": "^7.8.1", "vscode-languageserver-protocol": "3.18.1", "vscode-languageserver-textdocument": "1.0.13" } }, "sha512-kXitJTQVKfv69/TY0LnQdsSMaqzRaeoJMMic+B6ad7HLtFPO46MLxpNjnFh1KF1nOhZUoLX+6e+JoIl+Jp3ycQ=="],
+    "vscode-languageclient": ["vscode-languageclient@10.1.0", "", { "dependencies": { "minimatch": "^10.2.5", "semver": "^7.8.1", "vscode-languageserver-protocol": "3.18.2", "vscode-languageserver-textdocument": "1.0.13" } }, "sha512-XXRx6lqVitQy/oOLr9MfNYRG+MbQkhXkDaxbQMiKxEm8zZNfheRFUKNb8UYNh2stn9btl2wQM5wZFJjJvoc+jA=="],
 
-    "vscode-languageserver-protocol": ["vscode-languageserver-protocol@3.18.1", "", { "dependencies": { "vscode-jsonrpc": "9.0.0", "vscode-languageserver-types": "3.18.0" } }, "sha512-RTiiVHdpxpYcJVI5sq6S5TLjQ4WDR/rBrIWru+kPXe6sGQ9PFQ3GamrTKLvPqbR4ylr1SoodhmcqbFII0WXVuw=="],
+    "vscode-languageserver-protocol": ["vscode-languageserver-protocol@3.18.2", "", { "dependencies": { "vscode-jsonrpc": "9.0.1", "vscode-languageserver-types": "3.18.0" } }, "sha512-XRyDbT0Pp3sSNti3JmxVEUMySWCSi1hhM+/KUlCy1hV1zmrqpM1OwO12EAki8blhmLuIMpaJrYbo0OzGVfK2Qg=="],
 
     "vscode-languageserver-textdocument": ["vscode-languageserver-textdocument@1.0.13", "", {}, "sha512-nx0ZHwMGIsVkzFG3/VLeJYBLTaFBRuNdGDvevvjuoayU5EOS2fEYazOhtCM3PI9ClMMg5igc0uwXtAq4tJj+Dw=="],
 
