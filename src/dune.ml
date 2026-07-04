@@ -200,8 +200,7 @@ let get_opam_dunes opam =
 
 let get_system_dune_path () =
   let open Promise.Syntax in
-  let run_cmd bin args =
-    let cmd = Cmd.Spawn { bin = Path.of_string bin; args } in
+  let run_cmd cmd =
     let+ output = Cmd.output cmd ~cwd:(Path.of_string "") in
     match output with
     | Ok output ->
@@ -224,5 +223,5 @@ let get_system_dune_path () =
       "if which opam >/dev/null 2>&1; then eval $(opam env --revert || true); fi; "
       ^ "which dune && dune --version"
     in
-    run_cmd "sh" [ "-c"; shell_script ]
+    run_cmd (Cmd.Shell shell_script)
 ;;
