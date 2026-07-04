@@ -119,7 +119,7 @@ let exec_pkg ~cmd ?(args = []) t = Cmd.Spawn (Cmd.append t.bin ([ "pkg"; cmd ] @
 
 let is_dpm_enabled t =
   let open Promise.Syntax in
-  let+ { exitCode; _ } = Cmd.run (exec_pkg ~cmd:"enabled" t) in
+  let+ { exitCode; _ } = Cmd.run ~cwd:t.root (exec_pkg ~cmd:"enabled" t) in
   Int.equal exitCode 0
 ;;
 
