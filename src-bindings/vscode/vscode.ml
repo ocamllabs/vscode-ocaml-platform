@@ -3032,7 +3032,7 @@ module Window = struct
         -> TextEditorDecorationType.t
       [@@js.global "@vscode.window.createTextEditorDecorationType"]
 
-      val showInformationMessage
+      val informationMessage
         :  message:string
         -> ?options:MessageOptions.t
         -> items:(MessageItem.t list[@js.variadic])
@@ -3048,7 +3048,7 @@ module Window = struct
         -> MessageItem.t or_undefined Promise.t
       [@@js.global "@vscode.window.showWarningMessage"]
 
-      val errorMessage
+      val showErrorMessage
         :  message:string
         -> ?options:MessageOptions.t
         -> items:(MessageItem.t list[@js.variadic])
@@ -3193,9 +3193,7 @@ module Window = struct
   let showInformationMessage ~message ?options ?(choices = []) () =
     let choices = getChoices choices in
     let open Promise.Option.Syntax in
-    let+ item =
-      showInformationMessage ~message ?options ~items:(List.map fst choices) ()
-    in
+    let+ item = informationMessage ~message ?options ~items:(List.map fst choices) () in
     List.assoc item choices
   ;;
 
@@ -3209,7 +3207,7 @@ module Window = struct
   let showErrorMessage ~message ?options ?(choices = []) () =
     let choices = getChoices choices in
     let open Promise.Option.Syntax in
-    let+ item = errorMessage ~message ?options ~items:(List.map fst choices) () in
+    let+ item = showErrorMessage ~message ?options ~items:(List.map fst choices) () in
     List.assoc item choices
   ;;
 

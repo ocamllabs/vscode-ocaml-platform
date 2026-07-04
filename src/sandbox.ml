@@ -335,7 +335,7 @@ let suggest_to_run_dune_pkg_lock () =
   let open Promise.Syntax in
   let (_ : unit Promise.t) =
     let* maybe_choice =
-      Window.errorMessage
+      Window.informationMessage
         ~options:(MessageOptions.create ~modal:true ())
         ~message:
           "Dune Package Manager is selected as the active sandbox, but dune package \

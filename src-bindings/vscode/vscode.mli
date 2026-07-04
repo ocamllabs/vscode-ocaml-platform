@@ -2188,7 +2188,7 @@ module Window : sig
     :  options:DecorationRenderOptions.t
     -> TextEditorDecorationType.t
 
-  val errorMessage
+  val informationMessage
     :  message:string
     -> ?options:MessageOptions.t
     -> items:MessageItem.t maybe_list
