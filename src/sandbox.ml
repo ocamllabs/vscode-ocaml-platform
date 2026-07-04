@@ -360,7 +360,7 @@ let suggest_to_run_dune_pkg_lock () =
 
 let save_to_settings sandbox =
   let open Promise.Syntax in
-  let save_setting =
+  let save_setting () =
     let to_setting = function
       | Esy (_, root) -> Setting.Esy root
       | Opam (_, switch) -> Setting.Opam switch
@@ -376,9 +376,9 @@ let save_to_settings sandbox =
   | Dune dune ->
     Dune.is_dpm_enabled dune
     >>= (function
-     | true -> save_setting
+     | true -> save_setting ()
      | false -> Promise.return (suggest_to_run_dune_pkg_lock ()))
-  | _ -> save_setting
+  | _ -> save_setting ()
 ;;
 
 module Candidate = struct
