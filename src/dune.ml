@@ -130,6 +130,8 @@ let tools ~tool ?(args = []) t cmd =
   | `Install -> Cmd.Spawn (Cmd.append t.bin ([ "tools"; "install"; tool ] @ args))
 ;;
 
+let env t = Cmd.Spawn (Cmd.append t.bin [ "tools"; "env" ])
+
 let is_ocamllsp_present t =
   let open Promise.Syntax in
   let+ ocamllsp_path = tools ~tool:"ocamllsp" t `Which |> Cmd.output ~cwd:t.root in
