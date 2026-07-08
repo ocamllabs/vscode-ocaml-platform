@@ -154,11 +154,7 @@ end = struct
     let args = Settings.(get server_args_setting) |> Option.value ~default:[] in
     let command =
       match t.sandbox with
-      | Dune dune ->
-        (* FIXME: there is currently a bug in DPM causing the compilers to be recompiled
-           each time we try to execute OCaml LSP. As a workaround, we run ocamllsp
-           without the "dune tools exec" command. *)
-        Cmd.Spawn { bin = Path.of_string "ocamllsp"; args }
+      | Dune _ -> Cmd.Spawn { bin = Path.of_string "ocamllsp"; args }
       | _ -> Sandbox.get_command t.sandbox "ocamllsp" args `Tool
     in
     Cmd.log command;
@@ -173,10 +169,7 @@ end = struct
       | Dune dune ->
         let+ output = Cmd.output ~cwd:dune.root (Dune.env dune) in
         let paths =
-          String.drop_suffix
-            (Result.ok_or_failwith output)
-            1 (* Remove the last line feed. *)
-          |> String.chop_prefix_exn ~prefix:"export PATH="
+          Stdlib.Scanf.sscanf (Result.ok_or_failwith output) "export PATH=%s" Fn.id
         in
         Interop.Dict.add "PATH" paths env
       | _ -> Promise.return env
