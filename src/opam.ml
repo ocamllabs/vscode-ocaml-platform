@@ -260,6 +260,7 @@ let exec t switch ~args =
   spawn t ("exec" :: switch_arg switch :: "--set-switch" :: "--" :: args)
 ;;
 
+let var t switch ~args = spawn t ("var" :: switch_arg switch :: args)
 let init t = spawn t [ "init"; "-y" ]
 
 let parse_switch_list out =
