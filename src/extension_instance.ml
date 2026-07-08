@@ -76,35 +76,6 @@ let stop_server t =
     else Promise.return ()
 ;;
 
-let suggest_to_run_dune_pkg_lock () =
-  let open Promise.Syntax in
-  let (_ : unit Promise.t) =
-    let+ maybe_choice =
-      Window.showWarningMessage
-        ~message:
-          "Dune Package Manager is selected as the active sandbox, but no lock file is \
-           present. Do you want to run dune pkg lock?"
-        ~choices:
-          [ ( "Generate lockfile"
-            , fun () ->
-                let (_ : unit Promise.t) =
-                  Command_api.(execute Internal.run_dune_pkg_lock) ()
-                in
-                () )
-          ; ( "Pick another sandbox"
-            , fun () ->
-                let (_ : unit Promise.t) =
-                  Command_api.(execute Internal.select_sandbox) ()
-                in
-                () )
-          ]
-        ()
-    in
-    Option.iter maybe_choice ~f:(fun f -> f ())
-  in
-  ()
-;;
-
 let check_ocaml_lsp_available (sandbox : Sandbox.t) =
   match sandbox with
   | Dune dune ->
