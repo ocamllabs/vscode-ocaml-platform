@@ -2188,6 +2188,13 @@ module Window : sig
     :  options:DecorationRenderOptions.t
     -> TextEditorDecorationType.t
 
+  val informationMessage
+    :  message:string
+    -> ?options:MessageOptions.t
+    -> items:MessageItem.t maybe_list
+    -> unit
+    -> MessageItem.t or_undefined Promise.t
+
   val showInformationMessage
     :  message:string
     -> ?options:MessageOptions.t
