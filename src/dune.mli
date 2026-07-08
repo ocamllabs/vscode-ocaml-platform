@@ -26,6 +26,9 @@ val tools
   -> [< `Exec_ | `Which | `Install ]
   -> Cmd.t
 
+(** Run `dune tools env` *)
+val env : t -> Cmd.t
+
 (** Check if the dune project has ocamllsp server as a dev-tool. *)
 val is_ocamllsp_present : t -> bool Promise.t
 

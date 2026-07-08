@@ -150,14 +150,36 @@ end = struct
   ;;
 
   let server_options t =
+    let open Promise.Syntax in
     let args = Settings.(get server_args_setting) |> Option.value ~default:[] in
-    let command = Sandbox.get_command t.sandbox "ocamllsp" args `Tool in
+    let command =
+      match t.sandbox with
+      | Dune dune ->
+        (* FIXME: there is currently a bug in DPM causing the compilers to be recompiled
+           each time we try to execute OCaml LSP. As a workaround, we run ocamllsp
+           without the "dune tools exec" command. *)
+        Cmd.Spawn { bin = Path.of_string "ocamllsp"; args }
+      | _ -> Sandbox.get_command t.sandbox "ocamllsp" args `Tool
+    in
     Cmd.log command;
     let env =
       let extra_env_vars =
         Settings.server_extraEnv () |> Option.value ~default:Interop.Dict.empty
       in
       Interop.Dict.union (fun _k _v1 v2 -> Some v2) (Process.Env.env ()) extra_env_vars
+    in
+    let+ env =
+      match t.sandbox with
+      | Dune dune ->
+        let+ output = Cmd.output ~cwd:dune.root (Dune.env dune) in
+        let paths =
+          String.drop_suffix
+            (Result.ok_or_failwith output)
+            1 (* Remove the last line feed. *)
+          |> String.chop_prefix_exn ~prefix:"export PATH="
+        in
+        Interop.Dict.add "PATH" paths env
+      | _ -> Promise.return env
     in
     match command with
     | Shell command ->
@@ -172,7 +194,7 @@ end = struct
   let suggest_or_install_ocaml_lsp_server t =
     let open Promise.Syntax in
     match t.sandbox with
-    | Dune _dune ->
+    | Dune _ ->
       let+ () = Command_api.(execute Internal.install_dune_lsp) () in
       ()
     | _ ->
@@ -214,8 +236,8 @@ end = struct
     match ocamllsp_present with
     | Ok () ->
       let+ res =
-        let client =
-          let serverOptions = server_options t in
+        let* client =
+          let+ serverOptions = server_options t in
           let clientOptions = client_options () in
           LanguageClient.make
             ~id:"ocaml"
@@ -225,7 +247,6 @@ end = struct
             ()
         in
         LanguageClient.registerFeature client ~feature:client_capabilities;
-        let open Promise.Syntax in
         let+ () = LanguageClient.start client in
         let initialize_result = LanguageClient.initializeResult client in
         let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in

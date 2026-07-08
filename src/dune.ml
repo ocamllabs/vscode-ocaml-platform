@@ -88,7 +88,7 @@ let exec_pkg ~cmd ?(args = []) t = Cmd.Spawn (Cmd.append t.bin ([ "pkg"; cmd ] @
 
 let is_dpm_enabled t =
   let open Promise.Syntax in
-  let+ { exitCode; _ } = Cmd.run (exec_pkg ~cmd:"enabled" t) in
+  let+ { exitCode; _ } = Cmd.run ~cwd:t.root (exec_pkg ~cmd:"enabled" t) in
   Int.equal exitCode 0
 ;;
 
@@ -98,6 +98,8 @@ let tools ~tool ?(args = []) t cmd =
   | `Which -> Cmd.Spawn (Cmd.append t.bin ([ "tools"; "which"; tool ] @ args))
   | `Install -> Cmd.Spawn (Cmd.append t.bin ([ "tools"; "install"; tool ] @ args))
 ;;
+
+let env t = Cmd.Spawn (Cmd.append t.bin [ "tools"; "env" ])
 
 let is_ocamllsp_present t =
   let open Promise.Syntax in
