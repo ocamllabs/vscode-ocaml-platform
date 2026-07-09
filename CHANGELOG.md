@@ -6,6 +6,8 @@
   `library_parameter` stanza, the `parameters` and `implements` library fields,
   and the `(instantiate ...)` dependency form together with its `:as` keyword.
   (#2187)
+- Fix angle bracket colourisation for Menhir semantic actions and ocamlbuild
+  `_tags` files. (#2222)
 - Complete syntax highlighting for the remaining `library` stanza fields: the
   `(kind parameter)`/`(kind virtual)` and bare `(modes byte native best melange)`
   values, `virtual_modules`, `default_implementation`, `public_headers`,
