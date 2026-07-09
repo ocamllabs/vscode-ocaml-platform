@@ -510,6 +510,38 @@
         "editor.tabSize": 2,
         "editor.insertSpaces": true
       },
+      "[ocaml.menhir]": {
+        "editor.language.colorizedBracketPairs": [
+          [
+            "{",
+            "}"
+          ],
+          [
+            "[",
+            "]"
+          ],
+          [
+            "(",
+            ")"
+          ],
+          [
+            "%{",
+            "%}"
+          ]
+        ]
+      },
+      "[ocaml.ocamlbuild]": {
+        "editor.language.colorizedBracketPairs": [
+          [
+            "(",
+            ")"
+          ],
+          [
+            "{",
+            "}"
+          ]
+        ]
+      },
       "[reason]": {
         "editor.semanticHighlighting.enabled": false
       }
