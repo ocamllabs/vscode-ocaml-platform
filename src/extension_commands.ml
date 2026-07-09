@@ -1769,7 +1769,18 @@ module Ocamlgrep = struct
         show_message
           `Error
           "Invalid file type. This command only works in OCaml source files."
-      | Some text_editor -> show_query_input text_editor
+      | Some text_editor ->
+        let open Promise.Syntax in
+        let cmd = Cmd.(Spawn { bin = Path.of_string "ocamlgrep"; args = [] }) in
+        ignore
+          (let+ check_result = Cmd.check cmd in
+           match check_result with
+           | Error _ ->
+             show_message
+               `Error
+               "ocamlgrep is not installed. Please install it with: opam install \
+                ocamlgrep"
+           | Ok _ -> show_query_input text_editor)
     in
     command Command_api.Internal.ocamlgrep callback
   ;;
