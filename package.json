@@ -56,7 +56,7 @@
     "@vscode/vsce": "3.9.2",
     "ovsx": "1.0.2",
     "oxlint-tsgolint": "0.24.0",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   },
   "contributes": {
     "breakpoints": [
