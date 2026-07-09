@@ -264,9 +264,8 @@ let is_version_up_to_date t sandbox ocaml_v =
         let msg =
           sprintf
             "There is a newer version of ocaml-lsp-server available. Consider upgrading \
-             %s and restart the lsp server. Hint: $ opam install ocaml-lsp-server=%s"
+             %s and restart the lsp server."
             upgrade
-            new_
         in
         let hint =
           match sandbox with
