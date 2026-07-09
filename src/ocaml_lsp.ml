@@ -230,7 +230,7 @@ let suggest_to_upgrade_ocaml_lsp_server
   | _ -> Promise.return ()
 ;;
 
-let is_version_up_to_date t ocaml_v =
+let is_version_up_to_date t sandbox ocaml_v =
   let ocamllsp_version = get_version_from_serverInfo t in
   let res =
     (* if the server doesn't have a version, we assume it's ancient and we can
@@ -261,11 +261,26 @@ let is_version_up_to_date t ocaml_v =
           | None -> sprintf "to %s" new_
           | Some old -> sprintf "from %s to %s" old new_
         in
-        sprintf
-          "There is a newer version of ocaml-lsp-server available. Consider upgrading \
-           %s. Hint: $ opam install ocaml-lsp-server=%s and restart the lsp server"
-          upgrade
-          new_
+        let msg =
+          sprintf
+            "There is a newer version of ocaml-lsp-server available. Consider upgrading \
+             %s and restart the lsp server. Hint: $ opam install ocaml-lsp-server=%s"
+            upgrade
+            new_
+        in
+        let hint =
+          match sandbox with
+          | Sandbox.Opam _ | Global ->
+            Some (sprintf "$ opam install ocaml-lsp-server=%s" new_)
+          | Dune _ ->
+            Some "upgrade the version of OCaml LSP server used in your dune-project."
+          | Esy _ ->
+            Some "upgrade the version of OCaml LSP server used in your Esy manifest."
+          | Custom _ -> None
+        in
+        (match hint with
+         | None -> msg
+         | Some hint -> sprintf "%s Hint: %s" msg hint)
     in
     `Msg msg)
 ;;
