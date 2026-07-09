@@ -7,6 +7,10 @@
     ["{", "}"],
     ["<", ">"]
   ],
+  "colorizedBracketPairs": [
+    ["(", ")"],
+    ["{", "}"]
+  ],
   "autoClosingPairs": [
     { "open": "(", "close": ")" },
     { "open": "{", "close": "}" },
