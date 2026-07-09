@@ -49,7 +49,7 @@ let check_earlybird_available (sandbox : Sandbox.t) =
          let hint =
            match sandbox with
            | Sandbox.Opam _ -> Some "opam install earlybird"
-           | Esy _ -> Some "esy install earlybird"
+           | Esy _ -> Some "esy add @opam/earlybird"
            | Dune _ -> Some "dune tools install ocamlearlybird"
            | _ -> None
          in
