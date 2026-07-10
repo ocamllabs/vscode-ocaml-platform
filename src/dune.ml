@@ -97,13 +97,14 @@ let construct_dune_path path = Path.(of_string (String.strip path) / "dune")
 type t =
   { root : Path.t
   ; bin : Cmd.spawn
+  ; is_opam : bool
   }
 
-let make ~working_dir ~dune_path =
+let make ~working_dir ~dune_path ?(is_opam = true) () =
   let open Promise.Syntax in
   let* spawn = Cmd.check_spawn { Cmd.bin = dune_path; args = [] } in
   match spawn with
-  | Ok bin -> Promise.return (Some { root = working_dir; bin })
+  | Ok bin -> Promise.return (Some { root = working_dir; bin; is_opam })
   | Error _ ->
     log_chan `Info ~section:"dune package management" "Dune not found in the environment.";
     Promise.return None
@@ -150,6 +151,7 @@ let equal d1 d2 =
 
 let root t = t.root
 let dune_path t = t.bin.bin
+let is_opam t = t.is_opam
 
 let is_dune_in_switch opam switch =
   let open Promise.Syntax in
@@ -168,6 +170,7 @@ let is_dune_in_switch opam switch =
     command
       { root = Path.of_string ""
       ; bin = { Cmd.bin = construct_dune_path path; args = [] }
+      ; is_opam = true
       }
       ~args:[ "--version" ]
     |> Cmd.output
