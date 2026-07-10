@@ -207,7 +207,7 @@ let _upgrade_dune =
     let pick_sandbox ?(msg = "") () =
       let* selection =
         Window.showErrorMessage
-          ~message:("An error occurred while upgrading dune. %s" ^ msg)
+          ~message:("An error occurred while upgrading dune. " ^ msg)
           ~choices:[ "Select a different sandbox", `Select_sandbox ]
           ()
       in
@@ -227,14 +227,10 @@ let _upgrade_dune =
             ()
         in
         let task ~progress:_ ~token:_ =
-          let* cmd = Dune.get_upgrade_dune_cmd dune in
-          match cmd with
-          | Some cmd ->
-            let* res = Cmd.output cmd ~cwd:(Dune.root dune) in
-            (match res with
-             | Ok _ -> Sandbox.save_to_settings (Dune dune)
-             | Error err -> pick_sandbox ~msg:err ())
-          | None -> pick_sandbox ~msg:"Opam or current switch not found." ()
+          let* res = Dune.get_upgrade_dune_cmd dune in
+          match res with
+          | Ok _ -> Sandbox.save_to_settings (Dune dune)
+          | Error err -> pick_sandbox ~msg:err ()
         in
         let* () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
         Extension_instance.start_language_server instance

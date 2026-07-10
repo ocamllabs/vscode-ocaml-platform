@@ -121,14 +121,31 @@ let exec_pkg ~cmd ?(args = []) t = Cmd.Spawn (Cmd.append t.bin ([ "pkg"; cmd ] @
 let get_upgrade_dune_cmd t =
   match t.is_opam with
   | true ->
-    let open Promise.Option.Syntax in
-    let* opam = Opam.make () in
-    let+ switch = Opam.switch_show ~cwd:t.root opam in
-    Opam.upgrade ~packages:[ "dune" ] opam switch
+    let root =
+      let open Option.O in
+      let* bin_dir = Path.parent t.bin.bin in
+      let* opam_dir = Path.parent bin_dir in
+      Path.parent opam_dir
+    in
+    (match root with
+     | None -> Promise.return (Error "Workspace root not found from dune path")
+     | Some root ->
+       let open Promise.Syntax in
+       let* opam = Opam.make () in
+       (match opam with
+        | None -> Promise.return (Error "Opam not found")
+        | Some opam ->
+          let* switch = Opam.switch_show ~cwd:root opam in
+          (match switch with
+           | None ->
+             Promise.return
+               (Error "Current opam switch where dune is located is not found")
+           | Some switch ->
+             Opam.upgrade ~packages:[ "dune" ] opam switch |> Cmd.output ~cwd:root)))
   | false ->
-    Promise.return
-      (Some
-         (Cmd.Shell "curl -fsSL https://get.dune.build/install | sh -s - --release latest"))
+    Cmd.output
+      (Cmd.Shell "curl -fsSL https://get.dune.build/install | sh -s - --release latest")
+      ~cwd:(Path.of_string "")
 ;;
 
 let is_dpm_enabled t =

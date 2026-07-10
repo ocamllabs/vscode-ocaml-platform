@@ -30,7 +30,7 @@ val exec : target:string -> ?args:string list -> t -> Cmd.t
 val exec_pkg : cmd:string -> ?args:string list -> t -> Cmd.t
 
 (** Get command to upgrade dune to the latest version *)
-val get_upgrade_dune_cmd : t -> Cmd.t option Promise.t
+val get_upgrade_dune_cmd : t -> (string, string) result Promise.t
 
 (** Run `dune tools <exec/which>` *)
 val tools
