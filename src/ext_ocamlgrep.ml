@@ -75,11 +75,11 @@ let display_results
            ; [%js.of: Location.t array] locations
            ])
 
-(* Run 'ocamlgrep --format json <query>' with cwd=<folder> for each
-   workspace folder and merge the results.  Running with cwd set to the
-   folder lets dune locate the project root automatically, the same way
-   the CLI works when invoked from the terminal.
-   Exit code 1 ("no matches") is not an error. *)
+(*
+   Run 'ocamlgrep --format json <query>' with cwd=<folder> for each
+   workspace folder and merge the results.
+
+*)
 let search_all_folders query =
   let open Promise.Syntax in
   let folders = Workspace.workspaceFolders () in
@@ -87,7 +87,8 @@ let search_all_folders query =
     Promise.all_list
       (List.map
          ~f:(fun (folder : WorkspaceFolder.t) ->
-           let root = folder |> WorkspaceFolder.name |> Path.of_string in
+           let root =
+             folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string in
            let cmd =
              Cmd.(
                Spawn
@@ -95,41 +96,43 @@ let search_all_folders query =
                  ; args = [ "--format"; "json"; query ]
                  })
            in
-           let+ result = Cmd.run ~cwd:root cmd in
+           let+ result : ChildProcess.return = Cmd.run ~cwd:root cmd in
            let response : Custom_requests.Ocamlgrep.response =
-             if result.exitCode = 2
-             then
-               { findings = []
-               ; warnings = []
-               ; errors =
-                   [ sprintf
-                       "ocamlgrep failed in %s: %s"
-                       (Path.to_string root)
-                       (String.strip result.ChildProcess.stderr)
-                   ]
-               }
-           else
-             let resolve_path path =
-               (if Path.is_absolute path then path
-                else Path.join root path)
-               |> Path.to_string
-               |> Uri.file
-             in
-             (match
-               Jsonoo.try_parse_opt result.ChildProcess.stdout
-               |> Option.map
+             (* Exit code 1 ("no matches") is not an error. *)
+             match result.exitCode with
+             | 0 | 1 ->
+               let resolve_path path =
+                 (if Path.is_absolute path then path
+                  else Path.join root path)
+                 |> Path.to_string
+                 |> Uri.file
+               in
+               (match
+                  Jsonoo.try_parse_opt result.stdout
+                  |> Option.map
                     ~f:(Custom_requests.Ocamlgrep.decode_response ~resolve_path)
-             with
-             | Some r -> r
-             | None ->
-               { findings = []
-               ; warnings = []
-               ; errors =
-                   [ sprintf
-                       "ocamlgrep: unexpected output from %s"
-                       (Path.to_string root)
-                   ]
-               })
+                with
+                | Some r -> r
+                | None ->
+                    { findings = []
+                    ; warnings = []
+                    ; errors =
+                        [ sprintf
+                            "unexpected output from workspace root '%s'"
+                            (Path.to_string root)
+                        ]
+                    })
+             | exit_code ->
+                 { findings = []
+                 ; warnings = []
+                 ; errors =
+                     [ sprintf
+                         "ocamlgrep failed in %s with exit code %d: %s"
+                         (Path.to_string root)
+                         exit_code
+                         (String.strip result.stderr)
+                     ]
+                 }
            in
            response)
          folders)
@@ -179,6 +182,26 @@ let show_query_input =
     previous := Some disposable;
     InputBox.show input_box
 
+let with_check_for_ocamlgrep func =
+  (* Check for the presence of the ocamlgrep command.
+
+     It would be nicer if we didn't have to do this probing first
+     and simply could catch ENOENT ourselves.
+  *)
+  let open Promise.Syntax in
+  let cmd = Cmd.(Spawn { bin = Path.of_string "ocamlgrep"; args = [] }) in
+  (
+    let+ check_result = Cmd.check cmd in
+    match check_result with
+    | Error _ ->
+        show_message
+          `Error
+          "ocamlgrep is not installed. \
+           Please install it with: opam install ocamlgrep"
+    | Ok _ ->
+        func ()
+  ) |> ignore
+
 let callback (_instance : Extension_instance.t) () =
   match Window.activeTextEditor () with
   | None ->
@@ -191,4 +214,7 @@ let callback (_instance : Extension_instance.t) () =
       show_message
         `Error
         "Invalid file type. This command only works in OCaml source files."
-  | Some text_editor -> show_query_input text_editor
+  | Some text_editor ->
+      with_check_for_ocamlgrep (fun () ->
+        show_query_input text_editor
+      )
