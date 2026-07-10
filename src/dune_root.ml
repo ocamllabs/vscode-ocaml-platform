@@ -1,3 +1,7 @@
+(*
+   Find the root of a Dune project (kind of, see mli)
+*)
+
 open Import
 
 let rec find_from_dir real_dir =
