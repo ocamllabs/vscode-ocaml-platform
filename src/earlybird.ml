@@ -43,8 +43,19 @@ let check_earlybird_available (sandbox : Sandbox.t) =
   |> Promise.Result.fold
        ~ok:(fun (_ : string) -> ())
        ~error:(fun (_ : string) ->
-         "Debugging failed: `earlybird` is not installed in the current sandbox.\n\n\
-          Hint: $ opam install earlybird")
+         let msg =
+           "Debugging failed: `earlybird` is not installed in the current sandbox."
+         in
+         let hint =
+           match sandbox with
+           | Sandbox.Opam _ -> Some "opam install earlybird"
+           | Esy _ -> Some "esy add @opam/earlybird"
+           | Dune _ -> Some "dune tools install ocamlearlybird"
+           | _ -> None
+         in
+         match hint with
+         | None -> msg
+         | Some hint -> sprintf "%s\n\nHint: $ %s" msg hint)
 ;;
 
 let createDebugAdapterDescriptor ~instance ~session:_ ~executable:_ =

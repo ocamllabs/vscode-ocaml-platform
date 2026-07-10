@@ -77,6 +77,7 @@ let _upgrade_ocaml_lsp_server =
       match
         Ocaml_lsp.is_version_up_to_date
           (Extension_instance.ocaml_lsp instance |> Option.value_exn)
+          (Extension_instance.sandbox instance)
           (Extension_instance.ocaml_version_exn instance)
       with
       | Ok () -> Promise.return ()
@@ -601,6 +602,7 @@ end = struct
     match
       Ocaml_lsp.is_version_up_to_date
         ocaml_lsp
+        (Extension_instance.sandbox instance)
         (Extension_instance.ocaml_version_exn instance)
     with
     | Ok () -> ()
@@ -827,6 +829,7 @@ module Copy_type_under_cursor = struct
     match
       Ocaml_lsp.is_version_up_to_date
         ocaml_lsp
+        (Extension_instance.sandbox instance)
         (Extension_instance.ocaml_version_exn instance)
     with
     | Ok () -> ()
