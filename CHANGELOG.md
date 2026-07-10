@@ -27,6 +27,7 @@
 - Redesign how Dune Package Manager is handled. Users now use a two step process, first to select DPM as a sandbox and then to select which dune binary they wish to use in the project (#2199)
 - Enforce that users either enable dune package management by generating a lockfile (as recommended by the dune team) or select a different sandbox. Pressing the escape key will display the select sandbox ui. (2208)
 - Rely on `dune tools env` to retrieve the local OCaml LSP path in the context of DPM. (#2227)
+- Upgrade dune when it is outdated. (#2224)
 
 ## 2.3.0
 
