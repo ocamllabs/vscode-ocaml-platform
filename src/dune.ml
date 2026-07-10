@@ -118,6 +118,19 @@ let exec ~target ?(args = []) t =
 
 let exec_pkg ~cmd ?(args = []) t = Cmd.Spawn (Cmd.append t.bin ([ "pkg"; cmd ] @ args))
 
+let get_upgrade_dune_cmd t =
+  match t.is_opam with
+  | true ->
+    let open Promise.Option.Syntax in
+    let* opam = Opam.make () in
+    let+ switch = Opam.switch_show ~cwd:t.root opam in
+    Opam.upgrade ~packages:[ "dune" ] opam switch
+  | false ->
+    Promise.return
+      (Some
+         (Cmd.Shell "curl -fsSL https://get.dune.build/install | sh -s - --release latest"))
+;;
+
 let is_dpm_enabled t =
   let open Promise.Syntax in
   let+ { exitCode; _ } = Cmd.run ~cwd:t.root (exec_pkg ~cmd:"enabled" t) in
