@@ -58,6 +58,9 @@
     "oxlint-tsgolint": "0.24.0",
     "typescript": "7.0.2"
   },
+  "overrides": {
+    "is-unicode-supported": "0.1.0"
+  },
   "contributes": {
     "breakpoints": [
       {
