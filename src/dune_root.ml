@@ -9,7 +9,7 @@ let rec find_from_dir dir =
     | None -> Promise.return None
     | Some parent -> find_from_dir parent
 
-let find file =
+let find_nearest_dune_project file =
   let real_file =
     match Path.realpath file with
     | exception _ -> file
