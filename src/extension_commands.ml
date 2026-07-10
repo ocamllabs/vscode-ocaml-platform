@@ -178,8 +178,7 @@ let _run_dune_pkg_lock =
                 ()
             in
             (match selection with
-             | Some `Upgrade_dune ->
-               Command_api.(execute Internal.install_ocaml_lsp_server) ()
+             | Some `Upgrade_dune -> Command_api.(execute Internal.upgrade_dune) ()
              | Some `Select_sandbox | None ->
                Command_api.(execute Internal.select_sandbox) ())
             >>= (function
@@ -200,6 +199,58 @@ let _run_dune_pkg_lock =
     ()
   in
   command Command_api.Internal.run_dune_pkg_lock callback
+;;
+
+let _upgrade_dune =
+  let callback (instance : Extension_instance.t) () =
+    let open Promise.Syntax in
+    let pick_sandbox ?(msg = "") () =
+      let* selection =
+        Window.showErrorMessage
+          ~message:("An error occurred while upgrading dune. %s" ^ msg)
+          ~choices:[ "Select a different sandbox", `Select_sandbox ]
+          ()
+      in
+      (match selection with
+       | Some `Select_sandbox | None -> Command_api.(execute Internal.select_sandbox) ())
+      >>= function
+      | _ -> Promise.return ()
+    in
+    let _ =
+      match Extension_instance.sandbox instance with
+      | Dune dune ->
+        let options =
+          ProgressOptions.create
+            ~location:(`ProgressLocation Notification)
+            ~title:"Upgrading dune ..."
+            ~cancellable:false
+            ()
+        in
+        let task ~progress:_ ~token:_ =
+          let* cmd = Dune.get_upgrade_dune_cmd dune in
+          match cmd with
+          | Some cmd ->
+            let* res = Cmd.output cmd ~cwd:(Dune.root dune) in
+            (match res with
+             | Ok _ -> Sandbox.save_to_settings (Dune dune)
+             | Error err -> pick_sandbox ~msg:err ())
+          | None -> pick_sandbox ~msg:"Opam or current switch not found." ()
+        in
+        let* () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
+        Extension_instance.start_language_server instance
+      | _ ->
+        show_message
+          `Warn
+          "upgrade-dune: This command can only be executed in a Dune Package Management \
+           sandbox.";
+        log
+          "upgrade-dune: This command can only be executed in a Dune Package Management \
+           sandbox.";
+        Promise.return ()
+    in
+    ()
+  in
+  command Command_api.Internal.upgrade_dune callback
 ;;
 
 let _restart_language_server =
