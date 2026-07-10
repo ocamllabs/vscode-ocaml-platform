@@ -162,17 +162,31 @@ let _run_dune_pkg_lock =
             ()
         in
         let task ~progress:_ ~token:_ =
-          let+ result =
+          let* result =
             Dune.exec_pkg ~cmd:"lock" dune |> Cmd.output ~cwd:(Dune.root dune)
           in
           match result with
-          | Ok _ -> ()
+          | Ok _ -> Sandbox.save_to_settings (Dune dune)
           | Error err ->
-            show_message `Error "An error occurred while running dune pkg lock: %s" err
+            let* selection =
+              Window.showErrorMessage
+                ~message:("An error occurred while running dune pkg lock: " ^ err)
+                ~choices:
+                  [ "Upgrade dune", `Upgrade_dune
+                  ; "Select a different sandbox", `Select_sandbox
+                  ]
+                ()
+            in
+            (match selection with
+             | Some `Upgrade_dune ->
+               Command_api.(execute Internal.install_ocaml_lsp_server) ()
+             | Some `Select_sandbox | None ->
+               Command_api.(execute Internal.select_sandbox) ())
+            >>= (function
+             | _ -> Promise.return ())
         in
-        let+ () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
-        let _ = Extension_instance.start_language_server instance in
-        ()
+        let* () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
+        Extension_instance.start_language_server instance
       | _ ->
         show_message
           `Warn
