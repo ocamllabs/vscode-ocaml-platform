@@ -1,0 +1,194 @@
+(* ocamlgrep: project-wide search for OCaml expression patterns. *)
+
+open Import
+open Printf
+
+let extension_name = "OCamlgrep"
+
+let is_valid_text_doc textdoc =
+  match TextDocument.languageId textdoc with
+  | "ocaml"
+  | "ocaml.interface"
+  | "ocaml.ocamllex"
+  | "ocaml.mlx"
+  | "reason" -> true
+  | _ -> false
+
+let input_box =
+  InputBox.set
+    (Window.createInputBox ())
+    ~title:"OCamlgrep: Search OCaml Expressions"
+    ~ignoreFocusOut:false
+    ~placeholder:"List.filter __ __"
+    ~prompt:
+      "Enter an OCaml expression pattern. Use __ as a wildcard, __1/__2 for \
+       metavariables, and (e : t) to constrain types."
+    ()
+
+let log_to_output lines =
+  let channel = Lazy.force Output.extension_output_channel in
+  List.iter lines ~f:(fun line -> OutputChannel.appendLine channel ~value:line)
+
+(*
+   Show findings in VS Code's built-in References panel.
+
+   It stays open while the user navigates between files, unlike a QuickPick
+   which closes on focus loss.
+*)
+let display_results
+    query text_editor (response : Custom_requests.Ocamlgrep.response) =
+  let { Custom_requests.Ocamlgrep.findings; warnings; errors } = response in
+  log_to_output
+    (sprintf "ocamlgrep %S: %d finding(s)" query (List.length findings)
+     :: List.map warnings ~f:(fun w -> "  " ^ w)
+     @ List.map errors ~f:(fun e -> "  Error: " ^ e));
+  OutputChannel.show
+    (Lazy.force Output.extension_output_channel)
+    ~preserveFocus:true ();
+  match errors, findings with
+  | first_error :: _, _ ->
+    (* User-facing errors (e.g. project root not found) — shown as a plain
+       warning, not a scary error popup. Full text is in the output channel. *)
+    show_message `Warn "ocamlgrep: %s (see output panel for details)"
+      first_error
+  | [], [] ->
+    let hint =
+      match warnings with
+      | [] -> ""
+      | _ -> " (see 'OCaml Platform Extension' output for coverage details)"
+    in
+    show_message `Info "ocamlgrep: no matches found%s." hint
+  | _ ->
+    let anchor_uri = TextEditor.document text_editor |> TextDocument.uri in
+    let anchor_pos = TextEditor.selection text_editor |> Selection.active in
+    let locations =
+      Array.of_list
+        (List.map findings ~f:(fun (f : Custom_requests.Ocamlgrep.finding) ->
+           Location.make ~uri:f.uri ~rangeOrPosition:(`Range f.range)))
+    in
+    ignore
+      (Commands.executeCommand
+         ~command:"editor.action.showReferences"
+         ~args:
+           [ [%js.of: Uri.t] anchor_uri
+           ; [%js.of: Position.t] anchor_pos
+           ; [%js.of: Location.t array] locations
+           ])
+
+(* Run 'ocamlgrep --format json <query>' with cwd=<folder> for each
+   workspace folder and merge the results.  Running with cwd set to the
+   folder lets dune locate the project root automatically, the same way
+   the CLI works when invoked from the terminal.
+   Exit code 1 ("no matches") is not an error. *)
+let search_all_folders query =
+  let open Promise.Syntax in
+  let folders = Workspace.workspaceFolders () in
+  let* parts =
+    Promise.all_list
+      (List.map
+         ~f:(fun (folder : WorkspaceFolder.t) ->
+           let root = folder |> WorkspaceFolder.name |> Path.of_string in
+           let cmd =
+             Cmd.(
+               Spawn
+                 { bin = Path.of_string "ocamlgrep"
+                 ; args = [ "--format"; "json"; query ]
+                 })
+           in
+           let+ result = Cmd.run ~cwd:root cmd in
+           let response : Custom_requests.Ocamlgrep.response =
+             if result.exitCode = 2
+             then
+               { findings = []
+               ; warnings = []
+               ; errors =
+                   [ sprintf
+                       "ocamlgrep failed in %s: %s"
+                       (Path.to_string root)
+                       (String.strip result.ChildProcess.stderr)
+                   ]
+               }
+           else
+             let resolve_path path =
+               (if Path.is_absolute path then path
+                else Path.join root path)
+               |> Path.to_string
+               |> Uri.file
+             in
+             (match
+               Jsonoo.try_parse_opt result.ChildProcess.stdout
+               |> Option.map
+                    ~f:(Custom_requests.Ocamlgrep.decode_response ~resolve_path)
+             with
+             | Some r -> r
+             | None ->
+               { findings = []
+               ; warnings = []
+               ; errors =
+                   [ sprintf
+                       "ocamlgrep: unexpected output from %s"
+                       (Path.to_string root)
+                   ]
+               })
+           in
+           response)
+         folders)
+  in
+  let merge acc (r : Custom_requests.Ocamlgrep.response) =
+    { Custom_requests.Ocamlgrep.findings =
+        acc.Custom_requests.Ocamlgrep.findings @ r.findings
+    ; warnings = acc.warnings @ r.warnings
+    ; errors = acc.errors @ r.errors
+    }
+  in
+  Promise.return
+    (List.fold_left ~init:Custom_requests.Ocamlgrep.empty_response ~f:merge parts)
+
+let show_query_input =
+  let previous : Disposable.t option ref = ref None in
+  fun text_editor ->
+    let () =
+      match !previous with
+      | None -> ()
+      | Some d -> Disposable.dispose d
+    in
+    let disposable =
+      InputBox.onDidAccept
+        input_box
+        ~listener:(fun () ->
+          match InputBox.value input_box with
+          | Some query when String.length query > 0 ->
+            InputBox.hide input_box;
+            let open Promise.Syntax in
+            ignore
+              (let+ response =
+                 search_all_folders query
+                 |> Promise.catch ~rejected:(fun e ->
+                      let msg =
+                        if Ojs.has_property e "message"
+                        then [%js.to: string] (Ojs.get_prop_ascii e "message")
+                        else [%js.to: string] e
+                      in
+                      show_message `Error "ocamlgrep: %s" msg;
+                      Promise.return Custom_requests.Ocamlgrep.empty_response)
+               in
+               display_results query text_editor response)
+          | _ -> ())
+        ()
+    in
+    previous := Some disposable;
+    InputBox.show input_box
+
+let callback (_instance : Extension_instance.t) () =
+  match Window.activeTextEditor () with
+  | None ->
+      Command_api.Command_errors.text_editor_must_be_active
+        extension_name
+        ~expl:"An OCaml file must be open to determine the project root."
+      |> show_message `Error "%s"
+  | Some text_editor
+    when not (is_valid_text_doc (TextEditor.document text_editor)) ->
+      show_message
+        `Error
+        "Invalid file type. This command only works in OCaml source files."
+  | Some text_editor -> show_query_input text_editor

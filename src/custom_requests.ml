@@ -181,8 +181,8 @@ module Ocamlgrep = struct
       Position.make ~line:row ~character:col
     in
     let decode_finding json =
-      let loc = field "location" Fun.id json in
-      let file = field "file" string loc in
+      let loc = field "location" Fn.id json in
+      let file = field "file" string loc |> Path.of_string in
       let uri = resolve_path file in
       let start = field "start" decode_pos loc in
       let end_ = field "end" decode_pos loc in
