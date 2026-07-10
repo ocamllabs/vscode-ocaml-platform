@@ -2,6 +2,7 @@
 
 open Import
 open Printf
+open Promise.Syntax
 
 let extension_name = "OCamlgrep"
 
@@ -75,67 +76,78 @@ let display_results
            ; [%js.of: Location.t array] locations
            ])
 
-(*
-   Run 'ocamlgrep --format json <query>' with cwd=<folder> for each
-   workspace folder and merge the results.
+let scan_folder query (scan_root : Path.t)
+  : Custom_requests.Ocamlgrep.response Promise.t =
+  let cmd =
+    Cmd.(
+      Spawn
+        { bin = Path.of_string "ocamlgrep"
+        ; args = [ "--format"; "json"; query ]
+        })
+  in
+  let+ result : ChildProcess.return = Cmd.run ~cwd:scan_root cmd in
+  (* Exit code 1 ("no matches") is not an error. *)
+  match result.exitCode with
+  | 0 | 1 ->
+    let resolve_path path =
+      (if Path.is_absolute path then path
+       else Path.join scan_root path)
+      |> Path.to_string
+      |> Uri.file
+    in
+    (match
+       Jsonoo.try_parse_opt result.stdout
+       |> Option.map
+         ~f:(Custom_requests.Ocamlgrep.decode_response ~resolve_path)
+     with
+     | Some r -> r
+     | None ->
+         { findings = []
+         ; warnings = []
+         ; errors =
+             [ sprintf
+                 "unexpected output from workspace root '%s'"
+                 (Path.to_string scan_root)
+             ]
+         })
+  | exit_code ->
+      { findings = []
+      ; warnings = []
+      ; errors =
+          [ sprintf
+              "ocamlgrep failed in %s with exit code %d: %s"
+              (Path.to_string scan_root)
+              exit_code
+              (String.strip result.stderr)
+          ]
+      }
 
+(* Unused: we could use something like this if we wanted to scan
+   all the VSCode workspace folders.
+
+   This gets complicated because we need to ensure that these folders are
+   within Dune workspaces for ocamlgrep to work, or we'd have to filter
+   them out.
+
+   TODO: remove this code once we're confident that we're only going to
+   scan at most one workspace.
 *)
-let search_all_folders query =
-  let open Promise.Syntax in
-  let folders = Workspace.workspaceFolders () in
-  let* parts =
-    Promise.all_list
-      (List.map
-         ~f:(fun (folder : WorkspaceFolder.t) ->
-           let root =
-             folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string in
-           let cmd =
-             Cmd.(
-               Spawn
-                 { bin = Path.of_string "ocamlgrep"
-                 ; args = [ "--format"; "json"; query ]
-                 })
-           in
-           let+ result : ChildProcess.return = Cmd.run ~cwd:root cmd in
-           let response : Custom_requests.Ocamlgrep.response =
-             (* Exit code 1 ("no matches") is not an error. *)
-             match result.exitCode with
-             | 0 | 1 ->
-               let resolve_path path =
-                 (if Path.is_absolute path then path
-                  else Path.join root path)
-                 |> Path.to_string
-                 |> Uri.file
-               in
-               (match
-                  Jsonoo.try_parse_opt result.stdout
-                  |> Option.map
-                    ~f:(Custom_requests.Ocamlgrep.decode_response ~resolve_path)
-                with
-                | Some r -> r
-                | None ->
-                    { findings = []
-                    ; warnings = []
-                    ; errors =
-                        [ sprintf
-                            "unexpected output from workspace root '%s'"
-                            (Path.to_string root)
-                        ]
-                    })
-             | exit_code ->
-                 { findings = []
-                 ; warnings = []
-                 ; errors =
-                     [ sprintf
-                         "ocamlgrep failed in %s with exit code %d: %s"
-                         (Path.to_string root)
-                         exit_code
-                         (String.strip result.stderr)
-                     ]
-                 }
-           in
-           response)
-         folders)
+let _scan_all_folders query =
+  let workspace_folders = Workspace.workspaceFolders () in
+  let+ parts =
+    Promise.all_list (
+      List.map
+        ~f:(fun workspace_folder ->
+          let scan_root =
+            workspace_folder
+            |> WorkspaceFolder.uri
+            |> Uri.fsPath
+            |> Path.of_string
+          in
+          scan_folder query scan_root
+        )
+        workspace_folders
+    )
   in
   let merge acc (r : Custom_requests.Ocamlgrep.response) =
     { Custom_requests.Ocamlgrep.findings =
@@ -144,12 +156,20 @@ let search_all_folders query =
     ; errors = acc.errors @ r.errors
     }
   in
-  Promise.return
-    (List.fold_left ~init:Custom_requests.Ocamlgrep.empty_response ~f:merge parts)
+  List.fold_left
+    ~init:Custom_requests.Ocamlgrep.empty_response
+    ~f:merge
+    parts
 
+(*
+   TODO: derive the scan root from the current file,
+   using 'Dune_root.find_nearest_dune_project' - instead of using each
+   workspace folder as a root (because they may not be within a Dune
+   workspace).
+*)
 let show_query_input =
   let previous : Disposable.t option ref = ref None in
-  fun text_editor ->
+  fun scan_root text_editor ->
     let () =
       match !previous with
       | None -> ()
@@ -162,10 +182,9 @@ let show_query_input =
           match InputBox.value input_box with
           | Some query when String.length query > 0 ->
             InputBox.hide input_box;
-            let open Promise.Syntax in
             ignore
               (let+ response =
-                 search_all_folders query
+                 scan_folder query scan_root
                  |> Promise.catch ~rejected:(fun e ->
                       let msg =
                         if Ojs.has_property e "message"
@@ -188,19 +207,35 @@ let with_check_for_ocamlgrep func =
      It would be nicer if we didn't have to do this probing first
      and simply could catch ENOENT ourselves.
   *)
-  let open Promise.Syntax in
   let cmd = Cmd.(Spawn { bin = Path.of_string "ocamlgrep"; args = [] }) in
-  (
-    let+ check_result = Cmd.check cmd in
-    match check_result with
-    | Error _ ->
-        show_message
-          `Error
-          "ocamlgrep is not installed. \
-           Please install it with: opam install ocamlgrep"
-    | Ok _ ->
-        func ()
-  ) |> ignore
+  let* check_result = Cmd.check cmd in
+  match check_result with
+  | Error _ ->
+      show_message
+        `Error
+        "ocamlgrep is not installed. \
+         Please install it with: opam install ocamlgrep";
+      Promise.return ()
+  | Ok _ ->
+      func ()
+
+(* This ignores VSCode workspace boundaries and may return a root folder
+   that is an ancestor of one of the VSCode workspaces. *)
+let get_scan_root (text_editor : TextEditor.t) =
+   let active_file_path =
+     text_editor
+     |> TextEditor.document
+     |> TextDocument.uri
+     |> Uri.path
+     |> Path.of_string
+   in
+   Dune_root.find_nearest_dune_project active_file_path
+
+let with_scan_root (text_editor : TextEditor.t) func =
+  let+ opt_root = get_scan_root text_editor in
+  match opt_root with
+  | Error msg -> show_message `Error "%s" msg
+  | Ok path -> func path
 
 let callback (_instance : Extension_instance.t) () =
   match Window.activeTextEditor () with
@@ -216,5 +251,7 @@ let callback (_instance : Extension_instance.t) () =
         "Invalid file type. This command only works in OCaml source files."
   | Some text_editor ->
       with_check_for_ocamlgrep (fun () ->
-        show_query_input text_editor
+        with_scan_root text_editor
+          (fun root -> show_query_input root text_editor)
       )
+      |> ignore

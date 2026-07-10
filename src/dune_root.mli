@@ -14,4 +14,4 @@
 
     Returns [Some root] if found, or [None] if no [dune-project] exists on
     the path to the filesystem root. *)
-val find_nearest_dune_project : Path.t -> Path.t option Promise.t
+val find_nearest_dune_project : Path.t -> (Path.t, string) result Promise.t
