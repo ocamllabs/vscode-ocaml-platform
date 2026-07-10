@@ -151,7 +151,7 @@ module Setting = struct
     | Esy of Esy.Manifest.t
     | Global
     | Custom of string
-    | Dune of Path.t * bool (* path to dune and is_opam flag *)
+    | Dune of Path.t * bool (* path to dune and is_opam: a flag indicating if the dune instance is installed into an Opam switch. *)
 
   let kind : t -> Kind.t = function
     | Opam _ -> Opam
