@@ -16,6 +16,16 @@ type root =
   | Dune_workspace of Path.t
   | Dune_project of Path.t
 
+(* Unlike the rest of the Path module, this is not a pure syntactic operation
+   so I'm not sure if there's a better place to expose this function.
+
+   It resolves symlinks and returns the canonical absolute path.
+   Raises a JS exception if the path does not exist.
+*)
+let realpath x =
+  let+ str = Node.Fs.realpath (Path.to_string x) in
+  Path.of_string str
+
 let check_dir best_candidate real_dir =
   (* always check for a dune-workspace file *)
   let* exists = Fs.exists Path.(to_string (real_dir / "dune-workspace")) in
@@ -80,6 +90,5 @@ let find active_file =
   | Some dir ->
       (* determine the absolute parent path that doesn't contain symlinks
          (as if we did 'cd DIR; cd ..; pwd' with a naive shell) *)
-      dir
-      |> Path.realpath
-      |> find_from_dir ~active_file None
+      let* real_dir = realpath dir in
+      find_from_dir ~active_file None real_dir
