@@ -22,7 +22,7 @@ type root =
    It resolves symlinks and returns the canonical absolute path.
    Raises a JS exception if the path does not exist.
 *)
-let realpath x =
+let realpath (x : Path.t) : Path.t Promise.t =
   let+ str = Node.Fs.realpath (Path.to_string x) in
   Path.of_string str
 
