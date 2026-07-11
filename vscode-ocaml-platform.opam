@@ -22,6 +22,7 @@ depends: [
   "js_of_ocaml" {>= "6.4"}
   "gen_js_api" {= "1.1.7"}
   "base" {>= "v0.17"}
+  "csexp" {>= "1.5.0"}
   "promise_jsoo" {>= "0.4.3"}
   "jsonoo" {>= "0.3"}
   "ocaml-version" {>= "4.0"}

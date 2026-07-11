@@ -7,6 +7,8 @@ module Dune_version : sig
   val to_string : t -> string
   val from_string : string -> t option
   val is_valid : t -> bool
+  val supports_root_environment : t -> bool
+  val supports_cross_target_environment : t -> bool
 end
 
 val construct_dune_path : string -> Path.t

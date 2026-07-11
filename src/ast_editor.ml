@@ -63,22 +63,19 @@ module Pp_path : sig
     | Unknown
 
   val get_kind : document:TextDocument.t -> kind
-  val get_pp_path : document:TextDocument.t -> string
+
+  val get_pp_path
+    :  Extension_instance.t
+    -> document:TextDocument.t
+    -> (string, string) result Promise.t
 end = struct
   type kind =
     | Structure of [ `Ocaml | `Reason ]
     | Signature of [ `Ocaml | `Reason ]
     | Unknown
 
-  let relative_document_path ~document =
-    Workspace.asRelativePath ~pathOrUri:(`Uri (TextDocument.uri document)) ()
-  ;;
-
-  let project_root_path () = Workspace.rootPath ()
-
   let get_kind ~document =
-    let relative = relative_document_path ~document in
-    match Stdlib.Filename.extension relative with
+    match Stdlib.Filename.extension (TextDocument.fileName document) with
     | ".ml" -> Structure `Ocaml
     | ".mli" -> Signature `Ocaml
     | ".mlx" -> Structure `Ocaml
@@ -87,12 +84,26 @@ end = struct
     | _ -> Unknown
   ;;
 
-  let get_pp_path ~(document : TextDocument.t) =
-    let relative = relative_document_path ~document in
-    match project_root_path () with
-    | None -> raise (User_error "Project root wasn't found.")
-    | Some root ->
-      let build_root = "_build/default" in
+  let get_pp_path instance ~(document : TextDocument.t) =
+    let document_path = TextDocument.fileName document |> Path.of_string in
+    let cwd = Path.dirname document_path |> Path.of_string in
+    let open Promise.Syntax in
+    let+ workspace =
+      Dune_workspace.discover
+        (Extension_instance.sandbox instance)
+        ~cwd
+        ~source:document_path
+    in
+    let root = Dune_workspace.root workspace in
+    let relative = Path.relative_from root document_path in
+    if not (Path.is_inside ~dir:root document_path)
+    then
+      Error
+        (sprintf
+           "File %s is outside the Dune workspace root %s"
+           (TextDocument.fileName document)
+           (Path.to_string root))
+    else (
       let fname_opt =
         match get_kind ~document with
         | Unknown -> None
@@ -103,84 +114,78 @@ end = struct
         | Structure `Reason -> Some (relative ^ ".pp.ml")
         | Signature `Reason -> Some (relative ^ ".pp.mli")
       in
-      (match fname_opt with
-       | Some fname ->
-         let ( / ) = Stdlib.Filename.concat in
-         root / build_root / fname
-       | None ->
-         let uri = Uri.toString (TextDocument.uri document) () in
-         raise (User_error (sprintf "File %s has unknown file extension" uri)))
+      match fname_opt with
+      | Some fname ->
+        Ok (Path.(Dune_workspace.build_context workspace / fname) |> Path.to_string)
+      | None ->
+        let uri = Uri.toString (TextDocument.uri document) () in
+        Error (sprintf "File %s has unknown file extension" uri))
   ;;
 end
 
-let fetch_pp_code ~document =
-  let path = Pp_path.get_pp_path ~document in
-  Ppx_tools.get_reparsed_code_from_pp_file ~path
+let fetch_pp_code instance ~document =
+  let open Promise.Syntax in
+  let+ path = Pp_path.get_pp_path instance ~document in
+  Result.bind path ~f:(fun path -> Ppx_tools.get_reparsed_code_from_pp_file ~path)
 ;;
 
-let transform_to_ast instance ~document ~webview =
-  let ast_editor_state = Extension_instance.ast_editor_state instance in
+let transform_to_ast instance ~document ~mode =
   let module Dumpast = Ppx_tools.Dumpast in
-  let make_value result =
-    match result with
-    | Ok ast -> ast
-    | Error error_msg -> raise (User_error error_msg)
-  in
-  match Ast_editor_state.get_current_ast_mode ast_editor_state with
+  match mode with
   | Ast_editor_state.Original_ast ->
-    let origin_json =
-      let text = TextDocument.getText document () in
-      match Pp_path.get_kind ~document with
-      | Structure _ -> make_value (Dumpast.transform text `Impl)
-      | Signature _ -> make_value (Dumpast.transform text `Intf)
-      | Unknown -> raise (User_error "Unknown file extension")
-    in
-    send_msg "ast" ([%js.of: Jsonoo.t] origin_json) ~webview
+    let text = TextDocument.getText document () in
+    Promise.return
+      (match Pp_path.get_kind ~document with
+       | Structure _ -> Dumpast.transform text `Impl
+       | Signature _ -> Dumpast.transform text `Intf
+       | Unknown -> Error "Unknown file extension")
   | Preprocessed_ast ->
-    let pp_value =
-      let path = Pp_path.get_pp_path ~document in
-      match Ppx_tools.get_preprocessed_ast path with
-      | Error err_msg -> raise (User_error err_msg)
-      | Ok res ->
-        let pp_json_res =
-          let pp_code =
-            match fetch_pp_code ~document with
-            | Ok s -> s
-            | Error err_msg -> raise (User_error err_msg)
-          in
-          let lex = Lexing.from_string pp_code in
-          match Ppxlib.Ast_io.get_ast res with
-          | Impl ppml_structure ->
-            let reparsed_structure = Parse.implementation lex in
-            let reparsed_structure =
-              Ppxlib_ast.Selected_ast.Of_ocaml.copy_structure reparsed_structure
-            in
-            Dumpast.reparse ppml_structure reparsed_structure
-          | Intf signature ->
-            let reparsed_signature = Parse.interface lex in
-            let reparsed_signature =
-              Ppxlib_ast.Selected_ast.Of_ocaml.copy_signature reparsed_signature
-            in
-            Dumpast.reparse_signature signature reparsed_signature
+    let open Promise.Result.Syntax in
+    let* path = Pp_path.get_pp_path instance ~document in
+    let* res = Promise.return (Ppx_tools.get_preprocessed_ast path) in
+    let lex = Lexing.from_string (Ppx_tools.reparsed_code_of_ast res) in
+    Promise.return
+      (match Ppxlib.Ast_io.get_ast res with
+       | Impl ppml_structure ->
+         let reparsed_structure = Parse.implementation lex in
+         let reparsed_structure =
+           Ppxlib_ast.Selected_ast.Of_ocaml.copy_structure reparsed_structure
+         in
+         Dumpast.reparse ppml_structure reparsed_structure
+       | Intf signature ->
+         let reparsed_signature = Parse.interface lex in
+         let reparsed_signature =
+           Ppxlib_ast.Selected_ast.Of_ocaml.copy_signature reparsed_signature
+         in
+         Dumpast.reparse_signature signature reparsed_signature)
+;;
+
+let update_ast instance ~document ~webview =
+  let ast_editor_state = Extension_instance.ast_editor_state instance in
+  let mode, request_is_current =
+    Ast_editor_state.start_ast_update ast_editor_state (TextDocument.uri document)
+  in
+  let (_ : unit Promise.t) =
+    let open Promise.Syntax in
+    let+ result = transform_to_ast instance ~document ~mode in
+    if request_is_current ()
+    then (
+      match result with
+      | Ok ast ->
+        let msg_type =
+          match mode with
+          | Ast_editor_state.Original_ast -> "ast"
+          | Preprocessed_ast -> "pp_ast"
         in
-        (match pp_json_res with
-         | Error err_msg -> raise (User_error err_msg)
-         | Ok pp_json -> make_value (Ok pp_json))
-    in
-    send_msg "pp_ast" ([%js.of: Jsonoo.t] pp_value) ~webview
+        send_msg msg_type ([%js.of: Jsonoo.t] ast) ~webview
+      | Error error -> send_msg "error" ([%js.of: string] error) ~webview)
+  in
+  ()
 ;;
 
 let onDidChangeTextDocument_listener instance document webview event =
   let changed_document = TextDocumentChangeEvent.document event in
-  if document_eq document changed_document
-  then (
-    try transform_to_ast instance ~document ~webview with
-    | User_error err_msg -> send_msg "error" ([%js.of: string] err_msg) ~webview)
-;;
-
-let update_ast instance ~document ~webview =
-  try transform_to_ast instance ~document ~webview with
-  | User_error err_msg -> send_msg "error" ([%js.of: string] err_msg) ~webview
+  if document_eq document changed_document then update_ast instance ~document ~webview
 ;;
 
 let onDidReceiveMessage_listener instance webview document msg =
@@ -306,12 +311,11 @@ let resolveCustomTextEditor
         Disposable.dispose onDidChangeTextDocument_disposable)
       ()
   in
-  (try transform_to_ast instance ~document ~webview with
-   | User_error err_msg -> send_msg "error" ([%js.of: string] err_msg) ~webview);
   let p =
     let open Promise.Syntax in
-    let+ r = read_html_file ~webview ~extension () in
-    WebView.set_html webview r
+    let+ html = read_html_file ~webview ~extension () in
+    WebView.set_html webview html;
+    update_ast instance ~document ~webview
   in
   `Promise p
 ;;
@@ -343,7 +347,8 @@ let replace_document_content ~document ~content =
 let open_pp_doc instance ~document =
   let open Promise.Syntax in
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  match fetch_pp_code ~document with
+  let* content = fetch_pp_code instance ~document in
+  match content with
   | Error e -> Promise.return (Error e)
   | Ok pp_pp_str ->
     let file_name =
@@ -389,7 +394,8 @@ let reload_pp_doc instance ~document =
      with
      | None -> Promise.return (Error "Visible editor wasn't found")
      | Some _ ->
-       (match fetch_pp_code ~document:original_document with
+       let* content = fetch_pp_code instance ~document:original_document in
+       (match content with
         | Error err_msg -> Promise.return (Error err_msg)
         | Ok content ->
           replace_document_content ~content ~document;
@@ -400,6 +406,7 @@ let rec manage_choice instance choice ~document =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
   match choice with
   | Some `Update | Some `Retry ->
+    Dune_workspace.invalidate ();
     let res =
       (match
          (Ast_editor_state.pp_status ast_editor_state) (TextDocument.uri document)

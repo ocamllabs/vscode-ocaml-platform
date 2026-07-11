@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Make “Show Preprocessed Document” use Dune's effective workspace and build
+  context, including custom `DUNE_BUILD_DIR` values and esy build directories.
+  (#728)
 - Add syntax highlighting for Dune's parameterised library keywords: the
   `library_parameter` stanza, the `parameters` and `implements` library fields,
   and the `(instantiate ...)` dependency form together with its `:as` keyword.

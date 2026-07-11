@@ -90,6 +90,13 @@ module Dune_version = struct
       Stdlib.compare (major, minor, patch) (3, 24, 0) >= 0
     | Preview (y, m, d) -> Stdlib.compare (y, m, d) (2026, 6, 11) >= 0
   ;;
+
+  let at_least t (major, minor, patch) =
+    not (Ordering.is_less (compare t (Release (major, minor, patch))))
+  ;;
+
+  let supports_root_environment t = at_least t (3, 21, 0)
+  let supports_cross_target_environment t = at_least t (3, 22, 0)
 end
 
 let construct_dune_path path = Path.(of_string (String.strip path) / "dune")

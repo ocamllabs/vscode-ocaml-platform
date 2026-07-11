@@ -20,6 +20,15 @@ val basename : t -> string
 val join : t -> t -> t
 val ( / ) : t -> string -> t
 val relative : t -> string -> t
+
+(** [relative_from base path] is the relative path from [base] to [path]
+    (unlike {!relative}, which appends a segment). *)
+val relative_from : t -> t -> string
+
+(** [is_inside ~dir path] is whether [path] stays within [dir], i.e. the
+    relative path from [dir] to [path] does not escape [dir]. *)
+val is_inside : dir:t -> t -> bool
+
 val relative_all : t -> string list -> t
 val with_ext : t -> ext:string -> t
 val parent : t -> t option

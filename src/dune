@@ -4,6 +4,7 @@
   (pps gen_js_api.ppx))
  (libraries
   base
+  csexp
   gen_js_api
   js_of_ocaml
   jsonoo

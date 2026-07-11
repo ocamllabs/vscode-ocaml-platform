@@ -33,6 +33,8 @@
    (= 1.1.7))
   (base
    (>= v0.17))
+  (csexp
+   (>= 1.5.0))
   (promise_jsoo
    (>= 0.4.3))
   (jsonoo

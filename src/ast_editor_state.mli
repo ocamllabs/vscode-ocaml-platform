@@ -15,6 +15,13 @@ val find_webview_by_doc : t -> Uri.t -> WebView.t option
 val associate_origin_and_pp : t -> origin_uri:Uri.t -> pp_doc_uri:Uri.t -> unit
 val get_current_ast_mode : t -> ast_mode
 val set_current_ast_mode : t -> ast_mode -> unit
+
+(** Register a new AST update request for a document. Returns the mode the
+    request was started in, together with a function telling whether the
+    request is still the latest one for that document and the mode is still
+    current. *)
+val start_ast_update : t -> Uri.t -> ast_mode * (unit -> bool)
+
 val get_hover_disposable : t -> Disposable.t option
 val set_hover_disposable : t -> Disposable.t option -> unit
 val entry_exists : t -> origin_doc:Uri.t -> pp_doc:Uri.t -> bool
