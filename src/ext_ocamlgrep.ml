@@ -28,7 +28,8 @@ let input_box =
 
 let log_to_output lines =
   let channel = Lazy.force Output.extension_output_channel in
-  List.iter lines ~f:(fun line -> OutputChannel.appendLine channel ~value:line)
+  List.iter lines ~f:(fun line -> OutputChannel.appendLine channel ~value:line);
+  OutputChannel.show channel ~preserveFocus:true ()
 
 (*
    Show findings in VS Code's built-in References panel.
@@ -43,9 +44,6 @@ let display_results
     (sprintf "ocamlgrep %S: %d finding(s)" query (List.length findings)
      :: List.map warnings ~f:(fun w -> "  " ^ w)
      @ List.map errors ~f:(fun e -> "  Error: " ^ e));
-  OutputChannel.show
-    (Lazy.force Output.extension_output_channel)
-    ~preserveFocus:true ();
   match errors, findings with
   | first_error :: _, _ ->
     (* User-facing errors (e.g. project root not found) — shown as a plain
@@ -170,6 +168,8 @@ let _scan_all_folders query =
 let show_query_input =
   let previous : Disposable.t option ref = ref None in
   fun scan_root text_editor ->
+    log_to_output
+      [sprintf "ocamlgrep scan root: %s" (Path.to_string scan_root)];
     let () =
       match !previous with
       | None -> ()
@@ -229,7 +229,7 @@ let get_scan_root (text_editor : TextEditor.t) =
      |> Uri.path
      |> Path.of_string
    in
-   Dune_root.find_nearest_dune_project active_file_path
+   Dune_root.find active_file_path
 
 let with_scan_root (text_editor : TextEditor.t) func =
   let+ opt_root = get_scan_root text_editor in
