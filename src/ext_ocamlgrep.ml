@@ -120,45 +120,6 @@ let scan_folder query (scan_root : Path.t)
           ]
       }
 
-(* Unused: we could use something like this if we wanted to scan
-   all the VSCode workspace folders.
-
-   This gets complicated because we need to ensure that these folders are
-   within Dune workspaces for ocamlgrep to work, or we'd have to filter
-   them out.
-
-   TODO: remove this code once we're confident that we're only going to
-   scan at most one workspace.
-*)
-let _scan_all_folders query =
-  let workspace_folders = Workspace.workspaceFolders () in
-  let+ parts =
-    Promise.all_list (
-      List.map
-        ~f:(fun workspace_folder ->
-          let scan_root =
-            workspace_folder
-            |> WorkspaceFolder.uri
-            |> Uri.fsPath
-            |> Path.of_string
-          in
-          scan_folder query scan_root
-        )
-        workspace_folders
-    )
-  in
-  let merge acc (r : Custom_requests.Ocamlgrep.response) =
-    { Custom_requests.Ocamlgrep.findings =
-        acc.Custom_requests.Ocamlgrep.findings @ r.findings
-    ; warnings = acc.warnings @ r.warnings
-    ; errors = acc.errors @ r.errors
-    }
-  in
-  List.fold_left
-    ~init:Custom_requests.Ocamlgrep.empty_response
-    ~f:merge
-    parts
-
 (*
    TODO: derive the scan root from the current file,
    using 'Dune_root.find_nearest_dune_project' - instead of using each
