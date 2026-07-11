@@ -52,6 +52,7 @@
             propagatedBuildInputs = [ packages.vscode jsonoo ] ++
               (with pkgs.ocamlPackages; [
                 base
+                csexp
                 gen_js_api
                 js_of_ocaml
                 ocaml-version
