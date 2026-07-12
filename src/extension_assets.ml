@@ -11,40 +11,22 @@ type t =
   ; terminal : LightDarkIcon.t
   }
 
-let uri ~extension_uri ~name = Uri.joinPath extension_uri ~pathSegments:[ "assets"; name ]
-
-let light_dark_icon ~extension_uri ~light ~dark =
-  LightDarkIcon.
-    { light = `Uri (uri ~extension_uri ~name:light)
-    ; dark = `Uri (uri ~extension_uri ~name:dark)
-    }
-;;
-
-let make_dependency_icon ~extension_uri ~selected =
-  let suffix = if selected then "-selected" else "" in
-  light_dark_icon
-    ~extension_uri
-    ~light:("dependency-light" ^ suffix ^ ".svg")
-    ~dark:("dependency-dark" ^ suffix ^ ".svg")
-;;
-
 let make ~extension_uri =
-  { chat = light_dark_icon ~extension_uri ~light:"chat-light.svg" ~dark:"chat-dark.svg"
-  ; collection =
-      light_dark_icon
-        ~extension_uri
-        ~light:"collection-light.svg"
-        ~dark:"collection-dark.svg"
-  ; dependency = make_dependency_icon ~extension_uri ~selected:false
-  ; dependency_selected = make_dependency_icon ~extension_uri ~selected:true
-  ; discord =
-      light_dark_icon ~extension_uri ~light:"discord-light.svg" ~dark:"discord-dark.svg"
-  ; github =
-      light_dark_icon ~extension_uri ~light:"github-light.svg" ~dark:"github-dark.svg"
-  ; package =
-      light_dark_icon ~extension_uri ~light:"number-light.svg" ~dark:"number-dark.svg"
-  ; terminal =
-      light_dark_icon ~extension_uri ~light:"terminal-light.svg" ~dark:"terminal-dark.svg"
+  let uri name = Uri.joinPath extension_uri ~pathSegments:[ "assets"; name ] in
+  let icon ?(variant = "") stem =
+    LightDarkIcon.
+      { light = `Uri (uri (stem ^ "-light" ^ variant ^ ".svg"))
+      ; dark = `Uri (uri (stem ^ "-dark" ^ variant ^ ".svg"))
+      }
+  in
+  { chat = icon "chat"
+  ; collection = icon "collection"
+  ; dependency = icon "dependency"
+  ; dependency_selected = icon ~variant:"-selected" "dependency"
+  ; discord = icon "discord"
+  ; github = icon "github"
+  ; package = icon "number"
+  ; terminal = icon "terminal"
   }
 ;;
 
