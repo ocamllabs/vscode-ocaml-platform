@@ -55,8 +55,7 @@ module Environment = struct
     | Sandbox.Esy (esy, manifest) ->
       let open Promise.Syntax in
       let+ output =
-        Esy.exec esy manifest ~args:[ "command-env"; "--json" ]
-        |> Cmd.output ~cwd ~log_output:false
+        Esy.exec esy manifest ~args:[ "command-env"; "--json" ] |> Cmd.output ~cwd
       in
       (match output with
        | Error error ->
@@ -269,7 +268,7 @@ let sandbox_environment_is_opaque = function
 ;;
 
 let dune_output sandbox ~cwd args =
-  Sandbox.get_command sandbox "dune" args `Command |> Cmd.output ~cwd ~log_output:false
+  Sandbox.get_command sandbox "dune" args `Command |> Cmd.output ~cwd
 ;;
 
 let contexts_of_output output =
@@ -367,7 +366,7 @@ let query_merlin_context sandbox ~cwd ~source ~(layout : layout) ~contexts =
   let build_dirs = [ layout.build_dir; physical_build_dir ] in
   let request = Csexp.(to_string (List [ Atom "File"; Atom (Path.to_string source) ])) in
   let command = Sandbox.get_command sandbox "dune" [ "ocaml-merlin" ] `Command in
-  let+ output = Cmd.output command ~cwd ~stdin:request ~log_output:false in
+  let+ output = Cmd.output command ~cwd ~stdin:request in
   Result.bind output ~f:(merlin_context_of_output ~build_dirs ~contexts)
 ;;
 
