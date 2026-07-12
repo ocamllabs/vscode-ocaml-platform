@@ -78,14 +78,15 @@ let check ?env t =
     Spawn s
 ;;
 
-let run ?cwd ?env ?stdin cmd =
+let run ?cwd ?env ?stdin ?(log_output = true) cmd =
   let cwd = Option.map cwd ~f:Path.to_string in
   let logger event =
     let (lazy output) = Output.command_output_channel in
     match event with
     | ChildProcess.Spawned ->
       Vscode.OutputChannel.appendLine output ~value:("$ " ^ to_string cmd)
-    | Stdout data | Stderr data -> Vscode.OutputChannel.append output ~value:data
+    | Stdout data | Stderr data ->
+      if log_output then Vscode.OutputChannel.append output ~value:data
     | Closed -> Vscode.OutputChannel.appendLine output ~value:""
     | ProcessError err -> log_value "process error" @@ [%js.of: Node.JsError.t] err
   in
@@ -96,19 +97,20 @@ let run ?cwd ?env ?stdin cmd =
   | Shell command_line -> ChildProcess.exec command_line ~logger ?stdin ~options
 ;;
 
-let log ?(result : ChildProcess.return option) (t : t) =
+let log ?(result : ChildProcess.return option) ?(log_output = true) (t : t) =
   let open Jsonoo.Encode in
   let fields =
     match result with
     | None -> []
     | Some result ->
-      [ ( "result"
-        , object_
-            [ "exitCode", int result.exitCode
-            ; "stdout", string result.stdout
-            ; "stderr", string result.stderr
-            ] )
-      ]
+      let result_fields =
+        [ "exitCode", int result.exitCode ]
+        @
+        if log_output
+        then [ "stdout", string result.stdout; "stderr", string result.stderr ]
+        else []
+      in
+      [ "result", object_ result_fields ]
   in
   let fields =
     match t with
@@ -121,11 +123,11 @@ let log ?(result : ChildProcess.return option) (t : t) =
   | Some _ -> log_fields "external command (finished)" fields
 ;;
 
-let output ?cwd ?env ?stdin (t : t) =
+let output ?cwd ?env ?stdin ?(log_output = true) (t : t) =
   let open Promise.Syntax in
   log t;
-  let+ (result : ChildProcess.return) = run ?stdin ?cwd ?env t in
-  log ~result t;
+  let+ (result : ChildProcess.return) = run ?stdin ?cwd ?env ~log_output t in
+  log ~result ~log_output t;
   if result.exitCode = 0
   then Ok result.stdout
   else Error (Printf.sprintf "Command failed with error: \n%s" result.stderr)

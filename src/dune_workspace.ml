@@ -55,7 +55,8 @@ module Environment = struct
     | Sandbox.Esy (esy, manifest) ->
       let open Promise.Syntax in
       let+ output =
-        Esy.exec esy manifest ~args:[ "command-env"; "--json" ] |> Cmd.output ~cwd
+        Esy.exec esy manifest ~args:[ "command-env"; "--json" ]
+        |> Cmd.output ~cwd ~log_output:false
       in
       (match output with
        | Error error ->
@@ -74,7 +75,8 @@ module Environment = struct
               ~section:"Dune workspace"
               "Unable to parse `esy command-env --json` output.";
             process ()))
-    | Opam _ | Global | Custom _ | Dune _ -> Promise.return (process ())
+    | Sandbox.Opam _ | Sandbox.Global | Sandbox.Custom _ | Sandbox.Dune _ ->
+      Promise.return (process ())
   ;;
 
   let needs_version_check t = Option.is_some t.root || Option.is_some t.cross_target
@@ -214,18 +216,27 @@ let make { root; build_dir } ~context =
 type cache_key =
   { sandbox : Sandbox.t
   ; cwd : Path.t
+  ; source : Path.t
   ; build_dir : string option
   ; root : string option
   ; workspace : string option
   ; cross_target : string option
   }
 
-let cache : (cache_key * t) list ref = ref []
+type cache_entry =
+  { id : int
+  ; key : cache_key
+  ; workspace : t Promise.t
+  }
+
+let cache : cache_entry list ref = ref []
+let next_cache_id = ref 0
 let invalidate () = cache := []
 
-let cache_key sandbox ~cwd =
+let cache_key sandbox ~cwd ~source =
   { sandbox
   ; cwd
+  ; source
   ; build_dir = Process.Env.get "DUNE_BUILD_DIR"
   ; root = Process.Env.get "DUNE_ROOT"
   ; workspace = Process.Env.get "DUNE_WORKSPACE"
@@ -236,14 +247,29 @@ let cache_key sandbox ~cwd =
 let cache_key_equal left right =
   Sandbox.equal left.sandbox right.sandbox
   && Path.equal left.cwd right.cwd
+  && Path.equal left.source right.source
   && Option.equal String.equal left.build_dir right.build_dir
   && Option.equal String.equal left.root right.root
   && Option.equal String.equal left.workspace right.workspace
   && Option.equal String.equal left.cross_target right.cross_target
 ;;
 
+let find_cached key =
+  List.find_map !cache ~f:(fun entry ->
+    if cache_key_equal entry.key key then Some entry.workspace else None)
+;;
+
+let remove_cache_entry id =
+  cache := List.filter !cache ~f:(fun entry -> not (Int.equal entry.id id))
+;;
+
+let sandbox_environment_is_opaque = function
+  | Sandbox.Opam _ | Sandbox.Custom _ -> true
+  | Sandbox.Esy _ | Sandbox.Global | Sandbox.Dune _ -> false
+;;
+
 let dune_output sandbox ~cwd args =
-  Sandbox.get_command sandbox "dune" args `Command |> Cmd.output ~cwd
+  Sandbox.get_command sandbox "dune" args `Command |> Cmd.output ~cwd ~log_output:false
 ;;
 
 let contexts_of_output output =
@@ -341,7 +367,7 @@ let query_merlin_context sandbox ~cwd ~source ~(layout : layout) ~contexts =
   let build_dirs = [ layout.build_dir; physical_build_dir ] in
   let request = Csexp.(to_string (List [ Atom "File"; Atom (Path.to_string source) ])) in
   let command = Sandbox.get_command sandbox "dune" [ "ocaml-merlin" ] `Command in
-  let+ output = Cmd.output command ~cwd ~stdin:request in
+  let+ output = Cmd.output command ~cwd ~stdin:request ~log_output:false in
   Result.bind output ~f:(merlin_context_of_output ~build_dirs ~contexts)
 ;;
 
@@ -361,61 +387,74 @@ let select_context
     let+ merlin_context = query_merlin_context sandbox ~cwd ~source ~layout ~contexts in
     (match merlin_context with
      | Ok context -> context
-     | Error _ -> fallback)
+     | Error error ->
+       log_chan
+         `Info
+         ~section:"Dune workspace"
+         "Unable to identify the Merlin build context; using %s: %s"
+         fallback
+         error;
+       fallback)
+;;
+
+let discover_uncached sandbox ~cwd ~source =
+  let open Promise.Syntax in
+  let* environment = Environment.selected_sandbox sandbox ~cwd in
+  let* environment = environment_for_dune sandbox environment ~cwd in
+  let* root = root_of_environment environment ~cwd in
+  let fallback_layout = layout_of_environment environment ~root in
+  let* has_workspace_file = Fs.exists Path.(root / "dune-workspace" |> to_string) in
+  let needs_dune_description =
+    sandbox_environment_is_opaque sandbox
+    || Option.is_some environment.workspace
+    || has_workspace_file
+  in
+  let* contexts_result =
+    if needs_dune_description then query_contexts sandbox ~cwd else Promise.return (Ok [])
+  in
+  let contexts =
+    match contexts_result with
+    | Ok contexts -> contexts
+    | Error error ->
+      log_chan
+        `Warn
+        ~section:"Dune workspace"
+        "Unable to run `dune describe contexts`; using a fallback context: %s"
+        error;
+      []
+  in
+  let preferred_context = fallback_context environment contexts in
+  let* layout =
+    if needs_dune_description
+    then query_layout sandbox ~cwd ~context:preferred_context ~fallback:fallback_layout
+    else Promise.return fallback_layout
+  in
+  let* context =
+    select_context
+      sandbox
+      environment
+      ~cwd
+      ~source
+      ~layout
+      ~fallback:preferred_context
+      contexts
+  in
+  Promise.return (make layout ~context)
 ;;
 
 let discover sandbox ~cwd ~source =
-  let key = cache_key sandbox ~cwd in
-  match List.Assoc.find !cache key ~equal:cache_key_equal with
-  | Some workspace -> Promise.return workspace
+  let key = cache_key sandbox ~cwd ~source in
+  match find_cached key with
+  | Some workspace -> workspace
   | None ->
-    let open Promise.Syntax in
-    let* environment = Environment.selected_sandbox sandbox ~cwd in
-    let* environment = environment_for_dune sandbox environment ~cwd in
-    let* root = root_of_environment environment ~cwd in
-    let fallback_layout = layout_of_environment environment ~root in
-    let* has_workspace_file = Fs.exists Path.(root / "dune-workspace" |> to_string) in
-    let authoritative_workspace =
-      match sandbox with
-      | Sandbox.Opam _ | Custom _ -> true
-      | Global | Esy _ | Dune _ -> false
+    next_cache_id := !next_cache_id + 1;
+    let id = !next_cache_id in
+    let workspace =
+      discover_uncached sandbox ~cwd ~source
+      |> Promise.catch ~rejected:(fun error ->
+        remove_cache_entry id;
+        Promise.reject error)
     in
-    let needs_contexts =
-      authoritative_workspace
-      || Option.is_some environment.workspace
-      || has_workspace_file
-    in
-    let* contexts_result =
-      if needs_contexts then query_contexts sandbox ~cwd else Promise.return (Ok [])
-    in
-    let contexts =
-      match contexts_result with
-      | Ok contexts -> contexts
-      | Error error ->
-        log_chan
-          `Warn
-          ~section:"Dune workspace"
-          "Unable to run `dune describe contexts`; using Dune's default context: %s"
-          error;
-        []
-    in
-    let preferred_context = fallback_context environment contexts in
-    let* layout =
-      if authoritative_workspace
-      then query_layout sandbox ~cwd ~context:preferred_context ~fallback:fallback_layout
-      else Promise.return fallback_layout
-    in
-    let* context =
-      select_context
-        sandbox
-        environment
-        ~cwd
-        ~source
-        ~layout
-        ~fallback:preferred_context
-        contexts
-    in
-    let workspace = make layout ~context in
-    cache := (key, workspace) :: !cache;
-    Promise.return workspace
+    cache := { id; key; workspace } :: !cache;
+    workspace
 ;;
