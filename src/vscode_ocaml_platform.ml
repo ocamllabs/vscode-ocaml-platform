@@ -26,16 +26,19 @@ let notify_configuration_changes instance =
 let activate (extension : ExtensionContext.t) =
   let open Promise.Syntax in
   let instance = Extension_instance.make () in
+  let assets =
+    Extension_assets.make ~extension_uri:(ExtensionContext.extensionUri extension)
+  in
   ExtensionContext.subscribe
     extension
     ~disposable:(Extension_instance.disposable instance);
   ExtensionContext.subscribe extension ~disposable:(notify_configuration_changes instance);
   Dune_formatter.register extension instance;
   Dune_task_provider.register extension instance;
-  Treeview_switches.register extension instance;
-  Treeview_sandbox.register extension instance;
-  Treeview_commands.register extension;
-  Treeview_help.register extension;
+  Treeview_switches.register extension instance ~assets;
+  Treeview_sandbox.register extension instance ~assets;
+  Treeview_commands.register extension ~assets;
+  Treeview_help.register extension ~assets;
   Ast_editor.register extension instance;
   Cm_editor.register extension instance;
   Repl.register extension instance;

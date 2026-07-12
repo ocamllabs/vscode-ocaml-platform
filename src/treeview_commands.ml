@@ -1,11 +1,5 @@
-let select_sandbox_item =
-  let icon =
-    `LightDark
-      Vscode.LightDarkIcon.
-        { light = `String (Path.asset "collection-light.svg" |> Path.to_string)
-        ; dark = `String (Path.asset "collection-dark.svg" |> Path.to_string)
-        }
-  in
+let select_sandbox_item assets =
+  let icon = `LightDark (Extension_assets.collection_icon assets) in
   let label = `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Select a Sandbox" ()) in
   let item = Vscode.TreeItem.make_label ~label () in
   let command =
@@ -16,14 +10,8 @@ let select_sandbox_item =
   item
 ;;
 
-let terminal_item =
-  let icon =
-    `LightDark
-      Vscode.LightDarkIcon.
-        { light = `String (Path.asset "terminal-light.svg" |> Path.to_string)
-        ; dark = `String (Path.asset "terminal-dark.svg" |> Path.to_string)
-        }
-  in
+let terminal_item assets =
+  let icon = `LightDark (Extension_assets.terminal_icon assets) in
   let label =
     `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Open a sandboxed terminal" ())
   in
@@ -101,9 +89,9 @@ let navigate_holes_item =
   item
 ;;
 
-let items =
-  [ select_sandbox_item
-  ; terminal_item
+let items assets =
+  [ select_sandbox_item assets
+  ; terminal_item assets
   ; construct_item
   ; jump_item
   ; type_search_item
@@ -113,13 +101,15 @@ let items =
 
 let getTreeItem ~element = `Value element
 
-let getChildren ?element () =
+let getChildren items ?element () =
   match element with
   | None -> `Value (Some items)
   | Some _ -> `Value (Some [])
 ;;
 
-let register extension =
+let register extension ~assets =
+  let items = items assets in
+  let getChildren = getChildren items in
   let module TreeDataProvider = Vscode.TreeDataProvider.Make (Vscode.TreeItem) in
   let treeDataProvider = TreeDataProvider.create ~getTreeItem ~getChildren () in
   let disposable =
