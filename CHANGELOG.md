@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Expose the `ocaml.server.inlayHints.*` and
+  `ocaml.server.shortenMerlinDiagnostics` settings. (#2227)
 - Add syntax highlighting for Dune's parameterised library keywords: the
   `library_parameter` stanza, the `parameters` and `implements` library fields,
   and the `(instantiate ...)` dependency form together with its `:as` keyword.
