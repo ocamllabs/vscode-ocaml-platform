@@ -39,22 +39,36 @@ module Dependency = struct
     | Package _ -> "opam-package"
   ;;
 
-  let icon dependency is_current_sandbox =
+  type icons =
+    { dependency : LightDarkIcon.t
+    ; dependency_selected : LightDarkIcon.t
+    ; package : LightDarkIcon.t
+    }
+
+  let make_icons extension =
+    { dependency =
+        Extension_assets.light_dark_icon
+          ~extension
+          ~light:"dependency-light.svg"
+          ~dark:"dependency-dark.svg"
+    ; dependency_selected =
+        Extension_assets.light_dark_icon
+          ~extension
+          ~light:"dependency-light-selected.svg"
+          ~dark:"dependency-dark-selected.svg"
+    ; package =
+        Extension_assets.light_dark_icon
+          ~extension
+          ~light:"number-light.svg"
+          ~dark:"number-dark.svg"
+    }
+  ;;
+
+  let icon icons dependency is_current_sandbox =
     match dependency with
     | Switch _ ->
-      let selected = if is_current_sandbox then "-selected" else "" in
-      LightDarkIcon.
-        { light =
-            `String
-              (Path.asset @@ "dependency-light" ^ selected ^ ".svg" |> Path.to_string)
-        ; dark =
-            `String (Path.asset @@ "dependency-dark" ^ selected ^ ".svg" |> Path.to_string)
-        }
-    | Package _ ->
-      LightDarkIcon.
-        { light = `String (Path.asset "number-light.svg" |> Path.to_string)
-        ; dark = `String (Path.asset "number-dark.svg" |> Path.to_string)
-        }
+      if is_current_sandbox then icons.dependency_selected else icons.dependency
+    | Package _ -> icons.package
   ;;
 
   let collapsible_state =
@@ -72,11 +86,11 @@ module Dependency = struct
          else None)
   ;;
 
-  let to_treeitem instance dependency =
+  let to_treeitem icons instance dependency =
     let open Promise.Syntax in
     let current_sandbox = Extension_instance.sandbox instance in
     let is_current_sandbox = equals_opam_sandbox dependency current_sandbox in
-    let icon = `LightDark (icon dependency is_current_sandbox) in
+    let icon = `LightDark (icon icons dependency is_current_sandbox) in
     let* collapsibleState = collapsible_state dependency in
     let label =
       `TreeItemLabel (Vscode.TreeItemLabel.create ~label:(label dependency) ())
@@ -186,7 +200,9 @@ module Command = struct
   ;;
 end
 
-let getTreeItem instance ~element = `Promise (Dependency.to_treeitem instance element)
+let getTreeItem icons instance ~element =
+  `Promise (Dependency.to_treeitem icons instance element)
+;;
 
 let getChildren ?opam ?element () =
   match opam, element with
@@ -203,6 +219,7 @@ let getChildren ?opam ?element () =
 ;;
 
 let register extension instance =
+  let icons = Dependency.make_icons extension in
   let module EventEmitter = Vscode.EventEmitter.Make (Interop.Js.Or_undefined (Dependency))
   in
   let event_emitter = EventEmitter.make () in
@@ -211,7 +228,7 @@ let register extension instance =
     let open Promise.Syntax in
     let+ opam = Opam.make () in
     let getChildren = getChildren ?opam in
-    let getTreeItem = getTreeItem instance in
+    let getTreeItem = getTreeItem icons instance in
     let module TreeDataProvider = Vscode.TreeDataProvider.Make (Dependency) in
     let treeDataProvider =
       TreeDataProvider.create ~getTreeItem ~getChildren ~onDidChangeTreeData:event ()

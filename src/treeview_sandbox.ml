@@ -9,11 +9,11 @@ module Dependency = struct
   let description t = Promise.return (Some (Sandbox.Package.version t))
   let tooltip t = Sandbox.Package.synopsis t
 
-  let icon _ =
-    LightDarkIcon.
-      { light = `String (Path.asset "number-light.svg" |> Path.to_string)
-      ; dark = `String (Path.asset "number-dark.svg" |> Path.to_string)
-      }
+  let make_icon extension =
+    Extension_assets.light_dark_icon
+      ~extension
+      ~light:"number-light.svg"
+      ~dark:"number-dark.svg"
   ;;
 
   let collapsible_state t =
@@ -22,9 +22,9 @@ module Dependency = struct
     else TreeItemCollapsibleState.None
   ;;
 
-  let to_treeitem dependency =
+  let to_treeitem icon dependency =
     let open Promise.Syntax in
-    let icon = `LightDark (icon dependency) in
+    let icon = `LightDark icon in
     let collapsibleState = collapsible_state dependency in
     let label =
       `TreeItemLabel (Vscode.TreeItemLabel.create ~label:(label dependency) ())
@@ -206,7 +206,7 @@ module Command = struct
   ;;
 end
 
-let getTreeItem ~element = `Promise (Dependency.to_treeitem element)
+let getTreeItem icon ~element = `Promise (Dependency.to_treeitem icon element)
 
 let getChildren ~instance ?element () =
   let sandbox = Extension_instance.sandbox instance in
@@ -224,6 +224,8 @@ let getChildren ~instance ?element () =
 ;;
 
 let register extension instance =
+  let icon = Dependency.make_icon extension in
+  let getTreeItem = getTreeItem icon in
   let getChildren = getChildren ~instance in
   let module EventEmitter = Vscode.EventEmitter.Make (Interop.Js.Or_undefined (Dependency))
   in

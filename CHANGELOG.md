@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fix custom tree view icons not appearing in Remote WSL by resolving bundled
+  assets as extension URIs. (#945)
 - Expose the `ocaml.server.inlayHints.*` and
   `ocaml.server.shortenMerlinDiagnostics` settings. (#2227)
 - Add syntax highlighting for Dune's parameterised library keywords: the

@@ -1,10 +1,10 @@
-let discord_item =
+let discord_item extension =
   let icon =
     `LightDark
-      Vscode.LightDarkIcon.
-        { light = `String (Path.asset "discord-light.svg" |> Path.to_string)
-        ; dark = `String (Path.asset "discord-dark.svg" |> Path.to_string)
-        }
+      (Extension_assets.light_dark_icon
+         ~extension
+         ~light:"discord-light.svg"
+         ~dark:"discord-dark.svg")
   in
   let label = `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Chat on Discord" ()) in
   let item = Vscode.TreeItem.make_label ~label () in
@@ -21,13 +21,13 @@ let discord_item =
   item
 ;;
 
-let discuss_item =
+let discuss_item extension =
   let icon =
     `LightDark
-      Vscode.LightDarkIcon.
-        { light = `String (Path.asset "chat-light.svg" |> Path.to_string)
-        ; dark = `String (Path.asset "chat-dark.svg" |> Path.to_string)
-        }
+      (Extension_assets.light_dark_icon
+         ~extension
+         ~light:"chat-light.svg"
+         ~dark:"chat-dark.svg")
   in
   let label =
     `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Ask a question on Discuss" ())
@@ -46,7 +46,7 @@ let discuss_item =
   item
 ;;
 
-let tutorials_item =
+let tutorials_item () =
   let label =
     `TreeItemLabel
       (Vscode.TreeItemLabel.create ~label:"Explore OCaml exercises and tutorials" ())
@@ -66,13 +66,13 @@ let tutorials_item =
   item
 ;;
 
-let github_item =
+let github_item extension =
   let icon =
     `LightDark
-      Vscode.LightDarkIcon.
-        { light = `String (Path.asset "github-light.svg" |> Path.to_string)
-        ; dark = `String (Path.asset "github-dark.svg" |> Path.to_string)
-        }
+      (Extension_assets.light_dark_icon
+         ~extension
+         ~light:"github-light.svg"
+         ~dark:"github-dark.svg")
   in
   let label =
     `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Open an issue on Github" ())
@@ -93,16 +93,25 @@ let github_item =
   item
 ;;
 
-let items = [ discord_item; discuss_item; github_item; tutorials_item ]
+let items extension =
+  [ discord_item extension
+  ; discuss_item extension
+  ; github_item extension
+  ; tutorials_item ()
+  ]
+;;
+
 let getTreeItem ~element = `Value element
 
-let getChildren ?element () =
+let getChildren items ?element () =
   match element with
   | None -> `Value (Some items)
   | Some _ -> `Value (Some [])
 ;;
 
 let register extension =
+  let items = items extension in
+  let getChildren = getChildren items in
   let module TreeDataProvider = Vscode.TreeDataProvider.Make (Vscode.TreeItem) in
   let treeDataProvider = TreeDataProvider.create ~getTreeItem ~getChildren () in
   let disposable =
