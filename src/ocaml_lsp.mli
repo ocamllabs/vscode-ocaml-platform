@@ -52,21 +52,21 @@ end
 module OcamllspSettings : sig
   include Ojs.T
 
-  val codelens : t -> OcamllspSettingCodeLens.t option
   val extendedHover : t -> OcamllspSettingEnable.t option
   val standardHover : t -> OcamllspSettingEnable.t option
+  val codelens : t -> OcamllspSettingCodeLens.t option
   val duneDiagnostics : t -> OcamllspSettingEnable.t option
   val inlayHints : t -> OcamllspSettingInlayHints.t option
-  val shortenMerlinDiagnostics : t -> OcamllspSettingEnable.t option
   val syntaxDocumentation : t -> OcamllspSettingEnable.t option
+  val shortenMerlinDiagnostics : t -> OcamllspSettingEnable.t option
 
   val create
-    :  codelens:OcamllspSettingCodeLens.t option
-    -> extendedHover:OcamllspSettingEnable.t option
+    :  extendedHover:OcamllspSettingEnable.t option
     -> standardHover:OcamllspSettingEnable.t option
+    -> codelens:OcamllspSettingCodeLens.t option
     -> duneDiagnostics:OcamllspSettingEnable.t option
     -> inlayHints:OcamllspSettingInlayHints.t option
-    -> shortenMerlinDiagnostics:OcamllspSettingEnable.t option
     -> syntaxDocumentation:OcamllspSettingEnable.t option
+    -> shortenMerlinDiagnostics:OcamllspSettingEnable.t option
     -> t
 end

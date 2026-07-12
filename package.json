@@ -352,6 +352,11 @@
           "default": [],
           "markdownDescription": "Extra arguments to pass to ocamllsp."
         },
+        "ocaml.server.extendedHover": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable extended hover"
+        },
         "ocaml.server.codelens.enable": {
           "type": "boolean",
           "default": true,
@@ -361,11 +366,6 @@
           "type": "boolean",
           "default": false,
           "markdownDescription": "Enable/Disable codelens for nested let bindings"
-        },
-        "ocaml.server.extendedHover": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "Enable/Disable extended hover"
         },
         "ocaml.server.duneDiagnostics": {
           "type": "boolean",
@@ -387,6 +387,11 @@
           "default": false,
           "markdownDescription": "Enable/Disable inlay hints for function parameters"
         },
+        "ocaml.server.syntaxDocumentation": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable syntax documentation"
+        },
         "ocaml.server.shortenMerlinDiagnostics": {
           "type": "boolean",
           "default": false,
@@ -401,11 +406,6 @@
           "type": "boolean",
           "default": false,
           "markdownDescription": "Enable/Disable clearing of the output channel before showing a new result."
-        },
-        "ocaml.server.syntaxDocumentation": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "Enable/Disable syntax documentation"
         },
         "ocaml.commands.typedHoles.constructAfterNavigate": {
           "type": "boolean",

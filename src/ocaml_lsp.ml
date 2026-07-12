@@ -43,43 +43,43 @@ module OcamllspSettings = struct
 
   include
     [%js:
-      val codelens : t -> OcamllspSettingCodeLens.t or_undefined [@@js.get]
       val extendedHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
       val standardHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+      val codelens : t -> OcamllspSettingCodeLens.t or_undefined [@@js.get]
       val duneDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
       val inlayHints : t -> OcamllspSettingInlayHints.t or_undefined [@@js.get]
-      val shortenMerlinDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
       val syntaxDocumentation : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+      val shortenMerlinDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
 
       val create
-        :  ?codelens:OcamllspSettingCodeLens.t
-        -> ?extendedHover:OcamllspSettingEnable.t
+        :  ?extendedHover:OcamllspSettingEnable.t
         -> ?standardHover:OcamllspSettingEnable.t
+        -> ?codelens:OcamllspSettingCodeLens.t
         -> ?duneDiagnostics:OcamllspSettingEnable.t
         -> ?inlayHints:OcamllspSettingInlayHints.t
-        -> ?shortenMerlinDiagnostics:OcamllspSettingEnable.t
         -> ?syntaxDocumentation:OcamllspSettingEnable.t
+        -> ?shortenMerlinDiagnostics:OcamllspSettingEnable.t
         -> unit
         -> t
       [@@js.builder]]
 
   let create
-        ~codelens
         ~extendedHover
         ~standardHover
+        ~codelens
         ~duneDiagnostics
         ~inlayHints
-        ~shortenMerlinDiagnostics
         ~syntaxDocumentation
+        ~shortenMerlinDiagnostics
     =
     create
-      ?codelens
       ?extendedHover
       ?standardHover
+      ?codelens
       ?duneDiagnostics
       ?inlayHints
-      ?shortenMerlinDiagnostics
       ?syntaxDocumentation
+      ?shortenMerlinDiagnostics
       ()
   ;;
 end

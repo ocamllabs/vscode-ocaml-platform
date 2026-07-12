@@ -25,6 +25,11 @@ let send_configuration t client =
     Option.map (Settings.get setting) ~f:(fun enable ->
       Ocaml_lsp.OcamllspSettingEnable.create ~enable)
   in
+  let extendedHover = enable_setting Settings.server_extendedHover_setting in
+  let standardHover =
+    Option.map t.standard_hover ~f:(fun enable ->
+      Ocaml_lsp.OcamllspSettingEnable.create ~enable)
+  in
   let codelens =
     Option.map (Settings.get Settings.server_codelens_setting) ~f:(fun enable ->
       Ocaml_lsp.OcamllspSettingCodeLens.create
@@ -32,11 +37,6 @@ let send_configuration t client =
           (Settings.get Settings.server_codelens_for_nested_bindings_setting)
         ~enable
         ())
-  in
-  let extendedHover = enable_setting Settings.server_extendedHover_setting in
-  let standardHover =
-    Option.map t.standard_hover ~f:(fun enable ->
-      Ocaml_lsp.OcamllspSettingEnable.create ~enable)
   in
   let duneDiagnostics = enable_setting Settings.server_duneDiagnostics_setting in
   let inlayHints =
@@ -59,19 +59,19 @@ let send_configuration t client =
            ?hintFunctionParams
            ())
   in
+  let syntaxDocumentation = enable_setting Settings.server_syntaxDocumentation_setting in
   let shortenMerlinDiagnostics =
     enable_setting Settings.server_shortenMerlinDiagnostics_setting
   in
-  let syntaxDocumentation = enable_setting Settings.server_syntaxDocumentation_setting in
   let settings =
     Ocaml_lsp.OcamllspSettings.create
-      ~codelens
       ~extendedHover
       ~standardHover
+      ~codelens
       ~duneDiagnostics
       ~inlayHints
-      ~shortenMerlinDiagnostics
       ~syntaxDocumentation
+      ~shortenMerlinDiagnostics
   in
   let payload =
     let settings =

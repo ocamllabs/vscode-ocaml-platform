@@ -35,14 +35,14 @@ val substitute_workspace_vars : string -> string
 
 val server_extraEnv : unit -> string Interop.Dict.t option
 val server_args_setting : string list setting
+val server_extendedHover_setting : bool setting
 val server_codelens_setting : bool setting
 val server_codelens_for_nested_bindings_setting : bool setting
-val server_extendedHover_setting : bool setting
 val server_duneDiagnostics_setting : bool setting
 val server_inlayHints_hintPatternVariables_setting : bool setting
 val server_inlayHints_hintLetBindings_setting : bool setting
 val server_inlayHints_hintFunctionParams_setting : bool setting
-val server_shortenMerlinDiagnostics_setting : bool setting
 val server_syntaxDocumentation_setting : bool setting
+val server_shortenMerlinDiagnostics_setting : bool setting
 val server_typedHolesConstructAfterNavigate_setting : bool setting
 val server_constructRecursiveCalls_setting : bool setting
