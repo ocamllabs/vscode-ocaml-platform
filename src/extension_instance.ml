@@ -39,6 +39,29 @@ let send_configuration t client =
       Ocaml_lsp.OcamllspSettingEnable.create ~enable)
   in
   let duneDiagnostics = enable_setting Settings.server_duneDiagnostics_setting in
+  let inlayHints =
+    let hintPatternVariables =
+      Settings.get Settings.server_inlayHints_hintPatternVariables_setting
+    in
+    let hintLetBindings =
+      Settings.get Settings.server_inlayHints_hintLetBindings_setting
+    in
+    let hintFunctionParams =
+      Settings.get Settings.server_inlayHints_hintFunctionParams_setting
+    in
+    match hintPatternVariables, hintLetBindings, hintFunctionParams with
+    | None, None, None -> None
+    | _ ->
+      Some
+        (Ocaml_lsp.OcamllspSettingInlayHints.create
+           ?hintPatternVariables
+           ?hintLetBindings
+           ?hintFunctionParams
+           ())
+  in
+  let shortenMerlinDiagnostics =
+    enable_setting Settings.server_shortenMerlinDiagnostics_setting
+  in
   let syntaxDocumentation = enable_setting Settings.server_syntaxDocumentation_setting in
   let settings =
     Ocaml_lsp.OcamllspSettings.create
@@ -46,6 +69,8 @@ let send_configuration t client =
       ~extendedHover
       ~standardHover
       ~duneDiagnostics
+      ~inlayHints
+      ~shortenMerlinDiagnostics
       ~syntaxDocumentation
   in
   let payload =

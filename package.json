@@ -372,6 +372,26 @@
           "default": true,
           "markdownDescription": "Enable/Disable dune diagnostics"
         },
+        "ocaml.server.inlayHints.hintPatternVariables": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable inlay hints for pattern variables"
+        },
+        "ocaml.server.inlayHints.hintLetBindings": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable inlay hints for let bindings"
+        },
+        "ocaml.server.inlayHints.hintFunctionParams": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable inlay hints for function parameters"
+        },
+        "ocaml.server.shortenMerlinDiagnostics": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Shorten multi-line Merlin diagnostic ranges to their first line"
+        },
         "ocaml.commands.typeSelection.outputChannelResults": {
           "type": "boolean",
           "default": true,

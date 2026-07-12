@@ -20,6 +20,24 @@ module OcamllspSettingCodeLens = struct
       val create : ?forNestedBindings:bool -> enable:bool -> unit -> t [@@js.builder]]
 end
 
+module OcamllspSettingInlayHints = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val hintPatternVariables : t -> bool or_undefined [@@js.get]
+      val hintLetBindings : t -> bool or_undefined [@@js.get]
+      val hintFunctionParams : t -> bool or_undefined [@@js.get]
+
+      val create
+        :  ?hintPatternVariables:bool
+        -> ?hintLetBindings:bool
+        -> ?hintFunctionParams:bool
+        -> unit
+        -> t
+      [@@js.builder]]
+end
+
 module OcamllspSettings = struct
   include Interface.Make ()
 
@@ -29,6 +47,8 @@ module OcamllspSettings = struct
       val extendedHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
       val standardHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
       val duneDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+      val inlayHints : t -> OcamllspSettingInlayHints.t or_undefined [@@js.get]
+      val shortenMerlinDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
       val syntaxDocumentation : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
 
       val create
@@ -36,18 +56,29 @@ module OcamllspSettings = struct
         -> ?extendedHover:OcamllspSettingEnable.t
         -> ?standardHover:OcamllspSettingEnable.t
         -> ?duneDiagnostics:OcamllspSettingEnable.t
+        -> ?inlayHints:OcamllspSettingInlayHints.t
+        -> ?shortenMerlinDiagnostics:OcamllspSettingEnable.t
         -> ?syntaxDocumentation:OcamllspSettingEnable.t
         -> unit
         -> t
       [@@js.builder]]
 
-  let create ~codelens ~extendedHover ~standardHover ~duneDiagnostics ~syntaxDocumentation
+  let create
+        ~codelens
+        ~extendedHover
+        ~standardHover
+        ~duneDiagnostics
+        ~inlayHints
+        ~shortenMerlinDiagnostics
+        ~syntaxDocumentation
     =
     create
       ?codelens
       ?extendedHover
       ?standardHover
       ?duneDiagnostics
+      ?inlayHints
+      ?shortenMerlinDiagnostics
       ?syntaxDocumentation
       ()
   ;;

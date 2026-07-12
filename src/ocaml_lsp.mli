@@ -34,6 +34,21 @@ module OcamllspSettingCodeLens : sig
   val create : ?forNestedBindings:bool -> enable:bool -> unit -> t
 end
 
+module OcamllspSettingInlayHints : sig
+  include Ojs.T
+
+  val hintPatternVariables : t -> bool option
+  val hintLetBindings : t -> bool option
+  val hintFunctionParams : t -> bool option
+
+  val create
+    :  ?hintPatternVariables:bool
+    -> ?hintLetBindings:bool
+    -> ?hintFunctionParams:bool
+    -> unit
+    -> t
+end
+
 module OcamllspSettings : sig
   include Ojs.T
 
@@ -41,6 +56,8 @@ module OcamllspSettings : sig
   val extendedHover : t -> OcamllspSettingEnable.t option
   val standardHover : t -> OcamllspSettingEnable.t option
   val duneDiagnostics : t -> OcamllspSettingEnable.t option
+  val inlayHints : t -> OcamllspSettingInlayHints.t option
+  val shortenMerlinDiagnostics : t -> OcamllspSettingEnable.t option
   val syntaxDocumentation : t -> OcamllspSettingEnable.t option
 
   val create
@@ -48,6 +65,8 @@ module OcamllspSettings : sig
     -> extendedHover:OcamllspSettingEnable.t option
     -> standardHover:OcamllspSettingEnable.t option
     -> duneDiagnostics:OcamllspSettingEnable.t option
+    -> inlayHints:OcamllspSettingInlayHints.t option
+    -> shortenMerlinDiagnostics:OcamllspSettingEnable.t option
     -> syntaxDocumentation:OcamllspSettingEnable.t option
     -> t
 end
