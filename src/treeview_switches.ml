@@ -45,13 +45,6 @@ module Dependency = struct
     ; package : LightDarkIcon.t
     }
 
-  let make_icons extension =
-    { dependency = Extension_assets.dependency_icon ~extension ~selected:false
-    ; dependency_selected = Extension_assets.dependency_icon ~extension ~selected:true
-    ; package = Extension_assets.package_icon ~extension
-    }
-  ;;
-
   let icon icons dependency is_current_sandbox =
     match dependency with
     | Switch _ ->
@@ -207,7 +200,13 @@ let getChildren ?opam ?element () =
 ;;
 
 let register extension instance =
-  let icons = Dependency.make_icons extension in
+  let icons =
+    Dependency.
+      { dependency = Extension_assets.dependency_icon ~extension ~selected:false
+      ; dependency_selected = Extension_assets.dependency_icon ~extension ~selected:true
+      ; package = Extension_assets.package_icon ~extension
+      }
+  in
   let module EventEmitter = Vscode.EventEmitter.Make (Interop.Js.Or_undefined (Dependency))
   in
   let event_emitter = EventEmitter.make () in
