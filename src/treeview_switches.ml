@@ -39,17 +39,10 @@ module Dependency = struct
     | Package _ -> "opam-package"
   ;;
 
-  type icons =
-    { dependency : LightDarkIcon.t
-    ; dependency_selected : LightDarkIcon.t
-    ; package : LightDarkIcon.t
-    }
-
-  let icon icons dependency is_current_sandbox =
+  let icon assets dependency is_current_sandbox =
     match dependency with
-    | Switch _ ->
-      if is_current_sandbox then icons.dependency_selected else icons.dependency
-    | Package _ -> icons.package
+    | Switch _ -> Extension_assets.dependency_icon assets ~selected:is_current_sandbox
+    | Package _ -> Extension_assets.package_icon assets
   ;;
 
   let collapsible_state =
@@ -67,11 +60,11 @@ module Dependency = struct
          else None)
   ;;
 
-  let to_treeitem icons instance dependency =
+  let to_treeitem assets instance dependency =
     let open Promise.Syntax in
     let current_sandbox = Extension_instance.sandbox instance in
     let is_current_sandbox = equals_opam_sandbox dependency current_sandbox in
-    let icon = `LightDark (icon icons dependency is_current_sandbox) in
+    let icon = `LightDark (icon assets dependency is_current_sandbox) in
     let* collapsibleState = collapsible_state dependency in
     let label =
       `TreeItemLabel (Vscode.TreeItemLabel.create ~label:(label dependency) ())
@@ -181,8 +174,8 @@ module Command = struct
   ;;
 end
 
-let getTreeItem icons instance ~element =
-  `Promise (Dependency.to_treeitem icons instance element)
+let getTreeItem assets instance ~element =
+  `Promise (Dependency.to_treeitem assets instance element)
 ;;
 
 let getChildren ?opam ?element () =
@@ -199,14 +192,7 @@ let getChildren ?opam ?element () =
     `Promise items
 ;;
 
-let register extension instance =
-  let icons =
-    Dependency.
-      { dependency = Extension_assets.dependency_icon ~extension ~selected:false
-      ; dependency_selected = Extension_assets.dependency_icon ~extension ~selected:true
-      ; package = Extension_assets.package_icon ~extension
-      }
-  in
+let register extension instance ~assets =
   let module EventEmitter = Vscode.EventEmitter.Make (Interop.Js.Or_undefined (Dependency))
   in
   let event_emitter = EventEmitter.make () in
@@ -215,7 +201,7 @@ let register extension instance =
     let open Promise.Syntax in
     let+ opam = Opam.make () in
     let getChildren = getChildren ?opam in
-    let getTreeItem = getTreeItem icons instance in
+    let getTreeItem = getTreeItem assets instance in
     let module TreeDataProvider = Vscode.TreeDataProvider.Make (Dependency) in
     let treeDataProvider =
       TreeDataProvider.create ~getTreeItem ~getChildren ~onDidChangeTreeData:event ()

@@ -1,5 +1,5 @@
-let discord_item extension =
-  let icon = `LightDark (Extension_assets.discord_icon ~extension) in
+let discord_item assets =
+  let icon = `LightDark (Extension_assets.discord_icon assets) in
   let label = `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Chat on Discord" ()) in
   let item = Vscode.TreeItem.make_label ~label () in
   let command =
@@ -15,8 +15,8 @@ let discord_item extension =
   item
 ;;
 
-let discuss_item extension =
-  let icon = `LightDark (Extension_assets.chat_icon ~extension) in
+let discuss_item assets =
+  let icon = `LightDark (Extension_assets.chat_icon assets) in
   let label =
     `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Ask a question on Discuss" ())
   in
@@ -54,8 +54,8 @@ let tutorials_item =
   item
 ;;
 
-let github_item extension =
-  let icon = `LightDark (Extension_assets.github_icon ~extension) in
+let github_item assets =
+  let icon = `LightDark (Extension_assets.github_icon assets) in
   let label =
     `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Open an issue on Github" ())
   in
@@ -75,12 +75,8 @@ let github_item extension =
   item
 ;;
 
-let items extension =
-  [ discord_item extension
-  ; discuss_item extension
-  ; github_item extension
-  ; tutorials_item
-  ]
+let items assets =
+  [ discord_item assets; discuss_item assets; github_item assets; tutorials_item ]
 ;;
 
 let getTreeItem ~element = `Value element
@@ -91,8 +87,8 @@ let getChildren items ?element () =
   | Some _ -> `Value (Some [])
 ;;
 
-let register extension =
-  let items = items extension in
+let register extension ~assets =
+  let items = items assets in
   let getChildren = getChildren items in
   let module TreeDataProvider = Vscode.TreeDataProvider.Make (Vscode.TreeItem) in
   let treeDataProvider = TreeDataProvider.create ~getTreeItem ~getChildren () in

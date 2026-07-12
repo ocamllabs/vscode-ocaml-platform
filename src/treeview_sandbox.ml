@@ -216,8 +216,8 @@ let getChildren ~instance ?element () =
     `Promise items
 ;;
 
-let register extension instance =
-  let icon = Extension_assets.package_icon ~extension in
+let register extension instance ~assets =
+  let icon = Extension_assets.package_icon assets in
   let getTreeItem = getTreeItem icon in
   let getChildren = getChildren ~instance in
   let module EventEmitter = Vscode.EventEmitter.Make (Interop.Js.Or_undefined (Dependency))
