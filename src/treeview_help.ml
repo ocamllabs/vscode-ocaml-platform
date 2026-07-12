@@ -1,11 +1,5 @@
 let discord_item extension =
-  let icon =
-    `LightDark
-      (Extension_assets.light_dark_icon
-         ~extension
-         ~light:"discord-light.svg"
-         ~dark:"discord-dark.svg")
-  in
+  let icon = `LightDark (Extension_assets.discord_icon ~extension) in
   let label = `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Chat on Discord" ()) in
   let item = Vscode.TreeItem.make_label ~label () in
   let command =
@@ -22,13 +16,7 @@ let discord_item extension =
 ;;
 
 let discuss_item extension =
-  let icon =
-    `LightDark
-      (Extension_assets.light_dark_icon
-         ~extension
-         ~light:"chat-light.svg"
-         ~dark:"chat-dark.svg")
-  in
+  let icon = `LightDark (Extension_assets.chat_icon ~extension) in
   let label =
     `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Ask a question on Discuss" ())
   in
@@ -46,7 +34,7 @@ let discuss_item extension =
   item
 ;;
 
-let tutorials_item () =
+let tutorials_item =
   let label =
     `TreeItemLabel
       (Vscode.TreeItemLabel.create ~label:"Explore OCaml exercises and tutorials" ())
@@ -67,13 +55,7 @@ let tutorials_item () =
 ;;
 
 let github_item extension =
-  let icon =
-    `LightDark
-      (Extension_assets.light_dark_icon
-         ~extension
-         ~light:"github-light.svg"
-         ~dark:"github-dark.svg")
-  in
+  let icon = `LightDark (Extension_assets.github_icon ~extension) in
   let label =
     `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Open an issue on Github" ())
   in
@@ -97,7 +79,7 @@ let items extension =
   [ discord_item extension
   ; discuss_item extension
   ; github_item extension
-  ; tutorials_item ()
+  ; tutorials_item
   ]
 ;;
 

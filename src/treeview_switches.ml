@@ -46,21 +46,9 @@ module Dependency = struct
     }
 
   let make_icons extension =
-    { dependency =
-        Extension_assets.light_dark_icon
-          ~extension
-          ~light:"dependency-light.svg"
-          ~dark:"dependency-dark.svg"
-    ; dependency_selected =
-        Extension_assets.light_dark_icon
-          ~extension
-          ~light:"dependency-light-selected.svg"
-          ~dark:"dependency-dark-selected.svg"
-    ; package =
-        Extension_assets.light_dark_icon
-          ~extension
-          ~light:"number-light.svg"
-          ~dark:"number-dark.svg"
+    { dependency = Extension_assets.dependency_icon ~extension ~selected:false
+    ; dependency_selected = Extension_assets.dependency_icon ~extension ~selected:true
+    ; package = Extension_assets.package_icon ~extension
     }
   ;;
 

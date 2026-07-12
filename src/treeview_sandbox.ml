@@ -9,13 +9,6 @@ module Dependency = struct
   let description t = Promise.return (Some (Sandbox.Package.version t))
   let tooltip t = Sandbox.Package.synopsis t
 
-  let make_icon extension =
-    Extension_assets.light_dark_icon
-      ~extension
-      ~light:"number-light.svg"
-      ~dark:"number-dark.svg"
-  ;;
-
   let collapsible_state t =
     if Sandbox.Package.has_dependencies t
     then TreeItemCollapsibleState.Collapsed
@@ -224,7 +217,7 @@ let getChildren ~instance ?element () =
 ;;
 
 let register extension instance =
-  let icon = Dependency.make_icon extension in
+  let icon = Extension_assets.package_icon ~extension in
   let getTreeItem = getTreeItem icon in
   let getChildren = getChildren ~instance in
   let module EventEmitter = Vscode.EventEmitter.Make (Interop.Js.Or_undefined (Dependency))

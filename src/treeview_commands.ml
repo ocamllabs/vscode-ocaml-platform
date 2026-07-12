@@ -1,11 +1,5 @@
 let select_sandbox_item extension =
-  let icon =
-    `LightDark
-      (Extension_assets.light_dark_icon
-         ~extension
-         ~light:"collection-light.svg"
-         ~dark:"collection-dark.svg")
-  in
+  let icon = `LightDark (Extension_assets.collection_icon ~extension) in
   let label = `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Select a Sandbox" ()) in
   let item = Vscode.TreeItem.make_label ~label () in
   let command =
@@ -17,13 +11,7 @@ let select_sandbox_item extension =
 ;;
 
 let terminal_item extension =
-  let icon =
-    `LightDark
-      (Extension_assets.light_dark_icon
-         ~extension
-         ~light:"terminal-light.svg"
-         ~dark:"terminal-dark.svg")
-  in
+  let icon = `LightDark (Extension_assets.terminal_icon ~extension) in
   let label =
     `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Open a sandboxed terminal" ())
   in
@@ -39,7 +27,7 @@ let terminal_item extension =
   item
 ;;
 
-let construct_item () =
+let construct_item =
   let icon = `ThemeIcon (Vscode.ThemeIcon.make ~id:"tools" ()) in
   let label =
     `TreeItemLabel
@@ -54,7 +42,7 @@ let construct_item () =
   item
 ;;
 
-let jump_item () =
+let jump_item =
   let icon = `ThemeIcon (Vscode.ThemeIcon.make ~id:"fold-up" ()) in
   let label =
     `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Jump to a specific target" ())
@@ -66,7 +54,7 @@ let jump_item () =
   item
 ;;
 
-let type_search_item () =
+let type_search_item =
   let icon = `ThemeIcon (Vscode.ThemeIcon.make ~id:"search-view-icon" ()) in
   let label =
     `TreeItemLabel
@@ -84,7 +72,7 @@ let type_search_item () =
   item
 ;;
 
-let navigate_holes_item () =
+let navigate_holes_item =
   let icon = `ThemeIcon (Vscode.ThemeIcon.make ~id:"breakpoints-activate" ()) in
   let label =
     `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Navigate between typed holes" ())
@@ -104,10 +92,10 @@ let navigate_holes_item () =
 let items extension =
   [ select_sandbox_item extension
   ; terminal_item extension
-  ; construct_item ()
-  ; jump_item ()
-  ; type_search_item ()
-  ; navigate_holes_item ()
+  ; construct_item
+  ; jump_item
+  ; type_search_item
+  ; navigate_holes_item
   ]
 ;;
 

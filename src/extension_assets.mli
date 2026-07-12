@@ -1,9 +1,12 @@
-(** Resolve assets bundled with the extension as VS Code URIs. *)
+val chat_icon : extension:Vscode.ExtensionContext.t -> Vscode.LightDarkIcon.t
+val collection_icon : extension:Vscode.ExtensionContext.t -> Vscode.LightDarkIcon.t
 
-val uri : extension:Vscode.ExtensionContext.t -> name:string -> Vscode.Uri.t
-
-val light_dark_icon
+val dependency_icon
   :  extension:Vscode.ExtensionContext.t
-  -> light:string
-  -> dark:string
+  -> selected:bool
   -> Vscode.LightDarkIcon.t
+
+val discord_icon : extension:Vscode.ExtensionContext.t -> Vscode.LightDarkIcon.t
+val github_icon : extension:Vscode.ExtensionContext.t -> Vscode.LightDarkIcon.t
+val package_icon : extension:Vscode.ExtensionContext.t -> Vscode.LightDarkIcon.t
+val terminal_icon : extension:Vscode.ExtensionContext.t -> Vscode.LightDarkIcon.t
