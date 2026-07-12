@@ -98,6 +98,7 @@ module Path : sig
   val dirname : string -> string
   val extname : string -> string
   val isAbsolute : string -> bool
+  val relative : string -> string -> string
   val join : string list -> string
 end
 
@@ -112,6 +113,7 @@ end
 module Fs : sig
   val readDir : string -> (string list, string) result Promise.t
   val readFile : string -> string Promise.t
+  val realpath : string -> string Promise.t
   val exists : string -> bool Promise.t
 end
 

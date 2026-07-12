@@ -16,7 +16,17 @@ let basename = Node.Path.basename
 let join x y = Node.Path.join [ x; y ]
 let ( / ) = join
 let relative = join
+let relative_from = Node.Path.relative
 let relative_all p xs = List.fold_left xs ~f:join ~init:p
+
+let is_inside ~dir path =
+  let relative = relative_from dir path in
+  not
+    (is_absolute (of_string relative)
+     || String.equal relative ".."
+     || String.is_prefix relative ~prefix:(".." ^ String.of_char sep))
+;;
+
 let with_ext x ~ext = x ^ ext
 
 let is_root = function

@@ -20,17 +20,24 @@ type t =
   ; mutable origin_to_pp_doc_map : (string, string, String.comparator_witness) Map.t
     (** Mapping beween the original and Preprocessed Document used to
         simultaneously communicate with a common webview. *)
+  ; mutable ast_update_generation : int
+    (** Monotonically increasing identifier for AST update requests. *)
+  ; mutable current_ast_updates : (string, int, String.comparator_witness) Map.t
+    (** The latest AST update request for each original document. *)
   }
 
 let make () =
   let webview_map = Map.empty (module String) in
   let dirty_original_doc_set = Set.empty (module String) in
   let origin_to_pp_doc_map = Map.empty (module String) in
+  let current_ast_updates = Map.empty (module String) in
   { webview_map
   ; current_ast_mode = Original_ast
   ; hover_disposable = None
   ; dirty_original_doc_set
   ; origin_to_pp_doc_map
+  ; ast_update_generation = 0
+  ; current_ast_updates
   }
 ;;
 
@@ -63,6 +70,21 @@ let associate_origin_and_pp t ~origin_uri ~pp_doc_uri =
 
 let get_current_ast_mode t = t.current_ast_mode
 let set_current_ast_mode t v = t.current_ast_mode <- v
+
+let start_ast_update t uri =
+  t.ast_update_generation <- t.ast_update_generation + 1;
+  let generation = t.ast_update_generation in
+  let key = Uri.toString uri () in
+  t.current_ast_updates <- Map.set t.current_ast_updates ~key ~data:generation;
+  let mode = t.current_ast_mode in
+  let request_is_current () =
+    Poly.equal mode t.current_ast_mode
+    && Map.find t.current_ast_updates key
+       |> Option.value_map ~default:false ~f:(Int.equal generation)
+  in
+  mode, request_is_current
+;;
+
 let get_hover_disposable t = t.hover_disposable
 let set_hover_disposable t hover_disposable = t.hover_disposable <- hover_disposable
 
@@ -102,7 +124,8 @@ let set_webview t uri webview =
 
 let remove_webview t uri =
   let key = Uri.toString uri () in
-  t.webview_map <- Map.remove t.webview_map key
+  t.webview_map <- Map.remove t.webview_map key;
+  t.current_ast_updates <- Map.remove t.current_ast_updates key
 ;;
 
 let pp_status t uri =

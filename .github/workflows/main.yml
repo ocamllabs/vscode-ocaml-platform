@@ -51,7 +51,7 @@ jobs:
           path: ocaml-platform.vsix
 
       - name: Test extension
-        run: xvfb-run -a bun run test
+        run: opam exec -- xvfb-run -a bun run test
 
   lint-opam:
     runs-on: ubuntu-latest
