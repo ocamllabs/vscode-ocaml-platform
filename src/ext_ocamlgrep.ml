@@ -120,12 +120,6 @@ let scan_folder query (scan_root : Path.t)
           ]
       }
 
-(*
-   TODO: derive the scan root from the current file,
-   using 'Dune_root.find_nearest_dune_project' - instead of using each
-   workspace folder as a root (because they may not be within a Dune
-   workspace).
-*)
 let show_query_input =
   let previous : Disposable.t option ref = ref None in
   fun scan_root text_editor ->
