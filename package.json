@@ -42,7 +42,7 @@
     "test": "vscode-test"
   },
   "dependencies": {
-    "oxfmt": "0.58.0",
+    "oxfmt": "0.59.0",
     "oxlint": "1.73.0",
     "polka": "1.0.0-next.28",
     "sirv": "3.0.2",
