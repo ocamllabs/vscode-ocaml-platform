@@ -25,41 +25,39 @@ type root =
 let realpath (x : Path.t) : Path.t Promise.t =
   let+ str = Node.Fs.realpath (Path.to_string x) in
   Path.of_string str
+;;
 
 let check_dir best_candidate real_dir =
   (* always check for a dune-workspace file *)
   let* exists = Fs.exists Path.(to_string (real_dir / "dune-workspace")) in
-  if exists then
-    Promise.return (Some (Dune_workspace real_dir))
-  else
+  if exists
+  then Promise.return (Some (Dune_workspace real_dir))
+  else (
     (* only check for a dune-project file if we haven't encountered
        a dune-workspace file before *)
     match best_candidate with
     | Some (Dune_workspace _) -> Promise.return best_candidate
-    | None
-    | Some (Dune_project _) ->
-        let+ exists = Fs.exists Path.(to_string (real_dir / "dune-project")) in
-        if exists then
-          Some (Dune_project real_dir)
-        else
-          best_candidate
+    | None | Some (Dune_project _) ->
+      let+ exists = Fs.exists Path.(to_string (real_dir / "dune-project")) in
+      if exists then Some (Dune_project real_dir) else best_candidate)
+;;
 
 let rec find_from_dir ~active_file best_candidate real_dir =
   let* best_candidate = check_dir best_candidate real_dir in
   match Path.parent real_dir with
   | Some parent when not (Path.equal parent real_dir) ->
-      find_from_dir ~active_file best_candidate parent
+    find_from_dir ~active_file best_candidate parent
   | None | Some _ ->
-      (* we're reached the filesystem root *)
-      (match best_candidate with
-       | Some (Dune_workspace root_dir | Dune_project root_dir) ->
-           Ok root_dir
-       | None ->
-           Error
-             (sprintf "cannot find a Dune root folder for file '%s'"
-                (Path.to_string active_file)
-             )
-      ) |> Promise.return
+    (* we're reached the filesystem root *)
+    (match best_candidate with
+     | Some (Dune_workspace root_dir | Dune_project root_dir) -> Ok root_dir
+     | None ->
+       Error
+         (sprintf
+            "cannot find a Dune root folder for file '%s'"
+            (Path.to_string active_file)))
+    |> Promise.return
+;;
 
 (*
    A project may not contain workspaces but a workspace may contain
@@ -71,9 +69,9 @@ let rec find_from_dir ~active_file best_candidate real_dir =
      file passed as argument (typically an ml or mli file).
    - Walk up the ancestor folders until reaching the filesystem root.
      * Along the way, any folder containing a "dune-workspace" replaces
-       the best candidate for a workspace root.
+     the best candidate for a workspace root.
      * If a folder contains a "dune-project" file and no "dune-workspace"
-       root has been found so far, it is remembered as the best candidate.
+     root has been found so far, it is remembered as the best candidate.
 
    i.e. we stop considering "dune-project" files once we've found a
    "dune-workspace" file while walking up toward the filesystem root.
@@ -81,14 +79,15 @@ let rec find_from_dir ~active_file best_candidate real_dir =
 let find active_file =
   match Path.parent active_file with
   | None ->
-      (* FS root *)
-      Promise.return (
-        Error
-          (sprintf "cannot find a Dune root folder for file '%s'"
-             (Path.to_string active_file))
-      )
+    (* FS root *)
+    Promise.return
+      (Error
+         (sprintf
+            "cannot find a Dune root folder for file '%s'"
+            (Path.to_string active_file)))
   | Some dir ->
-      (* determine the absolute parent path that doesn't contain symlinks
-         (as if we did 'cd DIR; cd ..; pwd' with a naive shell) *)
-      let* real_dir = realpath dir in
-      find_from_dir ~active_file None real_dir
+    (* determine the absolute parent path that doesn't contain symlinks
+       (as if we did 'cd DIR; cd ..; pwd' with a naive shell) *)
+    let* real_dir = realpath dir in
+    find_from_dir ~active_file None real_dir
+;;
