@@ -32,6 +32,10 @@
 - Enforce that users either enable dune package management by generating a lockfile (as recommended by the dune team) or select a different sandbox. Pressing the escape key will display the select sandbox ui. (2208)
 - Rely on `dune tools env` to retrieve the local OCaml LSP path in the context of DPM. (#2227)
 - Ensure consistent installation hint with chosen sandbox. (#2221)
+- Add Ocamlgrep command. It takes an OCaml expression which may
+  contain holes and type annotations, and scans the Dune workspace for
+  matching expressions. Requires the `ocamlgrep` executable which is
+  available from Opam. (#2218)
 
 ## 2.3.0
 
