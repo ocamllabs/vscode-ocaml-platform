@@ -24,7 +24,7 @@
     "@types/vscode-webview": "1.57.5",
     "@vitejs/plugin-react": "6.0.3",
     "babel-plugin-react-compiler": "1.0.0",
-    "tailwindcss": "4.3.2",
+    "tailwindcss": "4.3.3",
     "typescript": "7.0.2",
     "vite": "8.1.4",
     "vite-plugin-singlefile": "2.3.3"
