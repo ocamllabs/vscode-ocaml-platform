@@ -72,10 +72,11 @@ let display_results query text_editor (response : Custom_requests.Ocamlgrep.resp
            ])
 ;;
 
-let scan_folder query (scan_root : Path.t) : Custom_requests.Ocamlgrep.response Promise.t =
-  let cmd =
-    Cmd.(Spawn { bin = Path.of_string "ocamlgrep"; args = [ "--format"; "json"; query ] })
-  in
+let scan_folder sandbox query (scan_root : Path.t)
+  : Custom_requests.Ocamlgrep.response Promise.t
+  =
+  let cmd = Sandbox.get_command sandbox "ocamlgrep" [ "--format"; "json"; query ] `Exec in
+  Cmd.log cmd;
   let+ result : ChildProcess.return = Cmd.run ~cwd:scan_root cmd in
   (* Exit code 1 ("no matches") is not an error. *)
   match result.exitCode with
@@ -114,7 +115,7 @@ let scan_folder query (scan_root : Path.t) : Custom_requests.Ocamlgrep.response 
 
 let show_query_input =
   let previous : Disposable.t option ref = ref None in
-  fun scan_root text_editor ->
+  fun sandbox scan_root text_editor ->
     log_to_output [ sprintf "ocamlgrep scan root: %s" (Path.to_string scan_root) ];
     let () =
       match !previous with
@@ -130,7 +131,7 @@ let show_query_input =
             InputBox.hide input_box;
             ignore
               (let+ response =
-                 scan_folder query scan_root
+                 scan_folder sandbox query scan_root
                  |> Promise.catch ~rejected:(fun e ->
                    let msg =
                      if Ojs.has_property e "message"
@@ -148,21 +149,18 @@ let show_query_input =
     InputBox.show input_box
 ;;
 
-let with_check_for_ocamlgrep func =
-  (* Check for the presence of the ocamlgrep command.
-
-     It would be nicer if we didn't have to do this probing first
-     and simply could catch ENOENT ourselves.
-  *)
-  let cmd = Cmd.(Spawn { bin = Path.of_string "ocamlgrep"; args = [] }) in
-  let* check_result = Cmd.check cmd in
-  match check_result with
-  | Error _ ->
+let with_check_for_ocamlgrep sandbox func =
+  (* Check for the presence of the ocamlgrep command. It may be wrapped
+     in an 'opam exec --switch=... -- ocamlgrep ...' invocation. *)
+  let cmd = Sandbox.get_command sandbox "ocamlgrep" [ "--help" ] `Exec in
+  let* result = Cmd.run cmd in
+  match result.exitCode with
+  | 0 -> func ()
+  | _exit_status ->
     show_message
       `Error
       "ocamlgrep is not installed. Please install it with: opam install ocamlgrep";
     Promise.return ()
-  | Ok _ -> func ()
 ;;
 
 (* This ignores VSCode workspace boundaries and may return a root folder
@@ -181,7 +179,8 @@ let with_scan_root (text_editor : TextEditor.t) func =
   | Ok path -> func path
 ;;
 
-let callback (_instance : Extension_instance.t) () =
+let callback (instance : Extension_instance.t) () =
+  let sandbox = Extension_instance.sandbox instance in
   match Window.activeTextEditor () with
   | None ->
     Command_api.Command_errors.text_editor_must_be_active
@@ -193,7 +192,7 @@ let callback (_instance : Extension_instance.t) () =
       `Error
       "Invalid file type. This command only works in OCaml source files."
   | Some text_editor ->
-    with_check_for_ocamlgrep (fun () ->
-      with_scan_root text_editor (fun root -> show_query_input root text_editor))
+    with_check_for_ocamlgrep sandbox (fun ocamlgrep_cmd ->
+      with_scan_root text_editor (fun root -> show_query_input sandbox root text_editor))
     |> ignore
 ;;
