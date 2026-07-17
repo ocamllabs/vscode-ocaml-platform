@@ -55,7 +55,7 @@
     "@vscode/test-electron": "3.0.0",
     "@vscode/vsce": "3.9.2",
     "ovsx": "1.0.2",
-    "oxlint-tsgolint": "0.24.0",
+    "oxlint-tsgolint": "0.25.0",
     "typescript": "7.0.2"
   },
   "overrides": {
