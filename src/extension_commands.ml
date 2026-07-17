@@ -180,10 +180,8 @@ let _run_dune_pkg_lock =
             in
             (match selection with
              | Some `Upgrade_dune -> Command_api.(execute Internal.upgrade_dune) ()
-             | Some `Select_sandbox | None ->
-               Command_api.(execute Internal.select_sandbox) ())
-            >>= (function
-             | _ -> Promise.return ())
+             | Some `Select_sandbox -> Command_api.(execute Internal.select_sandbox) ()
+             | None -> Command_api.(execute Internal.select_sandbox) ())
         in
         let* () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
         Extension_instance.start_language_server instance
@@ -212,10 +210,8 @@ let _upgrade_dune =
           ~choices:[ "Select a different sandbox", `Select_sandbox ]
           ()
       in
-      (match selection with
-       | Some `Select_sandbox | None -> Command_api.(execute Internal.select_sandbox) ())
-      >>= function
-      | _ -> Promise.return ()
+      match selection with
+      | Some `Select_sandbox | None -> Command_api.(execute Internal.select_sandbox) ()
     in
     let _ =
       match Extension_instance.sandbox instance with
