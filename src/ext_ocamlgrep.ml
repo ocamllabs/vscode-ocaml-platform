@@ -166,10 +166,16 @@ let with_check_for_ocamlgrep sandbox func =
 (* This ignores VSCode workspace boundaries and may return a root folder
    that is an ancestor of one of the VSCode workspaces. *)
 let get_scan_root (text_editor : TextEditor.t) =
-  let active_file_path =
-    text_editor |> TextEditor.document |> TextDocument.uri |> Uri.path |> Path.of_string
+  let uri =
+    text_editor |> TextEditor.document |> TextDocument.uri
   in
-  Dune_root.find active_file_path
+  match Uri.scheme uri with
+  | "file" ->
+      uri |> Uri.fsPath |> Path.of_string |> Dune_root.find
+  | _ ->
+      Error ("cannot determine dune root for a non-file URI: "
+             ^ Uri.toString uri ())
+      |> Promise.return
 ;;
 
 let with_scan_root (text_editor : TextEditor.t) func =
