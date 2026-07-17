@@ -172,14 +172,10 @@ let _run_dune_pkg_lock =
             let* selection =
               Window.showErrorMessage
                 ~message:("An error occurred while running dune pkg lock: " ^ err)
-                ~choices:
-                  [ "Upgrade dune", `Upgrade_dune
-                  ; "Select a different sandbox", `Select_sandbox
-                  ]
+                ~choices:[ "Select a different sandbox", `Select_sandbox ]
                 ()
             in
             (match selection with
-             | Some `Upgrade_dune -> Command_api.(execute Internal.upgrade_dune) ()
              | Some `Select_sandbox | None ->
                Command_api.(execute Internal.select_sandbox) ())
         in
