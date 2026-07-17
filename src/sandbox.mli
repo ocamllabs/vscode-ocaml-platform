@@ -80,6 +80,9 @@ val uninstall_packages : t -> Package.t list -> unit Promise.t
 (** Install new packages in the sandbox *)
 val install_packages : t -> string list -> unit Promise.t
 
+(** Command to install OCaml LSP in the sandbox *)
+val install_ocaml_lsp_server : t -> unit Promise.t
+
 (** Upgrade packages in the sandbox *)
 val upgrade_packages : ?packages:string list -> t -> unit Promise.t
 

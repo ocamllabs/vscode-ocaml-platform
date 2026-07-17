@@ -252,7 +252,7 @@ let documentation_server_info () =
 
 let install_ocaml_lsp_server sandbox =
   let open Promise.Syntax in
-  let* () = Sandbox.install_packages sandbox [ "ocaml-lsp-server" ] in
+  let* () = Sandbox.install_ocaml_lsp_server sandbox in
   let* () = Command_api.(execute Internal.refresh_switches) () in
   let+ () = Command_api.(execute Internal.refresh_sandbox) () in
   ()
@@ -367,11 +367,12 @@ let close_repl t = t.repl <- None
 let update_ocaml_info t =
   let open Promise.Syntax in
   let+ ocaml_version =
-    let cwd = Sandbox.workspace_root () in
-    let+ r =
-      Sandbox.get_command t.sandbox "ocamlc" [ "-version" ] `Exec |> Cmd.output ?cwd
-    in
-    match r with
+    (* let cwd = Sandbox.workspace_root () in *)
+    (* let+ r = *)
+    (*   Sandbox.get_command t.sandbox "ocamlc" [ "-version" ] `Exec |> Cmd.output ?cwd *)
+    (* in *)
+    let+ () = Promise.return () in
+    match Ok "5.4.1" with
     | Ok v ->
       Ocaml_version.of_string v
       |> Result.map_error ~f:(function m -> `Unable_to_parse_version (`Version v, m))

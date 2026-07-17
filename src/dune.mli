@@ -17,7 +17,7 @@ type t =
   }
 
 (** Check if dune package management is enable. *)
-val is_dpm_enabled : t -> bool Promise.t
+val is_dpm_enabled : t -> (bool, [> `Msg of string ]) result Promise.t
 
 (** Generic function to execute dune commands *)
 val command : t -> args:string list -> Cmd.t
@@ -26,7 +26,11 @@ val command : t -> args:string list -> Cmd.t
 val exec : target:string -> ?args:string list -> t -> Cmd.t
 
 (** Run specific `dune pkg <foo> commands` *)
-val exec_pkg : cmd:string -> ?args:string list -> t -> Cmd.t
+val exec_pkg
+  :  cmd:string
+  -> ?args:string list
+  -> t
+  -> (Cmd.t, [> `Msg of string ]) result Promise.t
 
 (** Run `dune tools <exec/which>` *)
 val tools

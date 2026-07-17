@@ -98,47 +98,54 @@ let _install_dune_lsp_server =
       match sandbox with
       | Dune dune ->
         let* dpm = Dune.is_dpm_enabled dune in
-        if dpm
-        then
-          let* dune_lsp_present = Dune.is_ocamllsp_present dune in
-          if dune_lsp_present
-          then
-            show_message `Info "OCaml-LSP server is already installed." |> Promise.return
-          else (
-            let options =
-              ProgressOptions.create
-                ~location:(`ProgressLocation Notification)
-                ~title:"Installing ocaml-lsp server using \"dune tools install ocamllsp\""
-                ~cancellable:false
-                ()
-            in
-            let task ~progress:_ ~token:_ =
-              let+ result =
-                (* We first check the version so that the process can exit, otherwise the progress indicator runs forever.*)
-                Sandbox.get_command sandbox "ocamllsp" [] `Install
-                |> Cmd.output ~cwd:(Dune.root dune)
-              in
-              match result with
-              | Ok _ -> true
-              | Error err ->
-                show_message `Error "An error occured while installing ocamllsp : %s" err;
-                false
-            in
-            let* installed =
-              Vscode.Window.withProgress (module Interop.Js.Bool) ~options ~task
-            in
-            if installed
-            then
-              let+ _ = Extension_instance.start_language_server instance in
-              ()
-            else Promise.return ())
-        else Sandbox.suggest_to_run_dune_pkg_lock () |> Promise.return
+        (match dpm with
+         | Ok true ->
+           let* dune_lsp_present = Dune.is_ocamllsp_present dune in
+           if dune_lsp_present
+           then
+             show_message `Info "OCaml-LSP server is already installed." |> Promise.return
+           else (
+             let options =
+               ProgressOptions.create
+                 ~location:(`ProgressLocation Notification)
+                 ~title:
+                   "Installing ocaml-lsp server using \"dune tools install ocamllsp\""
+                 ~cancellable:false
+                 ()
+             in
+             let task ~progress:_ ~token:_ =
+               let+ result =
+                 (* We first check the version so that the process can exit, otherwise the progress indicator runs forever.*)
+                 Sandbox.get_command sandbox "ocamllsp" [] `Install
+                 |> Cmd.output ~cwd:(Dune.root dune)
+               in
+               match result with
+               | Ok _ -> true
+               | Error err ->
+                 show_message `Error "An error occured while installing ocamllsp : %s" err;
+                 false
+             in
+             let* installed =
+               Window.withProgress (module Interop.Js.Bool) ~options ~task
+             in
+             if installed
+             then
+               let+ _ = Extension_instance.start_language_server instance in
+               ()
+             else Promise.return ())
+         | Ok false ->
+           (* TODO: after the lock we want to install the LSP. *)
+           Sandbox.suggest_to_run_dune_pkg_lock () |> Promise.return
+         | Error (`Msg message) ->
+           let* choice =
+             Window.showInformationMessage ~message ~choices:[ "Retry", `Retry ] ()
+           in
+           (match choice with
+            | Some `Retry -> Command_api.(execute Internal.install_dune_lsp) ()
+            | _ -> Promise.return ()))
       | _ ->
         show_message
           `Warn
-          "install_dune_lsp: This command can only be executed in a Dune Package \
-           Management sandbox.";
-        log
           "install_dune_lsp: This command can only be executed in a Dune Package \
            Management sandbox.";
         Promise.return ()
@@ -162,15 +169,24 @@ let _run_dune_pkg_lock =
             ()
         in
         let task ~progress:_ ~token:_ =
-          let+ result =
-            Dune.exec_pkg ~cmd:"lock" dune |> Cmd.output ~cwd:(Dune.root dune)
-          in
+          let* result = Dune.exec_pkg ~cmd:"lock" dune in
           match result with
-          | Ok _ -> ()
-          | Error err ->
-            show_message `Error "An error occurred while running dune pkg lock: %s" err
+          | Ok cmd ->
+            Cmd.output ~cwd:(Dune.root dune) cmd
+            >>| Result.iter_error
+                  ~f:
+                    (show_message
+                       `Error
+                       "An error occured while running dune pkg lock: %S")
+          | Error (`Msg message) ->
+            let* choice =
+              Window.showInformationMessage ~message ~choices:[ "Retry", `Retry ] ()
+            in
+            (match choice with
+             | Some `Retry -> Command_api.(execute Internal.run_dune_pkg_lock) ()
+             | _ -> Promise.return ())
         in
-        let+ () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
+        let+ () = Window.withProgress (module Interop.Js.Unit) ~options ~task in
         let _ = Extension_instance.start_language_server instance in
         ()
       | _ ->
@@ -178,9 +194,6 @@ let _run_dune_pkg_lock =
           `Warn
           "dune_pkg_lock: This command can only be executed in a Dune Package Management \
            sandbox.";
-        log
-          "run_dune_pkg_lock: This command can only be executed in a Dune Package \
-           Management sandbox.";
         Promise.return ()
     in
     ()

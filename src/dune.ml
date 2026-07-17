@@ -109,18 +109,40 @@ let make ~working_dir ~dune_path =
     Promise.return None
 ;;
 
+let is_build_dir_locked t =
+  let open Promise.Syntax in
+  let lock_file_path = Path.(t.root / "_build" / ".lock") in
+  let+ content = Path.to_string lock_file_path |> Fs.readFile in
+  (* If a Dune instance is currently running, [_build/lock] contains its PID.
+     Otherwise, the file is empty. *)
+  if String.is_empty content
+  then Ok ()
+  else (
+    let msg =
+      "It looks like another Dune process is preventing the extension from using Dune. \
+       You can wait for it to finish and click Retry, or select an Opam sandbox."
+    in
+    Error (`Msg msg))
+;;
+
 let command t ~args = Cmd.Spawn (Cmd.append t.bin args)
 
 let exec ~target ?(args = []) t =
   Cmd.Spawn (Cmd.append t.bin ([ "exec"; target; "--" ] @ args))
 ;;
 
-let exec_pkg ~cmd ?(args = []) t = Cmd.Spawn (Cmd.append t.bin ([ "pkg"; cmd ] @ args))
+let exec_pkg ~cmd ?(args = []) t =
+  let open Promise.Result.Syntax in
+  let+ () = is_build_dir_locked t in
+  Cmd.Spawn (Cmd.append t.bin ([ "pkg"; cmd ] @ args))
+;;
 
 let is_dpm_enabled t =
+  let open Promise.Result.Syntax in
+  let* cmd = exec_pkg ~cmd:"enabled" t in
   let open Promise.Syntax in
-  let+ { exitCode; _ } = Cmd.run ~cwd:t.root (exec_pkg ~cmd:"enabled" t) in
-  Int.equal exitCode 0
+  let+ { exitCode; _ } = Cmd.run ~cwd:t.root cmd in
+  Ok (Int.equal exitCode 0)
 ;;
 
 let tools ~tool ?(args = []) t cmd =
