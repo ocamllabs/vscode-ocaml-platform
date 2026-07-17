@@ -157,6 +157,8 @@ let with_check_for_ocamlgrep sandbox func =
   match result.exitCode with
   | 0 -> func ()
   | _exit_status ->
+    (* TODO: Show buttons to perform the install in the current sandbox or
+       to change sandbox, just like we do for ocaml_lsp_server. *)
     show_message
       `Error
       "ocamlgrep is not installed. Please install it with: opam install ocamlgrep";
