@@ -132,11 +132,11 @@ let show_query_input =
             ignore
               (let+ response =
                  scan_folder sandbox query scan_root
-                 |> Promise.catch ~rejected:(fun e ->
+                 |> Promise.catch ~rejected:(fun (e : Promise.error) ->
                    let msg =
                      if Ojs.has_property e "message"
                      then [%js.to: string] (Ojs.get_prop_ascii e "message")
-                     else [%js.to: string] e
+                     else "unknown error"
                    in
                    show_message `Error "ocamlgrep: %s" msg;
                    Promise.return Custom_requests.Ocamlgrep.empty_response)
