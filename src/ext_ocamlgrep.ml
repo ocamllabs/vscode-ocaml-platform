@@ -75,7 +75,9 @@ let display_results query text_editor (response : Custom_requests.Ocamlgrep.resp
 let scan_folder sandbox query (scan_root : Path.t)
   : Custom_requests.Ocamlgrep.response Promise.t
   =
-  let cmd = Sandbox.get_command sandbox "ocamlgrep" [ "--format"; "json"; "--"; query ] `Exec in
+  let cmd =
+    Sandbox.get_command sandbox "ocamlgrep" [ "--format"; "json"; "--"; query ] `Exec
+  in
   Cmd.log cmd;
   let+ result : ChildProcess.return = Cmd.run ~cwd:scan_root cmd in
   (* Exit code 1 ("no matches") is not an error. *)
