@@ -65,6 +65,23 @@ module Merlin_jump : sig
   val request : (params, response) custom_request
 end
 
+module Ocamlgrep : sig
+  type finding =
+    { uri : Uri.t
+    ; range : Range.t
+    ; lines : string list
+    }
+
+  type response =
+    { findings : finding list
+    ; warnings : string list
+    ; errors : string list
+    }
+
+  val decode_response : resolve_path:(Path.t -> Uri.t) -> Jsonoo.t -> response
+  val empty_response : response
+end
+
 module Type_search : sig
   type type_search_result =
     { name : string

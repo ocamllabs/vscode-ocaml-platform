@@ -157,6 +157,91 @@ module Merlin_jump = struct
   let request = { meth = ocamllsp_prefixed "jump"; encode_params; decode_response }
 end
 
+module Ocamlgrep = struct
+  (* Mirrors the JSON schema produced by [ocamlgrep --format json]
+     (generated from Export.atd in the ocamlgrep library).
+     Positions are 0-indexed rows/columns; location.file is an absolute path. *)
+  type finding =
+    { uri : Uri.t
+    ; range : Range.t
+    ; lines : string list
+    }
+
+  type response =
+    { findings : finding list
+    ; warnings : string list
+    ; errors : string list
+    }
+
+  (* string length in UTF-16 code units *)
+  include [%js: val js_string_length : string -> int [@@js.get "length"]]
+
+  (* Translate an offset in bytes into an offset in UTF-16 code units
+     i.e. the length of the corresponding JavaScript string *)
+  let translate_column ~line_array ~first_line_index ~line_index ~column_bytes =
+    let substr =
+      try
+        let line = line_array.(line_index - first_line_index) in
+        String.sub line ~pos:0 ~len:column_bytes
+      with
+      | Invalid_argument _ ->
+        (* tolerate broken input silently *)
+        ""
+    in
+    js_string_length substr
+  ;;
+
+  let decode_response ~resolve_path response =
+    let open Jsonoo.Decode in
+    let decode_pos json =
+      let row = field "row" int json in
+      let col = field "column" int json in
+      row, col
+    in
+    let decode_finding json =
+      let loc = field "location" Fn.id json in
+      let file = field "file" string loc |> Path.of_string in
+      let uri = resolve_path file in
+      let lines = field "lines" (list string) json in
+      let line_array = Array.of_list lines in
+      let start_row, start_col = field "start" decode_pos loc in
+      let end_row, end_col = field "end" decode_pos loc in
+      let range =
+        Range.makePositions
+          ~start:
+            (Position.make
+               ~line:start_row
+               ~character:
+                 (translate_column
+                    ~line_array
+                    ~first_line_index:start_row
+                    ~line_index:start_row
+                    ~column_bytes:start_col))
+          ~end_:
+            (Position.make
+               ~line:end_row
+               ~character:
+                 (translate_column
+                    ~line_array
+                    ~first_line_index:start_row
+                    ~line_index:end_row
+                    ~column_bytes:end_col))
+      in
+      { uri; range; lines }
+    in
+    let findings = field "findings" (list decode_finding) response in
+    let warnings = field "warnings" (list string) response in
+    let errors =
+      match try_optional (field "error" string) response with
+      | Some msg -> [ msg ]
+      | None -> []
+    in
+    { findings; warnings; errors }
+  ;;
+
+  let empty_response = { findings = []; warnings = []; errors = [] }
+end
+
 module Type_search = struct
   type type_search_result =
     { name : string

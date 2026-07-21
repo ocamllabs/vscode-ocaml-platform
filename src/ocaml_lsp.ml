@@ -93,6 +93,7 @@ module Experimental_capabilities = struct
     ; handleConstruct : bool
     ; handleJump : bool
     ; handleSearchByType : bool
+    ; handleOcamlgrep : bool
     }
 
   let default =
@@ -103,6 +104,7 @@ module Experimental_capabilities = struct
     ; handleConstruct = false
     ; handleJump = false
     ; handleSearchByType = false
+    ; handleOcamlgrep = false
     }
   ;;
 
@@ -120,6 +122,7 @@ module Experimental_capabilities = struct
       let handleSearchByType = has_capability "handleTypeSearch" in
       let handleConstruct = has_capability "handleConstruct" in
       let handleJump = has_capability "handleJump" in
+      let handleOcamlgrep = has_capability "handleOcamlgrep" in
       { handleSwitchImplIntf
       ; handleInferIntf
       ; handleTypedHoles
@@ -127,6 +130,7 @@ module Experimental_capabilities = struct
       ; handleConstruct
       ; handleJump
       ; handleSearchByType
+      ; handleOcamlgrep
       }
     with
     | Jsonoo.Decode_error err ->
@@ -328,3 +332,4 @@ let can_handle_type_selection t = t.experimental_capabilities.handleTypeEnclosin
 let can_handle_construct t = t.experimental_capabilities.handleConstruct
 let can_handle_merlin_jump t = t.experimental_capabilities.handleJump
 let can_handle_search_by_type t = t.experimental_capabilities.handleSearchByType
+let can_handle_ocamlgrep t = t.experimental_capabilities.handleOcamlgrep

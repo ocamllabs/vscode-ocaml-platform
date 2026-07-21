@@ -173,6 +173,7 @@ module Fs = struct
       [@@js.global "@node_fs.access"]
 
       val readdir : string -> string list Promise.t [@@js.global "@node_fs.readdir"]
+      val realpath : string -> string Promise.t [@@js.global "@node_fs.realpath"]
 
       val readFile : string -> options:ReadFileOptions.t -> string Promise.t
       [@@js.global "@node_fs.readFile"]]

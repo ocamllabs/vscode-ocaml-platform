@@ -1566,6 +1566,8 @@ module Navigate_holes = struct
   ;;
 end
 
+let _ocamlgrep : t = command Command_api.Internal.ocamlgrep Ext_ocamlgrep.callback
+
 let _type_selection =
   let open Type_selection in
   command Command_api.Internal.type_selection callback |> ignore;
