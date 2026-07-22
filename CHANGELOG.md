@@ -32,6 +32,7 @@
 - Enforce that users either enable dune package management by generating a lockfile (as recommended by the dune team) or select a different sandbox. Pressing the escape key will display the select sandbox ui. (2208)
 - Rely on `dune tools env` to retrieve the local OCaml LSP path in the context of DPM. (#2227)
 - Ensure consistent installation hint with chosen sandbox. (#2221)
+- Clean up all child processes spawned by the extension when quitting VS Code. (#2244)
 
 ## 2.3.0
 
