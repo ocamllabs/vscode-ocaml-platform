@@ -169,4 +169,6 @@ module ChildProcess : sig
     -> string
     -> string array
     -> return Promise.t
+
+  val kill_managed_processes : unit -> unit
 end

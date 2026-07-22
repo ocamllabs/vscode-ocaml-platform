@@ -73,9 +73,12 @@ let activate (extension : ExtensionContext.t) =
   Promise.return ()
 ;;
 
+let deactivate () = Node.ChildProcess.kill_managed_processes ()
+
 (* see {{:https://code.visualstudio.com/api/references/vscode-api#Extension}
-   activate() *)
+   activate() and deactivate() *)
 let () =
   let open Js_of_ocaml.Js in
-  export "activate" (wrap_callback activate)
+  export "activate" (wrap_callback activate);
+  export "deactivate" (wrap_callback deactivate)
 ;;
