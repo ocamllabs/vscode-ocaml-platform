@@ -207,11 +207,7 @@ module Setting = struct
     | Opam switch -> object_ [ kind; "switch", encode_vars @@ Opam.Switch.name switch ]
     | Custom template -> object_ [ kind; "template", string template ]
     | Dune (path, opam_switch) ->
-      let fields =
-        [ kind
-        ; "path", string (Path.to_string path)
-        ]
-      in
+      let fields = [ kind; "path", string (Path.to_string path) ] in
       let fields =
         match opam_switch with
         | Some switch -> fields @ [ "opam_switch", string (Opam.Switch.name switch) ]
@@ -502,10 +498,7 @@ let custom_dune_input_validation root =
   match input with
   | None -> Promise.return None
   | Some path_str ->
-    Dune.make
-      ~working_dir:root
-      ~dune_path:(Path.of_string (String.strip path_str))
-      ()
+    Dune.make ~working_dir:root ~dune_path:(Path.of_string (String.strip path_str)) ()
 ;;
 
 let get_active_switch_for_dpm opam_dunes = function
@@ -645,8 +638,7 @@ let select_dune_binary () =
         | None | Some `Separator -> Promise.return None
         | Some (`Opam_dune (path, switch)) ->
           Dune.make ~working_dir:root ~dune_path:path ~opam_switch:switch ()
-        | Some (`System_dune path) ->
-          Dune.make ~working_dir:root ~dune_path:path ()
+        | Some (`System_dune path) -> Dune.make ~working_dir:root ~dune_path:path ()
         | Some `Custom_dune -> custom_dune_input_validation root))
 ;;
 

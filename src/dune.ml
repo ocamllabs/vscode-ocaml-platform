@@ -125,7 +125,8 @@ let get_upgrade_dune_cmd t =
     let* opam = Opam.make () in
     (match opam with
      | None -> Promise.return (Error "Opam not found")
-     | Some opam -> Opam.upgrade ~packages:[ "dune" ] opam switch |> Cmd.output ~cwd:t.root)
+     | Some opam ->
+       Opam.upgrade ~packages:[ "dune" ] opam switch |> Cmd.output ~cwd:t.root)
   | None ->
     Cmd.output
       (Cmd.Shell "curl -fsSL https://get.dune.build/install | sh -s - --release latest")
