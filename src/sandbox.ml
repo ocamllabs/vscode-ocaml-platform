@@ -151,8 +151,8 @@ module Setting = struct
     | Esy of Esy.Manifest.t
     | Global
     | Custom of string
-    | Dune of Path.t * bool
-  (* path to dune and is_opam: a flag indicating if the dune instance is installed into an Opam switch. *)
+    | Dune of Path.t * Opam.Switch.t option
+  (* path to dune and optional opam switch if the dune instance is installed into an opam switch. *)
 
   let kind : t -> Kind.t = function
     | Opam _ -> Opam
@@ -185,13 +185,14 @@ module Setting = struct
       Custom template
     | Dune ->
       let path = Jsonoo.Decode.field "path" decode_vars json in
-      let is_opam =
-        Jsonoo.Decode.field "is_opam" Jsonoo.Decode.string json
-        |> function
-        | "true" -> true
-        | _ -> false
+      let opam_switch =
+        try
+          let sw_str = Jsonoo.Decode.field "opam_switch" Jsonoo.Decode.string json in
+          Opam.Switch.of_string sw_str
+        with
+        | _ -> None
       in
-      Dune (Path.of_string path, is_opam)
+      Dune (Path.of_string path, opam_switch)
   ;;
 
   let to_json (t : t) =
@@ -205,12 +206,18 @@ module Setting = struct
         [ kind; "root", encode_vars @@ (manifest |> Esy.Manifest.path |> Path.to_string) ]
     | Opam switch -> object_ [ kind; "switch", encode_vars @@ Opam.Switch.name switch ]
     | Custom template -> object_ [ kind; "template", string template ]
-    | Dune (path, is_opam) ->
-      object_
+    | Dune (path, opam_switch) ->
+      let fields =
         [ kind
         ; "path", string (Path.to_string path)
-        ; "is_opam", string (Bool.to_string is_opam)
         ]
+      in
+      let fields =
+        match opam_switch with
+        | Some switch -> fields @ [ "opam_switch", string (Opam.Switch.name switch) ]
+        | None -> fields
+      in
+      object_ fields
   ;;
 
   let t = Settings.create_setting ~scope:Workspace ~key:"sandbox" ~of_json ~to_json
@@ -269,10 +276,10 @@ let of_settings () : t option Promise.t =
          None))
   | Some Global -> Promise.return (Some Global)
   | Some (Custom template) -> Promise.return (Some (Custom template))
-  | Some (Dune (path, is_opam)) ->
+  | Some (Dune (path, opam_switch)) ->
     let open Promise.Option.Syntax in
     let* root = Promise.return (workspace_root ()) in
-    let* dune = Dune.make ~working_dir:root ~dune_path:path ~is_opam () in
+    let* dune = Dune.make ~working_dir:root ~dune_path:path ?opam_switch () in
     Promise.return (Some (Dune dune))
 ;;
 
@@ -380,8 +387,8 @@ let save_to_settings sandbox =
       | Custom template -> Setting.Custom template
       | Dune dune ->
         let path = Dune.dune_path dune in
-        let is_opam = Dune.is_opam dune in
-        Setting.Dune (path, is_opam)
+        let opam_switch = Dune.opam_switch dune in
+        Setting.Dune (path, opam_switch)
     in
     Settings.set ~section:"ocaml" Setting.t (to_setting sandbox)
   in
@@ -498,7 +505,6 @@ let custom_dune_input_validation root =
     Dune.make
       ~working_dir:root
       ~dune_path:(Path.of_string (String.strip path_str))
-      ~is_opam:false
       ()
 ;;
 
@@ -532,7 +538,7 @@ let get_active_switch_for_dpm opam_dunes = function
               ~detail:
                 (Printf.sprintf "%s" (Path.to_string (Dune.construct_dune_path path)))
               ()
-          , `Opam_dune (Dune.construct_dune_path path) ))
+          , `Opam_dune (Dune.construct_dune_path path, switch) ))
       else None)
 ;;
 
@@ -563,7 +569,7 @@ let get_non_active_opam_dunes opam_dunes current_switch =
              switch_name)
         ~detail:(Printf.sprintf "%s" (Path.to_string (Dune.construct_dune_path path)))
         ()
-    , `Opam_dune (Dune.construct_dune_path path) )
+    , `Opam_dune (Dune.construct_dune_path path, switch) )
   in
   List.map ~f:to_item global_dunes, List.map ~f:to_item local_dunes
 ;;
@@ -637,9 +643,10 @@ let select_dune_binary () =
        let* choice = Window.showQuickPickItems ~choices ~options () in
        (match choice with
         | None | Some `Separator -> Promise.return None
-        | Some (`Opam_dune path) -> Dune.make ~working_dir:root ~dune_path:path ()
+        | Some (`Opam_dune (path, switch)) ->
+          Dune.make ~working_dir:root ~dune_path:path ~opam_switch:switch ()
         | Some (`System_dune path) ->
-          Dune.make ~working_dir:root ~dune_path:path ~is_opam:false ()
+          Dune.make ~working_dir:root ~dune_path:path ()
         | Some `Custom_dune -> custom_dune_input_validation root))
 ;;
 
@@ -730,11 +737,11 @@ let sandbox_candidates ~workspace_folders =
        | None -> Promise.return None
        | Some root ->
          let* dune_binary = find_all_dune_binaries root opam () in
-         let dune_path, is_opam =
+         let dune_path, opam_switch =
            match dune_binary with
-           | _, _, Some (path, _) -> Some path, false
-           | (path, _, _) :: _, _, _ -> Some path, true
-           | _ -> None, false
+           | _, _, Some (path, _) -> Some path, None
+           | (path, switch, _) :: _, _, _ -> Some path, Some switch
+           | _ -> None, None
          in
          (match dune_path with
           | None -> Promise.return None
@@ -743,7 +750,7 @@ let sandbox_candidates ~workspace_folders =
               Dune.make
                 ~working_dir:root
                 ~dune_path:(Path.of_string dune_path)
-                ~is_opam
+                ?opam_switch
                 ()
             in
             (match dune with

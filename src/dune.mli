@@ -14,7 +14,7 @@ val construct_dune_path : string -> Path.t
 type t =
   { root : Path.t
   ; bin : Cmd.spawn
-  ; is_opam : bool
+  ; opam_switch : Opam.Switch.t option
   }
 
 (** Check if dune package management is enable. *)
@@ -52,7 +52,7 @@ val equal : t -> t -> bool
 val make
   :  working_dir:Path.t
   -> dune_path:Path.t
-  -> ?is_opam:bool
+  -> ?opam_switch:Opam.Switch.t
   -> unit
   -> t option Promise.t
 
@@ -66,4 +66,5 @@ val get_system_dune_path : unit -> (string * Dune_version.t) option Promise.t
 val root : t -> Path.t
 
 val dune_path : t -> Path.t
+val opam_switch : t -> Opam.Switch.t option
 val is_opam : t -> bool
