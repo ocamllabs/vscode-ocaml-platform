@@ -42,7 +42,6 @@ let _select_sandbox =
       | Some new_sandbox ->
         Extension_instance.set_sandbox instance new_sandbox;
         let* () = Sandbox.save_to_settings new_sandbox in
-        let* () = Extension_instance.update_ocaml_info instance in
         Extension_instance.start_language_server instance
     in
     ()

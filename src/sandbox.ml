@@ -818,14 +818,6 @@ let get_exec_command sandbox tools =
   | _ -> None
 ;;
 
-let ocaml_version sandbox =
-  let open Promise.Result.Syntax in
-  let cmd = get_command sandbox "ocamlc" [ "-version" ] `Exec in
-  let* cmd = Cmd.check cmd in
-  let+ output = Cmd.output cmd in
-  String.strip output
-;;
-
 let packages t =
   let open Promise.Result.Syntax in
   match t with

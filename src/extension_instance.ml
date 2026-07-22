@@ -122,6 +122,61 @@ let check_ocaml_lsp_available (sandbox : Sandbox.t) =
             current sandbox.")
 ;;
 
+let update_ocaml_info t =
+  let open Promise.Syntax in
+  let+ ocaml_version =
+    let cwd = Sandbox.workspace_root () in
+    let+ r =
+      Sandbox.get_command t.sandbox "ocamlc" [ "-version" ] `Exec |> Cmd.output ?cwd
+    in
+    match r with
+    | Ok v ->
+      Ocaml_version.of_string v
+      |> Result.map_error ~f:(function m -> `Unable_to_parse_version (`Version v, m))
+    | Error e ->
+      log_chan
+        ~section:"Ocaml.version_semver"
+        `Warn
+        "Error running \"ocamlc -version\": %s"
+        e;
+      Error `Ocamlc_missing
+  in
+  match ocaml_version with
+  | Ok ocaml_version -> t.ocaml_version <- Some ocaml_version
+  | Error e ->
+    (* [t.ocaml_version <- None] because we don't want [t.ocaml_version] to be
+       left over from a previous sandbox, which successfully set it *)
+    t.ocaml_version <- None;
+    (match e with
+     | `Unable_to_parse_version (`Version v, `Msg msg) ->
+       show_message
+         `Error
+         "OCaml bytecode compiler \"ocamlc\" version could not be parsed. Version: %s. \
+          Error %s"
+         v
+         msg
+     | `Ocamlc_missing ->
+       let (_ : unit Promise.t) =
+         let+ maybe_choice =
+           Window.showWarningMessage
+             ~message:
+               "OCaml bytecode compiler \"ocamlc\" was not found in the current sandbox. \
+                Do you have OCaml installed in the current sandbox?"
+             ~choices:
+               [ ( "Pick another sandbox"
+                 , fun () ->
+                     let (_ : unit Promise.t) =
+                       Command_api.(execute Internal.select_sandbox) ()
+                     in
+                     () )
+               ]
+             ()
+         in
+         Option.iter maybe_choice ~f:(fun f -> f ())
+       in
+       ())
+;;
+
 module Language_server_init : sig
   val start_language_server : t -> unit Promise.t
 end = struct
@@ -224,6 +279,7 @@ end = struct
     let* ocamllsp_present = check_ocaml_lsp_available t.sandbox in
     match ocamllsp_present with
     | Ok () ->
+      let* () = update_ocaml_info t in
       let+ res =
         let* client =
           let+ serverOptions = server_options t in
@@ -390,61 +446,6 @@ let start_documentation_server t ~path =
 let repl t = t.repl
 let set_repl t repl = t.repl <- Some repl
 let close_repl t = t.repl <- None
-
-let update_ocaml_info t =
-  let open Promise.Syntax in
-  let+ ocaml_version =
-    let cwd = Sandbox.workspace_root () in
-    let+ r =
-      Sandbox.get_command t.sandbox "ocamlc" [ "-version" ] `Exec |> Cmd.output ?cwd
-    in
-    match r with
-    | Ok v ->
-      Ocaml_version.of_string v
-      |> Result.map_error ~f:(function m -> `Unable_to_parse_version (`Version v, m))
-    | Error e ->
-      log_chan
-        ~section:"Ocaml.version_semver"
-        `Warn
-        "Error running \"ocamlc -version\": %s"
-        e;
-      Error `Ocamlc_missing
-  in
-  match ocaml_version with
-  | Ok ocaml_version -> t.ocaml_version <- Some ocaml_version
-  | Error e ->
-    (* [t.ocaml_version <- None] because we don't want [t.ocaml_version] to be
-       left over from a previous sandbox, which successfully set it *)
-    t.ocaml_version <- None;
-    (match e with
-     | `Unable_to_parse_version (`Version v, `Msg msg) ->
-       show_message
-         `Error
-         "OCaml bytecode compiler \"ocamlc\" version could not be parsed. Version: %s. \
-          Error %s"
-         v
-         msg
-     | `Ocamlc_missing ->
-       let (_ : unit Promise.t) =
-         let+ maybe_choice =
-           Window.showWarningMessage
-             ~message:
-               "OCaml bytecode compiler \"ocamlc\" was not found in the current sandbox. \
-                Do you have OCaml installed in the current sandbox?"
-             ~choices:
-               [ ( "Pick another sandbox"
-                 , fun () ->
-                     let (_ : unit Promise.t) =
-                       Command_api.(execute Internal.select_sandbox) ()
-                     in
-                     () )
-               ]
-             ()
-         in
-         Option.iter maybe_choice ~f:(fun f -> f ())
-       in
-       ())
-;;
 
 let open_terminal sandbox =
   let terminal = Terminal_sandbox.create sandbox in
