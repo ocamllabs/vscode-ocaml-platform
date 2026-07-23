@@ -32,6 +32,16 @@ let text_editor_command handle callback =
   command
 ;;
 
+let advance_walkthrough_step step_id =
+  let category = "ocamllabs.ocaml-platform#ocaml-onboarding" in
+  let (_ : unit Promise.t) =
+    let open Promise.Syntax in
+    let* () = Node.setTimeout' ~wait_ms:500 in
+    Command_api.(execute Vscode.open_walkthrough) (category, step_id)
+  in
+  ()
+;;
+
 let _select_sandbox =
   let callback (instance : Extension_instance.t) () =
     let open Promise.Syntax in
@@ -43,7 +53,8 @@ let _select_sandbox =
         Extension_instance.set_sandbox instance new_sandbox;
         let* () = Sandbox.save_to_settings new_sandbox in
         let* () = Extension_instance.update_ocaml_info instance in
-        Extension_instance.start_language_server instance
+        let+ () = Extension_instance.start_language_server instance in
+        advance_walkthrough_step "install-platform-tools"
     in
     ()
   in
@@ -314,7 +325,7 @@ let _install_opam =
             show_message `Error "An error occured while installing opam %s" err
         in
         let+ () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
-        ()
+        advance_walkthrough_step "init-opam"
       | Some opam, _ ->
         let* latest_version =
           Cmd.output
@@ -341,7 +352,8 @@ let _install_opam =
            show_message
              `Info
              "opam is already installed and up to date (version %s)."
-             installed_version
+             installed_version;
+           advance_walkthrough_step "init-opam"
          | Ok (true, latest_version, installed_version) ->
            outdated_opam := true;
            let _ =
@@ -399,7 +411,9 @@ let _init_opam =
       | Error err -> show_message `Error "An error occured while initializing opam %s" err
     in
     let (_ : unit Promise.t) =
-      Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task
+      let open Promise.Syntax in
+      let+ () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
+      advance_walkthrough_step "activate-opam-switch"
     in
     ()
   in
@@ -437,7 +451,9 @@ let _install_ocaml_dev =
         show_message `Error "An error occured while installing packages %s" err
     in
     let (_ : unit Promise.t) =
-      Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task
+      let open Promise.Syntax in
+      let+ () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
+      advance_walkthrough_step "check-installation"
     in
     ()
   in
@@ -472,7 +488,9 @@ let _open_utop =
       | Error err -> show_message `Error "An error occured while opening utop %s" err
     in
     let (_ : unit Promise.t) =
-      Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task
+      let open Promise.Syntax in
+      let+ () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
+      advance_walkthrough_step "finish-onboarding"
     in
     ()
   in
