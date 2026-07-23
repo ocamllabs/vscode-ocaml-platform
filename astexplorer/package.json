@@ -9,8 +9,8 @@
   "dependencies": {
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "react-error-boundary": "6.1.2",
     "tailwind-merge": "3.6.0"
   },
