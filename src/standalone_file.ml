@@ -8,16 +8,16 @@ let active_document_uri () =
          "Run standalone file"
          ~expl:"")
   | Some text_editor ->
-    let document = TextEditor.document text_editor in
-    if String.(TextDocument.languageId document = "ocaml")
+    let doc = TextEditor.document text_editor in
+    if String.(TextDocument.languageId doc = "ocaml")
     then (
-      let abs_path = TextDocument.uri document |> Uri.path in
+      let abs_path = TextDocument.uri doc |> Uri.path in
       match Workspace.rootPath () with
-      | None -> Ok abs_path
+      | None -> Ok (abs_path, doc)
       | Some root ->
         (match String.chop_prefix ~prefix:root abs_path with
-         | None -> Ok abs_path
-         | Some rel_path -> Ok ("." ^ rel_path)))
+         | None -> Ok (abs_path, doc)
+         | Some rel_path -> Ok ("." ^ rel_path, doc)))
     else
       Error "The command \"OCaml: Run standalone file\" should be run only on OCaml file."
 ;;
@@ -34,7 +34,7 @@ let inside_dune_project () =
 
 let run_dune_exec_command sandbox =
   active_document_uri ()
-  |> Result.map ~f:(fun filename ->
+  |> Result.map ~f:(fun (filename, _) ->
     let filename = Stdlib.Filename.remove_extension filename ^ ".exe" in
     Sandbox.get_command sandbox "dune" [ "exec"; filename ] `Exec)
 ;;
@@ -49,8 +49,9 @@ let run_program_command ~sandbox ?(args = []) program =
 
 let exec instance =
   match active_document_uri () with
-  | Ok program ->
+  | Ok (program, doc) ->
     let open Promise.Syntax in
+    let* _ : bool = TextDocument.save doc in
     let sandbox = Extension_instance.sandbox instance in
     OutputChannel.show ~preserveFocus:true (Lazy.force Output.run_output_channel) ();
     let* dune_context = inside_dune_project () in
@@ -119,7 +120,7 @@ let register_provider () =
         if not (Ojs.has_property config "program")
         then (
           match active_document_uri () with
-          | Ok filename ->
+          | Ok (filename, _) ->
             DebugConfiguration.set debugConfiguration "program"
             @@ [%js.of: string] filename
           | Error msg -> show_message `Error "%s" msg);
