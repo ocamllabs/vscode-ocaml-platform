@@ -63,6 +63,7 @@ module Vscode : sig
   val set_context : (string * bool, unit) handle
   val show_hover : (unit, unit) handle
   val show_simple_browser : (string, unit) handle
+  val open_walkthrough : (string * string, unit) handle
 end
 
 module Command_errors : sig

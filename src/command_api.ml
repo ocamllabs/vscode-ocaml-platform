@@ -156,6 +156,14 @@ module Internal = struct
   let open_utop = unit_handle "open-utop"
 end
 
+module Walkthrough_step = struct
+  type t =
+    { category : string
+    ; step : string
+    }
+  [@@js]
+end
+
 module Vscode = struct
   let external_handle id ~args_to_js ~return_type =
     let args_of_js _ =
@@ -197,6 +205,14 @@ module Vscode = struct
   let show_simple_browser =
     let args_to_js url = [ [%js.of: string] url ] in
     unit_external_handle "simpleBrowser.show" ~args_to_js
+  ;;
+
+  let open_walkthrough =
+    let args_to_js (category, step) =
+      let target = [%js.of: Walkthrough_step.t] { category; step } in
+      [ target ]
+    in
+    unit_external_handle "workbench.action.openWalkthrough" ~args_to_js
   ;;
 end
 
