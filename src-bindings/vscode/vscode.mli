@@ -2399,10 +2399,18 @@ module DebugAdapterDescriptor : sig
   include Ojs.T with type t := t
 end
 
+module DebugConfiguration : sig
+  include Ojs.T
+
+  val create : name:string -> request:string -> type_:string -> t
+  val set : t -> string -> Ojs.t -> unit
+end
+
 module DebugSession : sig
   include Ojs.T
 
   val customRequest : t -> command:string -> ?args:Ojs.t -> unit -> Ojs.t Promise.t
+  val configuration : t -> DebugConfiguration.t
 end
 
 module DebugAdapterDescriptorFactory : sig
@@ -2421,13 +2429,6 @@ module DebugAdapterDescriptorFactory : sig
           -> executable:DebugAdapterExecutable.t or_undefined
           -> DebugAdapterDescriptor.t ProviderResult.t)
     -> t
-end
-
-module DebugConfiguration : sig
-  include Ojs.T
-
-  val create : name:string -> request:string -> type_:string -> t
-  val set : t -> string -> Ojs.t -> unit
 end
 
 module DebugConfigurationProvider : sig

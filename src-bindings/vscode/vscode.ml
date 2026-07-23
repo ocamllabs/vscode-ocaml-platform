@@ -3359,13 +3359,24 @@ module DebugAdapterDescriptor = struct
   ;;
 end
 
+module DebugConfiguration = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val create : name:string -> request:string -> type_:string -> t [@@js.builder]
+      val set : t -> string -> Ojs.t -> unit [@@js.index_set]]
+end
+
 module DebugSession = struct
   include Class.Make ()
 
   include
     [%js:
       val customRequest : t -> command:string -> ?args:Ojs.t -> unit -> Ojs.t Promise.t
-      [@@js.call]]
+      [@@js.call]
+
+      val configuration : t -> DebugConfiguration.t [@@js.get]]
 end
 
 module DebugAdapterDescriptorFactory = struct
@@ -3387,15 +3398,6 @@ module DebugAdapterDescriptorFactory = struct
               -> DebugAdapterDescriptor.t ProviderResult.t)
         -> t
       [@@js.builder]]
-end
-
-module DebugConfiguration = struct
-  include Interface.Make ()
-
-  include
-    [%js:
-      val create : name:string -> request:string -> type_:string -> t [@@js.builder]
-      val set : t -> string -> Ojs.t -> unit [@@js.index_set]]
 end
 
 module DebugConfigurationProvider = struct
