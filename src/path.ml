@@ -25,4 +25,3 @@ let is_root = function
 ;;
 
 let parent x = if is_root x then None else Some (dirname x)
-let asset name = of_string (Node.__filename () ^ "/../../assets/" ^ name)

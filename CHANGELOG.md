@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Fix custom tree view icons not appearing in Remote WSL by resolving bundled
+  assets as extension URIs. (#945)
+- Expose the `ocaml.server.inlayHints.*` and
+  `ocaml.server.shortenMerlinDiagnostics` settings. (#2227)
 - Add syntax highlighting for Dune's parameterised library keywords: the
   `library_parameter` stanza, the `parameters` and `implements` library fields,
   and the `(instantiate ...)` dependency form together with its `:as` keyword.
@@ -27,6 +31,9 @@
 - Redesign how Dune Package Manager is handled. Users now use a two step process, first to select DPM as a sandbox and then to select which dune binary they wish to use in the project (#2199)
 - Enforce that users either enable dune package management by generating a lockfile (as recommended by the dune team) or select a different sandbox. Pressing the escape key will display the select sandbox ui. (2208)
 - Rely on `dune tools env` to retrieve the local OCaml LSP path in the context of DPM. (#2227)
+- Ensure consistent installation hint with chosen sandbox. (#2221)
+- Clean up all child processes spawned by the extension when quitting VS Code. (#2244)
+- Update the list of available OCaml LSP versions. (#2245)
 - Automatically move to the next step of the ocaml walkthrough upon completion of the current step (#2246)
 
 ## 2.3.0

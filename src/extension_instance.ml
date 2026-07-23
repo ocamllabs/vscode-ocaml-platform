@@ -25,6 +25,11 @@ let send_configuration t client =
     Option.map (Settings.get setting) ~f:(fun enable ->
       Ocaml_lsp.OcamllspSettingEnable.create ~enable)
   in
+  let extendedHover = enable_setting Settings.server_extendedHover_setting in
+  let standardHover =
+    Option.map t.standard_hover ~f:(fun enable ->
+      Ocaml_lsp.OcamllspSettingEnable.create ~enable)
+  in
   let codelens =
     Option.map (Settings.get Settings.server_codelens_setting) ~f:(fun enable ->
       Ocaml_lsp.OcamllspSettingCodeLens.create
@@ -33,20 +38,40 @@ let send_configuration t client =
         ~enable
         ())
   in
-  let extendedHover = enable_setting Settings.server_extendedHover_setting in
-  let standardHover =
-    Option.map t.standard_hover ~f:(fun enable ->
-      Ocaml_lsp.OcamllspSettingEnable.create ~enable)
-  in
   let duneDiagnostics = enable_setting Settings.server_duneDiagnostics_setting in
+  let inlayHints =
+    let hintPatternVariables =
+      Settings.get Settings.server_inlayHints_hintPatternVariables_setting
+    in
+    let hintLetBindings =
+      Settings.get Settings.server_inlayHints_hintLetBindings_setting
+    in
+    let hintFunctionParams =
+      Settings.get Settings.server_inlayHints_hintFunctionParams_setting
+    in
+    match hintPatternVariables, hintLetBindings, hintFunctionParams with
+    | None, None, None -> None
+    | _ ->
+      Some
+        (Ocaml_lsp.OcamllspSettingInlayHints.create
+           ?hintPatternVariables
+           ?hintLetBindings
+           ?hintFunctionParams
+           ())
+  in
   let syntaxDocumentation = enable_setting Settings.server_syntaxDocumentation_setting in
+  let shortenMerlinDiagnostics =
+    enable_setting Settings.server_shortenMerlinDiagnostics_setting
+  in
   let settings =
     Ocaml_lsp.OcamllspSettings.create
-      ~codelens
       ~extendedHover
       ~standardHover
+      ~codelens
       ~duneDiagnostics
+      ~inlayHints
       ~syntaxDocumentation
+      ~shortenMerlinDiagnostics
   in
   let payload =
     let settings =
@@ -215,7 +240,9 @@ end = struct
         let initialize_result = LanguageClient.initializeResult client in
         let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
         t.lsp_client <- Some (client, ocaml_lsp);
-        (match Ocaml_lsp.is_version_up_to_date ocaml_lsp (ocaml_version_exn t) with
+        (match
+           Ocaml_lsp.is_version_up_to_date ocaml_lsp (sandbox t) (ocaml_version_exn t)
+         with
          | Ok () -> ()
          | Error (`Msg _) -> ());
         send_configuration t client;

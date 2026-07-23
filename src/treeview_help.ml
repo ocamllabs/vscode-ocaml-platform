@@ -1,11 +1,5 @@
-let discord_item =
-  let icon =
-    `LightDark
-      Vscode.LightDarkIcon.
-        { light = `String (Path.asset "discord-light.svg" |> Path.to_string)
-        ; dark = `String (Path.asset "discord-dark.svg" |> Path.to_string)
-        }
-  in
+let discord_item assets =
+  let icon = `LightDark (Extension_assets.discord_icon assets) in
   let label = `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Chat on Discord" ()) in
   let item = Vscode.TreeItem.make_label ~label () in
   let command =
@@ -21,14 +15,8 @@ let discord_item =
   item
 ;;
 
-let discuss_item =
-  let icon =
-    `LightDark
-      Vscode.LightDarkIcon.
-        { light = `String (Path.asset "chat-light.svg" |> Path.to_string)
-        ; dark = `String (Path.asset "chat-dark.svg" |> Path.to_string)
-        }
-  in
+let discuss_item assets =
+  let icon = `LightDark (Extension_assets.chat_icon assets) in
   let label =
     `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Ask a question on Discuss" ())
   in
@@ -66,14 +54,8 @@ let tutorials_item =
   item
 ;;
 
-let github_item =
-  let icon =
-    `LightDark
-      Vscode.LightDarkIcon.
-        { light = `String (Path.asset "github-light.svg" |> Path.to_string)
-        ; dark = `String (Path.asset "github-dark.svg" |> Path.to_string)
-        }
-  in
+let github_item assets =
+  let icon = `LightDark (Extension_assets.github_icon assets) in
   let label =
     `TreeItemLabel (Vscode.TreeItemLabel.create ~label:"Open an issue on Github" ())
   in
@@ -93,16 +75,21 @@ let github_item =
   item
 ;;
 
-let items = [ discord_item; discuss_item; github_item; tutorials_item ]
+let items assets =
+  [ discord_item assets; discuss_item assets; github_item assets; tutorials_item ]
+;;
+
 let getTreeItem ~element = `Value element
 
-let getChildren ?element () =
+let getChildren items ?element () =
   match element with
   | None -> `Value (Some items)
   | Some _ -> `Value (Some [])
 ;;
 
-let register extension =
+let register extension ~assets =
+  let items = items assets in
+  let getChildren = getChildren items in
   let module TreeDataProvider = Vscode.TreeDataProvider.Make (Vscode.TreeItem) in
   let treeDataProvider = TreeDataProvider.create ~getTreeItem ~getChildren () in
   let disposable =

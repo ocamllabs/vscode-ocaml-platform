@@ -42,8 +42,8 @@
     "test": "vscode-test"
   },
   "dependencies": {
-    "oxfmt": "0.58.0",
-    "oxlint": "1.73.0",
+    "oxfmt": "0.59.0",
+    "oxlint": "1.74.0",
     "polka": "1.0.0-next.28",
     "sirv": "3.0.2",
     "vscode-languageclient": "10.1.0"
@@ -55,8 +55,11 @@
     "@vscode/test-electron": "3.0.0",
     "@vscode/vsce": "3.9.2",
     "ovsx": "1.0.2",
-    "oxlint-tsgolint": "0.24.0",
+    "oxlint-tsgolint": "0.25.0",
     "typescript": "7.0.2"
+  },
+  "overrides": {
+    "is-unicode-supported": "0.1.0"
   },
   "contributes": {
     "breakpoints": [
@@ -349,6 +352,11 @@
           "default": [],
           "markdownDescription": "Extra arguments to pass to ocamllsp."
         },
+        "ocaml.server.extendedHover": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable extended hover"
+        },
         "ocaml.server.codelens.enable": {
           "type": "boolean",
           "default": true,
@@ -359,15 +367,35 @@
           "default": false,
           "markdownDescription": "Enable/Disable codelens for nested let bindings"
         },
-        "ocaml.server.extendedHover": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "Enable/Disable extended hover"
-        },
         "ocaml.server.duneDiagnostics": {
           "type": "boolean",
           "default": true,
           "markdownDescription": "Enable/Disable dune diagnostics"
+        },
+        "ocaml.server.inlayHints.hintPatternVariables": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable inlay hints for pattern variables"
+        },
+        "ocaml.server.inlayHints.hintLetBindings": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable inlay hints for let bindings"
+        },
+        "ocaml.server.inlayHints.hintFunctionParams": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable inlay hints for function parameters"
+        },
+        "ocaml.server.syntaxDocumentation": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable/Disable syntax documentation"
+        },
+        "ocaml.server.shortenMerlinDiagnostics": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Shorten multi-line Merlin diagnostic ranges to their first line"
         },
         "ocaml.commands.typeSelection.outputChannelResults": {
           "type": "boolean",
@@ -378,11 +406,6 @@
           "type": "boolean",
           "default": false,
           "markdownDescription": "Enable/Disable clearing of the output channel before showing a new result."
-        },
-        "ocaml.server.syntaxDocumentation": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "Enable/Disable syntax documentation"
         },
         "ocaml.commands.typedHoles.constructAfterNavigate": {
           "type": "boolean",
