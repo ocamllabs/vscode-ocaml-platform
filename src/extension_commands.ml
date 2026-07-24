@@ -221,9 +221,7 @@ let _upgrade_dune =
         let* () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
         Extension_instance.start_language_server instance
       | _ ->
-        show_message
-          `Warn
-          "Select Dune Package Management to execute this action.";
+        show_message `Warn "Select Dune Package Management to execute this action.";
         Promise.return ()
     in
     ()
