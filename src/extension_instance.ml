@@ -25,6 +25,11 @@ let send_configuration t client =
     Option.map (Settings.get setting) ~f:(fun enable ->
       Ocaml_lsp.OcamllspSettingEnable.create ~enable)
   in
+  let extendedHover = enable_setting Settings.server_extendedHover_setting in
+  let standardHover =
+    Option.map t.standard_hover ~f:(fun enable ->
+      Ocaml_lsp.OcamllspSettingEnable.create ~enable)
+  in
   let codelens =
     Option.map (Settings.get Settings.server_codelens_setting) ~f:(fun enable ->
       Ocaml_lsp.OcamllspSettingCodeLens.create
@@ -33,20 +38,40 @@ let send_configuration t client =
         ~enable
         ())
   in
-  let extendedHover = enable_setting Settings.server_extendedHover_setting in
-  let standardHover =
-    Option.map t.standard_hover ~f:(fun enable ->
-      Ocaml_lsp.OcamllspSettingEnable.create ~enable)
-  in
   let duneDiagnostics = enable_setting Settings.server_duneDiagnostics_setting in
+  let inlayHints =
+    let hintPatternVariables =
+      Settings.get Settings.server_inlayHints_hintPatternVariables_setting
+    in
+    let hintLetBindings =
+      Settings.get Settings.server_inlayHints_hintLetBindings_setting
+    in
+    let hintFunctionParams =
+      Settings.get Settings.server_inlayHints_hintFunctionParams_setting
+    in
+    match hintPatternVariables, hintLetBindings, hintFunctionParams with
+    | None, None, None -> None
+    | _ ->
+      Some
+        (Ocaml_lsp.OcamllspSettingInlayHints.create
+           ?hintPatternVariables
+           ?hintLetBindings
+           ?hintFunctionParams
+           ())
+  in
   let syntaxDocumentation = enable_setting Settings.server_syntaxDocumentation_setting in
+  let shortenMerlinDiagnostics =
+    enable_setting Settings.server_shortenMerlinDiagnostics_setting
+  in
   let settings =
     Ocaml_lsp.OcamllspSettings.create
-      ~codelens
       ~extendedHover
       ~standardHover
+      ~codelens
       ~duneDiagnostics
+      ~inlayHints
       ~syntaxDocumentation
+      ~shortenMerlinDiagnostics
   in
   let payload =
     let settings =

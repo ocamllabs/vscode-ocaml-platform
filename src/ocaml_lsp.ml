@@ -20,35 +20,66 @@ module OcamllspSettingCodeLens = struct
       val create : ?forNestedBindings:bool -> enable:bool -> unit -> t [@@js.builder]]
 end
 
+module OcamllspSettingInlayHints = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val hintPatternVariables : t -> bool or_undefined [@@js.get]
+      val hintLetBindings : t -> bool or_undefined [@@js.get]
+      val hintFunctionParams : t -> bool or_undefined [@@js.get]
+
+      val create
+        :  ?hintPatternVariables:bool
+        -> ?hintLetBindings:bool
+        -> ?hintFunctionParams:bool
+        -> unit
+        -> t
+      [@@js.builder]]
+end
+
 module OcamllspSettings = struct
   include Interface.Make ()
 
   include
     [%js:
-      val codelens : t -> OcamllspSettingCodeLens.t or_undefined [@@js.get]
       val extendedHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
       val standardHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+      val codelens : t -> OcamllspSettingCodeLens.t or_undefined [@@js.get]
       val duneDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+      val inlayHints : t -> OcamllspSettingInlayHints.t or_undefined [@@js.get]
       val syntaxDocumentation : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+      val shortenMerlinDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
 
       val create
-        :  ?codelens:OcamllspSettingCodeLens.t
-        -> ?extendedHover:OcamllspSettingEnable.t
+        :  ?extendedHover:OcamllspSettingEnable.t
         -> ?standardHover:OcamllspSettingEnable.t
+        -> ?codelens:OcamllspSettingCodeLens.t
         -> ?duneDiagnostics:OcamllspSettingEnable.t
+        -> ?inlayHints:OcamllspSettingInlayHints.t
         -> ?syntaxDocumentation:OcamllspSettingEnable.t
+        -> ?shortenMerlinDiagnostics:OcamllspSettingEnable.t
         -> unit
         -> t
       [@@js.builder]]
 
-  let create ~codelens ~extendedHover ~standardHover ~duneDiagnostics ~syntaxDocumentation
+  let create
+        ~extendedHover
+        ~standardHover
+        ~codelens
+        ~duneDiagnostics
+        ~inlayHints
+        ~syntaxDocumentation
+        ~shortenMerlinDiagnostics
     =
     create
-      ?codelens
       ?extendedHover
       ?standardHover
+      ?codelens
       ?duneDiagnostics
+      ?inlayHints
       ?syntaxDocumentation
+      ?shortenMerlinDiagnostics
       ()
   ;;
 end
@@ -181,6 +212,7 @@ let lsp_versions =
          ; "1.18.0"
          ; "1.20.0-4.14"
          ; "1.20.1-4.14"
+         ; "1.21.0-4.14"
         |] )
     ; ( (5, 0)
       , [| "1.13.2~5.0preview"
@@ -193,7 +225,9 @@ let lsp_versions =
         |] )
     ; (5, 1), [| "1.16.1"; "1.16.2"; "1.17.0"; "1.18.0" |]
     ; (5, 2), [| "1.19.0"; "1.20.0"; "1.20.1"; "1.21.0" |]
-    ; (5, 3), [| "1.20.0~5.3preview"; "1.22.0" |]
+    ; (5, 3), [| "1.20.0~5.3preview"; "1.22.0"; "1.23.0"; "1.23.1" |]
+    ; (5, 4), [| "1.24.0"; "1.25.0"; "1.26.0" |]
+    ; (5, 5), [| "1.26.0-5.5~preview"; "1.27.0" |]
     ]
   in
   let rest =

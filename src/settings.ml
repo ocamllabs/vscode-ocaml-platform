@@ -117,6 +117,14 @@ let server_args_setting =
     ~to_json:Jsonoo.Encode.(list string)
 ;;
 
+let server_extendedHover_setting =
+  create_setting
+    ~scope:ConfigurationTarget.Workspace
+    ~key:"ocaml.server.extendedHover"
+    ~of_json:Jsonoo.Decode.bool
+    ~to_json:Jsonoo.Encode.bool
+;;
+
 let server_codelens_setting =
   create_setting
     ~scope:ConfigurationTarget.Workspace
@@ -133,14 +141,6 @@ let server_codelens_for_nested_bindings_setting =
     ~to_json:Jsonoo.Encode.bool
 ;;
 
-let server_extendedHover_setting =
-  create_setting
-    ~scope:ConfigurationTarget.Workspace
-    ~key:"ocaml.server.extendedHover"
-    ~of_json:Jsonoo.Decode.bool
-    ~to_json:Jsonoo.Encode.bool
-;;
-
 let server_duneDiagnostics_setting =
   create_setting
     ~scope:ConfigurationTarget.Workspace
@@ -149,10 +149,42 @@ let server_duneDiagnostics_setting =
     ~to_json:Jsonoo.Encode.bool
 ;;
 
+let server_inlayHints_hintPatternVariables_setting =
+  create_setting
+    ~scope:ConfigurationTarget.Workspace
+    ~key:"ocaml.server.inlayHints.hintPatternVariables"
+    ~of_json:Jsonoo.Decode.bool
+    ~to_json:Jsonoo.Encode.bool
+;;
+
+let server_inlayHints_hintLetBindings_setting =
+  create_setting
+    ~scope:ConfigurationTarget.Workspace
+    ~key:"ocaml.server.inlayHints.hintLetBindings"
+    ~of_json:Jsonoo.Decode.bool
+    ~to_json:Jsonoo.Encode.bool
+;;
+
+let server_inlayHints_hintFunctionParams_setting =
+  create_setting
+    ~scope:ConfigurationTarget.Workspace
+    ~key:"ocaml.server.inlayHints.hintFunctionParams"
+    ~of_json:Jsonoo.Decode.bool
+    ~to_json:Jsonoo.Encode.bool
+;;
+
 let server_syntaxDocumentation_setting =
   create_setting
     ~scope:ConfigurationTarget.Workspace
     ~key:"ocaml.server.syntaxDocumentation"
+    ~of_json:Jsonoo.Decode.bool
+    ~to_json:Jsonoo.Encode.bool
+;;
+
+let server_shortenMerlinDiagnostics_setting =
+  create_setting
+    ~scope:ConfigurationTarget.Workspace
+    ~key:"ocaml.server.shortenMerlinDiagnostics"
     ~of_json:Jsonoo.Decode.bool
     ~to_json:Jsonoo.Encode.bool
 ;;
