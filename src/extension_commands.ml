@@ -223,11 +223,7 @@ let _upgrade_dune =
       | _ ->
         show_message
           `Warn
-          "upgrade-dune: This command can only be executed in a Dune Package Management \
-           sandbox.";
-        log
-          "upgrade-dune: This command can only be executed in a Dune Package Management \
-           sandbox.";
+          "Select Dune Package Management to execute this action.";
         Promise.return ()
     in
     ()
