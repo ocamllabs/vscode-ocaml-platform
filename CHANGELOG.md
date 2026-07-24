@@ -34,6 +34,7 @@
 - Ensure consistent installation hint with chosen sandbox. (#2221)
 - Clean up all child processes spawned by the extension when quitting VS Code. (#2244)
 - Update the list of available OCaml LSP versions. (#2245)
+- Upgrade dune when it is outdated. (#2224)
 
 ## 2.3.0
 

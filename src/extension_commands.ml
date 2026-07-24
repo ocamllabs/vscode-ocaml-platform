@@ -189,6 +189,46 @@ let _run_dune_pkg_lock =
   command Command_api.Internal.run_dune_pkg_lock callback
 ;;
 
+let _upgrade_dune =
+  let callback (instance : Extension_instance.t) () =
+    let open Promise.Syntax in
+    let pick_sandbox ?(msg = "") () =
+      let* selection =
+        Window.showErrorMessage
+          ~message:("An error occurred while upgrading dune. " ^ msg)
+          ~choices:[ "Select a different sandbox", `Select_sandbox ]
+          ()
+      in
+      match selection with
+      | Some `Select_sandbox | None -> Command_api.(execute Internal.select_sandbox) ()
+    in
+    let _ =
+      match Extension_instance.sandbox instance with
+      | Dune dune ->
+        let options =
+          ProgressOptions.create
+            ~location:(`ProgressLocation Notification)
+            ~title:"Upgrading dune ..."
+            ~cancellable:false
+            ()
+        in
+        let task ~progress:_ ~token:_ =
+          let* res = Dune.get_upgrade_dune_cmd dune in
+          match res with
+          | Ok _ -> Sandbox.save_to_settings (Dune dune)
+          | Error err -> pick_sandbox ~msg:err ()
+        in
+        let* () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
+        Extension_instance.start_language_server instance
+      | _ ->
+        show_message `Warn "Select Dune Package Management to execute this action.";
+        Promise.return ()
+    in
+    ()
+  in
+  command Command_api.Internal.upgrade_dune callback
+;;
+
 let _restart_language_server =
   let callback (instance : Extension_instance.t) () =
     let (_ : unit Promise.t) = Extension_instance.start_language_server instance in
