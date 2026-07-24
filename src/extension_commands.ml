@@ -163,24 +163,17 @@ let _run_dune_pkg_lock =
             ()
         in
         let task ~progress:_ ~token:_ =
-          let* result =
+          let+ result =
             Dune.exec_pkg ~cmd:"lock" dune |> Cmd.output ~cwd:(Dune.root dune)
           in
           match result with
-          | Ok _ -> Sandbox.save_to_settings (Dune dune)
+          | Ok _ -> ()
           | Error err ->
-            let* selection =
-              Window.showErrorMessage
-                ~message:("An error occurred while running dune pkg lock: " ^ err)
-                ~choices:[ "Select a different sandbox", `Select_sandbox ]
-                ()
-            in
-            (match selection with
-             | Some `Select_sandbox | None ->
-               Command_api.(execute Internal.select_sandbox) ())
+            show_message `Error "An error occurred while running dune pkg lock: %s" err
         in
-        let* () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
-        Extension_instance.start_language_server instance
+        let+ () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
+        let _ = Extension_instance.start_language_server instance in
+        ()
       | _ ->
         show_message
           `Warn
