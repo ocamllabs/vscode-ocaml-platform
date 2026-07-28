@@ -35,6 +35,7 @@
 - Clean up all child processes spawned by the extension when quitting VS Code. (#2244)
 - Update the list of available OCaml LSP versions. (#2245)
 - Upgrade dune when it is outdated. (#2224)
+- Add a run button to launch standalone bytecode executable without a terminal and provide tasks to run workspace executables with Dune. (#2190)
 
 ## 2.3.0
 
