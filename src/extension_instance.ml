@@ -25,6 +25,11 @@ let send_configuration t client =
     Option.map (Settings.get setting) ~f:(fun enable ->
       Ocaml_lsp.OcamllspSettingEnable.create ~enable)
   in
+  let extendedHover = enable_setting Settings.server_extendedHover_setting in
+  let standardHover =
+    Option.map t.standard_hover ~f:(fun enable ->
+      Ocaml_lsp.OcamllspSettingEnable.create ~enable)
+  in
   let codelens =
     Option.map (Settings.get Settings.server_codelens_setting) ~f:(fun enable ->
       Ocaml_lsp.OcamllspSettingCodeLens.create
@@ -33,20 +38,40 @@ let send_configuration t client =
         ~enable
         ())
   in
-  let extendedHover = enable_setting Settings.server_extendedHover_setting in
-  let standardHover =
-    Option.map t.standard_hover ~f:(fun enable ->
-      Ocaml_lsp.OcamllspSettingEnable.create ~enable)
-  in
   let duneDiagnostics = enable_setting Settings.server_duneDiagnostics_setting in
+  let inlayHints =
+    let hintPatternVariables =
+      Settings.get Settings.server_inlayHints_hintPatternVariables_setting
+    in
+    let hintLetBindings =
+      Settings.get Settings.server_inlayHints_hintLetBindings_setting
+    in
+    let hintFunctionParams =
+      Settings.get Settings.server_inlayHints_hintFunctionParams_setting
+    in
+    match hintPatternVariables, hintLetBindings, hintFunctionParams with
+    | None, None, None -> None
+    | _ ->
+      Some
+        (Ocaml_lsp.OcamllspSettingInlayHints.create
+           ?hintPatternVariables
+           ?hintLetBindings
+           ?hintFunctionParams
+           ())
+  in
   let syntaxDocumentation = enable_setting Settings.server_syntaxDocumentation_setting in
+  let shortenMerlinDiagnostics =
+    enable_setting Settings.server_shortenMerlinDiagnostics_setting
+  in
   let settings =
     Ocaml_lsp.OcamllspSettings.create
-      ~codelens
       ~extendedHover
       ~standardHover
+      ~codelens
       ~duneDiagnostics
+      ~inlayHints
       ~syntaxDocumentation
+      ~shortenMerlinDiagnostics
   in
   let payload =
     let settings =
@@ -74,35 +99,6 @@ let stop_server t =
     if LanguageClient.isRunning client
     then LanguageClient.stop client
     else Promise.return ()
-;;
-
-let suggest_to_run_dune_pkg_lock () =
-  let open Promise.Syntax in
-  let (_ : unit Promise.t) =
-    let+ maybe_choice =
-      Window.showWarningMessage
-        ~message:
-          "Dune Package Manager is selected as the active sandbox, but no lock file is \
-           present. Do you want to run dune pkg lock?"
-        ~choices:
-          [ ( "Generate lockfile"
-            , fun () ->
-                let (_ : unit Promise.t) =
-                  Command_api.(execute Internal.run_dune_pkg_lock) ()
-                in
-                () )
-          ; ( "Pick another sandbox"
-            , fun () ->
-                let (_ : unit Promise.t) =
-                  Command_api.(execute Internal.select_sandbox) ()
-                in
-                () )
-          ]
-        ()
-    in
-    Option.iter maybe_choice ~f:(fun f -> f ())
-  in
-  ()
 ;;
 
 let check_ocaml_lsp_available (sandbox : Sandbox.t) =
@@ -150,14 +146,29 @@ end = struct
   ;;
 
   let server_options t =
+    let open Promise.Syntax in
     let args = Settings.(get server_args_setting) |> Option.value ~default:[] in
-    let command = Sandbox.get_command t.sandbox "ocamllsp" args `Tool in
+    let command =
+      match t.sandbox with
+      | Dune _ -> Cmd.Spawn { bin = Path.of_string "ocamllsp"; args }
+      | _ -> Sandbox.get_command t.sandbox "ocamllsp" args `Tool
+    in
     Cmd.log command;
     let env =
       let extra_env_vars =
         Settings.server_extraEnv () |> Option.value ~default:Interop.Dict.empty
       in
       Interop.Dict.union (fun _k _v1 v2 -> Some v2) (Process.Env.env ()) extra_env_vars
+    in
+    let+ env =
+      match t.sandbox with
+      | Dune dune ->
+        let+ output = Cmd.output ~cwd:dune.root (Dune.env dune) in
+        let paths =
+          Stdlib.Scanf.sscanf (Result.ok_or_failwith output) "export PATH=%s" Fn.id
+        in
+        Interop.Dict.add "PATH" paths env
+      | _ -> Promise.return env
     in
     match command with
     | Shell command ->
@@ -172,7 +183,7 @@ end = struct
   let suggest_or_install_ocaml_lsp_server t =
     let open Promise.Syntax in
     match t.sandbox with
-    | Dune _dune ->
+    | Dune _ ->
       let+ () = Command_api.(execute Internal.install_dune_lsp) () in
       ()
     | _ ->
@@ -214,8 +225,8 @@ end = struct
     match ocamllsp_present with
     | Ok () ->
       let+ res =
-        let client =
-          let serverOptions = server_options t in
+        let* client =
+          let+ serverOptions = server_options t in
           let clientOptions = client_options () in
           LanguageClient.make
             ~id:"ocaml"
@@ -225,12 +236,13 @@ end = struct
             ()
         in
         LanguageClient.registerFeature client ~feature:client_capabilities;
-        let open Promise.Syntax in
         let+ () = LanguageClient.start client in
         let initialize_result = LanguageClient.initializeResult client in
         let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
         t.lsp_client <- Some (client, ocaml_lsp);
-        (match Ocaml_lsp.is_version_up_to_date ocaml_lsp (ocaml_version_exn t) with
+        (match
+           Ocaml_lsp.is_version_up_to_date ocaml_lsp (sandbox t) (ocaml_version_exn t)
+         with
          | Ok () -> ()
          | Error (`Msg _) -> ());
         send_configuration t client;

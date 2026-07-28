@@ -77,6 +77,7 @@ let _upgrade_ocaml_lsp_server =
       match
         Ocaml_lsp.is_version_up_to_date
           (Extension_instance.ocaml_lsp instance |> Option.value_exn)
+          (Extension_instance.sandbox instance)
           (Extension_instance.ocaml_version_exn instance)
       with
       | Ok () -> Promise.return ()
@@ -97,8 +98,8 @@ let _install_dune_lsp_server =
       let sandbox = Extension_instance.sandbox instance in
       match sandbox with
       | Dune dune ->
-        let* is_dune_locked = Dune.is_project_locked dune in
-        if is_dune_locked
+        let* dpm = Dune.is_dpm_enabled dune in
+        if dpm
         then
           let* dune_lsp_present = Dune.is_ocamllsp_present dune in
           if dune_lsp_present
@@ -132,7 +133,7 @@ let _install_dune_lsp_server =
               let+ _ = Extension_instance.start_language_server instance in
               ()
             else Promise.return ())
-        else Extension_instance.suggest_to_run_dune_pkg_lock () |> Promise.return
+        else Sandbox.suggest_to_run_dune_pkg_lock () |> Promise.return
       | _ ->
         show_message
           `Warn
@@ -186,6 +187,46 @@ let _run_dune_pkg_lock =
     ()
   in
   command Command_api.Internal.run_dune_pkg_lock callback
+;;
+
+let _upgrade_dune =
+  let callback (instance : Extension_instance.t) () =
+    let open Promise.Syntax in
+    let pick_sandbox ?(msg = "") () =
+      let* selection =
+        Window.showErrorMessage
+          ~message:("An error occurred while upgrading dune. " ^ msg)
+          ~choices:[ "Select a different sandbox", `Select_sandbox ]
+          ()
+      in
+      match selection with
+      | Some `Select_sandbox | None -> Command_api.(execute Internal.select_sandbox) ()
+    in
+    let _ =
+      match Extension_instance.sandbox instance with
+      | Dune dune ->
+        let options =
+          ProgressOptions.create
+            ~location:(`ProgressLocation Notification)
+            ~title:"Upgrading dune ..."
+            ~cancellable:false
+            ()
+        in
+        let task ~progress:_ ~token:_ =
+          let* res = Dune.get_upgrade_dune_cmd dune in
+          match res with
+          | Ok _ -> Sandbox.save_to_settings (Dune dune)
+          | Error err -> pick_sandbox ~msg:err ()
+        in
+        let* () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
+        Extension_instance.start_language_server instance
+      | _ ->
+        show_message `Warn "Select Dune Package Management to execute this action.";
+        Promise.return ()
+    in
+    ()
+  in
+  command Command_api.Internal.upgrade_dune callback
 ;;
 
 let _restart_language_server =
@@ -601,6 +642,7 @@ end = struct
     match
       Ocaml_lsp.is_version_up_to_date
         ocaml_lsp
+        (Extension_instance.sandbox instance)
         (Extension_instance.ocaml_version_exn instance)
     with
     | Ok () -> ()
@@ -827,6 +869,7 @@ module Copy_type_under_cursor = struct
     match
       Ocaml_lsp.is_version_up_to_date
         ocaml_lsp
+        (Extension_instance.sandbox instance)
         (Extension_instance.ocaml_version_exn instance)
     with
     | Ok () -> ()

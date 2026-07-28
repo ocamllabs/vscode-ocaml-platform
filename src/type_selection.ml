@@ -48,6 +48,7 @@ let ocaml_lsp_doesnt_support_type_selection instance ocaml_lsp =
   match
     Ocaml_lsp.is_version_up_to_date
       ocaml_lsp
+      (Extension_instance.sandbox instance)
       (Extension_instance.ocaml_version_exn instance)
   with
   | Ok () -> ()

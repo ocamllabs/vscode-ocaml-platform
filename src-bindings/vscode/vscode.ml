@@ -1023,6 +1023,13 @@ module QuickInputButton = struct
       val create : iconPath:iconPath -> ?tooltip:string -> unit -> t [@@js.builder]]
 end
 
+module QuickPickItemKind = struct
+  type t =
+    | Separator [@js -1]
+    | Default [@js 0]
+  [@@js.enum] [@@js]
+end
+
 module QuickPickItem = struct
   include Interface.Make ()
 
@@ -1033,6 +1040,7 @@ module QuickPickItem = struct
       val detail : t -> string or_undefined [@@js.get]
       val picked : t -> bool or_undefined [@@js.get]
       val alwaysShow : t -> bool or_undefined [@@js.get]
+      val kind : t -> QuickPickItemKind.t or_undefined [@@js.get]
 
       val create
         :  label:string
@@ -1040,6 +1048,7 @@ module QuickPickItem = struct
         -> ?detail:string
         -> ?picked:bool
         -> ?alwaysShow:bool
+        -> ?kind:QuickPickItemKind.t
         -> unit
         -> t
       [@@js.builder]]
@@ -3023,7 +3032,7 @@ module Window = struct
         -> TextEditorDecorationType.t
       [@@js.global "@vscode.window.createTextEditorDecorationType"]
 
-      val showInformationMessage
+      val informationMessage
         :  message:string
         -> ?options:MessageOptions.t
         -> items:(MessageItem.t list[@js.variadic])
@@ -3184,9 +3193,7 @@ module Window = struct
   let showInformationMessage ~message ?options ?(choices = []) () =
     let choices = getChoices choices in
     let open Promise.Option.Syntax in
-    let+ item =
-      showInformationMessage ~message ?options ~items:(List.map fst choices) ()
-    in
+    let+ item = informationMessage ~message ?options ~items:(List.map fst choices) () in
     List.assoc item choices
   ;;
 

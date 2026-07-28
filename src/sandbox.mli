@@ -39,6 +39,7 @@ val to_pretty_string : t -> string
 val of_settings : unit -> t option Promise.t
 val detect : unit -> t option Promise.t
 val of_settings_or_detect : unit -> t option Promise.t
+val suggest_to_run_dune_pkg_lock : unit -> unit
 val save_to_settings : t -> unit Promise.t
 
 (** [select_sandbox_and_save] requires the process environment the plugin is

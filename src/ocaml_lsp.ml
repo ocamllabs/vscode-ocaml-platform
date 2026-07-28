@@ -20,35 +20,66 @@ module OcamllspSettingCodeLens = struct
       val create : ?forNestedBindings:bool -> enable:bool -> unit -> t [@@js.builder]]
 end
 
+module OcamllspSettingInlayHints = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val hintPatternVariables : t -> bool or_undefined [@@js.get]
+      val hintLetBindings : t -> bool or_undefined [@@js.get]
+      val hintFunctionParams : t -> bool or_undefined [@@js.get]
+
+      val create
+        :  ?hintPatternVariables:bool
+        -> ?hintLetBindings:bool
+        -> ?hintFunctionParams:bool
+        -> unit
+        -> t
+      [@@js.builder]]
+end
+
 module OcamllspSettings = struct
   include Interface.Make ()
 
   include
     [%js:
-      val codelens : t -> OcamllspSettingCodeLens.t or_undefined [@@js.get]
       val extendedHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
       val standardHover : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+      val codelens : t -> OcamllspSettingCodeLens.t or_undefined [@@js.get]
       val duneDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+      val inlayHints : t -> OcamllspSettingInlayHints.t or_undefined [@@js.get]
       val syntaxDocumentation : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
+      val shortenMerlinDiagnostics : t -> OcamllspSettingEnable.t or_undefined [@@js.get]
 
       val create
-        :  ?codelens:OcamllspSettingCodeLens.t
-        -> ?extendedHover:OcamllspSettingEnable.t
+        :  ?extendedHover:OcamllspSettingEnable.t
         -> ?standardHover:OcamllspSettingEnable.t
+        -> ?codelens:OcamllspSettingCodeLens.t
         -> ?duneDiagnostics:OcamllspSettingEnable.t
+        -> ?inlayHints:OcamllspSettingInlayHints.t
         -> ?syntaxDocumentation:OcamllspSettingEnable.t
+        -> ?shortenMerlinDiagnostics:OcamllspSettingEnable.t
         -> unit
         -> t
       [@@js.builder]]
 
-  let create ~codelens ~extendedHover ~standardHover ~duneDiagnostics ~syntaxDocumentation
+  let create
+        ~extendedHover
+        ~standardHover
+        ~codelens
+        ~duneDiagnostics
+        ~inlayHints
+        ~syntaxDocumentation
+        ~shortenMerlinDiagnostics
     =
     create
-      ?codelens
       ?extendedHover
       ?standardHover
+      ?codelens
       ?duneDiagnostics
+      ?inlayHints
       ?syntaxDocumentation
+      ?shortenMerlinDiagnostics
       ()
   ;;
 end
@@ -181,6 +212,7 @@ let lsp_versions =
          ; "1.18.0"
          ; "1.20.0-4.14"
          ; "1.20.1-4.14"
+         ; "1.21.0-4.14"
         |] )
     ; ( (5, 0)
       , [| "1.13.2~5.0preview"
@@ -193,7 +225,9 @@ let lsp_versions =
         |] )
     ; (5, 1), [| "1.16.1"; "1.16.2"; "1.17.0"; "1.18.0" |]
     ; (5, 2), [| "1.19.0"; "1.20.0"; "1.20.1"; "1.21.0" |]
-    ; (5, 3), [| "1.20.0~5.3preview"; "1.22.0" |]
+    ; (5, 3), [| "1.20.0~5.3preview"; "1.22.0"; "1.23.0"; "1.23.1" |]
+    ; (5, 4), [| "1.24.0"; "1.25.0"; "1.26.0" |]
+    ; (5, 5), [| "1.26.0-5.5~preview"; "1.27.0" |]
     ]
   in
   let rest =
@@ -230,7 +264,7 @@ let suggest_to_upgrade_ocaml_lsp_server
   | _ -> Promise.return ()
 ;;
 
-let is_version_up_to_date t ocaml_v =
+let is_version_up_to_date t sandbox ocaml_v =
   let ocamllsp_version = get_version_from_serverInfo t in
   let res =
     (* if the server doesn't have a version, we assume it's ancient and we can
@@ -261,11 +295,25 @@ let is_version_up_to_date t ocaml_v =
           | None -> sprintf "to %s" new_
           | Some old -> sprintf "from %s to %s" old new_
         in
-        sprintf
-          "There is a newer version of ocaml-lsp-server available. Consider upgrading \
-           %s. Hint: $ opam install ocaml-lsp-server=%s and restart the lsp server"
-          upgrade
-          new_
+        let msg =
+          sprintf
+            "There is a newer version of ocaml-lsp-server available. Consider upgrading \
+             %s and restart the lsp server."
+            upgrade
+        in
+        let hint =
+          match sandbox with
+          | Sandbox.Opam _ | Global ->
+            Some (sprintf "$ opam install ocaml-lsp-server=%s" new_)
+          | Dune _ ->
+            Some "upgrade the version of OCaml LSP server used in your dune-project."
+          | Esy _ ->
+            Some "upgrade the version of OCaml LSP server used in your Esy manifest."
+          | Custom _ -> None
+        in
+        (match hint with
+         | None -> msg
+         | Some hint -> sprintf "%s Hint: %s" msg hint)
     in
     `Msg msg)
 ;;

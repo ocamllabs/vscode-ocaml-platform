@@ -2,10 +2,16 @@
 
 ## Unreleased
 
+- Fix custom tree view icons not appearing in Remote WSL by resolving bundled
+  assets as extension URIs. (#945)
+- Expose the `ocaml.server.inlayHints.*` and
+  `ocaml.server.shortenMerlinDiagnostics` settings. (#2227)
 - Add syntax highlighting for Dune's parameterised library keywords: the
   `library_parameter` stanza, the `parameters` and `implements` library fields,
   and the `(instantiate ...)` dependency form together with its `:as` keyword.
   (#2187)
+- Fix angle bracket colourisation for Menhir semantic actions and ocamlbuild
+  `_tags` files. (#2222)
 - Complete syntax highlighting for the remaining `library` stanza fields: the
   `(kind parameter)`/`(kind virtual)` and bare `(modes byte native best melange)`
   values, `virtual_modules`, `default_implementation`, `public_headers`,
@@ -19,6 +25,16 @@
 - Fix the language server not receiving the workspace configuration on startup,
   so settings such as codelens are correctly applied when the extension host
   (re)starts instead of sending an empty configuration. (#2185)
+- Update dune cut-off version to 3.24.0 and nightly build from 11/06/2026 for DPM (#2192)
+- Fix the detection of Dune Package Management to use the recommended `dune pkg enabled` command. Previously, we were checking to see if a `dune.lock` file exists. (#2193)
+- Fix the launch of Utop REPL in context of Dune Package Management. (#2198)
+- Redesign how Dune Package Manager is handled. Users now use a two step process, first to select DPM as a sandbox and then to select which dune binary they wish to use in the project (#2199)
+- Enforce that users either enable dune package management by generating a lockfile (as recommended by the dune team) or select a different sandbox. Pressing the escape key will display the select sandbox ui. (2208)
+- Rely on `dune tools env` to retrieve the local OCaml LSP path in the context of DPM. (#2227)
+- Ensure consistent installation hint with chosen sandbox. (#2221)
+- Clean up all child processes spawned by the extension when quitting VS Code. (#2244)
+- Update the list of available OCaml LSP versions. (#2245)
+- Upgrade dune when it is outdated. (#2224)
 
 ## 2.3.0
 

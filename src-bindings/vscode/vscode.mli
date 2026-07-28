@@ -756,6 +756,13 @@ module QuickInputButton : sig
   val create : iconPath:iconPath -> ?tooltip:string -> unit -> t
 end
 
+module QuickPickItemKind : sig
+  type t =
+    | Separator [@js -1]
+    | Default [@js 0]
+  [@@js.enum]
+end
+
 module QuickPickItem : sig
   include Ojs.T
 
@@ -764,6 +771,7 @@ module QuickPickItem : sig
   val detail : t -> string option
   val picked : t -> bool option
   val alwaysShow : t -> bool option
+  val kind : t -> QuickPickItemKind.t option
 
   val create
     :  label:string
@@ -771,6 +779,7 @@ module QuickPickItem : sig
     -> ?detail:string
     -> ?picked:bool
     -> ?alwaysShow:bool
+    -> ?kind:QuickPickItemKind.t
     -> unit
     -> t
 end
@@ -2178,6 +2187,13 @@ module Window : sig
   val createTextEditorDecorationType
     :  options:DecorationRenderOptions.t
     -> TextEditorDecorationType.t
+
+  val informationMessage
+    :  message:string
+    -> ?options:MessageOptions.t
+    -> items:MessageItem.t maybe_list
+    -> unit
+    -> MessageItem.t or_undefined Promise.t
 
   val showInformationMessage
     :  message:string
