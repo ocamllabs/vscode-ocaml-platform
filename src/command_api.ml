@@ -140,18 +140,6 @@ module Internal = struct
       ~return_type:(module Return)
   ;;
 
-  let ask_run_program =
-    let module Return = struct
-      type t = string option Promise.t [@@js]
-    end
-    in
-    typed_handle
-      "ask-run-program"
-      ~args_of_js:(Fn.const ())
-      ~args_to_js:(Fn.const [])
-      ~return_type:(module Return)
-  ;;
-
   let copy_type_under_cursor = unit_handle "copy-type-under-cursor"
   let construct = unit_handle "construct"
   let merlin_jump = unit_handle "jump"

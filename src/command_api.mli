@@ -41,7 +41,6 @@ module Internal : sig
   val start_debugging : (Vscode.Uri.t option, unit) handle
   val goto_closure_code_location : (Jsonoo.t, unit) handle
   val ask_debug_program : (unit, string option Promise.t) handle
-  val ask_run_program : (unit, string option Promise.t) handle
   val copy_type_under_cursor : (unit, unit) handle
   val construct : (unit, unit) handle
   val merlin_jump : (unit, unit) handle

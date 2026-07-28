@@ -1,171 +1,206 @@
 open Import
 
-let active_document_uri () =
-  match Window.activeTextEditor () with
-  | None ->
-    Error
-      (Command_api.Command_errors.text_editor_must_be_active
-         "Run standalone file"
-         ~expl:"")
-  | Some text_editor ->
-    let doc = TextEditor.document text_editor in
-    if String.(TextDocument.languageId doc = "ocaml")
-    then (
-      let abs_path = TextDocument.uri doc |> Uri.path in
-      match Workspace.rootPath () with
-      | None -> Ok (abs_path, doc)
-      | Some root ->
-        (match String.chop_prefix ~prefix:root abs_path with
-         | None -> Ok (abs_path, doc)
-         | Some rel_path -> Ok ("." ^ rel_path, doc)))
-    else
-      Error "The command \"OCaml: Run standalone file\" should be run only on OCaml file."
-;;
+type executable =
+  { name : string
+  ; path : string
+  }
 
-let inside_dune_project () =
+module Dune_descr_parser = struct
+  module Conv = Sexplib.Conv
+  open Option.Monad_infix
+  open Stdlib.Option.Syntax
+
+  let field_sexp tag fields =
+    List.find_map
+      ~f:(function
+        | Sexp.List [ Atom t; v ] when String.equal t tag -> Some v
+        | _ -> None)
+      fields
+  ;;
+
+  let fields_sexp tag fields =
+    List.filter_map
+      ~f:(function
+        | Sexp.List [ Atom t; v ] when String.equal t tag -> Some v
+        | _ -> None)
+      fields
+  ;;
+
+  (* Récupère le chemin d'impl d'un module (souvent une liste à 0 ou 1 élément) *)
+  let mod_impl_path mod_sexp =
+    match mod_sexp with
+    | Sexp.List mod_fields ->
+      field_sexp "impl" mod_fields
+      >>| Conv.list_of_sexp Conv.string_of_sexp
+      >>= (function
+       | [ path ] -> Some path
+       | _ -> None)
+    | Atom _ -> None
+  ;;
+
+  let mod_name mod_sexp =
+    match mod_sexp with
+    | Sexp.List mod_fields -> field_sexp "name" mod_fields >>| Conv.string_of_sexp
+    | Atom _ -> None
+  ;;
+
+  let parse_executables = function
+    | Sexp.Atom _ -> None
+    | List root_fields ->
+      let+ build_context =
+        field_sexp "build_context" root_fields >>| Conv.string_of_sexp
+      in
+      fields_sexp "executables" root_fields
+      |> List.concat_map ~f:(function
+        | Sexp.Atom _ -> []
+        | List exe_fields ->
+          let names =
+            match field_sexp "names" exe_fields with
+            | Some names_sexp -> Conv.list_of_sexp Conv.string_of_sexp names_sexp
+            | None -> []
+          and modules =
+            match field_sexp "modules" exe_fields with
+            | Some (List mods) -> mods
+            | _ -> []
+          in
+          List.filter_map
+            ~f:(fun exe_name ->
+              let* mod_sexp =
+                List.find
+                  ~f:(fun mod_sexp ->
+                    match mod_name mod_sexp with
+                    | None -> false
+                    | Some name ->
+                      String.equal (String.lowercase name) (String.lowercase exe_name))
+                  modules
+              in
+              let+ path = mod_impl_path mod_sexp in
+              { name = exe_name; path })
+            names)
+      |> List.map ~f:(fun exec ->
+        let path = Stdlib.Filename.chop_extension exec.path in
+        let path = path ^ ".exe" in
+        let path = String.chop_prefix_if_exists path ~prefix:build_context in
+        let path =
+          if String.is_prefix path ~prefix:"/" then "." ^ path else "./" ^ path
+        in
+        { exec with path })
+  ;;
+end
+
+type context =
+  | Dune
+  | Unknown
+
+let project_context () =
   Workspace.findFiles
     ~includes:(`String "**/{dune-project}")
     ~excludes:(`String "{**/_*}" (* ignoring dune files from _build, _opam, _esy *))
     ()
   |> Promise.map (function
-    | [ _ ] -> true
-    | _ -> false)
+    | [] -> Unknown
+    | _ -> Dune)
 ;;
 
-let run_dune_exec_command sandbox =
-  active_document_uri ()
-  |> Result.map ~f:(fun (filename, _) ->
-    let filename = Stdlib.Filename.remove_extension filename ^ ".exe" in
-    Sandbox.get_command sandbox "dune" [ "exec"; filename ] `Exec)
-;;
-
-let run_program_command ~sandbox ?(args = []) program =
-  Sandbox.get_command
-    sandbox
-    "ocaml"
-    ([ "-I"; "+str"; "-I"; "+unix"; program ] @ args)
-    `Exec
-;;
-
-let exec instance =
-  match active_document_uri () with
-  | Ok (program, doc) ->
-    let open Promise.Syntax in
-    let* _ : bool = TextDocument.save doc in
-    let sandbox = Extension_instance.sandbox instance in
-    OutputChannel.show ~preserveFocus:true (Lazy.force Output.run_output_channel) ();
-    let* dune_context = inside_dune_project () in
-    (match
-       if dune_context
-       then run_dune_exec_command sandbox
-       else Ok (run_program_command ~sandbox program)
-     with
-     | Ok cmd ->
-       let* command = Cmd.check cmd in
-       (match command with
-        | Ok cmd ->
-          let+ _ =
-            Cmd.run ?cwd:(Sandbox.workspace_root ()) ~output:Output.run_output_channel cmd
+let find_executables sandbox project_ctx =
+  let open Promise.Syntax in
+  match project_ctx with
+  | Dune ->
+    let dune_describe =
+      Sandbox.get_command
+        sandbox
+        "dune"
+        [ "describe"; "--format"; "sexp"; "--lang"; "0.1" ]
+        `Command
+    in
+    let+ { ChildProcess.stdout; _ } =
+      Cmd.run ?cwd:(Sandbox.workspace_root ()) dune_describe
+    in
+    Parsexp.Conv_single.parse_string stdout Dune_descr_parser.parse_executables
+    |> Stdlib.Result.to_option
+    |> Option.join
+  | Unknown ->
+    let+ ml_files = Workspace.findFiles ~includes:(`String "**/*.ml") () in
+    let execs =
+      List.map
+        ~f:(fun uri ->
+          let abs_path = Uri.path uri in
+          let path =
+            match Workspace.rootPath () with
+            | None -> abs_path
+            | Some root ->
+              (match String.chop_prefix ~prefix:root abs_path with
+               | None -> abs_path
+               | Some rel_path -> "." ^ rel_path)
           in
-          Ok ()
-        | Error _ as err -> Promise.return err)
-     | Error _ as err -> Promise.return err)
-  | Error _ as err -> Promise.return err
+          { name = Stdlib.Filename.basename path; path })
+        ml_files
+    in
+    Some execs
+;;
+
+let exec_cmd sandbox project_ctx { path; _ } args =
+  let program, args =
+    match project_ctx with
+    | Dune -> "dune", [ "exec"; path; "--" ] @ args
+    | Unknown -> "ocaml", [ "-I"; "+str"; "-I"; "+unix"; path ] @ args
+  in
+  Sandbox.get_command sandbox program args `Exec
+;;
+
+let executable_choice_menu execs =
+  let choices =
+    List.map
+      ~f:(fun exec -> QuickPickItem.create ~label:exec.name ~detail:exec.path (), exec)
+      execs
+  and options =
+    QuickPickOptions.create
+      ~canPickMany:false
+      ~placeHolder:"Which executable do you want to execute?"
+      ()
+  in
+  Window.showQuickPickItems ~choices ~options ()
 ;;
 
 let _run_standalone_file =
-  let callback (instance : Extension_instance.t) () =
+  let callback instance () =
     let open Promise.Syntax in
     let (_ : unit Promise.t) =
-      let+ result = exec instance in
-      Result.iter_error result ~f:(fun msg -> show_message `Error "%s" msg)
+      let sandbox = Extension_instance.sandbox instance in
+      OutputChannel.show ~preserveFocus:true (Lazy.force Output.run_output_channel) ();
+      let* ctx = project_context () in
+      let* result = find_executables sandbox ctx in
+      match result with
+      | None ->
+        Promise.return (show_message `Error "Output parsing of dune describe failed")
+      | Some executables ->
+        let* selected = executable_choice_menu executables in
+        (match selected with
+         | None -> Promise.return ()
+         | Some exec ->
+           let cmd = exec_cmd sandbox ctx exec [] in
+           let+ _ =
+             Cmd.run
+               ?cwd:(Sandbox.workspace_root ())
+               ~output:Output.run_output_channel
+               cmd
+           in
+           ())
     in
     ()
   in
   Extension_commands.register Command_api.Internal.run_standalone_file callback
 ;;
 
-let _ask_run_program =
-  let callback (_ : Extension_instance.t) () =
-    let open Promise.Syntax in
-    let defaultUri =
-      Workspace.rootPath () |> Option.map ~f:(fun path -> Uri.parse path ())
-    in
-    let options =
-      OpenDialogOptions.create
-        ~canSelectFiles:true
-        ~canSelectFolders:false
-        ~canSelectMany:false
-        ?defaultUri
-        ~filters:(Interop.Dict.singleton "OCaml file" [ "ml" ])
-        ~openLabel:"Debug"
-        ~title:"Run OCaml standalone file"
-        ()
-    in
-    let+ uri = Window.showOpenDialog ~options () in
-    match uri with
-    | Some [ uri ] -> Some (Uri.fsPath uri)
-    | _ -> None
-  in
-  Extension_commands.register Command_api.Internal.ask_run_program callback
-;;
-
-let debugType = "ocaml.run-standalone-file"
-
-let register_provider () =
-  let provider =
-    DebugConfigurationProvider.create
-      ~resolveDebugConfiguration:(fun ~folder:_ ~debugConfiguration ?token:_ () ->
-        let config = DebugConfiguration.t_to_js debugConfiguration in
-        if not (Ojs.has_property config "program")
-        then (
-          match active_document_uri () with
-          | Ok (filename, _) ->
-            DebugConfiguration.set debugConfiguration "program"
-            @@ [%js.of: string] filename
-          | Error msg -> show_message `Error "%s" msg);
-        `Value (Some debugConfiguration))
-      ()
-  in
-  Debug.registerDebugConfigurationProvider ~debugType ~provider ()
-;;
-
-let debug_executable_from_session ~instance ~session () =
-  let config = DebugSession.configuration session |> DebugConfiguration.t_to_js in
-  let program = [%js.to: string] (Ojs.get_prop_ascii config "program")
-  and cwd = [%js.to: string] (Ojs.get_prop_ascii config "cwd")
-  and args = [%js.to: string list] (Ojs.get_prop_ascii config "args") in
-  let open Promise.Syntax in
-  let sandbox = Extension_instance.sandbox instance in
-  let+ command = run_program_command ~sandbox program ~args |> Cmd.check in
-  match command with
-  | Ok cmd ->
-    let { Cmd.bin; args } = Cmd.to_spawn cmd in
-    let options = DebugAdapterExecutableOptions.create ~cwd () in
-    let adaptater =
-      DebugAdapterExecutable.make ~command:(Path.to_string bin) ~args ~options ()
-    in
-    Some (`Executable adaptater)
-  | Error _ -> None
-;;
-
-let register_debug_adapter_descr ~instance =
-  let factory =
-    DebugAdapterDescriptorFactory.create
-      ~createDebugAdapterDescriptor:(fun ~session ~executable:_ ->
-        `Promise (debug_executable_from_session ~instance ~session ()))
-  in
-  Debug.registerDebugAdapterDescriptorFactory ~debugType ~factory
-;;
-
-let register extension instance =
-  let dispose_channel =
+let register extension _instance =
+  let disposable =
     Disposable.make ~dispose:(fun () ->
       Lazy.peek Output.run_output_channel |> Option.iter ~f:OutputChannel.dispose)
-  and dispose_provider = register_provider ()
-  and dispose_debug_adapter = register_debug_adapter_descr ~instance in
-  ExtensionContext.subscribe
-    extension
-    ~disposable:
-      (Disposable.from [ dispose_channel; dispose_debug_adapter; dispose_provider ])
+  in
+  ExtensionContext.subscribe extension ~disposable
 ;;
+
+(*
+   - enregistrer avant de lancer (si c'est le fichier courant) ?
+   - améliorer le task provider existant pour fournir l'exécution de tâche
+*)
