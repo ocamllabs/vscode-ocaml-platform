@@ -27,6 +27,17 @@ module Setting = struct
   ;;
 end
 
+let get_shell_execution ?(args = []) sandbox ~sub_cmd options =
+  let command = Sandbox.get_command sandbox "dune" ([ sub_cmd ] @ args) `Command in
+  Cmd.log command;
+  match command with
+  | Shell commandLine -> ShellExecution.makeCommandLine ~commandLine ~options ()
+  | Spawn { bin; args } ->
+    let command = `String (Path.to_string bin) in
+    let args = List.map ~f:(fun a -> `String a) args in
+    ShellExecution.makeCommandArgs ~command ~args ~options ()
+;;
+
 let folder_relative_path folders file =
   List.fold_left ~init:None folders ~f:(fun acc (folder : WorkspaceFolder.t) ->
     match acc with
@@ -38,18 +49,7 @@ let folder_relative_path folders file =
        | Some without_prefix -> Some (folder, without_prefix)))
 ;;
 
-let get_shell_execution (sandbox : Sandbox.t) options =
-  let command = Sandbox.get_command sandbox "dune" [ "build" ] `Command in
-  Cmd.log command;
-  match command with
-  | Shell commandLine -> ShellExecution.makeCommandLine ~commandLine ~options ()
-  | Spawn { bin; args } ->
-    let command = `String (Path.to_string bin) in
-    let args = List.map ~f:(fun a -> `String a) args in
-    ShellExecution.makeCommandArgs ~command ~args ~options ()
-;;
-
-let compute_tasks token sandbox =
+let compute_build_tasks token sandbox =
   let open Promise.Syntax in
   let folders = Workspace.workspaceFolders () in
   let excludes =
@@ -58,33 +58,79 @@ let compute_tasks token sandbox =
   in
   let includes = `String "**/{dune,dune-project,dune-workspace}" in
   let+ dunes = Workspace.findFiles ~includes ~excludes ~token () in
-  let tasks =
-    List.map dunes ~f:(fun dune ->
-      let scope, relative_path =
-        match folder_relative_path folders (Uri.fsPath dune) with
-        | None -> TaskScope.Workspace, Uri.fsPath dune
-        | Some (folder, relative_path) -> TaskScope.Folder folder, relative_path
-      in
-      let name = Printf.sprintf "build %s" relative_path in
-      let execution =
-        let cwd = Stdlib.Filename.dirname (Uri.fsPath dune) in
-        let options = ShellExecutionOptions.create ~env ~cwd () in
-        get_shell_execution sandbox options
-      in
-      let task =
-        Task.make
-          ~definition
-          ~scope
-          ~source
-          ~name
-          ~problemMatchers
-          ~execution:(`ShellExecution execution)
-          ()
-      in
-      Task.set_group task TaskGroup.build;
-      task)
+  List.map dunes ~f:(fun dune ->
+    let scope, relative_path =
+      match folder_relative_path folders (Uri.fsPath dune) with
+      | None -> TaskScope.Workspace, Uri.fsPath dune
+      | Some (folder, relative_path) -> TaskScope.Folder folder, relative_path
+    in
+    let name = Printf.sprintf "build %s" relative_path in
+    let execution =
+      let cwd = Stdlib.Filename.dirname (Uri.fsPath dune) in
+      let options = ShellExecutionOptions.create ~env ~cwd () in
+      get_shell_execution sandbox ~sub_cmd:"build" options
+    in
+    let task =
+      Task.make
+        ~definition
+        ~scope
+        ~source
+        ~name
+        ~problemMatchers
+        ~execution:(`ShellExecution execution)
+        ()
+    in
+    Task.set_group task TaskGroup.build;
+    task)
+;;
+
+let compute_exec_tasks sandbox =
+  let open Promise.Syntax in
+  let+ executables =
+    let dune_describe =
+      Sandbox.get_command
+        sandbox
+        "dune"
+        [ "describe"; "--format"; "sexp"; "--lang"; "0.1" ]
+        `Command
+    in
+    let+ { ChildProcess.stdout; _ } =
+      Cmd.run ?cwd:(Sandbox.workspace_root ()) dune_describe
+    in
+    match
+      Parsexp.Conv_single.parse_string
+        stdout
+        Standalone_file.Dune_descr_parser.parse_executables
+    with
+    | Ok (Some e) -> e
+    | Ok None | Error _ -> []
   in
-  Some tasks
+  List.map executables ~f:(fun { path; _ } ->
+    let name = Printf.sprintf "exec %s" path in
+    let execution =
+      let cwd = Sandbox.workspace_root () |> Option.map ~f:Path.to_string in
+      let options = ShellExecutionOptions.create ~env ?cwd () in
+      get_shell_execution sandbox ~sub_cmd:"exec" ~args:[ path ] options
+    in
+    let task =
+      Task.make
+        ~definition
+        ~scope:TaskScope.Workspace
+        ~source
+        ~name
+        ~problemMatchers
+        ~execution:(`ShellExecution execution)
+        ()
+    in
+    Task.set_group task TaskGroup.build;
+    task)
+;;
+
+let compute_tasks token sandbox =
+  let open Promise.Syntax in
+  let* exec_tasks = compute_exec_tasks sandbox in
+  let+ build_tasks = compute_build_tasks token sandbox in
+  Some (exec_tasks @ build_tasks)
 ;;
 
 let provide_tasks instance ~token =

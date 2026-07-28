@@ -202,5 +202,4 @@ let register extension _instance =
 
 (*
    - enregistrer avant de lancer (si c'est le fichier courant) ?
-   - améliorer le task provider existant pour fournir l'exécution de tâche
 *)
