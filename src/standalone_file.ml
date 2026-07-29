@@ -121,7 +121,12 @@ let find_executables sandbox project_ctx =
     |> Stdlib.Result.to_option
     |> Option.join
   | Unknown ->
-    let+ ml_files = Workspace.findFiles ~includes:(`String "**/*.ml") () in
+    let+ ml_files =
+      Workspace.findFiles
+        ~includes:(`String "**/*.ml")
+        ~excludes:(`String "{**/_*}" (* ignoring ml files from _build, _opam, _esy *))
+        ()
+    in
     let execs =
       List.map
         ~f:(fun uri ->
