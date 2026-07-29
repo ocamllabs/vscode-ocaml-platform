@@ -105,12 +105,12 @@ let compute_exec_tasks sandbox =
     | Ok (Some e) -> e
     | Ok None | Error _ -> []
   in
-  List.map executables ~f:(fun { path; _ } ->
-    let name = Printf.sprintf "exec %s" path in
+  List.map executables ~f:(fun { exec_path; _ } ->
+    let name = Printf.sprintf "exec %s" exec_path in
     let execution =
       let cwd = Sandbox.workspace_root () |> Option.map ~f:Path.to_string in
       let options = ShellExecutionOptions.create ~env ?cwd () in
-      get_shell_execution sandbox ~sub_cmd:"exec" ~args:[ path ] options
+      get_shell_execution sandbox ~sub_cmd:"exec" ~args:[ exec_path ] options
     in
     let task =
       Task.make

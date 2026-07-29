@@ -2,7 +2,8 @@ open Import
 
 type executable =
   { name : string
-  ; path : string
+  ; mod_path : string
+  ; exec_path : string
   }
 
 module Dune_descr_parser = struct
@@ -26,7 +27,6 @@ module Dune_descr_parser = struct
       fields
   ;;
 
-  (* Récupère le chemin d'impl d'un module (souvent une liste à 0 ou 1 élément) *)
   let mod_impl_path mod_sexp =
     match mod_sexp with
     | Sexp.List mod_fields ->
@@ -74,17 +74,18 @@ module Dune_descr_parser = struct
                       String.equal (String.lowercase name) (String.lowercase exe_name))
                   modules
               in
-              let+ path = mod_impl_path mod_sexp in
-              { name = exe_name; path })
+              let+ rel_path = mod_impl_path mod_sexp in
+              let mod_path =
+                String.chop_prefix_if_exists rel_path ~prefix:build_context
+              in
+              let exec_path = Stdlib.Filename.remove_extension mod_path ^ ".exe" in
+              let exec_path =
+                if String.is_prefix exec_path ~prefix:"/"
+                then "." ^ exec_path
+                else "./" ^ exec_path
+              in
+              { name = exe_name; mod_path; exec_path })
             names)
-      |> List.map ~f:(fun exec ->
-        let path = Stdlib.Filename.chop_extension exec.path in
-        let path = path ^ ".exe" in
-        let path = String.chop_prefix_if_exists path ~prefix:build_context in
-        let path =
-          if String.is_prefix path ~prefix:"/" then "." ^ path else "./" ^ path
-        in
-        { exec with path })
   ;;
 end
 
@@ -125,7 +126,7 @@ let find_executables sandbox project_ctx =
       List.map
         ~f:(fun uri ->
           let abs_path = Uri.path uri in
-          let path =
+          let mod_path =
             match Workspace.rootPath () with
             | None -> abs_path
             | Some root ->
@@ -133,17 +134,17 @@ let find_executables sandbox project_ctx =
                | None -> abs_path
                | Some rel_path -> "." ^ rel_path)
           in
-          { name = Stdlib.Filename.basename path; path })
+          { name = Stdlib.Filename.basename mod_path; mod_path; exec_path = mod_path })
         ml_files
     in
     Some execs
 ;;
 
-let exec_cmd sandbox project_ctx { path; _ } args =
+let exec_cmd sandbox project_ctx exec args =
   let program, args =
     match project_ctx with
-    | Dune -> "dune", [ "exec"; path; "--" ] @ args
-    | Unknown -> "ocaml", [ "-I"; "+str"; "-I"; "+unix"; path ] @ args
+    | Dune -> "dune", [ "exec"; exec.exec_path; "--" ] @ args
+    | Unknown -> "ocaml", [ "-I"; "+str"; "-I"; "+unix"; exec.mod_path ] @ args
   in
   Sandbox.get_command sandbox program args `Exec
 ;;
@@ -151,7 +152,8 @@ let exec_cmd sandbox project_ctx { path; _ } args =
 let executable_choice_menu execs =
   let choices =
     List.map
-      ~f:(fun exec -> QuickPickItem.create ~label:exec.name ~detail:exec.path (), exec)
+      ~f:(fun exec ->
+        QuickPickItem.create ~label:exec.name ~detail:exec.exec_path (), exec)
       execs
   and options =
     QuickPickOptions.create
@@ -160,6 +162,22 @@ let executable_choice_menu execs =
       ()
   in
   Window.showQuickPickItems ~choices ~options ()
+;;
+
+let active_text_doc () =
+  Window.activeTextEditor ()
+  |> Option.bind ~f:(fun text_editor ->
+    let doc = TextEditor.document text_editor in
+    if String.(TextDocument.languageId doc = "ocaml")
+    then (
+      let abs_path = TextDocument.uri doc |> Uri.path in
+      match Workspace.rootPath () with
+      | None -> Some (abs_path, doc)
+      | Some root ->
+        (match String.chop_prefix ~prefix:root abs_path with
+         | None -> Some (abs_path, doc)
+         | Some rel_path -> Some (rel_path, doc)))
+    else None)
 ;;
 
 let _run_standalone_file =
@@ -178,6 +196,12 @@ let _run_standalone_file =
         (match selected with
          | None -> Promise.return ()
          | Some exec ->
+           let* _ =
+             match active_text_doc () with
+             | Some (rel_path, doc) when String.(rel_path = exec.mod_path) ->
+               TextDocument.save doc
+             | _ -> Promise.return false
+           in
            let cmd = exec_cmd sandbox ctx exec [] in
            let+ _ =
              Cmd.run
@@ -199,7 +223,3 @@ let register extension _instance =
   in
   ExtensionContext.subscribe extension ~disposable
 ;;
-
-(*
-   - enregistrer avant de lancer (si c'est le fichier courant) ?
-*)
