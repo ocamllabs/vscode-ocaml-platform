@@ -87,25 +87,12 @@ let compute_build_tasks token sandbox =
 let compute_exec_tasks sandbox =
   let open Promise.Syntax in
   let+ executables =
-    let dune_describe =
-      Sandbox.get_command
-        sandbox
-        "dune"
-        [ "describe"; "--format"; "sexp"; "--lang"; "0.1" ]
-        `Command
-    in
     let+ { ChildProcess.stdout; _ } =
-      Cmd.run ?cwd:(Sandbox.workspace_root ()) dune_describe
+      Dune_describe.command sandbox |> Cmd.run ?cwd:(Sandbox.workspace_root ())
     in
-    match
-      Parsexp.Conv_single.parse_string
-        stdout
-        Standalone_file.Dune_descr_parser.parse_executables
-    with
-    | Ok (Some e) -> e
-    | Ok None | Error _ -> []
+    Dune_describe.(parse parse_executables) stdout |> Option.value ~default:[]
   in
-  List.map executables ~f:(fun { exec_path; _ } ->
+  List.map executables ~f:(fun { Dune_describe.exec_path; _ } ->
     let name = Printf.sprintf "exec %s" exec_path in
     let execution =
       let cwd = Sandbox.workspace_root () |> Option.map ~f:Path.to_string in
