@@ -3,7 +3,7 @@ open Sexplib
 open Option.Monad_infix
 open Stdlib.Option.Syntax
 
-type 'a parser = Sexplib.Sexp.t -> 'a option
+type 'a parser = Sexp.t -> 'a option
 
 type executable =
   { name : string
@@ -76,9 +76,9 @@ let parse_executables = function
             let mod_path = String.chop_prefix_if_exists rel_path ~prefix:build_context in
             let exec_path = Stdlib.Filename.remove_extension mod_path ^ ".exe" in
             let exec_path =
-              if String.is_prefix exec_path ~prefix:"/"
-              then "." ^ exec_path
-              else "./" ^ exec_path
+              if Stdlib.Filename.is_relative exec_path
+              then exec_path
+              else Stdlib.Filename.current_dir_name ^ exec_path
             in
             { name = exe_name; mod_path; exec_path })
           names)

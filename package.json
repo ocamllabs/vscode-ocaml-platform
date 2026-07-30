@@ -330,9 +330,9 @@
         "title": "Start the Ocaml-LSP server for Dune Package Management"
       },
       {
-        "command": "ocaml.run-standalone-file",
+        "command": "ocaml.run-file",
         "category": "OCaml",
-        "title": "Run a standalone bytecode executable",
+        "title": "Run a bytecode executable",
         "icon": {
           "light": "assets/run-light.svg",
           "dark": "assets/run-dark.svg"
@@ -1236,7 +1236,7 @@
           "group": "navigation"
         },
         {
-          "command": "ocaml.run-standalone-file",
+          "command": "ocaml.run-file",
           "when": "editorTextFocus && editorLangId == ocaml",
           "group": "navigation"
         }

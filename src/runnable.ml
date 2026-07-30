@@ -70,7 +70,7 @@ let executable_choice_menu (execs : Dune_describe.executable list) =
   and options =
     QuickPickOptions.create
       ~canPickMany:false
-      ~placeHolder:"Which executable do you want to execute?"
+      ~placeHolder:"Which executable do you want to run?"
       ()
   in
   Window.showQuickPickItems ~choices ~options ()
@@ -92,7 +92,7 @@ let active_text_doc () =
     else None)
 ;;
 
-let _run_standalone_file =
+let _run_file =
   let callback instance () =
     let open Promise.Syntax in
     let (_ : unit Promise.t) =
@@ -125,7 +125,7 @@ let _run_standalone_file =
     in
     ()
   in
-  Extension_commands.register Command_api.Internal.run_standalone_file callback
+  Extension_commands.register Command_api.Internal.run_file callback
 ;;
 
 let register extension _instance =
