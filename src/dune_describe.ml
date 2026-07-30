@@ -74,7 +74,10 @@ let parse_executables = function
             in
             let+ rel_path = mod_impl_path mod_sexp in
             let mod_path = String.chop_prefix_if_exists rel_path ~prefix:build_context in
-            let exec_path = Stdlib.Filename.remove_extension mod_path ^ ".exe" in
+            let exec_path =
+              (* No need to join here since [mod_path] is always absolute. *)
+              Stdlib.Filename.(current_dir_name ^ remove_extension mod_path ^ ".exe")
+            in
             let exec_path =
               if Stdlib.Filename.is_relative exec_path
               then exec_path

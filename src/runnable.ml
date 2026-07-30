@@ -34,6 +34,7 @@ let find_executables sandbox project_ctx =
     let execs =
       List.map
         ~f:(fun uri ->
+          (* FIXME: This is fragile. We probably need to use [Node.Path] bindings here. *)
           let abs_path = Uri.path uri in
           let mod_path =
             match Workspace.rootPath () with
@@ -82,6 +83,7 @@ let active_text_doc () =
     let doc = TextEditor.document text_editor in
     if String.(TextDocument.languageId doc = "ocaml")
     then (
+      (* FIXME: This is fragile. We probably need to use [Node.Path] bindings here. *)
       let abs_path = TextDocument.uri doc |> Uri.path in
       match Workspace.rootPath () with
       | None -> Some (abs_path, doc)
