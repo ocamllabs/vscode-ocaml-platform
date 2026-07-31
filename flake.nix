@@ -58,6 +58,7 @@
                 opam-file-format
                 ppxlib
                 promise_jsoo
+                sexplib
               ]);
             duneVersion = "3";
           };
