@@ -16,7 +16,7 @@ val start_documentation_server
 
 val stop_documentation_server : t -> unit
 val lsp_client : t -> (LanguageClient.t * Ocaml_lsp.t) option
-val ocaml_version_exn : t -> Ocaml_version.t
+val ocaml_version : t -> Ocaml_version.t option
 val start_language_server : t -> unit Promise.t
 val install_ocaml_lsp_server : Sandbox.t -> unit Promise.t
 val upgrade_ocaml_lsp_server : Sandbox.t -> unit Promise.t

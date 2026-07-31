@@ -18,7 +18,7 @@ let sandbox t = t.sandbox
 let language_client t = Option.map ~f:fst t.lsp_client
 let ocaml_lsp t = Option.map ~f:snd t.lsp_client
 let lsp_client t = t.lsp_client
-let ocaml_version_exn t = Option.value_exn t.ocaml_version
+let ocaml_version t = t.ocaml_version
 
 let send_configuration t client =
   let enable_setting setting =
@@ -296,11 +296,12 @@ end = struct
         let initialize_result = LanguageClient.initializeResult client in
         let ocaml_lsp = Ocaml_lsp.of_initialize_result initialize_result in
         t.lsp_client <- Some (client, ocaml_lsp);
-        (match
-           Ocaml_lsp.is_version_up_to_date ocaml_lsp (sandbox t) (ocaml_version_exn t)
-         with
-         | Ok () -> ()
-         | Error (`Msg _) -> ());
+        (match ocaml_version t with
+         | Some version ->
+           (match Ocaml_lsp.is_version_up_to_date ocaml_lsp (sandbox t) version with
+            | Ok () -> ()
+            | Error (`Msg _) -> ())
+         | None -> ());
         send_configuration t client;
         Ok ()
       in
