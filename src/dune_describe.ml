@@ -1,7 +1,6 @@
 open Import
 open Sexplib
 open Option.Monad_infix
-open Stdlib.Option.Syntax
 
 type 'a parser = Sexp.t -> 'a option
 
@@ -47,7 +46,9 @@ let mod_name mod_sexp =
 let parse_executables = function
   | Sexp.Atom _ -> None
   | List root_fields ->
-    let+ build_context = field_sexp "build_context" root_fields >>| Conv.string_of_sexp in
+    field_sexp "build_context" root_fields
+    >>| Conv.string_of_sexp
+    >>| fun build_context ->
     fields_sexp "executables" root_fields
     |> List.concat_map ~f:(function
       | Sexp.Atom _ -> []
@@ -63,16 +64,15 @@ let parse_executables = function
         in
         List.filter_map
           ~f:(fun exe_name ->
-            let* mod_sexp =
-              List.find
-                ~f:(fun mod_sexp ->
-                  match mod_name mod_sexp with
-                  | None -> false
-                  | Some name ->
-                    String.equal (String.lowercase name) (String.lowercase exe_name))
-                modules
-            in
-            let+ rel_path = mod_impl_path mod_sexp in
+            List.find
+              ~f:(fun mod_sexp ->
+                match mod_name mod_sexp with
+                | None -> false
+                | Some name ->
+                  String.equal (String.lowercase name) (String.lowercase exe_name))
+              modules
+            >>= mod_impl_path
+            >>| fun rel_path ->
             let mod_path = String.chop_prefix_if_exists rel_path ~prefix:build_context in
             let exec_path =
               (* No need to join here since [mod_path] is always absolute. *)
