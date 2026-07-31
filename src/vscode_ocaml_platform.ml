@@ -42,6 +42,7 @@ let activate (extension : ExtensionContext.t) =
   Ast_editor.register extension instance;
   Cm_editor.register extension instance;
   Repl.register extension instance;
+  Runnable.register extension instance;
   Earlybird.register extension instance;
   (* Extension_commands.register_all_commands registers all commands that were
      added in the register functions above. It must be called last. *)
@@ -71,9 +72,12 @@ let activate (extension : ExtensionContext.t) =
   Promise.return ()
 ;;
 
+let deactivate () = Node.ChildProcess.kill_managed_processes ()
+
 (* see {{:https://code.visualstudio.com/api/references/vscode-api#Extension}
-   activate() *)
+   activate() and deactivate() *)
 let () =
   let open Js_of_ocaml.Js in
-  export "activate" (wrap_callback activate)
+  export "activate" (wrap_callback activate);
+  export "deactivate" (wrap_callback deactivate)
 ;;

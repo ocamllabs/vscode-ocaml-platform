@@ -245,7 +245,9 @@ module ChildProcess = struct
       val get_stdout : t -> Stream.Readable.t [@@js.get "stdout"]
       val get_stderr : t -> Stream.Readable.t [@@js.get "stderr"]
       val get_stdin : t -> Stream.Writable.t [@@js.get "stdin"]
-      val on : t -> string -> Ojs.t -> unit [@@js.call]]
+      val on : t -> string -> Ojs.t -> unit [@@js.call]
+      val get_pid : t -> int [@@js.get "pid"]
+      val kill : t -> ?signal:int -> unit -> bool [@@js.call "kill"]]
 
   let on t = function
     | `Close f -> on t "close" @@ [%js.of: code:int -> ?signal:string -> unit -> unit] f
@@ -269,7 +271,10 @@ module ChildProcess = struct
     | Closed
     | ProcessError of JsError.t
 
+  let pid_tbl = Hashtbl.create 10
+
   let handle_child_process ?logger ?stdin cp resolve =
+    Hashtbl.replace pid_tbl (get_pid cp) cp;
     let log = Option.value logger ~default:ignore in
     log Spawned;
     let stdout = ref (Buffer.from "") in
@@ -298,6 +303,7 @@ module ChildProcess = struct
     on cp (`Error error);
     let close ~code ?signal:_ () =
       log Closed;
+      Hashtbl.remove pid_tbl (get_pid cp);
       resolve
         { exitCode = code
         ; stdout = Buffer.toString !stdout
@@ -324,5 +330,13 @@ module ChildProcess = struct
     @@ fun ~resolve ~reject:_ ->
     let cp = spawn cmd args ?options () in
     handle_child_process cp ?logger ?stdin resolve
+  ;;
+
+  let kill_managed_processes () =
+    Hashtbl.iter
+      (fun _ process ->
+         let _ : bool = kill process () in
+         ())
+      pid_tbl
   ;;
 end

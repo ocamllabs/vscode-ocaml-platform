@@ -14,3 +14,5 @@ let extension_output_channel =
 let command_output_channel =
   lazy (Vscode.Window.createOutputChannel ~name:"OCaml Commands" ())
 ;;
+
+let run_output_channel = lazy (Vscode.Window.createOutputChannel ~name:"Run OCaml" ())

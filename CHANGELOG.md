@@ -32,6 +32,10 @@
 - Enforce that users either enable dune package management by generating a lockfile (as recommended by the dune team) or select a different sandbox. Pressing the escape key will display the select sandbox ui. (2208)
 - Rely on `dune tools env` to retrieve the local OCaml LSP path in the context of DPM. (#2227)
 - Ensure consistent installation hint with chosen sandbox. (#2221)
+- Clean up all child processes spawned by the extension when quitting VS Code. (#2244)
+- Update the list of available OCaml LSP versions. (#2245)
+- Upgrade dune when it is outdated. (#2224)
+- Add a run button to launch bytecode executable directly from the UI and provide tasks to run workspace executables with Dune. (#2190)
 - Check the OCaml version used only if OCaml LSP is detected, this ehance user experience in the context of DPM. (#2238)
 
 ## 2.3.0

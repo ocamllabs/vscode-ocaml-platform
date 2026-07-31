@@ -32,7 +32,8 @@ val output
 val equal_spawn : spawn -> spawn -> bool
 
 val run
-  :  ?cwd:Path.t
+  :  ?output:OutputChannel.t Lazy.t
+  -> ?cwd:Path.t
   -> ?env:string Interop.Dict.t
   -> ?stdin:stderr
   -> t
