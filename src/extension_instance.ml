@@ -18,7 +18,7 @@ let sandbox t = t.sandbox
 let language_client t = Option.map ~f:fst t.lsp_client
 let ocaml_lsp t = Option.map ~f:snd t.lsp_client
 let lsp_client t = t.lsp_client
-let ocaml_version_exn t = Option.value_exn t.ocaml_version
+let ocaml_version t = t.ocaml_version
 
 let send_configuration t client =
   let enable_setting setting =
