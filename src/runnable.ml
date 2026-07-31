@@ -62,21 +62,6 @@ let exec_cmd project_ctx (exec : Dune_describe.executable) args =
   Spawn { Cmd.bin = Path.of_string program; args } |> Cmd.to_string
 ;;
 
-let executable_choice_menu (execs : Dune_describe.executable list) =
-  let choices =
-    List.map
-      ~f:(fun exec ->
-        QuickPickItem.create ~label:exec.name ~detail:exec.exec_path (), exec)
-      execs
-  and options =
-    QuickPickOptions.create
-      ~canPickMany:false
-      ~placeHolder:"Which executable do you want to run?"
-      ()
-  in
-  Window.showQuickPickItems ~choices ~options ()
-;;
-
 let active_text_doc () =
   Window.activeTextEditor ()
   |> Option.bind ~f:(fun text_editor ->
@@ -92,6 +77,33 @@ let active_text_doc () =
          | None -> Some (abs_path, doc)
          | Some rel_path -> Some (rel_path, doc)))
     else None)
+;;
+
+let executable_choice_menu (execs : Dune_describe.executable list) =
+  let text_doc = active_text_doc () in
+  let choices =
+    List.map
+      ~f:(fun exec ->
+        let is_current_doc =
+          match text_doc with
+          | None -> false
+          | Some (path, _) -> String.equal path exec.mod_path
+        in
+        ( QuickPickItem.create
+            ~label:exec.name
+            ~detail:exec.exec_path
+            ~alwaysShow:is_current_doc
+            ()
+        , exec ))
+      execs
+  and options =
+    QuickPickOptions.create
+      ~placeHolder:"Which executable do you want to run?"
+      ~canPickMany:false
+      ~matchOnDetail:true
+      ()
+  in
+  Window.showQuickPickItems ~choices ~options ()
 ;;
 
 let terms_tbl : (string, Terminal_sandbox.t) Hashtbl.t = Hashtbl.create (module String)
