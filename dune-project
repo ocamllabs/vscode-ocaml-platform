@@ -43,6 +43,8 @@
    (>= 0.36))
   (opam-file-format
    (>= 2.1.6))
+ (sexplib
+   (>= v0.17.0))
   (ocamlformat
    (and
     (= 0.28.1)

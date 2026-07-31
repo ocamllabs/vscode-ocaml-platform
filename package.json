@@ -328,6 +328,15 @@
         "command": "ocaml.install-dune-lsp",
         "category": "OCaml",
         "title": "Start the Ocaml-LSP server for Dune Package Management"
+      },
+      {
+        "command": "ocaml.run-file",
+        "category": "OCaml",
+        "title": "Run a bytecode executable",
+        "icon": {
+          "light": "assets/run-light.svg",
+          "dark": "assets/run-dark.svg"
+        }
       }
     ],
     "configuration": {
@@ -1224,6 +1233,11 @@
           "command": "ocaml.switch-impl-intf",
           "key": "Alt+O",
           "when": "editorTextFocus && (editorLangId == ocaml || editorLangId == ocaml.interface || editorLangId == ocaml.mlx || editorLangId == reason)",
+          "group": "navigation"
+        },
+        {
+          "command": "ocaml.run-file",
+          "when": "editorTextFocus && editorLangId == ocaml",
           "group": "navigation"
         }
       ],

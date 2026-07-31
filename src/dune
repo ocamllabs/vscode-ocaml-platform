@@ -12,6 +12,7 @@
   opam-file-format
   polka
   promise_jsoo
+  sexplib
   vscode
   vscode_languageclient
   ppxlib
