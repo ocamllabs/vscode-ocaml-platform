@@ -53,13 +53,13 @@ let find_executables sandbox project_ctx =
     Some execs
 ;;
 
-let exec_cmd sandbox project_ctx (exec : Dune_describe.executable) args =
+let exec_cmd project_ctx (exec : Dune_describe.executable) args =
   let program, args =
     match project_ctx with
     | Dune -> "dune", [ "exec"; exec.exec_path; "--" ] @ args
     | Unknown -> "ocaml", [ "-I"; "+str"; "-I"; "+unix"; exec.mod_path ] @ args
   in
-  Sandbox.get_command sandbox program args `Exec
+  Spawn { Cmd.bin = Path.of_string program; args } |> Cmd.to_string
 ;;
 
 let executable_choice_menu (execs : Dune_describe.executable list) =
@@ -99,31 +99,26 @@ let _run_file =
     let open Promise.Syntax in
     let (_ : unit Promise.t) =
       let sandbox = Extension_instance.sandbox instance in
-      OutputChannel.show ~preserveFocus:true (Lazy.force Output.run_output_channel) ();
       let* ctx = project_context () in
       let* result = find_executables sandbox ctx in
       match result with
       | None ->
         Promise.return (show_message `Error "Output parsing of dune describe failed")
       | Some executables ->
-        let* selected = executable_choice_menu executables in
+        let+ selected = executable_choice_menu executables in
         (match selected with
-         | None -> Promise.return ()
+         | None -> ()
          | Some exec ->
-           let* _ =
+           let _ =
              match active_text_doc () with
              | Some (rel_path, doc) when String.(rel_path = exec.mod_path) ->
                TextDocument.save doc
              | _ -> Promise.return false
            in
-           let cmd = exec_cmd sandbox ctx exec [] in
-           let+ _ =
-             Cmd.run
-               ?cwd:(Sandbox.workspace_root ())
-               ~output:Output.run_output_channel
-               cmd
-           in
-           ())
+           let command = exec_cmd ctx exec [] in
+           let term = Terminal_sandbox.create ~name:"Run OCaml" sandbox in
+           Terminal_sandbox.show ~preserveFocus:true term;
+           Terminal_sandbox.send term command)
     in
     ()
   in
