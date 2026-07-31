@@ -83,10 +83,6 @@ val install_packages : t -> string list -> unit Promise.t
 (** Upgrade packages in the sandbox *)
 val upgrade_packages : ?packages:string list -> t -> unit Promise.t
 
-(** [ocaml_version] returns the version of the ocaml compiler installed in given
-    sandbox. *)
-val ocaml_version : t -> (string, string) result Promise.t
-
 (** Focus on the command output channel. If [sandbox] is provided, the output
     channel will only be focused if the given sandbox supports package commands. *)
 val focus_on_package_command : ?sandbox:t -> unit -> unit
