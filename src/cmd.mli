@@ -16,6 +16,7 @@ type stderr = string
 
 (* surround a string with quotes if it has spaces *)
 val quote : string -> string
+val to_string : t -> string
 val to_spawn : t -> spawn
 val append : spawn -> string list -> spawn
 val check_spawn : ?env:string Interop.Dict.t -> spawn -> spawn Or_error.t Promise.t
@@ -32,8 +33,7 @@ val output
 val equal_spawn : spawn -> spawn -> bool
 
 val run
-  :  ?output:OutputChannel.t Lazy.t
-  -> ?cwd:Path.t
+  :  ?cwd:Path.t
   -> ?env:string Interop.Dict.t
   -> ?stdin:stderr
   -> t
