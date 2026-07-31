@@ -94,6 +94,18 @@ let active_text_doc () =
     else None)
 ;;
 
+let terms_tbl : (string, Terminal_sandbox.t) Hashtbl.t = Hashtbl.create (module String)
+
+let spawn_term sandbox exec =
+  let term =
+    Terminal_sandbox.create
+      ~name:(sprintf {|Run "%s"|} exec.Dune_describe.mod_path)
+      sandbox
+  in
+  let _ = Hashtbl.add terms_tbl ~key:exec.mod_path ~data:term in
+  term
+;;
+
 let _run_file =
   let callback instance () =
     let open Promise.Syntax in
@@ -115,8 +127,14 @@ let _run_file =
                TextDocument.save doc
              | _ -> Promise.return false
            in
+           let term =
+             match Hashtbl.find terms_tbl exec.mod_path with
+             | None -> spawn_term sandbox exec
+             | Some previous when Option.is_some (Terminal.exitStatus previous) ->
+               spawn_term sandbox exec
+             | Some term -> term
+           in
            let command = exec_cmd ctx exec [] in
-           let term = Terminal_sandbox.create ~name:"Run OCaml" sandbox in
            Terminal_sandbox.show ~preserveFocus:true term;
            Terminal_sandbox.send term command)
     in
@@ -128,7 +146,7 @@ let _run_file =
 let register extension _instance =
   let disposable =
     Disposable.make ~dispose:(fun () ->
-      Lazy.peek Output.run_output_channel |> Option.iter ~f:OutputChannel.dispose)
+      Hashtbl.iter ~f:Terminal_sandbox.dispose terms_tbl)
   in
   ExtensionContext.subscribe extension ~disposable
 ;;

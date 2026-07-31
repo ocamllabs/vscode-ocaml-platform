@@ -9,5 +9,3 @@ val extension_output_channel : Vscode.OutputChannel.t Lazy.t
 (** [command_output_channel] is the output channel for user-friendly logs of
     shell commands *)
 val command_output_channel : Vscode.OutputChannel.t Lazy.t
-
-val run_output_channel : Vscode.OutputChannel.t Lazy.t
