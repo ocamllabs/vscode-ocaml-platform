@@ -42,14 +42,14 @@
     "test": "vscode-test"
   },
   "dependencies": {
-    "oxfmt": "0.63.0",
-    "oxlint": "1.78.0",
+    "oxfmt": "0.65.0",
+    "oxlint": "1.80.0",
     "polka": "1.0.0-next.28",
     "sirv": "3.0.2",
     "vscode-languageclient": "10.1.0"
   },
   "devDependencies": {
-    "@types/node": "26.2.0",
+    "@types/node": "26.3.0",
     "@types/vscode": "1.86.0",
     "@vscode/test-cli": "0.0.15",
     "@vscode/test-electron": "3.1.0",
