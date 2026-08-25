@@ -1,5 +1,8 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error"
+  },
   "ignorePatterns": [".claude"],
   "options": {
     "typeAware": true,
@@ -10,15 +13,11 @@
     "typescript",
     "unicorn",
     "react",
-    "react-perf",
     "oxc",
     "import",
     "jsdoc",
     "jsx-a11y",
     "node",
     "promise"
-  ],
-  "rules": {
-    "react/react-compiler": "error"
-  }
+  ]
 }
