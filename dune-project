@@ -47,7 +47,7 @@
    (>= v0.17.0))
   (ocamlformat
    (and
-    (= 0.28.1)
+    (= 0.29.0)
     :with-dev-setup))
   (ocaml-lsp-server :with-dev-setup)))
 
@@ -64,7 +64,7 @@
    (= 1.1.7))
   (ocamlformat
    (and
-    (= 0.28.1)
+    (= 0.29.0)
     :with-dev-setup))
   (ocaml-lsp-server :with-dev-setup)))
 
@@ -86,7 +86,7 @@
    (= :version))
   (ocamlformat
    (and
-    (= 0.28.1)
+    (= 0.29.0)
     :with-dev-setup))
   (ocaml-lsp-server :with-dev-setup)))
 
@@ -109,6 +109,6 @@
    (= :version))
   (ocamlformat
    (and
-    (= 0.28.1)
+    (= 0.29.0)
     :with-dev-setup))
   (ocaml-lsp-server :with-dev-setup)))
