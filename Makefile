@@ -15,7 +15,7 @@ deps:
 
 .PHONY: create_switch
 create_switch:
-	opam switch create . 5.3.0 --no-install
+	opam switch create . 5.5.0 --no-install
 
 .PHONY: switch
 switch: create_switch deps

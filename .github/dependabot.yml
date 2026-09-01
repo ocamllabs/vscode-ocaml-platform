@@ -7,6 +7,10 @@ updates:
     labels:
       - dependencies
       - no changelog
+    groups:
+      ocaml:
+        patterns:
+          - "ocaml/*"
   - package-ecosystem: bun
     directory: /
     schedule:
@@ -19,5 +23,34 @@ updates:
         patterns:
           - "react"
           - "react-dom"
+          - "react-*"
+          - "@types/react"
+          - "@types/react-dom"
+      vite:
+        patterns:
+          - "vite"
+          - "vite-*"
+          - "@vitejs/*"
+          - "@rolldown/*"
+      tailwind:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
+          - "clsx"
+          - "tailwind-merge"
+          - "class-variance-authority"
+      babel:
+        patterns:
+          - "@babel/*"
+          - "babel-*"
+      oxc:
+        patterns:
+          - "oxlint*"
+          - "oxfmt"
+      vscode:
+        patterns:
+          - "@vscode/*"
+          - "vscode-*"
+          - "ovsx"
     ignore:
       - dependency-name: "@types/vscode"

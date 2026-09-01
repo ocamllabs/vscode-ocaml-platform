@@ -26,9 +26,9 @@
   (vscode
    (= :version))
   (ocaml
-   (= 5.3.0))
+   (= 5.5.0))
   (js_of_ocaml
-   (>= 6.3))
+   (>= 6.4))
   (gen_js_api
    (= 1.1.7))
   (base
@@ -43,9 +43,11 @@
    (>= 0.36))
   (opam-file-format
    (>= 2.1.6))
+ (sexplib
+   (>= v0.17.0))
   (ocamlformat
    (and
-    (= 0.28.1)
+    (= 0.29.0)
     :with-dev-setup))
   (ocaml-lsp-server :with-dev-setup)))
 
@@ -57,12 +59,12 @@
   (ocaml
    (>= 4.08))
   (js_of_ocaml
-   (>= 6.3))
+   (>= 6.4))
   (gen_js_api
    (= 1.1.7))
   (ocamlformat
    (and
-    (= 0.28.1)
+    (= 0.29.0)
     :with-dev-setup))
   (ocaml-lsp-server :with-dev-setup)))
 
@@ -73,7 +75,7 @@
   (ocaml
    (>= 4.08))
   (js_of_ocaml
-   (>= 6.3))
+   (>= 6.4))
   (gen_js_api
    (= 1.1.7))
   (promise_jsoo
@@ -84,7 +86,7 @@
    (= :version))
   (ocamlformat
    (and
-    (= 0.28.1)
+    (= 0.29.0)
     :with-dev-setup))
   (ocaml-lsp-server :with-dev-setup)))
 
@@ -96,7 +98,7 @@
   (ocaml
    (>= 4.08))
   (js_of_ocaml
-   (>= 6.3))
+   (>= 6.4))
   (gen_js_api
    (= 1.1.7))
   (promise_jsoo
@@ -107,6 +109,6 @@
    (= :version))
   (ocamlformat
    (and
-    (= 0.28.1)
+    (= 0.29.0)
     :with-dev-setup))
   (ocaml-lsp-server :with-dev-setup)))

@@ -26,19 +26,23 @@ let notify_configuration_changes instance =
 let activate (extension : ExtensionContext.t) =
   let open Promise.Syntax in
   let instance = Extension_instance.make () in
+  let assets =
+    Extension_assets.make ~extension_uri:(ExtensionContext.extensionUri extension)
+  in
   ExtensionContext.subscribe
     extension
     ~disposable:(Extension_instance.disposable instance);
   ExtensionContext.subscribe extension ~disposable:(notify_configuration_changes instance);
   Dune_formatter.register extension instance;
   Dune_task_provider.register extension instance;
-  Treeview_switches.register extension instance;
-  Treeview_sandbox.register extension instance;
-  Treeview_commands.register extension;
-  Treeview_help.register extension;
+  Treeview_switches.register extension instance ~assets;
+  Treeview_sandbox.register extension instance ~assets;
+  Treeview_commands.register extension ~assets;
+  Treeview_help.register extension ~assets;
   Ast_editor.register extension instance;
   Cm_editor.register extension instance;
   Repl.register extension instance;
+  Runnable.register extension instance;
   Earlybird.register extension instance;
   (* Extension_commands.register_all_commands registers all commands that were
      added in the register functions above. It must be called last. *)
@@ -63,16 +67,17 @@ let activate (extension : ExtensionContext.t) =
     let* sandbox_opt = sandbox_opt in
     let sandbox = Option.value sandbox_opt ~default:Sandbox.Global in
     Extension_instance.set_sandbox instance sandbox;
-    let* () = Extension_instance.update_ocaml_info instance in
-    let+ () = Extension_instance.start_language_server instance in
-    ()
+    Extension_instance.start_language_server instance
   in
   Promise.return ()
 ;;
 
+let deactivate () = Node.ChildProcess.kill_managed_processes ()
+
 (* see {{:https://code.visualstudio.com/api/references/vscode-api#Extension}
-   activate() *)
+   activate() and deactivate() *)
 let () =
   let open Js_of_ocaml.Js in
-  export "activate" (wrap_callback activate)
+  export "activate" (wrap_callback activate);
+  export "deactivate" (wrap_callback deactivate)
 ;;

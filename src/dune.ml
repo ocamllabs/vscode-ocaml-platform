@@ -97,13 +97,14 @@ let construct_dune_path path = Path.(of_string (String.strip path) / "dune")
 type t =
   { root : Path.t
   ; bin : Cmd.spawn
+  ; opam_switch : Opam.Switch.t option
   }
 
-let make ~working_dir ~dune_path =
+let make ~working_dir ~dune_path ?opam_switch () =
   let open Promise.Syntax in
   let* spawn = Cmd.check_spawn { Cmd.bin = dune_path; args = [] } in
   match spawn with
-  | Ok bin -> Promise.return (Some { root = working_dir; bin })
+  | Ok bin -> Promise.return (Some { root = working_dir; bin; opam_switch })
   | Error _ ->
     log_chan `Info ~section:"dune package management" "Dune not found in the environment.";
     Promise.return None
@@ -135,6 +136,21 @@ let exec_pkg ~cmd ?(args = []) t =
   let open Promise.Result.Syntax in
   let+ () = is_build_dir_locked t in
   Cmd.Spawn (Cmd.append t.bin ([ "pkg"; cmd ] @ args))
+;;
+
+let get_upgrade_dune_cmd t =
+  match t.opam_switch with
+  | Some switch ->
+    let open Promise.Syntax in
+    let* opam = Opam.make () in
+    (match opam with
+     | None -> Promise.return (Error "Opam not found")
+     | Some opam ->
+       Opam.upgrade ~packages:[ "dune" ] opam switch |> Cmd.output ~cwd:t.root)
+  | None ->
+    Cmd.output
+      (Cmd.Shell "curl -fsSL https://get.dune.build/install | sh -s - --release latest")
+      ~cwd:(Path.of_string "")
 ;;
 
 let is_dpm_enabled t =
@@ -172,6 +188,8 @@ let equal d1 d2 =
 
 let root t = t.root
 let dune_path t = t.bin.bin
+let opam_switch t = t.opam_switch
+let is_opam t = Option.is_some t.opam_switch
 
 let is_dune_in_switch opam switch =
   let open Promise.Syntax in
@@ -190,6 +208,7 @@ let is_dune_in_switch opam switch =
     command
       { root = Path.of_string ""
       ; bin = { Cmd.bin = construct_dune_path path; args = [] }
+      ; opam_switch = Some switch
       }
       ~args:[ "--version" ]
     |> Cmd.output

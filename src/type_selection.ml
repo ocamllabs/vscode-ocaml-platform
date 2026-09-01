@@ -45,17 +45,21 @@ let register_hover_provider ~type_ range () =
 ;;
 
 let ocaml_lsp_doesnt_support_type_selection instance ocaml_lsp =
-  match
-    Ocaml_lsp.is_version_up_to_date
-      ocaml_lsp
-      (Extension_instance.ocaml_version_exn instance)
-  with
-  | Ok () -> ()
-  | Error (`Msg msg) ->
-    show_message
-      `Warn
-      "The installed version of \"ocamllsp\" does not support type enclosings. %s"
-      msg
+  match Extension_instance.ocaml_version instance with
+  | None -> ()
+  | Some ocaml_version ->
+    (match
+       Ocaml_lsp.is_version_up_to_date
+         ocaml_lsp
+         (Extension_instance.sandbox instance)
+         ocaml_version
+     with
+     | Ok () -> ()
+     | Error (`Msg msg) ->
+       show_message
+         `Warn
+         "The installed version of \"ocamllsp\" does not support type enclosings. %s"
+         msg)
 ;;
 
 type state =

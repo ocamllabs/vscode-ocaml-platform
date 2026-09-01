@@ -55,6 +55,8 @@ module Internal : sig
   val init_opam : (unit, unit) handle
   val install_ocaml_dev : (unit, unit) handle
   val open_utop : (unit, unit) handle
+  val upgrade_dune : (unit, unit) handle
+  val run_file : (unit, unit) handle
 end
 
 module Vscode : sig

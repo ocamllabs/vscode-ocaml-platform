@@ -42,7 +42,6 @@ let _select_sandbox =
       | Some new_sandbox ->
         Extension_instance.set_sandbox instance new_sandbox;
         let* () = Sandbox.save_to_settings new_sandbox in
-        let* () = Extension_instance.update_ocaml_info instance in
         Extension_instance.start_language_server instance
     in
     ()
@@ -74,16 +73,25 @@ let _upgrade_ocaml_lsp_server =
     let open Promise.Syntax in
     let (_ : unit Promise.t) =
       let sandbox = Extension_instance.sandbox instance in
-      match
-        Ocaml_lsp.is_version_up_to_date
-          (Extension_instance.ocaml_lsp instance |> Option.value_exn)
-          (Extension_instance.ocaml_version_exn instance)
-      with
-      | Ok () -> Promise.return ()
-      | Error (`Msg _error) ->
-        let* _ = Extension_instance.upgrade_ocaml_lsp_server sandbox in
-        let+ _ = Extension_instance.start_language_server instance in
-        show_message `Info "OCaml-LSP server upgraded successfully"
+      match Extension_instance.ocaml_version instance with
+      | None ->
+        show_message
+          `Warn
+          "OCaml version could not be determined. Please ensure that OCaml is installed \
+           and configured correctly."
+        |> Promise.return
+      | Some ocaml_version ->
+        (match
+           Ocaml_lsp.is_version_up_to_date
+             (Extension_instance.ocaml_lsp instance |> Option.value_exn)
+             (Extension_instance.sandbox instance)
+             ocaml_version
+         with
+         | Ok () -> Promise.return ()
+         | Error (`Msg _error) ->
+           let* _ = Extension_instance.upgrade_ocaml_lsp_server sandbox in
+           let+ _ = Extension_instance.start_language_server instance in
+           show_message `Info "OCaml-LSP server upgraded successfully")
     in
     ()
   in
@@ -199,6 +207,46 @@ let _run_dune_pkg_lock =
     ()
   in
   command Command_api.Internal.run_dune_pkg_lock callback
+;;
+
+let _upgrade_dune =
+  let callback (instance : Extension_instance.t) () =
+    let open Promise.Syntax in
+    let pick_sandbox ?(msg = "") () =
+      let* selection =
+        Window.showErrorMessage
+          ~message:("An error occurred while upgrading dune. " ^ msg)
+          ~choices:[ "Select a different sandbox", `Select_sandbox ]
+          ()
+      in
+      match selection with
+      | Some `Select_sandbox | None -> Command_api.(execute Internal.select_sandbox) ()
+    in
+    let _ =
+      match Extension_instance.sandbox instance with
+      | Dune dune ->
+        let options =
+          ProgressOptions.create
+            ~location:(`ProgressLocation Notification)
+            ~title:"Upgrading dune ..."
+            ~cancellable:false
+            ()
+        in
+        let task ~progress:_ ~token:_ =
+          let* res = Dune.get_upgrade_dune_cmd dune in
+          match res with
+          | Ok _ -> Sandbox.save_to_settings (Dune dune)
+          | Error err -> pick_sandbox ~msg:err ()
+        in
+        let* () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
+        Extension_instance.start_language_server instance
+      | _ ->
+        show_message `Warn "Select Dune Package Management to execute this action.";
+        Promise.return ()
+    in
+    ()
+  in
+  command Command_api.Internal.upgrade_dune callback
 ;;
 
 let _restart_language_server =
@@ -611,17 +659,21 @@ end = struct
   (** Shows appropriate message for when the [ocaml-lsp] in use by the extension
       doesn't support jumping to holes. *)
   let ocaml_lsp_doesn't_support_holes instance ocaml_lsp =
-    match
-      Ocaml_lsp.is_version_up_to_date
-        ocaml_lsp
-        (Extension_instance.ocaml_version_exn instance)
-    with
-    | Ok () -> ()
-    | Error (`Msg msg) ->
-      show_message
-        `Warn
-        "The installed version of \"ocamllsp\" does not support typed holes. %s"
-        msg
+    match Extension_instance.ocaml_version instance with
+    | None -> ()
+    | Some ocaml_version ->
+      (match
+         Ocaml_lsp.is_version_up_to_date
+           ocaml_lsp
+           (Extension_instance.sandbox instance)
+           ocaml_version
+       with
+       | Ok () -> ()
+       | Error (`Msg msg) ->
+         show_message
+           `Warn
+           "The installed version of \"ocamllsp\" does not support typed holes. %s"
+           msg)
   ;;
 
   let current_cursor_pos text_editor =
@@ -837,17 +889,21 @@ module Copy_type_under_cursor = struct
   let extension_name = "Copy Type Under Cursor"
 
   let ocaml_lsp_doesnt_support_type_selection instance ocaml_lsp =
-    match
-      Ocaml_lsp.is_version_up_to_date
-        ocaml_lsp
-        (Extension_instance.ocaml_version_exn instance)
-    with
-    | Ok () -> ()
-    | Error (`Msg msg) ->
-      show_message
-        `Warn
-        "The installed version of \"ocamllsp\" does not support type enclosings. %s"
-        msg
+    match Extension_instance.ocaml_version instance with
+    | None -> ()
+    | Some ocaml_version ->
+      (match
+         Ocaml_lsp.is_version_up_to_date
+           ocaml_lsp
+           (Extension_instance.sandbox instance)
+           ocaml_version
+       with
+       | Ok () -> ()
+       | Error (`Msg msg) ->
+         show_message
+           `Warn
+           "The installed version of \"ocamllsp\" does not support type enclosings. %s"
+           msg)
   ;;
 
   let get_enclosings text_editor client =

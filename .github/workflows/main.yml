@@ -22,15 +22,17 @@ jobs:
       - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: 5.3.0
+          ocaml-compiler: 5.5.0
 
       - name: Set-up Mise
-        uses: jdx/mise-action@v4
+        uses: jdx/mise-action@v4.3.0
+        with:
+          cache: false
 
       - name: Install dependencies
         run: |
           bun install --frozen-lockfile
-          opam install . --deps-only --with-test
+          opam install . --deps-only --with-test --with-dev-setup
 
       - name: Run Oxlint and Oxfmt checks
         run: bun run lint
@@ -61,7 +63,7 @@ jobs:
       - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: 5.3.0
+          ocaml-compiler: 5.5.0
       - uses: ocaml/setup-ocaml/lint-opam@v3
 
   lint-fmt:
@@ -72,7 +74,7 @@ jobs:
       - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: 5.3.0
+          ocaml-compiler: 5.5.0
       - uses: ocaml/setup-ocaml/lint-fmt@v3
 
   release:
@@ -89,7 +91,9 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Set-up Mise
-        uses: jdx/mise-action@v4
+        uses: jdx/mise-action@v4.3.0
+        with:
+          cache: false
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
