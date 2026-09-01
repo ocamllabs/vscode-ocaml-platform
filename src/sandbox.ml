@@ -317,12 +317,9 @@ let detect_opam_sandbox ~project_root opam () =
 ;;
 
 let detect_dune_pkg ~project_root () =
-  let open Promise.Syntax in
-  Dune.make ~working_dir:project_root ~dune_path:project_root ()
-  >>= function
-  | Some dune ->
-    Dune.is_dpm_enabled dune >>| fun dpm -> if dpm then Some (Dune dune) else None
-  | None -> Promise.return None
+  let open Promise.Option.Syntax in
+  let+ dune = Dune.make ~working_dir:project_root ~dune_path:project_root () in
+  Dune dune
 ;;
 
 let detect () =
@@ -392,8 +389,9 @@ let save_to_settings sandbox =
   | Dune dune ->
     Dune.is_dpm_enabled dune
     >>= (function
-     | true -> save_setting ()
-     | false -> Promise.return (suggest_to_run_dune_pkg_lock ()))
+     | Ok true -> save_setting ()
+     | Ok false -> Promise.return (suggest_to_run_dune_pkg_lock ())
+     | Error _ -> Promise.return ())
   | _ -> save_setting ()
 ;;
 
@@ -1005,4 +1003,31 @@ let focus_on_package_command ?sandbox () =
     let (lazy output) = Output.command_output_channel in
     Vscode.OutputChannel.show output ()
   | _ -> ()
+;;
+
+let install_ocaml_lsp_server t =
+  let options =
+    ProgressOptions.create
+      ~location:(`ProgressLocation Notification)
+      ~title:"Installing OCaml LSP server"
+      ~cancellable:false
+      ()
+  in
+  match t with
+  | Dune dune ->
+    let task ~progress:_ ~token:_ =
+      let open Promise.Syntax in
+      let+ result =
+        let open Promise.Result.Syntax in
+        let+ _ = Dune.tools dune ~tool:"ocamllsp" `Install |> Cmd.output in
+        ()
+      in
+      Result.iter_error
+        ~f:(show_message `Error "An error occured while installing the packages: %s")
+        result
+    in
+    let open Promise.Syntax in
+    let+ () = Vscode.Window.withProgress (module Interop.Js.Unit) ~options ~task in
+    ()
+  | sandbox -> install_packages sandbox [ "ocaml-lsp-server" ]
 ;;
