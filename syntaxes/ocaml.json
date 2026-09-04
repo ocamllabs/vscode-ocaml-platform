@@ -337,7 +337,7 @@
           "begin": "\\b(struct)\\b",
           "end": "\\b(end)\\b",
           "beginCaptures": {
-            "1": {"name": "keyword.other.ocaml" }
+            "1": { "name": "keyword.other.ocaml" }
           },
           "endCaptures": {
             "1": { "name": "keyword.other.ocaml" }
