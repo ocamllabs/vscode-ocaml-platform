@@ -67,9 +67,13 @@
         {
           "comment": "embedded ocaml source",
           "begin": "{",
-          "beginCaptures": [{ "name": "keyword.other.ocamllex" }],
+          "beginCaptures": {
+            "1": { "name": "keyword.other.ocamllex" }
+          },
           "end": "}",
-          "endCaptures": [{ "name": "keyword.other.ocamllex" }],
+          "endCaptures": {
+            "1": { "name": "keyword.other.ocamllex" }
+          },
           "patterns": [{ "include": "source.ocaml" }]
         }
       ]

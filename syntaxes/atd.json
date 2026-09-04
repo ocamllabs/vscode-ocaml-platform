@@ -22,7 +22,9 @@
             "1": { "name": "keyword.other.atd" },
             "2": { "name": "keyword.other.atd" }
           },
-          "endCaptures": [{ "name": "keyword.other.atd" }],
+          "endCaptures": {
+            "1": { "name": "keyword.other.atd" }
+          },
           "patterns": [{ "include": "$self" }]
         }
       ]
