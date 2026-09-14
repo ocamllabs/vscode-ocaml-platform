@@ -42,19 +42,19 @@
     "test": "vscode-test"
   },
   "dependencies": {
-    "oxfmt": "0.65.0",
-    "oxlint": "1.80.0",
+    "oxfmt": "0.68.0",
+    "oxlint": "1.83.0",
     "polka": "1.0.0-next.28",
     "sirv": "3.0.2",
-    "vscode-languageclient": "10.1.0"
+    "vscode-languageclient": "10.1.1"
   },
   "devDependencies": {
-    "@types/node": "26.3.0",
-    "@types/vscode": "1.86.0",
+    "@types/node": "26.5.1",
+    "@types/vscode": "1.137.0",
     "@vscode/test-cli": "0.0.15",
     "@vscode/test-electron": "3.1.0",
     "@vscode/vsce": "3.9.2",
-    "ovsx": "1.1.1",
+    "ovsx": "1.2.0",
     "oxlint-tsgolint": "7.0.2001",
     "typescript": "7.0.2"
   },
