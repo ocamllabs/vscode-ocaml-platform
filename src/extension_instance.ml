@@ -320,7 +320,10 @@ include Language_server_init
 
 let documentation_server_info () =
   let status_bar =
-    Vscode.Window.createStatusBarItem ~alignment:StatusBarAlignment.Right ~priority:100 ()
+    Vscode.Window.createStatusBarItem
+      ~alignment:StatusBarAlignment.Right
+      ~priority:100.0
+      ()
   in
   let command =
     Command.create
@@ -329,7 +332,7 @@ let documentation_server_info () =
       ~arguments:[ [%js.of: string] ">OCaml: Stop Documentation server" ]
       ()
   in
-  StatusBarItem.set_command status_bar (`Command command);
+  StatusBarItem.set_command status_bar (Some (`Command command));
   StatusBarItem.set_text status_bar "$(radio-tower) OCaml Documentation";
   status_bar
 ;;
@@ -366,7 +369,7 @@ end = struct
     StatusBarItem.set_text status_bar_item status_bar_item_text;
     StatusBarItem.set_command
       status_bar_item
-      (`String Command_api.Internal.select_sandbox.id);
+      (Some (`String Command_api.Internal.select_sandbox.id));
     StatusBarItem.show status_bar_item;
     status_bar_item
   ;;

@@ -245,7 +245,7 @@ let on_hover custom_doc webview =
       in
       `Value (Some hover)
     in
-    HoverProvider.create ~provideHover
+    HoverProvider.create ~provideHover ()
   in
   Vscode.Languages.registerHoverProvider ~selector:(`String "ocaml") ~provider
 ;;
@@ -640,6 +640,7 @@ let register extension instance =
   let editorProvider =
     CustomTextEditorProvider.create
       ~resolveCustomTextEditor:(resolveCustomTextEditor instance extension)
+      ()
   in
   let disposable =
     let options =

@@ -39,6 +39,7 @@ let register extension instance =
     let provider =
       DocumentFormattingEditProvider.create
         ~provideDocumentFormattingEdits:(get_formatter instance)
+        ()
     in
     Languages.registerDocumentFormattingEditProvider ~selector ~provider)
   |> List.iter ~f:(fun disposable -> ExtensionContext.subscribe extension ~disposable)

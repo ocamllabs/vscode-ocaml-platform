@@ -180,7 +180,7 @@ end
 
 let register extension instance =
   let createDebugAdapterDescriptor = createDebugAdapterDescriptor ~instance in
-  let factory = DebugAdapterDescriptorFactory.create ~createDebugAdapterDescriptor in
+  let factory = DebugAdapterDescriptorFactory.create ~createDebugAdapterDescriptor () in
   let disposable = Debug.registerDebugAdapterDescriptorFactory ~debugType ~factory in
   ExtensionContext.subscribe extension ~disposable
 ;;

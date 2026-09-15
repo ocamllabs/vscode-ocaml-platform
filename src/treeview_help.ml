@@ -10,8 +10,8 @@ let discord_item assets =
         [ [%js.of: Vscode.Uri.t] @@ Vscode.Uri.parse "https://discord.gg/cCYQbqN" () ]
       ()
   in
-  Vscode.TreeItem.set_iconPath item icon;
-  Vscode.TreeItem.set_command item command;
+  Vscode.TreeItem.set_iconPath item (Some icon);
+  Vscode.TreeItem.set_command item (Some command);
   item
 ;;
 
@@ -29,8 +29,8 @@ let discuss_item assets =
         [ [%js.of: Vscode.Uri.t] @@ Vscode.Uri.parse "https://discuss.ocaml.org/" () ]
       ()
   in
-  Vscode.TreeItem.set_iconPath item icon;
-  Vscode.TreeItem.set_command item command;
+  Vscode.TreeItem.set_iconPath item (Some icon);
+  Vscode.TreeItem.set_command item (Some command);
   item
 ;;
 
@@ -49,8 +49,8 @@ let tutorials_item =
         [ Vscode.Uri.parse "https://ocaml.org/exercises" () |> Vscode.Uri.t_to_js ]
       ()
   in
-  Vscode.TreeItem.set_iconPath item icon;
-  Vscode.TreeItem.set_command item command;
+  Vscode.TreeItem.set_iconPath item (Some icon);
+  Vscode.TreeItem.set_command item (Some command);
   item
 ;;
 
@@ -70,8 +70,8 @@ let github_item assets =
         ]
       ()
   in
-  Vscode.TreeItem.set_iconPath item icon;
-  Vscode.TreeItem.set_command item command;
+  Vscode.TreeItem.set_iconPath item (Some icon);
+  Vscode.TreeItem.set_command item (Some command);
   item
 ;;
 

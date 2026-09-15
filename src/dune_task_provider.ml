@@ -51,7 +51,7 @@ let folder_relative_path folders file =
 
 let compute_build_tasks token sandbox =
   let open Promise.Syntax in
-  let folders = Workspace.workspaceFolders () in
+  let folders = Option.value (Workspace.workspaceFolders ()) ~default:[] in
   let excludes =
     (* ignoring dune files from _build, _opam, _esy *)
     `String "{**/_*}"
@@ -61,8 +61,8 @@ let compute_build_tasks token sandbox =
   List.map dunes ~f:(fun dune ->
     let scope, relative_path =
       match folder_relative_path folders (Uri.fsPath dune) with
-      | None -> TaskScope.Workspace, Uri.fsPath dune
-      | Some (folder, relative_path) -> TaskScope.Folder folder, relative_path
+      | None -> `TaskScope TaskScope.Workspace, Uri.fsPath dune
+      | Some (folder, relative_path) -> `WorkspaceFolder folder, relative_path
     in
     let name = Printf.sprintf "build %s" relative_path in
     let execution =
@@ -71,16 +71,16 @@ let compute_build_tasks token sandbox =
       get_shell_execution sandbox ~sub_cmd:"build" options
     in
     let task =
-      Task.make
-        ~definition
+      Task.makeWithScope
+        ~taskDefinition:definition
         ~scope
         ~source
         ~name
-        ~problemMatchers
+        ~problemMatchers:(`Items problemMatchers)
         ~execution:(`ShellExecution execution)
         ()
     in
-    Task.set_group task TaskGroup.build;
+    Task.set_group task (Some TaskGroup.build);
     task)
 ;;
 
@@ -100,16 +100,16 @@ let compute_exec_tasks sandbox =
       get_shell_execution sandbox ~sub_cmd:"exec" ~args:[ exec_path ] options
     in
     let task =
-      Task.make
-        ~definition
-        ~scope:TaskScope.Workspace
+      Task.makeWithScope
+        ~taskDefinition:definition
+        ~scope:(`TaskScope TaskScope.Workspace)
         ~source
         ~name
-        ~problemMatchers
+        ~problemMatchers:(`Items problemMatchers)
         ~execution:(`ShellExecution execution)
         ()
     in
-    Task.set_group task TaskGroup.build;
+    Task.set_group task (Some TaskGroup.build);
     task)
 ;;
 
@@ -133,7 +133,7 @@ let resolve_task ~task ~token:_ = `Value (Some task)
 let register extension instance =
   let provideTasks = provide_tasks instance in
   let resolveTask = resolve_task in
-  let provider = TaskProvider.Default.create ~provideTasks ~resolveTask in
+  let provider = TaskProvider.Default.create ~provideTasks ~resolveTask () in
   let disposable = Tasks.registerTaskProvider ~type_:task_type ~provider in
   ExtensionContext.subscribe extension ~disposable
 ;;
