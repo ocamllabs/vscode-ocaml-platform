@@ -104,8 +104,11 @@ let register (extension : ExtensionContext.t) (instance : Extension_instance.t) 
   in
   let editorProvider =
     CustomReadonlyEditorProvider.create
-      ~resolveCustomEditor:(resolveCustomEditor instance)
-      ~openCustomDocument
+      ~resolveCustomEditor:(fun ~document ~webviewPanel ~token ->
+        `Promise (resolveCustomEditor instance ~document ~webviewPanel ~token))
+      ~openCustomDocument:(fun ~uri ~openContext ~token ->
+        `Promise (openCustomDocument ~uri ~openContext ~token))
+      ()
   in
   let disposable =
     Vscode.Window.registerCustomReadonlyEditorProvider

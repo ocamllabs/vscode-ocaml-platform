@@ -92,6 +92,6 @@ let dispose = Terminal.dispose
 let show ~preserveFocus t = Terminal.show ~preserveFocus t ()
 
 let send t text =
-  let addNewLine = not (String.is_suffix text ~suffix:"\n") in
-  Terminal.sendText t ~text ~addNewLine ()
+  let shouldExecute = not (String.is_suffix text ~suffix:"\n") in
+  Terminal.sendText t ~text ~shouldExecute ()
 ;;

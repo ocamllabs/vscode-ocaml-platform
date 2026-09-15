@@ -79,7 +79,17 @@ module Command = struct
     let callback (_ : Extension_instance.t) () =
       let open Promise.Syntax in
       let defaultUri =
-        Option.map (Workspace.rootPath ()) ~f:(fun path -> Uri.parse path ())
+        let active_folder =
+          Option.bind (Window.activeTextEditor ()) ~f:(fun editor ->
+            Workspace.getWorkspaceFolder
+              ~uri:(TextDocument.uri (TextEditor.document editor)))
+        in
+        match active_folder with
+        | Some folder -> Some (WorkspaceFolder.uri folder)
+        | None ->
+          Workspace.workspaceFolders ()
+          |> Option.bind ~f:List.hd
+          |> Option.map ~f:WorkspaceFolder.uri
       in
       let filters = Interop.Dict.singleton "OCaml Bytecode Executable" [ "bc" ] in
       let options =
@@ -180,7 +190,7 @@ end
 
 let register extension instance =
   let createDebugAdapterDescriptor = createDebugAdapterDescriptor ~instance in
-  let factory = DebugAdapterDescriptorFactory.create ~createDebugAdapterDescriptor in
+  let factory = DebugAdapterDescriptorFactory.create ~createDebugAdapterDescriptor () in
   let disposable = Debug.registerDebugAdapterDescriptorFactory ~debugType ~factory in
   ExtensionContext.subscribe extension ~disposable
 ;;

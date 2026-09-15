@@ -39,7 +39,7 @@ let register_hover_provider ~type_ range () =
       in
       `Value (Some hover)
     in
-    HoverProvider.create ~provideHover
+    HoverProvider.create ~provideHover ()
   in
   Vscode.Languages.registerHoverProvider ~selector:(`String "ocaml") ~provider
 ;;

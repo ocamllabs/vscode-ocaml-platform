@@ -598,7 +598,7 @@ module Decorations = struct
         let options = ThemableDecorationInstanceRenderOptions.create ~before () in
         Some (DecorationInstanceRenderOptions.create ~light:options ~dark:options ())
       in
-      DecorationOptions.create ~range ~renderOptions ()
+      DecorationOptions.create ~range ?renderOptions ()
     in
     TextEditor.setDecorations
       text_editor
@@ -1158,7 +1158,7 @@ module MerlinJump = struct
         quickPick
         ~listener:(fun () ->
           match QuickPick.selectedItems quickPick with
-          | Some (item :: _) ->
+          | item :: _ ->
             ignore
               (let open Promise.Syntax in
                selected_item := true;
@@ -1326,7 +1326,7 @@ module Search_by_type = struct
         quickPick
         ~listener:(fun () ->
           match QuickPick.selectedItems quickPick with
-          | Some (item :: _) ->
+          | item :: _ ->
             let value = QuickPickItem.label item in
             let _ =
               Vscode.TextEditor.edit
@@ -1364,7 +1364,10 @@ module Search_by_type = struct
                  ())
           else None
         in
-        InputBox.set_validationMessage input_box validationMessage;
+        InputBox.set_validationMessage
+          input_box
+          (Option.map validationMessage ~f:(fun message ->
+             `InputBoxValidationMessage message));
         InputBox.set_busy input_box false;
         InputBox.set_enabled input_box true
       in
@@ -1372,36 +1375,33 @@ module Search_by_type = struct
         InputBox.onDidAccept
           input_box
           ~listener:(fun () ->
-            match InputBox.value input_box with
-            | Some query ->
-              let () = InputBox.set_busy input_box true in
-              let () = InputBox.set_enabled input_box false in
-              let position = TextEditor.selection text_editor |> Selection.active in
-              ignore
-                (let+ query_results =
-                   get_search_results
-                     ~query
-                     ~with_doc:true
-                     ~limit:100
-                     ~position
-                     text_editor
-                     client
+            let query = InputBox.value input_box in
+            let () = InputBox.set_busy input_box true in
+            let () = InputBox.set_enabled input_box false in
+            let position = TextEditor.selection text_editor |> Selection.active in
+            ignore
+              (let+ query_results =
+                 get_search_results
+                   ~query
+                   ~with_doc:true
+                   ~limit:100
+                   ~position
+                   text_editor
+                   client
+               in
+               match query_results with
+               | [] -> show_query_input ~empty_result:true text_editor client
+               | results ->
+                 let results =
+                   List.remove_consecutive_duplicates
+                     ~which_to_keep:`First
+                     ~equal:
+                       (fun
+                         (left : Custom_requests.Type_search.type_search_result) right ->
+                       String.equal left.name right.name && left.cost = right.cost)
+                     results
                  in
-                 match query_results with
-                 | [] -> show_query_input ~empty_result:true text_editor client
-                 | results ->
-                   let results =
-                     List.remove_consecutive_duplicates
-                       ~which_to_keep:`First
-                       ~equal:
-                         (fun
-                           (left : Custom_requests.Type_search.type_search_result)
-                           right ->
-                         String.equal left.name right.name && left.cost = right.cost)
-                       results
-                   in
-                   display_search_results query results text_editor position client)
-            | None -> ())
+                 display_search_results query results text_editor position client))
           ()
       in
       previous := Some onDidAccept_disposable;
@@ -1539,7 +1539,7 @@ module Navigate_holes = struct
         quickPick
         ~listener:(fun () ->
           match QuickPick.selectedItems quickPick with
-          | Some (item :: _) ->
+          | item :: _ ->
             ignore
               (let range = item.range in
                let* () = jump_to_range range text_editor in

@@ -5,8 +5,8 @@ let select_sandbox_item assets =
   let command =
     Vscode.Command.create ~title:"Select a Sandbox" ~command:"ocaml.select-sandbox" ()
   in
-  Vscode.TreeItem.set_iconPath item icon;
-  Vscode.TreeItem.set_command item command;
+  Vscode.TreeItem.set_iconPath item (Some icon);
+  Vscode.TreeItem.set_command item (Some command);
   item
 ;;
 
@@ -22,8 +22,8 @@ let terminal_item assets =
       ~command:"ocaml.open-terminal"
       ()
   in
-  Vscode.TreeItem.set_iconPath item icon;
-  Vscode.TreeItem.set_command item command;
+  Vscode.TreeItem.set_iconPath item (Some icon);
+  Vscode.TreeItem.set_command item (Some command);
   item
 ;;
 
@@ -37,8 +37,8 @@ let construct_item =
   in
   let item = Vscode.TreeItem.make_label ~label () in
   let command = Vscode.Command.create ~title:"Construct" ~command:"ocaml.construct" () in
-  Vscode.TreeItem.set_iconPath item icon;
-  Vscode.TreeItem.set_command item command;
+  Vscode.TreeItem.set_iconPath item (Some icon);
+  Vscode.TreeItem.set_command item (Some command);
   item
 ;;
 
@@ -49,8 +49,8 @@ let jump_item =
   in
   let item = Vscode.TreeItem.make_label ~label () in
   let command = Vscode.Command.create ~title:"MerlinJump" ~command:"ocaml.jump" () in
-  Vscode.TreeItem.set_iconPath item icon;
-  Vscode.TreeItem.set_command item command;
+  Vscode.TreeItem.set_iconPath item (Some icon);
+  Vscode.TreeItem.set_command item (Some command);
   item
 ;;
 
@@ -67,8 +67,8 @@ let type_search_item =
       ~command:"ocaml.search-by-type"
       ()
   in
-  Vscode.TreeItem.set_iconPath item icon;
-  Vscode.TreeItem.set_command item command;
+  Vscode.TreeItem.set_iconPath item (Some icon);
+  Vscode.TreeItem.set_command item (Some command);
   item
 ;;
 
@@ -84,8 +84,8 @@ let navigate_holes_item =
       ~command:"ocaml.navigate-typed-holes"
       ()
   in
-  Vscode.TreeItem.set_iconPath item icon;
-  Vscode.TreeItem.set_command item command;
+  Vscode.TreeItem.set_iconPath item (Some icon);
+  Vscode.TreeItem.set_command item (Some command);
   item
 ;;
 
