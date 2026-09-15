@@ -336,7 +336,7 @@ let documentation_server_info () =
 
 let install_ocaml_lsp_server sandbox =
   let open Promise.Syntax in
-  let* () = Sandbox.install_packages sandbox [ "ocaml-lsp-server" ] in
+  let* () = Sandbox.install_ocaml_lsp_server sandbox in
   let* () = Command_api.(execute Internal.refresh_switches) () in
   let+ () = Command_api.(execute Internal.refresh_sandbox) () in
   ()
