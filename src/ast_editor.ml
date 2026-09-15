@@ -610,16 +610,17 @@ let onDidSaveTextDocument_listener_pp instance document =
 
 let onDidChangeActiveTextEditor_listener instance e =
   let ast_editor_state = Extension_instance.ast_editor_state instance in
-  if not (Ojs.is_null @@ [%js.of: TextEditor.t] e)
-  then (
-    let document = TextEditor.document e in
-    match Ast_editor_state.pp_status ast_editor_state (TextDocument.uri document) with
-    | `Absent_or_pped -> ()
-    | `Original ->
-      let (_ : (unit, string) result Promise.t) =
-        manage_changed_origin instance ~document
-      in
-      ())
+  match e with
+  | None -> ()
+  | Some editor ->
+    let document = TextEditor.document editor in
+    (match Ast_editor_state.pp_status ast_editor_state (TextDocument.uri document) with
+     | `Absent_or_pped -> ()
+     | `Original ->
+       let (_ : (unit, string) result Promise.t) =
+         manage_changed_origin instance ~document
+       in
+       ())
 ;;
 
 let onDidCloseTextDocument_listener instance (document : TextDocument.t) =

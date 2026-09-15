@@ -180,30 +180,15 @@ end
 
 module LightDarkIcon = struct
   type t =
-    { light : ([ `String of string | `Uri of Uri.t ][@js.union])
-    ; dark : ([ `String of string | `Uri of Uri.t ][@js.union])
+    { light : Uri.t
+    ; dark : Uri.t
     }
   [@@js]
-
-  let t_of_js js_val =
-    let light_js = Ojs.get_prop_ascii js_val "light" in
-    let dark_js = Ojs.get_prop_ascii js_val "dark" in
-    let light =
-      if Ojs.has_property light_js "parse"
-      then `Uri ([%js.to: Uri.t] light_js)
-      else `String ([%js.to: string] light_js)
-    in
-    let dark =
-      if Ojs.has_property dark_js "parse"
-      then `Uri ([%js.to: Uri.t] dark_js)
-      else `String ([%js.to: string] dark_js)
-    in
-    { light; dark }
-  ;;
 end
 
 module ThemeColor = struct
   include Class.Make ()
+  include [%js: val id : t -> string [@@js.get]]
   include [%js: val make : id:string -> t [@@js.new "@vscode.ThemeColor"]]
 end
 
@@ -221,6 +206,26 @@ module ThemeIcon = struct
       val color : t -> ThemeColor.t or_undefined [@@js.get]]
 end
 
+module IconPath = struct
+  type t =
+    ([ `Uri of Uri.t
+     | `LightDark of LightDarkIcon.t
+     | `ThemeIcon of ThemeIcon.t
+     ]
+    [@js.union])
+  [@@js]
+
+  let t_of_js js_val =
+    if Ojs.has_property js_val "path"
+    then `Uri ([%js.to: Uri.t] js_val)
+    else if Ojs.has_property js_val "id"
+    then `ThemeIcon ([%js.to: ThemeIcon.t] js_val)
+    else if Ojs.has_property js_val "light"
+    then `LightDark ([%js.to: LightDarkIcon.t] js_val)
+    else assert false
+  ;;
+end
+
 module TextDocument = struct
   include Interface.Make ()
 
@@ -230,6 +235,7 @@ module TextDocument = struct
       val fileName : t -> string [@@js.get]
       val isUntitled : t -> bool [@@js.get]
       val languageId : t -> string [@@js.get]
+      val encoding : t -> string [@@js.get]
       val version : t -> int [@@js.get]
       val isDirty : t -> bool [@@js.get]
       val isClosed : t -> bool [@@js.get]
@@ -379,6 +385,7 @@ module TextEditorLineNumbersStyle = struct
     | Off [@js 0]
     | On [@js 1]
     | Relative [@js 2]
+    | Interval [@js 3]
   [@@js.enum] [@@js]
 end
 
@@ -425,12 +432,14 @@ module TextEditorOptions = struct
   include
     [%js:
       val tabSize : t -> tabSize or_undefined [@@js.get]
+      val indentSize : t -> tabSize or_undefined [@@js.get]
       val insertSpaces : t -> insertSpaces or_undefined [@@js.get]
       val cursorStyle : t -> TextEditorCursorStyle.t or_undefined [@@js.get]
       val lineNumbers : t -> TextEditorLineNumbersStyle.t or_undefined [@@js.get]
 
       val create
         :  ?tabSize:tabSize
+        -> ?indentSize:tabSize
         -> ?insertSpaces:insertSpaces
         -> ?cursorStyle:TextEditorCursorStyle.t
         -> ?lineNumbers:TextEditorLineNumbersStyle.t
@@ -691,7 +700,7 @@ module TextEditor = struct
       val insertSnippet
         :  t
         -> snippet:SnippetString.t
-        -> ?location:insertSnippetLocation
+        -> location:insertSnippetLocation or_undefined
         -> Ojs.t
         -> bool Promise.t
       [@@js.call]
@@ -720,11 +729,20 @@ module TextEditor = struct
     edit this ~callback options ()
   ;;
 
-  let insertSnippet this ~snippet ?location ?undoStopBefore ?undoStopAfter () =
+  let insertSnippet
+        this
+        ~snippet
+        ?location
+        ?undoStopBefore
+        ?undoStopAfter
+        ?keepWhitespace
+        ()
+    =
     let options = Ojs.obj [||] in
     iter_set options "undoStopBefore" [%js.of: bool] undoStopBefore;
     iter_set options "undoStopAfter" [%js.of: bool] undoStopAfter;
-    insertSnippet this ~snippet ?location options
+    iter_set options "keepWhitespace" [%js.of: bool] keepWhitespace;
+    insertSnippet this ~snippet ~location options
   ;;
 end
 
@@ -995,32 +1013,45 @@ module CancellationToken = struct
       [@@js.builder]]
 end
 
+module QuickInputButtonLocation = struct
+  type t =
+    | Title [@js 1]
+    | Inline [@js 2]
+    | Input [@js 3]
+  [@@js.enum] [@@js]
+end
+
+module QuickInputButtonToggle = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val checked : t -> bool [@@js.get]
+      val set_checked : t -> bool -> unit [@@js.set]
+      val create : checked:bool -> t [@@js.builder]]
+end
+
 module QuickInputButton = struct
   include Interface.Make ()
 
-  type iconPath =
-    ([ `Uri of Uri.t
-     | `LightDark of LightDarkIcon.t
-     | `ThemeIcon of ThemeIcon.t
-     ]
-    [@js.union])
-  [@@js]
-
-  let iconPath_of_js js_val =
-    if Ojs.has_property js_val "path"
-    then `Uri ([%js.to: Uri.t] js_val)
-    else if Ojs.has_property js_val "id"
-    then `ThemeIcon ([%js.to: ThemeIcon.t] js_val)
-    else if Ojs.has_property js_val "light"
-    then `LightDark ([%js.to: LightDarkIcon.t] js_val)
-    else assert false
-  ;;
+  type iconPath = IconPath.t [@@js]
 
   include
     [%js:
       val iconPath : t -> iconPath [@@js.get]
       val tooltip : t -> string or_undefined [@@js.get]
-      val create : iconPath:iconPath -> ?tooltip:string -> unit -> t [@@js.builder]]
+      val location : t -> QuickInputButtonLocation.t or_undefined [@@js.get]
+      val toggle : t -> QuickInputButtonToggle.t or_undefined [@@js.get]
+      val set_location : t -> QuickInputButtonLocation.t or_undefined -> unit [@@js.set]
+
+      val create
+        :  iconPath:iconPath
+        -> ?tooltip:string
+        -> ?location:QuickInputButtonLocation.t
+        -> ?toggle:QuickInputButtonToggle.t
+        -> unit
+        -> t
+      [@@js.builder]]
 end
 
 module QuickPickItemKind = struct
@@ -1041,9 +1072,15 @@ module QuickPickItem = struct
       val picked : t -> bool or_undefined [@@js.get]
       val alwaysShow : t -> bool or_undefined [@@js.get]
       val kind : t -> QuickPickItemKind.t or_undefined [@@js.get]
+      val buttons : t -> QuickInputButton.t list or_undefined [@@js.get]
+      val resourceUri : t -> Uri.t or_undefined [@@js.get]
+      val iconPath : t -> IconPath.t or_undefined [@@js.get]
 
       val create
         :  label:string
+        -> ?iconPath:IconPath.t
+        -> ?resourceUri:Uri.t
+        -> ?buttons:QuickInputButton.t list
         -> ?description:string
         -> ?detail:string
         -> ?picked:bool
@@ -1076,6 +1113,7 @@ module QuickPickOptions = struct
       val matchOnDescription : t -> bool or_undefined [@@js.get]
       val matchOnDetail : t -> bool or_undefined [@@js.get]
       val placeHolder : t -> string or_undefined [@@js.get]
+      val prompt : t -> string or_undefined [@@js.get]
       val ignoreFocusOut : t -> bool or_undefined [@@js.get]
       val canPickMany : t -> bool or_undefined [@@js.get]
       val onDidSelectItem : t -> (onDidSelectItemArgs -> unit) or_undefined [@@js.get]
@@ -1085,6 +1123,7 @@ module QuickPickOptions = struct
         -> ?matchOnDescription:bool
         -> ?matchOnDetail:bool
         -> ?placeHolder:string
+        -> ?prompt:string
         -> ?ignoreFocusOut:bool
         -> ?canPickMany:bool
         -> ?onDidSelectItem:(item:onDidSelectItemArgs -> unit)
@@ -1129,6 +1168,8 @@ module QuickPick = struct
         val matchOnDetail : t -> bool or_undefined [@@js.get]
         val set_matchOnDetail : t -> bool or_undefined -> unit [@@js.set]
         val placeholder : t -> string or_undefined [@@js.get]
+        val prompt : t -> string or_undefined [@@js.get]
+        val set_prompt : t -> string or_undefined -> unit [@@js.set]
         val set_placeholder : t -> string or_undefined -> unit [@@js.set]
         val selectedItems : t -> T.t list or_undefined [@@js.get]
         val set_selectedItems : t -> T.t list or_undefined -> unit [@@js.set]
@@ -1157,6 +1198,7 @@ module QuickPick = struct
           ?matchOnDescription
           ?matchOnDetail
           ?placeholder
+          ?prompt
           ?selectedItems
           ?step
           ?title
@@ -1175,6 +1217,7 @@ module QuickPick = struct
       set_matchOnDescription t matchOnDescription;
       set_matchOnDetail t matchOnDetail;
       set_placeholder t placeholder;
+      set_prompt t prompt;
       set_selectedItems t selectedItems;
       set_step t step;
       set_title t title;
@@ -1532,8 +1575,24 @@ module TerminalOptions = struct
       val shellArgs : t -> shellArgs or_undefined [@@js.get]
       val cwd : t -> cwd or_undefined [@@js.get]
       val env : t -> string or_undefined Dict.t or_undefined [@@js.get]
-      val strictEnv : t -> bool [@@js.get]
-      val hideFromUser : t -> bool [@@js.get]]
+      val strictEnv : t -> bool or_undefined [@@js.get]
+      val hideFromUser : t -> bool or_undefined [@@js.get]
+      val shellIntegrationNonce : t -> string or_undefined [@@js.get]]
+
+  include
+    [%js:
+      val create
+        :  ?name:string
+        -> ?shellPath:string
+        -> ?shellArgs:shellArgs
+        -> ?cwd:cwd
+        -> ?env:string or_undefined Dict.t
+        -> ?strictEnv:bool
+        -> ?hideFromUser:bool
+        -> ?shellIntegrationNonce:string
+        -> unit
+        -> t
+      [@@js.builder]]
 end
 
 module TerminalDimensions = struct
@@ -1586,7 +1645,15 @@ module ExtensionTerminalOptions = struct
     [%js:
       val name : t -> string [@@js.get]
       val pty : t -> Pseudoterminal.t [@@js.get]
-      val create : name:string -> pty:Pseudoterminal.t -> t [@@js.builder]]
+      val shellIntegrationNonce : t -> string or_undefined [@@js.get]
+
+      val create
+        :  ?shellIntegrationNonce:string
+        -> name:string
+        -> pty:Pseudoterminal.t
+        -> unit
+        -> t
+      [@@js.builder]]
 end
 
 module Extension = struct
@@ -1600,13 +1667,98 @@ module Extensions = struct
       [@@js.global "@vscode.extensions.getExtension"]]
 end
 
+module TerminalExitReason = struct
+  type t =
+    | Unknown [@js 0]
+    | Shutdown [@js 1]
+    | Process [@js 2]
+    | User [@js 3]
+    | Extension [@js 4]
+  [@@js.enum] [@@js]
+end
+
 module TerminalExitStatus = struct
   include Interface.Make ()
 
   include
     [%js:
-      val code : t -> int [@@js.get]
-      val create : code:int -> t [@@js.builder]]
+      val code : t -> int or_undefined [@@js.get]
+      val reason : t -> TerminalExitReason.t [@@js.get]
+      val create : ?code:int -> reason:TerminalExitReason.t -> unit -> t [@@js.builder]]
+end
+
+module TerminalShellExecutionOutput = struct
+  include Interface.Make ()
+
+  type result =
+    { done_ : bool [@js "done"]
+    ; value : string or_undefined
+    }
+  [@@js]
+
+  include [%js: val next : t -> result Promise.t [@@js.call]]
+end
+
+module TerminalShellExecutionCommandLineConfidence = struct
+  type t =
+    | Low [@js 0]
+    | Medium [@js 1]
+    | High [@js 2]
+  [@@js.enum] [@@js]
+end
+
+module TerminalShellExecutionCommandLine = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val value : t -> string [@@js.get]
+      val isTrusted : t -> bool [@@js.get]
+      val confidence : t -> TerminalShellExecutionCommandLineConfidence.t [@@js.get]]
+end
+
+module TerminalShellExecution = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val commandLine : t -> TerminalShellExecutionCommandLine.t [@@js.get]
+      val cwd : t -> Uri.t or_undefined [@@js.get]
+      val read : t -> Ojs.t [@@js.call]]
+
+  let read this =
+    let iterable = read this in
+    let symbol =
+      Ojs.get_prop_ascii (Ojs.get_prop_ascii Ojs.global "Symbol") "asyncIterator"
+    in
+    let iterator = Ojs.call (Ojs.get_prop iterable symbol) "call" [| iterable |] in
+    TerminalShellExecutionOutput.t_of_js iterator
+  ;;
+end
+
+module TerminalShellIntegration = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val cwd : t -> Uri.t or_undefined [@@js.get]
+      val executeCommand : t -> commandLine:string -> TerminalShellExecution.t [@@js.call]
+
+      val executeCommandArgs
+        :  t
+        -> executable:string
+        -> args:string list
+        -> TerminalShellExecution.t
+      [@@js.call "executeCommand"]]
+end
+
+module TerminalState = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val isInteractedWith : t -> bool [@@js.get]
+      val shell : t -> string or_undefined [@@js.get]]
 end
 
 module Terminal = struct
@@ -1631,12 +1783,44 @@ module Terminal = struct
       val processId : t -> int or_undefined Promise.t [@@js.get]
       val creationOptions : t -> creationOptions [@@js.get]
       val exitStatus : t -> TerminalExitStatus.t or_undefined [@@js.get]
+      val state : t -> TerminalState.t [@@js.get]
+      val shellIntegration : t -> TerminalShellIntegration.t or_undefined [@@js.get]
       val sendText : t -> text:string -> ?addNewLine:bool -> unit -> unit [@@js.call]
       val show : t -> ?preserveFocus:bool -> unit -> unit [@@js.call]
       val hide : t -> unit [@@js.call]
       val dispose : t -> unit [@@js.call]]
 
   let disposable this = Disposable.make ~dispose:(fun () -> dispose this)
+end
+
+module TerminalShellIntegrationChangeEvent = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val terminal : t -> Terminal.t [@@js.get]
+      val shellIntegration : t -> TerminalShellIntegration.t [@@js.get]]
+end
+
+module TerminalShellExecutionStartEvent = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val terminal : t -> Terminal.t [@@js.get]
+      val shellIntegration : t -> TerminalShellIntegration.t [@@js.get]
+      val execution : t -> TerminalShellExecution.t [@@js.get]]
+end
+
+module TerminalShellExecutionEndEvent = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val terminal : t -> Terminal.t [@@js.get]
+      val shellIntegration : t -> TerminalShellIntegration.t [@@js.get]
+      val execution : t -> TerminalShellExecution.t [@@js.get]
+      val exitCode : t -> int or_undefined [@@js.get]]
 end
 
 module OutputChannel = struct
@@ -1742,6 +1926,7 @@ end
 
 module SecretStorage = struct
   include Interface.Make ()
+  include [%js: val keys : t -> string list Promise.t [@@js.call]]
 
   include
     [%js:
@@ -1749,6 +1934,28 @@ module SecretStorage = struct
       val store : t -> key:string -> value:string -> unit Promise.t [@@js.call]
       val delete : t -> key:string -> unit Promise.t [@@js.call]
       val onDidChange : t -> SecretStorageChangeEvent.t Event.t [@@js.get]]
+end
+
+module LanguageModelChat = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val id : t -> string [@@js.get]
+      val name : t -> string [@@js.get]
+      val vendor : t -> string [@@js.get]
+      val family : t -> string [@@js.get]
+      val version : t -> string [@@js.get]
+      val maxInputTokens : t -> int [@@js.get]]
+end
+
+module LanguageModelAccessInformation = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val onDidChange : t -> unit Event.t [@@js.get]
+      val canSendRequest : t -> chat:LanguageModelChat.t -> bool or_undefined [@@js.call]]
 end
 
 module ExtensionContext = struct
@@ -1767,7 +1974,10 @@ module ExtensionContext = struct
       val storageUri : t -> Uri.t or_undefined [@@js.get]
       val globalStorageUri : t -> Uri.t [@@js.get]
       val logUri : t -> Uri.t [@@js.get]
-      val extensionMode : t -> ExtensionMode.t [@@js.get]]
+      val extensionMode : t -> ExtensionMode.t [@@js.get]
+
+      val languageModelAccessInformation : t -> LanguageModelAccessInformation.t
+      [@@js.get]]
 
   let subscribe this ~disposable =
     let subscriptions = Ojs.get_prop_ascii ([%js.of: t] this) "subscriptions" in
@@ -1884,8 +2094,8 @@ module ShellExecution = struct
       [@@js.new "@vscode.ShellExecution"]
 
       val commandLine : t -> string or_undefined [@@js.get]
-      val command : t -> shellString [@@js.get]
-      val args : t -> shellString list [@@js.get]
+      val command : t -> shellString or_undefined [@@js.get]
+      val args : t -> shellString list or_undefined [@@js.get]
       val options : t -> ShellExecutionOptions.t or_undefined [@@js.get]]
 end
 
@@ -2341,6 +2551,48 @@ module ConfigurationChangeEvent = struct
   include Interface.Make ()
 end
 
+module Uint8Array = struct
+  include Class.Make ()
+
+  include
+    [%js:
+      val of_array : int array -> t [@@js.new "Uint8Array"]
+      val to_array : t -> int array [@@js.global "Array.from"]]
+end
+
+module TextEncodingOptions = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val encoding : t -> string or_undefined [@@js.get]
+      val uri : t -> Uri.t or_undefined [@@js.get]
+      val of_encoding : encoding:string -> t [@@js.builder]
+      val of_uri : uri:Uri.t -> t [@@js.builder]]
+end
+
+module TextDocumentEncodingOptions = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val encoding : t -> string or_undefined [@@js.get]
+      val create : ?encoding:string -> unit -> t [@@js.builder]]
+end
+
+module TextDocumentOpenOptions = struct
+  include Interface.Make ()
+
+  include
+    [%js:
+      val encoding : t -> string or_undefined [@@js.get]
+      val language : t -> string or_undefined [@@js.get]
+      val content : t -> string or_undefined [@@js.get]
+
+      val create : ?encoding:string -> ?language:string -> ?content:string -> unit -> t
+      [@@js.builder]]
+end
+
 module Workspace = struct
   type textDocumentOptions =
     { language : string
@@ -2381,7 +2633,7 @@ module Workspace = struct
       val onDidChangeConfiguration : ConfigurationChangeEvent.t Event.t
       [@@js.global "@vscode.workspace.onDidChangeConfiguration"]
 
-      val onDidChangeWorkspaceFolders : WorkspaceFolder.t Event.t
+      val onDidChangeWorkspaceFolders : WorkspaceFoldersChangeEvent.t Event.t
       [@@js.global "@vscode.workspace.onDidChangeWorkspaceFolders"]
 
       val getWorkspaceFolder : uri:Uri.t -> WorkspaceFolder.t or_undefined
@@ -2431,9 +2683,30 @@ module Workspace = struct
         -> Uri.t list Promise.t
       [@@js.global "@vscode.workspace.findFiles"]
 
+      val decode
+        :  content:Uint8Array.t
+        -> ?options:TextEncodingOptions.t
+        -> unit
+        -> string Promise.t
+      [@@js.global "@vscode.workspace.decode"]
+
+      val encode
+        :  content:string
+        -> ?options:TextEncodingOptions.t
+        -> unit
+        -> Uint8Array.t Promise.t
+      [@@js.global "@vscode.workspace.encode"]
+
+      val openTextDocumentWithEncoding
+        :  ([ `Uri of Uri.t | `Filename of string ][@js.union])
+        -> options:TextDocumentEncodingOptions.t
+        -> TextDocument.t Promise.t
+      [@@js.global "@vscode.workspace.openTextDocument"]
+
       val openTextDocument
         :  ([ `Uri of Uri.t
             | `Filename of string
+            | `Options of TextDocumentOpenOptions.t
             | `Interactive of textDocumentOptions or_undefined
             ]
            [@js.union])
@@ -2823,20 +3096,9 @@ module WebviewPanel = struct
     include [%js: val webviewPanel : t -> webviewPanel [@@js.get]]
   end
 
-  module LightDarkIcon = struct
-    type t =
-      { light : Uri.t
-      ; dark : Uri.t
-      }
-    [@@js]
-  end
+  module LightDarkIcon = LightDarkIcon
 
-  type iconPath =
-    ([ `Uri of Uri.t
-     | `LightDark of LightDarkIcon.t
-     ]
-    [@js.union])
-  [@@js]
+  type iconPath = IconPath.t [@@js]
 
   include
     [%js:
@@ -2847,6 +3109,8 @@ module WebviewPanel = struct
       val active : t -> bool [@@js.get]
       val options : t -> WebviewPanelOptions.t [@@js.get]
       val title : t -> string [@@js.get]
+      val iconPath : t -> iconPath or_undefined [@@js.get]
+      val set_iconPath : t -> iconPath or_undefined -> unit [@@js.set]
       val viewColumn : t -> ViewColumn.t or_undefined [@@js.get]
       val viewType : t -> string [@@js.get]
       val visible : t -> bool [@@js.get]
@@ -2987,7 +3251,7 @@ module Window = struct
       val visibleTextEditors : unit -> TextEditor.t list
       [@@js.get "@vscode.window.visibleTextEditors"]
 
-      val onDidChangeActiveTextEditor : unit -> TextEditor.t Event.t
+      val onDidChangeActiveTextEditor : unit -> TextEditor.t or_undefined Event.t
       [@@js.get "@vscode.window.onDidChangeActiveTextEditor"]
 
       val onDidChangeVisibleTextEditors : unit -> TextEditor.t list Event.t
@@ -2997,6 +3261,24 @@ module Window = struct
         :  unit
         -> TextEditorSelectionChangeEvent.t Event.t
       [@@js.get "@vscode.window.onDidChangeTextEditorSelection"]
+
+      val onDidChangeTerminalState : unit -> Terminal.t Event.t
+      [@@js.get "@vscode.window.onDidChangeTerminalState"]
+
+      val onDidChangeTerminalShellIntegration
+        :  unit
+        -> TerminalShellIntegrationChangeEvent.t Event.t
+      [@@js.get "@vscode.window.onDidChangeTerminalShellIntegration"]
+
+      val onDidStartTerminalShellExecution
+        :  unit
+        -> TerminalShellExecutionStartEvent.t Event.t
+      [@@js.get "@vscode.window.onDidStartTerminalShellExecution"]
+
+      val onDidEndTerminalShellExecution
+        :  unit
+        -> TerminalShellExecutionEndEvent.t Event.t
+      [@@js.get "@vscode.window.onDidEndTerminalShellExecution"]
 
       val terminals : unit -> Terminal.t list [@@js.get "@vscode.window.terminals"]
 
@@ -3293,6 +3575,7 @@ end
 module Env = struct
   include
     [%js:
+      val isAppPortable : unit -> bool [@@js.get "@vscode.env.isAppPortable"]
       val shell : unit -> string [@@js.get "@vscode.env.shell"]
       val clipboard : unit -> Clipboard.t [@@js.get "@vscode.env.clipboard"]]
 end
@@ -3368,6 +3651,25 @@ module DebugSession = struct
       [@@js.call]]
 end
 
+module DebugThread = struct
+  include Class.Make ()
+
+  include
+    [%js:
+      val session : t -> DebugSession.t [@@js.get]
+      val threadId : t -> int [@@js.get]]
+end
+
+module DebugStackFrame = struct
+  include Class.Make ()
+
+  include
+    [%js:
+      val session : t -> DebugSession.t [@@js.get]
+      val threadId : t -> int [@@js.get]
+      val frameId : t -> int [@@js.get]]
+end
+
 module DebugAdapterDescriptorFactory = struct
   include Interface.Make ()
 
@@ -3434,8 +3736,27 @@ module DebugConfigurationProviderTriggerKind = struct
 end
 
 module Debug = struct
+  type stackItem =
+    ([ `Thread of DebugThread.t
+     | `StackFrame of DebugStackFrame.t
+     ]
+    [@js.union])
+  [@@js]
+
+  let stackItem_of_js js_val =
+    if Ojs.has_property js_val "frameId"
+    then `StackFrame (DebugStackFrame.t_of_js js_val)
+    else `Thread (DebugThread.t_of_js js_val)
+  ;;
+
   include
     [%js:
+      val activeStackItem : unit -> stackItem or_undefined
+      [@@js.get "@vscode.debug.activeStackItem"]
+
+      val onDidChangeActiveStackItem : unit -> stackItem or_undefined Event.t
+      [@@js.get "@vscode.debug.onDidChangeActiveStackItem"]
+
       val activeDebugSession : unit -> DebugSession.t or_undefined
       [@@js.get "@vscode.debug.activeDebugSession"]
 

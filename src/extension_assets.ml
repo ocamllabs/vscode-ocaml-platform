@@ -15,8 +15,8 @@ let make ~extension_uri =
   let uri name = Uri.joinPath extension_uri ~pathSegments:[ "assets"; name ] in
   let icon ?(variant = "") stem =
     LightDarkIcon.
-      { light = `Uri (uri (stem ^ "-light" ^ variant ^ ".svg"))
-      ; dark = `Uri (uri (stem ^ "-dark" ^ variant ^ ".svg"))
+      { light = uri (stem ^ "-light" ^ variant ^ ".svg")
+      ; dark = uri (stem ^ "-dark" ^ variant ^ ".svg")
       }
   in
   { chat = icon "chat"
