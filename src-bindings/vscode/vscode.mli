@@ -146,8 +146,8 @@ end
 
 module LightDarkIcon : sig
   type t =
-    { light : [ `String of string | `Uri of Uri.t ]
-    ; dark : [ `String of string | `Uri of Uri.t ]
+    { light : Uri.t
+    ; dark : Uri.t
     }
 
   include Ojs.T with type t := t
@@ -156,6 +156,7 @@ end
 module ThemeColor : sig
   include Ojs.T
 
+  val id : t -> string
   val make : id:string -> t
 end
 
@@ -169,6 +170,16 @@ module ThemeIcon : sig
   val color : t -> ThemeColor.t option
 end
 
+module IconPath : sig
+  type t =
+    [ `Uri of Uri.t
+    | `LightDark of LightDarkIcon.t
+    | `ThemeIcon of ThemeIcon.t
+    ]
+
+  include Ojs.T with type t := t
+end
+
 module TextDocument : sig
   include Ojs.T
 
@@ -176,6 +187,7 @@ module TextDocument : sig
   val fileName : t -> string
   val isUntitled : t -> bool
   val languageId : t -> string
+  val encoding : t -> string
   val version : t -> int
   val isDirty : t -> bool
   val isClosed : t -> bool
@@ -294,6 +306,7 @@ module TextEditorLineNumbersStyle : sig
     | Off
     | On
     | Relative
+    | Interval
 
   include Ojs.T with type t := t
 end
@@ -322,12 +335,14 @@ module TextEditorOptions : sig
     ]
 
   val tabSize : t -> tabSize option
+  val indentSize : t -> tabSize option
   val insertSpaces : t -> insertSpaces option
   val cursorStyle : t -> TextEditorCursorStyle.t option
   val lineNumbers : t -> TextEditorLineNumbersStyle.t option
 
   val create
     :  ?tabSize:tabSize
+    -> ?indentSize:tabSize
     -> ?insertSpaces:insertSpaces
     -> ?cursorStyle:TextEditorCursorStyle.t
     -> ?lineNumbers:TextEditorLineNumbersStyle.t
@@ -533,6 +548,7 @@ module TextEditor : sig
     -> ?location:insertSnippetLocation
     -> ?undoStopBefore:bool
     -> ?undoStopAfter:bool
+    -> ?keepWhitespace:bool
     -> unit
     -> bool Promise.t
 
@@ -742,18 +758,41 @@ module CustomDocument : sig
   val create : uri:Uri.t -> dispose:(unit -> unit) -> t
 end
 
+module QuickInputButtonLocation : sig
+  type t =
+    | Title
+    | Inline
+    | Input
+
+  include Ojs.T with type t := t
+end
+
+module QuickInputButtonToggle : sig
+  include Ojs.T
+
+  val checked : t -> bool
+  val set_checked : t -> bool -> unit
+  val create : checked:bool -> t
+end
+
 module QuickInputButton : sig
   include Ojs.T
 
-  type iconPath =
-    [ `Uri of Uri.t
-    | `LightDark of LightDarkIcon.t
-    | `ThemeIcon of ThemeIcon.t
-    ]
+  type iconPath = IconPath.t
 
   val iconPath : t -> iconPath
   val tooltip : t -> string option
-  val create : iconPath:iconPath -> ?tooltip:string -> unit -> t
+  val location : t -> QuickInputButtonLocation.t option
+  val toggle : t -> QuickInputButtonToggle.t option
+  val set_location : t -> QuickInputButtonLocation.t option -> unit
+
+  val create
+    :  iconPath:iconPath
+    -> ?tooltip:string
+    -> ?location:QuickInputButtonLocation.t
+    -> ?toggle:QuickInputButtonToggle.t
+    -> unit
+    -> t
 end
 
 module QuickPickItemKind : sig
@@ -772,9 +811,15 @@ module QuickPickItem : sig
   val picked : t -> bool option
   val alwaysShow : t -> bool option
   val kind : t -> QuickPickItemKind.t option
+  val buttons : t -> QuickInputButton.t list option
+  val resourceUri : t -> Uri.t option
+  val iconPath : t -> IconPath.t option
 
   val create
     :  label:string
+    -> ?iconPath:IconPath.t
+    -> ?resourceUri:Uri.t
+    -> ?buttons:QuickInputButton.t list
     -> ?description:string
     -> ?detail:string
     -> ?picked:bool
@@ -796,6 +841,7 @@ module QuickPickOptions : sig
   val matchOnDescription : t -> bool option
   val matchOnDetail : t -> bool option
   val placeHolder : t -> string option
+  val prompt : t -> string option
   val ignoreFocusOut : t -> bool option
   val canPickMany : t -> bool option
   val onDidSelectItem : t -> (onDidSelectItemArgs -> unit) option
@@ -805,6 +851,7 @@ module QuickPickOptions : sig
     -> ?matchOnDescription:bool
     -> ?matchOnDetail:bool
     -> ?placeHolder:string
+    -> ?prompt:string
     -> ?ignoreFocusOut:bool
     -> ?canPickMany:bool
     -> ?onDidSelectItem:(item:onDidSelectItemArgs -> unit)
@@ -845,6 +892,8 @@ module QuickPick : sig
     val matchOnDetail : t -> bool option
     val set_matchOnDetail : t -> bool option -> unit
     val placeholder : t -> string option
+    val prompt : t -> string option
+    val set_prompt : t -> string option -> unit
     val set_placeholder : t -> string option -> unit
     val selectedItems : t -> T.t list option
     val set_selectedItems : t -> T.t list option -> unit
@@ -873,6 +922,7 @@ module QuickPick : sig
       -> ?matchOnDescription:bool
       -> ?matchOnDetail:bool
       -> ?placeholder:string
+      -> ?prompt:string
       -> ?selectedItems:T.t list
       -> ?step:int
       -> ?title:string
@@ -1117,8 +1167,21 @@ module TerminalOptions : sig
   val shellArgs : t -> shellArgs option
   val cwd : t -> cwd option
   val env : t -> string option Interop.Dict.t option
-  val strictEnv : t -> bool
-  val hideFromUser : t -> bool
+  val strictEnv : t -> bool option
+  val hideFromUser : t -> bool option
+  val shellIntegrationNonce : t -> string option
+
+  val create
+    :  ?name:string
+    -> ?shellPath:string
+    -> ?shellArgs:shellArgs
+    -> ?cwd:cwd
+    -> ?env:string option Dict.t
+    -> ?strictEnv:bool
+    -> ?hideFromUser:bool
+    -> ?shellIntegrationNonce:string
+    -> unit
+    -> t
 end
 
 module TerminalDimensions : sig
@@ -1157,7 +1220,14 @@ module ExtensionTerminalOptions : sig
 
   val name : t -> string
   val pty : t -> Pseudoterminal.t
-  val create : name:string -> pty:Pseudoterminal.t -> t
+  val shellIntegrationNonce : t -> string option
+
+  val create
+    :  ?shellIntegrationNonce:string
+    -> name:string
+    -> pty:Pseudoterminal.t
+    -> unit
+    -> t
 end
 
 module Extension : sig
@@ -1168,11 +1238,79 @@ module Extensions : sig
   val getExtension : string -> Extension.t or_undefined
 end
 
+module TerminalExitReason : sig
+  type t =
+    | Unknown
+    | Shutdown
+    | Process
+    | User
+    | Extension
+
+  include Ojs.T with type t := t
+end
+
 module TerminalExitStatus : sig
   include Ojs.T
 
-  val code : t -> int
-  val create : code:int -> t
+  val code : t -> int option
+  val reason : t -> TerminalExitReason.t
+  val create : ?code:int -> reason:TerminalExitReason.t -> unit -> t
+end
+
+module TerminalShellExecutionOutput : sig
+  include Ojs.T
+
+  type result =
+    { done_ : bool
+    ; value : string option
+    }
+
+  val next : t -> result Promise.t
+end
+
+module TerminalShellExecutionCommandLineConfidence : sig
+  type t =
+    | Low
+    | Medium
+    | High
+
+  include Ojs.T with type t := t
+end
+
+module TerminalShellExecutionCommandLine : sig
+  include Ojs.T
+
+  val value : t -> string
+  val isTrusted : t -> bool
+  val confidence : t -> TerminalShellExecutionCommandLineConfidence.t
+end
+
+module TerminalShellExecution : sig
+  include Ojs.T
+
+  val commandLine : t -> TerminalShellExecutionCommandLine.t
+  val cwd : t -> Uri.t option
+  val read : t -> TerminalShellExecutionOutput.t
+end
+
+module TerminalShellIntegration : sig
+  include Ojs.T
+
+  val cwd : t -> Uri.t option
+  val executeCommand : t -> commandLine:string -> TerminalShellExecution.t
+
+  val executeCommandArgs
+    :  t
+    -> executable:string
+    -> args:string list
+    -> TerminalShellExecution.t
+end
+
+module TerminalState : sig
+  include Ojs.T
+
+  val isInteractedWith : t -> bool
+  val shell : t -> string option
 end
 
 module Terminal : sig
@@ -1187,11 +1325,37 @@ module Terminal : sig
   val processId : t -> int option Promise.t
   val creationOptions : t -> creationOptions
   val exitStatus : t -> TerminalExitStatus.t option
+  val state : t -> TerminalState.t
+  val shellIntegration : t -> TerminalShellIntegration.t option
   val sendText : t -> text:string -> ?addNewLine:bool -> unit -> unit
   val show : t -> ?preserveFocus:bool -> unit -> unit
   val hide : t -> unit
   val dispose : t -> unit
   val disposable : t -> Disposable.t
+end
+
+module TerminalShellIntegrationChangeEvent : sig
+  include Ojs.T
+
+  val terminal : t -> Terminal.t
+  val shellIntegration : t -> TerminalShellIntegration.t
+end
+
+module TerminalShellExecutionStartEvent : sig
+  include Ojs.T
+
+  val terminal : t -> Terminal.t
+  val shellIntegration : t -> TerminalShellIntegration.t
+  val execution : t -> TerminalShellExecution.t
+end
+
+module TerminalShellExecutionEndEvent : sig
+  include Ojs.T
+
+  val terminal : t -> Terminal.t
+  val shellIntegration : t -> TerminalShellIntegration.t
+  val execution : t -> TerminalShellExecution.t
+  val exitCode : t -> int option
 end
 
 module OutputChannel : sig
@@ -1276,10 +1440,29 @@ end
 module SecretStorage : sig
   include Ojs.T
 
+  val keys : t -> string list Promise.t
   val get : t -> key:string -> string option Promise.t
   val store : t -> key:string -> value:string -> unit Promise.t
   val delete : t -> key:string -> unit Promise.t
   val onDidChange : t -> SecretStorageChangeEvent.t Event.t
+end
+
+module LanguageModelChat : sig
+  include Ojs.T
+
+  val id : t -> string
+  val name : t -> string
+  val vendor : t -> string
+  val family : t -> string
+  val version : t -> string
+  val maxInputTokens : t -> int
+end
+
+module LanguageModelAccessInformation : sig
+  include Ojs.T
+
+  val onDidChange : t -> unit Event.t
+  val canSendRequest : t -> chat:LanguageModelChat.t -> bool option
 end
 
 module ExtensionContext : sig
@@ -1297,6 +1480,7 @@ module ExtensionContext : sig
   val globalStorageUri : t -> Uri.t
   val logUri : t -> Uri.t
   val extensionMode : t -> ExtensionMode.t
+  val languageModelAccessInformation : t -> LanguageModelAccessInformation.t
   val subscribe : t -> disposable:Disposable.t -> unit
 end
 
@@ -1377,8 +1561,8 @@ module ShellExecution : sig
     -> t
 
   val commandLine : t -> string option
-  val command : t -> shellString
-  val args : t -> shellString list
+  val command : t -> shellString option
+  val args : t -> shellString list option
   val options : t -> ShellExecutionOptions.t option
 end
 
@@ -1709,6 +1893,38 @@ module ConfigurationChangeEvent : sig
   include Ojs.T
 end
 
+module Uint8Array : sig
+  include Ojs.T
+
+  val of_array : int array -> t
+  val to_array : t -> int array
+end
+
+module TextEncodingOptions : sig
+  include Ojs.T
+
+  val encoding : t -> string option
+  val uri : t -> Uri.t option
+  val of_encoding : encoding:string -> t
+  val of_uri : uri:Uri.t -> t
+end
+
+module TextDocumentEncodingOptions : sig
+  include Ojs.T
+
+  val encoding : t -> string option
+  val create : ?encoding:string -> unit -> t
+end
+
+module TextDocumentOpenOptions : sig
+  include Ojs.T
+
+  val encoding : t -> string option
+  val language : t -> string option
+  val content : t -> string option
+  val create : ?encoding:string -> ?language:string -> ?content:string -> unit -> t
+end
+
 module Workspace : sig
   val workspaceFolders : unit -> WorkspaceFolder.t list
   val name : unit -> string option
@@ -1723,7 +1939,7 @@ module Workspace : sig
 
   val workspaceFile : unit -> Uri.t option
   val rootPath : unit -> string or_undefined
-  val onDidChangeWorkspaceFolders : WorkspaceFolder.t Event.t
+  val onDidChangeWorkspaceFolders : WorkspaceFoldersChangeEvent.t Event.t
   val onDidChangeTextDocument : TextDocumentChangeEvent.t Event.t
   val onDidChangeConfiguration : ConfigurationChangeEvent.t Event.t
 
@@ -1750,8 +1966,29 @@ module Workspace : sig
     ; content : string
     }
 
+  val decode
+    :  content:Uint8Array.t
+    -> ?options:TextEncodingOptions.t
+    -> unit
+    -> string Promise.t
+
+  val encode
+    :  content:string
+    -> ?options:TextEncodingOptions.t
+    -> unit
+    -> Uint8Array.t Promise.t
+
+  val openTextDocumentWithEncoding
+    :  [ `Uri of Uri.t | `Filename of string ]
+    -> options:TextDocumentEncodingOptions.t
+    -> TextDocument.t Promise.t
+
   val openTextDocument
-    :  [ `Uri of Uri.t | `Filename of string | `Interactive of textDocumentOptions option ]
+    :  [ `Uri of Uri.t
+       | `Filename of string
+       | `Options of TextDocumentOpenOptions.t
+       | `Interactive of textDocumentOptions option
+       ]
     -> TextDocument.t Promise.t
 
   val onDidOpenTextDocument : TextDocument.t Event.t
@@ -2033,26 +2270,18 @@ module WebviewPanel : sig
     val webviewPanel : t -> webviewPanel
   end
 
-  module LightDarkIcon : sig
-    type t =
-      { light : Uri.t
-      ; dark : Uri.t
-      }
-
-    include Ojs.T with type t := t
-  end
+  module LightDarkIcon = LightDarkIcon
 
   val onDidChangeViewState : t -> WebviewPanelOnDidChangeViewStateEvent.t Event.t
   val onDidDispose : t -> unit Event.t
   val active : t -> bool
 
-  type iconPath =
-    [ `Uri of Uri.t
-    | `LightDark of LightDarkIcon.t
-    ]
+  type iconPath = IconPath.t
 
   val options : t -> WebviewPanelOptions.t
   val title : t -> string
+  val iconPath : t -> iconPath option
+  val set_iconPath : t -> iconPath option -> unit
   val viewColumn : t -> ViewColumn.t option
   val viewType : t -> string
   val visible : t -> bool
@@ -2162,9 +2391,20 @@ end
 module Window : sig
   val activeTextEditor : unit -> TextEditor.t option
   val visibleTextEditors : unit -> TextEditor.t list
-  val onDidChangeActiveTextEditor : unit -> TextEditor.t Event.t
+  val onDidChangeActiveTextEditor : unit -> TextEditor.t option Event.t
   val onDidChangeVisibleTextEditors : unit -> TextEditor.t list Event.t
   val onDidChangeTextEditorSelection : unit -> TextEditorSelectionChangeEvent.t Event.t
+  val onDidChangeTerminalState : unit -> Terminal.t Event.t
+
+  val onDidChangeTerminalShellIntegration
+    :  unit
+    -> TerminalShellIntegrationChangeEvent.t Event.t
+
+  val onDidStartTerminalShellExecution
+    :  unit
+    -> TerminalShellExecutionStartEvent.t Event.t
+
+  val onDidEndTerminalShellExecution : unit -> TerminalShellExecutionEndEvent.t Event.t
   val terminals : unit -> Terminal.t List.t
   val activeTerminal : unit -> Terminal.t option
   val onDidChangeActiveTerminal : unit -> Terminal.t option Event.t
@@ -2353,6 +2593,7 @@ module Tasks : sig
 end
 
 module Env : sig
+  val isAppPortable : unit -> bool
   val shell : unit -> string
   val clipboard : unit -> Clipboard.t
 end
@@ -2403,6 +2644,21 @@ module DebugSession : sig
   include Ojs.T
 
   val customRequest : t -> command:string -> ?args:Ojs.t -> unit -> Ojs.t Promise.t
+end
+
+module DebugThread : sig
+  include Ojs.T
+
+  val session : t -> DebugSession.t
+  val threadId : t -> int
+end
+
+module DebugStackFrame : sig
+  include Ojs.T
+
+  val session : t -> DebugSession.t
+  val threadId : t -> int
+  val frameId : t -> int
 end
 
 module DebugAdapterDescriptorFactory : sig
@@ -2464,6 +2720,13 @@ module DebugConfigurationProviderTriggerKind : sig
 end
 
 module Debug : sig
+  type stackItem =
+    [ `Thread of DebugThread.t
+    | `StackFrame of DebugStackFrame.t
+    ]
+
+  val activeStackItem : unit -> stackItem option
+  val onDidChangeActiveStackItem : unit -> stackItem option Event.t
   val activeDebugSession : unit -> DebugSession.t option
 
   val registerDebugAdapterDescriptorFactory
