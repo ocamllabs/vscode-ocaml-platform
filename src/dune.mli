@@ -17,8 +17,8 @@ type t =
   ; opam_switch : Opam.Switch.t option
   }
 
-(** Check if dune package management is enable. *)
-val is_dpm_enabled : t -> bool Promise.t
+(** Errors running the check are distinct from package management being disabled. *)
+val is_dpm_enabled : t -> (bool, string) result Promise.t
 
 (** Generic function to execute dune commands *)
 val command : t -> args:string list -> Cmd.t

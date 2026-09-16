@@ -106,41 +106,43 @@ let _install_dune_lsp_server =
       match sandbox with
       | Dune dune ->
         let* dpm = Dune.is_dpm_enabled dune in
-        if dpm
-        then
-          let* dune_lsp_present = Dune.is_ocamllsp_present dune in
-          if dune_lsp_present
-          then
-            show_message `Info "OCaml-LSP server is already installed." |> Promise.return
-          else (
-            let options =
-              ProgressOptions.create
-                ~location:(`ProgressLocation Notification)
-                ~title:"Installing ocaml-lsp server using \"dune tools install ocamllsp\""
-                ~cancellable:false
-                ()
-            in
-            let task ~progress:_ ~token:_ =
-              let+ result =
-                (* We first check the version so that the process can exit, otherwise the progress indicator runs forever.*)
-                Sandbox.get_command sandbox "ocamllsp" [] `Install
-                |> Cmd.output ~cwd:(Dune.root dune)
-              in
-              match result with
-              | Ok _ -> true
-              | Error err ->
-                show_message `Error "An error occured while installing ocamllsp : %s" err;
-                false
-            in
-            let* installed =
-              Vscode.Window.withProgress (module Interop.Js.Bool) ~options ~task
-            in
-            if installed
-            then
-              let+ _ = Extension_instance.start_language_server instance in
-              ()
-            else Promise.return ())
-        else Sandbox.suggest_to_run_dune_pkg_lock () |> Promise.return
+        (match dpm with
+         | Error err -> Promise.return (show_message `Error "%s" err)
+         | Ok false -> Sandbox.suggest_to_run_dune_pkg_lock () |> Promise.return
+         | Ok true ->
+           let* dune_lsp_present = Dune.is_ocamllsp_present dune in
+           if dune_lsp_present
+           then
+             show_message `Info "OCaml-LSP server is already installed." |> Promise.return
+           else (
+             let options =
+               ProgressOptions.create
+                 ~location:(`ProgressLocation Notification)
+                 ~title:
+                   "Installing ocaml-lsp server using \"dune tools install ocamllsp\""
+                 ~cancellable:false
+                 ()
+             in
+             let task ~progress:_ ~token:_ =
+               let+ result =
+                 (* We first check the version so that the process can exit, otherwise the progress indicator runs forever.*)
+                 Sandbox.get_command sandbox "ocamllsp" [] `Install
+                 |> Cmd.output ~cwd:(Dune.root dune)
+               in
+               match result with
+               | Ok _ -> true
+               | Error err ->
+                 show_message `Error "An error occured while installing ocamllsp : %s" err;
+                 false
+             in
+             let* installed =
+               Vscode.Window.withProgress (module Interop.Js.Bool) ~options ~task
+             in
+             if installed
+             then
+               let+ _ = Extension_instance.start_language_server instance in
+               ()
+             else Promise.return ()))
       | _ ->
         show_message
           `Warn
