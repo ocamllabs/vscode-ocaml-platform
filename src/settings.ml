@@ -46,7 +46,7 @@ let workspace_folder_path folder = Uri.fsPath (WorkspaceFolder.uri folder)
 let resolve_workspace_vars setting =
   let find_folder name =
     let pred folder = String.equal name (WorkspaceFolder.name folder) in
-    List.find ~f:pred (Workspace.workspaceFolders ())
+    List.find ~f:pred (Option.value (Workspace.workspaceFolders ()) ~default:[])
   in
   let regexp = Js_of_ocaml.Regexp.regexp "\\$\\{workspaceFolder:([^}]+)\\}" in
   let replacer ~matched ~captures ~offset:_ ~string:_ =
@@ -59,7 +59,7 @@ let resolve_workspace_vars setting =
     (* name will always be captured *)
   in
   let first_workspace_folder_path =
-    Workspace.workspaceFolders ()
+    Option.value (Workspace.workspaceFolders ()) ~default:[]
     |> List.hd
     |> Option.value_map ~f:workspace_folder_path ~default:""
   in
@@ -77,11 +77,14 @@ let substitute_workspace_vars setting =
     | Win32 -> String.Caseless.substr_replace_all
     | _ -> String.substr_replace_all
   in
-  List.fold (Workspace.workspaceFolders ()) ~init:setting ~f:(fun acc folder ->
-    folder_replace_all
-      acc
-      ~pattern:(workspace_folder_path folder)
-      ~with_:(workspace_folder_var folder))
+  List.fold
+    (Option.value (Workspace.workspaceFolders ()) ~default:[])
+    ~init:setting
+    ~f:(fun acc folder ->
+      folder_replace_all
+        acc
+        ~pattern:(workspace_folder_path folder)
+        ~with_:(workspace_folder_var folder))
 ;;
 
 module ExtraEnv = struct

@@ -18,12 +18,22 @@ let find_executables sandbox project_ctx =
   let open Promise.Syntax in
   match project_ctx with
   | Dune ->
+    let cwd =
+      Option.value_map
+        (Sandbox.workspace_root ())
+        ~default:(Process.cwd ())
+        ~f:Path.to_string
+    in
     let+ { ChildProcess.stdout; _ } =
-      Dune_describe.command sandbox |> Cmd.run ?cwd:(Sandbox.workspace_root ())
+      Dune_describe.command sandbox |> Cmd.run ~cwd:(Path.of_string cwd)
     in
     Parsexp.Conv_single.parse_string stdout Dune_describe.parse_executables
     |> Stdlib.Result.to_option
     |> Option.join
+    |> Option.map
+         ~f:
+           (List.map ~f:(fun (exec : Dune_describe.executable) ->
+              { exec with mod_path = Node.Path.join [ cwd; exec.mod_path ] }))
   | Unknown ->
     let+ ml_files =
       Workspace.findFiles
@@ -34,19 +44,10 @@ let find_executables sandbox project_ctx =
     let execs =
       List.map
         ~f:(fun uri ->
-          (* FIXME: This is fragile. We probably need to use [Node.Path] bindings here. *)
-          let abs_path = Uri.path uri in
-          let mod_path =
-            match Workspace.rootPath () with
-            | None -> abs_path
-            | Some root ->
-              (match String.chop_prefix ~prefix:root abs_path with
-               | None -> abs_path
-               | Some rel_path -> "." ^ rel_path)
-          in
-          { Dune_describe.name = Stdlib.Filename.basename mod_path
-          ; mod_path
-          ; exec_path = mod_path
+          let path = Uri.fsPath uri in
+          { Dune_describe.name = Node.Path.basename path
+          ; mod_path = path
+          ; exec_path = path
           })
         ml_files
     in
@@ -67,15 +68,7 @@ let active_text_doc () =
   |> Option.bind ~f:(fun text_editor ->
     let doc = TextEditor.document text_editor in
     if String.(TextDocument.languageId doc = "ocaml")
-    then (
-      (* FIXME: This is fragile. We probably need to use [Node.Path] bindings here. *)
-      let abs_path = TextDocument.uri doc |> Uri.path in
-      match Workspace.rootPath () with
-      | None -> Some (abs_path, doc)
-      | Some root ->
-        (match String.chop_prefix ~prefix:root abs_path with
-         | None -> Some (abs_path, doc)
-         | Some rel_path -> Some (rel_path, doc)))
+    then Some (Uri.fsPath (TextDocument.uri doc), doc)
     else None)
 ;;
 

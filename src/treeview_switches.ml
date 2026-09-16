@@ -70,15 +70,15 @@ module Dependency = struct
       `TreeItemLabel (Vscode.TreeItemLabel.create ~label:(label dependency) ())
     in
     let item = Vscode.TreeItem.make_label ~label ~collapsibleState () in
-    Vscode.TreeItem.set_iconPath item icon;
-    TreeItem.set_contextValue item (context_value dependency);
+    Vscode.TreeItem.set_iconPath item (Some icon);
+    TreeItem.set_contextValue item (Some (context_value dependency));
     let+ () =
       Promise.Option.iter
-        (fun desc -> TreeItem.set_description item (`String desc))
+        (fun desc -> TreeItem.set_description item (Some (`String desc)))
         (description dependency)
     in
     Option.iter (tooltip dependency) ~f:(fun desc ->
-      TreeItem.set_tooltip item (`String desc));
+      TreeItem.set_tooltip item (Some (`String desc)));
     item
   ;;
 
@@ -196,7 +196,11 @@ let register extension instance ~assets =
   let module EventEmitter = Vscode.EventEmitter.Make (Interop.Js.Or_undefined (Dependency))
   in
   let event_emitter = EventEmitter.make () in
-  let event = EventEmitter.event event_emitter in
+  let event =
+    Event.map
+      (EventEmitter.event event_emitter)
+      ~f:(Option.map ~f:(fun element -> `Element element))
+  in
   let (_ : unit Promise.t) =
     let open Promise.Syntax in
     let+ opam = Opam.make () in

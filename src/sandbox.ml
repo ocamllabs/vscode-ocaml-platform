@@ -59,7 +59,7 @@ end
 (** If [Workspace.workspaceFolders()] returns a list with a single element,
     returns it; otherwise, returns [None]. *)
 let workspace_root () =
-  match Workspace.workspaceFolders () with
+  match Option.value (Workspace.workspaceFolders ()) ~default:[] with
   | [] -> None
   | [ workspace_folder ] ->
     Some (workspace_folder |> WorkspaceFolder.uri |> Uri.fsPath |> Path.of_string)
@@ -491,7 +491,11 @@ let custom_dune_input_validation root =
   let options =
     InputBoxOptions.create
       ~prompt:"Input the path to the dune executable"
-      ~validateInput
+      ~validateInput:(fun ~value ->
+        `Promise
+          (Promise.map
+             (Option.map ~f:(fun message -> `String message))
+             (validateInput ~value)))
       ()
   in
   let* input = Window.showInputBox ~options () in
@@ -757,7 +761,7 @@ let sandbox_candidates ~workspace_folders =
 
 let select_sandbox t =
   let open Promise.Syntax in
-  let workspace_folders = Workspace.workspaceFolders () in
+  let workspace_folders = Option.value (Workspace.workspaceFolders ()) ~default:[] in
   let* candidates = sandbox_candidates ~workspace_folders in
   let open Promise.Option.Syntax in
   let* candidate = select_sandbox candidates t in
@@ -774,7 +778,11 @@ let select_sandbox t =
       InputBoxOptions.create
         ~prompt:"Input a custom command template"
         ~value:"$prog $args"
-        ~validateInput
+        ~validateInput:(fun ~value ->
+          `Promise
+            (Promise.map
+               (Option.map ~f:(fun message -> `String message))
+               (validateInput ~value)))
         ()
     in
     let* input = Window.showInputBox ~options () in

@@ -71,10 +71,16 @@ end = struct
     | Unknown
 
   let relative_document_path ~document =
-    Workspace.asRelativePath ~pathOrUri:(`Uri (TextDocument.uri document)) ()
+    Workspace.asRelativePath
+      ~pathOrUri:(`Uri (TextDocument.uri document))
+      ~includeWorkspaceFolder:false
+      ()
   ;;
 
-  let project_root_path () = Workspace.rootPath ()
+  let project_root_path ~document =
+    Workspace.getWorkspaceFolder ~uri:(TextDocument.uri document)
+    |> Option.map ~f:(fun folder -> Uri.fsPath (WorkspaceFolder.uri folder))
+  ;;
 
   let get_kind ~document =
     let relative = relative_document_path ~document in
@@ -89,10 +95,9 @@ end = struct
 
   let get_pp_path ~(document : TextDocument.t) =
     let relative = relative_document_path ~document in
-    match project_root_path () with
+    match project_root_path ~document with
     | None -> raise (User_error "Project root wasn't found.")
     | Some root ->
-      let build_root = "_build/default" in
       let fname_opt =
         match get_kind ~document with
         | Unknown -> None
@@ -104,9 +109,7 @@ end = struct
         | Signature `Reason -> Some (relative ^ ".pp.mli")
       in
       (match fname_opt with
-       | Some fname ->
-         let ( / ) = Stdlib.Filename.concat in
-         root / build_root / fname
+       | Some fname -> Node.Path.join [ root; "_build"; "default"; fname ]
        | None ->
          let uri = Uri.toString (TextDocument.uri document) () in
          raise (User_error (sprintf "File %s has unknown file extension" uri)))
@@ -245,7 +248,7 @@ let on_hover custom_doc webview =
       in
       `Value (Some hover)
     in
-    HoverProvider.create ~provideHover
+    HoverProvider.create ~provideHover ()
   in
   Vscode.Languages.registerHoverProvider ~selector:(`String "ocaml") ~provider
 ;;
@@ -640,6 +643,7 @@ let register extension instance =
   let editorProvider =
     CustomTextEditorProvider.create
       ~resolveCustomTextEditor:(resolveCustomTextEditor instance extension)
+      ()
   in
   let disposable =
     let options =
