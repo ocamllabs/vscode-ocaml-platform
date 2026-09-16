@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Report errors checking Dune Package Management, including build directory lock
+  conflicts, instead of incorrectly prompting to generate a lockfile. Fix automatic
+  detection to use the Dune executable from `PATH`.
 - Fix custom tree view icons not appearing in Remote WSL by resolving bundled
   assets as extension URIs. (#945)
 - Expose the `ocaml.server.inlayHints.*` and

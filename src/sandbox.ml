@@ -318,10 +318,16 @@ let detect_opam_sandbox ~project_root opam () =
 
 let detect_dune_pkg ~project_root () =
   let open Promise.Syntax in
-  Dune.make ~working_dir:project_root ~dune_path:project_root ()
+  Dune.make ~working_dir:project_root ~dune_path:(Path.of_string "dune") ()
   >>= function
   | Some dune ->
-    Dune.is_dpm_enabled dune >>| fun dpm -> if dpm then Some (Dune dune) else None
+    let+ enabled = Dune.is_dpm_enabled dune in
+    (match enabled with
+     | Ok true -> Some (Dune dune)
+     | Ok false -> None
+     | Error err ->
+       log_chan `Warn ~section:"dune package management" "%s" err;
+       None)
   | None -> Promise.return None
 ;;
 
@@ -392,8 +398,9 @@ let save_to_settings sandbox =
   | Dune dune ->
     Dune.is_dpm_enabled dune
     >>= (function
-     | true -> save_setting ()
-     | false -> Promise.return (suggest_to_run_dune_pkg_lock ()))
+     | Ok true -> save_setting ()
+     | Ok false -> Promise.return (suggest_to_run_dune_pkg_lock ())
+     | Error err -> Promise.return (show_message `Error "%s" err))
   | _ -> save_setting ()
 ;;
 

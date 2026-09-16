@@ -135,8 +135,17 @@ let get_upgrade_dune_cmd t =
 
 let is_dpm_enabled t =
   let open Promise.Syntax in
-  let+ { exitCode; _ } = Cmd.run ~cwd:t.root (exec_pkg ~cmd:"enabled" t) in
-  Int.equal exitCode 0
+  let+ { exitCode; stderr; _ } = Cmd.run ~cwd:t.root (exec_pkg ~cmd:"enabled" t) in
+  match exitCode with
+  | 0 -> Ok true
+  (* Dune also exits with 1 on errors, but reports a disabled workspace silently. *)
+  | 1 when String.is_empty (String.strip stderr) -> Ok false
+  | _ ->
+    Error
+      (Printf.sprintf
+         "Unable to check whether Dune package management is enabled (exit code %d):\n%s"
+         exitCode
+         (String.strip stderr))
 ;;
 
 let tools ~tool ?(args = []) t cmd =
