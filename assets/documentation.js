@@ -34,6 +34,8 @@
     const link = event.target.closest("a[href]");
     if (!link) return;
     event.preventDefault();
+    // VS Code also opens trusted link clicks, even when their default is prevented.
+    event.stopPropagation();
     const href = link.getAttribute("href");
     if (href.startsWith("#")) {
       scrollToFragment(href);
