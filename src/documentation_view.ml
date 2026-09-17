@@ -1,11 +1,5 @@
 open Import
 
-type location =
-  { path : string
-  ; fragment : string
-  ; scroll : int option
-  }
-
 type t =
   { panel : WebviewPanel.t
   ; root : string
@@ -14,9 +8,6 @@ type t =
   ; mutable disposed : bool
   ; mutable revision : int
   ; mutable nonce : string
-  ; mutable current : location option
-  ; mutable back : location list
-  ; mutable forward : location list
   }
 
 let root t = t.root
@@ -72,7 +63,7 @@ let read_page t path =
   root, file, html
 ;;
 
-let render t location root file html =
+let render t ~fragment root file html =
   let webview = WebviewPanel.webview t.panel in
   let nonce = Node.Crypto.randomUUID () in
   t.nonce <- nonce;
@@ -90,13 +81,7 @@ let render t location root file html =
     object_
       [ "nonce", string nonce
       ; "root", string (resource webview root)
-      ; "fragment", string location.fragment
-      ; ( "scroll"
-        , match location.scroll with
-          | Some scroll -> int scroll
-          | None -> null )
-      ; "back", bool (not (List.is_empty t.back))
-      ; "forward", bool (not (List.is_empty t.forward))
+      ; "fragment", string fragment
       ]
     |> Jsonoo.stringify
     |> fun value -> String.substr_replace_all value ~pattern:"<" ~with_:"\\u003c"
@@ -144,18 +129,14 @@ let render t location root file html =
        (Node.Path.basename (Node.Path.dirname file)))
 ;;
 
-let load t location ~back ~forward =
+let load t ~path ~fragment =
   t.revision <- t.revision + 1;
   let revision = t.revision in
   let open Promise.Syntax in
   let operation =
-    let+ root, file, html = read_page t location.path in
+    let+ root, file, html = read_page t path in
     if (not t.disposed) && Int.equal revision t.revision
-    then (
-      t.back <- back;
-      t.forward <- forward;
-      t.current <- Some location;
-      render t location root file html)
+    then render t ~fragment root file html
   in
   Promise.catch operation ~rejected:(fun error ->
     if t.disposed || not (Int.equal revision t.revision)
@@ -168,12 +149,7 @@ let show t ~path =
   then Promise.return ()
   else (
     WebviewPanel.reveal t.panel ();
-    let back =
-      match t.current with
-      | Some current when not (String.equal current.path path) -> current :: t.back
-      | _ -> t.back
-    in
-    load t { path; fragment = ""; scroll = None } ~back ~forward:[])
+    load t ~path ~fragment:"")
 ;;
 
 let receive t message =
@@ -183,32 +159,13 @@ let receive t message =
     then Some (Ojs.string_of_js value)
     else None
   in
-  let scroll =
-    let value = Ojs.get_prop_ascii message "scroll" in
-    if String.equal (Ojs.type_of value) "number"
-    then Some (Int.max 0 (Ojs.int_of_js value))
-    else None
-  in
-  match string "nonce", string "type", t.current with
-  | Some nonce, Some kind, Some current when String.equal nonce t.nonce && not t.disposed
-    ->
-    let current = { current with scroll } in
-    t.current <- Some current;
+  match string "nonce", string "type" with
+  | Some nonce, Some kind when String.equal nonce t.nonce && not t.disposed ->
     (match kind with
      | "navigate" ->
        (match string "path", string "fragment" with
-        | Some path, Some fragment ->
-          load t { path; fragment; scroll = None } ~back:(current :: t.back) ~forward:[]
+        | Some path, Some fragment -> load t ~path ~fragment
         | _ -> Promise.return ())
-     | "back" ->
-       (match t.back with
-        | location :: back -> load t location ~back ~forward:(current :: t.forward)
-        | [] -> Promise.return ())
-     | "forward" ->
-       (match t.forward with
-        | location :: forward -> load t location ~back:(current :: t.back) ~forward
-        | [] -> Promise.return ())
-     | "reload" -> load t current ~back:t.back ~forward:t.forward
      | "external" ->
        (match string "href" with
         | None -> Promise.return ()
@@ -234,9 +191,6 @@ let create ~panel ~root ~extension_uri =
     ; disposed = false
     ; revision = 0
     ; nonce = ""
-    ; current = None
-    ; back = []
-    ; forward = []
     }
   in
   let webview = WebviewPanel.webview panel in

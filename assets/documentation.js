@@ -12,7 +12,6 @@
       ...values,
       type,
       nonce: config.nonce,
-      scroll: Math.round(window.scrollY),
     });
   }
 
@@ -50,63 +49,6 @@
     }
   });
 
-  document.addEventListener("keydown", (event) => {
-    if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-    if (event.key === "ArrowLeft" && config.back) {
-      event.preventDefault();
-      send("back");
-    } else if (event.key === "ArrowRight" && config.forward) {
-      event.preventDefault();
-      send("forward");
-    }
-  });
-
-  function toolbar() {
-    document.documentElement.classList.add("ocaml-documentation");
-    const nav = document.createElement("nav");
-    nav.className = "ocaml-documentation-toolbar";
-    nav.setAttribute("aria-label", "Documentation navigation");
-    for (const [type, label, title, enabled] of [
-      ["back", "Back", "Back (Alt+Left)", config.back],
-      ["forward", "Forward", "Forward (Alt+Right)", config.forward],
-      ["reload", "Reload", "Reload documentation", true],
-    ]) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.textContent = label;
-      button.title = title;
-      button.disabled = !enabled;
-      button.dataset.action = type;
-      button.addEventListener("click", () => send(type));
-      nav.append(button);
-    }
-    document.body.prepend(nav);
-    const sticky = [...document.querySelectorAll(".odoc-search, .odoc-toc")].map((element) => ({
-      element,
-      top: element.style.top,
-      maxHeight: element.style.maxHeight,
-    }));
-    function positionNavigation() {
-      const height = nav.getBoundingClientRect().height;
-      document.documentElement.style.setProperty(
-        "--ocaml-documentation-toolbar-height",
-        `${height}px`,
-      );
-      for (const { element, top, maxHeight } of sticky) {
-        element.style.top = top;
-        element.style.maxHeight = maxHeight;
-        const style = getComputedStyle(element);
-        if (!["sticky", "fixed"].includes(style.position)) continue;
-        element.style.top = `${(Number.parseFloat(style.top) || 0) + height}px`;
-        if (style.maxHeight !== "none") {
-          element.style.maxHeight = `${Math.max(0, Number.parseFloat(style.maxHeight) - height)}px`;
-        }
-      }
-    }
-    positionNavigation();
-    window.addEventListener("resize", positionNavigation);
-  }
-
   async function prepareSearch() {
     const input = document.querySelector(".search-bar");
     if (!input || typeof search_urls === "undefined") return;
@@ -142,7 +84,7 @@
         const worker = new Worker(workerUrl);
         workers.add(worker);
         worker.addEventListener("error", () => {
-          status.textContent = "Search could not run. Reload to try again.";
+          status.textContent = "Search could not run. Try generating the documentation again.";
           input.disabled = true;
         });
         return worker;
@@ -151,18 +93,16 @@
       input.disabled = false;
     } catch (error) {
       console.error("Could not initialise documentation search", error);
-      status.textContent = "Search could not be loaded. Reload to try again.";
+      status.textContent = "Search could not be loaded. Try generating the documentation again.";
     }
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    toolbar();
     void prepareSearch();
   });
 
   window.addEventListener("load", () => {
-    if (config.scroll !== null) window.scrollTo(0, config.scroll);
-    else if (config.fragment) scrollToFragment(config.fragment);
+    if (config.fragment) scrollToFragment(config.fragment);
   });
 
   window.addEventListener("pagehide", () => {
