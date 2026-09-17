@@ -265,13 +265,6 @@ let _open_terminal =
   command Command_api.Internal.open_terminal callback
 ;;
 
-let _stop_documentation_server =
-  let callback (instance : Extension_instance.t) () =
-    Extension_instance.stop_documentation_server instance
-  in
-  command Command_api.Internal.stop_documentation_server callback
-;;
-
 let _switch_impl_intf =
   let callback (instance : Extension_instance.t) () =
     let try_switching () =

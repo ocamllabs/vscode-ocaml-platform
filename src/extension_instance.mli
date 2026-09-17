@@ -2,19 +2,13 @@ open Import
 
 type t
 
-val make : unit -> t
+val make : extension_uri:Uri.t -> unit -> t
 val sandbox : t -> Sandbox.t
 val set_sandbox : t -> Sandbox.t -> unit
 val language_client : t -> LanguageClient.t option
 val ocaml_lsp : t -> Ocaml_lsp.t option
 val check_ocaml_lsp_available : Sandbox.t -> (unit, string) result Promise.t
-
-val start_documentation_server
-  :  t
-  -> path:Path.t
-  -> (Documentation_server.t, unit) result Promise.t
-
-val stop_documentation_server : t -> unit
+val show_documentation : t -> path:Path.t -> package_name:string -> unit Promise.t
 val lsp_client : t -> (LanguageClient.t * Ocaml_lsp.t) option
 val ocaml_version : t -> Ocaml_version.t option
 val start_language_server : t -> unit Promise.t

@@ -1,8 +1,0 @@
-(library
- (name polka)
- (preprocess
-  (pps gen_js_api.ppx))
- (js_of_ocaml
-  (javascript_files polka_stub.js))
- (libraries vscode-interop promise_jsoo jsonoo js_of_ocaml gen_js_api node)
- (modes byte))

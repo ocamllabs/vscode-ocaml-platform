@@ -23,7 +23,6 @@ module Internal : sig
   val uninstall_sandbox_package : (Ojs.t, unit) handle
   val open_switches_documentation : (Ojs.t, unit) handle
   val open_sandbox_documentation : (Ojs.t, unit) handle
-  val stop_documentation_server : (unit, unit) handle
   val generate_sandbox_documentation : (Ojs.t, unit) handle
   val open_current_dune_file : (unit, unit) handle
   val evaluate_selection : (unit, unit) handle
@@ -64,7 +63,6 @@ module Vscode : sig
   val open_with : (Vscode.Uri.t * string * Vscode.ViewColumn.t, unit) handle
   val set_context : (string * bool, unit) handle
   val show_hover : (unit, unit) handle
-  val show_simple_browser : (string, unit) handle
 end
 
 module Command_errors : sig

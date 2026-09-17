@@ -104,21 +104,13 @@ module Command = struct
                 package has no documentation."
                package_name;
              Promise.resolve ()
+           | Ok _ when not (Sandbox.equal sandbox (Extension_instance.sandbox instance))
+             -> Promise.return ()
            | Ok _ ->
-             let+ server =
-               let html_dir = Odig.html_dir odig in
-               Extension_instance.start_documentation_server instance ~path:html_dir
-             in
-             (match server with
-              | Error () -> ()
-              | Ok server ->
-                let (_ : unit Promise.t) =
-                  let port = Documentation_server.port server in
-                  let host = Documentation_server.host server in
-                  Command_api.(execute Vscode.show_simple_browser)
-                    (Printf.sprintf "http://%s:%i/%s/index.html" host port package_name)
-                in
-                ()))
+             Extension_instance.show_documentation
+               instance
+               ~path:(Odig.html_dir odig)
+               ~package_name)
       in
       ()
     in
