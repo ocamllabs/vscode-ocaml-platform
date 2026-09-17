@@ -90,8 +90,6 @@ module Internal = struct
     at_least_one_handle "open-sandbox-documentation" ~t_to_js:Fn.id ~t_of_js:Fn.id
   ;;
 
-  let stop_documentation_server = unit_handle "stop-documentation-server"
-
   let generate_sandbox_documentation =
     at_least_one_handle "generate-sandbox-documentation" ~t_to_js:Fn.id ~t_of_js:Fn.id
   ;;
@@ -194,11 +192,6 @@ module Vscode = struct
   let show_hover =
     let args_to_js () = [] in
     unit_external_handle "editor.action.showHover" ~args_to_js
-  ;;
-
-  let show_simple_browser =
-    let args_to_js url = [ [%js.of: string] url ] in
-    unit_external_handle "simpleBrowser.show" ~args_to_js
   ;;
 end
 

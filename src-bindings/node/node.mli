@@ -98,6 +98,7 @@ module Path : sig
   val dirname : string -> string
   val extname : string -> string
   val isAbsolute : string -> bool
+  val relative : string -> string -> string
   val join : string list -> string
 end
 
@@ -110,6 +111,14 @@ module Crypto : sig
 end
 
 module Fs : sig
+  module Stats : sig
+    include Ojs.T
+
+    val isDirectory : t -> bool
+  end
+
+  val realpath : string -> string Promise.t
+  val stat : string -> Stats.t Promise.t
   val readDir : string -> (string list, string) result Promise.t
   val readFile : string -> string Promise.t
   val exists : string -> bool Promise.t

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Display generated package documentation in a VS Code webview with navigation
+  and search, without starting a local HTTP server.
 - Report errors checking Dune Package Management, including build directory lock
   conflicts, instead of incorrectly prompting to generate a lockfile. Fix automatic
   detection to use the Dune executable from `PATH`. (#2283)

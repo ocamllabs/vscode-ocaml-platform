@@ -25,7 +25,9 @@ let notify_configuration_changes instance =
 
 let activate (extension : ExtensionContext.t) =
   let open Promise.Syntax in
-  let instance = Extension_instance.make () in
+  let instance =
+    Extension_instance.make ~extension_uri:(ExtensionContext.extensionUri extension) ()
+  in
   let assets =
     Extension_assets.make ~extension_uri:(ExtensionContext.extensionUri extension)
   in

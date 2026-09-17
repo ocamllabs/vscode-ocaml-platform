@@ -44,8 +44,6 @@
   "dependencies": {
     "oxfmt": "0.68.0",
     "oxlint": "1.83.0",
-    "polka": "1.0.0-next.28",
-    "sirv": "3.0.2",
     "vscode-languageclient": "10.1.1"
   },
   "devDependencies": {
@@ -198,11 +196,6 @@
           "light": "assets/document-search-light.svg",
           "dark": "assets/document-search-dark.svg"
         }
-      },
-      {
-        "command": "ocaml.stop-documentation-server",
-        "category": "OCaml",
-        "title": "Stop Documentation Server"
       },
       {
         "command": "ocaml.next-hole",
@@ -1178,10 +1171,6 @@
         {
           "command": "ocaml.uninstall-sandbox-package",
           "when": "false"
-        },
-        {
-          "command": "ocaml.stop-documentation-server",
-          "when": "ocaml.documentation-server-on"
         },
         {
           "command": "ocaml.upgrade-sandbox",

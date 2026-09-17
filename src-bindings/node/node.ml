@@ -138,6 +138,7 @@ module Path = struct
       val dirname : string -> string [@@js.global "@node_path.dirname"]
       val extname : string -> string [@@js.global "@node_path.extname"]
       val isAbsolute : string -> bool [@@js.global "@node_path.isAbsolute"]
+      val relative : string -> string -> string [@@js.global "@node_path.relative"]
       val join : (string list[@js.variadic]) -> string [@@js.global "@node_path.join"]]
 
   let delimiter =
@@ -162,6 +163,11 @@ module Constants = struct
 end
 
 module Fs = struct
+  module Stats = struct
+    include Interface.Make ()
+    include [%js: val isDirectory : t -> bool [@@js.call]]
+  end
+
   module ReadFileOptions = struct
     include Interface.Make ()
     include [%js: val create : encoding:string -> t [@@js.builder]]
@@ -173,6 +179,8 @@ module Fs = struct
       [@@js.global "@node_fs.access"]
 
       val readdir : string -> string list Promise.t [@@js.global "@node_fs.readdir"]
+      val realpath : string -> string Promise.t [@@js.global "@node_fs.realpath"]
+      val stat : string -> Stats.t Promise.t [@@js.global "@node_fs.stat"]
 
       val readFile : string -> options:ReadFileOptions.t -> string Promise.t
       [@@js.global "@node_fs.readFile"]]

@@ -7,8 +7,8 @@ type t =
     (** assumption: it must be set before initializing the language server;
         the lang server initialization needs the ocaml version *)
   ; mutable lsp_client : (LanguageClient.t * Ocaml_lsp.t) option
-  ; mutable documentation_server : Documentation_server.t option
-  ; documentation_server_info : StatusBarItem.t
+  ; mutable documentation_view : Documentation_view.t option
+  ; extension_uri : Uri.t
   ; sandbox_info : StatusBarItem.t
   ; ast_editor_state : Ast_editor_state.t
   ; mutable standard_hover : bool option
@@ -318,25 +318,6 @@ end
 
 include Language_server_init
 
-let documentation_server_info () =
-  let status_bar =
-    Vscode.Window.createStatusBarItem
-      ~alignment:StatusBarAlignment.Right
-      ~priority:100.0
-      ()
-  in
-  let command =
-    Command.create
-      ~title:"Open Command Palette"
-      ~command:"workbench.action.quickOpen"
-      ~arguments:[ [%js.of: string] ">OCaml: Stop Documentation server" ]
-      ()
-  in
-  StatusBarItem.set_command status_bar (Some (`Command command));
-  StatusBarItem.set_text status_bar "$(radio-tower) OCaml Documentation";
-  status_bar
-;;
-
 let install_ocaml_lsp_server sandbox =
   let open Promise.Syntax in
   let* () = Sandbox.install_packages sandbox [ "ocaml-lsp-server" ] in
@@ -380,71 +361,69 @@ end = struct
   ;;
 end
 
-let make () =
+let make ~extension_uri () =
   let sandbox = Sandbox.Global in
   let sandbox_info = Sandbox_info.make sandbox in
-  let documentation_server_info = documentation_server_info () in
   let ast_editor_state = Ast_editor_state.make () in
   { sandbox
   ; lsp_client = None
   ; sandbox_info
-  ; documentation_server_info
+  ; extension_uri
   ; repl = None
   ; ocaml_version = None
   ; ast_editor_state
-  ; documentation_server = None
+  ; documentation_view = None
   ; standard_hover = None
   }
 ;;
 
-let set_documentation_context ~running =
-  let document_server_on = "ocaml.documentation-server-on" in
-  let (_ : unit Promise.t) =
-    Command_api.(execute Vscode.set_context) (document_server_on, running)
-  in
-  ()
-;;
-
-let stop_documentation_server t =
-  match t.documentation_server with
-  | None -> ()
-  | Some server ->
-    StatusBarItem.hide t.documentation_server_info;
-    t.documentation_server <- None;
-    Documentation_server.dispose server |> Disposable.dispose;
-    set_documentation_context ~running:false
+let close_documentation t =
+  Option.iter t.documentation_view ~f:Documentation_view.dispose;
+  t.documentation_view <- None
 ;;
 
 let set_sandbox t new_sandbox =
   Sandbox_info.update t.sandbox_info ~new_sandbox;
   t.sandbox <- new_sandbox;
-  stop_documentation_server t;
+  close_documentation t;
   let (_ : unit Promise.t) = Command_api.(execute Internal.refresh_sandbox) ()
   and (_ : unit Promise.t) = Command_api.(execute Internal.refresh_switches) () in
   ()
 ;;
 
-let start_documentation_server t ~path =
-  match
-    match t.documentation_server with
-    | None -> `Create
-    | Some ds ->
-      if Path.equal (Documentation_server.path ds) path then `Keep ds else `Create
-  with
-  | `Keep ds -> Promise.return (Ok ds)
-  | `Create ->
-    stop_documentation_server t;
-    let open Promise.Syntax in
-    let+ server = Documentation_server.start ~path in
-    (match server with
-     | Ok server ->
-       StatusBarItem.show t.documentation_server_info;
-       t.documentation_server <- Some server;
-       set_documentation_context ~running:true;
-       Ok server
-     | Error e ->
-       log "Error while starting the documentation server: %s" (Node.JsError.message e);
-       Error ())
+let show_documentation t ~path ~package_name =
+  let root = Path.to_string path in
+  let view =
+    match t.documentation_view with
+    | Some view
+      when (not (Documentation_view.is_disposed view))
+           && String.equal (Documentation_view.root view) root -> view
+    | _ ->
+      close_documentation t;
+      let panel =
+        Window.createWebviewPanelWithOptions
+          ~viewType:"ocaml.documentation"
+          ~title:"OCaml Documentation"
+          ~showOptions:(`ViewColumn ViewColumn.Beside)
+          ~options:
+            { enableFindWidget = Some true
+            ; retainContextWhenHidden = Some true
+            ; enableScripts = Some true
+            ; enableForms = Some false
+            ; enableCommandUris = None
+            ; localResourceRoots = None
+            ; portMapping = None
+            }
+          ()
+      in
+      let view = Documentation_view.create ~panel ~root ~extension_uri:t.extension_uri in
+      t.documentation_view <- Some view;
+      view
+  in
+  Documentation_view.show view ~path:(Node.Path.join [ package_name; "index.html" ])
+  |> Promise.catch ~rejected:(fun error ->
+    show_message `Error "Could not open documentation: %s" (Node.JsError.message error);
+    Promise.return ())
 ;;
 
 let repl t = t.repl
@@ -461,7 +440,6 @@ let ast_editor_state t = t.ast_editor_state
 let disposable t =
   Disposable.make ~dispose:(fun () ->
     StatusBarItem.dispose t.sandbox_info;
-    StatusBarItem.dispose t.documentation_server_info;
     let (_ : unit Promise.t) = stop_server t in
-    stop_documentation_server t)
+    close_documentation t)
 ;;
