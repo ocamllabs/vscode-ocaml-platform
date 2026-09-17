@@ -23,15 +23,9 @@ let root t = t.root
 let is_disposed t = t.disposed
 let dispose t = if not t.disposed then WebviewPanel.dispose t.panel
 
-let escape_html value =
-  List.fold
-    [ "&", "&amp;"; "\"", "&quot;"; "<", "&lt;"; ">", "&gt;" ]
-    ~init:value
-    ~f:(fun value (pattern, with_) -> String.substr_replace_all value ~pattern ~with_)
-;;
-
 let resource webview uri =
-  Uri.toString (WebView.asWebviewUri webview ~localResource:uri) ()
+  (* Keep URI encoding enabled for interpolation into HTML attributes. *)
+  Uri.toString (WebView.asWebviewUri webview ~localResource:uri) ~skipEncoding:false ()
 ;;
 
 let inside root file =
@@ -127,13 +121,13 @@ let render t location root file html =
        href=\"%s\"><script id=\"ocaml-documentation-config\" type=\"application/json\" \
        nonce=\"%s\">%s</script><link rel=\"stylesheet\" href=\"%s\"><script nonce=\"%s\" \
        src=\"%s\" defer></script>"
-      (escape_html csp)
-      (escape_html (resource webview base))
+      csp
+      (resource webview base)
       nonce
       config
-      (escape_html (asset "documentation.css"))
+      (asset "documentation.css")
       nonce
-      (escape_html (asset "documentation.js"))
+      (asset "documentation.js")
   in
   let html =
     html
