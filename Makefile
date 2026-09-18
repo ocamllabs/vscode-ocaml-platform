@@ -15,7 +15,7 @@ deps:
 
 .PHONY: create_switch
 create_switch:
-	opam switch create . 5.5.0 --no-install
+	opam switch create . 5.5.1 --no-install
 
 .PHONY: switch
 switch: create_switch deps
@@ -62,7 +62,3 @@ pkg: build
 .PHONY: install
 install: pkg
 	code --force --install-extension ocaml-platform.vsix
-
-.PHONY:
-nix-tests:
-	dune build @runtest @all

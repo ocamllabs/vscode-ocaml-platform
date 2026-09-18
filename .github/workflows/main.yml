@@ -22,7 +22,7 @@ jobs:
       - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: 5.5.0
+          ocaml-compiler: 5.5.1
 
       - name: Set-up Mise
         uses: jdx/mise-action@v4.3.0
@@ -63,7 +63,7 @@ jobs:
       - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: 5.5.0
+          ocaml-compiler: 5.5.1
       - uses: ocaml/setup-ocaml/lint-opam@v3
 
   lint-fmt:
@@ -74,7 +74,7 @@ jobs:
       - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: 5.5.0
+          ocaml-compiler: 5.5.1
       - uses: ocaml/setup-ocaml/lint-fmt@v3
 
   release:

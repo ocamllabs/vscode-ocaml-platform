@@ -26,7 +26,7 @@
   (vscode
    (= :version))
   (ocaml
-   (= 5.5.0))
+   (= 5.5.1))
   (js_of_ocaml
    (>= 6.4))
   (gen_js_api
@@ -38,13 +38,13 @@
   (jsonoo
    (>= 0.3))
   (ocaml-version
-   (>= 4.0))
+   (>= 4.1))
   (ppxlib
-   (>= 0.36))
+   (>= 0.38))
   (opam-file-format
-   (>= 2.1.6))
+   (>= 2.2))
  (sexplib
-   (>= v0.17.0))
+   (>= v0.17))
   (ocamlformat
    (and
     (= 0.29.0)
