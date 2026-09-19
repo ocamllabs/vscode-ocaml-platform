@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 2.4.0
+
 - Display generated package documentation in a VS Code webview with local links
   and search, without starting a local HTTP server. (#2285)
 - Report errors checking Dune Package Management, including build directory lock
