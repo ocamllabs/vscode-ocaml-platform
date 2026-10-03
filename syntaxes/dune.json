@@ -3905,16 +3905,12 @@
           "comment": "variable",
           "begin": "%\\{",
           "end": "\\}",
-          "beginCaptures": [
-            {
-              "name": "keyword.operator.dune"
-            }
-          ],
-          "endCaptures": [
-            {
-              "name": "keyword.operator.dune"
-            }
-          ],
+          "beginCaptures": {
+            "0": { "name": "keyword.operator.dune" }
+          },
+          "endCaptures": {
+            "0": { "name": "keyword.operator.dune" }
+          },
           "patterns": [
             {
               "include": "#variables"
@@ -3993,16 +3989,12 @@
               "comment": "escaped variable",
               "begin": "(\\%\\{)",
               "end": "(\\})",
-              "beginCaptures": [
-                {
-                  "name": "constant.character.escape.dune"
-                }
-              ],
-              "endCaptures": [
-                {
-                  "name": "constant.character.escape.dune"
-                }
-              ],
+              "beginCaptures": {
+                "0": { "name": "constant.character.escape.dune" }
+              },
+              "endCaptures": {
+                "0": { "name": "constant.character.escape.dune" }
+              },
               "patterns": [
                 {
                   "include": "#variables"

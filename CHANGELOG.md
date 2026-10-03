@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Make syntax grammars compatible with more TextMate consumers. Preserve Menhir
+  highlighting for whitespace-separated production calls and use the standard HTML
+  grammar for OCamlDoc blocks.
+
 ## 2.4.0
 
 - Display generated package documentation in a VS Code webview with local links
