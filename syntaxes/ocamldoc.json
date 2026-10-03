@@ -219,7 +219,7 @@
           "begin": "(?<!\\\\){\\%html:",
           "end": "\\%}",
           "name": "markup.inline.raw.ocamldoc",
-          "patterns": [{ "include": "text.html.derivative" }]
+          "patterns": [{ "include": "text.html.basic" }]
         }
       ]
     },
