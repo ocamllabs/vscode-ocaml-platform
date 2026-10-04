@@ -6,16 +6,31 @@ engines. The registry uses the grammar paths and injection registrations from
 editor token capture for OCaml implementations, interfaces, Menhir actions, opam
 and install files, and OCaml and Reason blocks inside the built-in Markdown grammar.
 
-Each JSON file in `cases/` contains source snippets and scope assertions. Lines
-and occurrences are one-based. Every token overlapping the selected text must
-have each required scope and none of the excluded scopes. A scope matches itself
-and its dot-separated descendants. `singleToken` also requires exact token
-boundaries. State passes between lines, so the cases check comment and string
-termination as well as individual tokens.
+The language test files keep each source example beside its native Bun inline
+snapshot. Each output row is `line:start:end "text" scopes`: the line is one-based,
+columns are the original zero-based UTF-16 TextMate boundaries, and `text` is JSON
+encoded. The scope list omits only its first entry when that entry is the requested
+root scope. Scope order and repeated scopes remain significant.
 
-The `reference` field records the specification behind each case. `SYNTAX_ROOT`
-selects another checkout's grammars, registrations, and cases for comparison
-with a baseline. The runner itself and its dependencies come from this checkout.
+The renderer keeps empty tokens and scoped whitespace. It omits only nonempty
+whitespace tokens whose entire scope stack is the root. Token boundaries are not
+merged or clipped, including TextMate's synthetic line-end position. State passes
+between lines, so snapshots show comment and string continuation and recovery.
+
+Specification links sit above the corresponding tests. `SYNTAX_ROOT` selects
+another checkout's grammars and registrations; tests, expectations and dependencies
+always come from this checkout.
+
+To update expectations after an intentional change:
+
+```sh
+bun test ./tests/syntax --update-snapshots
+```
+
+Review the changed snapshots before committing. Ordinary runs compare existing
+expectations, but Bun may create missing snapshots locally. `CI=true` makes missing
+snapshots fail without writing them. Each test file owns and disposes its TextMate
+registry; the files share Oniguruma's WebAssembly initialisation.
 
 ## Portability checks
 
@@ -24,8 +39,11 @@ cross-grammar includes. It also checks 2,520 Markdown fence combinations with
 unterminated embedded strings, including marker, length, and indentation changes.
 
 An optional comparison runs expressions changed since a Git revision against
-the fixture lines using both VS Code's Oniguruma and a supplied Ruby executable.
-It requires Ruby with its standard JSON library. For example:
+the same source lines using both VS Code's Oniguruma and a supplied Ruby executable.
+It requires Bun and Ruby with its standard JSON library. The comparator first runs
+the snapshot tests with `CI=true`, collecting their actual inputs in a temporary
+file. It reads the corpus only after that run succeeds, then removes the temporary
+file. Test inputs are neither duplicated nor extracted from test source code. For example:
 
 ```sh
 node tests/syntax/compare-engines.js origin/master /usr/bin/ruby

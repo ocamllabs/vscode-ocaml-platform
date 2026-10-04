@@ -1,7 +1,7 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { test } = require("node:test");
+const { test } = require("bun:test");
 
 const root = process.env.SYNTAX_ROOT || path.resolve(__dirname, "../..");
 const registrations = require(path.join(root, "package.json")).contributes.grammars;

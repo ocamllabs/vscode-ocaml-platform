@@ -2,9 +2,11 @@ const assert = require("node:assert/strict");
 const { execFileSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
+const os = require("node:os");
 const { loadWASM, OnigScanner } = require("vscode-oniguruma");
 
-const root = path.resolve(__dirname, "../..");
+const checkout = path.resolve(__dirname, "../..");
+const root = process.env.SYNTAX_ROOT || checkout;
 const base = process.argv[2] || "origin/master";
 const ruby = process.argv[3] || "ruby";
 const regexKeys = new Set(["match", "begin", "end", "while"]);
@@ -43,12 +45,22 @@ async function compare() {
   }
 
   const lines = new Set();
-  const casesDirectory = path.join(__dirname, "cases");
-  for (const filename of fs.readdirSync(casesDirectory).sort()) {
-    const cases = JSON.parse(fs.readFileSync(path.join(casesDirectory, filename), "utf8"));
-    for (const fixture of cases) {
-      for (const line of fixture.source.split("\n")) lines.add(line);
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ocaml-syntax-corpus-"));
+  try {
+    const corpus = path.join(directory, "inputs.jsonl");
+    execFileSync("bun", ["test", __dirname], {
+      cwd: checkout,
+      env: { ...process.env, CI: "true", SYNTAX_CORPUS: corpus },
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+      maxBuffer: 32 * 1024 * 1024,
+    });
+    for (const entry of fs.readFileSync(corpus, "utf8").trimEnd().split("\n")) {
+      const { source } = JSON.parse(entry);
+      for (const line of source.split("\n")) lines.add(line);
     }
+  } finally {
+    fs.rmSync(directory, { recursive: true });
   }
   for (const line of [
     "é",
