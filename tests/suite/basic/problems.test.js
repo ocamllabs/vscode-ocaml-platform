@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+const assert = require("node:assert/strict");
 
 const problemLocations = {
   'File "file.ml", line 4, characters 6-7:': ["file.ml", "4", undefined, "6", "7"],

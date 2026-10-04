@@ -1,10 +1,9 @@
-import assert from "node:assert/strict";
+const assert = require("node:assert/strict");
+const vscode = require("vscode");
 
-import * as vscode from "vscode";
-
-async function waitFor(assertion: () => void | PromiseLike<void>, timeoutMs = 20000) {
+async function waitFor(assertion, timeoutMs = 20000) {
   const deadline = Date.now() + timeoutMs;
-  let lastError: unknown;
+  let lastError;
 
   while (Date.now() < deadline) {
     try {
@@ -18,20 +17,19 @@ async function waitFor(assertion: () => void | PromiseLike<void>, timeoutMs = 20
   throw new Error(`Condition was not met within ${timeoutMs}ms`, { cause: lastError });
 }
 
-function hoverText(hover: vscode.Hover) {
+function hoverText(hover) {
   return hover.contents
     .map((content) => (typeof content === "string" ? content : content.value))
     .join("\n");
 }
 
 suite("extension", () => {
-  let extension: vscode.Extension<unknown>;
-  let mainUri: vscode.Uri;
+  let extension;
+  let mainUri;
 
   suiteSetup(() => {
-    const installedExtension = vscode.extensions.getExtension<unknown>("ocamllabs.ocaml-platform");
-    assert.ok(installedExtension, "OCaml Platform extension should be installed for tests");
-    extension = installedExtension;
+    extension = vscode.extensions.getExtension("ocamllabs.ocaml-platform");
+    assert.ok(extension, "OCaml Platform extension should be installed for tests");
 
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
     assert.ok(workspaceFolder, "The OCaml fixture workspace should be open for tests");
@@ -61,13 +59,13 @@ suite("extension", () => {
     await vscode.window.showTextDocument(document);
 
     await waitFor(async () => {
-      const hovers = await vscode.commands.executeCommand<vscode.Hover[] | undefined>(
+      const hovers = await vscode.commands.executeCommand(
         "vscode.executeHoverProvider",
         mainUri,
         new vscode.Position(0, 4),
       );
 
-      assert.ok(hovers && hovers.length > 0, "Expected at least one LSP hover result");
+      assert.ok(hovers?.length > 0, "Expected at least one LSP hover result");
       assert.match(
         hovers.map(hoverText).join("\n"),
         /\bint\b/,
