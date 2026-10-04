@@ -1,0 +1,392 @@
+[
+  {
+    "name": "ocaml fence permits 0 leading spaces",
+    "scope": "markdown.ocaml.codeblock",
+    "source": "```ocaml\nlet value = 42;\n```\nafter",
+    "assertions": [
+      {
+        "line": 2,
+        "text": "42",
+        "scopes": ["meta.embedded.block.ocaml"]
+      },
+      {
+        "line": 4,
+        "text": "after",
+        "notScopes": ["markup.fenced_code.block.markdown", "meta.embedded.block.ocaml"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#fenced-code-blocks"
+  },
+  {
+    "name": "ocaml fence permits 1 leading spaces",
+    "scope": "markdown.ocaml.codeblock",
+    "source": " ```ocaml\nlet value = 42;\n ```\nafter",
+    "assertions": [
+      {
+        "line": 2,
+        "text": "42",
+        "scopes": ["meta.embedded.block.ocaml"]
+      },
+      {
+        "line": 4,
+        "text": "after",
+        "notScopes": ["markup.fenced_code.block.markdown", "meta.embedded.block.ocaml"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#fenced-code-blocks"
+  },
+  {
+    "name": "ocaml fence permits 2 leading spaces",
+    "scope": "markdown.ocaml.codeblock",
+    "source": "  ```ocaml\nlet value = 42;\n  ```\nafter",
+    "assertions": [
+      {
+        "line": 2,
+        "text": "42",
+        "scopes": ["meta.embedded.block.ocaml"]
+      },
+      {
+        "line": 4,
+        "text": "after",
+        "notScopes": ["markup.fenced_code.block.markdown", "meta.embedded.block.ocaml"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#fenced-code-blocks"
+  },
+  {
+    "name": "ocaml fence permits 3 leading spaces",
+    "scope": "markdown.ocaml.codeblock",
+    "source": "   ```ocaml\nlet value = 42;\n   ```\nafter",
+    "assertions": [
+      {
+        "line": 2,
+        "text": "42",
+        "scopes": ["meta.embedded.block.ocaml"]
+      },
+      {
+        "line": 4,
+        "text": "after",
+        "notScopes": ["markup.fenced_code.block.markdown", "meta.embedded.block.ocaml"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#fenced-code-blocks"
+  },
+  {
+    "name": "ocaml fence rejects opener indented by four spaces",
+    "scope": "markdown.ocaml.codeblock",
+    "source": "    ```ocaml\n    let value = 42;\n    ```",
+    "assertions": [
+      {
+        "line": 1,
+        "text": "ocaml",
+        "notScopes": ["markup.fenced_code.block.markdown"]
+      },
+      {
+        "line": 2,
+        "text": "42",
+        "notScopes": ["meta.embedded.block.ocaml"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#tabs"
+  },
+  {
+    "name": "ocaml fence retains closer indented by four spaces as code",
+    "scope": "markdown.ocaml.codeblock",
+    "source": "```ocaml\n    ```\nlet value = 42;\n```\nafter",
+    "assertions": [
+      {
+        "line": 2,
+        "text": "```",
+        "scopes": ["meta.embedded.block.ocaml"]
+      },
+      {
+        "line": 3,
+        "text": "42",
+        "scopes": ["meta.embedded.block.ocaml"]
+      },
+      {
+        "line": 5,
+        "text": "after",
+        "notScopes": ["meta.embedded.block.ocaml", "markup.fenced_code.block.markdown"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#fenced-code-blocks"
+  },
+  {
+    "name": "ocaml fence rejects opener indented by a tab",
+    "scope": "markdown.ocaml.codeblock",
+    "source": "\t```ocaml\n\tlet value = 42;\n\t```",
+    "assertions": [
+      {
+        "line": 1,
+        "text": "ocaml",
+        "notScopes": ["markup.fenced_code.block.markdown"]
+      },
+      {
+        "line": 2,
+        "text": "42",
+        "notScopes": ["meta.embedded.block.ocaml"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#tabs"
+  },
+  {
+    "name": "ocaml fence retains closer indented by a tab as code",
+    "scope": "markdown.ocaml.codeblock",
+    "source": "```ocaml\n\t```\nlet value = 42;\n```\nafter",
+    "assertions": [
+      {
+        "line": 2,
+        "text": "```",
+        "scopes": ["meta.embedded.block.ocaml"]
+      },
+      {
+        "line": 3,
+        "text": "42",
+        "scopes": ["meta.embedded.block.ocaml"]
+      },
+      {
+        "line": 5,
+        "text": "after",
+        "notScopes": ["meta.embedded.block.ocaml", "markup.fenced_code.block.markdown"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#fenced-code-blocks"
+  },
+  {
+    "name": "ocaml fence rejects opener indented by space then tab",
+    "scope": "markdown.ocaml.codeblock",
+    "source": " \t```ocaml\n \tlet value = 42;\n \t```",
+    "assertions": [
+      {
+        "line": 1,
+        "text": "ocaml",
+        "notScopes": ["markup.fenced_code.block.markdown"]
+      },
+      {
+        "line": 2,
+        "text": "42",
+        "notScopes": ["meta.embedded.block.ocaml"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#tabs"
+  },
+  {
+    "name": "ocaml fence retains closer indented by space then tab as code",
+    "scope": "markdown.ocaml.codeblock",
+    "source": "```ocaml\n \t```\nlet value = 42;\n```\nafter",
+    "assertions": [
+      {
+        "line": 2,
+        "text": "```",
+        "scopes": ["meta.embedded.block.ocaml"]
+      },
+      {
+        "line": 3,
+        "text": "42",
+        "scopes": ["meta.embedded.block.ocaml"]
+      },
+      {
+        "line": 5,
+        "text": "after",
+        "notScopes": ["meta.embedded.block.ocaml", "markup.fenced_code.block.markdown"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#fenced-code-blocks"
+  },
+  {
+    "name": "reason fence permits 0 leading spaces",
+    "scope": "markdown.reason.codeblock",
+    "source": "~~~reason\nlet value = 42;\n~~~\nafter",
+    "assertions": [
+      {
+        "line": 2,
+        "text": "42",
+        "scopes": ["meta.embedded.block.reason"]
+      },
+      {
+        "line": 4,
+        "text": "after",
+        "notScopes": ["markup.fenced_code.block.markdown", "meta.embedded.block.reason"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#fenced-code-blocks"
+  },
+  {
+    "name": "reason fence permits 1 leading spaces",
+    "scope": "markdown.reason.codeblock",
+    "source": " ~~~reason\nlet value = 42;\n ~~~\nafter",
+    "assertions": [
+      {
+        "line": 2,
+        "text": "42",
+        "scopes": ["meta.embedded.block.reason"]
+      },
+      {
+        "line": 4,
+        "text": "after",
+        "notScopes": ["markup.fenced_code.block.markdown", "meta.embedded.block.reason"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#fenced-code-blocks"
+  },
+  {
+    "name": "reason fence permits 2 leading spaces",
+    "scope": "markdown.reason.codeblock",
+    "source": "  ~~~reason\nlet value = 42;\n  ~~~\nafter",
+    "assertions": [
+      {
+        "line": 2,
+        "text": "42",
+        "scopes": ["meta.embedded.block.reason"]
+      },
+      {
+        "line": 4,
+        "text": "after",
+        "notScopes": ["markup.fenced_code.block.markdown", "meta.embedded.block.reason"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#fenced-code-blocks"
+  },
+  {
+    "name": "reason fence permits 3 leading spaces",
+    "scope": "markdown.reason.codeblock",
+    "source": "   ~~~reason\nlet value = 42;\n   ~~~\nafter",
+    "assertions": [
+      {
+        "line": 2,
+        "text": "42",
+        "scopes": ["meta.embedded.block.reason"]
+      },
+      {
+        "line": 4,
+        "text": "after",
+        "notScopes": ["markup.fenced_code.block.markdown", "meta.embedded.block.reason"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#fenced-code-blocks"
+  },
+  {
+    "name": "reason fence rejects opener indented by four spaces",
+    "scope": "markdown.reason.codeblock",
+    "source": "    ~~~reason\n    let value = 42;\n    ~~~",
+    "assertions": [
+      {
+        "line": 1,
+        "text": "reason",
+        "notScopes": ["markup.fenced_code.block.markdown"]
+      },
+      {
+        "line": 2,
+        "text": "42",
+        "notScopes": ["meta.embedded.block.reason"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#tabs"
+  },
+  {
+    "name": "reason fence retains closer indented by four spaces as code",
+    "scope": "markdown.reason.codeblock",
+    "source": "~~~reason\n    ~~~\nlet value = 42;\n~~~\nafter",
+    "assertions": [
+      {
+        "line": 2,
+        "text": "~~~",
+        "scopes": ["meta.embedded.block.reason"]
+      },
+      {
+        "line": 3,
+        "text": "42",
+        "scopes": ["meta.embedded.block.reason"]
+      },
+      {
+        "line": 5,
+        "text": "after",
+        "notScopes": ["meta.embedded.block.reason", "markup.fenced_code.block.markdown"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#fenced-code-blocks"
+  },
+  {
+    "name": "reason fence rejects opener indented by a tab",
+    "scope": "markdown.reason.codeblock",
+    "source": "\t~~~reason\n\tlet value = 42;\n\t~~~",
+    "assertions": [
+      {
+        "line": 1,
+        "text": "reason",
+        "notScopes": ["markup.fenced_code.block.markdown"]
+      },
+      {
+        "line": 2,
+        "text": "42",
+        "notScopes": ["meta.embedded.block.reason"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#tabs"
+  },
+  {
+    "name": "reason fence retains closer indented by a tab as code",
+    "scope": "markdown.reason.codeblock",
+    "source": "~~~reason\n\t~~~\nlet value = 42;\n~~~\nafter",
+    "assertions": [
+      {
+        "line": 2,
+        "text": "~~~",
+        "scopes": ["meta.embedded.block.reason"]
+      },
+      {
+        "line": 3,
+        "text": "42",
+        "scopes": ["meta.embedded.block.reason"]
+      },
+      {
+        "line": 5,
+        "text": "after",
+        "notScopes": ["meta.embedded.block.reason", "markup.fenced_code.block.markdown"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#fenced-code-blocks"
+  },
+  {
+    "name": "reason fence rejects opener indented by space then tab",
+    "scope": "markdown.reason.codeblock",
+    "source": " \t~~~reason\n \tlet value = 42;\n \t~~~",
+    "assertions": [
+      {
+        "line": 1,
+        "text": "reason",
+        "notScopes": ["markup.fenced_code.block.markdown"]
+      },
+      {
+        "line": 2,
+        "text": "42",
+        "notScopes": ["meta.embedded.block.reason"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#tabs"
+  },
+  {
+    "name": "reason fence retains closer indented by space then tab as code",
+    "scope": "markdown.reason.codeblock",
+    "source": "~~~reason\n \t~~~\nlet value = 42;\n~~~\nafter",
+    "assertions": [
+      {
+        "line": 2,
+        "text": "~~~",
+        "scopes": ["meta.embedded.block.reason"]
+      },
+      {
+        "line": 3,
+        "text": "42",
+        "scopes": ["meta.embedded.block.reason"]
+      },
+      {
+        "line": 5,
+        "text": "after",
+        "notScopes": ["meta.embedded.block.reason", "markup.fenced_code.block.markdown"]
+      }
+    ],
+    "reference": "https://spec.commonmark.org/0.31.2/#fenced-code-blocks"
+  }
+]
