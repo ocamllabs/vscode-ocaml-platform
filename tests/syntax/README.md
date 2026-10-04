@@ -6,9 +6,15 @@ engines. The registry uses the grammar paths and injection registrations from
 editor token capture for OCaml implementations, interfaces, Menhir actions, opam
 and install files, and OCaml and Reason blocks inside the built-in Markdown grammar.
 
-`bun run typecheck:syntax` checks all syntax tests and helpers with the scoped
-strict TypeScript configuration. CI runs this gate before the OCaml build.
-The extension and its VS Code/Mocha runner remain CommonJS JavaScript.
+`bun run typecheck:syntax` checks the Bun syntax tests and helpers with their
+scoped strict TypeScript configuration. `bun run typecheck:tests` also checks the
+VS Code/Mocha tests. CI runs this combined gate before the OCaml build.
+
+`bun run test:vscode` compiles the TypeScript extension tests to CommonJS in
+`.test-out` and runs them in VS Code. `bun run compile:tests` clears this generated
+directory before compilation so renamed or deleted tests cannot run accidentally.
+The generated tests are excluded from the extension package. The extension and
+`.vscode-test.js` configuration retain their CommonJS format.
 
 The language test files keep each source example beside its native Bun inline
 snapshot. Each output row is `line:start:end "text" scopes`: the line is one-based,

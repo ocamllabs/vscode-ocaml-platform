@@ -1,6 +1,7 @@
-const assert = require("node:assert/strict");
-const path = require("node:path");
-const vscode = require("vscode");
+import assert from "node:assert/strict";
+import * as path from "node:path";
+
+import * as vscode from "vscode";
 
 const root = path.resolve(__dirname, "../../../");
 const fixtureSrcDir = path.join(root, "tests", "fixtures");

@@ -1,10 +1,32 @@
-const assert = require("node:assert/strict");
-const fs = require("node:fs/promises");
-const os = require("node:os");
-const path = require("node:path");
-const vscode = require("vscode");
+import assert from "node:assert/strict";
+import * as fs from "node:fs/promises";
+import * as os from "node:os";
+import * as path from "node:path";
 
-const examples = [
+import * as vscode from "vscode";
+
+type Example = {
+  filename: string;
+  source: string;
+  assertions: { text: string; scope: string; exact?: boolean; absent?: string }[];
+};
+
+function parseTokens(value: unknown) {
+  assert.ok(Array.isArray(value), "The editor must return a syntax token array");
+  return value.map((token: unknown) => {
+    assert.ok(
+      typeof token === "object" && token !== null && "c" in token && "t" in token,
+      "Each syntax token must contain text and scopes",
+    );
+    assert.ok(
+      typeof token.c === "string" && typeof token.t === "string",
+      "Syntax token text and scopes must be strings",
+    );
+    return { c: token.c, t: token.t };
+  });
+}
+
+const examples: Example[] = [
   {
     filename: "sample.ml",
     source: "let \\#effect = 1\nlet f () = match () with | effect E, k -> ()\n",
@@ -121,10 +143,7 @@ examples.push({
 
 for (const language of ["ocaml", "reason"]) {
   const fence = language === "ocaml" ? "```" : "~~~";
-  for (const [name, indent] of [
-    ["spaces", "    "],
-    ["tab", "\t"],
-  ]) {
+  for (const [name, indent] of Object.entries({ spaces: "    ", tab: "\t" })) {
     examples.push({
       filename: `${language}-indented-${name}.md`,
       source: [indent + fence + language, indent + "IndentedCode", indent + fence].join("\n"),
@@ -169,10 +188,7 @@ for (const language of ["ocaml", "reason"]) {
 }
 
 for (const language of ["ocaml", "reason"]) {
-  for (const [name, fence] of [
-    ["backtick", "```"],
-    ["tilde", "~~~"],
-  ]) {
+  for (const [name, fence] of Object.entries({ backtick: "```", tilde: "~~~" })) {
     examples.push({
       filename: `${language}-${name}-closing-whitespace.md`,
       source: [
@@ -213,22 +229,27 @@ for (const language of ["ocaml", "reason"]) {
 }
 
 suite("editor syntax tokenisation", () => {
-  let directory;
+  let directory: string | undefined;
   suiteSetup(async () => {
     directory = await fs.mkdtemp(path.join(os.tmpdir(), "ocaml-platform-syntax-"));
   });
   suiteTeardown(async () => {
-    await fs.rm(directory, { recursive: true });
+    if (directory !== undefined) {
+      await fs.rm(directory, { recursive: true });
+    }
   });
 
   for (const example of examples) {
     test(example.filename, async function () {
       this.timeout(30000);
+      assert.ok(directory, "The syntax fixture directory must be created before tests run");
       const filename = path.join(directory, example.filename);
       await fs.writeFile(filename, example.source);
-      const tokens = await vscode.commands.executeCommand(
-        "_workbench.captureSyntaxTokens",
-        vscode.Uri.file(filename),
+      const tokens = parseTokens(
+        await vscode.commands.executeCommand<unknown>(
+          "_workbench.captureSyntaxTokens",
+          vscode.Uri.file(filename),
+        ),
       );
       assert.ok(tokens.length, "The editor must produce syntax tokens");
       for (const expected of example.assertions) {

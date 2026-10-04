@@ -33,7 +33,7 @@ jobs:
 
       - run: bun run lint
 
-      - run: bun run typecheck:syntax
+      - run: bun run typecheck:tests
 
       - run: make deps
 
