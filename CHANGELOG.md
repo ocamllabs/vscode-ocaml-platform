@@ -13,7 +13,8 @@
   Distinguish type, class, and method declarations from other bindings, including
   declarations joined by `and`.
 - Fix Menhir action keyword highlighting and Markdown fence boundaries. Reject
-  invalid top-level indentation while preserving fences inside quotes and lists.
+  invalid top-level indentation and Unicode closing-fence separators while
+  preserving fences inside quotes and lists.
 
 ## 2.4.0
 

@@ -61,11 +61,12 @@ captures, which the APIs represent differently. Parent-dependent end expressions
 are reported separately because TextMate must substitute their begin captures
 before compilation. The syntax suite exercises those expressions with real state.
 
-Validation during this change found no remaining differences across 104,760
+Validation during this change found no remaining differences across 140,336
 expression/input pairs with Ruby 2.6.10, Ruby 4.0.7, and native Oniguruma 6.9.10
 against vscode-oniguruma 2.0.1. The native comparison checked capture byte offsets
 under both Ruby syntax and the default Oniguruma syntax. Dune atom boundaries use
-explicit ASCII whitespace because engines disagree about Unicode `\s`.
+the same explicit ASCII separators at both ends of atoms and inside structural
+forms because engines disagree about Unicode `\s`.
 
 ## Reference coverage
 
@@ -114,3 +115,9 @@ container-relative position. They reject top-level fences indented by four
 spaces or a tab while preserving valid tabbed fences in quotes and lists. The
 host still owns Markdown block classification and list indentation. These rules
 do not correct the host's generic fenced-block or deeply indented list parsing.
+
+Markdown language hints continue to accept NBSP before the language and its
+attributes, matching VS Code's editor and preview. CommonMark does not prescribe
+how renderers interpret these hints. Closing fences follow a separate rule and
+accept only ASCII spaces or tabs after the marker, with an optional terminal CR
+for callers that retain CRLF line endings.
