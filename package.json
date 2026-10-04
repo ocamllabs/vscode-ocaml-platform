@@ -39,7 +39,8 @@
     "fix": "oxlint --fix && oxfmt",
     "lint": "oxlint && oxfmt --check",
     "package": "vsce package --out ocaml-platform.vsix --no-dependencies",
-    "test": "vscode-test"
+    "test": "bun run test:syntax && vscode-test",
+    "test:syntax": "node --test tests/syntax/grammar.test.js"
   },
   "dependencies": {
     "oxfmt": "0.68.0",
@@ -54,7 +55,9 @@
     "@vscode/vsce": "4.0.0",
     "ovsx": "1.2.0",
     "oxlint-tsgolint": "7.0.2002",
-    "typescript": "7.0.2"
+    "typescript": "7.0.2",
+    "vscode-oniguruma": "2.0.1",
+    "vscode-textmate": "9.3.2"
   },
   "overrides": {
     "is-unicode-supported": "0.1.0"
@@ -764,7 +767,8 @@
         "scopeName": "source.action.menhir",
         "path": "./syntaxes/menhir-action.json",
         "injectTo": [
-          "source.ocaml"
+          "source.ocaml",
+          "source.ocaml.menhir"
         ]
       },
       {

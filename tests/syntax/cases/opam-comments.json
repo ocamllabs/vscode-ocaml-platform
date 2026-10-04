@@ -1,0 +1,133 @@
+[
+  {
+    "name": "opam nested block comments recover after outer closer",
+    "scope": "source.ocaml.opam",
+    "reference": "https://github.com/ocaml/opam-file-format/blob/2.2.0/src/opamLexer.mll",
+    "source": "(* outer (* inner *) true\nstill outer *) false",
+    "assertions": [
+      {
+        "line": 1,
+        "text": "true",
+        "scopes": ["comment.block.opam"],
+        "notScopes": ["constant.language.opam"]
+      },
+      {
+        "line": 2,
+        "text": "still outer",
+        "scopes": ["comment.block.opam"]
+      },
+      {
+        "line": 2,
+        "text": "false",
+        "scopes": ["constant.language.opam"],
+        "notScopes": ["comment"]
+      }
+    ]
+  },
+  {
+    "name": "opam hashes and quotes do not shield block comment closers",
+    "scope": "source.ocaml.opam",
+    "reference": "https://github.com/ocaml/opam-file-format/blob/2.2.0/src/opamLexer.mll",
+    "source": "(* # *) true\n(* \" *) false\n# ordinary line comment",
+    "assertions": [
+      {
+        "line": 1,
+        "text": "true",
+        "scopes": ["constant.language.opam"],
+        "notScopes": ["comment"]
+      },
+      {
+        "line": 2,
+        "text": "false",
+        "scopes": ["constant.language.opam"],
+        "notScopes": ["comment", "string"]
+      },
+      {
+        "line": 3,
+        "text": "ordinary line comment",
+        "scopes": ["comment.line.opam"]
+      }
+    ]
+  },
+  {
+    "name": "opam install uses common nested block comment syntax",
+    "scope": "source.ocaml.opam-install",
+    "reference": "https://github.com/ocaml/opam/blob/2.4.1/src/format/opamFile.ml",
+    "source": "(* outer (* inner *) bin: [\"hidden\"]\nstill outer *)\nlib: [\"visible\"]\n(* # *) bin: [\"tool\"]\n(* \" *) doc: [\"readme\"]",
+    "assertions": [
+      {
+        "line": 1,
+        "text": "hidden",
+        "scopes": ["comment.block.opam"],
+        "notScopes": ["string"]
+      },
+      {
+        "line": 2,
+        "text": "still outer",
+        "scopes": ["comment.block.opam"]
+      },
+      {
+        "line": 3,
+        "text": "lib",
+        "scopes": ["entity.name.tag.opam-install"],
+        "notScopes": ["comment"]
+      },
+      {
+        "line": 4,
+        "text": "tool",
+        "scopes": ["string.quoted.double.opam-install"],
+        "notScopes": ["comment"]
+      },
+      {
+        "line": 5,
+        "text": "readme",
+        "scopes": ["string.quoted.double.opam-install"],
+        "notScopes": ["comment"]
+      }
+    ]
+  },
+  {
+    "name": "opam install percent markers remain literal filenames",
+    "scope": "source.ocaml.opam-install",
+    "reference": "https://github.com/ocaml/opam/blob/2.4.1/src/client/opamAction.ml#L24",
+    "source": "lib: [\"%{prefix}%/file\" \"%{unclosed\"] # done\nbin: [\"tool\"]",
+    "assertions": [
+      {
+        "line": 1,
+        "text": "%{prefix}%",
+        "scopes": ["string.quoted.double.opam-install"],
+        "notScopes": ["constant.variable"]
+      },
+      {
+        "line": 1,
+        "text": "%{unclosed",
+        "scopes": ["string.quoted.double.opam-install"],
+        "notScopes": ["constant.variable"]
+      },
+      {
+        "line": 1,
+        "text": "# done",
+        "scopes": ["comment.line.opam-install"]
+      },
+      {
+        "line": 2,
+        "text": "bin",
+        "scopes": ["entity.name.tag.opam-install"],
+        "notScopes": ["string"]
+      }
+    ]
+  },
+  {
+    "name": "opam string interpolation remains enabled",
+    "scope": "source.ocaml.opam",
+    "reference": "https://opam.ocaml.org/doc/Manual.html#Interpolation",
+    "source": "build: [[\"echo\" \"%{prefix}%\"]]",
+    "assertions": [
+      {
+        "line": 1,
+        "text": "%{prefix}%",
+        "scopes": ["constant.variable.opam", "string.quoted.double.opam"]
+      }
+    ]
+  }
+]

@@ -6,6 +6,13 @@
   highlighting for whitespace-separated production calls and use the standard HTML
   grammar for OCamlDoc blocks.
 
+- Correct syntax highlighting against current language references, including
+  OCaml effects and raw identifiers, Dune atom boundaries and actions, and
+  strings, comments, and escapes in the supported configuration languages.
+  Avoid classifying ordinary identifiers as built-in types without type context.
+  Distinguish type, class, and method declarations from other bindings.
+- Fix Menhir action keyword highlighting and longer Markdown closing fences.
+
 ## 2.4.0
 
 - Display generated package documentation in a VS Code webview with local links

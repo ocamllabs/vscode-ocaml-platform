@@ -22,10 +22,16 @@
             "1": { "name": "keyword.other.atd" },
             "2": { "name": "keyword.other.atd" }
           },
-          "endCaptures": {
-            "0": { "name": "keyword.other.atd" }
-          },
-          "patterns": [{ "include": "$self" }]
+          "endCaptures": { "0": { "name": "keyword.other.atd" } },
+          "patterns": [
+            {
+              "name": "string.quoted.single.atd",
+              "begin": "'",
+              "end": "'",
+              "patterns": [{ "match": "\\\\.", "name": "constant.character.escape.atd" }]
+            },
+            { "include": "$self" }
+          ]
         }
       ]
     },
@@ -34,24 +40,19 @@
       "captures": {
         "1": { "name": "keyword.other.atd" },
         "2": { "patterns": [{ "include": "$self" }] },
-        "3": { "name": "entity.name.function.binding.atd" }
+        "3": { "name": "entity.name.type.atd" }
       }
     },
     "keywords": {
       "name": "keyword.other.atd",
-      "match": "\\b(type|of|inherit)\\b(?!')"
+      "match": "\\b(type|of|inherit|from|as|import)\\b(?!')"
     },
     "types": {
       "patterns": [
         {
           "comment": "type parameter",
           "name": "storage.type.ocaml.atd",
-          "match": "'[[:alpha:]][[:word:]']*\\b"
-        },
-        {
-          "comment": "builtin type",
-          "name": "support.type.ocaml.atd",
-          "match": "\\b(unit|bool|int|float|string|abstract)\\b"
+          "match": "'[[:alpha:]][[:word:]']*(?![[:word:]'])"
         }
       ]
     }

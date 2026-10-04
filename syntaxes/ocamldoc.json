@@ -8,7 +8,7 @@
       "patterns": [
         {
           "comment": "ocamldoc documentation tag @raise",
-          "match": "(@raises?)[[:space:]]+([^[:space:]]+)",
+          "match": "(?<!\\\\)(@raises?)[[:space:]]+([^[:space:]]+)",
           "captures": {
             "1": { "name": "keyword.doc-tag.ocamldoc" },
             "2": {
@@ -18,7 +18,7 @@
         },
         {
           "comment": "ocamldoc documentation tag @param",
-          "match": "(@param)[[:space:]]+([^[:space:]]+)",
+          "match": "(?<!\\\\)(@param)[[:space:]]+([^[:space:]]+)",
           "captures": {
             "1": { "name": "keyword.doc-tag.ocamldoc" },
             "2": {
@@ -28,7 +28,7 @@
         },
         {
           "comment": "ocamldoc documentation tag @see",
-          "match": "(@see)[[:space:]]+(<.*?>|\".*?\"|'.*?')",
+          "match": "(?<!\\\\)(@see)[[:space:]]+(<.*?>|\".*?\"|'.*?')",
           "captures": {
             "1": { "name": "keyword.doc-tag.ocamldoc" },
             "2": {
@@ -39,7 +39,7 @@
         {
           "comment": "ocamldoc documentation tag",
           "name": "keyword.doc-tag.ocamldoc",
-          "match": "@[[:lower:]]+"
+          "match": "(?<!\\\\)@[[:lower:]]+"
         },
         {
           "comment": "embedded ocaml source",
@@ -95,6 +95,13 @@
           "beginCaptures": {
             "1": { "name": "meta.link.label.ocamldoc" }
           }
+        },
+        {
+          "comment": "ocamldoc alignment",
+          "begin": "(?<!\\\\){[CLR][[:space:]]",
+          "end": "(?<!\\\\)}",
+          "name": "meta.alignment.ocamldoc",
+          "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "ocamldoc bold",
