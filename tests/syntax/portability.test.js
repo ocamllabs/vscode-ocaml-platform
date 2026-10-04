@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { test } = require("bun:test");
 
-const root = process.env.SYNTAX_ROOT || path.resolve(__dirname, "../..");
+const root = path.resolve(process.env.SYNTAX_ROOT || path.join(__dirname, "../.."));
 const registrations = require(path.join(root, "package.json")).contributes.grammars;
 const grammars = new Map(
   registrations.map((entry) => [

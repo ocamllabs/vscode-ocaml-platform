@@ -4,7 +4,7 @@ const path = require("node:path");
 const { Registry, INITIAL, parseRawGrammar } = require("vscode-textmate");
 const { loadWASM, OnigScanner, OnigString } = require("vscode-oniguruma");
 
-const grammarRoot = process.env.SYNTAX_ROOT || path.resolve(__dirname, "../..");
+const grammarRoot = path.resolve(process.env.SYNTAX_ROOT || path.join(__dirname, "../.."));
 const registrations = require(path.join(grammarRoot, "package.json")).contributes.grammars;
 const byScope = new Map(registrations.map((entry) => [entry.scopeName, entry]));
 const onigLib = loadWASM(

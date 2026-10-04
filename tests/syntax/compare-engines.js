@@ -6,7 +6,7 @@ const os = require("node:os");
 const { loadWASM, OnigScanner } = require("vscode-oniguruma");
 
 const checkout = path.resolve(__dirname, "../..");
-const root = process.env.SYNTAX_ROOT || checkout;
+const root = path.resolve(process.env.SYNTAX_ROOT || checkout);
 const base = process.argv[2] || "origin/master";
 const ruby = process.argv[3] || "ruby";
 const regexKeys = new Set(["match", "begin", "end", "while"]);
@@ -50,7 +50,7 @@ async function compare() {
     const corpus = path.join(directory, "inputs.jsonl");
     execFileSync("bun", ["test", __dirname], {
       cwd: checkout,
-      env: { ...process.env, CI: "true", SYNTAX_CORPUS: corpus },
+      env: { ...process.env, SYNTAX_ROOT: root, CI: "true", SYNTAX_CORPUS: corpus },
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
       maxBuffer: 32 * 1024 * 1024,

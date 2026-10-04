@@ -18,8 +18,11 @@ merged or clipped, including TextMate's synthetic line-end position. State passe
 between lines, so snapshots show comment and string continuation and recovery.
 
 Specification links sit above the corresponding tests. `SYNTAX_ROOT` selects
-another checkout's grammars and registrations; tests, expectations and dependencies
-always come from this checkout.
+another checkout's grammars and registrations. Relative paths, including `.`, are
+resolved against the invoking working directory. Tests, expectations and
+dependencies always come from this checkout. The engine comparator forwards the
+resolved absolute path when it starts Bun from the test checkout, so grammar
+reads, Git operations and child tests use the same root.
 
 To update expectations after an intentional change:
 
