@@ -374,3 +374,172 @@ test("Dune atom boundaries retain tab and form-feed separators", async () => {
     2:17:18 ")""
   `);
 });
+
+// https://github.com/ocaml/dune/blob/3.24.2/src/dune_sexp/lexer.mll
+test("Dune structural separators use ASCII whitespace in every grammar", async () => {
+  const output = [];
+  for (const { scope, stanza, field } of [
+    { scope: "source.dune", stanza: "library", field: "name" },
+    { scope: "source.dune-project", stanza: "package", field: "name" },
+    { scope: "source.dune-workspace", stanza: "context", field: "default" },
+  ]) {
+    const sources = ["\u00a0", "\v", "\t", "\f"].flatMap((separator) => [
+      `(${separator}${stanza})`,
+      `(${stanza}${separator})`,
+      `(${stanza} (${separator}${field}))`,
+      `(${separator}and true)`,
+      `(${separator}= a b)`,
+      `"${separator}and"`,
+    ]);
+    output.push({
+      scope,
+      tokens: await Promise.all(
+        sources.map(async (source) =>
+          (await tokenizer.render(scope, source)).replaceAll("\n", "; "),
+        ),
+      ),
+    });
+  }
+  expect(output).toMatchInlineSnapshot(`
+    [
+      {
+        "scope": "source.dune",
+        "tokens": [
+          "1:0:1 "("; 1:1:9 " library"; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:9 "library "; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "library" keyword.language.dune; 1:9:10 "("; 1:10:15 " name"; 1:15:16 ")"; 1:16:17 ")"",
+          "1:0:1 "("; 1:1:6 " and "; 1:6:10 "true" constant.language.dune; 1:10:11 ")"",
+          "1:0:1 "("; 1:1:7 " = a b"; 1:7:8 ")"",
+          "1:0:1 "\\"" string.quoted.double.dune; 1:1:5 " and" string.quoted.double.dune; 1:5:6 "\\"" string.quoted.double.dune",
+          "1:0:1 "("; 1:1:9 "\\u000blibrary"; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:9 "library\\u000b"; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "library" keyword.language.dune; 1:9:10 "("; 1:10:15 "\\u000bname"; 1:15:16 ")"; 1:16:17 ")"",
+          "1:0:1 "("; 1:1:6 "\\u000band "; 1:6:10 "true" constant.language.dune; 1:10:11 ")"",
+          "1:0:1 "("; 1:1:7 "\\u000b= a b"; 1:7:8 ")"",
+          "1:0:1 "\\"" string.quoted.double.dune; 1:1:5 "\\u000band" string.quoted.double.dune; 1:5:6 "\\"" string.quoted.double.dune",
+          "1:0:2 "(\\t"; 1:2:9 "library" keyword.language.dune; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "library" keyword.language.dune; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "library" keyword.language.dune; 1:9:11 "(\\t"; 1:11:15 "name" keyword.language.dune; 1:15:16 ")"; 1:16:17 ")"",
+          "1:0:2 "(\\t"; 1:2:5 "and" entity.name.function.action.dune; 1:6:10 "true" constant.language.dune; 1:10:11 ")"",
+          "1:0:2 "(\\t"; 1:2:3 "=" keyword.operator.dune; 1:3:7 " a b"; 1:7:8 ")"",
+          "1:0:1 "\\"" string.quoted.double.dune; 1:1:5 "\\tand" string.quoted.double.dune; 1:5:6 "\\"" string.quoted.double.dune",
+          "1:0:2 "(\\f"; 1:2:9 "library" keyword.language.dune; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "library" keyword.language.dune; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "library" keyword.language.dune; 1:9:11 "(\\f"; 1:11:15 "name" keyword.language.dune; 1:15:16 ")"; 1:16:17 ")"",
+          "1:0:2 "(\\f"; 1:2:5 "and" entity.name.function.action.dune; 1:6:10 "true" constant.language.dune; 1:10:11 ")"",
+          "1:0:2 "(\\f"; 1:2:3 "=" keyword.operator.dune; 1:3:7 " a b"; 1:7:8 ")"",
+          "1:0:1 "\\"" string.quoted.double.dune; 1:1:5 "\\fand" string.quoted.double.dune; 1:5:6 "\\"" string.quoted.double.dune",
+        ],
+      },
+      {
+        "scope": "source.dune-project",
+        "tokens": [
+          "1:0:1 "("; 1:1:9 " package"; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:9 "package "; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "package" keyword.language.dune-project; 1:9:10 "("; 1:10:15 " name"; 1:15:16 ")"; 1:16:17 ")"",
+          "1:0:1 "("; 1:1:6 " and "; 1:6:10 "true" constant.language.dune; 1:10:11 ")"",
+          "1:0:1 "("; 1:1:7 " = a b"; 1:7:8 ")"",
+          "1:0:1 "\\"" string.quoted.double.dune; 1:1:5 " and" string.quoted.double.dune; 1:5:6 "\\"" string.quoted.double.dune",
+          "1:0:1 "("; 1:1:9 "\\u000bpackage"; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:9 "package\\u000b"; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "package" keyword.language.dune-project; 1:9:10 "("; 1:10:15 "\\u000bname"; 1:15:16 ")"; 1:16:17 ")"",
+          "1:0:1 "("; 1:1:6 "\\u000band "; 1:6:10 "true" constant.language.dune; 1:10:11 ")"",
+          "1:0:1 "("; 1:1:7 "\\u000b= a b"; 1:7:8 ")"",
+          "1:0:1 "\\"" string.quoted.double.dune; 1:1:5 "\\u000band" string.quoted.double.dune; 1:5:6 "\\"" string.quoted.double.dune",
+          "1:0:2 "(\\t"; 1:2:9 "package" keyword.language.dune-project; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "package" keyword.language.dune-project; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "package" keyword.language.dune-project; 1:9:11 "(\\t"; 1:11:15 "name" keyword.language.dune-project; 1:15:16 ")"; 1:16:17 ")"",
+          "1:0:2 "(\\t"; 1:2:5 "and" entity.name.function.action.dune; 1:6:10 "true" constant.language.dune; 1:10:11 ")"",
+          "1:0:2 "(\\t"; 1:2:3 "=" keyword.operator.dune; 1:3:7 " a b"; 1:7:8 ")"",
+          "1:0:1 "\\"" string.quoted.double.dune; 1:1:5 "\\tand" string.quoted.double.dune; 1:5:6 "\\"" string.quoted.double.dune",
+          "1:0:2 "(\\f"; 1:2:9 "package" keyword.language.dune-project; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "package" keyword.language.dune-project; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "package" keyword.language.dune-project; 1:9:11 "(\\f"; 1:11:15 "name" keyword.language.dune-project; 1:15:16 ")"; 1:16:17 ")"",
+          "1:0:2 "(\\f"; 1:2:5 "and" entity.name.function.action.dune; 1:6:10 "true" constant.language.dune; 1:10:11 ")"",
+          "1:0:2 "(\\f"; 1:2:3 "=" keyword.operator.dune; 1:3:7 " a b"; 1:7:8 ")"",
+          "1:0:1 "\\"" string.quoted.double.dune; 1:1:5 "\\fand" string.quoted.double.dune; 1:5:6 "\\"" string.quoted.double.dune",
+        ],
+      },
+      {
+        "scope": "source.dune-workspace",
+        "tokens": [
+          "1:0:1 "("; 1:1:9 " context"; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:9 "context "; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "context" keyword.language.dune-workspace; 1:9:10 "("; 1:10:18 " default"; 1:18:19 ")"; 1:19:20 ")"",
+          "1:0:1 "("; 1:1:6 " and "; 1:6:10 "true" constant.language.dune; 1:10:11 ")"",
+          "1:0:1 "("; 1:1:7 " = a b"; 1:7:8 ")"",
+          "1:0:1 "\\"" string.quoted.double.dune; 1:1:5 " and" string.quoted.double.dune; 1:5:6 "\\"" string.quoted.double.dune",
+          "1:0:1 "("; 1:1:9 "\\u000bcontext"; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:9 "context\\u000b"; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "context" keyword.language.dune-workspace; 1:9:10 "("; 1:10:18 "\\u000bdefault"; 1:18:19 ")"; 1:19:20 ")"",
+          "1:0:1 "("; 1:1:6 "\\u000band "; 1:6:10 "true" constant.language.dune; 1:10:11 ")"",
+          "1:0:1 "("; 1:1:7 "\\u000b= a b"; 1:7:8 ")"",
+          "1:0:1 "\\"" string.quoted.double.dune; 1:1:5 "\\u000band" string.quoted.double.dune; 1:5:6 "\\"" string.quoted.double.dune",
+          "1:0:2 "(\\t"; 1:2:9 "context" keyword.language.dune-workspace; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "context" keyword.language.dune-workspace; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "context" keyword.language.dune-workspace; 1:9:11 "(\\t"; 1:11:18 "default" keyword.language.dune-workspace; 1:18:19 ")"; 1:19:20 ")"",
+          "1:0:2 "(\\t"; 1:2:5 "and" entity.name.function.action.dune; 1:6:10 "true" constant.language.dune; 1:10:11 ")"",
+          "1:0:2 "(\\t"; 1:2:3 "=" keyword.operator.dune; 1:3:7 " a b"; 1:7:8 ")"",
+          "1:0:1 "\\"" string.quoted.double.dune; 1:1:5 "\\tand" string.quoted.double.dune; 1:5:6 "\\"" string.quoted.double.dune",
+          "1:0:2 "(\\f"; 1:2:9 "context" keyword.language.dune-workspace; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "context" keyword.language.dune-workspace; 1:9:10 ")"",
+          "1:0:1 "("; 1:1:8 "context" keyword.language.dune-workspace; 1:9:11 "(\\f"; 1:11:18 "default" keyword.language.dune-workspace; 1:18:19 ")"; 1:19:20 ")"",
+          "1:0:2 "(\\f"; 1:2:5 "and" entity.name.function.action.dune; 1:6:10 "true" constant.language.dune; 1:10:11 ")"",
+          "1:0:2 "(\\f"; 1:2:3 "=" keyword.operator.dune; 1:3:7 " a b"; 1:7:8 ")"",
+          "1:0:1 "\\"" string.quoted.double.dune; 1:1:5 "\\fand" string.quoted.double.dune; 1:5:6 "\\"" string.quoted.double.dune",
+        ],
+      },
+    ]
+  `);
+});
+
+// https://github.com/ocaml/dune/blob/3.24.2/src/dune_sexp/lexer.mll
+test("Dune compound forms require ASCII separators", async () => {
+  const output = [];
+  for (const scope of ["source.dune-project", "source.dune-workspace"]) {
+    const sources = ["\u00a0", "\v", "\t", "\f"].flatMap((separator) => [
+      `(lang${separator}dune 3.0)`,
+      ...(scope === "source.dune-project"
+        ? [`(using${separator}menhir 3.0)`, `(explicit_js_mode${separator})`]
+        : []),
+    ]);
+    output.push({
+      scope,
+      tokens: await Promise.all(
+        sources.map(async (source) =>
+          (await tokenizer.render(scope, source)).replaceAll("\n", "; "),
+        ),
+      ),
+    });
+  }
+  expect(output).toMatchInlineSnapshot(`
+    [
+      {
+        "scope": "source.dune-project",
+        "tokens": [
+          "1:0:1 "("; 1:1:11 "lang dune "; 1:11:14 "3.0" constant.numeric.dune; 1:14:15 ")"",
+          "1:0:1 "("; 1:1:14 "using menhir "; 1:14:17 "3.0" constant.numeric.dune; 1:17:18 ")"",
+          "1:0:1 "("; 1:1:18 "explicit_js_mode "; 1:18:19 ")"",
+          "1:0:1 "("; 1:1:11 "lang\\u000bdune "; 1:11:14 "3.0" constant.numeric.dune; 1:14:15 ")"",
+          "1:0:1 "("; 1:1:14 "using\\u000bmenhir "; 1:14:17 "3.0" constant.numeric.dune; 1:17:18 ")"",
+          "1:0:1 "("; 1:1:18 "explicit_js_mode\\u000b"; 1:18:19 ")"",
+          "1:0:1 "("; 1:1:5 "lang" keyword.language.dune-project; 1:6:10 "dune" keyword.language.dune-project; 1:11:14 "3.0" constant.numeric.dune; 1:14:15 ")"",
+          "1:0:1 "("; 1:1:6 "using" keyword.language.dune-project; 1:6:13 "\\tmenhir" variable.other.declaration.dune-project; 1:14:17 "3.0" constant.numeric.dune; 1:17:18 ")"",
+          "1:0:1 "("; 1:1:17 "explicit_js_mode" keyword.language.dune-project; 1:17:19 "\\t)"",
+          "1:0:1 "("; 1:1:5 "lang" keyword.language.dune-project; 1:6:10 "dune" keyword.language.dune-project; 1:11:14 "3.0" constant.numeric.dune; 1:14:15 ")"",
+          "1:0:1 "("; 1:1:6 "using" keyword.language.dune-project; 1:6:13 "\\fmenhir" variable.other.declaration.dune-project; 1:14:17 "3.0" constant.numeric.dune; 1:17:18 ")"",
+          "1:0:1 "("; 1:1:17 "explicit_js_mode" keyword.language.dune-project; 1:17:19 "\\f)"",
+        ],
+      },
+      {
+        "scope": "source.dune-workspace",
+        "tokens": [
+          "1:0:1 "("; 1:1:11 "lang dune "; 1:11:14 "3.0" constant.numeric.dune; 1:14:15 ")"",
+          "1:0:1 "("; 1:1:11 "lang\\u000bdune "; 1:11:14 "3.0" constant.numeric.dune; 1:14:15 ")"",
+          "1:0:1 "("; 1:1:5 "lang" keyword.language.dune-workspace; 1:6:10 "dune" keyword.language.dune-workspace; 1:11:14 "3.0" constant.numeric.dune; 1:14:15 ")"",
+          "1:0:1 "("; 1:1:5 "lang" keyword.language.dune-workspace; 1:6:10 "dune" keyword.language.dune-workspace; 1:11:14 "3.0" constant.numeric.dune; 1:14:15 ")"",
+        ],
+      },
+    ]
+  `);
+});

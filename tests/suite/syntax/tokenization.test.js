@@ -168,6 +168,50 @@ for (const language of ["ocaml", "reason"]) {
   });
 }
 
+for (const language of ["ocaml", "reason"]) {
+  for (const [name, fence] of [
+    ["backtick", "```"],
+    ["tilde", "~~~"],
+  ]) {
+    examples.push({
+      filename: `${language}-${name}-closing-whitespace.md`,
+      source: [
+        fence + "\u00a0" + language + "\u00a0attrs",
+        "RootEmbedded",
+        fence + "\u00a0",
+        "RootStillEmbedded",
+        fence + " \t",
+        "RootOutside",
+        "",
+        "> " + fence + language,
+        "> QuotedEmbedded",
+        "> " + fence + "\u2003",
+        "> QuotedStillEmbedded",
+        "> " + fence + "\t",
+        "> QuotedOutside",
+        "",
+        "- item",
+        "",
+        "  " + fence + language,
+        "  ListedEmbedded",
+        "  " + fence + "\u0085",
+        "  ListedStillEmbedded",
+        "  " + fence + " ",
+        "  ListedOutside",
+      ].join("\r\n"),
+      assertions: [
+        { text: "RootEmbedded", scope: `meta.embedded.block.${language}` },
+        { text: "RootStillEmbedded", scope: `meta.embedded.block.${language}` },
+        { text: "QuotedEmbedded", scope: `meta.embedded.block.${language}` },
+        { text: "QuotedStillEmbedded", scope: `meta.embedded.block.${language}` },
+        { text: "ListedEmbedded", scope: `meta.embedded.block.${language}` },
+        { text: "ListedStillEmbedded", scope: `meta.embedded.block.${language}` },
+        { text: "Outside", scope: "text.html.markdown", absent: "meta.embedded.block" },
+      ],
+    });
+  }
+}
+
 suite("editor syntax tokenisation", () => {
   let directory;
   suiteSetup(async () => {

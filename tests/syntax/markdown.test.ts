@@ -554,3 +554,153 @@ plain`;
     7:0:6 "plain""
   `);
 });
+
+// https://spec.commonmark.org/0.31.2/#fenced-code-blocks
+test("ocaml backtick closing fences require ASCII whitespace", async () => {
+  const source = [
+    "```\u00a0ocaml\u00a0attrs",
+    "Before",
+    "```\u00a0",
+    "AfterNbsp",
+    "```\u2003",
+    "AfterEmSpace",
+    "```\u0085",
+    "AfterNel",
+    "``` \t",
+    "Outside",
+  ].join("\r\n");
+  expect(await tokenizer.render("markdown.ocaml.codeblock", source)).toMatchInlineSnapshot(`
+    "1:0:3 "\`\`\`" markup.fenced_code.block.markdown punctuation.definition.markdown
+    1:3:4 " " markup.fenced_code.block.markdown
+    1:4:9 "ocaml" markup.fenced_code.block.markdown fenced_code.block.language.markdown
+    1:9:17 " attrs\\r" markup.fenced_code.block.markdown fenced_code.block.language.attributes.markdown
+    2:0:6 "Before" markup.fenced_code.block.markdown meta.embedded.block.ocaml constant.language.capital-identifier.ocaml
+    2:6:8 "\\r" markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    3:0:6 "\`\`\` \\r" markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    4:0:9 "AfterNbsp" markup.fenced_code.block.markdown meta.embedded.block.ocaml constant.language.capital-identifier.ocaml
+    4:9:11 "\\r" markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    5:0:6 "\`\`\` \\r" markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    6:0:12 "AfterEmSpace" markup.fenced_code.block.markdown meta.embedded.block.ocaml constant.language.capital-identifier.ocaml
+    6:12:14 "\\r" markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    7:0:6 "\`\`\`\\r" markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    8:0:8 "AfterNel" markup.fenced_code.block.markdown meta.embedded.block.ocaml constant.language.capital-identifier.ocaml
+    8:8:10 "\\r" markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    9:0:3 "\`\`\`" markup.fenced_code.block.markdown punctuation.definition.markdown
+    9:3:6 " \\t\\r" markup.fenced_code.block.markdown
+    10:0:8 "Outside""
+  `);
+});
+
+// https://spec.commonmark.org/0.31.2/#fenced-code-blocks
+test("ocaml tilde closing fences require ASCII whitespace", async () => {
+  const source = [
+    "~~~\u00a0ocaml\u00a0attrs",
+    "Before",
+    "~~~\u00a0",
+    "AfterNbsp",
+    "~~~\u2003",
+    "AfterEmSpace",
+    "~~~\u0085",
+    "AfterNel",
+    "~~~ \t",
+    "Outside",
+  ].join("\r\n");
+  expect(await tokenizer.render("markdown.ocaml.codeblock", source)).toMatchInlineSnapshot(`
+    "1:0:3 "~~~" markup.fenced_code.block.markdown punctuation.definition.markdown
+    1:3:4 " " markup.fenced_code.block.markdown
+    1:4:9 "ocaml" markup.fenced_code.block.markdown fenced_code.block.language.markdown
+    1:9:17 " attrs\\r" markup.fenced_code.block.markdown fenced_code.block.language.attributes.markdown
+    2:0:6 "Before" markup.fenced_code.block.markdown meta.embedded.block.ocaml constant.language.capital-identifier.ocaml
+    2:6:8 "\\r" markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    3:0:3 "~~~" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.operator.ocaml
+    3:3:6 " \\r" markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    4:0:9 "AfterNbsp" markup.fenced_code.block.markdown meta.embedded.block.ocaml constant.language.capital-identifier.ocaml
+    4:9:11 "\\r" markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    5:0:3 "~~~" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.operator.ocaml
+    5:3:6 " \\r" markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    6:0:12 "AfterEmSpace" markup.fenced_code.block.markdown meta.embedded.block.ocaml constant.language.capital-identifier.ocaml
+    6:12:14 "\\r" markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    7:0:3 "~~~" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.operator.ocaml
+    7:3:6 "\\r" markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    8:0:8 "AfterNel" markup.fenced_code.block.markdown meta.embedded.block.ocaml constant.language.capital-identifier.ocaml
+    8:8:10 "\\r" markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    9:0:3 "~~~" markup.fenced_code.block.markdown punctuation.definition.markdown
+    9:3:6 " \\t\\r" markup.fenced_code.block.markdown
+    10:0:8 "Outside""
+  `);
+});
+
+// https://spec.commonmark.org/0.31.2/#fenced-code-blocks
+test("reason backtick closing fences require ASCII whitespace", async () => {
+  const source = [
+    "```\u00a0reason\u00a0attrs",
+    "Before",
+    "```\u00a0",
+    "AfterNbsp",
+    "```\u2003",
+    "AfterEmSpace",
+    "```\u0085",
+    "AfterNel",
+    "``` \t",
+    "Outside",
+  ].join("\r\n");
+  expect(await tokenizer.render("markdown.reason.codeblock", source)).toMatchInlineSnapshot(`
+    "1:0:3 "\`\`\`" markup.fenced_code.block.markdown punctuation.definition.markdown
+    1:3:4 " " markup.fenced_code.block.markdown
+    1:4:10 "reason" markup.fenced_code.block.markdown fenced_code.block.language.markdown
+    1:10:18 " attrs\\r" markup.fenced_code.block.markdown fenced_code.block.language.attributes.markdown
+    2:0:6 "Before" markup.fenced_code.block.markdown meta.embedded.block.reason entity.other.attribute-name.css constant.language constant.numeric
+    2:6:8 "\\r" markup.fenced_code.block.markdown meta.embedded.block.reason
+    3:0:6 "\`\`\` \\r" markup.fenced_code.block.markdown meta.embedded.block.reason
+    4:0:9 "AfterNbsp" markup.fenced_code.block.markdown meta.embedded.block.reason entity.other.attribute-name.css constant.language constant.numeric
+    4:9:11 "\\r" markup.fenced_code.block.markdown meta.embedded.block.reason
+    5:0:6 "\`\`\` \\r" markup.fenced_code.block.markdown meta.embedded.block.reason
+    6:0:12 "AfterEmSpace" markup.fenced_code.block.markdown meta.embedded.block.reason entity.other.attribute-name.css constant.language constant.numeric
+    6:12:14 "\\r" markup.fenced_code.block.markdown meta.embedded.block.reason
+    7:0:6 "\`\`\`\\r" markup.fenced_code.block.markdown meta.embedded.block.reason
+    8:0:8 "AfterNel" markup.fenced_code.block.markdown meta.embedded.block.reason entity.other.attribute-name.css constant.language constant.numeric
+    8:8:10 "\\r" markup.fenced_code.block.markdown meta.embedded.block.reason
+    9:0:3 "\`\`\`" markup.fenced_code.block.markdown punctuation.definition.markdown
+    9:3:6 " \\t\\r" markup.fenced_code.block.markdown
+    10:0:8 "Outside""
+  `);
+});
+
+// https://spec.commonmark.org/0.31.2/#fenced-code-blocks
+test("reason tilde closing fences require ASCII whitespace", async () => {
+  const source = [
+    "~~~\u00a0reason\u00a0attrs",
+    "Before",
+    "~~~\u00a0",
+    "AfterNbsp",
+    "~~~\u2003",
+    "AfterEmSpace",
+    "~~~\u0085",
+    "AfterNel",
+    "~~~ \t",
+    "Outside",
+  ].join("\r\n");
+  expect(await tokenizer.render("markdown.reason.codeblock", source)).toMatchInlineSnapshot(`
+    "1:0:3 "~~~" markup.fenced_code.block.markdown punctuation.definition.markdown
+    1:3:4 " " markup.fenced_code.block.markdown
+    1:4:10 "reason" markup.fenced_code.block.markdown fenced_code.block.language.markdown
+    1:10:18 " attrs\\r" markup.fenced_code.block.markdown fenced_code.block.language.attributes.markdown
+    2:0:6 "Before" markup.fenced_code.block.markdown meta.embedded.block.reason entity.other.attribute-name.css constant.language constant.numeric
+    2:6:8 "\\r" markup.fenced_code.block.markdown meta.embedded.block.reason
+    3:0:3 "~~~" markup.fenced_code.block.markdown meta.embedded.block.reason variable.other.class.js variable.interpolation keyword.operator keyword.control message.error
+    3:3:6 " \\r" markup.fenced_code.block.markdown meta.embedded.block.reason
+    4:0:9 "AfterNbsp" markup.fenced_code.block.markdown meta.embedded.block.reason entity.other.attribute-name.css constant.language constant.numeric
+    4:9:11 "\\r" markup.fenced_code.block.markdown meta.embedded.block.reason
+    5:0:3 "~~~" markup.fenced_code.block.markdown meta.embedded.block.reason variable.other.class.js variable.interpolation keyword.operator keyword.control message.error
+    5:3:6 " \\r" markup.fenced_code.block.markdown meta.embedded.block.reason
+    6:0:12 "AfterEmSpace" markup.fenced_code.block.markdown meta.embedded.block.reason entity.other.attribute-name.css constant.language constant.numeric
+    6:12:14 "\\r" markup.fenced_code.block.markdown meta.embedded.block.reason
+    7:0:3 "~~~" markup.fenced_code.block.markdown meta.embedded.block.reason variable.other.class.js variable.interpolation keyword.operator keyword.control message.error
+    7:3:6 "\\r" markup.fenced_code.block.markdown meta.embedded.block.reason
+    8:0:8 "AfterNel" markup.fenced_code.block.markdown meta.embedded.block.reason entity.other.attribute-name.css constant.language constant.numeric
+    8:8:10 "\\r" markup.fenced_code.block.markdown meta.embedded.block.reason
+    9:0:3 "~~~" markup.fenced_code.block.markdown punctuation.definition.markdown
+    9:3:6 " \\t\\r" markup.fenced_code.block.markdown
+    10:0:8 "Outside""
+  `);
+});
