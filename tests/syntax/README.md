@@ -6,6 +6,10 @@ engines. The registry uses the grammar paths and injection registrations from
 editor token capture for OCaml implementations, interfaces, Menhir actions, opam
 and install files, and OCaml and Reason blocks inside the built-in Markdown grammar.
 
+`bun run typecheck:syntax` checks all syntax tests and helpers with the scoped
+strict TypeScript configuration. CI runs this gate before the OCaml build.
+The extension and its VS Code/Mocha runner remain CommonJS JavaScript.
+
 The language test files keep each source example beside its native Bun inline
 snapshot. Each output row is `line:start:end "text" scopes`: the line is one-based,
 columns are the original zero-based UTF-16 TextMate boundaries, and `text` is JSON
@@ -49,7 +53,7 @@ file. It reads the corpus only after that run succeeds, then removes the tempora
 file. Test inputs are neither duplicated nor extracted from test source code. For example:
 
 ```sh
-node tests/syntax/compare-engines.js origin/master /usr/bin/ruby
+bun tests/syntax/compare-engines.ts origin/master /usr/bin/ruby
 ```
 
 The comparison checks match positions and captured text. It normalises unmatched

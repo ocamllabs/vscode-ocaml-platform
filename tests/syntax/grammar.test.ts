@@ -1,7 +1,9 @@
-const assert = require("node:assert/strict");
-const { afterAll, test } = require("bun:test");
-const { INITIAL } = require("vscode-textmate");
-const { createTokenizer, registrations } = require("./tokenizer");
+import { afterAll, test } from "bun:test";
+import assert from "node:assert/strict";
+
+import { INITIAL } from "vscode-textmate";
+
+import { createTokenizer, registrations } from "./tokenizer.ts";
 
 const tokenizer = createTokenizer();
 afterAll(() => tokenizer.dispose());
@@ -9,6 +11,7 @@ afterAll(() => tokenizer.dispose());
 test("Markdown fences preserve delimiter length, marker and multiline state", async () => {
   for (const language of ["ocaml", "reason"]) {
     const grammar = await tokenizer.loadGrammar(`markdown.${language}.codeblock`);
+    assert.ok(grammar);
     for (const marker of ["`", "~"]) {
       const otherMarker = marker === "`" ? "~" : "`";
       for (let opening = 3; opening <= 9; opening++) {
@@ -19,7 +22,7 @@ test("Markdown fences preserve delimiter length, marker and multiline state", as
                 (ending === "other" ? otherMarker : marker).repeat(closing) +
                 (ending === "mixed" ? otherMarker : "");
               let state = INITIAL;
-              let result;
+              let result: ReturnType<typeof grammar.tokenizeLine> | undefined;
               for (const line of [
                 indent + marker.repeat(opening) + language,
                 'let x = "unterminated',
@@ -30,6 +33,7 @@ test("Markdown fences preserve delimiter length, marker and multiline state", as
                 assert.equal(result.stoppedEarly, false);
                 state = result.ruleStack;
               }
+              assert.ok(result);
               const remainsInside = result.tokens.some((token) =>
                 token.scopes.includes("markup.fenced_code.block.markdown"),
               );

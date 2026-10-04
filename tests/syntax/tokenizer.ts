@@ -1,21 +1,22 @@
-const assert = require("node:assert/strict");
-const fs = require("node:fs");
-const path = require("node:path");
-const { Registry, INITIAL, parseRawGrammar } = require("vscode-textmate");
-const { loadWASM, OnigScanner, OnigString } = require("vscode-oniguruma");
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 
-const grammarRoot = path.resolve(process.env.SYNTAX_ROOT || path.join(__dirname, "../.."));
-const registrations = require(path.join(grammarRoot, "package.json")).contributes.grammars;
+import { loadWASM, OnigScanner, OnigString } from "vscode-oniguruma";
+import { Registry, INITIAL, parseRawGrammar, type IOnigLib } from "vscode-textmate";
+
+import { grammarRoot, registrations } from "./manifest.ts";
+
 const byScope = new Map(registrations.map((entry) => [entry.scopeName, entry]));
 const onigLib = loadWASM(
-  fs.readFileSync(require.resolve("vscode-oniguruma/release/onig.wasm")),
-).then(() => ({
+  fs.readFileSync(new URL(import.meta.resolve("vscode-oniguruma/release/onig.wasm"))),
+).then((): IOnigLib => ({
   createOnigScanner: (patterns) => new OnigScanner(patterns),
   createOnigString: (value) => new OnigString(value),
 }));
-const collected = new Set();
+const collected = new Set<string>();
 
-function createTokenizer() {
+export function createTokenizer() {
   const registry = new Registry({
     onigLib,
     loadGrammar: async (scope) => {
@@ -31,9 +32,9 @@ function createTokenizer() {
   });
 
   return {
-    loadGrammar: (scope) => registry.loadGrammar(scope),
+    loadGrammar: (scope: string) => registry.loadGrammar(scope),
     dispose: () => registry.dispose(),
-    async render(scope, source) {
+    async render(scope: string, source: string) {
       const grammar = await registry.loadGrammar(scope);
       assert.ok(grammar, `Unknown grammar ${scope}`);
       let state = INITIAL;
@@ -51,11 +52,12 @@ function createTokenizer() {
           ];
         });
       });
-      if (process.env.SYNTAX_CORPUS) {
+      const corpus = process.env["SYNTAX_CORPUS"];
+      if (corpus) {
         const entry = JSON.stringify({ scope, source });
         if (!collected.has(entry)) {
           collected.add(entry);
-          fs.appendFileSync(process.env.SYNTAX_CORPUS, entry + "\n");
+          fs.appendFileSync(corpus, entry + "\n");
         }
       }
       return output.join("\n");
@@ -63,4 +65,4 @@ function createTokenizer() {
   };
 }
 
-module.exports = { createTokenizer, registrations };
+export { registrations };

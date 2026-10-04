@@ -1,5 +1,6 @@
-const { afterAll, expect, test } = require("bun:test");
-const { createTokenizer } = require("./tokenizer");
+import { afterAll, expect, test } from "bun:test";
+
+import { createTokenizer } from "./tokenizer.ts";
 
 const tokenizer = createTokenizer();
 afterAll(() => tokenizer.dispose());

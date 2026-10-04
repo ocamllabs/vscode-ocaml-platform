@@ -1,15 +1,18 @@
-const assert = require("node:assert/strict");
-const { spawnSync } = require("node:child_process");
-const fs = require("node:fs");
-const os = require("node:os");
-const path = require("node:path");
-const { test } = require("bun:test");
+import { test } from "bun:test";
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+
+import { isRecord } from "./manifest.ts";
 
 const scope = "source.syntax-root-fixture";
-const tokenizerPath = path.join(__dirname, "tokenizer.js");
-const portabilityPath = path.join(__dirname, "portability.test.js");
+const tokenizerPath = path.join(import.meta.dirname, "tokenizer.ts");
+const portabilityPath = path.join(import.meta.dirname, "portability.test.ts");
 const probe = `
-  const { createTokenizer, registrations } = require(${JSON.stringify(tokenizerPath)});
+  const { createTokenizer, registrations } = await import(${JSON.stringify(pathToFileURL(tokenizerPath).href)});
   const tokenizer = createTokenizer();
   try {
     console.log(JSON.stringify({
@@ -49,8 +52,8 @@ for (const form of ["dot", "sibling", "absolute"]) {
           : form === "sibling"
             ? path.relative(caller, grammarRoot)
             : grammarRoot;
-      const env = { ...process.env, SYNTAX_ROOT: selected };
-      delete env.SYNTAX_CORPUS;
+      const env: NodeJS.ProcessEnv = { ...process.env, SYNTAX_ROOT: selected };
+      delete env["SYNTAX_CORPUS"];
 
       const tokenization = spawnSync(process.execPath, ["-e", probe], {
         cwd,
@@ -58,7 +61,8 @@ for (const form of ["dot", "sibling", "absolute"]) {
         encoding: "utf8",
       });
       assert.equal(tokenization.status, 0, tokenization.stderr);
-      assert.deepEqual(JSON.parse(tokenization.stdout), {
+      const actual: unknown = JSON.parse(tokenization.stdout);
+      assert.deepEqual(actual, {
         scopes: [scope],
         tokens: '1:0:6 "chosen" keyword.other.selected-root',
       });
@@ -82,21 +86,28 @@ for (const form of ["dot", "sibling", "absolute"]) {
 
 for (const form of ["unset", "empty"]) {
   test(`SYNTAX_ROOT uses checkout grammars when ${form}`, () => {
-    const env = { ...process.env };
-    delete env.SYNTAX_CORPUS;
-    if (form === "unset") delete env.SYNTAX_ROOT;
-    else env.SYNTAX_ROOT = "";
-    const expected = require(path.join(__dirname, "../../package.json")).contributes.grammars;
+    const env: NodeJS.ProcessEnv = { ...process.env };
+    delete env["SYNTAX_CORPUS"];
+    if (form === "unset") delete env["SYNTAX_ROOT"];
+    else env["SYNTAX_ROOT"] = "";
+    const manifest: unknown = JSON.parse(
+      fs.readFileSync(path.join(import.meta.dirname, "../../package.json"), "utf8"),
+    );
+    assert.ok(isRecord(manifest));
+    const contributes = manifest["contributes"];
+    assert.ok(isRecord(contributes));
+    const expected = contributes["grammars"];
     const result = spawnSync(
       process.execPath,
       [
         "-e",
-        `const { registrations } = require(${JSON.stringify(tokenizerPath)});
+        `const { registrations } = await import(${JSON.stringify(pathToFileURL(tokenizerPath).href)});
          console.log(JSON.stringify(registrations));`,
       ],
       { cwd: os.tmpdir(), env, encoding: "utf8" },
     );
     assert.equal(result.status, 0, result.stderr);
-    assert.deepEqual(JSON.parse(result.stdout), expected);
+    const actual: unknown = JSON.parse(result.stdout);
+    assert.deepEqual(actual, expected);
   });
 }
