@@ -36,7 +36,7 @@ captures, which the APIs represent differently. Parent-dependent end expressions
 are reported separately because TextMate must substitute their begin captures
 before compilation. The syntax suite exercises those expressions with real state.
 
-Validation during this change found no remaining differences across 67,881
+Validation during this change found no remaining differences across 104,760
 expression/input pairs with Ruby 2.6.10, Ruby 4.0.7, and native Oniguruma 6.9.10
 against vscode-oniguruma 2.0.1. The native comparison checked capture byte offsets
 under both Ruby syntax and the default Oniguruma syntax. Dune atom boundaries use
@@ -72,10 +72,10 @@ TextMate classifies syntax without name resolution or type checking. OCaml and
 MLX names such as `int` and `string` can denote values or locally defined types.
 ATD uses predefined type names in type expressions, but the same names can label
 record fields. These names no longer receive a built-in type scope everywhere.
-Type and class declarations receive type scopes, and methods receive method
-scopes. Other bindings use a neutral binding scope where the declaration does
-not establish that the value is a function. Syntactic type parameters retain
-their type-variable scopes.
+Type and class declarations retain their kind across `and` continuations. Nested
+value bindings keep neutral binding scopes, and methods receive method scopes.
+Other bindings use a neutral scope where the declaration does not establish that
+the value is a function. Syntactic type parameters retain their type-variable scopes.
 
 These tests cover the reported lexical distinctions and state boundaries. They
 do not establish complete parser conformance, exact Unicode identifier
@@ -83,3 +83,9 @@ validation, or correctness of the external JavaScript, HTML, and LaTeX grammars.
 Consumers must provide `source.js`, `text.html.basic`, and `text.tex.latex` for
 those embedded languages. Menhir actions and Markdown blocks also require host
 support for grammar injections. Scope colours remain theme-dependent.
+
+Markdown injections distinguish absolute line starts from the host grammar's
+container-relative position. They reject top-level fences indented by four
+spaces or a tab while preserving valid tabbed fences in quotes and lists. The
+host still owns Markdown block classification and list indentation. These rules
+do not correct the host's generic fenced-block or deeply indented list parsing.

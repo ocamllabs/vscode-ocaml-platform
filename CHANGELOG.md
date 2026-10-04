@@ -10,8 +10,10 @@
   OCaml effects and raw identifiers, Dune atom boundaries and actions, and
   strings, comments, and escapes in the supported configuration languages.
   Avoid classifying ordinary identifiers as built-in types without type context.
-  Distinguish type, class, and method declarations from other bindings.
-- Fix Menhir action keyword highlighting and longer Markdown closing fences.
+  Distinguish type, class, and method declarations from other bindings, including
+  declarations joined by `and`.
+- Fix Menhir action keyword highlighting and Markdown fence boundaries. Reject
+  invalid top-level indentation while preserving fences inside quotes and lists.
 
 ## 2.4.0
 

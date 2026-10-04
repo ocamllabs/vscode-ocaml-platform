@@ -86,6 +86,21 @@ for (const extension of ["ml", "mlx"]) {
   });
 }
 examples.push({
+  filename: "declaration-prefixes.ml",
+  source: [
+    "type +'a positive = 'a list and -'b negative = 'b -> unit",
+    "class local_open = let open M in c and following_class = object end",
+    "class type local_open_type = let open! M in c and following_class_type = object end",
+  ].join("\n"),
+  assertions: [
+    { text: "+", scope: "keyword.operator.ocaml", exact: true },
+    { text: "-", scope: "keyword.operator.ocaml", exact: true },
+    { text: "open", scope: "keyword", absent: "entity.name.binding", exact: true },
+    { text: "following_class", scope: "entity.name.type.class.ocaml", exact: true },
+    { text: "following_class_type", scope: "entity.name.type.class.ocaml" },
+  ],
+});
+examples.push({
   filename: "declaration-continuations.mli",
   source: [
     "type first_type = int",
