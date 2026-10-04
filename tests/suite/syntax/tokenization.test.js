@@ -59,6 +59,100 @@ const examples = [
   },
 ];
 
+for (const extension of ["ml", "mlx"]) {
+  examples.push({
+    filename: `declaration-continuations.${extension}`,
+    source: [
+      "type first_type = int",
+      "and second_type = string",
+      "class first_class = let helper = 1 and sibling = 2 in object method value = helper end",
+      "and second_class = object end",
+      "class type first_class_type = object end",
+      "and second_class_type = object end",
+      "let first_value = 1 and second_value = 2",
+    ].join("\n"),
+    assertions: [
+      { text: "second_type", scope: "entity.name.type.ocaml" },
+      { text: "second_class", scope: "entity.name.type.class.ocaml", exact: true },
+      { text: "second_class_type", scope: "entity.name.type.class.ocaml" },
+      {
+        text: "sibling",
+        scope: "entity.name.binding.ocaml",
+        absent: "entity.name.type",
+        exact: true,
+      },
+      { text: "second_value", scope: "entity.name.binding.ocaml", absent: "entity.name.type" },
+    ],
+  });
+}
+examples.push({
+  filename: "declaration-continuations.mli",
+  source: [
+    "type first_type = int",
+    "and second_type = string",
+    "class first_class : object end",
+    "and second_class : object end",
+    "class type first_class_type = object end",
+    "and second_class_type = object end",
+    "val next_value : int",
+  ].join("\n"),
+  assertions: [
+    { text: "second_type", scope: "entity.name.type.ocaml" },
+    { text: "second_class", scope: "entity.name.type.class.ocaml", exact: true },
+    { text: "second_class_type", scope: "entity.name.type.class.ocaml" },
+    { text: "next_value", scope: "entity.name.binding.ocaml", absent: "entity.name.type" },
+  ],
+});
+
+for (const language of ["ocaml", "reason"]) {
+  const fence = language === "ocaml" ? "```" : "~~~";
+  for (const [name, indent] of [
+    ["spaces", "    "],
+    ["tab", "\t"],
+  ]) {
+    examples.push({
+      filename: `${language}-indented-${name}.md`,
+      source: [indent + fence + language, indent + "IndentedCode", indent + fence].join("\n"),
+      assertions: [
+        { text: "IndentedCode", scope: "text.html.markdown", absent: "meta.embedded.block" },
+      ],
+    });
+  }
+  examples.push({
+    filename: `${language}-indented-closer.md`,
+    source: [
+      fence + language,
+      "let value = 1",
+      "\t" + fence,
+      "StillEmbedded",
+      fence,
+      "Outside",
+    ].join("\n"),
+    assertions: [
+      { text: "StillEmbedded", scope: `meta.embedded.block.${language}` },
+      { text: "Outside", scope: "text.html.markdown", absent: "meta.embedded.block" },
+    ],
+  });
+  examples.push({
+    filename: `${language}-container-tabs.md`,
+    source: [
+      "> \t" + fence + language,
+      "> \tQuotedCode",
+      "> \t" + fence,
+      "",
+      "- item",
+      "",
+      "  \t" + fence + language,
+      "  \tListedCode",
+      "  \t" + fence,
+    ].join("\n"),
+    assertions: [
+      { text: "QuotedCode", scope: `meta.embedded.block.${language}` },
+      { text: "ListedCode", scope: `meta.embedded.block.${language}` },
+    ],
+  });
+}
+
 suite("editor syntax tokenisation", () => {
   let directory;
   suiteSetup(async () => {
