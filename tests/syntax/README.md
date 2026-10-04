@@ -17,6 +17,31 @@ The `reference` field records the specification behind each case. `SYNTAX_ROOT`
 selects another checkout's grammars, registrations, and cases for comparison
 with a baseline. The runner itself and its dependencies come from this checkout.
 
+## Portability checks
+
+The syntax suite checks numeric capture dictionaries and resolves local and
+cross-grammar includes. It also checks 2,520 Markdown fence combinations with
+unterminated embedded strings, including marker, length, and indentation changes.
+
+An optional comparison runs expressions changed since a Git revision against
+the fixture lines using both VS Code's Oniguruma and a supplied Ruby executable.
+It requires Ruby with its standard JSON library. For example:
+
+```sh
+node tests/syntax/compare-engines.js origin/master /usr/bin/ruby
+```
+
+The comparison checks match positions and captured text. It normalises unmatched
+captures, which the APIs represent differently. Parent-dependent end expressions
+are reported separately because TextMate must substitute their begin captures
+before compilation. The syntax suite exercises those expressions with real state.
+
+Validation during this change found no remaining differences across 67,881
+expression/input pairs with Ruby 2.6.10, Ruby 4.0.7, and native Oniguruma 6.9.10
+against vscode-oniguruma 2.0.1. The native comparison checked capture byte offsets
+under both Ruby syntax and the default Oniguruma syntax. Dune atom boundaries use
+explicit ASCII whitespace because engines disagree about Unicode `\s`.
+
 ## Reference coverage
 
 The audit checked all 22 registered grammars on 4 October 2026. The references
@@ -55,3 +80,6 @@ their type-variable scopes.
 These tests cover the reported lexical distinctions and state boundaries. They
 do not establish complete parser conformance, exact Unicode identifier
 validation, or correctness of the external JavaScript, HTML, and LaTeX grammars.
+Consumers must provide `source.js`, `text.html.basic`, and `text.tex.latex` for
+those embedded languages. Menhir actions and Markdown blocks also require host
+support for grammar injections. Scope colours remain theme-dependent.

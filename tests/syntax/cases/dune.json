@@ -356,5 +356,51 @@
       }
     ],
     "reference": "https://dune.readthedocs.io/en/stable/reference/dune/files.html"
+  },
+  {
+    "name": "Dune atom boundaries do not treat Unicode spaces as delimiters",
+    "scope": "source.dune",
+    "source": "(library (name a))\n(library (name a))\n(rule (action (echo true value 1.2 suffix)))",
+    "assertions": [
+      {
+        "line": 1,
+        "text": "library",
+        "notScopes": ["keyword.language"]
+      },
+      {
+        "line": 2,
+        "text": "library",
+        "notScopes": ["keyword.language"]
+      },
+      {
+        "line": 3,
+        "text": "true",
+        "notScopes": ["constant.language"]
+      },
+      {
+        "line": 3,
+        "text": "1.2",
+        "notScopes": ["constant.numeric"]
+      }
+    ],
+    "reference": "https://github.com/ocaml/dune/blob/3.24.2/src/dune_sexp/lexer.mll"
+  },
+  {
+    "name": "Dune atom boundaries retain tab and form-feed separators",
+    "scope": "source.dune",
+    "source": "(library\t(name a))\n(library\f(name b))",
+    "assertions": [
+      {
+        "line": 1,
+        "text": "library",
+        "scopes": ["keyword.language.dune"]
+      },
+      {
+        "line": 2,
+        "text": "library",
+        "scopes": ["keyword.language.dune"]
+      }
+    ],
+    "reference": "https://github.com/ocaml/dune/blob/3.24.2/src/dune_sexp/lexer.mll"
   }
 ]

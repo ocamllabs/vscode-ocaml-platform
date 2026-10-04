@@ -30,6 +30,46 @@ before(async () => {
 });
 after(() => registry.dispose());
 
+test("Markdown fences preserve delimiter length, marker and multiline state", async () => {
+  for (const language of ["ocaml", "reason"]) {
+    const grammar = await registry.loadGrammar(`markdown.${language}.codeblock`);
+    for (const marker of ["`", "~"]) {
+      const otherMarker = marker === "`" ? "~" : "`";
+      for (let opening = 3; opening <= 9; opening++) {
+        for (let closing = 2; closing <= 11; closing++) {
+          for (const indent of ["", " ", "   "]) {
+            for (const ending of ["same", "other", "mixed"]) {
+              const fence =
+                (ending === "other" ? otherMarker : marker).repeat(closing) +
+                (ending === "mixed" ? otherMarker : "");
+              let state = INITIAL;
+              let result;
+              for (const line of [
+                indent + marker.repeat(opening) + language,
+                'let x = "unterminated',
+                indent + fence,
+                "AFTER",
+              ]) {
+                result = grammar.tokenizeLine(line, state);
+                assert.equal(result.stoppedEarly, false);
+                state = result.ruleStack;
+              }
+              const remainsInside = result.tokens.some((token) =>
+                token.scopes.includes("markup.fenced_code.block.markdown"),
+              );
+              assert.equal(
+                remainsInside,
+                ending !== "same" || closing < opening,
+                JSON.stringify({ language, marker, opening, closing, indent, ending }),
+              );
+            }
+          }
+        }
+      }
+    }
+  }
+});
+
 for (const entry of grammars) {
   test(`loads ${entry.scopeName}`, async () => {
     const grammar = await registry.loadGrammar(entry.scopeName);

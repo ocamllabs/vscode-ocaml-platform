@@ -40,7 +40,7 @@
     "lint": "oxlint && oxfmt --check",
     "package": "vsce package --out ocaml-platform.vsix --no-dependencies",
     "test": "bun run test:syntax && vscode-test",
-    "test:syntax": "node --test tests/syntax/grammar.test.js"
+    "test:syntax": "node --test tests/syntax/grammar.test.js tests/syntax/portability.test.js"
   },
   "dependencies": {
     "oxfmt": "0.68.0",
