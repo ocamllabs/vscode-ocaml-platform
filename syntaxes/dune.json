@@ -1911,7 +1911,7 @@
       "patterns": [
         {
           "comment": "dependency with name",
-          "begin": "\\([ \\t\\r\\n\\f]*(:[[:word:]]+\\b)",
+          "begin": "\\([ \\t\\r\\n\\f]*(:[[:word:]_-]+)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {

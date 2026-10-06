@@ -543,3 +543,57 @@ test("Dune compound forms require ASCII separators", async () => {
     ]
   `);
 });
+
+// https://dune.readthedocs.io/en/stable/concepts/dependency-spec.html
+test("Dune named dependencies accept hyphenated names", async () => {
+  const source = `(rule
+ (deps (:my-dep foo.ml))
+ (action (run cat %{my-dep})))`;
+  expect(await tokenizer.render("source.dune", source)).toMatchInlineSnapshot(`
+    "1:0:1 "("
+    1:1:5 "rule" keyword.language.dune
+    2:1:2 "("
+    2:2:6 "deps" keyword.language.dune
+    2:7:8 "("
+    2:8:15 ":my-dep" entity.name.function.action.dune
+    2:15:22 " foo.ml"
+    2:22:23 ")"
+    2:23:24 ")"
+    3:1:2 "("
+    3:2:8 "action" keyword.language.dune
+    3:9:10 "("
+    3:10:13 "run" entity.name.function.action.dune
+    3:13:18 " cat "
+    3:18:20 "%{" keyword.operator.dune
+    3:20:26 "my-dep"
+    3:26:27 "}" keyword.operator.dune
+    3:27:28 ")"
+    3:28:29 ")"
+    3:29:30 ")""
+  `);
+});
+
+// https://dune.readthedocs.io/en/stable/reference/dune-project/package.html
+test("dune-project dependencies accept package names with plus signs", async () => {
+  const source = `(package
+ (name p)
+ (depends conf-c++ (conf-g++ :build) ocaml))`;
+  expect(await tokenizer.render("source.dune-project", source)).toMatchInlineSnapshot(`
+    "1:0:1 "("
+    1:1:8 "package" keyword.language.dune-project
+    2:1:2 "("
+    2:2:6 "name" keyword.language.dune-project
+    2:6:8 " p" variable.other.declaration.dune-project
+    2:8:9 ")"
+    3:1:2 "("
+    3:2:9 "depends" keyword.language.dune-project
+    3:10:18 "conf-c++" variable.other.declaration.dune-project
+    3:19:20 "("
+    3:20:28 "conf-g++" variable.other.declaration.dune-project
+    3:29:35 ":build" entity.name.function.action.dune
+    3:35:36 ")"
+    3:37:42 "ocaml" variable.other.declaration.dune-project
+    3:42:43 ")"
+    3:43:44 ")""
+  `);
+});

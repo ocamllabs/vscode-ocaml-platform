@@ -126,3 +126,41 @@ let next = 42;`;
     2:13:14 ";" variable.other.class.js variable.interpolation keyword.operator keyword.control message.error"
   `);
 });
+
+// https://raw.githubusercontent.com/reasonml/reason/master/src/reason-parser/reason_declarative_lexer.mll
+test("Reason external primitives are not printf formats", async () => {
+  const source = `external identity: 'a => 'a = "%identity";
+external add: (int, int) => int = "%addint";`;
+  expect(await tokenizer.render("source.reason", source)).toMatchInlineSnapshot(`
+    "1:0:8 "external" storage.type
+    1:9:17 "identity" entity.name.function
+    1:17:18 ":" variable.other.class.js variable.interpolation keyword.operator keyword.control message.error
+    1:19:20 "'" comment
+    1:20:21 "a" variable.parameter string.other.link variable.language
+    1:22:24 "=>" markup.inserted keyword.control.less
+    1:25:26 "'" comment
+    1:26:27 "a" variable.parameter string.other.link variable.language
+    1:28:29 "=" keyword.control.less
+    1:30:31 "\\"" string.double string.regexp
+    1:31:32 "%" string.double string.regexp entity.other.attribute-name.css constant.language constant.numeric
+    1:32:40 "identity" string.double string.regexp variable.other.class.js variable.interpolation keyword.operator keyword.control message.error
+    1:40:41 "\\"" string.double string.regexp
+    1:41:42 ";" variable.other.class.js variable.interpolation keyword.operator keyword.control message.error
+    2:0:8 "external" storage.type
+    2:9:12 "add" entity.name.function
+    2:12:13 ":" variable.other.class.js variable.interpolation keyword.operator keyword.control message.error
+    2:14:15 "("
+    2:15:18 "int" support.type string.regexp
+    2:18:19 "," keyword.control.less
+    2:20:23 "int" support.type string.regexp
+    2:23:24 ")"
+    2:25:27 "=>" markup.inserted keyword.control.less
+    2:28:31 "int" support.type string.regexp
+    2:32:33 "=" keyword.control.less
+    2:34:35 "\\"" string.double string.regexp
+    2:35:36 "%" string.double string.regexp entity.other.attribute-name.css constant.language constant.numeric
+    2:36:42 "addint" string.double string.regexp variable.other.class.js variable.interpolation keyword.operator keyword.control message.error
+    2:42:43 "\\"" string.double string.regexp
+    2:43:44 ";" variable.other.class.js variable.interpolation keyword.operator keyword.control message.error"
+  `);
+});

@@ -24,7 +24,7 @@
 
     "fields": {
       "comment": "labeled field",
-      "match": "^[[:blank:]]*([[:word:]+-]*[[:alpha:]][[:word:]+-]*)[[:blank:]]*(:)",
+      "match": "^[[:blank:]]*([[:word:]+-]*[[:alpha:]][[:word:]+-]*)[[:blank:]]*(:)(?![[:word:]-]*[[:alpha:]])",
       "captures": {
         "1": { "name": "entity.name.tag.opam" },
         "2": { "name": "keyword.operator.opam" }

@@ -195,11 +195,11 @@
                 {
                   "comment": "dependency",
                   "name": "variable.other.declaration.dune-project",
-                  "match": "(?<![^ \\t\\r\\n\\f();\"])([[:word:]-]+)(?=[ \\t\\r\\n\\f();\"]|$)"
+                  "match": "(?<![^ \\t\\r\\n\\f();\"])([[:word:]+-]+)(?=[ \\t\\r\\n\\f();\"]|$)"
                 },
                 {
                   "comment": "dependency constraint",
-                  "begin": "\\([ \\t\\r\\n\\f]*([[:word:]-]+)(?=[ \\t\\r\\n\\f();\"]|$)",
+                  "begin": "\\([ \\t\\r\\n\\f]*([[:word:]+-]+)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "variable.other.declaration.dune-project" }

@@ -1,6 +1,6 @@
 {
   "fileTypes": [],
-  "injectionSelector": "L:text.html.markdown",
+  "injectionSelector": "L:text.html.markdown - markup.fenced_code.block.markdown",
   "patterns": [{ "include": "#reason-code-block" }],
   "repository": {
     "reason-code-block": {

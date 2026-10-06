@@ -105,9 +105,7 @@ x-count:-123`;
     1:27:31 "-123" constant.numeric.decimal.opam
     1:32:37 "1_000" constant.numeric.decimal.opam
     1:37:39 "]"
-    2:0:9 "x-enabled" entity.name.tag.opam
-    2:9:10 ":" keyword.operator.opam
-    2:10:14 "true" constant.language.opam
+    2:0:14 "x-enabled:true" variable.parameter.opam
     3:0:7 "x-count" entity.name.tag.opam
     3:7:8 ":" keyword.operator.opam
     3:8:12 "-123" constant.numeric.decimal.opam"
@@ -399,5 +397,37 @@ test("opam install strings continue across LF and CRLF", async () => {
     4:7:11 "tool" string.quoted.double.opam-install
     4:11:12 "\\"" string.quoted.double.opam-install
     4:12:14 "]""
+  `);
+});
+
+// https://opam.ocaml.org/doc/Manual.html
+test("opam package variables start indented filter lines", async () => {
+  const source = `build: [
+  ["dune" "build"] {
+    with-test &
+    ocaml:version >= "4.14"
+  }
+]`;
+  expect(await tokenizer.render("source.ocaml.opam", source)).toMatchInlineSnapshot(`
+    "1:0:5 "build" entity.name.tag.opam
+    1:5:6 ":" keyword.operator.opam
+    1:6:9 " ["
+    2:0:3 "  ["
+    2:3:4 "\\"" string.quoted.double.opam
+    2:4:8 "dune" string.quoted.double.opam
+    2:8:9 "\\"" string.quoted.double.opam
+    2:10:11 "\\"" string.quoted.double.opam
+    2:11:16 "build" string.quoted.double.opam
+    2:16:17 "\\"" string.quoted.double.opam
+    2:17:21 "] {"
+    3:4:13 "with-test" variable.parameter.opam
+    3:14:15 "&" keyword.operator.opam
+    4:4:17 "ocaml:version" variable.parameter.opam
+    4:18:20 ">=" keyword.operator.opam
+    4:21:22 "\\"" string.quoted.double.opam
+    4:22:26 "4.14" string.quoted.double.opam
+    4:26:27 "\\"" string.quoted.double.opam
+    5:0:4 "  }"
+    6:0:2 "]""
   `);
 });
