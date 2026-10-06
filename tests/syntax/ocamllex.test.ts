@@ -48,3 +48,54 @@ rule _token = parse
     5:8:9 "}" keyword.other.ocamllex"
   `);
 });
+
+// https://ocaml.org/manual/5.5/lexyacc.html
+test("OCamllex header declarations use OCaml scopes", async () => {
+  const source = `{
+type t = A of int | B of { x : int }
+class c = object method m = if x then 1 else A.f end
+}
+rule token = parse eof { () }`;
+  expect(await tokenizer.render("source.ocaml.ocamllex", source)).toMatchInlineSnapshot(`
+    "1:0:1 "{" keyword.other.ocamllex
+    2:0:4 "type" keyword.ocaml
+    2:5:6 "t" entity.name.type.ocaml
+    2:7:8 "=" keyword.operator.ocaml
+    2:9:10 "A" constant.language.capital-identifier.ocaml
+    2:11:13 "of" keyword.other.ocaml
+    2:14:17 "int" source.ocaml
+    2:18:19 "|" keyword.other.ocaml
+    2:20:21 "B" constant.language.capital-identifier.ocaml
+    2:22:24 "of" keyword.other.ocaml
+    2:25:26 "{"
+    2:27:28 "x" source.ocaml
+    2:29:30 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
+    2:31:34 "int" source.ocaml
+    2:35:36 "}"
+    3:0:5 "class" keyword.ocaml
+    3:6:7 "c" entity.name.type.class.ocaml
+    3:8:9 "=" keyword.operator.ocaml
+    3:10:16 "object" keyword.ocaml
+    3:17:23 "method" keyword.ocaml
+    3:24:25 "m" entity.name.function.method.ocaml
+    3:26:27 "=" keyword.operator.ocaml
+    3:28:30 "if" keyword.other.ocaml
+    3:31:32 "x" source.ocaml
+    3:33:37 "then" keyword.other.ocaml
+    3:38:39 "1" constant.numeric.decimal.integer.ocaml
+    3:40:44 "else" keyword.other.ocaml
+    3:45:46 "A" constant.language.capital-identifier.ocaml
+    3:46:47 "." keyword.other.ocaml punctuation.other.period punctuation.separator.period
+    3:47:48 "f" source.ocaml
+    3:49:52 "end" keyword.ocaml
+    4:0:1 "}" keyword.other.ocamllex
+    5:0:4 "rule" keyword.other.ocamllex
+    5:5:10 "token" entity.name.function.rule.ocamllex
+    5:11:12 "=" keyword.operator.symbol.ocamllex
+    5:13:18 "parse" keyword.other.ocamllex
+    5:19:22 "eof" constant.language.eof.ocamllex
+    5:23:24 "{" keyword.other.ocamllex
+    5:25:27 "()" constant.language.unit.ocaml
+    5:28:29 "}" keyword.other.ocamllex"
+  `);
+});

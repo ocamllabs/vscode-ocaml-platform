@@ -704,3 +704,66 @@ test("reason tilde closing fences require ASCII whitespace", async () => {
     10:0:8 "Outside""
   `);
 });
+
+// https://spec.commonmark.org/0.31.2/#fenced-code-blocks
+test("OCaml Markdown declaration bodies keep OCaml scopes", async () => {
+  const source = `\`\`\`ocaml
+type t = A of int | B of { x : int }
+class c x = object method m = x + 1 end
+\`\`\``;
+  expect(await tokenizer.render("markdown.ocaml.codeblock", source)).toMatchInlineSnapshot(`
+    "1:0:3 "\`\`\`" markup.fenced_code.block.markdown punctuation.definition.markdown
+    1:3:8 "ocaml" markup.fenced_code.block.markdown fenced_code.block.language.markdown
+    2:0:4 "type" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.ocaml
+    2:4:5 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    2:5:6 "t" markup.fenced_code.block.markdown meta.embedded.block.ocaml entity.name.type.ocaml
+    2:6:7 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    2:7:8 "=" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.operator.ocaml
+    2:8:9 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    2:9:10 "A" markup.fenced_code.block.markdown meta.embedded.block.ocaml constant.language.capital-identifier.ocaml
+    2:10:11 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    2:11:13 "of" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.other.ocaml
+    2:13:14 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    2:14:17 "int" markup.fenced_code.block.markdown meta.embedded.block.ocaml source.ocaml
+    2:17:18 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    2:18:19 "|" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.other.ocaml
+    2:19:20 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    2:20:21 "B" markup.fenced_code.block.markdown meta.embedded.block.ocaml constant.language.capital-identifier.ocaml
+    2:21:22 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    2:22:24 "of" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.other.ocaml
+    2:24:25 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    2:25:26 "{" markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    2:26:27 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    2:27:28 "x" markup.fenced_code.block.markdown meta.embedded.block.ocaml source.ocaml
+    2:28:29 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    2:29:30 ":" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.other.ocaml punctuation.other.colon punctuation.colon
+    2:30:31 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    2:31:34 "int" markup.fenced_code.block.markdown meta.embedded.block.ocaml source.ocaml
+    2:34:35 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    2:35:36 "}" markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    3:0:5 "class" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.ocaml
+    3:5:6 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    3:6:7 "c" markup.fenced_code.block.markdown meta.embedded.block.ocaml entity.name.type.class.ocaml
+    3:7:8 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    3:8:9 "x" markup.fenced_code.block.markdown meta.embedded.block.ocaml source.ocaml
+    3:9:10 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    3:10:11 "=" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.operator.ocaml
+    3:11:12 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    3:12:18 "object" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.ocaml
+    3:18:19 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    3:19:25 "method" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.ocaml
+    3:25:26 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    3:26:27 "m" markup.fenced_code.block.markdown meta.embedded.block.ocaml entity.name.function.method.ocaml
+    3:27:28 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    3:28:29 "=" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.operator.ocaml
+    3:29:30 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    3:30:31 "x" markup.fenced_code.block.markdown meta.embedded.block.ocaml source.ocaml
+    3:31:32 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    3:32:33 "+" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.operator.ocaml
+    3:33:34 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    3:34:35 "1" markup.fenced_code.block.markdown meta.embedded.block.ocaml constant.numeric.decimal.integer.ocaml
+    3:35:36 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
+    3:36:39 "end" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.ocaml
+    4:0:3 "\`\`\`" markup.fenced_code.block.markdown punctuation.definition.markdown"
+  `);
+});

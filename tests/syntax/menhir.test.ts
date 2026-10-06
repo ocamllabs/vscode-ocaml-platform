@@ -120,3 +120,106 @@ let plain = "$startpos"`;
     5:22:23 "\\"" string.quoted.double.ocaml"
   `);
 });
+
+// https://gallium.inria.fr/~fpottier/menhir/manual.html
+test("Menhir header closes after type and class declarations", async () => {
+  const source = `%{
+type t = A | B
+class c = object end
+%}
+%{ type u = int %}
+%token EOF
+%%
+main: EOF { () }`;
+  expect(await tokenizer.render("source.ocaml.menhir", source)).toMatchInlineSnapshot(`
+    "1:0:2 "%{" keyword.other.menhir
+    2:0:4 "type" keyword.ocaml
+    2:5:6 "t" entity.name.type.ocaml
+    2:7:8 "=" keyword.operator.ocaml
+    2:9:10 "A" constant.language.capital-identifier.ocaml
+    2:11:12 "|" keyword.other.ocaml
+    2:13:14 "B" constant.language.capital-identifier.ocaml
+    3:0:5 "class" keyword.ocaml
+    3:6:7 "c" entity.name.type.class.ocaml
+    3:8:9 "=" keyword.operator.ocaml
+    3:10:16 "object" keyword.ocaml
+    3:17:20 "end" keyword.ocaml
+    4:0:2 "%}" keyword.other.menhir
+    5:0:2 "%{" keyword.other.menhir
+    5:3:7 "type" keyword.ocaml
+    5:8:9 "u" entity.name.type.ocaml
+    5:10:11 "=" keyword.operator.ocaml
+    5:12:15 "int" source.ocaml
+    5:16:18 "%}" keyword.other.menhir
+    6:0:6 "%token" keyword.other.menhir
+    6:7:10 "EOF" constant.other.token.menhir
+    7:0:2 "%%" keyword.other.menhir
+    8:0:4 "main" entity.name.function.rule.menhir
+    8:4:5 ":" keyword.other.menhir
+    8:6:9 "EOF" constant.other.token.menhir
+    8:10:11 "{" keyword.other.menhir
+    8:11:12 " " source.embedded-action.menhir
+    8:12:14 "()" source.embedded-action.menhir constant.language.unit.ocaml
+    8:14:15 " " source.embedded-action.menhir
+    8:15:16 "}" keyword.other.menhir"
+  `);
+});
+
+// https://gallium.inria.fr/~fpottier/menhir/manual.html
+test("Menhir parameter annotations close after type constraints", async () => {
+  const source = `%parameter <Ord : Map.OrderedType with type t = int>
+%token <int> INT
+%start <int> main
+%%
+main: INT { $1 }
+%%
+let max a b = if a > b then a else b`;
+  expect(await tokenizer.render("source.ocaml.menhir", source)).toMatchInlineSnapshot(`
+    "1:0:10 "%parameter" keyword.other.menhir
+    1:11:12 "<" keyword.other.menhir
+    1:12:15 "Ord" constant.language.capital-identifier.ocaml
+    1:16:17 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
+    1:18:21 "Map" constant.language.capital-identifier.ocaml
+    1:21:22 "." keyword.other.ocaml punctuation.other.period punctuation.separator.period
+    1:22:33 "OrderedType" constant.language.capital-identifier.ocaml
+    1:34:38 "with" keyword.other.ocaml
+    1:39:43 "type" keyword.ocaml
+    1:44:45 "t" entity.name.type.ocaml
+    1:46:47 "=" keyword.operator.ocaml
+    1:48:51 "int" source.ocaml
+    1:51:52 ">" keyword.other.menhir
+    2:0:6 "%token" keyword.other.menhir
+    2:7:8 "<" keyword.other.menhir
+    2:8:11 "int" source.ocaml
+    2:11:12 ">" keyword.other.menhir
+    2:13:16 "INT" constant.other.token.menhir
+    3:0:6 "%start" keyword.other.menhir
+    3:7:8 "<" keyword.other.menhir
+    3:8:11 "int" source.ocaml
+    3:11:12 ">" keyword.other.menhir
+    3:13:17 "main" entity.name.function.rule.menhir
+    4:0:2 "%%" keyword.other.menhir
+    5:0:4 "main" entity.name.function.rule.menhir
+    5:4:5 ":" keyword.other.menhir
+    5:6:9 "INT" constant.other.token.menhir
+    5:10:11 "{" keyword.other.menhir
+    5:11:12 " " source.embedded-action.menhir
+    5:12:14 "$1" source.embedded-action.menhir keyword.other.menhir
+    5:14:15 " " source.embedded-action.menhir
+    5:15:16 "}" keyword.other.menhir
+    6:0:2 "%%" keyword.other.menhir
+    7:0:3 "let" keyword.ocaml
+    7:4:7 "max" entity.name.binding.ocaml
+    7:8:9 "a" source.ocaml
+    7:10:11 "b" source.ocaml
+    7:12:13 "=" keyword.operator.ocaml
+    7:14:16 "if" keyword.other.ocaml
+    7:17:18 "a" source.ocaml
+    7:19:20 ">" keyword.operator.ocaml
+    7:21:22 "b" source.ocaml
+    7:23:27 "then" keyword.other.ocaml
+    7:28:29 "a" source.ocaml
+    7:30:34 "else" keyword.other.ocaml
+    7:35:36 "b" source.ocaml"
+  `);
+});

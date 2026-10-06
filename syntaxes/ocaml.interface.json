@@ -131,8 +131,8 @@
       ]
     },
     "type-declarations": {
-      "begin": "(?=\\btype\\b(?!'))",
-      "end": "(?=\\b(?:let|val|external|exception|module|open|include|end|in)\\b(?!')|;;|[)}\\]]|\\bclass\\b(?!')|\\band[[:space:]]+module\\b(?!'))",
+      "begin": "(?=\\btype\\b(?!')(?![[:space:]]+(?:(?:\\\\#)?[[:lower:]_][[:word:]']*[[:space:]]+)*(?:\\\\#)?[[:lower:]_][[:word:]']*[[:space:]]*\\.))",
+      "end": "(?=\\b(?:let|val|external|exception|module|open|include|end|in)\\b(?!')|;;|[)}\\]>]|%}|\\*\\)|\\bclass\\b(?!')|\\band[[:space:]]+module\\b(?!'))",
       "patterns": [
         {
           "begin": "\\b(type|and)\\b(?!')",
@@ -168,12 +168,24 @@
             { "include": "#declaration-delimiters" }
           ]
         },
+        { "include": "#object-types" },
         { "include": "#declaration-body" }
       ]
     },
+    "object-types": {
+      "begin": "<",
+      "beginCaptures": {
+        "0": { "name": "keyword.operator.ocaml" }
+      },
+      "end": ">",
+      "endCaptures": {
+        "0": { "name": "keyword.operator.ocaml" }
+      },
+      "patterns": [{ "include": "#object-types" }, { "include": "#declaration-body" }]
+    },
     "class-declarations": {
       "begin": "(?=\\bclass\\b(?!'))",
-      "end": "(?=\\b(?:let|val|external|exception|module|open|include|end|in)\\b(?!')|;;|[)}\\]]|\\btype\\b(?!')|\\band[[:space:]]+(?:type|module)\\b(?!'))",
+      "end": "(?=\\b(?:let|val|external|exception|module|open|include|end|in)\\b(?!')|;;|[)}\\]]|%}|\\*\\)|\\btype\\b(?!')|\\band[[:space:]]+(?:type|module)\\b(?!'))",
       "patterns": [
         {
           "begin": "\\b(class|and)\\b(?!')",
@@ -240,7 +252,7 @@
         { "include": "#class-local-let" },
         {
           "begin": "\\b(fun)\\b(?!')",
-          "end": "->",
+          "end": "->|(?=[)}\\]]|;;|%}|\\*\\))",
           "beginCaptures": {
             "1": { "name": "keyword.ocaml" }
           },
@@ -254,8 +266,8 @@
     "class-local-let": {
       "patterns": [
         {
-          "begin": "\\b(let)[[:space:]]+(?!(?:lazy|open)\\b(?!'))(rec[[:space:]]+)?(?!rec\\b(?!'))((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]'])[[:space:]]*(?!,|::|[[:space:]])",
-          "end": "\\b(in)\\b(?!')",
+          "begin": "\\b(let)[[:space:]]+(?!(?:lazy|open|exception|module)\\b(?!'))(rec[[:space:]]+)?(?!rec\\b(?!'))((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]'])[[:space:]]*(?!,|::|[[:space:]])",
+          "end": "\\b(in)\\b(?!')|(?=[)}\\]]|;;|%}|\\*\\))",
           "beginCaptures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
@@ -268,7 +280,7 @@
         },
         {
           "begin": "\\b(let)\\b(?!')",
-          "end": "\\b(in)\\b(?!')",
+          "end": "\\b(in)\\b(?!')|(?=[)}\\]]|;;|%}|\\*\\))",
           "beginCaptures": {
             "1": { "name": "keyword.ocaml" }
           },
@@ -326,7 +338,7 @@
       "patterns": [
         { "include": "#declaration-lexical" },
         { "include": "#declaration-blocks" },
-        { "include": "$base" },
+        { "include": "source.ocaml" },
         { "include": "#declaration-delimiters" }
       ]
     },

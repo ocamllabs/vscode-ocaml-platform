@@ -92,9 +92,9 @@ and third = string`;
     1:5:10 "first" entity.name.type.ocaml
     1:11:12 "=" keyword.operator.ocaml
     1:13:14 "("
-    1:14:20 "module" keyword.other.ocaml.interface
+    1:14:20 "module" keyword.other.ocaml
     1:21:22 "S" constant.language.capital-identifier.ocaml
-    1:23:27 "with" keyword.other.ocaml.interface
+    1:23:27 "with" keyword.other.ocaml
     1:28:32 "type" keyword.ocaml
     1:33:38 "inner" entity.name.type.ocaml
     1:39:40 "=" keyword.operator.ocaml
@@ -109,7 +109,7 @@ and third = string`;
     2:4:10 "second" entity.name.type.ocaml
     2:11:12 "=" keyword.operator.ocaml
     2:13:14 "A" constant.language.capital-identifier.ocaml
-    2:15:17 "of" keyword.other.ocaml.interface
+    2:15:17 "of" keyword.other.ocaml
     2:18:19 "{"
     2:20:25 "field" source.ocaml
     2:26:27 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
@@ -146,7 +146,7 @@ module type U = sig type inner = int and other = string end`;
     1:12:13 "T" constant.language.capital-identifier.ocaml
     1:14:15 "=" keyword.operator.ocaml
     1:16:17 "S" constant.language.capital-identifier.ocaml
-    1:18:22 "with" keyword.other.ocaml.interface
+    1:18:22 "with" keyword.other.ocaml
     1:23:27 "type" keyword.ocaml
     1:28:33 "first" entity.name.type.ocaml
     1:34:35 "=" keyword.operator.ocaml
@@ -339,7 +339,7 @@ class type fifth = let (* comment *) open! M in base and sixth = object end`;
     1:11:16 "first" entity.name.type.class.ocaml
     1:17:18 "=" keyword.operator.ocaml
     1:19:22 "let" keyword.ocaml
-    1:23:27 "open" keyword.other.ocaml.interface
+    1:23:27 "open" keyword.other.ocaml
     1:28:29 "M" constant.language.capital-identifier.ocaml
     1:30:32 "in" keyword.ocaml
     1:33:37 "base" source.ocaml
@@ -353,7 +353,7 @@ class type fifth = let (* comment *) open! M in base and sixth = object end`;
     2:11:16 "third" entity.name.type.class.ocaml
     2:17:18 "=" keyword.operator.ocaml
     2:19:22 "let" keyword.ocaml
-    2:23:27 "open" keyword.other.ocaml.interface
+    2:23:27 "open" keyword.other.ocaml
     2:27:28 "!" keyword.operator.ocaml
     2:29:30 "M" constant.language.capital-identifier.ocaml
     2:31:33 "in" keyword.ocaml
@@ -371,7 +371,7 @@ class type fifth = let (* comment *) open! M in base and sixth = object end`;
     3:23:25 "(*" comment.block.ocaml
     3:25:34 " comment " comment.block.ocaml
     3:34:36 "*)" comment.block.ocaml
-    3:37:41 "open" keyword.other.ocaml.interface
+    3:37:41 "open" keyword.other.ocaml
     3:41:42 "!" keyword.operator.ocaml
     3:43:44 "M" constant.language.capital-identifier.ocaml
     3:45:47 "in" keyword.ocaml
@@ -507,5 +507,52 @@ type first = int and second = string`;
     6:21:27 "second" entity.name.type.ocaml
     6:28:29 "=" keyword.operator.ocaml
     6:30:36 "string" source.ocaml"
+  `);
+});
+
+// https://ocaml.org/manual/5.5/ocamldoc.html
+test("Doc comment class examples use OCaml scopes", async () => {
+  const source = `(** {[
+class c = object method m = if x then 1 else 2 end
+]} *)
+val x : int`;
+  expect(await tokenizer.render("source.ocaml.interface", source)).toMatchInlineSnapshot(`
+    "1:0:3 "(**" comment.doc.ocaml
+    1:3:4 " " comment.doc.ocaml
+    1:4:6 "{[" comment.doc.ocaml markup.inline.raw.ocamldoc
+    2:0:5 "class" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.ocaml
+    2:5:6 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    2:6:7 "c" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc entity.name.type.class.ocaml
+    2:7:8 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    2:8:9 "=" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.operator.ocaml
+    2:9:10 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    2:10:16 "object" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.ocaml
+    2:16:17 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    2:17:23 "method" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.ocaml
+    2:23:24 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    2:24:25 "m" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc entity.name.function.method.ocaml
+    2:25:26 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    2:26:27 "=" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.operator.ocaml
+    2:27:28 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    2:28:30 "if" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.other.ocaml
+    2:30:31 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    2:31:32 "x" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
+    2:32:33 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    2:33:37 "then" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.other.ocaml
+    2:37:38 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    2:38:39 "1" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc constant.numeric.decimal.integer.ocaml
+    2:39:40 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    2:40:44 "else" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.other.ocaml
+    2:44:45 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    2:45:46 "2" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc constant.numeric.decimal.integer.ocaml
+    2:46:47 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    2:47:50 "end" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.ocaml
+    3:0:2 "]}" comment.doc.ocaml markup.inline.raw.ocamldoc
+    3:2:3 " " comment.doc.ocaml
+    3:3:5 "*)" comment.doc.ocaml
+    4:0:3 "val" keyword.ocaml
+    4:4:5 "x" entity.name.binding.ocaml
+    4:6:7 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
+    4:8:11 "int" source.ocaml"
   `);
 });

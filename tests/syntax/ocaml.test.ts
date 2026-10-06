@@ -1033,3 +1033,198 @@ let f (type local) = ()`;
     9:21:23 "()" constant.language.unit.ocaml"
   `);
 });
+
+// https://github.com/ocaml-ppx/cinaps
+test("Cinaps comments close after declarations", async () => {
+  const source = `(*$ type t = int *)
+(*$ class c = object end *)
+let x = 1
+(*$*)`;
+  expect(await tokenizer.render("source.ocaml", source)).toMatchInlineSnapshot(`
+    "1:0:3 "(*$" comment.cinaps.ocaml
+    1:4:8 "type" keyword.ocaml
+    1:9:10 "t" entity.name.type.ocaml
+    1:11:12 "=" keyword.operator.ocaml
+    1:13:16 "int" source.ocaml
+    1:17:19 "*)" comment.cinaps.ocaml
+    2:0:3 "(*$" comment.cinaps.ocaml
+    2:4:9 "class" keyword.ocaml
+    2:10:11 "c" entity.name.type.class.ocaml
+    2:12:13 "=" keyword.operator.ocaml
+    2:14:20 "object" keyword.ocaml
+    2:21:24 "end" keyword.ocaml
+    2:25:27 "*)" comment.cinaps.ocaml
+    3:0:3 "let" keyword.ocaml
+    3:4:5 "x" entity.name.binding.ocaml
+    3:6:7 "=" keyword.operator.ocaml
+    3:8:9 "1" constant.numeric.decimal.integer.ocaml
+    4:0:3 "(*$" comment.cinaps.ocaml
+    4:3:5 "*)" comment.cinaps.ocaml"
+  `);
+});
+
+// https://ocaml.org/manual/5.5/locallyabstract.html
+test("Locally abstract annotations continued on the next line", async () => {
+  const source = `let rec eval :
+    type a. a term -> a =
+ fun e -> eval e
+and eval_list l = List.map eval l`;
+  expect(await tokenizer.render("source.ocaml", source)).toMatchInlineSnapshot(`
+    "1:0:3 "let" keyword.ocaml
+    1:4:8 "rec " keyword.ocaml
+    1:8:12 "eval" entity.name.binding.ocaml
+    1:13:14 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
+    2:4:8 "type" keyword.other.ocaml
+    2:9:10 "a" source.ocaml
+    2:10:11 "." keyword.other.ocaml punctuation.other.period punctuation.separator.period
+    2:12:13 "a" source.ocaml
+    2:14:18 "term" source.ocaml
+    2:19:21 "->" keyword.operator.ocaml
+    2:22:23 "a" source.ocaml
+    2:24:25 "=" keyword.operator.ocaml
+    3:1:4 "fun" keyword.other.ocaml
+    3:5:6 "e" source.ocaml
+    3:7:9 "->" keyword.operator.ocaml
+    3:10:14 "eval" source.ocaml
+    3:15:16 "e" source.ocaml
+    4:0:3 "and" keyword.ocaml
+    4:4:13 "eval_list" entity.name.binding.ocaml
+    4:14:15 "l" source.ocaml
+    4:16:17 "=" keyword.operator.ocaml
+    4:18:22 "List" constant.language.capital-identifier.ocaml
+    4:22:23 "." keyword.other.ocaml punctuation.other.period punctuation.separator.period
+    4:23:26 "map" source.ocaml
+    4:27:31 "eval" source.ocaml
+    4:32:33 "l" source.ocaml"
+  `);
+});
+
+// https://ocaml.org/manual/5.5/classes.html
+test("Class local modules and exceptions keep keyword scopes", async () => {
+  const source = `class c = let x = let module M = Map.Make (String) in M.empty in object end
+class d = let y = let exception E in 1 in object end`;
+  expect(await tokenizer.render("source.ocaml", source)).toMatchInlineSnapshot(`
+    "1:0:5 "class" keyword.ocaml
+    1:6:7 "c" entity.name.type.class.ocaml
+    1:8:9 "=" keyword.operator.ocaml
+    1:10:13 "let" keyword.ocaml
+    1:14:15 "x" entity.name.binding.ocaml
+    1:16:17 "=" keyword.operator.ocaml
+    1:18:21 "let" keyword.ocaml
+    1:22:28 "module" keyword.other.ocaml
+    1:29:30 "M" constant.language.capital-identifier.ocaml
+    1:31:32 "=" keyword.operator.ocaml
+    1:33:36 "Map" constant.language.capital-identifier.ocaml
+    1:36:37 "." keyword.other.ocaml punctuation.other.period punctuation.separator.period
+    1:37:41 "Make" constant.language.capital-identifier.ocaml
+    1:42:43 "("
+    1:43:49 "String" constant.language.capital-identifier.ocaml
+    1:49:50 ")"
+    1:51:53 "in" keyword.ocaml
+    1:54:55 "M" constant.language.capital-identifier.ocaml
+    1:55:56 "." keyword.other.ocaml punctuation.other.period punctuation.separator.period
+    1:56:61 "empty" source.ocaml
+    1:62:64 "in" keyword.ocaml
+    1:65:71 "object" keyword.ocaml
+    1:72:75 "end" keyword.ocaml
+    2:0:5 "class" keyword.ocaml
+    2:6:7 "d" entity.name.type.class.ocaml
+    2:8:9 "=" keyword.operator.ocaml
+    2:10:13 "let" keyword.ocaml
+    2:14:15 "y" entity.name.binding.ocaml
+    2:16:17 "=" keyword.operator.ocaml
+    2:18:21 "let" keyword.ocaml
+    2:22:31 "exception" keyword.other.ocaml
+    2:32:33 "E" constant.language.capital-identifier.ocaml
+    2:34:36 "in" keyword.ocaml
+    2:37:38 "1" constant.numeric.decimal.integer.ocaml
+    2:39:41 "in" keyword.ocaml
+    2:42:48 "object" keyword.ocaml
+    2:49:52 "end" keyword.ocaml"
+  `);
+});
+
+// https://ocaml.org/manual/5.5/types.html
+test("Object types keep type declaration continuations", async () => {
+  const source = `type t = < m : int; n : < p : float > > and u = int -> int
+and w = [> \`A ] * < .. >`;
+  expect(await tokenizer.render("source.ocaml", source)).toMatchInlineSnapshot(`
+    "1:0:4 "type" keyword.ocaml
+    1:5:6 "t" entity.name.type.ocaml
+    1:7:8 "=" keyword.operator.ocaml
+    1:9:10 "<" keyword.operator.ocaml
+    1:11:12 "m" source.ocaml
+    1:13:14 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
+    1:15:18 "int" source.ocaml
+    1:18:19 ";" keyword.other.ocaml punctuation.separator.terminator punctuation.separator.semicolon
+    1:20:21 "n" source.ocaml
+    1:22:23 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
+    1:24:25 "<" keyword.operator.ocaml
+    1:26:27 "p" source.ocaml
+    1:28:29 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
+    1:30:35 "float" source.ocaml
+    1:36:37 ">" keyword.operator.ocaml
+    1:38:39 ">" keyword.operator.ocaml
+    1:40:43 "and" keyword.ocaml
+    1:44:45 "u" entity.name.type.ocaml
+    1:46:47 "=" keyword.operator.ocaml
+    1:48:51 "int" source.ocaml
+    1:52:54 "->" keyword.operator.ocaml
+    1:55:58 "int" source.ocaml
+    2:0:3 "and" keyword.ocaml
+    2:4:5 "w" entity.name.type.ocaml
+    2:6:7 "=" keyword.operator.ocaml
+    2:8:9 "["
+    2:9:10 ">" keyword.operator.ocaml
+    2:11:13 "\`A" constant.language.polymorphic-variant.ocaml
+    2:14:15 "]"
+    2:16:17 "*" keyword.operator.ocaml
+    2:18:19 "<" keyword.operator.ocaml
+    2:20:21 "." keyword.other.ocaml punctuation.other.period punctuation.separator.period
+    2:21:22 "." keyword.other.ocaml punctuation.other.period punctuation.separator.period
+    2:23:24 ">" keyword.operator.ocaml"
+  `);
+});
+
+// https://ocaml.org/manual/5.5/ocamldoc.html
+test("Unfinished class fragments in documentation close with the comment", async () => {
+  const source = `(** [class c = fun x] and [class d = let x = 1] *)
+let x = 1`;
+  expect(await tokenizer.render("source.ocaml", source)).toMatchInlineSnapshot(`
+    "1:0:3 "(**" comment.doc.ocaml
+    1:3:4 " " comment.doc.ocaml
+    1:4:5 "[" comment.doc.ocaml markup.inline.raw.ocamldoc
+    1:5:10 "class" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.ocaml
+    1:10:11 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:11:12 "c" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc entity.name.type.class.ocaml
+    1:12:13 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:13:14 "=" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.operator.ocaml
+    1:14:15 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:15:18 "fun" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.ocaml
+    1:18:19 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:19:20 "x" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
+    1:20:21 "]" comment.doc.ocaml markup.inline.raw.ocamldoc
+    1:21:26 " and " comment.doc.ocaml
+    1:26:27 "[" comment.doc.ocaml markup.inline.raw.ocamldoc
+    1:27:32 "class" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.ocaml
+    1:32:33 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:33:34 "d" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc entity.name.type.class.ocaml
+    1:34:35 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:35:36 "=" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.operator.ocaml
+    1:36:37 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:37:40 "let" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.ocaml
+    1:40:41 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:41:42 "x" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc entity.name.binding.ocaml
+    1:42:43 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:43:44 "=" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.operator.ocaml
+    1:44:45 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:45:46 "1" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc constant.numeric.decimal.integer.ocaml
+    1:46:47 "]" comment.doc.ocaml markup.inline.raw.ocamldoc
+    1:47:48 " " comment.doc.ocaml
+    1:48:50 "*)" comment.doc.ocaml
+    2:0:3 "let" keyword.ocaml
+    2:4:5 "x" entity.name.binding.ocaml
+    2:6:7 "=" keyword.operator.ocaml
+    2:8:9 "1" constant.numeric.decimal.integer.ocaml"
+  `);
+});
