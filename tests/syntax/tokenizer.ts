@@ -25,9 +25,12 @@ export function createTokenizer() {
       const filename = path.join(grammarRoot, entry.path);
       return parseRawGrammar(fs.readFileSync(filename, "utf8"), filename);
     },
+    // VS Code injects grammars registered for the scope or any of its dotted prefixes.
     getInjections: (scope) =>
       registrations
-        .filter((entry) => entry.injectTo?.includes(scope))
+        .filter((entry) =>
+          entry.injectTo?.some((target) => scope === target || scope.startsWith(`${target}.`)),
+        )
         .map((entry) => entry.scopeName),
   });
 

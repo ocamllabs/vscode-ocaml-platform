@@ -73,11 +73,8 @@ for (const form of ["dot", "sibling", "absolute"]) {
         encoding: "utf8",
       });
       assert.equal(portability.status, 0, portability.stderr);
-      assert.match(
-        portability.stderr,
-        /portable structure and includes: source\.syntax-root-fixture/,
-      );
-      assert.match(portability.stderr, /1 pass/);
+      // Bun omits passing test names in agent environments; the fixture registers one grammar.
+      assert.match(portability.stderr, /^\s*1 pass$/m);
     } finally {
       fs.rmSync(directory, { recursive: true });
     }

@@ -34,11 +34,20 @@ async function compare() {
   const patterns: (RegexExpression & { file: string })[] = [];
   const dynamic: (RegexExpression & { file: string })[] = [];
   const seen = new Set<string>();
+  const baseFiles = new Set(
+    execFileSync("git", ["ls-tree", "--name-only", base, "syntaxes/"], {
+      cwd: grammarRoot,
+      encoding: "utf8",
+    }).split("\n"),
+  );
   for (const filename of fs.readdirSync(path.join(grammarRoot, "syntaxes")).sort()) {
+    if (!filename.endsWith(".json")) continue;
     const file = `syntaxes/${filename}`;
-    const previous: unknown = JSON.parse(
-      execFileSync("git", ["show", `${base}:${file}`], { cwd: grammarRoot, encoding: "utf8" }),
-    );
+    const previous: unknown = baseFiles.has(file)
+      ? JSON.parse(
+          execFileSync("git", ["show", `${base}:${file}`], { cwd: grammarRoot, encoding: "utf8" }),
+        )
+      : {};
     const current: unknown = JSON.parse(fs.readFileSync(path.join(grammarRoot, file), "utf8"));
     const oldExpressions = new Set([...expressions(previous)].map((entry) => entry.regex));
     for (const entry of expressions(current)) {
@@ -52,11 +61,12 @@ async function compare() {
     }
   }
 
+  assert.ok(patterns.length, `No changed standalone expressions against ${base}`);
   const lines = new Set<string>();
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ocaml-syntax-corpus-"));
   try {
     const corpus = path.join(directory, "inputs.jsonl");
-    execFileSync("bun", ["test", import.meta.dirname], {
+    execFileSync(process.execPath, ["test", import.meta.dirname], {
       cwd: checkout,
       env: { ...process.env, SYNTAX_ROOT: grammarRoot, CI: "true", SYNTAX_CORPUS: corpus },
       encoding: "utf8",
@@ -93,7 +103,6 @@ async function compare() {
   ])
     lines.add(line);
   const input = { patterns, lines: [...lines].sort((left, right) => left.localeCompare(right)) };
-  assert.ok(patterns.length, `No changed standalone expressions against ${base}`);
   const other: unknown = JSON.parse(
     execFileSync(ruby, [path.join(import.meta.dirname, "ruby-match.rb")], {
       input: JSON.stringify(input),

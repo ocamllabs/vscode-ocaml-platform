@@ -2,7 +2,8 @@
 
 `bun run test:syntax` runs the grammars through VS Code's TextMate and Oniguruma
 engines. The registry uses the grammar paths and injection registrations from
-`package.json`. `bun run test` also runs the extension tests in VS Code, including
+`package.json`, and like VS Code it applies an `injectTo` scope to its dotted
+descendants. `bun run test` also runs the extension tests in VS Code, including
 editor token capture for OCaml implementations, interfaces, Menhir actions, opam
 and install files, and OCaml and Reason blocks inside the built-in Markdown grammar.
 
