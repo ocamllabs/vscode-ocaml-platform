@@ -1,5 +1,8 @@
 import { afterAll, expect, test } from "bun:test";
+import fs from "node:fs";
+import path from "node:path";
 
+import { grammarRoot } from "./manifest.ts";
 import { createTokenizer } from "./tokenizer.ts";
 
 const tokenizer = createTokenizer();
@@ -702,6 +705,174 @@ class final = let (* comment *) open! M in base and following = object end`;
     5:62:63 "=" keyword.operator.ocaml
     5:64:70 "object" keyword.ocaml
     5:71:74 "end" keyword.ocaml"
+  `);
+});
+
+// https://ocaml.org/manual/5.5/classes.html
+test("Class declaration rules mirror the interface with MLX bodies", () => {
+  const repository = (file: string) =>
+    JSON.parse(fs.readFileSync(path.join(grammarRoot, "syntaxes", file), "utf8")).repository;
+  const shared = repository("ocaml.interface.json");
+  const reach = (from: string) => {
+    const seen = new Set([from]);
+    for (const name of seen)
+      for (const next of JSON.stringify(shared[name]).match(/(?<="include":"#)[^"]+/g) ?? [])
+        seen.add(next);
+    return seen;
+  };
+  const copied = [...reach("class-declarations")].filter((name) =>
+    reach(name).has("declaration-body"),
+  );
+  const pick = (rules: Record<string, unknown>) =>
+    Object.fromEntries(copied.map((name) => [name, rules[name]]));
+  const expected = JSON.parse(JSON.stringify(pick(shared)), (key, value) =>
+    key !== "include"
+      ? value
+      : value === "source.ocaml"
+        ? "$self"
+        : value.startsWith("#") && !copied.includes(value.slice(1))
+          ? `source.ocaml.interface${value}`
+          : value,
+  );
+  expect(copied).toContain("class-declarations");
+  expect(pick(repository("mlx.json"))).toEqual(expected);
+});
+
+// https://github.com/ocaml-mlx/mlx/blob/0.11/mlx/parser.mly
+test("MLX class bodies keep JSX", async () => {
+  const source = `class first = object method render = <div /> end
+class second = let header = <h1 /> in object method render = header end
+class third = fun ?(child = <span />) label -> object method render = <p>label</p> end
+class fourth = (object method render = <b /> end : renderer)
+class fifth = object method child = object method render = <i /> end end`;
+  expect(await tokenizer.render("source.ocaml.mlx", source)).toMatchInlineSnapshot(`
+    "1:0:5 "class" keyword.ocaml
+    1:6:11 "first" entity.name.type.class.ocaml
+    1:12:13 "=" keyword.operator.ocaml
+    1:14:20 "object" keyword.ocaml
+    1:21:27 "method" keyword.ocaml
+    1:28:34 "render" entity.name.function.method.ocaml
+    1:35:36 "=" keyword.operator.ocaml
+    1:37:38 "<" punctuation.definition.tag.begin.js
+    1:38:41 "div" entity.name.tag.inline.any.html
+    1:42:44 "/>" punctuation.definition.tag.end.js
+    1:45:48 "end" keyword.ocaml
+    2:0:5 "class" keyword.ocaml
+    2:6:12 "second" entity.name.type.class.ocaml
+    2:13:14 "=" keyword.operator.ocaml
+    2:15:18 "let" keyword.ocaml
+    2:19:25 "header" entity.name.binding.ocaml
+    2:26:27 "=" keyword.operator.ocaml
+    2:28:29 "<" punctuation.definition.tag.begin.js
+    2:29:31 "h1" entity.name.tag.inline.any.html
+    2:32:34 "/>" punctuation.definition.tag.end.js
+    2:35:37 "in" keyword.ocaml
+    2:38:44 "object" keyword.ocaml
+    2:45:51 "method" keyword.ocaml
+    2:52:58 "render" entity.name.function.method.ocaml
+    2:59:60 "=" keyword.operator.ocaml
+    2:61:67 "header" source.ocaml
+    2:68:71 "end" keyword.ocaml
+    3:0:5 "class" keyword.ocaml
+    3:6:11 "third" entity.name.type.class.ocaml
+    3:12:13 "=" keyword.operator.ocaml
+    3:14:17 "fun" keyword.ocaml
+    3:18:19 "?" variable.parameter.optional.ocaml
+    3:19:20 "("
+    3:20:25 "child" variable.parameter.optional.ocaml
+    3:26:27 "=" keyword.operator.ocaml
+    3:28:29 "<" punctuation.definition.tag.begin.js
+    3:29:33 "span" entity.name.tag.inline.any.html
+    3:34:36 "/>" punctuation.definition.tag.end.js
+    3:36:37 ")"
+    3:38:43 "label" source.ocaml
+    3:44:46 "->" keyword.operator.ocaml
+    3:47:53 "object" keyword.ocaml
+    3:54:60 "method" keyword.ocaml
+    3:61:67 "render" entity.name.function.method.ocaml
+    3:68:69 "=" keyword.operator.ocaml
+    3:70:71 "<" punctuation.definition.tag.begin.js
+    3:71:72 "p" entity.name.tag.inline.any.html
+    3:72:73 ">" punctuation.definition.tag.end.js
+    3:73:78 "label" source.ocaml
+    3:78:80 "</" punctuation.definition.tag.begin.js
+    3:80:81 "p" entity.name.tag.inline.any.html
+    3:81:82 ">" punctuation.definition.tag.end.js
+    3:83:86 "end" keyword.ocaml
+    4:0:5 "class" keyword.ocaml
+    4:6:12 "fourth" entity.name.type.class.ocaml
+    4:13:14 "=" keyword.operator.ocaml
+    4:15:16 "("
+    4:16:22 "object" keyword.other.ocaml
+    4:23:29 "method" keyword.ocaml
+    4:30:36 "render" entity.name.function.method.ocaml
+    4:37:38 "=" keyword.operator.ocaml
+    4:39:40 "<" punctuation.definition.tag.begin.js
+    4:40:41 "b" entity.name.tag.inline.any.html
+    4:42:44 "/>" punctuation.definition.tag.end.js
+    4:45:48 "end" keyword.other.ocaml
+    4:49:50 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
+    4:51:59 "renderer" source.ocaml
+    4:59:60 ")"
+    5:0:5 "class" keyword.ocaml
+    5:6:11 "fifth" entity.name.type.class.ocaml
+    5:12:13 "=" keyword.operator.ocaml
+    5:14:20 "object" keyword.ocaml
+    5:21:27 "method" keyword.ocaml
+    5:28:33 "child" entity.name.function.method.ocaml
+    5:34:35 "=" keyword.operator.ocaml
+    5:36:42 "object" keyword.ocaml
+    5:43:49 "method" keyword.ocaml
+    5:50:56 "render" entity.name.function.method.ocaml
+    5:57:58 "=" keyword.operator.ocaml
+    5:59:60 "<" punctuation.definition.tag.begin.js
+    5:60:61 "i" entity.name.tag.inline.any.html
+    5:62:64 "/>" punctuation.definition.tag.end.js
+    5:65:68 "end" keyword.ocaml
+    5:69:72 "end" keyword.ocaml"
+  `);
+});
+
+// https://ocaml.org/manual/5.5/classes.html
+test("MLX class continuations end after JSX bodies", async () => {
+  const source = `class first = object
+  method render = <div />
+end
+and second = object method render = <span /> end
+let after = <p /> and peer = 2`;
+  expect(await tokenizer.render("source.ocaml.mlx", source)).toMatchInlineSnapshot(`
+    "1:0:5 "class" keyword.ocaml
+    1:6:11 "first" entity.name.type.class.ocaml
+    1:12:13 "=" keyword.operator.ocaml
+    1:14:20 "object" keyword.ocaml
+    2:2:8 "method" keyword.ocaml
+    2:9:15 "render" entity.name.function.method.ocaml
+    2:16:17 "=" keyword.operator.ocaml
+    2:18:19 "<" punctuation.definition.tag.begin.js
+    2:19:22 "div" entity.name.tag.inline.any.html
+    2:23:25 "/>" punctuation.definition.tag.end.js
+    3:0:3 "end" keyword.ocaml
+    4:0:3 "and" keyword.ocaml
+    4:4:10 "second" entity.name.type.class.ocaml
+    4:11:12 "=" keyword.operator.ocaml
+    4:13:19 "object" keyword.ocaml
+    4:20:26 "method" keyword.ocaml
+    4:27:33 "render" entity.name.function.method.ocaml
+    4:34:35 "=" keyword.operator.ocaml
+    4:36:37 "<" punctuation.definition.tag.begin.js
+    4:37:41 "span" entity.name.tag.inline.any.html
+    4:42:44 "/>" punctuation.definition.tag.end.js
+    4:45:48 "end" keyword.ocaml
+    5:0:3 "let" keyword.ocaml
+    5:4:9 "after" entity.name.binding.ocaml
+    5:10:11 "=" keyword.operator.ocaml
+    5:12:13 "<" punctuation.definition.tag.begin.js
+    5:13:14 "p" entity.name.tag.inline.any.html
+    5:15:17 "/>" punctuation.definition.tag.end.js
+    5:18:21 "and" keyword.ocaml
+    5:22:26 "peer" entity.name.binding.ocaml
+    5:27:28 "=" keyword.operator.ocaml
+    5:29:30 "2" constant.numeric.decimal.integer.ocaml"
   `);
 });
 

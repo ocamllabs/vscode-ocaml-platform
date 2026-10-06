@@ -85,6 +85,17 @@ for (const extension of ["ml", "mlx"]) {
     ],
   });
 }
+for (const extension of ["ml", "mlx"]) {
+  examples.push({
+    filename: `class-jsx.${extension}`,
+    source: "class c = object method render = <div /> end\n",
+    assertions: [
+      extension === "mlx"
+        ? { text: "div", scope: "entity.name.tag", exact: true }
+        : { text: "div", scope: "source.ocaml", absent: "entity.name.tag", exact: true },
+    ],
+  });
+}
 examples.push({
   filename: "declaration-prefixes.ml",
   source: [

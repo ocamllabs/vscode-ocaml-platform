@@ -664,7 +664,138 @@
           "end": "\\)",
           "patterns": [{ "include": "$self" }]
         },
+        { "include": "#class-declarations" },
         { "include": "source.ocaml.interface#bindings" }
+      ]
+    },
+    "class-declarations": {
+      "begin": "(?=\\bclass\\b(?!'))",
+      "end": "(?=\\b(?:let|val|external|exception|module|open|include|end|in)\\b(?!')|;;|[)}\\]]|%}|\\*\\)|\\btype\\b(?!')|\\band[[:space:]]+(?:type|module)\\b(?!'))",
+      "patterns": [
+        {
+          "begin": "\\b(class|and)\\b(?!')",
+          "beginCaptures": { "1": { "name": "keyword.ocaml" } },
+          "end": "((?:\\\\#)?[[:lower:]_][[:word:]']*)|(?=[[:upper:]]|[=;)}\\]])",
+          "endCaptures": { "1": { "name": "entity.name.type.class.ocaml" } },
+          "applyEndPatternLast": true,
+          "patterns": [
+            {
+              "match": "(%)([[:alpha:]_][[:word:]']*(?:\\.[[:alpha:]_][[:word:]']*)*)",
+              "captures": {
+                "1": { "name": "keyword.operator.extension.ocaml" },
+                "2": { "name": "keyword.other.extension.ocaml" }
+              }
+            },
+            { "match": "\\b(type|virtual)\\b(?!')", "name": "keyword.ocaml" },
+            { "include": "source.ocaml#comments" },
+            { "include": "source.ocaml#attributes" },
+            { "include": "source.ocaml#extensions" },
+            { "include": "source.ocaml#types" },
+            { "include": "#declaration-delimiters" }
+          ]
+        },
+        { "include": "#class-expression-prefix" },
+        { "include": "#declaration-body" }
+      ]
+    },
+    "declaration-delimiters": {
+      "patterns": [
+        {
+          "begin": "\\(",
+          "end": "\\)",
+          "patterns": [{ "include": "#declaration-body" }]
+        },
+        {
+          "begin": "\\[",
+          "end": "\\]",
+          "patterns": [{ "include": "#declaration-body" }]
+        },
+        {
+          "begin": "\\{",
+          "end": "\\}",
+          "patterns": [{ "include": "#declaration-body" }]
+        }
+      ]
+    },
+    "class-expression-prefix": {
+      "begin": "=",
+      "beginCaptures": { "0": { "name": "keyword.operator.ocaml" } },
+      "end": "(?=[^ \\t\\r\\n\\f])",
+      "applyEndPatternLast": true,
+      "patterns": [
+        { "include": "source.ocaml#comments" },
+        { "include": "source.ocaml#attributes" },
+        { "include": "#class-local-let" },
+        {
+          "begin": "\\b(fun)\\b(?!')",
+          "end": "->|(?=[)}\\]]|;;|%}|\\*\\))",
+          "beginCaptures": { "1": { "name": "keyword.ocaml" } },
+          "endCaptures": { "0": { "name": "keyword.operator.ocaml" } },
+          "patterns": [{ "include": "#declaration-body" }]
+        }
+      ]
+    },
+    "declaration-body": {
+      "patterns": [
+        { "include": "source.ocaml.interface#declaration-lexical" },
+        { "include": "#declaration-blocks" },
+        { "include": "$self" },
+        { "include": "#declaration-delimiters" }
+      ]
+    },
+    "class-local-let": {
+      "patterns": [
+        {
+          "begin": "\\b(let)[[:space:]]+(?!(?:lazy|open|exception|module)\\b(?!'))(rec[[:space:]]+)?(?!rec\\b(?!'))((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]'])[[:space:]]*(?!,|::|[[:space:]])",
+          "end": "\\b(in)\\b(?!')|(?=[)}\\]]|;;|%}|\\*\\))",
+          "beginCaptures": {
+            "1": { "name": "keyword.ocaml" },
+            "2": { "name": "keyword.ocaml" },
+            "3": { "name": "entity.name.binding.ocaml" }
+          },
+          "endCaptures": { "1": { "name": "keyword.ocaml" } },
+          "patterns": [{ "include": "#class-local-let" }, { "include": "#declaration-body" }]
+        },
+        {
+          "begin": "\\b(let)\\b(?!')",
+          "end": "\\b(in)\\b(?!')|(?=[)}\\]]|;;|%}|\\*\\))",
+          "beginCaptures": { "1": { "name": "keyword.ocaml" } },
+          "endCaptures": { "1": { "name": "keyword.ocaml" } },
+          "patterns": [{ "include": "#class-local-let" }, { "include": "#declaration-body" }]
+        }
+      ]
+    },
+    "declaration-blocks": {
+      "patterns": [
+        {
+          "begin": "\\b(object)\\b(?!')(?:[[:space:]]*\\([[:space:]]*((?:\\\\#)?[[:lower:]_][[:word:]']*))?",
+          "end": "\\b(end)\\b(?!')",
+          "beginCaptures": {
+            "1": { "name": "keyword.ocaml" },
+            "2": { "name": "variable.other.binding.ocaml" }
+          },
+          "endCaptures": { "1": { "name": "keyword.ocaml" } },
+          "patterns": [{ "include": "#declaration-body" }]
+        },
+        {
+          "begin": "\\b(begin|struct)\\b(?!')",
+          "end": "\\b(end)\\b(?!')",
+          "beginCaptures": { "1": { "name": "keyword.ocaml" } },
+          "endCaptures": { "1": { "name": "keyword.ocaml" } },
+          "patterns": [{ "include": "#declaration-body" }]
+        },
+        {
+          "begin": "\\b(sig)\\b(?!')",
+          "end": "\\b(end)\\b(?!')",
+          "beginCaptures": { "1": { "name": "keyword.ocaml" } },
+          "endCaptures": { "1": { "name": "keyword.ocaml" } },
+          "patterns": [
+            { "include": "source.ocaml.interface#declaration-lexical" },
+            { "include": "#declaration-blocks" },
+            { "include": "source.ocaml.interface" },
+            { "include": "#declaration-delimiters" }
+          ]
+        }
       ]
     },
     "operators": {
