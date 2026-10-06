@@ -98,11 +98,20 @@ below supplement the links beside individual cases.
 TextMate classifies syntax without name resolution or type checking. OCaml and
 MLX names such as `int` and `string` can denote values or locally defined types.
 ATD uses predefined type names in type expressions, but the same names can label
-record fields. These names no longer receive a built-in type scope everywhere.
-Type and class declarations retain their kind across `and` continuations. Nested
-value bindings keep neutral binding scopes, and methods receive method scopes.
-Other bindings use a neutral scope where the declaration does not establish that
-the value is a function. Syntactic type parameters retain their type-variable scopes.
+record fields. These names receive a built-in type scope only in type contexts
+the grammars can delimit: type declaration bodies, interface and `sig` signatures,
+`external` declarations, and ATD type expressions. Record labels and module paths
+such as `M.int` are excluded. Implementation annotations such as `(x : int)` and
+class bodies leave the names unscoped.
+
+Type and class declarations retain their kind across `and` continuations, and
+methods receive method scopes. A `let`, `and`, or `val` name receives
+`entity.name.function.binding.ocaml` when the same line shows a function: a
+parameter, `= fun`, `= function`, or an arrow type. `external` names always
+receive it, because OCaml requires externals to have function types. Other names,
+including declarations whose type starts on the next line, use the neutral
+`entity.name.binding.ocaml` scope. Syntactic type parameters retain their
+type-variable scopes.
 
 These tests cover the reported lexical distinctions and state boundaries. They
 do not establish complete parser conformance, exact Unicode identifier

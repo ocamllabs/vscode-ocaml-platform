@@ -724,7 +724,7 @@ class c x = object method m = x + 1 end
     2:10:11 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
     2:11:13 "of" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.other.ocaml
     2:13:14 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
-    2:14:17 "int" markup.fenced_code.block.markdown meta.embedded.block.ocaml source.ocaml
+    2:14:17 "int" markup.fenced_code.block.markdown meta.embedded.block.ocaml support.type.ocaml
     2:17:18 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
     2:18:19 "|" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.other.ocaml
     2:19:20 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
@@ -738,7 +738,7 @@ class c x = object method m = x + 1 end
     2:28:29 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
     2:29:30 ":" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.other.ocaml punctuation.other.colon punctuation.colon
     2:30:31 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
-    2:31:34 "int" markup.fenced_code.block.markdown meta.embedded.block.ocaml source.ocaml
+    2:31:34 "int" markup.fenced_code.block.markdown meta.embedded.block.ocaml support.type.ocaml
     2:34:35 " " markup.fenced_code.block.markdown meta.embedded.block.ocaml
     2:35:36 "}" markup.fenced_code.block.markdown meta.embedded.block.ocaml
     3:0:5 "class" markup.fenced_code.block.markdown meta.embedded.block.ocaml keyword.ocaml

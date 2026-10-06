@@ -29,7 +29,7 @@ type next = int`;
     2:0:4 "type" keyword.other.atd
     2:5:9 "next" entity.name.type.atd
     2:10:11 "=" keyword.operator.ocaml
-    2:12:15 "int" source.ocaml"
+    2:12:15 "int" support.type.ocaml.atd"
   `);
 });
 
@@ -67,7 +67,7 @@ type 'ab' wrap_value = 'ab' list`;
     "1:0:4 "type" keyword.other.atd
     1:5:10 "list'" entity.name.type.atd
     1:11:12 "=" keyword.operator.ocaml
-    1:13:16 "int" source.ocaml
+    1:13:16 "int" support.type.ocaml.atd
     2:0:4 "type" keyword.other.atd
     2:5:8 "foo" entity.name.type.atd
     2:9:10 "=" keyword.operator.ocaml
@@ -78,11 +78,11 @@ type 'ab' wrap_value = 'ab' list`;
     3:11:14 " { "
     3:14:18 "list" source.ocaml
     3:18:19 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
-    3:20:23 "int" source.ocaml
+    3:20:23 "int" support.type.ocaml.atd
     3:23:24 ";" keyword.other.ocaml punctuation.separator.terminator punctuation.separator.semicolon
     3:25:31 "string" source.ocaml
     3:31:32 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
-    3:33:39 "string" source.ocaml
+    3:33:39 "string" support.type.ocaml.atd
     3:39:42 " }"
     4:0:4 "type" keyword.other.atd
     4:5:9 "'ab'" storage.type.ocaml.atd
@@ -101,7 +101,7 @@ type 'a wrapper = 'a list`;
     "1:0:4 "type" keyword.other.atd
     1:5:9 "item" entity.name.type.atd
     1:10:11 "=" keyword.operator.ocaml
-    1:12:15 "int" source.ocaml
+    1:12:15 "int" support.type.ocaml.atd
     2:0:4 "type" keyword.other.atd
     2:5:7 "'a" storage.type.ocaml.atd
     2:8:15 "wrapper" entity.name.type.atd

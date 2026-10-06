@@ -97,6 +97,44 @@ for (const extension of ["ml", "mlx"]) {
   });
 }
 examples.push({
+  filename: "binding-roles.ml",
+  source: "let apply f x = f x\nlet value = float 1\ntype t = int\n",
+  assertions: [
+    { text: "apply", scope: "entity.name.function.binding.ocaml", exact: true },
+    {
+      text: "value",
+      scope: "entity.name.binding.ocaml",
+      absent: "entity.name.function",
+      exact: true,
+    },
+    { text: "float", scope: "source.ocaml", absent: "support.type", exact: true },
+    { text: "int", scope: "support.type.ocaml", exact: true },
+  ],
+});
+examples.push({
+  filename: "binding-roles.mli",
+  source: "val length : string -> int\nval count : int\n",
+  assertions: [
+    { text: "length", scope: "entity.name.function.binding.ocaml", exact: true },
+    {
+      text: "count",
+      scope: "entity.name.binding.ocaml",
+      absent: "entity.name.function",
+      exact: true,
+    },
+    { text: "string", scope: "support.type.ocaml", exact: true },
+    { text: "int", scope: "support.type.ocaml", exact: true },
+  ],
+});
+examples.push({
+  filename: "field-labels.atd",
+  source: "type t = { string : int }\n",
+  assertions: [
+    { text: "string", scope: "source.atd", absent: "support.type", exact: true },
+    { text: "int", scope: "support.type.ocaml.atd", exact: true },
+  ],
+});
+examples.push({
   filename: "declaration-prefixes.ml",
   source: [
     "type +'a positive = 'a list and -'b negative = 'b -> unit",

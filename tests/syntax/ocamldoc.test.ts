@@ -46,7 +46,7 @@ class point = object val v = {v = [||]} end
     2:13:14 " " markup.inline.raw.ocamldoc source.embedded.ocamldoc
     2:14:15 ":" markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.other.ocaml punctuation.other.colon punctuation.colon
     2:15:16 " " markup.inline.raw.ocamldoc source.embedded.ocamldoc
-    2:16:21 "float" markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
+    2:16:21 "float" markup.inline.raw.ocamldoc source.embedded.ocamldoc support.type.ocaml
     2:21:22 " " markup.inline.raw.ocamldoc source.embedded.ocamldoc
     2:22:27 "array" markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
     2:27:28 "}" markup.inline.raw.ocamldoc source.embedded.ocamldoc

@@ -63,14 +63,14 @@ rule token = parse eof { () }`;
     2:7:8 "=" keyword.operator.ocaml
     2:9:10 "A" constant.language.capital-identifier.ocaml
     2:11:13 "of" keyword.other.ocaml
-    2:14:17 "int" source.ocaml
+    2:14:17 "int" support.type.ocaml
     2:18:19 "|" keyword.other.ocaml
     2:20:21 "B" constant.language.capital-identifier.ocaml
     2:22:24 "of" keyword.other.ocaml
     2:25:26 "{"
     2:27:28 "x" source.ocaml
     2:29:30 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
-    2:31:34 "int" source.ocaml
+    2:31:34 "int" support.type.ocaml
     2:35:36 "}"
     3:0:5 "class" keyword.ocaml
     3:6:7 "c" entity.name.type.class.ocaml

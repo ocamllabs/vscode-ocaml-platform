@@ -149,7 +149,7 @@ main: EOF { () }`;
     5:3:7 "type" keyword.ocaml
     5:8:9 "u" entity.name.type.ocaml
     5:10:11 "=" keyword.operator.ocaml
-    5:12:15 "int" source.ocaml
+    5:12:15 "int" support.type.ocaml
     5:16:18 "%}" keyword.other.menhir
     6:0:6 "%token" keyword.other.menhir
     6:7:10 "EOF" constant.other.token.menhir
@@ -186,7 +186,7 @@ let max a b = if a > b then a else b`;
     1:39:43 "type" keyword.ocaml
     1:44:45 "t" entity.name.type.ocaml
     1:46:47 "=" keyword.operator.ocaml
-    1:48:51 "int" source.ocaml
+    1:48:51 "int" support.type.ocaml
     1:51:52 ">" keyword.other.menhir
     2:0:6 "%token" keyword.other.menhir
     2:7:8 "<" keyword.other.menhir
@@ -209,7 +209,7 @@ let max a b = if a > b then a else b`;
     5:15:16 "}" keyword.other.menhir
     6:0:2 "%%" keyword.other.menhir
     7:0:3 "let" keyword.ocaml
-    7:4:7 "max" entity.name.binding.ocaml
+    7:4:7 "max" entity.name.function.binding.ocaml
     7:8:9 "a" source.ocaml
     7:10:11 "b" source.ocaml
     7:12:13 "=" keyword.operator.ocaml

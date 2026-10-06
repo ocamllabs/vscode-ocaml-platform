@@ -11,6 +11,7 @@
     { "include": "source.ocaml#raw-identifiers" },
     { "include": "source.ocaml#operators" },
     { "include": "#keywords" },
+    { "include": "#builtin-types" },
     { "include": "source.ocaml#types" },
     { "include": "source.ocaml#identifiers" }
   ],
@@ -31,14 +32,15 @@
         { "include": "#type-declarations" },
         {
           "comment": "and declaration for let bindings, type declarations, class bindings, class type definitions, or module constraints",
-          "match": "\\b(and)[[:space:]]+(?!(?:module|type|lazy)\\b(?!'))(virtual[[:space:]]+)?(_[[:space:]]+|'[[:alpha:]][[:word:]']*[[:space:]]+|\\(.*\\)[[:space:]]+)?((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]'])[[:space:]]*(?!,|::|[[:space:]])",
+          "match": "\\b(and)[[:space:]]+(?!(?:module|type|lazy)\\b(?!'))(virtual[[:space:]]+)?(_[[:space:]]+|'[[:alpha:]][[:word:]']*[[:space:]]+|\\(.*\\)[[:space:]]+)?(?:((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]'])(?=[[:space:]]+(?:(?!as\\b(?!'))[[:lower:]_~?{]|\\\\#)|[[:space:]]*(?:\\((?!\\*)|=[[:space:]]*(?:fun|function)\\b(?!')|:(?![:=>])[^=]*->))|((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]']))[[:space:]]*(?!,|::|[[:space:]])",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
             "3": {
               "patterns": [{ "include": "$base" }]
             },
-            "4": { "name": "entity.name.binding.ocaml" }
+            "4": { "name": "entity.name.function.binding.ocaml" },
+            "5": { "name": "entity.name.binding.ocaml" }
           }
         },
         {
@@ -46,7 +48,7 @@
           "begin": "\\b(external)[[:space:]]+((?:\\\\#)?[[:lower:]_][[:word:]']*)?",
           "beginCaptures": {
             "1": { "name": "keyword.ocaml" },
-            "2": { "name": "entity.name.binding.ocaml" }
+            "2": { "name": "entity.name.function.binding.ocaml" }
           },
           "end": "(?<=]|\")[[:space:]]*(?:$|(?=]))",
           "patterns": [
@@ -56,27 +58,30 @@
               "begin": "\"",
               "end": "\""
             },
+            { "include": "#builtin-types" },
             { "include": "$base" }
           ]
         },
         {
           "comment": "val declaration for class instance variables",
-          "match": "\\b(val)[[:space:]]+(virtual)[[:space:]]+(mutable)[[:space:]]+((?:\\\\#)?[[:lower:]_][[:word:]']*)",
+          "match": "\\b(val)[[:space:]]+(virtual)[[:space:]]+(mutable)[[:space:]]+(?:((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]'])(?=[[:space:]]+(?:(?!as\\b(?!'))[[:lower:]_~?{]|\\\\#)|[[:space:]]*(?:\\((?!\\*)|=[[:space:]]*(?:fun|function)\\b(?!')|:(?![:=>])[^=]*->))|((?:\\\\#)?[[:lower:]_][[:word:]']*))",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
             "3": { "name": "keyword.ocaml" },
-            "4": { "name": "entity.name.binding.ocaml" }
+            "4": { "name": "entity.name.function.binding.ocaml" },
+            "5": { "name": "entity.name.binding.ocaml" }
           }
         },
         {
           "comment": "val declaration for let bindings or class instance variables",
-          "match": "\\b(val|val!)[[:space:]]+(mutable[[:space:]]+)?(virtual[[:space:]]+)?((?:\\\\#)?[[:lower:]_][[:word:]']*)",
+          "match": "\\b(val|val!)[[:space:]]+(mutable[[:space:]]+)?(virtual[[:space:]]+)?(?:((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]'])(?=[[:space:]]+(?:(?!as\\b(?!'))[[:lower:]_~?{]|\\\\#)|[[:space:]]*(?:\\((?!\\*)|=[[:space:]]*(?:fun|function)\\b(?!')|:(?![:=>])[^=]*->))|((?:\\\\#)?[[:lower:]_][[:word:]']*))",
           "captures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
             "3": { "name": "keyword.ocaml" },
-            "4": { "name": "entity.name.binding.ocaml" }
+            "4": { "name": "entity.name.function.binding.ocaml" },
+            "5": { "name": "entity.name.binding.ocaml" }
           }
         },
         {
@@ -169,7 +174,7 @@
           ]
         },
         { "include": "#object-types" },
-        { "include": "#declaration-body" }
+        { "include": "#type-declaration-body" }
       ]
     },
     "object-types": {
@@ -181,7 +186,35 @@
       "endCaptures": {
         "0": { "name": "keyword.operator.ocaml" }
       },
-      "patterns": [{ "include": "#object-types" }, { "include": "#declaration-body" }]
+      "patterns": [{ "include": "#object-types" }, { "include": "#type-declaration-body" }]
+    },
+    "type-declaration-body": {
+      "patterns": [
+        { "include": "#declaration-lexical" },
+        { "include": "#declaration-blocks" },
+        { "include": "#type-declaration-delimiters" },
+        { "include": "#builtin-types" },
+        { "include": "source.ocaml" }
+      ]
+    },
+    "type-declaration-delimiters": {
+      "patterns": [
+        {
+          "begin": "\\(",
+          "end": "\\)",
+          "patterns": [{ "include": "#type-declaration-body" }]
+        },
+        {
+          "begin": "\\[",
+          "end": "\\]",
+          "patterns": [{ "include": "#type-declaration-body" }]
+        },
+        {
+          "begin": "\\{",
+          "end": "\\}",
+          "patterns": [{ "include": "#type-declaration-body" }]
+        }
+      ]
     },
     "class-declarations": {
       "begin": "(?=\\bclass\\b(?!'))",
@@ -266,12 +299,13 @@
     "class-local-let": {
       "patterns": [
         {
-          "begin": "\\b(let)[[:space:]]+(?!(?:lazy|open|exception|module)\\b(?!'))(rec[[:space:]]+)?(?!rec\\b(?!'))((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]'])[[:space:]]*(?!,|::|[[:space:]])",
+          "begin": "\\b(let)[[:space:]]+(?!(?:lazy|open|exception|module)\\b(?!'))(rec[[:space:]]+)?(?!rec\\b(?!'))(?:((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]'])(?=[[:space:]]+(?:(?!as\\b(?!'))[[:lower:]_~?{]|\\\\#)|[[:space:]]*(?:\\((?!\\*)|=[[:space:]]*(?:fun|function)\\b(?!')|:(?![:=>])[^=]*->))|((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]']))[[:space:]]*(?!,|::|[[:space:]])",
           "end": "\\b(in)\\b(?!')|(?=[)}\\]]|;;|%}|\\*\\))",
           "beginCaptures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
-            "3": { "name": "entity.name.binding.ocaml" }
+            "3": { "name": "entity.name.function.binding.ocaml" },
+            "4": { "name": "entity.name.binding.ocaml" }
           },
           "endCaptures": {
             "1": { "name": "keyword.ocaml" }
@@ -341,6 +375,11 @@
         { "include": "source.ocaml" },
         { "include": "#declaration-delimiters" }
       ]
+    },
+    "builtin-types": {
+      "comment": "builtin type",
+      "name": "support.type.ocaml",
+      "match": "(?<![.'#~?\\\\])\\b(?:unit|bool|int|int32|int64|nativeint|float|char|bytes|string)\\b(?!')(?![[:space:]]*:(?![:=>]))"
     },
     "declaration-lexical": {
       "patterns": [

@@ -16,14 +16,14 @@ let value = 1 and peer = 2`;
     "1:0:4 "type" keyword.ocaml
     1:5:10 "first" entity.name.type.ocaml
     1:11:12 "=" keyword.operator.ocaml
-    1:13:16 "int" source.ocaml
+    1:13:16 "int" support.type.ocaml
     2:0:2 "(*" comment.block.ocaml
     2:2:23 " declaration comment " comment.block.ocaml
     2:23:25 "*)" comment.block.ocaml
     3:0:3 "and" keyword.ocaml
     3:4:10 "second" entity.name.type.ocaml
     3:11:12 "=" keyword.operator.ocaml
-    3:13:19 "string" source.ocaml
+    3:13:19 "string" support.type.ocaml
     4:0:3 "and" keyword.ocaml
     4:4:5 "("
     4:5:7 "'a" storage.type.ocaml
@@ -67,7 +67,7 @@ and (* continuation *) [@warning "-34"]
     1:31:33 "*)" comment.block.ocaml
     2:2:8 "\\\\#type" entity.name.type.ocaml
     2:9:10 "=" keyword.operator.ocaml
-    2:11:14 "int" source.ocaml
+    2:11:14 "int" support.type.ocaml
     3:0:3 "and" keyword.ocaml
     3:4:6 "(*" comment.block.ocaml
     3:6:20 " continuation " comment.block.ocaml
@@ -81,7 +81,7 @@ and (* continuation *) [@warning "-34"]
     3:38:39 "]"
     4:2:7 "\\\\#and" entity.name.type.ocaml
     4:8:9 "=" keyword.operator.ocaml
-    4:10:16 "string" source.ocaml"
+    4:10:16 "string" support.type.ocaml"
   `);
 });
 
@@ -102,12 +102,12 @@ and third = string`;
     1:28:32 "type" keyword.ocaml
     1:33:38 "inner" entity.name.type.ocaml
     1:39:40 "=" keyword.operator.ocaml
-    1:41:44 "int" source.ocaml
+    1:41:44 "int" support.type.ocaml
     1:45:48 "and" keyword.ocaml
     1:49:53 "type" keyword.ocaml
     1:54:61 "another" entity.name.type.ocaml
     1:62:63 "=" keyword.operator.ocaml
-    1:64:70 "string" source.ocaml
+    1:64:70 "string" support.type.ocaml
     1:70:71 ")"
     2:0:3 "and" keyword.ocaml
     2:4:10 "second" entity.name.type.ocaml
@@ -117,7 +117,7 @@ and third = string`;
     2:18:19 "{"
     2:20:25 "field" source.ocaml
     2:26:27 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
-    2:28:31 "int" source.ocaml
+    2:28:31 "int" support.type.ocaml
     2:32:33 "}"
     3:0:1 "["
     3:1:3 "@@" keyword.operator.attribute.ocaml
@@ -134,7 +134,7 @@ and third = string`;
     4:0:3 "and" keyword.ocaml
     4:4:9 "third" entity.name.type.ocaml
     4:10:11 "=" keyword.operator.ocaml
-    4:12:18 "string" source.ocaml"
+    4:12:18 "string" support.type.ocaml"
   `);
 });
 
@@ -154,12 +154,12 @@ module type U = sig type inner = int and other = string end`;
     1:23:27 "type" keyword.ocaml
     1:28:33 "first" entity.name.type.ocaml
     1:34:35 "=" keyword.operator.ocaml
-    1:36:39 "int" source.ocaml
+    1:36:39 "int" support.type.ocaml
     2:0:3 "and" keyword.ocaml
     2:4:8 "type" keyword.ocaml
     2:9:15 "second" entity.name.type.ocaml
     2:16:17 "=" keyword.operator.ocaml
-    2:18:24 "string" source.ocaml
+    2:18:24 "string" support.type.ocaml
     3:0:3 "and" keyword.other.ocaml
     3:4:10 "module" keyword.other.ocaml
     3:11:12 "N" constant.language.capital-identifier.ocaml
@@ -173,11 +173,11 @@ module type U = sig type inner = int and other = string end`;
     4:20:24 "type" keyword.ocaml
     4:25:30 "inner" entity.name.type.ocaml
     4:31:32 "=" keyword.operator.ocaml
-    4:33:36 "int" source.ocaml
+    4:33:36 "int" support.type.ocaml
     4:37:40 "and" keyword.ocaml
     4:41:46 "other" entity.name.type.ocaml
     4:47:48 "=" keyword.operator.ocaml
-    4:49:55 "string" source.ocaml
+    4:49:55 "string" support.type.ocaml
     4:56:59 "end" keyword.ocaml"
   `);
 });
@@ -401,11 +401,11 @@ and second = object end`;
     2:0:4 "type" keyword.ocaml
     2:5:10 "inner" entity.name.type.ocaml
     2:11:12 "=" keyword.operator.ocaml
-    2:13:16 "int" source.ocaml
+    2:13:16 "int" support.type.ocaml
     2:17:20 "and" keyword.ocaml
     2:21:28 "another" entity.name.type.ocaml
     2:29:30 "=" keyword.operator.ocaml
-    2:31:37 "string" source.ocaml
+    2:31:37 "string" support.type.ocaml
     3:0:3 "let" keyword.ocaml
     3:4:9 "value" entity.name.binding.ocaml
     3:10:11 "=" keyword.operator.ocaml
@@ -463,11 +463,11 @@ let top = 1 and peer = 2`;
     3:0:4 "type" keyword.ocaml
     3:5:9 "next" entity.name.type.ocaml
     3:10:11 "=" keyword.operator.ocaml
-    3:12:15 "int" source.ocaml
+    3:12:15 "int" support.type.ocaml
     3:16:19 "and" keyword.ocaml
     3:20:29 "following" entity.name.type.ocaml
     3:30:31 "=" keyword.operator.ocaml
-    3:32:38 "string" source.ocaml
+    3:32:38 "string" support.type.ocaml
     4:0:3 "let" keyword.ocaml
     4:4:7 "top" entity.name.binding.ocaml
     4:8:9 "=" keyword.operator.ocaml
@@ -522,11 +522,11 @@ class type%bar first_class = object end and second_class = object end`;
     1:5:8 "foo" keyword.other.extension.ocaml
     1:9:14 "first" entity.name.type.ocaml
     1:15:16 "=" keyword.operator.ocaml
-    1:17:20 "int" source.ocaml
+    1:17:20 "int" support.type.ocaml
     1:21:24 "and" keyword.ocaml
     1:25:31 "second" entity.name.type.ocaml
     1:32:33 "=" keyword.operator.ocaml
-    1:34:40 "string" source.ocaml
+    1:34:40 "string" support.type.ocaml
     2:0:5 "class" keyword.ocaml
     2:6:10 "type" keyword.ocaml
     2:10:11 "%" keyword.operator.extension.ocaml
@@ -613,7 +613,7 @@ test("Type parameter variance keeps operator scopes", async () => {
     1:40:41 "=" keyword.operator.ocaml
     1:42:44 "'b" storage.type.ocaml
     1:45:47 "->" keyword.operator.ocaml
-    1:48:52 "unit" source.ocaml"
+    1:48:52 "unit" support.type.ocaml"
   `);
 });
 
@@ -873,7 +873,7 @@ let f (x : 'ab') (y : '_weak') = x`;
     3:16:17 "=" keyword.operator.ocaml
     3:18:19 "1" constant.numeric.decimal.integer.ocaml
     4:0:3 "let" keyword.ocaml
-    4:4:5 "f" entity.name.binding.ocaml
+    4:4:5 "f" entity.name.function.binding.ocaml
     4:6:7 "("
     4:7:8 "x" source.ocaml
     4:9:10 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
@@ -932,9 +932,9 @@ let f ~\\#effect = \\#type`;
     "1:0:4 "type" keyword.ocaml
     1:5:11 "\\\\#type" entity.name.type.ocaml
     1:12:13 "=" keyword.operator.ocaml
-    1:14:17 "int" source.ocaml
+    1:14:17 "int" support.type.ocaml
     2:0:3 "let" keyword.ocaml
-    2:4:5 "f" entity.name.binding.ocaml
+    2:4:5 "f" entity.name.function.binding.ocaml
     2:6:15 "~\\\\#effect" variable.parameter.labeled.ocaml
     2:16:17 "=" keyword.operator.ocaml
     2:18:24 "\\\\#type" variable.other.ocaml"
@@ -956,7 +956,7 @@ let f (type local) = ()`;
     "1:0:4 "type" keyword.ocaml
     1:5:11 "\\\\#type" entity.name.type.ocaml
     1:12:13 "=" keyword.operator.ocaml
-    1:14:17 "int" source.ocaml
+    1:14:17 "int" support.type.ocaml
     2:0:5 "class" keyword.ocaml
     2:6:7 "c" entity.name.type.class.ocaml
     2:8:9 "=" keyword.operator.ocaml
@@ -989,11 +989,11 @@ let f (type local) = ()`;
     4:33:34 "1" constant.numeric.decimal.integer.ocaml
     4:35:38 "end" keyword.ocaml
     5:0:8 "external" keyword.ocaml
-    5:9:18 "primitive" entity.name.binding.ocaml
+    5:9:18 "primitive" entity.name.function.binding.ocaml
     5:19:20 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
-    5:21:24 "int" source.ocaml
+    5:21:24 "int" support.type.ocaml
     5:25:27 "->" keyword.operator.ocaml
-    5:28:31 "int" source.ocaml
+    5:28:31 "int" support.type.ocaml
     5:32:33 "=" keyword.operator.ocaml
     5:34:35 "\\"" string.quoted.double.ocaml
     5:35:44 "primitive" string.quoted.double.ocaml
@@ -1001,11 +1001,11 @@ let f (type local) = ()`;
     6:0:4 "type" keyword.ocaml
     6:5:10 "first" entity.name.type.ocaml
     6:11:12 "=" keyword.operator.ocaml
-    6:13:16 "int" source.ocaml
+    6:13:16 "int" support.type.ocaml
     6:17:20 "and" keyword.ocaml
     6:21:27 "second" entity.name.type.ocaml
     6:28:29 "=" keyword.operator.ocaml
-    6:30:36 "string" source.ocaml
+    6:30:36 "string" support.type.ocaml
     7:0:3 "let" keyword.ocaml
     7:4:9 "\\\\#let" entity.name.binding.ocaml
     7:10:11 "=" keyword.operator.ocaml
@@ -1024,7 +1024,7 @@ let f (type local) = ()`;
     8:24:26 "()" constant.language.unit.ocaml
     8:27:31 "done" keyword.other.ocaml
     9:0:3 "let" keyword.ocaml
-    9:4:5 "f" entity.name.binding.ocaml
+    9:4:5 "f" entity.name.function.binding.ocaml
     9:6:7 "("
     9:7:11 "type" keyword.ocaml
     9:11:17 " local" entity.name.type.ocaml
@@ -1045,7 +1045,7 @@ let x = 1
     1:4:8 "type" keyword.ocaml
     1:9:10 "t" entity.name.type.ocaml
     1:11:12 "=" keyword.operator.ocaml
-    1:13:16 "int" source.ocaml
+    1:13:16 "int" support.type.ocaml
     1:17:19 "*)" comment.cinaps.ocaml
     2:0:3 "(*$" comment.cinaps.ocaml
     2:4:9 "class" keyword.ocaml
@@ -1088,7 +1088,7 @@ and eval_list l = List.map eval l`;
     3:10:14 "eval" source.ocaml
     3:15:16 "e" source.ocaml
     4:0:3 "and" keyword.ocaml
-    4:4:13 "eval_list" entity.name.binding.ocaml
+    4:4:13 "eval_list" entity.name.function.binding.ocaml
     4:14:15 "l" source.ocaml
     4:16:17 "=" keyword.operator.ocaml
     4:18:22 "List" constant.language.capital-identifier.ocaml
@@ -1155,22 +1155,22 @@ and w = [> \`A ] * < .. >`;
     1:9:10 "<" keyword.operator.ocaml
     1:11:12 "m" source.ocaml
     1:13:14 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
-    1:15:18 "int" source.ocaml
+    1:15:18 "int" support.type.ocaml
     1:18:19 ";" keyword.other.ocaml punctuation.separator.terminator punctuation.separator.semicolon
     1:20:21 "n" source.ocaml
     1:22:23 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
     1:24:25 "<" keyword.operator.ocaml
     1:26:27 "p" source.ocaml
     1:28:29 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
-    1:30:35 "float" source.ocaml
+    1:30:35 "float" support.type.ocaml
     1:36:37 ">" keyword.operator.ocaml
     1:38:39 ">" keyword.operator.ocaml
     1:40:43 "and" keyword.ocaml
     1:44:45 "u" entity.name.type.ocaml
     1:46:47 "=" keyword.operator.ocaml
-    1:48:51 "int" source.ocaml
+    1:48:51 "int" support.type.ocaml
     1:52:54 "->" keyword.operator.ocaml
-    1:55:58 "int" source.ocaml
+    1:55:58 "int" support.type.ocaml
     2:0:3 "and" keyword.ocaml
     2:4:5 "w" entity.name.type.ocaml
     2:6:7 "=" keyword.operator.ocaml
@@ -1226,5 +1226,175 @@ let x = 1`;
     2:4:5 "x" entity.name.binding.ocaml
     2:6:7 "=" keyword.operator.ocaml
     2:8:9 "1" constant.numeric.decimal.integer.ocaml"
+  `);
+});
+
+// https://ocaml.org/manual/5.5/expr.html
+test("Function bindings use function scopes", async () => {
+  const source = `let f x = x
+let g () = ()
+let h ~x ?y { z } = x
+let i = fun x -> x
+let j = function _ -> ()
+let k : int -> int = succ
+let rec l x = l x and m y = y
+let v = 1
+let w : int = 1
+let n (* comment *) = 1
+let a [@warning "-32"] = 1
+let b = function_call ()
+let* c = d
+let e =
+  fun x -> x`;
+  expect(await tokenizer.render("source.ocaml", source)).toMatchInlineSnapshot(`
+    "1:0:3 "let" keyword.ocaml
+    1:4:5 "f" entity.name.function.binding.ocaml
+    1:6:7 "x" source.ocaml
+    1:8:9 "=" keyword.operator.ocaml
+    1:10:11 "x" source.ocaml
+    2:0:3 "let" keyword.ocaml
+    2:4:5 "g" entity.name.function.binding.ocaml
+    2:6:8 "()" constant.language.unit.ocaml
+    2:9:10 "=" keyword.operator.ocaml
+    2:11:13 "()" constant.language.unit.ocaml
+    3:0:3 "let" keyword.ocaml
+    3:4:5 "h" entity.name.function.binding.ocaml
+    3:6:8 "~x" variable.parameter.labeled.ocaml
+    3:9:11 "?y" variable.parameter.optional.ocaml
+    3:12:13 "{"
+    3:14:15 "z" source.ocaml
+    3:16:17 "}"
+    3:18:19 "=" keyword.operator.ocaml
+    3:20:21 "x" source.ocaml
+    4:0:3 "let" keyword.ocaml
+    4:4:5 "i" entity.name.function.binding.ocaml
+    4:6:7 "=" keyword.operator.ocaml
+    4:8:11 "fun" keyword.other.ocaml
+    4:12:13 "x" source.ocaml
+    4:14:16 "->" keyword.operator.ocaml
+    4:17:18 "x" source.ocaml
+    5:0:3 "let" keyword.ocaml
+    5:4:5 "j" entity.name.function.binding.ocaml
+    5:6:7 "=" keyword.operator.ocaml
+    5:8:16 "function" keyword.other.ocaml
+    5:17:18 "_" constant.language.ocaml
+    5:19:21 "->" keyword.operator.ocaml
+    5:22:24 "()" constant.language.unit.ocaml
+    6:0:3 "let" keyword.ocaml
+    6:4:5 "k" entity.name.function.binding.ocaml
+    6:6:7 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
+    6:8:11 "int" source.ocaml
+    6:12:14 "->" keyword.operator.ocaml
+    6:15:18 "int" source.ocaml
+    6:19:20 "=" keyword.operator.ocaml
+    6:21:25 "succ" source.ocaml
+    7:0:3 "let" keyword.ocaml
+    7:4:8 "rec " keyword.ocaml
+    7:8:9 "l" entity.name.function.binding.ocaml
+    7:10:11 "x" source.ocaml
+    7:12:13 "=" keyword.operator.ocaml
+    7:14:15 "l" source.ocaml
+    7:16:17 "x" source.ocaml
+    7:18:21 "and" keyword.ocaml
+    7:22:23 "m" entity.name.function.binding.ocaml
+    7:24:25 "y" source.ocaml
+    7:26:27 "=" keyword.operator.ocaml
+    7:28:29 "y" source.ocaml
+    8:0:3 "let" keyword.ocaml
+    8:4:5 "v" entity.name.binding.ocaml
+    8:6:7 "=" keyword.operator.ocaml
+    8:8:9 "1" constant.numeric.decimal.integer.ocaml
+    9:0:3 "let" keyword.ocaml
+    9:4:5 "w" entity.name.binding.ocaml
+    9:6:7 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
+    9:8:11 "int" source.ocaml
+    9:12:13 "=" keyword.operator.ocaml
+    9:14:15 "1" constant.numeric.decimal.integer.ocaml
+    10:0:3 "let" keyword.ocaml
+    10:4:5 "n" entity.name.binding.ocaml
+    10:6:8 "(*" comment.block.ocaml
+    10:8:17 " comment " comment.block.ocaml
+    10:17:19 "*)" comment.block.ocaml
+    10:20:21 "=" keyword.operator.ocaml
+    10:22:23 "1" constant.numeric.decimal.integer.ocaml
+    11:0:3 "let" keyword.ocaml
+    11:4:5 "a" entity.name.binding.ocaml
+    11:6:7 "["
+    11:7:8 "@" keyword.operator.attribute.ocaml
+    11:8:15 "warning" keyword.other.attribute.ocaml
+    11:16:17 "\\"" string.quoted.double.ocaml
+    11:17:20 "-32" string.quoted.double.ocaml
+    11:20:21 "\\"" string.quoted.double.ocaml
+    11:21:22 "]"
+    11:23:24 "=" keyword.operator.ocaml
+    11:25:26 "1" constant.numeric.decimal.integer.ocaml
+    12:0:3 "let" keyword.ocaml
+    12:4:5 "b" entity.name.binding.ocaml
+    12:6:7 "=" keyword.operator.ocaml
+    12:8:21 "function_call" source.ocaml
+    12:22:24 "()" constant.language.unit.ocaml
+    13:0:3 "let" keyword.ocaml
+    13:3:4 "*" keyword.ocaml
+    13:5:6 "c" entity.name.binding.ocaml
+    13:7:8 "=" keyword.operator.ocaml
+    13:9:10 "d" source.ocaml
+    14:0:3 "let" keyword.ocaml
+    14:4:5 "e" entity.name.binding.ocaml
+    14:6:7 "=" keyword.operator.ocaml
+    15:2:5 "fun" keyword.other.ocaml
+    15:6:7 "x" source.ocaml
+    15:8:10 "->" keyword.operator.ocaml
+    15:11:12 "x" source.ocaml"
+  `);
+});
+
+// https://ocaml.org/manual/5.5/core.html
+test("Built-in type names are types only in type contexts", async () => {
+  const source = `type t = { string : string; f : M.int -> float }
+let float = float 1
+external g : int -> unit = "g"
+class c = object method m = float 1 end`;
+  expect(await tokenizer.render("source.ocaml", source)).toMatchInlineSnapshot(`
+    "1:0:4 "type" keyword.ocaml
+    1:5:6 "t" entity.name.type.ocaml
+    1:7:8 "=" keyword.operator.ocaml
+    1:9:10 "{"
+    1:11:17 "string" source.ocaml
+    1:18:19 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
+    1:20:26 "string" support.type.ocaml
+    1:26:27 ";" keyword.other.ocaml punctuation.separator.terminator punctuation.separator.semicolon
+    1:28:29 "f" source.ocaml
+    1:30:31 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
+    1:32:33 "M" constant.language.capital-identifier.ocaml
+    1:33:34 "." keyword.other.ocaml punctuation.other.period punctuation.separator.period
+    1:34:37 "int" source.ocaml
+    1:38:40 "->" keyword.operator.ocaml
+    1:41:46 "float" support.type.ocaml
+    1:47:48 "}"
+    2:0:3 "let" keyword.ocaml
+    2:4:9 "float" entity.name.binding.ocaml
+    2:10:11 "=" keyword.operator.ocaml
+    2:12:17 "float" source.ocaml
+    2:18:19 "1" constant.numeric.decimal.integer.ocaml
+    3:0:8 "external" keyword.ocaml
+    3:9:10 "g" entity.name.function.binding.ocaml
+    3:11:12 ":" keyword.other.ocaml punctuation.other.colon punctuation.colon
+    3:13:16 "int" support.type.ocaml
+    3:17:19 "->" keyword.operator.ocaml
+    3:20:24 "unit" support.type.ocaml
+    3:25:26 "=" keyword.operator.ocaml
+    3:27:28 "\\"" string.quoted.double.ocaml
+    3:28:29 "g" string.quoted.double.ocaml
+    3:29:30 "\\"" string.quoted.double.ocaml
+    4:0:5 "class" keyword.ocaml
+    4:6:7 "c" entity.name.type.class.ocaml
+    4:8:9 "=" keyword.operator.ocaml
+    4:10:16 "object" keyword.ocaml
+    4:17:23 "method" keyword.ocaml
+    4:24:25 "m" entity.name.function.method.ocaml
+    4:26:27 "=" keyword.operator.ocaml
+    4:28:33 "float" source.ocaml
+    4:34:35 "1" constant.numeric.decimal.integer.ocaml
+    4:36:39 "end" keyword.ocaml"
   `);
 });

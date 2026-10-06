@@ -581,7 +581,7 @@
         },
         {
           "comment": "let expression",
-          "match": "\\b(let)[[:space:]]+(?!lazy\\b(?!'))(rec[[:space:]]+)?(?!rec\\b(?!'))((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]'])[[:space:]]*(?!,|::|[[:space:]])",
+          "match": "\\b(let)[[:space:]]+(?!lazy\\b(?!'))(rec[[:space:]]+)?(?!rec\\b(?!'))(?:((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]'])(?=[[:space:]]+(?:(?!as\\b(?!'))[[:lower:]_~?{]|\\\\#)|[[:space:]]*(?:\\((?!\\*)|=[[:space:]]*(?:fun|function)\\b(?!')|:(?![:=>])[^=]*->))|((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]']))[[:space:]]*(?!,|::|[[:space:]])",
           "captures": {
             "1": {
               "name": "keyword.ocaml"
@@ -590,6 +590,9 @@
               "name": "keyword.ocaml"
             },
             "3": {
+              "name": "entity.name.function.binding.ocaml"
+            },
+            "4": {
               "name": "entity.name.binding.ocaml"
             }
           }
@@ -746,12 +749,13 @@
     "class-local-let": {
       "patterns": [
         {
-          "begin": "\\b(let)[[:space:]]+(?!(?:lazy|open|exception|module)\\b(?!'))(rec[[:space:]]+)?(?!rec\\b(?!'))((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]'])[[:space:]]*(?!,|::|[[:space:]])",
+          "begin": "\\b(let)[[:space:]]+(?!(?:lazy|open|exception|module)\\b(?!'))(rec[[:space:]]+)?(?!rec\\b(?!'))(?:((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]'])(?=[[:space:]]+(?:(?!as\\b(?!'))[[:lower:]_~?{]|\\\\#)|[[:space:]]*(?:\\((?!\\*)|=[[:space:]]*(?:fun|function)\\b(?!')|:(?![:=>])[^=]*->))|((?:\\\\#)?[[:lower:]_][[:word:]']*)(?![[:word:]']))[[:space:]]*(?!,|::|[[:space:]])",
           "end": "\\b(in)\\b(?!')|(?=[)}\\]]|;;|%}|\\*\\))",
           "beginCaptures": {
             "1": { "name": "keyword.ocaml" },
             "2": { "name": "keyword.ocaml" },
-            "3": { "name": "entity.name.binding.ocaml" }
+            "3": { "name": "entity.name.function.binding.ocaml" },
+            "4": { "name": "entity.name.binding.ocaml" }
           },
           "endCaptures": { "1": { "name": "keyword.ocaml" } },
           "patterns": [{ "include": "#class-local-let" }, { "include": "#declaration-body" }]

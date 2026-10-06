@@ -53,6 +53,11 @@
           "comment": "type parameter",
           "name": "storage.type.ocaml.atd",
           "match": "'[[:alpha:]][[:word:]']*(?![[:word:]'])"
+        },
+        {
+          "comment": "builtin type",
+          "name": "support.type.ocaml.atd",
+          "match": "(?<![.'~?])\\b(?:unit|bool|int|float|string|abstract)\\b(?!')(?![[:space:]]*:)"
         }
       ]
     }
