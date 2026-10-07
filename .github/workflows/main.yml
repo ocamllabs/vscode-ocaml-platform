@@ -25,7 +25,7 @@ jobs:
           ocaml-compiler: 5.5.1
 
       - name: Set-up Mise
-        uses: jdx/mise-action@v5.0.1
+        uses: jdx/mise-action@v5.1.1
         with:
           cache: false
 
@@ -87,7 +87,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Set-up Mise
-        uses: jdx/mise-action@v5.0.1
+        uses: jdx/mise-action@v5.1.1
         with:
           cache: false
 
