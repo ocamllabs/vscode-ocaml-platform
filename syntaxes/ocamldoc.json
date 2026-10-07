@@ -42,9 +42,31 @@
           "match": "(?<!\\\\)@[[:lower:]]+"
         },
         {
+          "comment": "embedded ocaml source on one line",
+          "match": "(?<!\\\\)(\\[)((?:(?!\\*\\))(?:\\\\[\\[\\]]|\\\\(?![\\[\\]])|[^\\[\\]\\\\])|\\[(?:(?!\\*\\))(?:\\\\[\\[\\]]|\\\\(?![\\[\\]])|[^\\[\\]\\\\])|\\[(?!\\*\\))(?:\\\\[\\[\\]]|\\\\(?![\\[\\]])|[^\\[\\]\\\\])*\\])*\\])*)(\\])",
+          "name": "markup.inline.raw.ocamldoc",
+          "captures": {
+            "2": {
+              "name": "source.embedded.ocamldoc",
+              "patterns": [{ "include": "source.ocaml" }]
+            }
+          }
+        },
+        {
+          "comment": "embedded ocaml source cut short by the enclosing comment",
+          "match": "(?<!\\\\)(\\[)((?:(?!\\*\\))(?:\\\\\\]|[^\\]]))*)(?=\\*\\))",
+          "name": "markup.inline.raw.ocamldoc",
+          "captures": {
+            "2": {
+              "name": "source.embedded.ocamldoc",
+              "patterns": [{ "include": "source.ocaml" }]
+            }
+          }
+        },
+        {
           "comment": "embedded ocaml source",
           "begin": "(?<!\\\\)\\[",
-          "end": "(?<!\\\\)\\]",
+          "end": "(?<!\\\\)\\]|(?=\\*\\))",
           "name": "markup.inline.raw.ocamldoc",
           "contentName": "source.embedded.ocamldoc",
           "patterns": [{ "include": "source.ocaml" }]
@@ -52,7 +74,7 @@
         {
           "comment": "embedded preformatted ocaml source",
           "begin": "(?<!\\\\)\\{(@ocaml([[:space:]].*?)?)?\\[",
-          "end": "(?<!\\\\)\\]\\}",
+          "end": "(?<!\\\\)\\]\\}|(?=\\*\\))",
           "name": "markup.inline.raw.ocamldoc",
           "contentName": "source.embedded.ocamldoc",
           "patterns": [{ "include": "source.ocaml" }]
@@ -60,14 +82,14 @@
         {
           "comment": "embedded other language source",
           "begin": "(?<!\\\\)\\{@.+?\\[",
-          "end": "(?<!\\\\)\\]\\}",
+          "end": "(?<!\\\\)\\]\\}|(?=\\*\\))",
           "name": "markup.inline.raw.odoc",
           "contentName": "source.embedded.odoc"
         },
         {
           "comment": "cross-reference",
           "begin": "(?<!\\\\)\\{!((modules?|modtype|module-type|class|classtype|class-type|val|value|type|exception|exn|attribute|method|section|const|recfield|field|extension|extension-decl|instance-variable|label|page):)?",
-          "end": "(?<!\\\\)\\}",
+          "end": "(?<!\\\\)\\}|(?=\\*\\))",
           "name": "markup.inline.raw.ocamldoc",
           "contentName": "source.embedded.ocamldoc",
           "patterns": [{ "include": "source.ocaml" }]
@@ -75,7 +97,7 @@
         {
           "comment": "cross-reference with alt text",
           "begin": "(?<!\\\\)\\{(\\{!((module|modtype|module-type|class|classtype|class-type|val|value|type|exception|exn|attribute|method|section|const|recfield|field|extension|extension-decl|instance-variable|label|page):)?)",
-          "end": "(\\}).*?(?<!\\\\)\\}",
+          "end": "(\\}).*?(?<!\\\\)\\}|(?=\\*\\))",
           "name": "markup.underline.link.ocamldoc meta.link.ocamldoc",
           "contentName": "markup.inline.raw.ocamldoc source.embedded.ocamldoc",
           "patterns": [{ "include": "source.ocaml" }],
@@ -89,7 +111,7 @@
         {
           "comment": "ocamldoc heading tag",
           "begin": "(?<!\\\\){[[:digit:]]+(:[^[:space:]]*)?[[:space:]]",
-          "end": "(?<!\\\\)}",
+          "end": "(?<!\\\\)}|(?=\\*\\))",
           "name": "markup.heading.ocamldoc",
           "patterns": [{ "include": "#markup" }],
           "beginCaptures": {
@@ -99,48 +121,48 @@
         {
           "comment": "ocamldoc alignment",
           "begin": "(?<!\\\\){[CLR][[:space:]]",
-          "end": "(?<!\\\\)}",
+          "end": "(?<!\\\\)}|(?=\\*\\))",
           "name": "meta.alignment.ocamldoc",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "ocamldoc bold",
           "begin": "(?<!\\\\){b[[:space:]]",
-          "end": "(?<!\\\\)}",
+          "end": "(?<!\\\\)}|(?=\\*\\))",
           "name": "markup.bold.ocamldoc",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "ocamldoc italic/emph",
           "begin": "(?<!\\\\){(i|e)[[:space:]]",
-          "end": "(?<!\\\\)}",
+          "end": "(?<!\\\\)}|(?=\\*\\))",
           "name": "markup.italic.ocamldoc",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "ocamldoc verbatim",
           "begin": "(?<!\\\\){v[[:space:]]",
-          "end": "\\bv}",
+          "end": "\\bv}|(?=\\*\\))",
           "name": "markup.inline.raw.ocamldoc"
         },
         {
           "comment": "ocamldoc exponent/index",
           "begin": "(?<!\\\\){(\\^|\\_)[[:space:]]",
-          "end": "(?<!\\\\)}",
+          "end": "(?<!\\\\)}|(?=\\*\\))",
           "name": "markup.exponent.ocamldoc",
           "patterns": [{ "include": "#markup" }]
         },
         {
           "comment": "odoc inline math",
           "begin": "(?<!\\\\){m[[:space:]]",
-          "end": "(?<!\\\\)\\}",
+          "end": "(?<!\\\\)\\}|(?=\\*\\))",
           "name": "support.class.math.odoc markup.math.inline.odoc meta.math.inline.odoc",
           "patterns": [{ "include": "#braces" }]
         },
         {
           "comment": "odoc math block",
           "begin": "(?<!\\\\){math[[:space:]]",
-          "end": "(?<!\\\\)\\}",
+          "end": "(?<!\\\\)\\}|(?=\\*\\))",
           "name": "support.class.math.odoc markup.math.block.odoc meta.math.block.odoc",
           "patterns": [{ "include": "#braces" }]
         },
@@ -152,7 +174,7 @@
         {
           "comment": "ocamldoc lists",
           "begin": "((?<!\\\\){(ul|ol)[[:space:]])",
-          "end": "((?<!\\\\)})",
+          "end": "((?<!\\\\)})|(?=\\*\\))",
           "beginCaptures": {
             "1": {
               "name": "punctuation.definition.list.begin.markdown.ocamldoc"
@@ -168,7 +190,7 @@
         {
           "comment": "ocamldoc tables",
           "begin": "((?<!\\\\){table[[:space:]])",
-          "end": "((?<!\\\\)})",
+          "end": "((?<!\\\\)})|(?=\\*\\))",
           "beginCaptures": {
             "1": {
               "name": "punctuation.definition.list.begin.markdown.table.ocamldoc"
@@ -184,7 +206,7 @@
         {
           "comment": "ocamldoc light tables",
           "begin": "((?<!\\\\){t[[:space:]])",
-          "end": "((?<!\\\\)})",
+          "end": "((?<!\\\\)})|(?=\\*\\))",
           "beginCaptures": {
             "1": {
               "name": "punctuation.definition.list.begin.markdown.table.light.ocamldoc"
@@ -203,7 +225,7 @@
           "beginCaptures": {
             "1": { "name": "string.other.link.title.markdown.ocamldoc" }
           },
-          "end": "(?<!\\\\)\\}",
+          "end": "(?<!\\\\)\\}|(?=\\*\\))",
           "patterns": [{ "include": "#markup" }],
           "name": "markup.underline.link.ocamldoc meta.link.ocamldoc"
         },
@@ -215,16 +237,48 @@
           }
         },
         {
+          "comment": "ocamldoc latex on one line",
+          "match": "(?<!\\\\)(\\{%(?:[[:space:]]|latex:))((?:(?!%\\}|\\*\\)).)*)(%\\})",
+          "name": "markup.inline.raw.ocamldoc",
+          "captures": {
+            "2": { "patterns": [{ "include": "text.tex.latex" }] }
+          }
+        },
+        {
+          "comment": "ocamldoc latex cut short by the enclosing comment",
+          "match": "(?<!\\\\)(\\{%(?:[[:space:]]|latex:))((?:(?!%\\}|\\*\\)).)*)(?=\\*\\))",
+          "name": "markup.inline.raw.ocamldoc",
+          "captures": {
+            "2": { "patterns": [{ "include": "text.tex.latex" }] }
+          }
+        },
+        {
           "comment": "ocamldoc latex",
           "begin": "(?<!\\\\){\\%([[:space:]]|latex:)",
-          "end": "\\%}",
+          "end": "\\%}|(?=\\*\\))",
           "name": "markup.inline.raw.ocamldoc",
           "patterns": [{ "include": "text.tex.latex" }]
         },
         {
+          "comment": "ocamldoc html on one line",
+          "match": "(?<!\\\\)(\\{%html:)((?:(?!%\\}|\\*\\)).)*)(%\\})",
+          "name": "markup.inline.raw.ocamldoc",
+          "captures": {
+            "2": { "patterns": [{ "include": "text.html.basic" }] }
+          }
+        },
+        {
+          "comment": "ocamldoc html cut short by the enclosing comment",
+          "match": "(?<!\\\\)(\\{%html:)((?:(?!%\\}|\\*\\)).)*)(?=\\*\\))",
+          "name": "markup.inline.raw.ocamldoc",
+          "captures": {
+            "2": { "patterns": [{ "include": "text.html.basic" }] }
+          }
+        },
+        {
           "comment": "ocamldoc html",
           "begin": "(?<!\\\\){\\%html:",
-          "end": "\\%}",
+          "end": "\\%}|(?=\\*\\))",
           "name": "markup.inline.raw.ocamldoc",
           "patterns": [{ "include": "text.html.basic" }]
         }
@@ -235,7 +289,7 @@
         {
           "comment": "ocamldoc list element",
           "begin": "((?<!\\\\){(\\-|li)[[:space:]])",
-          "end": "((?<!\\\\)})",
+          "end": "((?<!\\\\)})|(?=\\*\\))",
           "beginCaptures": {
             "1": {
               "name": "punctuation.definition.list.begin.markdown.ocamldoc"
@@ -255,7 +309,7 @@
         {
           "comment": "ocamldoc table row",
           "begin": "((?<!\\\\){tr[[:space:]])",
-          "end": "((?<!\\\\)})",
+          "end": "((?<!\\\\)})|(?=\\*\\))",
           "beginCaptures": {
             "1": {
               "name": "punctuation.definition.list.begin.markdown.table.row.ocamldoc"
@@ -275,7 +329,7 @@
         {
           "comment": "ocamldoc table cell",
           "begin": "((?<!\\\\){td[[:space:]])",
-          "end": "((?<!\\\\)})",
+          "end": "((?<!\\\\)})|(?=\\*\\))",
           "beginCaptures": {
             "1": {
               "name": "punctuation.definition.list.begin.markdown.table.cell.ocamldoc"
@@ -291,7 +345,7 @@
         {
           "comment": "ocamldoc table header cell",
           "begin": "((?<!\\\\){th[[:space:]])",
-          "end": "((?<!\\\\)})",
+          "end": "((?<!\\\\)})|(?=\\*\\))",
           "contentName": "markup.bold.tableheader.ocamldoc",
           "beginCaptures": {
             "1": {
@@ -321,7 +375,7 @@
       "patterns": [
         {
           "begin": "(?<!\\\\){",
-          "end": "(?<!\\\\)\\}",
+          "end": "(?<!\\\\)\\}|(?=\\*\\))",
           "patterns": [{ "include": "#braces" }]
         }
       ]

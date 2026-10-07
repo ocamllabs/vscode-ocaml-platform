@@ -1398,3 +1398,157 @@ class c = object method m = float 1 end`;
     4:36:39 "end" keyword.ocaml"
   `);
 });
+
+// https://ocaml.org/manual/5.5/ocamldoc.html
+test("Unbalanced inline documentation closes with the comment", async () => {
+  const source = `(** silly bracket [(] and [foo "bar] *)
+let after_code = 1
+(** {% $ %} and {%html: <b %} *)
+let after_markup = 2
+(** {0 *)
+let after_heading = 3
+(** [foo "bar *)
+let after_cut = 4`;
+  expect(await tokenizer.render("source.ocaml", source)).toMatchInlineSnapshot(`
+    "1:0:3 "(**" comment.doc.ocaml
+    1:3:18 " silly bracket " comment.doc.ocaml
+    1:18:19 "[" comment.doc.ocaml markup.inline.raw.ocamldoc
+    1:19:20 "(" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:20:21 "]" comment.doc.ocaml markup.inline.raw.ocamldoc
+    1:21:26 " and " comment.doc.ocaml
+    1:26:27 "[" comment.doc.ocaml markup.inline.raw.ocamldoc
+    1:27:30 "foo" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
+    1:30:31 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:31:32 "\\"" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc string.quoted.double.ocaml
+    1:32:35 "bar" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc string.quoted.double.ocaml
+    1:35:36 "]" comment.doc.ocaml markup.inline.raw.ocamldoc
+    1:36:37 " " comment.doc.ocaml
+    1:37:39 "*)" comment.doc.ocaml
+    2:0:3 "let" keyword.ocaml
+    2:4:14 "after_code" entity.name.binding.ocaml
+    2:15:16 "=" keyword.operator.ocaml
+    2:17:18 "1" constant.numeric.decimal.integer.ocaml
+    3:0:3 "(**" comment.doc.ocaml
+    3:3:4 " " comment.doc.ocaml
+    3:4:7 "{% " comment.doc.ocaml markup.inline.raw.ocamldoc
+    3:7:9 "$ " comment.doc.ocaml markup.inline.raw.ocamldoc
+    3:9:11 "%}" comment.doc.ocaml markup.inline.raw.ocamldoc
+    3:11:16 " and " comment.doc.ocaml
+    3:16:23 "{%html:" comment.doc.ocaml markup.inline.raw.ocamldoc
+    3:23:27 " <b " comment.doc.ocaml markup.inline.raw.ocamldoc
+    3:27:29 "%}" comment.doc.ocaml markup.inline.raw.ocamldoc
+    3:29:30 " " comment.doc.ocaml
+    3:30:32 "*)" comment.doc.ocaml
+    4:0:3 "let" keyword.ocaml
+    4:4:16 "after_markup" entity.name.binding.ocaml
+    4:17:18 "=" keyword.operator.ocaml
+    4:19:20 "2" constant.numeric.decimal.integer.ocaml
+    5:0:3 "(**" comment.doc.ocaml
+    5:3:4 " " comment.doc.ocaml
+    5:4:7 "{0 " comment.doc.ocaml markup.heading.ocamldoc
+    5:7:9 "*)" comment.doc.ocaml
+    6:0:3 "let" keyword.ocaml
+    6:4:17 "after_heading" entity.name.binding.ocaml
+    6:18:19 "=" keyword.operator.ocaml
+    6:20:21 "3" constant.numeric.decimal.integer.ocaml
+    7:0:3 "(**" comment.doc.ocaml
+    7:3:4 " " comment.doc.ocaml
+    7:4:5 "[" comment.doc.ocaml markup.inline.raw.ocamldoc
+    7:5:8 "foo" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
+    7:8:9 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    7:9:10 "\\"" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc string.quoted.double.ocaml
+    7:10:14 "bar " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc string.quoted.double.ocaml
+    7:14:16 "*)" comment.doc.ocaml
+    8:0:3 "let" keyword.ocaml
+    8:4:13 "after_cut" entity.name.binding.ocaml
+    8:14:15 "=" keyword.operator.ocaml
+    8:16:17 "4" constant.numeric.decimal.integer.ocaml"
+  `);
+});
+
+// https://ocaml.org/manual/5.5/ocamldoc.html
+test("Inline code spans follow odoc bracket rules", async () => {
+  const source = `(** [a \\] b] [Str.regexp "\\\\["] [f [x] (g [y])] [print_string "*)"] *)
+let x = 1`;
+  expect(await tokenizer.render("source.ocaml", source)).toMatchInlineSnapshot(`
+    "1:0:3 "(**" comment.doc.ocaml
+    1:3:4 " " comment.doc.ocaml
+    1:4:5 "[" comment.doc.ocaml markup.inline.raw.ocamldoc
+    1:5:6 "a" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
+    1:6:10 " \\\\] " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:10:11 "b" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
+    1:11:12 "]" comment.doc.ocaml markup.inline.raw.ocamldoc
+    1:12:13 " " comment.doc.ocaml
+    1:13:14 "[" comment.doc.ocaml markup.inline.raw.ocamldoc
+    1:14:17 "Str" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc constant.language.capital-identifier.ocaml
+    1:17:18 "." comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc keyword.other.ocaml punctuation.other.period punctuation.separator.period
+    1:18:24 "regexp" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
+    1:24:25 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:25:26 "\\"" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc string.quoted.double.ocaml
+    1:26:28 "\\\\\\\\" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc string.quoted.double.ocaml constant.character.escape.ocaml
+    1:28:29 "[" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc string.quoted.double.ocaml
+    1:29:30 "\\"" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc string.quoted.double.ocaml
+    1:30:31 "]" comment.doc.ocaml markup.inline.raw.ocamldoc
+    1:31:32 " " comment.doc.ocaml
+    1:32:33 "[" comment.doc.ocaml markup.inline.raw.ocamldoc
+    1:33:34 "f" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
+    1:34:35 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:35:36 "[" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:36:37 "x" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
+    1:37:38 "]" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:38:39 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:39:40 "(" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:40:41 "g" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
+    1:41:42 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:42:43 "[" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:43:44 "y" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
+    1:44:45 "]" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:45:46 ")" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:46:47 "]" comment.doc.ocaml markup.inline.raw.ocamldoc
+    1:47:48 " " comment.doc.ocaml
+    1:48:49 "[" comment.doc.ocaml markup.inline.raw.ocamldoc
+    1:49:61 "print_string" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
+    1:61:62 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:62:63 "\\"" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc string.quoted.double.ocaml
+    1:63:65 "*)" comment.doc.ocaml
+    1:65:66 "\\"" string.quoted.double.ocaml
+    1:66:71 "] *)" string.quoted.double.ocaml
+    2:0:10 "let x = 1" string.quoted.double.ocaml"
+  `);
+});
+
+// https://ocaml.org/manual/5.5/ocamldoc.html
+test("Multi-line inline code keeps embedded state", async () => {
+  const source = `(** [ "a
+ b" ] and [f (a
+ b)] *)
+let x = 1`;
+  expect(await tokenizer.render("source.ocaml", source)).toMatchInlineSnapshot(`
+    "1:0:3 "(**" comment.doc.ocaml
+    1:3:4 " " comment.doc.ocaml
+    1:4:5 "[" comment.doc.ocaml markup.inline.raw.ocamldoc
+    1:5:6 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    1:6:7 "\\"" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc string.quoted.double.ocaml
+    1:7:9 "a" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc string.quoted.double.ocaml
+    2:0:2 " b" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc string.quoted.double.ocaml
+    2:2:3 "\\"" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc string.quoted.double.ocaml
+    2:3:4 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    2:4:5 "]" comment.doc.ocaml markup.inline.raw.ocamldoc
+    2:5:10 " and " comment.doc.ocaml
+    2:10:11 "[" comment.doc.ocaml markup.inline.raw.ocamldoc
+    2:11:12 "f" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
+    2:12:13 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    2:13:14 "(" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    2:14:15 "a" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
+    3:0:1 " " comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    3:1:2 "b" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc source.ocaml
+    3:2:3 ")" comment.doc.ocaml markup.inline.raw.ocamldoc source.embedded.ocamldoc
+    3:3:4 "]" comment.doc.ocaml markup.inline.raw.ocamldoc
+    3:4:5 " " comment.doc.ocaml
+    3:5:7 "*)" comment.doc.ocaml
+    4:0:3 "let" keyword.ocaml
+    4:4:5 "x" entity.name.binding.ocaml
+    4:6:7 "=" keyword.operator.ocaml
+    4:8:9 "1" constant.numeric.decimal.integer.ocaml"
+  `);
+});

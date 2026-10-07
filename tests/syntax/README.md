@@ -113,6 +113,14 @@ including declarations whose type starts on the next line, use the neutral
 `entity.name.binding.ocaml` scope. Syntactic type parameters retain their
 type-variable scopes.
 
+Documentation markup ends at the enclosing `*)`. Inline code, LaTeX, and HTML
+that start and end on one line, or that run into the `*)`, are tokenised in
+isolation, so unbalanced brackets, quotes, or `$` inside them cannot escape the
+comment. A span that continues onto another line keeps its embedded state across
+lines and ends only at its own closer, so an unbalanced multi-line span still
+runs to the next `]` or `%}`. `{[ ... ]}` code blocks behave the same way. In
+`.mld` pages the `*)` boundary also applies.
+
 These tests cover the reported lexical distinctions and state boundaries. They
 do not establish complete parser conformance, exact Unicode identifier
 validation, or correctness of the external JavaScript, HTML, and LaTeX grammars.

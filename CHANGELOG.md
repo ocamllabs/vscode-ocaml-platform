@@ -15,6 +15,9 @@
 - Fix Menhir action keyword highlighting and Markdown fence boundaries. Reject
   invalid top-level indentation and Unicode closing-fence separators while
   preserving fences inside quotes and lists.
+- Close documentation comments after unbalanced inline code, LaTeX, or HTML. A
+  `[(]`, `{% $ %}`, or `{0` inside a doc comment no longer colours the rest of
+  the file as a comment.
 
 ## 2.4.0
 

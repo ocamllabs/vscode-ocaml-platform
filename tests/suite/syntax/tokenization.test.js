@@ -261,6 +261,25 @@ for (const language of ["ocaml", "reason"]) {
   }
 }
 
+examples.push({
+  filename: "doc-comment-boundaries.ml",
+  source: [
+    "(** silly bracket [(] *)",
+    "let after_code = 1",
+    "(** {% $ %} *)",
+    "let after_latex = 2",
+    '(** [ "a',
+    ' b" ] *)',
+    "let after_span = 3",
+  ].join("\n"),
+  assertions: [
+    { text: "after_code", scope: "entity.name.binding.ocaml", absent: "comment", exact: true },
+    { text: "after_latex", scope: "entity.name.binding.ocaml", absent: "comment", exact: true },
+    { text: ' b"', scope: "string.quoted.double.ocaml", exact: true },
+    { text: "after_span", scope: "entity.name.binding.ocaml", absent: "comment", exact: true },
+  ],
+});
+
 suite("editor syntax tokenisation", () => {
   let directory;
   suiteSetup(async () => {
