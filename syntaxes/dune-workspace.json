@@ -8,7 +8,7 @@
       "patterns": [
         {
           "comment": "lang",
-          "begin": "\\([[:space:]]*(lang)[[:space:]]+(dune)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(lang)[ \\t\\r\\n\\f]+(dune)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-workspace" },
@@ -18,8 +18,28 @@
         },
 
         {
+          "comment": "pkg",
+          "begin": "\\([ \\t\\r\\n\\f]*(pkg)(?=[ \\t\\r\\n\\f();\"]|$)",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.language.dune-workspace"
+            }
+          },
+          "patterns": [
+            {
+              "name": "constant.language.dune-workspace",
+              "match": "(?<![^ \\t\\r\\n\\f();\"])(enabled|disabled)(?=[ \\t\\r\\n\\f();\"]|$)"
+            },
+            {
+              "include": "source.dune#general"
+            }
+          ]
+        },
+
+        {
           "comment": "profile",
-          "begin": "\\([[:space:]]*(profile)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(profile)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-workspace" }
@@ -30,7 +50,7 @@
 
         {
           "comment": "env",
-          "begin": "\\([[:space:]]*(env)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(env)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-workspace" }
@@ -40,7 +60,7 @@
 
         {
           "comment": "lock_dir",
-          "begin": "\\([[:space:]]*(lock_dir)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(lock_dir)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-workspace" }
@@ -48,7 +68,7 @@
           "patterns": [
             {
               "comment": "path",
-              "begin": "\\([[:space:]]*(path)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(path)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-workspace" }
@@ -57,7 +77,7 @@
             },
             {
               "comment": "repositories",
-              "begin": "\\([[:space:]]*(repositories)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(repositories)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-workspace" }
@@ -66,7 +86,7 @@
             },
             {
               "comment": "solver_env",
-              "begin": "\\([[:space:]]*(solver_env)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(solver_env)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-workspace" }
@@ -75,7 +95,7 @@
             },
             {
               "comment": "unset_variables",
-              "begin": "\\([[:space:]]*(unset_variables)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(unset_variables)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-workspace" }
@@ -84,7 +104,7 @@
             },
             {
               "comment": "pins",
-              "begin": "\\([[:space:]]*(pins)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(pins)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-workspace" }
@@ -93,7 +113,7 @@
             },
             {
               "comment": "version_preference",
-              "begin": "\\([[:space:]]*(version_preference)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(version_preference)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-workspace" }
@@ -102,14 +122,14 @@
                 {
                   "comment": "newest/oldest",
                   "name": "variable.other.declaration.dune-project",
-                  "match": "\\b(newest|oldest)\\b"
+                  "match": "(?<![^ \\t\\r\\n\\f();\"])(newest|oldest)(?=[ \\t\\r\\n\\f();\"]|$)"
                 },
                 { "include": "source.dune#general" }
               ]
             },
             {
               "comment": "constraints",
-              "begin": "\\([[:space:]]*(constraints)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(constraints)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-workspace" }
@@ -118,7 +138,7 @@
             },
             {
               "comment": "depopts",
-              "begin": "\\([[:space:]]*(depopts)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(depopts)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-workspace" }
@@ -131,7 +151,7 @@
 
         {
           "comment": "pin",
-          "begin": "\\([[:space:]]*(pin)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(pin)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-workspace" }
@@ -139,7 +159,7 @@
           "patterns": [
             {
               "comment": "url",
-              "begin": "\\([[:space:]]*(url)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(url)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-workspace" }
@@ -148,7 +168,7 @@
             },
             {
               "comment": "package",
-              "begin": "\\([[:space:]]*(package)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(package)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-workspace" }
@@ -156,7 +176,7 @@
               "patterns": [
                 {
                   "comment": "name",
-                  "begin": "\\([[:space:]]*(name)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(name)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "keyword.language.dune-workspace" }
@@ -166,7 +186,7 @@
                 },
                 {
                   "comment": "version",
-                  "begin": "\\([[:space:]]*(version)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(version)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "keyword.language.dune-workspace" }
@@ -183,7 +203,7 @@
 
         {
           "comment": "repository",
-          "begin": "\\([[:space:]]*(repository)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(repository)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-workspace" }
@@ -191,7 +211,7 @@
           "patterns": [
             {
               "comment": "name",
-              "begin": "\\([[:space:]]*(name)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(name)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-workspace" }
@@ -201,7 +221,7 @@
             },
             {
               "comment": "url",
-              "begin": "\\([[:space:]]*(url)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(url)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-workspace" }
@@ -214,7 +234,7 @@
 
         {
           "comment": "context",
-          "begin": "\\([[:space:]]*(context)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(context)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-workspace" }
@@ -223,11 +243,11 @@
             {
               "comment": "default",
               "name": "keyword.language.dune-workspace",
-              "match": "\\b(default)\\b"
+              "match": "(?<![^ \\t\\r\\n\\f();\"])(default)(?=[ \\t\\r\\n\\f();\"]|$)"
             },
             {
               "comment": "opam/default",
-              "begin": "\\([[:space:]]*(opam|default)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(opam|default)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-workspace" }
@@ -235,7 +255,7 @@
               "patterns": [
                 {
                   "comment": "opam switch",
-                  "begin": "\\([[:space:]]*(switch)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(switch)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "keyword.language.dune-workspace" }
@@ -245,7 +265,7 @@
 
                 {
                   "comment": "name",
-                  "begin": "\\([[:space:]]*(name)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(name)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "keyword.language.dune-workspace" }
@@ -255,7 +275,7 @@
 
                 {
                   "comment": "root",
-                  "begin": "\\([[:space:]]*(root)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(root)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "keyword.language.dune-workspace" }
@@ -265,7 +285,7 @@
 
                 {
                   "comment": "merlin",
-                  "begin": "\\([[:space:]]*(merlin)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(merlin)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "keyword.language.dune-workspace" }
@@ -275,7 +295,7 @@
 
                 {
                   "comment": "profile",
-                  "begin": "\\([[:space:]]*(profile)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(profile)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "keyword.language.dune-workspace" }
@@ -285,7 +305,7 @@
 
                 {
                   "comment": "env",
-                  "begin": "\\([[:space:]]*(env)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(env)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "keyword.language.dune-workspace" }
@@ -295,7 +315,7 @@
 
                 {
                   "comment": "toolchain",
-                  "begin": "\\([[:space:]]*(toolchain)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(toolchain)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "keyword.language.dune-workspace" }
@@ -305,7 +325,7 @@
 
                 {
                   "comment": "host",
-                  "begin": "\\([[:space:]]*(host)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(host)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "keyword.language.dune-workspace" }
@@ -315,7 +335,7 @@
 
                 {
                   "comment": "paths",
-                  "begin": "\\([[:space:]]*(paths)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(paths)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "keyword.language.dune-workspace" }
@@ -325,7 +345,7 @@
 
                 {
                   "comment": "fdo",
-                  "begin": "\\([[:space:]]*(fdo)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(fdo)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "keyword.language.dune-workspace" }
@@ -335,7 +355,7 @@
 
                 {
                   "comment": "disable_dynamically_linked_foreign_archives",
-                  "begin": "\\([[:space:]]*(disable_dynamically_linked_foreign_archives)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(disable_dynamically_linked_foreign_archives)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "keyword.language.dune-workspace" }
@@ -345,7 +365,7 @@
 
                 {
                   "comment": "targets",
-                  "begin": "\\([[:space:]]*(targets)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(targets)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": { "name": "keyword.language.dune-workspace" }
@@ -362,7 +382,7 @@
 
         {
           "comment": "config:action_stderr_on_success/action_stdout_on_success",
-          "begin": "\\([[:space:]]*(action_stderr_on_success|action_stdout_on_success)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(action_stderr_on_success|action_stdout_on_success)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-workspace" }
@@ -371,7 +391,7 @@
             {
               "comment": "print/swallow/must-be-empty",
               "name": "variable.other.declaration.dune-project",
-              "match": "\\b(print|swallow|must-be-empty)\\b"
+              "match": "(?<![^ \\t\\r\\n\\f();\"])(print|swallow|must-be-empty)(?=[ \\t\\r\\n\\f();\"]|$)"
             },
             { "include": "source.dune#general" }
           ]
@@ -379,7 +399,7 @@
 
         {
           "comment": "config:chache-check-probability",
-          "begin": "\\([[:space:]]*(cache-check-probability)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(cache-check-probability)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-workspace" }
@@ -388,7 +408,7 @@
         },
         {
           "comment": "config:chache-storage-mode",
-          "begin": "\\([[:space:]]*(cache-storage-mode)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(cache-storage-mode)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-workspace" }
@@ -397,14 +417,14 @@
             {
               "comment": "auto/hardlink/copy",
               "name": "variable.other.declaration.dune-project",
-              "match": "\\b(auto|hardlink|copy)\\b"
+              "match": "(?<![^ \\t\\r\\n\\f();\"])(auto|hardlink|copy)(?=[ \\t\\r\\n\\f();\"]|$)"
             },
             { "include": "source.dune#general" }
           ]
         },
         {
           "comment": "config:cache",
-          "begin": "\\([[:space:]]*(cache)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(cache)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-workspace" }
@@ -413,14 +433,14 @@
             {
               "comment": "enabled/disabled",
               "name": "variable.other.declaration.dune-project",
-              "match": "\\b(enabled|disabled)\\b"
+              "match": "(?<![^ \\t\\r\\n\\f();\"])(enabled|disabled)(?=[ \\t\\r\\n\\f();\"]|$)"
             },
             { "include": "source.dune#general" }
           ]
         },
         {
           "comment": "config:jobs",
-          "begin": "\\([[:space:]]*(jobs)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(jobs)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-workspace" }
@@ -429,14 +449,14 @@
             {
               "comment": "auto",
               "name": "variable.other.declaration.dune-project",
-              "match": "\\b(auto)\\b"
+              "match": "(?<![^ \\t\\r\\n\\f();\"])(auto)(?=[ \\t\\r\\n\\f();\"]|$)"
             },
             { "include": "source.dune#general" }
           ]
         },
         {
           "comment": "config:display",
-          "begin": "\\([[:space:]]*(display)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(display)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-workspace" }
@@ -445,14 +465,14 @@
             {
               "comment": "progress/verbose/short/quiet",
               "name": "variable.other.declaration.dune-project",
-              "match": "\\b(progress|verbose|short|quiet)\\b"
+              "match": "(?<![^ \\t\\r\\n\\f();\"])(progress|verbose|short|quiet)(?=[ \\t\\r\\n\\f();\"]|$)"
             },
             { "include": "source.dune#general" }
           ]
         },
         {
           "comment": "config:sandboxing_preference",
-          "begin": "\\([[:space:]]*(sandboxing_preference)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(sandboxing_preference)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-workspace" }
@@ -461,14 +481,14 @@
             {
               "comment": "none/hardlink/copy/symlink",
               "name": "variable.other.declaration.dune-project",
-              "match": "\\b(none|hardlink|copy|symlink)\\b"
+              "match": "(?<![^ \\t\\r\\n\\f();\"])(none|hardlink|copy|symlink)(?=[ \\t\\r\\n\\f();\"]|$)"
             },
             { "include": "source.dune#general" }
           ]
         },
         {
           "comment": "config:terminal-persistence",
-          "begin": "\\([[:space:]]*(terminal-persistence)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(terminal-persistence)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-workspace" }
@@ -477,14 +497,14 @@
             {
               "comment": "preserve/clear-on-rebuild/clear-on-rebuild-and-flush-history",
               "name": "variable.other.declaration.dune-project",
-              "match": "\\b(preserve|clear-on-rebuild-and-flush-history|clear-on-rebuild)\\b"
+              "match": "(?<![^ \\t\\r\\n\\f();\"])(preserve|clear-on-rebuild-and-flush-history|clear-on-rebuild)(?=[ \\t\\r\\n\\f();\"]|$)"
             },
             { "include": "source.dune#general" }
           ]
         },
         {
           "comment": "config:project_defaults",
-          "begin": "\\([[:space:]]*(project_defaults)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(project_defaults)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": { "name": "keyword.language.dune-workspace" }
@@ -492,7 +512,7 @@
           "patterns": [
             {
               "comment": "authors/maintainers",
-              "begin": "\\([[:space:]]*(authors|maintainers)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(authors|maintainers)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-workspace" }
@@ -501,7 +521,7 @@
             },
             {
               "comment": "license",
-              "begin": "\\([[:space:]]*(license)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(license)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": { "name": "keyword.language.dune-workspace" }

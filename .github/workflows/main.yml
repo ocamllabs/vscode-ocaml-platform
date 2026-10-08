@@ -33,6 +33,8 @@ jobs:
 
       - run: bun run lint
 
+      - run: bun run typecheck:syntax
+
       - run: make deps
 
       - run: opam exec -- make pkg
