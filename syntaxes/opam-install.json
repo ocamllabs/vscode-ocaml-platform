@@ -2,6 +2,7 @@
   "scopeName": "source.ocaml.opam-install",
   "fileTypes": ["install"],
   "patterns": [
+    { "include": "source.ocaml.opam#block-comments" },
     {
       "name": "comment.line.opam-install",
       "begin": "#",
@@ -17,7 +18,8 @@
     {
       "name": "string.quoted.double.opam-install",
       "begin": "\"",
-      "end": "\""
+      "end": "\"",
+      "patterns": [{ "include": "source.ocaml.opam#string-escapes" }]
     }
   ]
 }

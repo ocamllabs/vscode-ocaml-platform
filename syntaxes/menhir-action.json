@@ -1,6 +1,6 @@
 {
   "scopeName": "source.action.menhir",
-  "injectionSelector": "L:source.embedded-action.menhir",
+  "injectionSelector": "L:source.embedded-action.menhir -comment -string",
   "patterns": [
     {
       "begin": "(\\$(?:startpos|endpos|startofs|endofs|loc))[[:space:]]*\\(",

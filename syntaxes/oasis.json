@@ -12,7 +12,7 @@
     "comments": {
       "comment": "line comment",
       "name": "comment.line.oasis",
-      "begin": "#",
+      "begin": "^[[:blank:]]*#",
       "end": "$"
     },
 
