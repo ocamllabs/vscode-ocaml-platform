@@ -45,6 +45,8 @@
    (>= 2.2))
  (sexplib
    (>= v0.17))
+  (parsexp
+   (>= v0.17))
   (ocamlformat
    (and
     (= 0.29.0)
