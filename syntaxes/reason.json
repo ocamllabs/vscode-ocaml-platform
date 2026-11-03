@@ -108,13 +108,37 @@
       "begin": "/\\*",
       "end": "\\*/",
       "name": "comment.block",
-      "patterns": [{ "include": "#comment-block-doc" }, { "include": "#comment-block" }]
+      "patterns": [
+        { "include": "#comment-strings" },
+        { "include": "#comment-block-doc" },
+        { "include": "#comment-block" }
+      ]
     },
     "comment-block-doc": {
       "begin": "/\\*\\*(?!/)",
       "end": "\\*/",
       "name": "comment.block.documentation",
-      "patterns": [{ "include": "#comment-block-doc" }, { "include": "#comment-block" }]
+      "patterns": [
+        { "include": "#comment-strings" },
+        { "include": "#comment-block-doc" },
+        { "include": "#comment-block" }
+      ]
+    },
+    "comment-strings": {
+      "patterns": [
+        {
+          "match": "(')([[:space:]]|[[:graph:]]|\\\\[\\\\\"'ntbr]|\\\\[[:digit:]][[:digit:]][[:digit:]]|\\\\x[[:xdigit:]][[:xdigit:]]|\\\\o[0-3][0-7][0-7])(')"
+        },
+        {
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [{ "match": "\\\\." }]
+        },
+        {
+          "begin": "\\{(?:%%?[[:alpha:]_][[:word:].']*[[:blank:]]*)?([_[:lower:]]*)\\|",
+          "end": "\\|\\1\\}"
+        }
+      ]
     },
     "condition-lhs": {
       "begin": "(?<![#\\-:!?.@*/&%^+<=>|~$\\\\])([\\?])(?![#\\-:!?.@*/&%^+<=>|~$\\\\])",
@@ -399,7 +423,7 @@
               "end": "\"",
               "name": "string.double string.regexp",
               "patterns": [
-                { "include": "#value-literal-string-escape" },
+                { "include": "#value-expression-literal-string-escape-sequence" },
                 {
                   "match": "(?:(%)(.*?)|(caml.*?))(?=\"|(?:[^\\\\\\n]$))",
                   "captures": {
@@ -2026,13 +2050,13 @@
         }
       ]
     },
+    "value-expression-literal-string-escape-sequence": {
+      "match": "\\\\[\\\\\"'ntbr ]|\\\\[[:digit:]][[:digit:]][[:digit:]]|\\\\x[[:xdigit:]][[:xdigit:]]|\\\\o[0-3][0-7][0-7]|\\\\u\\{[[:xdigit:]]{1,6}\\}",
+      "name": "constant.character"
+    },
     "value-expression-literal-string-escape": {
       "patterns": [
-        {
-          "comment": "FIXME: make escapes into separate rule",
-          "match": "\\\\[\\\\\"'ntbr ]|\\\\[[:digit:]][[:digit:]][[:digit:]]|\\\\x[[:xdigit:]][[:xdigit:]]|\\\\o[0-3][0-7][0-7]",
-          "name": "constant.character"
-        },
+        { "include": "#value-expression-literal-string-escape-sequence" },
         {
           "match": "(@)([ \\[\\],.]|\\\\n)",
           "captures": {

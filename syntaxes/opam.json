@@ -5,12 +5,7 @@
   "repository": {
     "comments": {
       "patterns": [
-        {
-          "comment": "block comment",
-          "name": "comment.block.opam",
-          "begin": "\\(\\*",
-          "end": "\\*\\)"
-        },
+        { "include": "#block-comments" },
         {
           "comment": "line comment",
           "name": "comment.line.opam",
@@ -20,9 +15,16 @@
       ]
     },
 
+    "block-comments": {
+      "name": "comment.block.opam",
+      "begin": "\\(\\*",
+      "end": "\\*\\)",
+      "patterns": [{ "include": "#block-comments" }]
+    },
+
     "fields": {
       "comment": "labeled field",
-      "match": "^([[:word:]-]*[[:alpha:]][[:word:]-]*)(:)",
+      "match": "^[[:blank:]]*([[:word:]+-]*[[:alpha:]][[:word:]+-]*)[[:blank:]]*(:)(?![[:word:]-]*[[:alpha:]])",
       "captures": {
         "1": { "name": "entity.name.tag.opam" },
         "2": { "name": "keyword.operator.opam" }
@@ -34,17 +36,17 @@
         {
           "comment": "boolean literal",
           "name": "constant.language.opam",
-          "match": "\\b(true|false)\\b"
+          "match": "(?<![[:word:]+-])(true|false)(?![[:word:]+:-])"
         },
         {
           "comment": "integer literal",
           "name": "constant.numeric.decimal.opam",
-          "match": "(\\b|\\-?)[[:digit:]]+\\b"
+          "match": "(?<![[:word:]+-])-?[[:digit:]][_[:digit:]]*(?![[:word:]+:-])"
         },
         {
           "comment": "double-quote string literal",
           "name": "string.quoted.double.opam",
-          "begin": "\"",
+          "begin": "\"(?!\"\")",
           "end": "\"",
           "patterns": [{ "include": "#string-elements" }]
         },
@@ -62,13 +64,25 @@
         },
         {
           "comment": "identifier",
-          "match": "\\b([[:word:]+-]+)\\b",
+          "match": "(?<![[:word:]+-])[[:word:]+-]+(?::[[:word:]-]+)?(?![[:word:]+-])",
           "name": "variable.parameter.opam"
         }
       ]
     },
 
     "string-elements": {
+      "patterns": [
+        { "include": "#string-escapes" },
+        {
+          "comment": "variable interpolation",
+          "name": "constant.variable.opam",
+          "begin": "%\\{",
+          "end": "}\\%"
+        }
+      ]
+    },
+
+    "string-escapes": {
       "patterns": [
         {
           "comment": "escaped backslash",
@@ -78,23 +92,17 @@
         {
           "comment": "escaped quote or whitespace",
           "name": "constant.character.escape.opam",
-          "match": "\\\\[\"ntbr\\n]"
+          "match": "\\\\(?:['\" ntbr]|\\r?\\n)"
         },
         {
           "comment": "character from decimal ASCII code",
           "name": "constant.character.escape.opam",
-          "match": "\\\\[[:digit:]]{3}"
+          "match": "\\\\(?:[01][0-9]{2}|2[0-4][0-9]|25[0-5])"
         },
         {
           "comment": "character from hexadecimal ASCII code",
           "name": "constant.character.escape.opam",
           "match": "\\\\x[[:xdigit:]]{2}"
-        },
-        {
-          "comment": "variable interpolation",
-          "name": "constant.variable.opam",
-          "begin": "%\\{",
-          "end": "}\\%"
         },
         {
           "comment": "unknown escape sequence",

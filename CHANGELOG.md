@@ -5,6 +5,19 @@
 - Make syntax grammars compatible with more TextMate consumers. Preserve Menhir
   highlighting for whitespace-separated production calls and use the standard HTML
   grammar for OCamlDoc blocks.
+- Correct syntax highlighting against current language references, including
+  OCaml effects and raw identifiers, Dune atom boundaries and actions, and
+  strings, comments, and escapes in the supported configuration languages.
+  Avoid classifying ordinary identifiers as built-in types without type context.
+  Distinguish type, class, and method declarations from other bindings, including
+  declarations joined by `and`, and keep function scopes for bindings whose
+  declaration shows a function.
+- Fix Menhir action keyword highlighting and Markdown fence boundaries. Reject
+  invalid top-level indentation and Unicode closing-fence separators while
+  preserving fences inside quotes and lists.
+- Close documentation comments after unbalanced inline code, LaTeX, or HTML. A
+  `[(]`, `{% $ %}`, or `{0` inside a doc comment no longer colours the rest of
+  the file as a comment.
 
 ## 2.4.0
 

@@ -15,7 +15,7 @@
       "patterns": [
         {
           "comment": "jbuild_version",
-          "begin": "\\([[:space:]]*(jbuild_version)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(jbuild_version)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -31,7 +31,7 @@
         },
         {
           "comment": "library",
-          "begin": "\\([[:space:]]*(library)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(library)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -49,7 +49,7 @@
         },
         {
           "comment": "library_parameter",
-          "begin": "\\([[:space:]]*(library_parameter)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(library_parameter)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -67,7 +67,7 @@
         },
         {
           "comment": "foreign_library",
-          "begin": "\\([[:space:]]*(foreign_library)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(foreign_library)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -77,7 +77,7 @@
           "patterns": [
             {
               "comment": "names",
-              "begin": "\\([[:space:]]*(names)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(names)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -93,7 +93,7 @@
             },
             {
               "comment": "archive_name/language/include_dir/enabled_if",
-              "begin": "\\([[:space:]]*(archive_name|language|include_dir|enabled_if)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(archive_name|language|include_dir|enabled_if)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -113,7 +113,7 @@
         },
         {
           "comment": "deprecated_library_name",
-          "begin": "\\([[:space:]]*(deprecated_library_name)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(deprecated_library_name)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -123,7 +123,7 @@
           "patterns": [
             {
               "comment": "old_public_name/new_public_name",
-              "begin": "\\([[:space:]]*(old_public_name|new_public_name)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(old_public_name|new_public_name)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -141,7 +141,7 @@
         },
         {
           "comment": "executable",
-          "begin": "\\([[:space:]]*(executable)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(executable)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -159,7 +159,7 @@
         },
         {
           "comment": "executables",
-          "begin": "\\([[:space:]]*(executables)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(executables)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -169,7 +169,7 @@
           "patterns": [
             {
               "comment": "executables/names",
-              "begin": "\\([[:space:]]*(names|public_names)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(names|public_names)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -193,7 +193,7 @@
         },
         {
           "comment": "rule",
-          "begin": "\\([[:space:]]*(rule)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(rule)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -203,7 +203,7 @@
           "patterns": [
             {
               "comment": "rule/target/targets",
-              "begin": "\\([[:space:]]*(target|targets)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(target|targets)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -218,7 +218,7 @@
             },
             {
               "comment": "rule/deps",
-              "begin": "\\([[:space:]]*(deps)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(deps)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -236,7 +236,7 @@
             },
             {
               "comment": "rule/action",
-              "begin": "\\([[:space:]]*(action)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(action)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -254,7 +254,7 @@
             },
             {
               "comment": "rule/mode",
-              "begin": "\\([[:space:]]*(mode)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(mode)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -264,7 +264,7 @@
               "patterns": [
                 {
                   "comment": "mode/standard/fallback",
-                  "begin": "\\([[:space:]]*(standard|fallback)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(standard|fallback)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -279,7 +279,7 @@
                 },
                 {
                   "comment": "mode/promote",
-                  "begin": "\\([[:space:]]*(promote)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(promote)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -289,7 +289,7 @@
                   "patterns": [
                     {
                       "comment": "promote/until_clean/into/only",
-                      "begin": "\\([[:space:]]*(until_clean|into|only)\\b",
+                      "begin": "\\([ \\t\\r\\n\\f]*(until_clean|into|only)(?=[ \\t\\r\\n\\f();\"]|$)",
                       "end": "\\)",
                       "beginCaptures": {
                         "1": {
@@ -304,7 +304,7 @@
                     },
                     {
                       "comment": "promote/only",
-                      "begin": "\\([[:space:]]*(only)\\b",
+                      "begin": "\\([ \\t\\r\\n\\f]*(only)(?=[ \\t\\r\\n\\f();\"]|$)",
                       "end": "\\)",
                       "beginCaptures": {
                         "1": {
@@ -326,7 +326,7 @@
             },
             {
               "comment": "rule/fallback",
-              "begin": "\\([[:space:]]*(fallback)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(fallback)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -341,7 +341,7 @@
             },
             {
               "comment": "rule/locks",
-              "begin": "\\([[:space:]]*(locks)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(locks)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -356,7 +356,7 @@
             },
             {
               "comment": "rule/alias/aliases",
-              "begin": "\\([[:space:]]*(alias|aliases)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(alias|aliases)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -371,7 +371,7 @@
             },
             {
               "comment": "rule/package",
-              "begin": "\\([[:space:]]*(package)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(package)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -387,7 +387,7 @@
             },
             {
               "comment": "rule/enabled_if",
-              "begin": "\\([[:space:]]*(enabled_if)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(enabled_if)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -410,7 +410,7 @@
         },
         {
           "comment": "ocamllex",
-          "begin": "\\([[:space:]]*(ocamllex)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(ocamllex)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -420,7 +420,7 @@
           "patterns": [
             {
               "comment": "modules/mode",
-              "begin": "\\([[:space:]]*(modules|mode)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(modules|mode)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -440,7 +440,7 @@
         },
         {
           "comment": "ocamlyacc",
-          "begin": "\\([[:space:]]*(ocamlyacc)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(ocamlyacc)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -450,7 +450,7 @@
           "patterns": [
             {
               "comment": "modules/mode",
-              "begin": "\\([[:space:]]*(modules|mode)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(modules|mode)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -474,7 +474,7 @@
         },
         {
           "comment": "cinaps",
-          "begin": "\\([[:space:]]*(cinaps)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(cinaps)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -484,7 +484,7 @@
           "patterns": [
             {
               "comment": "files/libraries",
-              "begin": "\\([[:space:]]*(files|libraries)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(files|libraries)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -504,7 +504,7 @@
         },
         {
           "comment": "documentation",
-          "begin": "\\([[:space:]]*(documentation)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(documentation)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -514,7 +514,7 @@
           "patterns": [
             {
               "comment": "package",
-              "begin": "\\([[:space:]]*(package)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(package)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -530,7 +530,7 @@
             },
             {
               "comment": "mld_files",
-              "begin": "\\([[:space:]]*(mld_files)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(mld_files)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -547,7 +547,7 @@
         },
         {
           "comment": "alias",
-          "begin": "\\([[:space:]]*(alias)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(alias)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -557,7 +557,7 @@
           "patterns": [
             {
               "comment": "name",
-              "begin": "\\([[:space:]]*(name)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(name)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -573,7 +573,7 @@
             },
             {
               "comment": "action",
-              "begin": "\\([[:space:]]*(action)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(action)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -591,7 +591,7 @@
             },
             {
               "comment": "package",
-              "begin": "\\([[:space:]]*(package)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(package)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -607,7 +607,7 @@
             },
             {
               "comment": "enabled_if",
-              "begin": "\\([[:space:]]*(enabled_if)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(enabled_if)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -625,7 +625,7 @@
             },
             {
               "comment": "deps",
-              "begin": "\\([[:space:]]*(deps)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(deps)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -643,7 +643,7 @@
             },
             {
               "comment": "locks",
-              "begin": "\\([[:space:]]*(locks)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(locks)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -663,7 +663,7 @@
         },
         {
           "comment": "install",
-          "begin": "\\([[:space:]]*(install)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(install)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -673,7 +673,7 @@
           "patterns": [
             {
               "comment": "install/files",
-              "begin": "\\([[:space:]]*(files)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(files)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -688,7 +688,7 @@
             },
             {
               "comment": "install/section",
-              "begin": "\\([[:space:]]*(section)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(section)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -698,12 +698,12 @@
               "patterns": [
                 {
                   "comment": "all section names",
-                  "match": "\\b(lib|lib_root|libexec|libexec_root|bin|sbin|toplevel|share|share_root|etc|stublibs|doc|man|misc)\\b",
+                  "match": "(?<![^ \\t\\r\\n\\f();\"])(lib|lib_root|libexec|libexec_root|bin|sbin|toplevel|share|share_root|etc|stublibs|doc|man|misc)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "name": "variable.other.declaration.dune"
                 },
                 {
                   "comment": "site",
-                  "begin": "\\([[:space:]]*(site)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(site)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -720,7 +720,7 @@
             },
             {
               "comment": "install/package",
-              "begin": "\\([[:space:]]*(package)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(package)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -733,7 +733,7 @@
         },
         {
           "comment": "copy_files/copy_files#",
-          "begin": "\\([[:space:]]*(copy_files|copy_files#)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(copy_files|copy_files#)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -743,7 +743,7 @@
           "patterns": [
             {
               "comment": "files/alias/mode/enabled_if/only_sources",
-              "begin": "\\([[:space:]]*(files|alias|mode|enabled_if|only_sources)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(files|alias|mode|enabled_if|only_sources)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -760,7 +760,7 @@
         },
         {
           "comment": "env",
-          "begin": "\\([[:space:]]*(env)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(env)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -770,7 +770,7 @@
           "patterns": [
             {
               "comment": "profile name",
-              "begin": "\\([[:space:]]*([[:word:]]+)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*([[:word:]]+)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -780,7 +780,7 @@
               "patterns": [
                 {
                   "comment": "env/flags",
-                  "begin": "\\([[:space:]]*(flags)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(flags)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -795,7 +795,7 @@
                 },
                 {
                   "comment": "env/ocamlc_flags/ocamlopt_flags/c_flags/cxx_flags/menhir_flags/link_flags",
-                  "begin": "\\([[:space:]]*(ocamlc_flags|ocamlopt_flags|c_flags|cxx_flags|menhir_flags|link_flags)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(ocamlc_flags|ocamlopt_flags|c_flags|cxx_flags|menhir_flags|link_flags)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -810,7 +810,7 @@
                 },
                 {
                   "comment": "env-vars",
-                  "begin": "\\([[:space:]]*(env-vars)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(env-vars)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -834,7 +834,7 @@
                 },
                 {
                   "comment": "env/binaries",
-                  "begin": "\\([[:space:]]*(binaries)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(binaries)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -849,7 +849,7 @@
                 },
                 {
                   "comment": "env/inline_tests/odoc",
-                  "begin": "\\([[:space:]]*(inline_tests|odoc)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(inline_tests|odoc)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -864,7 +864,7 @@
                 },
                 {
                   "comment": "env/rocq",
-                  "begin": "\\([[:space:]]*(coq|rocq)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(coq|rocq)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -874,7 +874,7 @@
                   "patterns": [
                     {
                       "comment": "rocq/flags",
-                      "begin": "\\([[:space:]]*(flags)\\b",
+                      "begin": "\\([ \\t\\r\\n\\f]*(flags)(?=[ \\t\\r\\n\\f();\"]|$)",
                       "end": "\\)",
                       "beginCaptures": {
                         "1": {
@@ -894,7 +894,7 @@
                 },
                 {
                   "comment": "env/formatting",
-                  "begin": "\\([[:space:]]*(formatting)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(formatting)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -904,7 +904,7 @@
                   "patterns": [
                     {
                       "comment": "enabled_for",
-                      "begin": "\\([[:space:]]*(enabled_for)\\b",
+                      "begin": "\\([ \\t\\r\\n\\f]*(enabled_for)(?=[ \\t\\r\\n\\f();\"]|$)",
                       "end": "\\)",
                       "beginCaptures": {
                         "1": {
@@ -924,7 +924,7 @@
                 },
                 {
                   "comment": "env/bin_annot",
-                  "begin": "\\([[:space:]]*(bin_annot)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(bin_annot)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -949,7 +949,7 @@
         },
         {
           "comment": "include",
-          "begin": "\\([[:space:]]*(include)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(include)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -964,7 +964,7 @@
         },
         {
           "comment": "test",
-          "begin": "\\([[:space:]]*(test)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(test)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -974,7 +974,7 @@
           "patterns": [
             {
               "comment": "action",
-              "begin": "\\([[:space:]]*(action)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(action)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1000,7 +1000,7 @@
         },
         {
           "comment": "tests",
-          "begin": "\\([[:space:]]*(tests)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(tests)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1010,7 +1010,7 @@
           "patterns": [
             {
               "comment": "names",
-              "begin": "\\([[:space:]]*(names)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(names)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1026,7 +1026,7 @@
             },
             {
               "comment": "action",
-              "begin": "\\([[:space:]]*(action)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(action)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1052,7 +1052,7 @@
         },
         {
           "comment": "cram",
-          "begin": "\\([[:space:]]*(cram)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(cram)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1062,7 +1062,7 @@
           "patterns": [
             {
               "comment": "deps",
-              "begin": "\\([[:space:]]*(deps)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(deps)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1080,7 +1080,7 @@
             },
             {
               "comment": "applies_to",
-              "begin": "\\([[:space:]]*(applies_to)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(applies_to)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1095,7 +1095,7 @@
             },
             {
               "comment": "enabled_if",
-              "begin": "\\([[:space:]]*(enabled_if)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(enabled_if)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1110,7 +1110,7 @@
             },
             {
               "comment": "alias",
-              "begin": "\\([[:space:]]*(alias)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(alias)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1126,7 +1126,7 @@
             },
             {
               "comment": "locks",
-              "begin": "\\([[:space:]]*(locks)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(locks)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1141,7 +1141,7 @@
             },
             {
               "comment": "package",
-              "begin": "\\([[:space:]]*(package)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(package)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1157,7 +1157,7 @@
             },
             {
               "comment": "runtest_alias",
-              "begin": "\\([[:space:]]*(runtest_alias)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(runtest_alias)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1172,7 +1172,7 @@
             },
             {
               "comment": "timeout",
-              "begin": "\\([[:space:]]*(timeout)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(timeout)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1191,8 +1191,8 @@
           ]
         },
         {
-          "comment": "dirs",
-          "begin": "\\([[:space:]]*(dirs)\\b",
+          "comment": "dirs/files",
+          "begin": "\\([ \\t\\r\\n\\f]*(dirs|files)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1207,7 +1207,7 @@
         },
         {
           "comment": "data_only_dirs",
-          "begin": "\\([[:space:]]*(data_only_dirs)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(data_only_dirs)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1222,7 +1222,7 @@
         },
         {
           "comment": "ignored_subdirs",
-          "begin": "\\([[:space:]]*(ignored_subdirs)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(ignored_subdirs)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1237,7 +1237,7 @@
         },
         {
           "comment": "vendored_dirs",
-          "begin": "\\([[:space:]]*(vendored_dirs)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(vendored_dirs)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1252,7 +1252,7 @@
         },
         {
           "comment": "include_subdirs",
-          "begin": "\\([[:space:]]*(include_subdirs)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(include_subdirs)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1262,7 +1262,7 @@
           "patterns": [
             {
               "comment": "no/qualified/unqualified",
-              "match": "\\b(no|qualified|unqualified)\\b",
+              "match": "(?<![^ \\t\\r\\n\\f();\"])(no|qualified|unqualified)(?=[ \\t\\r\\n\\f();\"]|$)",
               "name": "variable.other.declaration.dune",
               "patterns": [
                 {
@@ -1277,7 +1277,7 @@
         },
         {
           "comment": "toplevel",
-          "begin": "\\([[:space:]]*(toplevel)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(toplevel)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1287,7 +1287,7 @@
           "patterns": [
             {
               "comment": "name",
-              "begin": "\\([[:space:]]*(name)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(name)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1303,7 +1303,7 @@
             },
             {
               "comment": "preprocess",
-              "begin": "\\([[:space:]]*(preprocess)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(preprocess)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1321,7 +1321,7 @@
             },
             {
               "comment": "libraries",
-              "begin": "\\([[:space:]]*(libraries)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(libraries)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1341,7 +1341,7 @@
         },
         {
           "comment": "subdir",
-          "begin": "\\([[:space:]]*(subdir)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(subdir)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1359,7 +1359,7 @@
         },
         {
           "comment": "dynamic_include",
-          "begin": "\\([[:space:]]*(dynamic_include)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(dynamic_include)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1374,7 +1374,7 @@
         },
         {
           "comment": "using",
-          "begin": "\\([[:space:]]*(using)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(using)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1389,7 +1389,7 @@
         },
         {
           "comment": "rocq.theory",
-          "begin": "\\([[:space:]]*((coq|rocq).theory)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*((coq|rocq).theory)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1399,7 +1399,7 @@
           "patterns": [
             {
               "comment": "name/package",
-              "begin": "\\([[:space:]]*(name|package)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(name|package)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1415,7 +1415,7 @@
             },
             {
               "comment": "generate_project_file",
-              "begin": "\\([[:space:]]*(generate_project_file)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(generate_project_file)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1425,7 +1425,7 @@
             },
             {
               "comment": "synopsis/modules/libraries/flags/mode/theories/plugins/modules_flags/rocqdep_flags/rocqdoc_flags/rocqdoc_header/rocqdoc_footer",
-              "begin": "\\([[:space:]]*(synopsis|modules|libraries|flags|mode|theories|plugins|modules_flags|rocqdep_flags|rocqdoc_flags|rocqdoc_header|rocqdoc_footer)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(synopsis|modules|libraries|flags|mode|theories|plugins|modules_flags|rocqdep_flags|rocqdoc_flags|rocqdoc_header|rocqdoc_footer)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1440,7 +1440,7 @@
             },
             {
               "comment": "stdlib",
-              "begin": "\\([[:space:]]*(stdlib)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(stdlib)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1450,7 +1450,7 @@
               "patterns": [
                 {
                   "comment": "yes/no",
-                  "match": "\\b(yes|no)\\b",
+                  "match": "(?<![^ \\t\\r\\n\\f();\"])(yes|no)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "name": "constant.language.dune"
                 }
               ]
@@ -1462,7 +1462,7 @@
         },
         {
           "comment": "rocq.pp",
-          "begin": "\\([[:space:]]*((coq|rocq).pp)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*((coq|rocq).pp)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1472,7 +1472,7 @@
           "patterns": [
             {
               "comment": "modules",
-              "begin": "\\([[:space:]]*(modules)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(modules)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1492,7 +1492,7 @@
         },
         {
           "comment": "rocq.extraction",
-          "begin": "\\([[:space:]]*((coq|rocq).extraction)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*((coq|rocq).extraction)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1502,7 +1502,7 @@
           "patterns": [
             {
               "comment": "prelude/extracted_modules/libraries/flags/theories/mode/public_name",
-              "begin": "\\([[:space:]]*(prelude|extracted_modules|libraries|flags|theories|mode|public_name)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(prelude|extracted_modules|libraries|flags|theories|mode|public_name)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1522,7 +1522,7 @@
         },
         {
           "comment": "mdx",
-          "begin": "\\([[:space:]]*(mdx)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(mdx)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1532,7 +1532,7 @@
           "patterns": [
             {
               "comment": "packages",
-              "begin": "\\([[:space:]]*(packages)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(packages)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1548,7 +1548,7 @@
             },
             {
               "comment": "files/preludes/deps/libraries/enabled_if/package/locks",
-              "begin": "\\([[:space:]]*(files|preludes|deps|libraries|enabled_if|package|locks)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(files|preludes|deps|libraries|enabled_if|package|locks)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1568,7 +1568,7 @@
         },
         {
           "comment": "plugin",
-          "begin": "\\([[:space:]]*(plugin)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(plugin)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1578,7 +1578,7 @@
           "patterns": [
             {
               "comment": "name/package",
-              "begin": "\\([[:space:]]*(name|package)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(name|package)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1594,7 +1594,7 @@
             },
             {
               "comment": "libraries/optional",
-              "begin": "\\([[:space:]]*(libraries|optional)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(libraries|optional)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1609,7 +1609,7 @@
             },
             {
               "comment": "site",
-              "begin": "\\([[:space:]]*(site)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(site)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1619,7 +1619,7 @@
               "patterns": [
                 {
                   "comment": "package",
-                  "begin": "\\([[:space:]]*(package)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(package)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -1645,7 +1645,7 @@
         },
         {
           "comment": "generate_sites_module",
-          "begin": "\\([[:space:]]*(generate_sites_module)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(generate_sites_module)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1655,7 +1655,7 @@
           "patterns": [
             {
               "comment": "module",
-              "begin": "\\([[:space:]]*(module)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(module)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1670,7 +1670,7 @@
             },
             {
               "comment": "sourceroot",
-              "begin": "\\([[:space:]]*(sourceroot)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(sourceroot)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1685,7 +1685,7 @@
             },
             {
               "comment": "relocatable",
-              "begin": "\\([[:space:]]*(relocatable)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(relocatable)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1700,7 +1700,7 @@
             },
             {
               "comment": "sites",
-              "begin": "\\([[:space:]]*(sites)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(sites)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1715,7 +1715,7 @@
             },
             {
               "comment": "plugins",
-              "begin": "\\([[:space:]]*(plugins)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(plugins)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1725,7 +1725,7 @@
               "patterns": [
                 {
                   "comment": "package",
-                  "begin": "\\([[:space:]]*(package)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(package)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -1751,7 +1751,7 @@
         },
         {
           "comment": "melange.emit",
-          "begin": "\\([[:space:]]*(melange)(\\.)((emit))\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(melange)(\\.)((emit))(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1767,7 +1767,7 @@
           "patterns": [
             {
               "comment": "target",
-              "begin": "\\([[:space:]]*(target)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(target)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1783,7 +1783,7 @@
             },
             {
               "comment": "alias",
-              "begin": "\\([[:space:]]*(alias)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(alias)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1798,7 +1798,7 @@
             },
             {
               "comment": "module_systems",
-              "begin": "\\([[:space:]]*(module_systems)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(module_systems)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1808,7 +1808,7 @@
               "patterns": [
                 {
                   "comment": "es6/commonjs",
-                  "match": "\\b(es6|commonjs)\\b",
+                  "match": "(?<![^ \\t\\r\\n\\f();\"])(es6|commonjs)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "name": "variable.other.declaration.dune"
                 },
                 {
@@ -1818,7 +1818,7 @@
             },
             {
               "comment": "runtime_deps",
-              "begin": "\\([[:space:]]*(runtime_deps)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(runtime_deps)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1836,7 +1836,7 @@
             },
             {
               "comment": "emit_stdlib",
-              "begin": "\\([[:space:]]*(emit_stdlib)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(emit_stdlib)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1851,7 +1851,7 @@
             },
             {
               "comment": "promote",
-              "begin": "\\([[:space:]]*(promote)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(promote)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1861,7 +1861,7 @@
               "patterns": [
                 {
                   "comment": "until-clean/into/only",
-                  "begin": "\\([[:space:]]*(until-clean|into|only)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(until-clean|into|only)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -1881,7 +1881,7 @@
             },
             {
               "comment": "compile_flags",
-              "begin": "\\([[:space:]]*(compile_flags)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(compile_flags)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -1911,7 +1911,7 @@
       "patterns": [
         {
           "comment": "dependency with name",
-          "begin": "\\([[:space:]]*(:[[:word:]]+\\b)",
+          "begin": "\\([ \\t\\r\\n\\f]*(:[[:word:]_-]+)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1937,7 +1937,7 @@
       "patterns": [
         {
           "comment": "dependencies/file",
-          "begin": "\\([[:space:]]*(file)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(file)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1952,7 +1952,7 @@
         },
         {
           "comment": "dependencies/alias",
-          "begin": "\\([[:space:]]*(alias)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(alias)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1967,7 +1967,7 @@
         },
         {
           "comment": "dependencies/alias_rec",
-          "begin": "\\([[:space:]]*(alias_rec)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(alias_rec)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1982,7 +1982,7 @@
         },
         {
           "comment": "dependencies/glob_files",
-          "begin": "\\([[:space:]]*(glob_files)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(glob_files)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -1997,7 +1997,7 @@
         },
         {
           "comment": "dependencies/source_tree",
-          "begin": "\\([[:space:]]*(source_tree)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(source_tree)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2012,7 +2012,7 @@
         },
         {
           "comment": "dependencies/universe",
-          "begin": "\\([[:space:]]*(universe)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(universe)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2027,7 +2027,7 @@
         },
         {
           "comment": "dependencies/package",
-          "begin": "\\([[:space:]]*(package)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(package)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2043,7 +2043,7 @@
         },
         {
           "comment": "dependencies/env_var",
-          "begin": "\\([[:space:]]*(env_var)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(env_var)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2058,7 +2058,7 @@
         },
         {
           "comment": "dependencies/sandbox",
-          "begin": "\\([[:space:]]*(sandbox)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(sandbox)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2068,7 +2068,7 @@
           "patterns": [
             {
               "comment": "dependencies/sandbox/config",
-              "match": "\\b(always|none|preserve_file_kind)\\b",
+              "match": "(?<![^ \\t\\r\\n\\f();\"])(always|none|preserve_file_kind)(?=[ \\t\\r\\n\\f();\"]|$)",
               "name": "constant.language.dune"
             },
             {
@@ -2085,7 +2085,7 @@
       "patterns": [
         {
           "comment": "with-stdout-to/with-stdin-from/with-stderr-to/with-outputs-to",
-          "begin": "\\([[:space:]]*(with-stdout-to|with-stdin-from|with-stderr-to|with-outputs-to)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(with-stdout-to|with-stdin-from|with-stderr-to|with-outputs-to)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2102,8 +2102,8 @@
           ]
         },
         {
-          "comment": "ignore-stdout-to/ignore-stderr-to/ignore-outputs-to",
-          "begin": "\\([[:space:]]*(ignore-stdout-to|ignore-stderr-to|ignore-outputs-to)\\b",
+          "comment": "ignore-stdout/ignore-stderr/ignore-outputs",
+          "begin": "\\([ \\t\\r\\n\\f]*(ignore-stdout|ignore-stderr|ignore-outputs)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2120,8 +2120,8 @@
           ]
         },
         {
-          "comment": "run/dynamic_run",
-          "begin": "\\([[:space:]]*(run|dynamic_run)\\b",
+          "comment": "run/dynamic-run",
+          "begin": "\\([ \\t\\r\\n\\f]*(run|dynamic-run)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2139,7 +2139,7 @@
         },
         {
           "comment": "with-accepted-exit-codes",
-          "begin": "\\([[:space:]]*(with-accepted-exit-codes)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(with-accepted-exit-codes)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2157,7 +2157,7 @@
         },
         {
           "comment": "chdir/setenv",
-          "begin": "\\([[:space:]]*(chdir|setenv)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(chdir|setenv)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2174,8 +2174,8 @@
           ]
         },
         {
-          "comment": "progn/echo/write-file/cat/copy/copy#",
-          "begin": "\\([[:space:]]*(progn|echo|write-file|cat|copy|copy\\#)\\b",
+          "comment": "progn/concurrent/echo/write-file/cat/copy/copy#",
+          "begin": "\\([ \\t\\r\\n\\f]*(progn|concurrent|echo|write-file|cat|copy|copy\\#)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2192,8 +2192,8 @@
           ]
         },
         {
-          "comment": "system/bash/diff/diff?/cmp/no-infer",
-          "begin": "\\([[:space:]]*(system|bash|diff|diff\\?|cmp|no-infer)\\b",
+          "comment": "format-dune-file/system/bash/diff/diff?/cmp/no-infer",
+          "begin": "\\([ \\t\\r\\n\\f]*(format-dune-file|system|bash|diff|diff\\?|cmp|no-infer)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2211,7 +2211,7 @@
         },
         {
           "comment": "pipe-stdout/pipe-stderr/pipe-outputs",
-          "begin": "\\([[:space:]]*(pipe-stdout|pipe-stderr|pipe-outputs)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(pipe-stdout|pipe-stderr|pipe-outputs)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2236,7 +2236,7 @@
       "patterns": [
         {
           "comment": "name/public_name/package",
-          "begin": "\\([[:space:]]*(name|public_name|package)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(name|public_name|package)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2252,7 +2252,7 @@
         },
         {
           "comment": "synopsis",
-          "begin": "\\([[:space:]]*(synopsis)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(synopsis)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2267,7 +2267,7 @@
         },
         {
           "comment": "modules",
-          "begin": "\\([[:space:]]*(modules)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(modules)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2282,7 +2282,7 @@
         },
         {
           "comment": "libraries",
-          "begin": "\\([[:space:]]*(libraries)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(libraries)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2300,7 +2300,7 @@
         },
         {
           "comment": "parameters",
-          "begin": "\\([[:space:]]*(parameters)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(parameters)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2315,7 +2315,7 @@
         },
         {
           "comment": "implements",
-          "begin": "\\([[:space:]]*(implements)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(implements)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2330,7 +2330,7 @@
         },
         {
           "comment": "default_implementation",
-          "begin": "\\([[:space:]]*(default_implementation)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(default_implementation)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2345,7 +2345,7 @@
         },
         {
           "comment": "virtual_modules",
-          "begin": "\\([[:space:]]*(virtual_modules)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(virtual_modules)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2360,7 +2360,7 @@
         },
         {
           "comment": "self_build_stubs_archive",
-          "begin": "\\([[:space:]]*(self_build_stubs_archive)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(self_build_stubs_archive)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2375,7 +2375,7 @@
         },
         {
           "comment": "library_flags",
-          "begin": "\\([[:space:]]*(library_flags)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(library_flags)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2390,7 +2390,7 @@
         },
         {
           "comment": "wrapped",
-          "begin": "\\([[:space:]]*(wrapped)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(wrapped)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2400,7 +2400,7 @@
           "patterns": [
             {
               "comment": "transition",
-              "begin": "\\([[:space:]]*(transition)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(transition)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -2420,7 +2420,7 @@
         },
         {
           "comment": "preprocess",
-          "begin": "\\([[:space:]]*(preprocess)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(preprocess)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2438,7 +2438,7 @@
         },
         {
           "comment": "preprocessor_deps",
-          "begin": "\\([[:space:]]*(preprocessor_deps)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(preprocessor_deps)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2456,7 +2456,7 @@
         },
         {
           "comment": "deps",
-          "begin": "\\([[:space:]]*(deps)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(deps)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2471,7 +2471,7 @@
         },
         {
           "comment": "melange.runtime_deps",
-          "begin": "\\([[:space:]]*(melange)(\\.)((runtime_deps))\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(melange)(\\.)((runtime_deps))(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2495,7 +2495,7 @@
         },
         {
           "comment": "melange.libraries",
-          "begin": "\\([[:space:]]*(melange)(\\.)((libraries))\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(melange)(\\.)((libraries))(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2519,7 +2519,7 @@
         },
         {
           "comment": "melange.modules",
-          "begin": "\\([[:space:]]*(melange)(\\.)((modules))\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(melange)(\\.)((modules))(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2540,7 +2540,7 @@
         },
         {
           "comment": "melange.ppx_runtime_libraries",
-          "begin": "\\([[:space:]]*(melange)(\\.)((ppx_runtime_libraries))\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(melange)(\\.)((ppx_runtime_libraries))(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2561,7 +2561,7 @@
         },
         {
           "comment": "melange.preprocessor_deps",
-          "begin": "\\([[:space:]]*(melange)(\\.)((preprocessor_deps))\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(melange)(\\.)((preprocessor_deps))(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2585,7 +2585,7 @@
         },
         {
           "comment": "melange.preprocess",
-          "begin": "\\([[:space:]]*(melange)(\\.)((preprocess))\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(melange)(\\.)((preprocess))(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2609,7 +2609,7 @@
         },
         {
           "comment": "optional",
-          "begin": "\\([[:space:]]*(optional)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(optional)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2619,7 +2619,7 @@
         },
         {
           "comment": "empty_module_interface_if_absent",
-          "begin": "\\([[:space:]]*(empty_module_interface_if_absent)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(empty_module_interface_if_absent)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2629,7 +2629,7 @@
         },
         {
           "comment": "public_headers",
-          "begin": "\\([[:space:]]*(public_headers)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(public_headers)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2644,7 +2644,7 @@
         },
         {
           "comment": "allow_unused_libraries",
-          "begin": "\\([[:space:]]*(allow_unused_libraries)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(allow_unused_libraries)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2659,7 +2659,7 @@
         },
         {
           "comment": "lint",
-          "begin": "\\([[:space:]]*(lint)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(lint)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2677,7 +2677,7 @@
         },
         {
           "comment": "instrumentation",
-          "begin": "\\([[:space:]]*(instrumentation)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(instrumentation)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2687,7 +2687,7 @@
           "patterns": [
             {
               "comment": "backend",
-              "begin": "\\([[:space:]]*(backend)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(backend)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -2702,7 +2702,7 @@
             },
             {
               "comment": "flags/deps",
-              "begin": "\\([[:space:]]*(flags|deps)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(flags|deps)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -2725,7 +2725,7 @@
         },
         {
           "comment": "extra_objects",
-          "begin": "\\([[:space:]]*(extra_objects)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(extra_objects)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2735,7 +2735,7 @@
           "patterns": [
             {
               "comment": "files/archives",
-              "begin": "\\([[:space:]]*(files|archives)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(files|archives)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -2755,7 +2755,7 @@
         },
         {
           "comment": "stdlib",
-          "begin": "\\([[:space:]]*(stdlib)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(stdlib)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2765,7 +2765,7 @@
           "patterns": [
             {
               "comment": "modules_before_stdlib/exit_module/internal_modules/experimental_building_ocaml_compiler_with_dune",
-              "begin": "\\([[:space:]]*(modules_before_stdlib|exit_module|internal_modules|experimental_building_ocaml_compiler_with_dune)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(modules_before_stdlib|exit_module|internal_modules|experimental_building_ocaml_compiler_with_dune)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -2785,7 +2785,7 @@
         },
         {
           "comment": "special_builtin_support",
-          "begin": "\\([[:space:]]*(special_builtin_support)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(special_builtin_support)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2795,12 +2795,12 @@
           "patterns": [
             {
               "comment": "findlib_dynload",
-              "match": "\\b(findlib_dynload)\\b",
+              "match": "(?<![^ \\t\\r\\n\\f();\"])(findlib_dynload)(?=[ \\t\\r\\n\\f();\"]|$)",
               "name": "variable.other.declaration.dune"
             },
             {
               "comment": "build_info/configurator/dune_site",
-              "begin": "\\([[:space:]]*(build_info|configurator|dune_site)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(build_info|configurator|dune_site)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -2810,7 +2810,7 @@
               "patterns": [
                 {
                   "comment": "data_module/api_version/plugins",
-                  "begin": "\\([[:space:]]*(data_module|api_version|plugins)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(data_module|api_version|plugins)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -2835,7 +2835,7 @@
         },
         {
           "comment": "foreign_archives",
-          "begin": "\\([[:space:]]*(foreign_archives)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(foreign_archives)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "contentName": "variable.other.declaration.dune",
           "beginCaptures": {
@@ -2851,7 +2851,7 @@
         },
         {
           "comment": "foreign_stubs",
-          "begin": "\\([[:space:]]*(foreign_stubs)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(foreign_stubs)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2861,7 +2861,7 @@
           "patterns": [
             {
               "comment": "names",
-              "begin": "\\([[:space:]]*(names)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(names)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -2877,7 +2877,7 @@
             },
             {
               "comment": "language",
-              "begin": "\\([[:space:]]*(language)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(language)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -2887,7 +2887,7 @@
               "patterns": [
                 {
                   "comment": "c/cxx",
-                  "begin": "\\([[:space:]]*(c|cxx)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(c|cxx)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -2907,7 +2907,7 @@
             },
             {
               "comment": "flags",
-              "begin": "\\([[:space:]]*(flags)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(flags)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -2917,7 +2917,7 @@
               "patterns": [
                 {
                   "comment": "c_flags/cxx_flags",
-                  "begin": "\\([[:space:]]*(c_flags|cxx_flags)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(c_flags|cxx_flags)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -2932,7 +2932,7 @@
                 },
                 {
                   "comment": "include_dirs",
-                  "begin": "\\([[:space:]]*(include_dirs)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(include_dirs)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -2947,7 +2947,7 @@
                 },
                 {
                   "comment": "extra_deps",
-                  "begin": "\\([[:space:]]*(extra_deps)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(extra_deps)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -2969,7 +2969,7 @@
         },
         {
           "comment": "c_names/c_flags/cxx_names/cxx_flags/install_c_headers",
-          "begin": "\\([[:space:]]*(c_names|c_flags|cxx_names|cxx_flags|install_c_headers)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(c_names|c_flags|cxx_names|cxx_flags|install_c_headers)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2984,7 +2984,7 @@
         },
         {
           "comment": "modes",
-          "begin": "\\([[:space:]]*(modes)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(modes)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -2994,12 +2994,12 @@
           "patterns": [
             {
               "comment": "byte/native/best/melange atoms",
-              "match": "\\b(byte|native|best|melange)\\b",
+              "match": "(?<![^ \\t\\r\\n\\f();\"])(byte|native|best|melange)(?=[ \\t\\r\\n\\f();\"]|$)",
               "name": "variable.other.declaration.dune"
             },
             {
               "comment": "byte/native/best",
-              "begin": "\\([[:space:]]*(byte|native|best)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(byte|native|best)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -3019,7 +3019,7 @@
         },
         {
           "comment": "no_dynlink",
-          "begin": "\\([[:space:]]*(no_dynlink)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(no_dynlink)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3034,7 +3034,7 @@
         },
         {
           "comment": "kind",
-          "begin": "\\([[:space:]]*(kind)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(kind)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3044,12 +3044,12 @@
           "patterns": [
             {
               "comment": "normal/parameter/virtual/ppx_rewriter/ppx_deriver",
-              "match": "\\b(normal|parameter|virtual|ppx_rewriter|ppx_deriver)\\b",
+              "match": "(?<![^ \\t\\r\\n\\f();\"])(normal|parameter|virtual|ppx_rewriter|ppx_deriver)(?=[ \\t\\r\\n\\f();\"]|$)",
               "name": "variable.other.declaration.dune"
             },
             {
               "comment": "normal/ppx_rewriter/ppx_deriver/cookies",
-              "begin": "\\([[:space:]]*(normal|ppx_rewriter|ppx_deriver|cookies)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(normal|ppx_rewriter|ppx_deriver|cookies)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -3069,7 +3069,7 @@
         },
         {
           "comment": "ppx_runtime_libraries",
-          "begin": "\\([[:space:]]*(ppx_runtime_libraries)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(ppx_runtime_libraries)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3084,7 +3084,7 @@
         },
         {
           "comment": "virtual_deps",
-          "begin": "\\([[:space:]]*(virtual_deps)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(virtual_deps)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3099,7 +3099,7 @@
         },
         {
           "comment": "flags",
-          "begin": "\\([[:space:]]*(flags)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(flags)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3114,7 +3114,7 @@
         },
         {
           "comment": "private_modules",
-          "begin": "\\([[:space:]]*(private_modules)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(private_modules)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3129,7 +3129,7 @@
         },
         {
           "comment": "allow_overlapping_dependencies",
-          "begin": "\\([[:space:]]*(allow_overlapping_dependencies)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(allow_overlapping_dependencies)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3144,7 +3144,7 @@
         },
         {
           "comment": "enabled_if",
-          "begin": "\\([[:space:]]*(enabled_if)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(enabled_if)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3167,7 +3167,7 @@
         },
         {
           "comment": "inline_tests",
-          "begin": "\\([[:space:]]*(inline_tests)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(inline_tests)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3177,7 +3177,7 @@
           "patterns": [
             {
               "comment": "executable",
-              "begin": "\\([[:space:]]*(executable)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(executable)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -3187,7 +3187,7 @@
               "patterns": [
                 {
                   "comment": "flags",
-                  "begin": "\\([[:space:]]*(flags)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(flags)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -3207,7 +3207,7 @@
             },
             {
               "comment": "preprocess",
-              "begin": "\\([[:space:]]*(preprocess)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(preprocess)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -3225,7 +3225,7 @@
             },
             {
               "comment": "backend/flags/libraries",
-              "begin": "\\([[:space:]]*(backend|flags|libraries)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(backend|flags|libraries)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -3235,7 +3235,7 @@
               "patterns": [
                 {
                   "comment": "flags",
-                  "begin": "\\([[:space:]]*(flags)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(flags)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -3260,7 +3260,7 @@
         },
         {
           "comment": "root_module",
-          "begin": "\\([[:space:]]*(root_module)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(root_module)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3279,7 +3279,7 @@
         },
         {
           "comment": "ocamlopt_flags",
-          "begin": "\\([[:space:]]*(ocamlopt_flags)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(ocamlopt_flags)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3294,7 +3294,7 @@
         },
         {
           "comment": "ocamlc_flags",
-          "begin": "\\([[:space:]]*(ocamlc_flags)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(ocamlc_flags)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3309,7 +3309,7 @@
         },
         {
           "comment": "c_library_flags/library_flags",
-          "begin": "\\([[:space:]]*(c_library_flags|library_flags)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(c_library_flags|library_flags)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3324,7 +3324,7 @@
         },
         {
           "comment": "modules_without_implementation",
-          "begin": "\\([[:space:]]*(modules_without_implementation|)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(modules_without_implementation|)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3346,7 +3346,7 @@
       "patterns": [
         {
           "comment": "instantiated_dependencies",
-          "begin": "\\([[:space:]]*(instantiate)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(instantiate)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3356,7 +3356,7 @@
           "patterns": [
             {
               "comment": "instantiate/:as",
-              "match": ":as\\b",
+              "match": ":as(?=[ \\t\\r\\n\\f();\"]|$)",
               "name": "keyword.language.dune"
             },
             {
@@ -3369,7 +3369,7 @@
           "patterns": [
             {
               "comment": "select/from",
-              "match": "\\b(select|from)\\b",
+              "match": "(?<![^ \\t\\r\\n\\f();\"])(select|from)(?=[ \\t\\r\\n\\f();\"]|$)",
               "name": "constant.language.dune",
               "contentName": "variable.other.declaration.dune",
               "patterns": [
@@ -3388,7 +3388,7 @@
           "patterns": [
             {
               "comment": "re-export",
-              "begin": "\\([[:space:]]*(re-export)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(re-export)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -3418,7 +3418,7 @@
       "patterns": [
         {
           "comment": "preprocess/no_preprocessing",
-          "match": "\\b(no_preprocessing)\\b",
+          "match": "(?<![^ \\t\\r\\n\\f();\"])(no_preprocessing)(?=[ \\t\\r\\n\\f();\"]|$)",
           "name": "constant.language.dune",
           "patterns": [
             {
@@ -3428,7 +3428,7 @@
         },
         {
           "comment": "preprocess/future_syntax",
-          "match": "\\b(future_syntax)\\b",
+          "match": "(?<![^ \\t\\r\\n\\f();\"])(future_syntax)(?=[ \\t\\r\\n\\f();\"]|$)",
           "name": "constant.language.dune",
           "patterns": [
             {
@@ -3438,7 +3438,7 @@
         },
         {
           "comment": "pps",
-          "begin": "\\([[:space:]]*(pps)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(pps)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3453,7 +3453,7 @@
         },
         {
           "comment": "action",
-          "begin": "\\([[:space:]]*(action)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(action)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3471,7 +3471,7 @@
         },
         {
           "comment": "staged_pps",
-          "begin": "\\([[:space:]]*(staged_pps)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(staged_pps)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3490,7 +3490,7 @@
       "patterns": [
         {
           "comment": "menhir",
-          "begin": "\\([[:space:]]*(menhir)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(menhir)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3500,7 +3500,7 @@
           "patterns": [
             {
               "comment": "modules/merge_into/flags/infer/explain",
-              "begin": "\\([[:space:]]*(modules|merge_into|flags|infer|explain)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(modules|merge_into|flags|infer|explain)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -3524,7 +3524,7 @@
       "patterns": [
         {
           "comment": "ctypes",
-          "begin": "\\([[:space:]]*(ctypes)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(ctypes)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3534,7 +3534,7 @@
           "patterns": [
             {
               "comment": "external_library_name",
-              "begin": "\\([[:space:]]*(external_library_name)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(external_library_name)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -3549,7 +3549,7 @@
             },
             {
               "comment": "type_description",
-              "begin": "\\([[:space:]]*(type_description)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(type_description)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -3559,7 +3559,7 @@
               "patterns": [
                 {
                   "comment": "type_description/instance",
-                  "begin": "\\([[:space:]]*(instance)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(instance)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -3574,7 +3574,7 @@
                 },
                 {
                   "comment": "type_description/functor",
-                  "begin": "\\([[:space:]]*(functor)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(functor)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -3591,7 +3591,7 @@
             },
             {
               "comment": "function_description",
-              "begin": "\\([[:space:]]*(function_description)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(function_description)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -3601,7 +3601,7 @@
               "patterns": [
                 {
                   "comment": "function_description/instance",
-                  "begin": "\\([[:space:]]*(instance)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(instance)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -3616,7 +3616,7 @@
                 },
                 {
                   "comment": "function_description/functor",
-                  "begin": "\\([[:space:]]*(functor)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(functor)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -3631,7 +3631,7 @@
                 },
                 {
                   "comment": "function_description/concurrency",
-                  "begin": "\\([[:space:]]*(concurrency)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(concurrency)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -3640,14 +3640,14 @@
                   },
                   "patterns": [
                     {
-                      "match": "\\b(sequential|unlocked|lwt_jobs|lwt_preemptive)\\b",
+                      "match": "(?<![^ \\t\\r\\n\\f();\"])(sequential|unlocked|lwt_jobs|lwt_preemptive)(?=[ \\t\\r\\n\\f();\"]|$)",
                       "name": "variable.other.declaration.dune"
                     }
                   ]
                 },
                 {
                   "comment": "function_description/errno_policy",
-                  "begin": "\\([[:space:]]*(errno_policy)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(errno_policy)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -3656,7 +3656,7 @@
                   },
                   "patterns": [
                     {
-                      "match": "\\b(ignore_errno|return_errno)\\b",
+                      "match": "(?<![^ \\t\\r\\n\\f();\"])(ignore_errno|return_errno)(?=[ \\t\\r\\n\\f();\"]|$)",
                       "name": "variable.other.declaration.dune"
                     }
                   ]
@@ -3665,7 +3665,7 @@
             },
             {
               "comment": "build_flags_resolver",
-              "begin": "\\([[:space:]]*(build_flags_resolver)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(build_flags_resolver)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -3675,12 +3675,12 @@
               "patterns": [
                 {
                   "comment": "pkg_config",
-                  "match": "\\b(pkg_config)\\b",
+                  "match": "(?<![^ \\t\\r\\n\\f();\"])(pkg_config)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "name": "variable.other.declaration.dune"
                 },
                 {
                   "comment": "vendored-field",
-                  "begin": "\\([[:space:]]*(vendored)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(vendored)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -3690,7 +3690,7 @@
                   "patterns": [
                     {
                       "comment": "c_flags/c_library_flags",
-                      "begin": "\\([[:space:]]*(c_flags|c_library_flags)\\b",
+                      "begin": "\\([ \\t\\r\\n\\f]*(c_flags|c_library_flags)(?=[ \\t\\r\\n\\f();\"]|$)",
                       "end": "\\)",
                       "beginCaptures": {
                         "1": {
@@ -3709,7 +3709,7 @@
             },
             {
               "comment": "generated_types",
-              "begin": "\\([[:space:]]*(generated_types)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(generated_types)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -3719,7 +3719,7 @@
             },
             {
               "comment": "generated_entry_point",
-              "begin": "\\([[:space:]]*(generated_entry_point)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(generated_entry_point)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -3729,7 +3729,7 @@
             },
             {
               "comment": "headers",
-              "begin": "\\([[:space:]]*(headers)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(headers)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -3739,7 +3739,7 @@
               "patterns": [
                 {
                   "comment": "include",
-                  "begin": "\\([[:space:]]*(include)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(include)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -3754,7 +3754,7 @@
                 },
                 {
                   "comment": "preamble",
-                  "begin": "\\([[:space:]]*(preamble)\\b",
+                  "begin": "\\([ \\t\\r\\n\\f]*(preamble)(?=[ \\t\\r\\n\\f();\"]|$)",
                   "end": "\\)",
                   "beginCaptures": {
                     "1": {
@@ -3771,7 +3771,7 @@
             },
             {
               "comment": "deps",
-              "begin": "\\([[:space:]]*(deps)\\b",
+              "begin": "\\([ \\t\\r\\n\\f]*(deps)(?=[ \\t\\r\\n\\f();\"]|$)",
               "end": "\\)",
               "beginCaptures": {
                 "1": {
@@ -3796,7 +3796,7 @@
     },
     "js_of_ocaml": {
       "comment": "js_of_ocaml",
-      "begin": "\\([[:space:]]*(js_of_ocaml)\\b",
+      "begin": "\\([ \\t\\r\\n\\f]*(js_of_ocaml)(?=[ \\t\\r\\n\\f();\"]|$)",
       "end": "\\)",
       "beginCaptures": {
         "1": {
@@ -3806,7 +3806,7 @@
       "patterns": [
         {
           "comment": "javascript_files/wasm_files/flags/build_runtime_flags/link_flags/enabled_if/compilation_mode/sourcemap",
-          "begin": "\\([[:space:]]*(javascript_files|wasm_files|flags|build_runtime_flags|link_flags|enabled_if|compilation_mode|sourcemap)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(javascript_files|wasm_files|flags|build_runtime_flags|link_flags|enabled_if|compilation_mode|sourcemap)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3826,7 +3826,7 @@
     },
     "wasm_of_ocaml": {
       "comment": "wasm_of_ocaml",
-      "begin": "\\([[:space:]]*(wasm_of_ocaml)\\b",
+      "begin": "\\([ \\t\\r\\n\\f]*(wasm_of_ocaml)(?=[ \\t\\r\\n\\f();\"]|$)",
       "end": "\\)",
       "beginCaptures": {
         "1": {
@@ -3836,7 +3836,7 @@
       "patterns": [
         {
           "comment": "javascript_files/wasm_files/flags/build_runtime_flags/link_flags/enabled_if/compilation_mode/sourcemap",
-          "begin": "\\([[:space:]]*(javascript_files|wasm_files|flags|build_runtime_flags|link_flags|enabled_if|compilation_mode|sourcemap)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(javascript_files|wasm_files|flags|build_runtime_flags|link_flags|enabled_if|compilation_mode|sourcemap)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3868,6 +3868,9 @@
           "patterns": [
             {
               "include": "#escape-characters"
+            },
+            {
+              "include": "#interpolation"
             }
           ]
         },
@@ -3883,43 +3886,33 @@
           "patterns": [
             {
               "include": "#escape-characters"
+            },
+            {
+              "include": "#interpolation"
             }
           ]
         },
         {
           "comment": "symbol",
           "name": "entity.name.function.action.dune",
-          "match": "(:[[:word:]_-]+)\\b"
+          "match": "(?<![^ \\t\\r\\n\\f();\"])(:[[:word:]_-]+)(?=[ \\t\\r\\n\\f();\"]|$)"
         },
         {
           "comment": "number or version",
           "name": "constant.numeric.dune",
-          "match": "\\b([[:digit:]](\\.[[:digit:]]+)+)\\b"
+          "match": "(?<![^ \\t\\r\\n\\f();\"])([[:digit:]]+(\\.[[:digit:]]+)+)(?=[ \\t\\r\\n\\f();\"]|$)"
         },
         {
           "comment": "true or false",
           "name": "constant.language.dune",
-          "match": "\\b(true|false)\\b"
+          "match": "(?<![^ \\t\\r\\n\\f();\"])(true|false)(?=[ \\t\\r\\n\\f();\"]|$)"
         },
         {
-          "comment": "variable",
-          "begin": "%\\{",
-          "end": "\\}",
-          "beginCaptures": {
-            "0": { "name": "keyword.operator.dune" }
-          },
-          "endCaptures": {
-            "0": { "name": "keyword.operator.dune" }
-          },
-          "patterns": [
-            {
-              "include": "#variables"
-            }
-          ]
+          "include": "#interpolation"
         },
         {
           "comment": "boolean/predicate language",
-          "begin": "\\([[:space:]]*(=|<>|>=|<=|<|>)",
+          "begin": "\\([ \\t\\r\\n\\f]*(=|<>|>=|<=|<|>)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3934,7 +3927,7 @@
         },
         {
           "comment": "boolean/predicate language",
-          "begin": "\\([[:space:]]*(and|or|not)\\b",
+          "begin": "\\([ \\t\\r\\n\\f]*(and|or|not)(?=[ \\t\\r\\n\\f();\"]|$)",
           "end": "\\)",
           "beginCaptures": {
             "1": {
@@ -3948,14 +3941,15 @@
           ]
         },
         {
-          "comment": "ordered set language",
+          "comment": "ordered set subtraction",
+          "name": "keyword.operator.dune",
+          "match": "(?<![^ \\t\\r\\n\\f();\"])\\\\(?=[ \\t\\r\\n\\f();\"]|$)"
+        },
+        {
+          "comment": "nested list",
           "begin": "\\(",
           "end": "\\)",
           "patterns": [
-            {
-              "name": "keyword.operator.dune",
-              "match": "/"
-            },
             {
               "include": "#general"
             }
@@ -3973,7 +3967,7 @@
             {
               "comment": "escaped character",
               "name": "constant.character.escape.dune",
-              "match": "\\\\(n|r|b|t|\\\\|\")"
+              "match": "\\\\[nrbt\\\\\"']"
             },
             {
               "comment": "character from decimal ASCII code",
@@ -3986,20 +3980,9 @@
               "match": "\\\\x[[:xdigit:]]{2}"
             },
             {
-              "comment": "escaped variable",
-              "begin": "(\\%\\{)",
-              "end": "(\\})",
-              "beginCaptures": {
-                "0": { "name": "constant.character.escape.dune" }
-              },
-              "endCaptures": {
-                "0": { "name": "constant.character.escape.dune" }
-              },
-              "patterns": [
-                {
-                  "include": "#variables"
-                }
-              ]
+              "comment": "escaped percent",
+              "name": "constant.character.escape.dune",
+              "match": "\\\\%"
             }
           ]
         },
@@ -4072,6 +4055,26 @@
             {
               "name": "constant.language.variable.action.dune",
               "match": "(?<=\\{)(read|read-lines|read-strings)(?=:)"
+            }
+          ]
+        },
+        "interpolation": {
+          "comment": "variable",
+          "begin": "%\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "0": {
+              "name": "keyword.operator.dune"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "keyword.operator.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#variables"
             }
           ]
         }
