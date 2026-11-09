@@ -1,0 +1,13 @@
+(library
+ (name describe_parser)
+ (modules describe_parser)
+ (libraries base sexplib parsexp))
+
+(test
+ (name dune_describe_test)
+ (modules dune_describe_test)
+ (libraries describe_parser)
+ (deps
+  (source_tree ../../tests/fixtures/run-standalone)
+  (source_tree ../../tests/fixtures/run-standalone-nested)
+  (source_tree ../../tests/fixtures/run-standalone-plain)))
