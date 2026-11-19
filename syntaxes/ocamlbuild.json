@@ -44,17 +44,18 @@
           "comment": "quoted string",
           "name": "string.quoted.double.ocamlbuild",
           "begin": "\"",
-          "end": "\""
+          "end": "\"",
+          "patterns": [{ "match": "\\\\\"", "name": "constant.character.escape.ocamlbuild" }]
         },
         {
           "comment": "boolean",
           "name": "constant.language.ocamlbuild",
-          "match": "\\b(true|false)\\b"
+          "match": "\\b(true|false|1|0)\\b"
         },
         {
           "comment": "operators",
           "name": "keyword.operator.ocamlbuild",
-          "match": "\\b(or|and|not)\\b"
+          "match": "\\b(or|and|not|OR|AND|NOT)\\b|[&|~]"
         },
         { "include": "#variables" },
         { "include": "$self" }

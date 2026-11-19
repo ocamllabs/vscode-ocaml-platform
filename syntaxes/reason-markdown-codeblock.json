@@ -1,16 +1,16 @@
 {
   "fileTypes": [],
-  "injectionSelector": "L:text.html.markdown",
+  "injectionSelector": "L:text.html.markdown - markup.fenced_code.block.markdown",
   "patterns": [{ "include": "#reason-code-block" }],
   "repository": {
     "reason-code-block": {
-      "begin": "(^|\\G)([[:space:]]*)(\\`{3,}|~{3,})[[:space:]]*(?i:(re|reason|reasonml)([[:space:]]+[^`~]*)?$)",
+      "begin": "(^|\\G)((?!^)[ \\t]*|[ ]{0,3})((`|~)\\4{2,})[[:space:]]*(?i:(re|reason|reasonml)([[:space:]]+[^`~]*)?$)",
       "name": "markup.fenced_code.block.markdown",
-      "end": "(^|\\G)(\\2|[[:space:]]{0,3})(\\3)[[:space:]]*$",
+      "end": "(^|\\G)((?!^)(?:\\2|[ \\t]{0,3})|[ ]{0,3})(\\3\\4*)[ \\t]*\\r?$",
       "beginCaptures": {
         "3": { "name": "punctuation.definition.markdown" },
-        "4": { "name": "fenced_code.block.language.markdown" },
-        "5": { "name": "fenced_code.block.language.attributes.markdown" }
+        "5": { "name": "fenced_code.block.language.markdown" },
+        "6": { "name": "fenced_code.block.language.attributes.markdown" }
       },
       "endCaptures": {
         "3": { "name": "punctuation.definition.markdown" }
@@ -18,7 +18,7 @@
       "patterns": [
         {
           "begin": "(^|\\G)([[:space:]]*)(.*)",
-          "while": "(^|\\G)(?![[:space:]]*([`~]{3,})[[:space:]]*$)",
+          "while": "(^|\\G)(?!(?:(?!^)[ \\t]*|[ ]{0,3})([`~]{3,})[ \\t]*\\r?$)",
           "contentName": "meta.embedded.block.reason",
           "patterns": [
             {
