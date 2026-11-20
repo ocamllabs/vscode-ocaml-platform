@@ -12,6 +12,8 @@
   opam-file-format
   promise_jsoo
   sexplib
+  parsexp
+  describe_parser
   vscode
   vscode_languageclient
   ppxlib

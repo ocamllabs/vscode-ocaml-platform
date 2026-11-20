@@ -1,6 +1,6 @@
 open Import
 
-type context =
+type context = Describe_parser.context =
   | Dune
   | Unknown
 
@@ -9,9 +9,7 @@ let project_context () =
     ~includes:(`String "**/{dune-project}")
     ~excludes:(`String "{**/_*}" (* ignoring dune files from _build, _opam, _esy *))
     ()
-  |> Promise.map (function
-    | [] -> Unknown
-    | _ -> Dune)
+  |> Promise.map Describe_parser.context_of_dune_project_files
 ;;
 
 let find_executables sandbox project_ctx =
@@ -41,26 +39,11 @@ let find_executables sandbox project_ctx =
         ~excludes:(`String "{**/_*}" (* ignoring ml files from _build, _opam, _esy *))
         ()
     in
-    let execs =
-      List.map
-        ~f:(fun uri ->
-          let path = Uri.fsPath uri in
-          { Dune_describe.name = Node.Path.basename path
-          ; mod_path = path
-          ; exec_path = path
-          })
-        ml_files
-    in
-    Some execs
+    Some
+      (Describe_parser.executables_of_ml_files (List.map ml_files ~f:Uri.fsPath))
 ;;
 
-let exec_cmd project_ctx (exec : Dune_describe.executable) args =
-  let program, args =
-    match project_ctx with
-    | Dune -> "dune", [ "exec"; exec.exec_path; "--" ] @ args
-    | Unknown -> "ocaml", [ "-I"; "+str"; "-I"; "+unix"; exec.mod_path ] @ args
-  in
-  Spawn { Cmd.bin = Path.of_string program; args } |> Cmd.to_string
+let exec_cmd project_ctx exec args = Describe_parser.command_line project_ctx exec args
 ;;
 
 let active_text_doc () =
