@@ -1,7 +1,7 @@
 {
   "scopeName": "source.ocaml.META",
   "fileTypes": ["META"],
-  "patterns": [{ "include": "#comments" }, { "include": "#entries" }],
+  "patterns": [{ "include": "#comments" }, { "include": "#strings" }, { "include": "#entries" }],
   "repository": {
     "comments": {
       "comment": "line comment",
@@ -9,15 +9,20 @@
       "begin": "#",
       "end": "$"
     },
+    "strings": {
+      "name": "string.quoted.double.META",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [{ "match": "\\\\[\"\\\\]", "name": "constant.character.escape.META" }]
+    },
     "entries": {
       "patterns": [
         {
           "comment": "assignment or addition",
-          "match": "\\b([[:word:].]+)[[:space:]]*(\\+?=)[[:space:]]*(\".*\")",
+          "match": "\\b([[:word:].]+)[[:space:]]*(\\+?=)",
           "captures": {
             "1": { "name": "entity.name.tag.META" },
-            "2": { "name": "keyword.operator.META" },
-            "3": { "name": "string.quoted.double.META" }
+            "2": { "name": "keyword.operator.META" }
           }
         },
         {
@@ -26,12 +31,9 @@
           "beginCaptures": {
             "1": { "name": "entity.name.tag.META" }
           },
-          "end": "\\)[[:space:]]*(\\+?=)[[:space:]]*(\".*\")",
-          "endCaptures": {
-            "1": { "name": "keyword.operator.META" },
-            "2": { "name": "string.quoted.double.META" }
-          },
+          "end": "\\)",
           "patterns": [
+            { "include": "#comments" },
             { "match": "-", "name": "keyword.operator.META" },
             {
               "comment": "standard predicates",
@@ -40,9 +42,10 @@
             }
           ]
         },
+        { "match": "\\+?=", "name": "keyword.operator.META" },
         {
           "comment": "subpackage",
-          "begin": "\\b(package)[[:space:]]*(\"[^.]*\")[[:space:]]*\\(",
+          "begin": "\\b(package)[[:space:]]*(\"(?:[^\"\\\\.]|\\\\[\"\\\\])*\")[[:space:]]*\\(",
           "beginCaptures": {
             "1": { "name": "keyword.other.META" },
             "2": { "name": "string.quoted.double.META" }

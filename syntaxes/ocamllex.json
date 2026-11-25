@@ -36,7 +36,7 @@
   ],
   "repository": {
     "rules": {
-      "match": "\\b(rule|and)[[:space:]]+([[:lower:]][[:word:]']*('|\\b))",
+      "match": "\\b(rule|and)[[:space:]]+([[:lower:]_][[:word:]']*('|\\b))",
       "captures": {
         "1": {
           "name": "keyword.other.ocamllex"
@@ -97,14 +97,19 @@
           "match": "\\^|#|\\*|\\+|\\?|\\||-"
         },
         {
+          "comment": "wildcard character",
+          "name": "constant.language.wildcard.ocamllex",
+          "match": "\\b_\\b(?!')"
+        },
+        {
           "comment": "end-of-file token",
           "name": "constant.language.eof.ocamllex",
-          "match": "\\beof\\b"
+          "match": "\\beof\\b(?!')"
         },
         {
           "comment": "reference to regex pattern",
           "name": "entity.name.type.reference.ocamllex",
-          "match": "\\b[[:alpha:]][[:word:]']*('|\\b)"
+          "match": "\\b[[:alpha:]_][[:word:]']*('|\\b)"
         }
       ]
     }

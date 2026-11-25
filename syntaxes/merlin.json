@@ -14,7 +14,7 @@
       "name": "comment.line.merlin"
     },
     "directory": {
-      "begin": "\\b(B|S)\\b",
+      "begin": "^[[:blank:]]*(B|S|BH|SH|INDEX)\\b",
       "end": "$",
       "beginCaptures": {
         "1": { "name": "keyword.other.merlin" }
